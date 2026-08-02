@@ -2,9 +2,9 @@
 // Created by Jan Drewniok on 02.09.24.
 //
 
+#include "exhaustive_ground_state_simulation.hpp"
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>

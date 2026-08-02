@@ -12,7 +12,6 @@ void detect_bdl_pairs(pybind11::module& m);
 void detect_bdl_wires(pybind11::module& m);
 void determine_displacement_robustness_domain(pybind11::module& m);
 void energy_distribution(pybind11::module& m);
-void exhaustive_ground_state_simulation(pybind11::module& m);
 void is_ground_state(pybind11::module& m);
 void is_operational(pybind11::module& m);
 void minimum_energy(pybind11::module& m);
@@ -38,7 +37,6 @@ void register_sidb_simulation(pybind11::module& m)
     detect_bdl_wires(m);
     determine_displacement_robustness_domain(m);
     energy_distribution(m);
-    exhaustive_ground_state_simulation(m);
     is_ground_state(m);
     is_operational(m);
     minimum_energy(m);

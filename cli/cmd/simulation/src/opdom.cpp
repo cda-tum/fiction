@@ -75,7 +75,7 @@ opdom_command::opdom_command(const environment::ptr& e) :
     add_option("--base", simulation_params.base,
                "The simulation base, can be 2 or 3 (only ClusterComplete supports base-3 simulation)", true);
     add_option("--engine", sim_engine_str,
-               "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
+               "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim}", true);
 }
 
 void opdom_command::execute()

@@ -9,7 +9,6 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/ground_state_space.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -423,17 +422,10 @@ TEMPLATE_TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[gro
 {
     const auto& verify_layout = [](const TestType& lyt)
     {
-        const sidb_simulation_result<TestType>& qe_res   = quickexact(lyt);
-        const sidb_simulation_result<TestType>& exgs_res = exhaustive_ground_state_simulation(lyt);
-        const ground_state_space_results&       gss_res  = ground_state_space(lyt);
+        const sidb_simulation_result<TestType>& qe_res  = quickexact(lyt);
+        const ground_state_space_results&       gss_res = ground_state_space(lyt);
 
         for (const charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
-        {
-            const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
-            CHECK(verification);
-        }
-
-        for (const charge_distribution_surface<TestType>& cl : exgs_res.charge_distributions)
         {
             const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
             CHECK(verification);

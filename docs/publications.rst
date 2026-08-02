@@ -66,7 +66,7 @@ Furthermore, if you use any of the design automation algorithms, please consider
           publisher={ACM New York, NY, USA}
         }
 
-* :ref:`One-pass synthesis <onepass>` (``onepass``):
+* One-pass synthesis:
 
     .. code-block:: tex
 

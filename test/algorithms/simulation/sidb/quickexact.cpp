@@ -7,7 +7,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -910,11 +909,6 @@ TEMPLATE_TEST_CASE("Seven randomly distributed DBs, test if dependent cell calcu
     const quickexact_params<cell<TestType>> params{sidb_simulation_parameters{3, -0.28}};
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
-
-    const auto simulation_results_exgs =
-        exhaustive_ground_state_simulation<TestType>(lyt, params.simulation_parameters);
-
-    REQUIRE(simulation_results.charge_distributions.size() == simulation_results_exgs.charge_distributions.size());
 
     const auto highest_state = std::min_element(
         simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),

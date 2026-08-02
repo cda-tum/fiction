@@ -122,7 +122,7 @@ yourself. List them with:
   $ cmake --list-presets
 
 Noteworthy presets include ``dev`` (a quick Debug build with only the CLI and tests enabled), ``dev-full`` (the same,
-but with Z3, ALGLIB, and Mugen also enabled), ``dev-asan`` (``dev`` with sanitizers), ``tests-slim``/``tests-full``
+but with Z3 and ALGLIB also enabled), ``dev-asan`` (``dev`` with sanitizers), ``tests-slim``/``tests-full``
 (test-only builds, without/with all optional components, for the fastest edit-compile-test loop), ``pyfiction``
 (mirrors the ``pyproject.toml`` configuration for iterating on the Python bindings directly with CMake), and
 ``release`` (an optimized, IPO-enabled build). The ``ci-*`` and ``coverage`` presets provide the shared baseline
@@ -304,22 +304,6 @@ Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/maste
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
 ``-DZ3_ROOT=<path_to_z3_root>`` to set Z3's root directory that is to be searched for the installed solver.
-
-SAT-based ``onepass`` synthesis
-###############################
-
-The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 script
-`Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
-It has some further Python dependencies that can be installed via ``pip3``:
-
-.. code-block:: console
-
-    (venv) $ pip install -r vendors/mugen/requirements.txt
-
-The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
-and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
-
-Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
 .. _abc-cmake:
 

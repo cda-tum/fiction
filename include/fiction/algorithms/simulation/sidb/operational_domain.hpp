@@ -875,11 +875,6 @@ class operational_domain_impl
                                                 simulation_parameters,
                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                     }
-                    else if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
-                    {
-                        // perform an exhaustive ground state simulation
-                        sim_results = exhaustive_ground_state_simulation(lyt, simulation_parameters);
-                    }
                     else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
                     {
                         // perform a heuristic simulation

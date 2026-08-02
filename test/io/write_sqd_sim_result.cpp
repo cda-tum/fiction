@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
@@ -294,7 +294,9 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
 
-    auto sim_result = exhaustive_ground_state_simulation(lat, params);
+    auto sim_result =
+        quickexact(lat, quickexact_params<cell<decltype(lat)>>{
+                            params, quickexact_params<cell<decltype(lat)>>::automatic_base_number_detection::OFF});
 
     sim_result.algorithm_name = "ExGS";
 
@@ -316,6 +318,8 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     "        <debye_length>{}</debye_length>\n"
                     "        <eps_r>{}</eps_r>\n"
                     "        <muzm>{}</muzm>\n"
+                    "        <base_number>2</base_number>\n"
+                    "        <global_potential>0.000000</global_potential>\n"
                     "    </sim_params>\n"
                     "    <physloc>\n"
                     "        <dbdot x=\"0.000000\" y=\"0.000000\"/>\n"
@@ -356,7 +360,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
 
-    auto sim_result = exhaustive_ground_state_simulation(lat, params);
+    auto sim_result =
+        quickexact(lat, quickexact_params<cell<decltype(lat)>>{
+                            params, quickexact_params<cell<decltype(lat)>>::automatic_base_number_detection::OFF});
 
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};
@@ -377,6 +383,8 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <debye_length>{}</debye_length>\n"
         "        <eps_r>{}</eps_r>\n"
         "        <muzm>{}</muzm>\n"
+        "        <base_number>3</base_number>\n"
+        "        <global_potential>0.000000</global_potential>\n"
         "    </sim_params>\n"
         "    <physloc>\n"
         "        <dbdot x=\"19.200000\" y=\"0.000000\"/>\n"

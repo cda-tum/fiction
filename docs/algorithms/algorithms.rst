@@ -50,7 +50,6 @@ Physical Design
    exact.rst
    orthogonal.rst
    graph_oriented_layout_design.rst
-   one_pass_synthesis.rst
    color_routing.rst
    hexagonalization.rst
    post_layout_optimization.rst

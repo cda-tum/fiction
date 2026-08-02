@@ -5,8 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/is_ground_state.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
@@ -76,7 +76,9 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         TestType                             lyt{};
         const charge_distribution_surface    charge_layout{lyt};
         constexpr sidb_simulation_parameters params{2, -0.32};
-        const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(charge_layout, params);
+        const auto                           simulation_results_exgs = quickexact<TestType>(
+            charge_layout, quickexact_params<cell<TestType>>{
+                               params, quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
         const quicksim_params quicksim_params{params};
         const auto            simulation_results_quicksim = quicksim<TestType>(charge_layout, quicksim_params);
 
@@ -100,8 +102,9 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         const charge_distribution_surface    charge_layout{lyt};
         constexpr sidb_simulation_parameters params{2, -0.32};
 
-        sidb_simulation_result<TestType> simulation_results_exgs =
-            exhaustive_ground_state_simulation<TestType>(charge_layout, params);
+        sidb_simulation_result<TestType> simulation_results_exgs = quickexact<TestType>(
+            charge_layout, quickexact_params<cell<TestType>>{
+                               params, quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
 
         // assign different charge index on purpose to see if the algorithm still works as desired
         for (auto& cds : simulation_results_exgs.charge_distributions)

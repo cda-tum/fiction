@@ -230,7 +230,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         is_operational_params{sidb_simulation_parameters{2, -0.28},
-                              sidb_simulation_engine::EXGS,
+                              sidb_simulation_engine::QUICKEXACT,
                               {detect_bdl_wires_params{2.0}}},
         design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,

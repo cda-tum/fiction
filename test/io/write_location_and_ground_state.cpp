@@ -4,7 +4,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -52,7 +52,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({8, 0}, lattice::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.32};
-        const auto                       simulation_results = exhaustive_ground_state_simulation<lattice>(lyt, params);
+        const auto                       simulation_results = quickexact<lattice>(
+            lyt, quickexact_params<cell<lattice>>{
+                     params, quickexact_params<cell<lattice>>::automatic_base_number_detection::OFF});
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);
@@ -79,7 +81,9 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.32};
-        const auto                       simulation_results = exhaustive_ground_state_simulation<lattice>(lyt, params);
+        const auto                       simulation_results = quickexact<lattice>(
+            lyt, quickexact_params<cell<lattice>>{
+                     params, quickexact_params<cell<lattice>>::automatic_base_number_detection::OFF});
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);

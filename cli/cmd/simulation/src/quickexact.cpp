@@ -28,7 +28,7 @@ namespace alice
 quickexact_command::quickexact_command(const environment::ptr& e) :
         command(e, "QuickExact is a quick and exact electrostatic ground state simulation algorithm designed "
                    "specifically for SiDB layouts. It provides a significant performance advantage of more than "
-                   "three orders of magnitude over ExGS from SiQAD.")
+                   "three orders of magnitude over naive exhaustive ground state search.")
 {
     add_option("--epsilon_r,-e", physical_params.epsilon_r, "Electric permittivity of the substrate (unit-less)", true);
     add_option("--lambda_tf,-l", physical_params.lambda_tf, "Thomas-Fermi screening distance (unit: nm)", true);

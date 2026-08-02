@@ -802,7 +802,7 @@ TEMPLATE_TEST_CASE("Edge case with four SiDBs", "[quicksim]", (sidb_100_cell_clk
     }
 }
 
-TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS]",
+TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[quicksim]",
                    (sidb_100_cell_clk_lyt_siqad), (charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
 {
     TestType lyt{};

@@ -2,10 +2,10 @@
 // Created by Jan Drewniok on 17.05.24.
 //
 
+#include "exhaustive_ground_state_simulation.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>

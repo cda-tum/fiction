@@ -205,19 +205,6 @@ This scalable approach only works on logic networks which are AOIGs (MAJ gates d
 `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ and the algorithm can only be slightly parameterized
 (see ``ortho -h``).
 
-SAT-based one-pass synthesis (``onepass``)
-##########################################
-
-The idea of the one-pass synthesis is to combine logic synthesis and physical design into a single run and, thereby,
-obtain even smaller layouts than possible with the SMT-based exact placement & routing approach. The backend of this
-algorithm was developed by Winston Haaswijk as the Python3 library `Mugen <https://github.com/whaaswijk/mugen>`_.
-It utilizes the SAT solver `Glucose <https://www.labri.fr/perso/lsimon/glucose/>`_ to solve instances of said combined
-physical design problem. Given a clocking scheme and a set of gate types to use, this algorithm finds the true minimum
-FCN circuit implementation of some specification under the provided parameters. For more information, see
-`the paper <https://ieeexplore.ieee.org/abstract/document/9371573>`_.
-
-The possible parameters are similar to the ones used for ``exact``. See ``onepass -h`` for a full list.
-
 Graph-oriented layout design (``gold``)
 #######################################
 

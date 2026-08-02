@@ -10,7 +10,6 @@
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
@@ -921,11 +920,6 @@ class is_operational_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_layout(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        if (parameters.sim_engine == sidb_simulation_engine::EXGS)
-        {
-            // perform exhaustive ground state simulation
-            return exhaustive_ground_state_simulation(*bdl_iterator, parameters.simulation_parameters);
-        }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform QuickExact exact simulation

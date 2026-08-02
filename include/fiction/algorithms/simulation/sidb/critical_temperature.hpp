@@ -440,11 +440,6 @@ class critical_temperature_impl
     [[nodiscard]] sidb_simulation_result<Lyt>
     physical_simulation_of_bdl_iterator(const bdl_input_iterator<Lyt>& bdl_iterator) noexcept
     {
-        if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
-        {
-            // perform exhaustive ground state simulation
-            return exhaustive_ground_state_simulation(*bdl_iterator, params.operational_params.simulation_parameters);
-        }
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform QuickExact exact simulation

@@ -6,7 +6,6 @@
 #define FICTION_TIME_TO_SOLUTION_HPP
 
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
-#include "fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp"
 #include "fiction/algorithms/simulation/sidb/is_ground_state.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
@@ -134,11 +133,6 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
         simulation_result = clustercomplete(lyt, params);
     }
 #endif  // FICTION_ALGLIB_ENABLED
-    else
-    {
-        st.algorithm      = sidb_simulation_engine_name(exact_sidb_simulation_engine::EXGS);
-        simulation_result = exhaustive_ground_state_simulation(lyt, quicksim_params.simulation_parameters);
-    }
 
     std::vector<sidb_simulation_result<Lyt>> simulation_results_quicksim{};
     simulation_results_quicksim.reserve(tts_params.repetitions);

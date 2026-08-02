@@ -79,10 +79,6 @@ Exhaustive Ground State Simulation
            :members:
         .. doxygenfunction:: fiction::clustercomplete
 
-        **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
-
-        .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
-
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.quickexact_params
             :members:
@@ -90,7 +86,6 @@ Exhaustive Ground State Simulation
         .. autoclass:: mnt.pyfiction.clustercomplete_params
             :members:
         .. autofunction:: mnt.pyfiction.clustercomplete
-        .. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 
 
 Engine Selectors

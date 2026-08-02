@@ -5,7 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/types.hpp>
 
@@ -109,7 +109,9 @@ TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice 
         lyt.assign_cell_type({4, 3}, lattice::cell_type::NORMAL);
 
         const sidb_simulation_parameters params{2, -0.30};
-        const auto                       results = exhaustive_ground_state_simulation(lyt, params);
+        const auto                       results =
+            quickexact(lyt, quickexact_params<cell<lattice>>{
+                                params, quickexact_params<cell<lattice>>::automatic_base_number_detection::OFF});
 
         const auto ground_state = results.groundstates();
         REQUIRE(ground_state.size() == 2);
@@ -136,7 +138,9 @@ TEMPLATE_TEST_CASE("Determine the groundstate of a two BDL pair wire with input 
 
     const sidb_simulation_parameters params{2, -0.32};
 
-    const auto results = exhaustive_ground_state_simulation(lyt, params);
+    const auto results =
+        quickexact(lyt, quickexact_params<cell<TestType>>{
+                            params, quickexact_params<cell<TestType>>::automatic_base_number_detection::OFF});
 
     const auto ground_state = results.groundstates();
     REQUIRE(ground_state.size() == 2);

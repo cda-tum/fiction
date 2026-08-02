@@ -55,15 +55,6 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         CHECK_THAT(tts_stat_clustercomplete.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
 
 #endif  // FICTION_ALGLIB_ENABLED
-
-        time_to_solution_stats        tts_stat_exgs{};
-        const time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
-        time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
-
-        CHECK(tts_stat_exgs.algorithm == "ExGS");
-        CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
-        CHECK(std::isinf(tts_stat_exgs.time_to_solution));
-        CHECK_THAT(tts_stat_exgs.mean_single_runtime, Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 
     SECTION("layout with seven SiDBs placed")
@@ -77,14 +68,6 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 
         constexpr sidb_simulation_parameters params{2, -0.30};
         const quicksim_params                quicksim_params{params};
-
-        constexpr time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
-        time_to_solution_stats            tts_stat_exgs{};
-        time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
-
-        CHECK(tts_stat_exgs.acc == 100.0);
-        CHECK(tts_stat_exgs.time_to_solution > 0.0);
-        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats        tts_stat_quickexact{};
         const time_to_solution_params tts_params{exact_sidb_simulation_engine::QUICKEXACT};
@@ -150,13 +133,6 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
 
         quicksim_params quicksim_params{params};
         quicksim_params.iteration_steps = 10;
-
-        constexpr time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
-        time_to_solution_stats            tts_stat_exgs{};
-        time_to_solution<TestType>(lyt, quicksim_params, tts_params_exgs, &tts_stat_exgs);
-
-        CHECK(tts_stat_exgs.time_to_solution > 0.0);
-        CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
         time_to_solution_stats            tts_stat_quickexact{};
         constexpr time_to_solution_params tts_params{exact_sidb_simulation_engine::QUICKEXACT};

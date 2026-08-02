@@ -24,16 +24,18 @@ namespace fiction
 enum class sidb_simulation_engine : uint8_t
 {
     /**
-     * *Exhaustive Ground State Search (EXGS)* is an exact simulation engine that always has exponential runtime.
+     * No specific engine has been selected. `charge_distribution_surface` uses this as its default so that it
+     * exercises the general-purpose (non-specialized) code paths unless an algorithm explicitly opts into one of
+     * the engine-specific optimizations below.
      */
-    EXGS,
+    NONE,
     /**
      * *QuickSim* is a heuristic simulation engine that only requires polynomial runtime.
      */
     QUICKSIM,
     /**
-     * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
-     * than *ExGS* due to its effective search-space pruning.
+     * *QuickExact* is an exact simulation engine that requires exponential runtime, but scales a lot better than
+     * exhaustive search due to its effective search-space pruning.
      */
     QUICKEXACT,
 #if (FICTION_ALGLIB_ENABLED)
@@ -52,12 +54,8 @@ enum class sidb_simulation_engine : uint8_t
 enum class exact_sidb_simulation_engine : uint8_t
 {
     /**
-     * *Exhaustive Ground State Search* (EXGS) is an exact simulation engine that always has exponential runtime.
-     */
-    EXGS,
-    /**
-     * *QuickExact* is also an exact simulation engine that requires exponential runtime, but it scales a lot better
-     * than ExGS due to its effective search-space pruning.
+     * *QuickExact* is an exact simulation engine that requires exponential runtime, but scales a lot better than
+     * exhaustive search due to its effective search-space pruning.
      */
     QUICKEXACT,
 #if (FICTION_ALGLIB_ENABLED)
@@ -100,9 +98,9 @@ template <typename EngineType>
     {
         switch (engine)
         {
-            case EngineType::EXGS:
+            case EngineType::NONE:
             {
-                return "ExGS";
+                return "None";
             }
             case EngineType::QUICKEXACT:
             {
@@ -130,10 +128,6 @@ template <typename EngineType>
     {
         switch (engine)
         {
-            case EngineType::EXGS:
-            {
-                return "ExGS";
-            }
             case EngineType::QUICKEXACT:
             {
                 return "QuickExact";
@@ -173,7 +167,6 @@ template <typename EngineType>
 get_sidb_simulation_engine(const std::string_view& name) noexcept
 {
     static const phmap::flat_hash_map<std::string, sidb_simulation_engine> engine_lookup{
-        {"EXGS", sidb_simulation_engine::EXGS},
         {"QUICKEXACT", sidb_simulation_engine::QUICKEXACT},
 #if (FICTION_ALGLIB_ENABLED)
         {"CLUSTERCOMPLETE", sidb_simulation_engine::CLUSTERCOMPLETE},

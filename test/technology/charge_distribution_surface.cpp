@@ -250,7 +250,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_electrostatic_potential_energy() < system_energy_maximum);
 
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
-        charge_layout.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
         charge_layout.reset_charge_index_sub_layout();
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
         CHECK(charge_layout.get_charge_state({6, 5}) == sidb_charge_state::NEGATIVE);
@@ -348,7 +347,6 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout.increase_charge_index_of_sub_layout_by_one();
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 2);
 
-        charge_layout.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
         charge_layout.increase_charge_index_of_sub_layout_by_one(
             dependent_cell_mode::FIXED, energy_calculation::UPDATE_ENERGY, charge_distribution_history::NEGLECT);
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 3);
