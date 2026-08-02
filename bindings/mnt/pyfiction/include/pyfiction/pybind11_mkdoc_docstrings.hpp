@@ -12265,13 +12265,9 @@ problem sizes that were previously considered astronomical. Inherent
 to the simulation methodology that does not depend on the simulation
 base, it simulates very effectively for either base number (2 or 3).)doc";
 
-static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
-R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
-
 static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
-R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than ExGS due to its
+R"doc(*QuickExact* is an exact simulation engine that requires exponential
+runtime, but scales a lot better than exhaustive search due to its
 effective search-space pruning.)doc";
 
 static const char *__doc_fiction_exact_with_blacklist =
@@ -12304,35 +12300,6 @@ Returns:
     A gate-level layout of type `Lyt` that implements `ntk` as an FCN
     circuit if one is found under the given parameters;
     `std::nullopt`, otherwise.)doc";
-
-static const char *__doc_fiction_exhaustive_ground_state_simulation =
-R"doc(*Exhaustive Ground State Simulation* (ExGS) which was proposed in
-\"Computer-Aided Design of Atomic Silicon Quantum Dots and
-Computational Applications\" by S. S. H. Ng
-(https://dx.doi.org/10.14288/1.0392909) computes all physically valid
-charge configurations of a given SiDB layout. All possible charge
-configurations are passed and checked for physical validity. As a
-consequence, its runtime grows exponentially with the number of SiDBs
-per layout. Therefore, only layouts with up to 30 SiDBs can be
-simulated in a reasonable time. However, since all charge
-configurations are checked for validity, 100 % simulation accuracy is
-guaranteed.
-
-@note This was the first exact simulation approach. However, it is
-replaced by *QuickExact* and *ClusterComplete* due to the much better
-runtimes and more functionality.
-
-Template parameter ``Lyt``:
-    SiDB cell-level layout type.
-
-Parameter ``lyt``:
-    The layout to simulate.
-
-Parameter ``params``:
-    Simulation parameters.
-
-Returns:
-    sidb_simulation_result is returned with all results.)doc";
 
 static const char *__doc_fiction_extract_routing_objectives =
 R"doc(Extracts all routing objectives from the given layout. To this end,
@@ -19250,8 +19217,7 @@ by J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2024
 (https://ieeexplore.ieee.org/document/10473946). It determines all
 physically valid charge configurations of a given SiDB layout,
 providing a significant performance advantage of more than three
-orders of magnitude over *ExGS*
-(`exhaustive_ground_state_simulation`).
+orders of magnitude over naive exhaustive ground state search.
 
 The performance improvement of *QuickExact* can be attributed to the
 incorporation of three key ideas:
@@ -21006,13 +20972,15 @@ Inherent to the simulation methodology that does not depend on the
 simulation base, it simulates very effectively for either base number
 (2 or 3).)doc";
 
-static const char *__doc_fiction_sidb_simulation_engine_EXGS =
-R"doc(*Exhaustive Ground State Search (EXGS)* is an exact simulation engine
-that always has exponential runtime.)doc";
+static const char *__doc_fiction_sidb_simulation_engine_NONE =
+R"doc(No specific engine has been selected. `charge_distribution_surface`
+uses this as its default so that it exercises the general-purpose
+(non-specialized) code paths unless an algorithm explicitly opts into
+one of the engine-specific optimizations below.)doc";
 
 static const char *__doc_fiction_sidb_simulation_engine_QUICKEXACT =
-R"doc(*QuickExact* is also an exact simulation engine that requires
-exponential runtime, but it scales a lot better than *ExGS* due to its
+R"doc(*QuickExact* is an exact simulation engine that requires exponential
+runtime, but scales a lot better than exhaustive search due to its
 effective search-space pruning.)doc";
 
 static const char *__doc_fiction_sidb_simulation_engine_QUICKSIM =
