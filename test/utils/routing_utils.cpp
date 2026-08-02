@@ -10,6 +10,7 @@
 #include <fiction/utils/routing_utils.hpp>
 
 #include <algorithm>
+#include <ranges>
 #include <vector>
 
 using namespace fiction;
@@ -20,12 +21,8 @@ void check_containing_objectives(const std::vector<routing_objective<Lyt>>& obje
 {
     CHECK(objectives.size() == expected_objectives.size());
 
-    std::for_each(objectives.cbegin(), objectives.cend(),
-                  [&expected_objectives](const auto& obj)
-                  {
-                      CHECK(std::find(expected_objectives.cbegin(), expected_objectives.cend(), obj) !=
-                            expected_objectives.cend());
-                  });
+    std::ranges::for_each(objectives, [&expected_objectives](const auto& obj)
+                          { CHECK(std::ranges::find(expected_objectives, obj) != expected_objectives.cend()); });
 }
 
 TEST_CASE("Extract routing objectives", "[routing-utils]")

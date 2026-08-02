@@ -13,6 +13,7 @@
 #include <cstdint>
 #include <functional>
 #include <optional>
+#include <ranges>
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
@@ -34,20 +35,7 @@ struct edge
      * @param other Edge to compare to.
      * @return `true` iff both sources and targets match.
      */
-    bool operator==(const edge<Ntk>& other) const
-    {
-        return source == other.source && target == other.target;
-    }
-    /**
-     * Inequality operator.
-     *
-     * @param other Edge to compare to.
-     * @return `true` iff this edge is not equal to other.
-     */
-    bool operator!=(const edge<Ntk>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const edge<Ntk>& other) const = default;
 };
 }  // namespace mockturtle
 
@@ -449,13 +437,13 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
     {
         auto fos = fanouts(ntk, n);
         // if all inverse predecessors are already discovered
-        if (std::all_of(fos.cbegin(), fos.cend(), is_discovered))
+        if (std::ranges::all_of(fos, is_discovered))
         {
             set_discovered(n);
 
             // determine successor's maximum level
-            const auto post_l = std::max_element(fos.cbegin(), fos.cend(), [&](const auto& n1, const auto& n2)
-                                                 { return get_inv_level(n1) < get_inv_level(n2); });
+            const auto post_l = std::ranges::max_element(fos, [&](const auto& n1, const auto& n2)
+                                                         { return get_inv_level(n1) < get_inv_level(n2); });
 
             // if there are no successors, the level of current node is 0, else it is 1 higher than theirs
             set_inv_level(n, post_l != fos.cend() ? std::max(get_inv_level(n), get_inv_level(*post_l) + 1u) : 0u);
