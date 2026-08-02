@@ -557,7 +557,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (const auto it = std::ranges::find(strg->sidb_order, c); it != strg->sidb_order.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->sidb_order.cbegin(), it));
+            return static_cast<int64_t>(std::distance(strg->sidb_order.begin(), it));
         }
 
         return -1;
@@ -1737,7 +1737,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         if (const auto it = std::ranges::find(strg->three_state_cells, c); it != strg->three_state_cells.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->three_state_cells.cbegin(), it));
+            return static_cast<int64_t>(std::distance(strg->three_state_cells.begin(), it));
         }
 
         return -1;
@@ -1754,7 +1754,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (const auto it = std::ranges::find(strg->sidb_order_without_three_state_cells, c);
             it != strg->sidb_order_without_three_state_cells.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->sidb_order_without_three_state_cells.cbegin(), it));
+            return static_cast<int64_t>(std::distance(strg->sidb_order_without_three_state_cells.begin(), it));
         }
 
         return -1;

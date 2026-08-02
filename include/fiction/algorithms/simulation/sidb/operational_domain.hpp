@@ -1056,7 +1056,7 @@ class operational_domain_impl
 
             const auto it = std::ranges::lower_bound(values[d], pp.get_parameters()[d]);
 
-            const auto dis = std::distance(values[d].cbegin(), it);
+            const auto dis = std::distance(values[d].begin(), it);
 
             step_values.push_back(static_cast<std::size_t>(dis));
         }
