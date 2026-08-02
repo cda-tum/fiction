@@ -31,6 +31,7 @@
 #include <mutex>
 #include <optional>
 #include <random>
+#include <stop_token>
 #include <thread>
 #include <utility>
 #include <vector>
@@ -219,14 +220,16 @@ class design_sidb_gates_impl
 
         std::mutex mutex_to_protect_designed_gate_layouts{};
 
-        std::atomic<bool> solution_found = false;
+        // Shared cancellation signal: requested once a solution has been found and only the first solution is
+        // required, so that all other threads can stop early.
+        std::stop_source solution_found_stop_source{};
 
         // Shuffle the combinations before dividing them among threads
         std::ranges::shuffle(all_combinations, std::default_random_engine(std::random_device{}()));
 
-        const auto add_combination_to_layout_and_check_operation = [this, &mutex_to_protect_designed_gate_layouts,
-                                                                    &designed_gate_layouts,
-                                                                    &solution_found](const auto& combination) noexcept
+        const auto add_combination_to_layout_and_check_operation =
+            [this, &mutex_to_protect_designed_gate_layouts, &designed_gate_layouts,
+             &solution_found_stop_source](const auto& combination) noexcept
         {
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
@@ -240,13 +243,11 @@ class design_sidb_gates_impl
                     designed_gate_layouts.push_back(layout_with_added_cells);
                 }
 
-                solution_found = true;
-            }
-
-            if (solution_found && (params.termination_cond ==
-                                   design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
-            {
-                return;
+                if (params.termination_cond ==
+                    design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION)
+                {
+                    solution_found_stop_source.request_stop();
+                }
             }
         };
 
@@ -254,23 +255,21 @@ class design_sidb_gates_impl
 
         const std::size_t chunk_size = (all_combinations.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
             threads.emplace_back(
-                [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation, &solution_found,
-                 this]()
+                [i, chunk_size, &all_combinations, &add_combination_to_layout_and_check_operation,
+                 stop_token = solution_found_stop_source.get_token(), this]()
                 {
                     const std::size_t start_index = i * chunk_size;
                     const std::size_t end_index   = std::min(start_index + chunk_size, all_combinations.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
-                        if (solution_found &&
-                            (params.termination_cond ==
-                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                        if (stop_token.stop_requested())
                         {
                             return;
                         }
@@ -279,6 +278,7 @@ class design_sidb_gates_impl
                 });
         }
 
+        // wait for all threads to complete (jthreads also auto-join on destruction, but we need the results below)
         for (auto& thread : threads)
         {
             if (thread.joinable())
@@ -309,20 +309,22 @@ class design_sidb_gates_impl
 
         const auto num_threads = std::min(number_of_threads, all_canvas_layouts.size());
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
 
         std::mutex mutex_to_protect_designed_gate_layouts{};  // used to control access to shared resources
 
-        std::atomic<bool> gate_layout_is_found(false);
+        // Shared cancellation signal: requested by whichever thread finds a valid gate layout first, so that all
+        // other threads can stop searching.
+        std::stop_source gate_layout_found_stop_source{};
 
         for (uint64_t z = 0u; z < num_threads; z++)
         {
             threads.emplace_back(
-                [this, &gate_layout_is_found, &mutex_to_protect_designed_gate_layouts, &parameter,
-                 &randomly_designed_gate_layouts]
+                [this, stop_token = gate_layout_found_stop_source.get_token(), &gate_layout_found_stop_source,
+                 &mutex_to_protect_designed_gate_layouts, &parameter, &randomly_designed_gate_layouts]
                 {
-                    while (!gate_layout_is_found)
+                    while (!stop_token.stop_requested())
                     {
                         auto result_lyt = generate_random_sidb_layout<Lyt>(parameter, skeleton_layout);
 
@@ -364,7 +366,7 @@ class design_sidb_gates_impl
                             }
 
                             randomly_designed_gate_layouts.push_back(result_lyt.value());
-                            gate_layout_is_found = true;
+                            gate_layout_found_stop_source.request_stop();
                             break;
                         }
                     }
@@ -429,17 +431,19 @@ class design_sidb_gates_impl
 
         const std::size_t chunk_size = (gate_candidates.size() + num_threads - 1) / num_threads;  // Ceiling division
 
-        std::vector<std::thread> threads;
+        std::vector<std::jthread> threads;
         threads.reserve(num_threads);
 
-        std::atomic<bool> gate_design_found = false;
+        // Shared cancellation signal: requested once a solution has been found and only the first solution is
+        // required, so that all other threads can stop early.
+        std::stop_source gate_design_found_stop_source{};
 
         const auto check_operational_status =
-            [this, &gate_layouts, &mutex_to_protect_gate_designs, &gate_design_found](const auto& candidate) noexcept
+            [this, &gate_layouts, &mutex_to_protect_gate_designs, &gate_design_found_stop_source,
+             stop_token = gate_design_found_stop_source.get_token()](const auto& candidate) noexcept
         {
             // Early exit if a solution is found and only the first solution is required
-            if (gate_design_found && (params.termination_cond ==
-                                      design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+            if (stop_token.stop_requested())
             {
                 return;
             }
@@ -457,23 +461,28 @@ class design_sidb_gates_impl
                     const std::scoped_lock lock{mutex_to_protect_gate_designs};
                     gate_layouts.push_back(candidate);
                 }
-                gate_design_found = true;  // Notify all threads that a solution has been found
+
+                if (params.termination_cond ==
+                    design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION)
+                {
+                    // Notify all threads that a solution has been found
+                    gate_design_found_stop_source.request_stop();
+                }
             }
         };
 
         for (std::size_t i = 0; i < num_threads; ++i)
         {
             threads.emplace_back(
-                [this, i, chunk_size, &gate_candidates, &check_operational_status, &gate_design_found]()
+                [this, i, chunk_size, &gate_candidates, &check_operational_status,
+                 stop_token = gate_design_found_stop_source.get_token()]()
                 {
                     const std::size_t start_index = i * chunk_size;
                     const std::size_t end_index   = std::min(start_index + chunk_size, gate_candidates.size());
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
-                        if (gate_design_found &&
-                            (params.termination_cond ==
-                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                        if (stop_token.stop_requested())
                         {
                             return;
                         }
@@ -643,7 +652,7 @@ class design_sidb_gates_impl
         const std::size_t num_threads = std::min(number_of_threads, all_canvas_layouts.size());
         const std::size_t chunk_size  = (all_canvas_layouts.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(num_threads);
 
         for (std::size_t i = 0; i < num_threads; ++i)
