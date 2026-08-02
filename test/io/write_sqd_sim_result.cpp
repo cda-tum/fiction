@@ -160,8 +160,9 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     using lattice = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
 
-    sidb_simulation_result<lattice> sim_result{.algorithm_name     = "TestSim",
-                                               .simulation_runtime = 42s};  // NOLINT(misc-include-cleaner)
+    sidb_simulation_result<lattice> sim_result{};
+    sim_result.algorithm_name     = "TestSim";
+    sim_result.simulation_runtime = 42s;  // NOLINT(misc-include-cleaner)
 
     std::stringstream simulation_stream{};
 

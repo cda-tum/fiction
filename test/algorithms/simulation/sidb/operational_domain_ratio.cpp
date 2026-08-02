@@ -41,7 +41,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const sidb_simulation_parameters sim_params{.base = 2};
+    const sidb_simulation_parameters sim_params{2};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -87,7 +87,7 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>();
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.28, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.28};
 
     const operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params,
@@ -126,7 +126,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
     const auto lyt = blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>();
 
-    const sidb_simulation_parameters sim_params{.base = 2};
+    const sidb_simulation_parameters sim_params{2};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},

@@ -305,11 +305,15 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
 
     operational_domain_stats op_domain_stats{};
 
-    const operational_domain_params op_domain_params{
-        .operational_params = {.simulation_parameters     = {.mu_minus = -0.28},
-                               .input_bdl_iterator_params = {.bdl_wire_params = {.threshold_bdl_interdistance = 1.5}},
-                               .op_condition = is_operational_params::operational_condition::TOLERATE_KINKS},
-        .sweep_dimensions   = {{sweep_parameter::EPSILON_R, 7, 8, 0.01}, {sweep_parameter::LAMBDA_TF, 5.5, 6, 0.01}}};
+    operational_domain_params op_domain_params{};
+
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R, 7, 8, 0.01},
+                                         {sweep_parameter::LAMBDA_TF, 5.5, 6, 0.01}};
+
+    op_domain_params.operational_params.simulation_parameters.mu_minus                                        = -0.28;
+    op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
 
     const auto op_domain =
         operational_domain_grid_search(lyt, std::vector{create_or_tt()}, op_domain_params, &op_domain_stats);
@@ -341,7 +345,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const sidb_simulation_parameters sim_params{.base = 2};
+    const sidb_simulation_parameters sim_params{2};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -1077,7 +1081,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.28, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.28};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -1191,7 +1195,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     const sidb_100_cell_clk_lyt_cube lat{lyt};
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.28, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.28};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -1273,7 +1277,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 {
     const auto layout = blueprints::and_gate_111<TestType>();
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.32};
 
     operational_domain_params op_domain_params{.operational_params = {.simulation_parameters = sim_params},
                                                .sweep_dimensions   = {{sweep_parameter::EPSILON_R, 5.60, 5.61, 0.01},
@@ -1359,7 +1363,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 {
     const auto layout = blueprints::and_gate_with_kink_states<TestType>();
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.32};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -1402,7 +1406,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
 {
     const auto layout = blueprints::bestagon_and<TestType>();
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.32};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -1483,7 +1487,7 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.32};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},
@@ -1565,7 +1569,7 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
 
     lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
+    const sidb_simulation_parameters sim_params{2, -0.32};
 
     operational_domain_params op_domain_params{
         .operational_params = {.simulation_parameters = sim_params},

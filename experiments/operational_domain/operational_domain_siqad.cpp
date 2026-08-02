@@ -51,7 +51,7 @@ int main()  // NOLINT
         };
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{.mu_minus = -0.28, .base = 2};
+    sidb_simulation_parameters sim_params{2, -0.28};
 
     // operational domain parameters
     // reducing the threshold for the interdistance between two BDL wires makes sure that not both BDL pairs of the

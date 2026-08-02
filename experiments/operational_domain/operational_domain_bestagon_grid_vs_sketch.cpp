@@ -43,7 +43,7 @@ int main()  // NOLINT
         "t in s (grid search) / t in s (sketch)"};
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{.mu_minus = -0.32, .base = 2};
+    sidb_simulation_parameters sim_params{2, -0.32};
 
     // operational domain parameters
     operational_domain_params op_domain_params{

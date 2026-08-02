@@ -33,7 +33,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     lyt.assign_cell_type({6, 5, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({6, 7, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_simulation_parameters sim_params{.base = 2};
+    const sidb_simulation_parameters sim_params{2};
 
     charge_distribution_surface cds{lyt, sim_params};
 

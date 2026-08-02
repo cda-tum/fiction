@@ -120,7 +120,8 @@ int main()  // NOLINT
         const fiction::technology_mapping_params tech_map_params = fiction::all_standard_2_input_functions();
 
         // parameters for cut rewriting
-        mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
+        mockturtle::cut_rewriting_params cut_params{};
+        cut_params.cut_enumeration_ps.cut_size = 4;
 
         const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
                                               mockturtle::xag_network,                    // the database network type

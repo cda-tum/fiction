@@ -41,8 +41,9 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         cds2.assign_charge_index(1, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
         cds3.assign_charge_index(2, charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
 
-        const sidb_simulation_result<lattice> results{.algorithm_name       = "test",
-                                                      .charge_distributions = {cds1, cds2, cds3}};
+        sidb_simulation_result<lattice> results{};
+        results.algorithm_name       = "test";
+        results.charge_distributions = {cds1, cds2, cds3};
 
         const auto ground_state = results.groundstates();
         CHECK(ground_state.size() == 1);
@@ -79,8 +80,9 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         CHECK_THAT(cds2.get_electrostatic_potential_energy() - cds1.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
 
-        const sidb_simulation_result<lattice> results{.algorithm_name       = "test",
-                                                      .charge_distributions = {cds1, cds2, cds3, cds4}};
+        sidb_simulation_result<lattice> results{};
+        results.algorithm_name       = "test";
+        results.charge_distributions = {cds1, cds2, cds3, cds4};
 
         const auto ground_states = results.groundstates();
         REQUIRE(ground_states.size() == 2);
