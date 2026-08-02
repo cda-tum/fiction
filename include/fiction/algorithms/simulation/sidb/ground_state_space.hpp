@@ -1129,9 +1129,8 @@ class ground_state_space_impl
 
         // find the parent with the minimum cluster size
         const sidb_cluster_ptr& min_parent =
-            (*std::min_element(clustering.cbegin(), clustering.cend(),
-                               [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
-                               { return c1->get_parent()->num_sidbs() < c2->get_parent()->num_sidbs(); }))
+            (*std::ranges::min_element(clustering, [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
+                                       { return c1->get_parent()->num_sidbs() < c2->get_parent()->num_sidbs(); }))
                 ->get_parent();
 
         for (const sidb_cluster_ptr& c : min_parent->children)
