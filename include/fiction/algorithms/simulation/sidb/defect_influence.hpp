@@ -165,7 +165,7 @@ class defect_influence_impl
         // calculate the size of each slice
         const auto slice_size = (num_positions + number_of_threads - 1) / number_of_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(number_of_threads);
 
         // launch threads, each with its own slice of random step points
@@ -236,7 +236,7 @@ class defect_influence_impl
         // calculate the size of each slice
         const auto slice_size = (min_iterations + number_of_threads - 1) / number_of_threads;
 
-        std::vector<std::thread> threads{};
+        std::vector<std::jthread> threads{};
         threads.reserve(number_of_threads);
 
         // launch threads, each with its own slice of random step points

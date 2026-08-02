@@ -177,7 +177,7 @@ class clustercomplete_impl
                     initialize_worker_queues(extract_work_from_top_cluster(gss_stats.top_cluster));
 
                     // set up threads
-                    std::vector<std::thread> supporting_threads{};
+                    std::vector<std::jthread> supporting_threads{};
                     supporting_threads.reserve(available_threads);
 
                     for (uint64_t i = 1; i < available_threads; ++i)

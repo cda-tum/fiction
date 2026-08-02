@@ -178,7 +178,7 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     assert(std::isfinite(final_temp) && "final_temp must be a finite number");
 
     std::vector<std::pair<state_t, cost_t>> results(instances);
-    std::vector<std::thread>                threads{};
+    std::vector<std::jthread>               threads{};
     threads.reserve(instances);
 
     // Function to perform simulated annealing and store the result in the results vector

@@ -61,7 +61,7 @@ int main()  // NOLINT
         end   = i == num_threads_to_use - 2 ? all_distributions.size() - 1 : start + chunk_size - 1;
     }
 
-    std::vector<std::thread> threads{};
+    std::vector<std::jthread> threads{};
     threads.reserve(num_threads_to_use);
 
     std::mutex mutex_qe{};
