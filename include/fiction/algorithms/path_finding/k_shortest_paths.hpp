@@ -145,8 +145,8 @@ class yen_k_shortest_paths_impl
 
             // fetch and remove the lowest cost path from the candidates and add it to k_shortest_paths
             if (const auto lowest_cost_path_it =
-                    std::min_element(shortest_path_candidates.cbegin(), shortest_path_candidates.cend(),
-                                     [](const auto& p1, const auto& p2) { return path_cost(p1) < path_cost(p2); });
+                    std::ranges::min_element(shortest_path_candidates, [](const auto& p1, const auto& p2)
+                                             { return path_cost(p1) < path_cost(p2); });
                 lowest_cost_path_it != shortest_path_candidates.cend())
             {
                 k_shortest_paths.add(*lowest_cost_path_it);
