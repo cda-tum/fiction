@@ -592,7 +592,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             Ntk::foreach_ci([&starts](const auto& n) { starts.push_back(n); });
             if constexpr (Randomize)
             {
-                std::ranges::shuffle(starts, rng);
+                // NOTE: std::ranges::shuffle on a vector of a custom type triggers a Clang <16 + libstdc++ >=12
+                // concepts bug
+                std::shuffle(starts.begin(), starts.end(), rng);
             }
             for (const auto& n : starts)
             {
@@ -606,7 +608,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             Ntk::foreach_co([&starts](const auto& f) { starts.push_back(f); });
             if constexpr (Randomize)
             {
-                std::ranges::shuffle(starts, rng);
+                // NOTE: std::ranges::shuffle on a vector of a custom type triggers a Clang <16 + libstdc++ >=12
+                // concepts bug
+                std::shuffle(starts.begin(), starts.end(), rng);
             }
             for (const auto& f : starts)
             {
@@ -645,7 +649,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
                 std::vector<node> fanouts{};
                 fanouts.reserve(this->fanout_size(n));
                 this->foreach_fanout(n, [&fanouts](const node& fo) { fanouts.push_back(fo); });
-                std::ranges::shuffle(fanouts, rng);
+                // NOTE: std::ranges::shuffle on a vector of a custom type triggers a Clang <16 + libstdc++ >=12
+                // concepts bug
+                std::shuffle(fanouts.begin(), fanouts.end(), rng);
                 for (const auto& fo : fanouts)
                 {
                     create_topo_rec(fo);
@@ -673,7 +679,9 @@ class topo_view : public mockturtle::immutable_view<Ntk>
                 std::vector<signal> fanins{};
                 fanins.reserve(this->fanin_size(n));
                 this->foreach_fanin(n, [&fanins](const signal& f) { fanins.push_back(f); });
-                std::ranges::shuffle(fanins, rng);
+                // NOTE: std::ranges::shuffle on a vector of a custom type triggers a Clang <16 + libstdc++ >=12
+                // concepts bug
+                std::shuffle(fanins.begin(), fanins.end(), rng);
                 for (const auto& f : fanins)
                 {
                     create_topo_rec(this->get_node(f));

@@ -969,7 +969,10 @@ class clustercomplete_impl
             }
         }
 
-        std::ranges::shuffle(work_from_top_cluster, std::mt19937_64{std::random_device{}()});
+        // NOTE: std::ranges::shuffle on a vector of a custom type triggers a Clang <16 + libstdc++ >=12 concepts bug
+        // (see operational_domain.hpp), so the classic iterator-pair form is used here deliberately.
+        std::shuffle(work_from_top_cluster.begin(), work_from_top_cluster.end(),
+                     std::mt19937_64{std::random_device{}()});
 
         return work_from_top_cluster;
     }

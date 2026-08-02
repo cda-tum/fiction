@@ -224,8 +224,11 @@ class design_sidb_gates_impl
         // required, so that all other threads can stop early.
         std::stop_source solution_found_stop_source{};
 
-        // Shuffle the combinations before dividing them among threads
-        std::ranges::shuffle(all_combinations, std::default_random_engine(std::random_device{}()));
+        // Shuffle the combinations before dividing them among threads.
+        // NOTE: std::ranges::shuffle on a vector of a custom type triggers a Clang <16 + libstdc++ >=12 concepts bug
+        // (see operational_domain.hpp), so the classic iterator-pair form is used here deliberately.
+        std::shuffle(all_combinations.begin(), all_combinations.end(),
+                     std::default_random_engine(std::random_device{}()));
 
         const auto add_combination_to_layout_and_check_operation =
             [this, &mutex_to_protect_designed_gate_layouts, &designed_gate_layouts,

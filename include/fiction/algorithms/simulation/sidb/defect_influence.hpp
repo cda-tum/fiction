@@ -225,8 +225,9 @@ class defect_influence_impl
         // Get all possible defect positions within the grid spanned by nw_cell and se_cell
         auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
 
-        // Shuffle the vector using std::ranges::shuffle
-        std::ranges::shuffle(all_possible_defect_positions, generator);
+        // NOTE: std::ranges::shuffle on a vector of a custom coordinate type triggers a Clang <16 + libstdc++ >=12
+        // concepts bug (see operational_domain.hpp), so the classic iterator-pair form is used here deliberately.
+        std::shuffle(all_possible_defect_positions.begin(), all_possible_defect_positions.end(), generator);
 
         // Determine how many positions to sample (use the smaller of samples or the total number of positions)
         const auto min_iterations = std::min(all_possible_defect_positions.size(), samples);
@@ -309,12 +310,15 @@ class defect_influence_impl
         const auto next_clockwise_point = [](std::vector<typename Lyt::cell>& neighborhood,
                                              const typename Lyt::cell&        backtrack) noexcept -> typename Lyt::cell
         {
-            assert(std::ranges::find(neighborhood, backtrack) != neighborhood.cend() &&
+            // NOTE: std::ranges::find/rotate on a vector of a custom coordinate type trigger a Clang <16 +
+            // libstdc++ >=12 concepts bug (see operational_domain.hpp), so the classic iterator-pair form is used
+            // here deliberately.
+            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
 
             while (neighborhood.back() != backtrack)
             {
-                std::ranges::rotate(neighborhood, neighborhood.begin() + 1);
+                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
             }
 
             return neighborhood.front();
