@@ -308,6 +308,30 @@ TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
     CHECK(volume(cube::coord_t{1, 1, 1}) == 8);
 }
 
+TEST_CASE("Cube coordinate ordering ignores the dead indicator, equality respects it", "[coordinates]")
+{
+    const cube::coord_t live{0, 0, 0};
+    auto                dead = live;
+    dead.d                   = true;
+
+    // live and dead coordinates at the same position are order-equivalent (operator<=> ignores `d`)...
+    CHECK_FALSE(live < dead);
+    CHECK_FALSE(dead < live);
+    CHECK(live <= dead);
+    CHECK(dead <= live);
+    CHECK(live >= dead);
+    CHECK(dead >= live);
+
+    // ...but are not equal (operator== respects `d`)
+    CHECK(live != dead);
+    CHECK_FALSE(live == dead);
+
+    // ordering by z, then y, then x still holds regardless of `d`
+    CHECK(cube::coord_t{0, 0, 0} < cube::coord_t{1, 0, 0});
+    CHECK(cube::coord_t{0, 0, 0} < cube::coord_t{0, 1, 0});
+    CHECK(cube::coord_t{0, 0, 0} < cube::coord_t{0, 0, 1});
+}
+
 TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
 {
     CHECK(area(siqad::coord_t{1, 1, 1}) == 8);

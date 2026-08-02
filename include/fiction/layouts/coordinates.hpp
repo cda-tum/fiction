@@ -429,11 +429,36 @@ struct coord_t
         }
     }
     /**
-     * Spaceship operator for automatically generating all six comparison operators.
+     * Compares against another coordinate for equality. Respects the dead indicator.
      *
      * @param other Right-hand side coordinate.
+     * @return `true` iff both coordinates are identical.
      */
-    constexpr std::strong_ordering operator<=>(const coord_t& other) const noexcept = default;
+    constexpr bool operator==(const coord_t& other) const noexcept
+    {
+        return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Three-way comparison operator that orders coordinates by z, then y, then x, ignoring the dead indicator (so a
+     * live and a dead coordinate at the same position compare equivalent under `<`, `<=`, `>`, and `>=`). Note that
+     * this makes ordering coarser than `==`, hence `std::weak_ordering` rather than `std::strong_ordering`.
+     *
+     * @param other Right-hand side coordinate.
+     * @return `std::weak_ordering` result of comparing z, then y, then x.
+     */
+    constexpr std::weak_ordering operator<=>(const coord_t& other) const noexcept
+    {
+        if (const auto cmp_z = z <=> other.z; cmp_z != std::strong_ordering::equal)
+        {
+            return cmp_z;
+        }
+        if (const auto cmp_y = y <=> other.y; cmp_y != std::strong_ordering::equal)
+        {
+            return cmp_y;
+        }
+
+        return x <=> other.x;
+    }
     /**
      * Adds another coordinate to this one and returns the result. Does not modify this coordinate.
      *
