@@ -165,6 +165,26 @@ struct box { [[no_unique_address]] empty_alloc a{}; int* data; };  // a adds no 
 
 ## Library
 
+### `std::jthread` + `std::stop_token` (`<thread>`, `<stop_token>`)
+
+```cpp
+// before
+std::thread t([]{ while (running) { work(); } });
+running = false;  // separate atomic flag needed
+t.join();         // must remember to join, or std::terminate on destruction
+
+// after
+std::jthread t([](std::stop_token st) { while (!st.stop_requested()) { work(); } });
+t.request_stop(); // cooperative cancellation, no separate flag needed
+// automatically joins on destruction — no explicit join() required
+```
+
+Use when a thread needs cooperative cancellation and/or automatic join-on-destruction (RAII).
+For fire-and-forget threads with no cancellation needs, a plain `std::jthread` (auto-join only,
+ignore the `stop_token` parameter) is still a strict improvement over `std::thread`.
+<https://en.cppreference.com/w/cpp/thread/jthread.html>,
+<https://en.cppreference.com/w/cpp/thread/stop_token.html>
+
 ### `std::span` (`<span>`)
 
 ```cpp
