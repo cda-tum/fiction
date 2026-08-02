@@ -17,6 +17,65 @@
     "pre-commit",
     "pep621",
     "dockerfile",
+    "custom.regex",
+  ],
+  customManagers: [
+    {
+      // Renovate has no native manager for CMake FetchContent, so the pinned
+      // GIT_TAG versions in cmake/Dependencies.cmake are tracked via regex
+      // managers instead, one per dependency, matching the GIT_REPOSITORY on
+      // the preceding line to disambiguate between blocks.
+      customType: "regex",
+      description: "Update the nlohmann_json revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/nlohmann/json\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+      ],
+      depNameTemplate: "nlohmann/json",
+      packageNameTemplate: "https://github.com/nlohmann/json",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
+      description: "Update the Catch2 revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/catchorg/Catch2\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+      ],
+      depNameTemplate: "catchorg/Catch2",
+      packageNameTemplate: "https://github.com/catchorg/Catch2",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
+      description: "Update the parallel-hashmap revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/greg7mdp/parallel-hashmap\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+      ],
+      depNameTemplate: "greg7mdp/parallel-hashmap",
+      packageNameTemplate: "https://github.com/greg7mdp/parallel-hashmap",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
+      description: "Update the tinyxml2 revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/leethomason/tinyxml2\\.git\\s+GIT_TAG (?<currentValue>[0-9.]+)"
+      ],
+      depNameTemplate: "leethomason/tinyxml2",
+      packageNameTemplate: "https://github.com/leethomason/tinyxml2",
+      datasourceTemplate: "github-tags",
+    }
   ],
   lockFileMaintenance: {
     enabled: true,
@@ -63,6 +122,17 @@
         "docker"
       ],
       commitMessagePrefix: "⬆\uD83D\uDC0B",
+    },
+    {
+      matchManagers: [
+        "custom.regex"
+      ],
+      addLabels: [
+        "dependencies",
+        "C++",
+        "build_system"
+      ],
+      commitMessagePrefix: "⬆️📦",
     },
     {
       description: "Sphinx 8.2+ dropped support for Python <3.11, so keep this pin as-is to avoid breaking dependency resolution",
