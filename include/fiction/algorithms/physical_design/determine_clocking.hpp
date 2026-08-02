@@ -212,8 +212,8 @@ class sat_clocking_handler
 
                 // for each of t's predecessors (disregarding clocking)
                 const auto incoming_tiles = layout.template incoming_data_flow<false>(t1);
-                std::for_each(
-                    incoming_tiles.cbegin(), incoming_tiles.cend(),
+                std::ranges::for_each(
+                    incoming_tiles,
                     [this, &t1](const auto& t2)
                     {
                         // for each combination of possible clock numbers
