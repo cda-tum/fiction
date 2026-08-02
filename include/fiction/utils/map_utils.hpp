@@ -8,6 +8,7 @@
 #include "fiction/technology/constants.hpp"
 
 #include <algorithm>
+#include <ranges>
 
 namespace fiction
 {
@@ -31,7 +32,7 @@ typename MapType::const_iterator find_key_with_tolerance(const MapType& map, con
 
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
 
-    return std::find_if(map.cbegin(), map.cend(), compare_keys);
+    return std::ranges::find_if(map, compare_keys);
 }
 
 }  // namespace fiction
