@@ -87,11 +87,10 @@ double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_st
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    area_stats st{};
+    const auto width  = static_cast<double>(lyt.x() + 1) * ps.width + static_cast<double>(lyt.x()) * ps.hspace;
+    const auto height = static_cast<double>(lyt.y() + 1) * ps.height + static_cast<double>(lyt.y()) * ps.vspace;
 
-    st.width  = static_cast<double>(lyt.x() + 1) * ps.width + static_cast<double>(lyt.x()) * ps.hspace;
-    st.height = static_cast<double>(lyt.y() + 1) * ps.height + static_cast<double>(lyt.y()) * ps.vspace;
-    st.area   = st.width * st.height;
+    const area_stats st{.width = width, .height = height, .area = width * height};
 
     if (pst)
     {
@@ -117,11 +116,12 @@ double area(const bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& 
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
 
-    area_stats st{};
+    const auto width =
+        static_cast<double>(bb.get_x_size() + 1) * ps.width + static_cast<double>(bb.get_x_size()) * ps.hspace;
+    const auto height =
+        static_cast<double>(bb.get_y_size() + 1) * ps.height + static_cast<double>(bb.get_y_size()) * ps.vspace;
 
-    st.width  = static_cast<double>(bb.get_x_size() + 1) * ps.width + static_cast<double>(bb.get_x_size()) * ps.hspace;
-    st.height = static_cast<double>(bb.get_y_size() + 1) * ps.height + static_cast<double>(bb.get_y_size()) * ps.vspace;
-    st.area   = st.width * st.height;
+    const area_stats st{.width = width, .height = height, .area = width * height};
 
     if (pst)
     {
