@@ -76,6 +76,7 @@ static_assert(sorted({4,2,3,1})[0] == 1);
 ### Range-`for` with init-statement
 
 ```cpp
+// note: m.find(k) may return m.end() — only usable in a range-for like this when k is known to be present
 for (auto it = m.find(k); auto& [key, val] : it->second) { ... }
 // common case: scope a lookup/lock to the loop
 for (std::lock_guard lk{mtx}; auto& x : shared_vec) { ... }
@@ -180,8 +181,8 @@ t.request_stop(); // cooperative cancellation, no separate flag needed
 ```
 
 Use when a thread needs cooperative cancellation and/or automatic join-on-destruction (RAII).
-For fire-and-forget threads with no cancellation needs, a plain `std::jthread` (auto-join only,
-ignore the `stop_token` parameter) is still a strict improvement over `std::thread`.
+For threads that do not need cancellation but should be joined automatically, a plain
+`std::jthread` can be used without accepting the `stop_token` parameter.
 <https://en.cppreference.com/w/cpp/thread/jthread.html>,
 <https://en.cppreference.com/w/cpp/thread/stop_token.html>
 
