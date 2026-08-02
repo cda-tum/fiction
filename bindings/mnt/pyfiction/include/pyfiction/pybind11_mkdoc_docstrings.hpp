@@ -4203,32 +4203,15 @@ R"doc(Returns whether the coordinate is dead.
 Returns:
     `true` iff coordinate is dead.)doc";
 
-static const char *__doc_fiction_cube_coord_t_operator_add =
-R"doc(Adds another coordinate to this one and returns the result. Does not
-modify this coordinate.
+static const char *__doc_fiction_cube_coord_t_operator_eq =
+R"doc(Compares against another coordinate for equality. Respects the dead
+indicator.
 
 Parameter ``other``:
-    Coordinate to add.
+    Right-hand side coordinate.
 
 Returns:
-    Sum of both coordinates.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_sub =
-R"doc(Subtracts another coordinate from this one and returns the result.
-Does not modify this coordinate.
-
-Parameter ``other``:
-    Coordinate to subtract.
-
-Returns:
-    Difference of both coordinates.)doc";
-
-static const char *__doc_fiction_cube_coord_t_str =
-R"doc(Returns a string representation of the coordinate of the form `"(x, y,
-z)"` that does not respect the dead indicator.
-
-Returns:
-    String representation of the form `"(x, y, z)"`.)doc";
+    `true` iff both coordinates are identical.)doc";
 
 static const char *__doc_fiction_cube_coord_t_wrap =
 R"doc(Wraps the coordinate with respect to the given aspect ratio by
@@ -23302,9 +23285,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1015_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1040_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1031_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1056_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_292_8 = R"doc()doc";
 
