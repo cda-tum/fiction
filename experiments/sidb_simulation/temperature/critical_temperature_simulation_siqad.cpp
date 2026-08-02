@@ -39,14 +39,16 @@ int main()  // NOLINT
         std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
 
     const sidb_simulation_parameters sim_params{2, -0.28};
-    critical_temperature_params      ct_params{sim_params};
 
     // this is how the gates are presented and simulated in "SiQAD: A Design and Simulation Tool for Atomic Silicon
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,
     // Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
     // TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020. (https://ieeexplore.ieee.org/abstract/document/8963859)
-    ct_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+    const critical_temperature_params ct_params{
+        .operational_params = {
+            .simulation_parameters     = sim_params,
+            .input_bdl_iterator_params = {
+                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}}};
 
     for (const auto& [gate, truth_table] : gates)
     {
