@@ -214,7 +214,10 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
         do
         {
-            status st = status::SEARCH;
+            using enum status;
+            using enum inml_technology::cell_type;
+
+            status st = SEARCH;
 
             improvement_found = false;
 
@@ -227,70 +230,70 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                     // simple state machine for identifying humps and removing them
                     switch (const auto c = cell<CellLyt>{column, row}; st)
                     {
-                        case status::SEARCH:
+                        case SEARCH:
                         {
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // encountering a normal, input, or inverter magnet triggers collecting hump cells
-                                case inml_technology::cell_type::NORMAL:
-                                case inml_technology::cell_type::INPUT:
-                                case inml_technology::cell_type::INVERTER_MAGNET:
+                                case NORMAL:
+                                case INPUT:
+                                case INVERTER_MAGNET:
                                 {
-                                    st = status::COLLECT;
+                                    st = COLLECT;
                                     hump.push_back(c);
                                     break;
                                 }
                                 // remain searching
-                                case inml_technology::cell_type::EMPTY:
+                                case EMPTY:
                                 {
                                     break;
                                 }
                                 // everything else leads to skipping
                                 default:
                                 {
-                                    st = status::SKIP;
+                                    st = SKIP;
                                     break;
                                 }
                             }
                             break;
                         }
-                        case status::COLLECT:
+                        case COLLECT:
                         {
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // collect cells
-                                case inml_technology::cell_type::NORMAL:
-                                case inml_technology::cell_type::INVERTER_MAGNET:
+                                case NORMAL:
+                                case INVERTER_MAGNET:
                                 {
                                     hump.push_back(c);
                                     break;
                                 }
                                 // interesting branch: could be a hump
-                                case inml_technology::cell_type::EMPTY:
-                                case inml_technology::cell_type::OUTPUT:
+                                case EMPTY:
+                                case OUTPUT:
                                 {
                                     handle(hump);
                                     // discard hump cells and start searching again
                                     hump.clear();
-                                    st = status::SEARCH;
+                                    st = SEARCH;
                                     break;
                                 }
                                 // encountered anything else: cannot be a hump
                                 default:
                                 {
                                     hump.clear();
-                                    st = status::SKIP;
+                                    st = SKIP;
                                     break;
                                 }
                             }
                             break;
                         }
-                        case status::SKIP:
+                        case SKIP:
                         {
-                            if (const auto t = lyt.get_cell_type(c); t == inml_technology::cell_type::EMPTY)
+                            if (const auto t = lyt.get_cell_type(c); t == EMPTY)
                             {
                                 // skipping over, return to searching
-                                st = status::SEARCH;
+                                st = SEARCH;
                             }
                             break;
                         }

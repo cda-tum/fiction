@@ -259,10 +259,12 @@ struct sidb_cluster_projector_state
     template <sidb_charge_state cs>
     [[nodiscard]] constexpr uint64_t get_count() const noexcept
     {
+        using enum sidb_charge_state;
+
         switch (cs)
         {
-            case sidb_charge_state::NEGATIVE: return multiset_conf >> 32ull;
-            case sidb_charge_state::POSITIVE: return multiset_conf & 0xFFFFFFFF;
+            case NEGATIVE: return multiset_conf >> 32ull;
+            case POSITIVE: return multiset_conf & 0xFFFFFFFF;
             default: return get_cluster_size(cluster) - (multiset_conf >> 32ull) - (multiset_conf & 0xFFFFFFFF);
         }
     }
@@ -651,14 +653,16 @@ struct sidb_cluster_charge_state
      */
     constexpr void add_charge(const sidb_charge_state cs) noexcept
     {
+        using enum sidb_charge_state;
+
         switch (cs)
         {
-            case sidb_charge_state::NEGATIVE:
+            case NEGATIVE:
             {
                 neg_count++;
                 return;
             }
-            case sidb_charge_state::POSITIVE:
+            case POSITIVE:
             {
                 pos_count++;
                 return;
@@ -897,8 +901,7 @@ struct potential_projection_order
 
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
+            return *std::ranges::find_if(order, [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
@@ -921,8 +924,7 @@ struct potential_projection_order
     {
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.multiset == m_conf; });
+            return *std::ranges::find_if(order, [&](const potential_projection& pp) { return pp.multiset == m_conf; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {

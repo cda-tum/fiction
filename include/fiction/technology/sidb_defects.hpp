@@ -130,20 +130,7 @@ struct sidb_defect
      *
      * @param rhs `sidb_defect` instance to compare against.
      */
-    constexpr bool operator==(const sidb_defect& rhs) const noexcept
-    {
-        return type == rhs.type && charge == rhs.charge && epsilon_r == rhs.epsilon_r && lambda_tf == rhs.lambda_tf;
-    }
-    /**
-     * This operator compares two `sidb_defect` instances for inequality. It uses the `operator==` to check
-     * if the two instances are equal and returns the negation of the result.
-     *
-     * @param rhs `sidb_defect` instance to compare against.
-     */
-    constexpr bool operator!=(const sidb_defect& rhs) const noexcept
-    {
-        return !(*this == rhs);
-    }
+    constexpr bool operator==(const sidb_defect& rhs) const noexcept = default;
 };
 
 /**

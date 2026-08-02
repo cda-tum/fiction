@@ -11,6 +11,7 @@
 #include <fmt/ranges.h>
 
 #include <cassert>
+#include <compare>
 #include <cstdint>
 #include <cstdlib>
 #include <functional>
@@ -56,14 +57,18 @@ struct port_position
      */
     bool po = false;
     /**
-     * Comparator for set insertion.
+     * Comparator for set insertion. Orders by `x` first, then by `y`. Deliberately ignores `pi`/`po`.
      *
      * @param p Port to compare to.
-     * @return `true` iff this port goes before `p` in set.
      */
-    constexpr bool operator<(const port_position& p) const
+    constexpr std::strong_ordering operator<=>(const port_position& p) const
     {
-        return (this->x < p.x) || ((this->x == p.x) && (this->y < p.y));
+        if (const auto cmp = this->x <=> p.x; cmp != std::strong_ordering::equal)
+        {
+            return cmp;
+        }
+
+        return this->y <=> p.y;
     }
     /**
      * Comparator for equality tests.
@@ -155,14 +160,13 @@ struct port_direction
      */
     bool po = false;
     /**
-     * Comparator for set insertion.
+     * Comparator for set insertion. Deliberately ignores `pi`/`po`.
      *
      * @param p Port to compare to.
-     * @return `true` iff this port goes before `p` in set.
      */
-    constexpr bool operator<(const port_direction& p) const
+    constexpr std::strong_ordering operator<=>(const port_direction& p) const
     {
-        return (this->dir < p.dir);
+        return this->dir <=> p.dir;
     }
     /**
      * Comparator for equality tests.
@@ -208,10 +212,7 @@ struct port_list
      * @param p Ports to compare to.
      * @return `true` iff these ports are equal to `p`.
      */
-    bool operator==(const port_list<PortType>& p) const
-    {
-        return this->inp == p.inp && this->out == p.out;
-    }
+    bool operator==(const port_list<PortType>& p) const = default;
     /**
      * Merges two `port_list` objects together. The given `port_list` might be altered.
      *
