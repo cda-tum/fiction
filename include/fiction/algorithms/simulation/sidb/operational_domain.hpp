@@ -560,15 +560,15 @@ class operational_domain_impl
         std::vector<step_point> all_step_points{};
         all_step_points.reserve(all_index_combinations.size());
 
-        std::transform(all_index_combinations.cbegin(), all_index_combinations.cend(),
-                       std::back_inserter(all_step_points), [](const auto& comb) noexcept { return step_point{comb}; });
+        std::ranges::transform(all_index_combinations, std::back_inserter(all_step_points),
+                               [](const auto& comb) noexcept { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
         // faster on average because of the early termination condition. Thus, threads that mainly simulate
         // non-operational points will finish earlier and will be idle while other threads are still simulating the more
         // expensive operational points
-        std::shuffle(all_step_points.begin(), all_step_points.end(), std::mt19937_64{std::random_device{}()});
+        std::ranges::shuffle(all_step_points, std::mt19937_64{std::random_device{}()});
 
         simulate_operational_status_in_parallel(all_step_points);
 
@@ -714,12 +714,12 @@ class operational_domain_impl
         const auto next_clockwise_point = [](std::vector<step_point>& neighborhood,
                                              const step_point&        backtrack) noexcept -> step_point
         {
-            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
+            assert(std::ranges::find(neighborhood, backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
 
             while (neighborhood.back() != backtrack)
             {
-                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
+                std::ranges::rotate(neighborhood, neighborhood.begin() + 1);
             }
 
             return neighborhood.front();
@@ -883,7 +883,9 @@ class operational_domain_impl
                     else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
                     {
                         // perform a heuristic simulation
-                        const quicksim_params qs_params{simulation_parameters, 500, 0.6};
+                        const quicksim_params qs_params{.simulation_parameters = simulation_parameters,
+                                                        .iteration_steps       = 500,
+                                                        .alpha                 = 0.6};
 
                         if (const auto result = quicksim(lyt, qs_params); result.has_value())
                         {
@@ -1010,35 +1012,11 @@ class operational_domain_impl
          */
         std::vector<std::size_t> step_values;
         /**
-         * Equality operator.
+         * Equality, inequality, and less-than comparisons are defined member-wise on `step_values`.
          *
          * @param other Other step point to compare with.
-         * @return `true` iff the step points are equal.
          */
-        [[nodiscard]] bool operator==(const step_point& other) const noexcept
-        {
-            return step_values == other.step_values;
-        }
-        /**
-         * Inequality operator.
-         *
-         * @param other Other step point to compare with.
-         * @return `true` iff the step points are not equal.
-         */
-        [[nodiscard]] bool operator!=(const step_point& other) const noexcept
-        {
-            return !(*this == other);
-        }
-        /**
-         * Less than operator.
-         *
-         * @param other Other step point to compare with.
-         * @return `true` if this step point is less than to the other.
-         */
-        [[nodiscard]] bool operator<(const step_point& other) const noexcept
-        {
-            return step_values < other.step_values;
-        }
+        [[nodiscard]] auto operator<=>(const step_point& other) const noexcept = default;
     };
     /**
      * Converts a step point to a parameter point.
@@ -1076,7 +1054,7 @@ class operational_domain_impl
             assert(pp.get_parameters()[d] >= min_val && pp.get_parameters()[d] <= max_val &&
                    "Parameter point is outside of the value range");
 
-            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.get_parameters()[d]);
+            const auto it = std::ranges::lower_bound(values[d], pp.get_parameters()[d]);
 
             const auto dis = std::distance(values[d].cbegin(), it);
 
