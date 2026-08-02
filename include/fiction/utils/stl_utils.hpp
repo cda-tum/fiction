@@ -5,6 +5,7 @@
 #ifndef FICTION_STL_UTILS_HPP
 #define FICTION_STL_UTILS_HPP
 
+#include <algorithm>
 #include <ctime>
 #include <functional>
 #include <iterator>
