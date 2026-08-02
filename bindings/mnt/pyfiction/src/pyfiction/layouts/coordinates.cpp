@@ -128,11 +128,26 @@ void cube_coordinate(pybind11::module& m)
 
         // NOLINTBEGIN(misc-redundant-expression): pybind11 operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ne))
-        .def(py::self < py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_lt))
-        .def(py::self > py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_gt))
-        .def(py::self <= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_le))
-        .def(py::self >= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ge))
+        .def(py::self != py::self, py::arg("other"),
+             "Compares against another coordinate for inequality. Respects the dead indicator.\n\n"
+             "Parameter ``other``:\n    Right-hand side coordinate.")
+        .def(py::self < py::self, py::arg("other"),
+             "Determine whether this coordinate is \"less than\" another one, ignoring the dead indicator. This is "
+             "the case if z is smaller, or if z is equal but y is smaller, or if z and y are equal but x is "
+             "smaller.\n\n"
+             "Parameter ``other``:\n    Right-hand side coordinate.")
+        .def(py::self > py::self, py::arg("other"),
+             "Determine whether this coordinate is \"greater than\" another one, ignoring the dead indicator. This "
+             "is the case if the other one is \"less than\".\n\n"
+             "Parameter ``other``:\n    Right-hand side coordinate.")
+        .def(py::self <= py::self, py::arg("other"),
+             "Determine whether this coordinate is \"less than or equal to\" another one, ignoring the dead "
+             "indicator. This is the case if this one is not \"greater than\" the other.\n\n"
+             "Parameter ``other``:\n    Right-hand side coordinate.")
+        .def(py::self >= py::self, py::arg("other"),
+             "Determine whether this coordinate is \"greater than or equal to\" another one, ignoring the dead "
+             "indicator. This is the case if this one is not \"less than\" the other.\n\n"
+             "Parameter ``other``:\n    Right-hand side coordinate.")
         // NOLINTEND(misc-redundant-expression)
 
         .def("__repr__", &py_cube_coordinate::str, DOC(fiction_cube_coord_t_str))

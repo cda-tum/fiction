@@ -45,19 +45,29 @@ void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
             py::arg("m"), DOC(fiction_bdl_input_iterator_operator_eq))
         .def(
             "__ne__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self != n; },
-            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ne))
+            py::arg("m"),
+            "Inequality operator. Compares the current input index with the given integer.\n\n"
+            "Parameter ``m``:\n    Integer to compare with.")
         .def(
             "__lt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self < n; },
-            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_lt))
+            py::arg("m"),
+            "Less-than operator. Compares the current input index with the given integer.\n\n"
+            "Parameter ``m``:\n    Integer to compare with.")
         .def(
             "__le__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self <= n; },
-            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_le))
+            py::arg("m"),
+            "Less-or-equal-than operator. Compares the current input index with the given integer.\n\n"
+            "Parameter ``m``:\n    Integer to compare with.")
         .def(
             "__gt__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self > n; },
-            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_gt))
+            py::arg("m"),
+            "Greater-than operator. Compares the current input index with the given integer.\n\n"
+            "Parameter ``m``:\n    Integer to compare with.")
         .def(
             "__ge__", [](const fiction::bdl_input_iterator<Lyt>& self, const uint64_t n) -> bool { return self >= n; },
-            py::arg("m"), DOC(fiction_bdl_input_iterator_operator_ge))
+            py::arg("m"),
+            "Greater-or-equal-than operator. Compares the current input index with the given integer.\n\n"
+            "Parameter ``m``:\n    Integer to compare with.")
         .def(
             "__add__", [](const fiction::bdl_input_iterator<Lyt>& self, const int n) -> fiction::bdl_input_iterator<Lyt>
             { return self + n; }, py::arg("m"), DOC(fiction_bdl_input_iterator_operator_add))
