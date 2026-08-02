@@ -55,12 +55,13 @@ void offset_coordinate(nanobind::module_& m)
 
                 if (size == 2)
                 {
-                    new (self.p) py_offset_coordinate{py::int_(t[0]), py::int_(t[1])};
+                    new (self.p) py_offset_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1]))};
                     return;
                 }
                 if (size == 3)
                 {
-                    new (self.p) py_offset_coordinate{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
+                    new (self.p) py_offset_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
+                                                      py::int_(py::handle(t[2]))};
                     return;
                 }
 
@@ -121,12 +122,13 @@ void cube_coordinate(nanobind::module_& m)
 
                 if (size == 2)
                 {
-                    new (self.p) py_cube_coordinate{py::int_(t[0]), py::int_(t[1])};
+                    new (self.p) py_cube_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1]))};
                     return;
                 }
                 if (size == 3)
                 {
-                    new (self.p) py_cube_coordinate{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
+                    new (self.p) py_cube_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
+                                                    py::int_(py::handle(t[2]))};
                     return;
                 }
 
@@ -184,12 +186,13 @@ void siqad_coordinate(nanobind::module_& m)
 
                 if (size == 2)
                 {
-                    new (self.p) py_siqad_coordinate{py::int_(t[0]), py::int_(t[1])};
+                    new (self.p) py_siqad_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1]))};
                     return;
                 }
                 if (size == 3)
                 {
-                    new (self.p) py_siqad_coordinate{py::int_(t[0]), py::int_(t[1]), py::int_(t[2])};
+                    new (self.p) py_siqad_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
+                                                     py::int_(py::handle(t[2]))};
                     return;
                 }
 
