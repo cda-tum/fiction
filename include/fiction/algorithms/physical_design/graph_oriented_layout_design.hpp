@@ -592,7 +592,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             Ntk::foreach_ci([&starts](const auto& n) { starts.push_back(n); });
             if constexpr (Randomize)
             {
-                std::shuffle(starts.begin(), starts.end(), rng);
+                std::ranges::shuffle(starts, rng);
             }
             for (const auto& n : starts)
             {
@@ -606,7 +606,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
             Ntk::foreach_co([&starts](const auto& f) { starts.push_back(f); });
             if constexpr (Randomize)
             {
-                std::shuffle(starts.begin(), starts.end(), rng);
+                std::ranges::shuffle(starts, rng);
             }
             for (const auto& f : starts)
             {
@@ -645,7 +645,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
                 std::vector<node> fanouts{};
                 fanouts.reserve(this->fanout_size(n));
                 this->foreach_fanout(n, [&fanouts](const node& fo) { fanouts.push_back(fo); });
-                std::shuffle(fanouts.begin(), fanouts.end(), rng);
+                std::ranges::shuffle(fanouts, rng);
                 for (const auto& fo : fanouts)
                 {
                     create_topo_rec(fo);
@@ -673,7 +673,7 @@ class topo_view : public mockturtle::immutable_view<Ntk>
                 std::vector<signal> fanins{};
                 fanins.reserve(this->fanin_size(n));
                 this->foreach_fanin(n, [&fanins](const signal& f) { fanins.push_back(f); });
-                std::shuffle(fanins.begin(), fanins.end(), rng);
+                std::ranges::shuffle(fanins, rng);
                 for (const auto& f : fanins)
                 {
                     create_topo_rec(this->get_node(f));
