@@ -14,7 +14,6 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
-#include <algorithm>
 #include <sstream>
 #include <string>
 
@@ -26,10 +25,10 @@ using lattice = sidb_100_cell_clk_lyt_siqad;
 bool compare_output(const std::string& output, const std::string& expected)
 {
     std::string clean_output = output;
-    clean_output.erase(std::remove_if(clean_output.begin(), clean_output.end(), ::isspace), clean_output.end());
+    std::erase_if(clean_output, ::isspace);
 
     std::string clean_expected = expected;
-    clean_expected.erase(std::remove_if(clean_expected.begin(), clean_expected.end(), ::isspace), clean_expected.end());
+    std::erase_if(clean_expected, ::isspace);
 
     return clean_output == clean_expected;
 }

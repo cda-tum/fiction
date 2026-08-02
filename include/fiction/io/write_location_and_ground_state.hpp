@@ -17,6 +17,7 @@
 #include <fstream>
 #include <limits>
 #include <ostream>
+#include <ranges>
 #include <string_view>
 #include <vector>
 
@@ -65,7 +66,7 @@ class write_location_and_ground_state_impl
             const auto ground_state = ground_state_layouts.front();
             auto       sidbs        = ground_state.get_sidb_order();
 
-            std::sort(sidbs.begin(), sidbs.end());
+            std::ranges::sort(sidbs);
 
             for (const auto& sidb : sidbs)
             {
