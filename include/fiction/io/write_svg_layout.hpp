@@ -13,6 +13,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -20,6 +21,7 @@
 #include <fstream>
 #include <iostream>
 #include <optional>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -631,7 +633,7 @@ class write_sidb_layout_svg_impl
         all_cells.reserve(lyt.num_cells());
         // collect all cells
         lyt.foreach_cell([&all_cells](const auto& cell) { all_cells.push_back(cell); });
-        std::sort(all_cells.begin(), all_cells.end());
+        std::ranges::sort(all_cells);
 
         for (const auto& cell : all_cells)
         {

@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <fstream>
 #include <ostream>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -321,7 +322,7 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
 
     [[nodiscard]] bool is_node_number(const std::string_view& s) const noexcept
     {
-        return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
+        return !s.empty() && std::ranges::all_of(s, ::isdigit);
     }
 };
 /**

@@ -15,7 +15,6 @@
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <cctype>
 #include <sstream>
 #include <string>
@@ -35,7 +34,7 @@ using namespace fiction;
     std::string result = svg;
 
     // Remove all whitespace (spaces, tabs, newlines)
-    result.erase(std::remove_if(result.begin(), result.end(), ::isspace), result.end());
+    std::erase_if(result, ::isspace);
 
     return result;
 };

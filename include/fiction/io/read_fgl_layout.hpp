@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <istream>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -111,8 +112,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
                 }
             }
-            else if (std::find(shifted_cartesian.cbegin(), shifted_cartesian.cend(), topology_name) !=
-                     shifted_cartesian.cend())
+            else if (std::ranges::find(shifted_cartesian, topology_name) != shifted_cartesian.cend())
             {
                 if constexpr (is_shifted_cartesian_layout_v<Lyt>)
                 {
@@ -152,7 +152,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
                 }
             }
-            else if (std::find(hex.cbegin(), hex.cend(), topology_name) != hex.cend())
+            else if (std::ranges::find(hex, topology_name) != hex.cend())
             {
                 if constexpr (is_hexagonal_layout_v<Lyt>)
                 {
@@ -300,8 +300,8 @@ class read_fgl_layout_impl
                             lyt.assign_clock_number({x_coord, y_coord}, clock);
                         }
                     }
-                    else if (std::find(open_clocking_schemes.cbegin(), open_clocking_schemes.cend(),
-                                       static_cast<std::string>(clocking_scheme_name->GetText())) !=
+                    else if (std::ranges::find(open_clocking_schemes,
+                                               static_cast<std::string>(clocking_scheme_name->GetText())) !=
                              open_clocking_schemes.cend())
                     {
                         throw fgl_parsing_error("Error parsing FGL file: no element 'zones' in 'clocking'");
@@ -457,7 +457,7 @@ class read_fgl_layout_impl
             }
 
             // sort gates ascending based on id
-            std::sort(gates.begin(), gates.end(), gate_storage::compare_by_id);
+            std::ranges::sort(gates, gate_storage::compare_by_id);
 
             for (const auto& gate : gates)
             {
@@ -506,7 +506,7 @@ class read_fgl_layout_impl
                             lyt.create_not(incoming_signal, location);
                         }
                     }
-                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    else if (std::ranges::all_of(gate.type, ::isxdigit))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -602,7 +602,7 @@ class read_fgl_layout_impl
                             lyt.create_ge(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    else if (std::ranges::all_of(gate.type, ::isxdigit))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -636,7 +636,7 @@ class read_fgl_layout_impl
                             lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
                         }
                     }
-                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    else if (std::ranges::all_of(gate.type, ::isxdigit))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -651,7 +651,7 @@ class read_fgl_layout_impl
                             "Error parsing FGL file: unknown gate of type '{}' with 3 input signals", gate.type));
                     }
                 }
-                else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                else if (std::ranges::all_of(gate.type, ::isxdigit))
                 {
                     if constexpr (mockturtle::has_create_node_v<Lyt>)
                     {

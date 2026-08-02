@@ -18,6 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include <ostream>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <string_view>
@@ -162,7 +163,7 @@ class write_qll_layout_impl
     {
         std::vector<cell<Lyt>> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
-        std::sort(pi_list.begin(), pi_list.end(), [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(pi_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
 
         return pi_list;
     }
@@ -171,7 +172,7 @@ class write_qll_layout_impl
     {
         std::vector<cell<Lyt>> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
-        std::sort(po_list.begin(), po_list.end(), [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(po_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
 
         return po_list;
     }

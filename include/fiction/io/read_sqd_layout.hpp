@@ -19,6 +19,7 @@
 #include <exception>
 #include <fstream>
 #include <istream>
+#include <ranges>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -347,7 +348,7 @@ class read_sqd_layout_impl
              {"unknown", sidb_defect_type::UNKNOWN}}};
 
         std::string name{label};
-        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        std::ranges::transform(name, name.begin(), ::tolower);
 
         const auto it = defect_name_to_type.find(name);
         return it == defect_name_to_type.cend() ? sidb_defect_type::UNKNOWN : it->second;
@@ -410,9 +411,9 @@ class read_sqd_layout_impl
                 lambda_tf = std::stod(lambda_tf_string);
             }
 
-            std::for_each(incl_cells.begin(), incl_cells.end(),
-                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
-                          { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
+            std::ranges::for_each(
+                incl_cells, [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
+                { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
         }
     }
 };
