@@ -239,7 +239,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                 color = color | detail::OUT_COLOR;
             }
 
-            os << fmt::format(color, gate);
+            os << fmt::format(color, fmt::runtime(gate));
 
             os << x_dirs[r_ctr][c_ctr];
             ++c_ctr;
@@ -326,8 +326,9 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                     color = color | detail::OUT_COLOR;
                 }
 
-                os << fmt::format(color,
-                                  (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
+                os << fmt::format(
+                    color,
+                    fmt::runtime(Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
             }
         }
         os << '\n';
