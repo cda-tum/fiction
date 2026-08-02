@@ -73,8 +73,7 @@ int main()  // NOLINT
         resynthesis_function{};
 
     // parameters for cut rewriting
-    mockturtle::cut_rewriting_params cut_params{};
-    cut_params.cut_enumeration_ps.cut_size = 4;
+    mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
 
     // instantiate a technology mapping library
     std::stringstream library_stream{};
