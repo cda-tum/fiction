@@ -214,8 +214,6 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
         do
         {
-            using enum inml_technology::cell_type;
-
             status st = status::SEARCH;
 
             improvement_found = false;
@@ -234,16 +232,16 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // encountering a normal, input, or inverter magnet triggers collecting hump cells
-                                case NORMAL:
-                                case INPUT:
-                                case INVERTER_MAGNET:
+                                case inml_technology::cell_type::NORMAL:
+                                case inml_technology::cell_type::INPUT:
+                                case inml_technology::cell_type::INVERTER_MAGNET:
                                 {
                                     st = status::COLLECT;
                                     hump.push_back(c);
                                     break;
                                 }
                                 // remain searching
-                                case EMPTY:
+                                case inml_technology::cell_type::EMPTY:
                                 {
                                     break;
                                 }
@@ -261,15 +259,15 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // collect cells
-                                case NORMAL:
-                                case INVERTER_MAGNET:
+                                case inml_technology::cell_type::NORMAL:
+                                case inml_technology::cell_type::INVERTER_MAGNET:
                                 {
                                     hump.push_back(c);
                                     break;
                                 }
                                 // interesting branch: could be a hump
-                                case EMPTY:
-                                case OUTPUT:
+                                case inml_technology::cell_type::EMPTY:
+                                case inml_technology::cell_type::OUTPUT:
                                 {
                                     handle(hump);
                                     // discard hump cells and start searching again
@@ -289,7 +287,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                         }
                         case status::SKIP:
                         {
-                            if (const auto t = lyt.get_cell_type(c); t == EMPTY)
+                            if (const auto t = lyt.get_cell_type(c); t == inml_technology::cell_type::EMPTY)
                             {
                                 // skipping over, return to searching
                                 st = status::SEARCH;

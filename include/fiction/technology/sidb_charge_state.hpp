@@ -52,15 +52,13 @@ static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
  */
 [[nodiscard]] inline constexpr int8_t charge_state_to_sign(const sidb_charge_state& cs) noexcept
 {
-    using enum sidb_charge_state;
-
     switch (cs)
     {
-        case NEGATIVE:
+        case sidb_charge_state::NEGATIVE:
         {
             return -1;
         }
-        case POSITIVE:
+        case sidb_charge_state::POSITIVE:
         {
             return +1;
         }
@@ -78,25 +76,23 @@ static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
  */
 [[nodiscard]] inline constexpr sidb_charge_state sign_to_charge_state(const int8_t sg) noexcept
 {
-    using enum sidb_charge_state;
-
     switch (sg)
     {
         case -1:
         {
-            return NEGATIVE;
+            return sidb_charge_state::NEGATIVE;
         }
         case 0:
         {
-            return NEUTRAL;
+            return sidb_charge_state::NEUTRAL;
         }
         case +1:
         {
-            return POSITIVE;
+            return sidb_charge_state::POSITIVE;
         }
         default:
         {
-            return NONE;
+            return sidb_charge_state::NONE;
         }
     }
 }
@@ -109,38 +105,36 @@ static inline const std::vector<sidb_charge_state> SIDB_CHARGE_STATES_BASE_3{
 [[nodiscard]] inline std::string
 charge_configuration_to_string(const std::vector<sidb_charge_state>& charge_distribution) noexcept
 {
-    using enum sidb_charge_state;
-
     std::stringstream config_str{};
 
     for (const auto& cs : charge_distribution)
     {
-        if (cs == NONE)
+        if (cs == sidb_charge_state::NONE)
         {
             continue;
         }
 
         switch (cs)
         {
-            case NEGATIVE:
+            case sidb_charge_state::NEGATIVE:
             {
                 config_str << '-';
 
                 break;
             }
-            case NEUTRAL:
+            case sidb_charge_state::NEUTRAL:
             {
                 config_str << '0';
 
                 break;
             }
-            case POSITIVE:
+            case sidb_charge_state::POSITIVE:
             {
                 config_str << '+';
 
                 break;
             }
-            case NONE:
+            case sidb_charge_state::NONE:
             {
                 break;
             }

@@ -107,9 +107,7 @@ class fanout_substitution_impl
             available_fanouts{ntk_topo},
             ps{p}
     {
-        using enum fanout_substitution_params::substitution_strategy;
-
-        if (ps.strategy == RANDOM)
+        if (ps.strategy == fanout_substitution_params::substitution_strategy::RANDOM)
         {
             rng.emplace(ps.seed.value_or(std::random_device{}()));
         }
@@ -234,23 +232,21 @@ class fanout_substitution_impl
             return;
         }
 
-        using enum fanout_substitution_params::substitution_strategy;
-
         switch (ps.strategy)
         {
-            case DEPTH:
+            case fanout_substitution_params::substitution_strategy::DEPTH:
             {
                 generate_depth_tree(substituted, n, child, num_fanouts);
                 break;
             }
 
-            case BREADTH:
+            case fanout_substitution_params::substitution_strategy::BREADTH:
             {
                 generate_breadth_tree(substituted, n, child, num_fanouts);
                 break;
             }
 
-            case RANDOM:
+            case fanout_substitution_params::substitution_strategy::RANDOM:
             {
                 generate_random_tree(substituted, n, child, num_fanouts);
                 break;

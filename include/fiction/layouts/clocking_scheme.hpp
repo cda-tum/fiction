@@ -196,20 +196,18 @@ enum class num_clks : uint8_t
 template <typename Lyt>
 static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    using enum num_clks;
-
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function open_clock_function =
         []([[maybe_unused]] const clock_zone<Lyt>& cz) noexcept
     { return typename clocking_scheme<clock_zone<Lyt>>::clock_number{}; };
 
     switch (n)
     {
-        case THREE:
+        case num_clks::THREE:
         {
             return clocking_scheme{
                 clock_name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 3u, false};
         }
-        case FOUR:
+        case num_clks::FOUR:
         {
             return clocking_scheme{
                 clock_name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
@@ -230,8 +228,6 @@ static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    using enum num_clks;
-
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
@@ -252,12 +248,12 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
 
     switch (n)
     {
-        case THREE:
+        case num_clks::THREE:
         {
             return clocking_scheme{
                 clock_name::COLUMNAR, columnar_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
         }
-        case FOUR:
+        case num_clks::FOUR:
         {
             return clocking_scheme{
                 clock_name::COLUMNAR, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
@@ -279,8 +275,6 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    using enum num_clks;
-
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
@@ -301,12 +295,12 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
 
     switch (n)
     {
-        case THREE:
+        case num_clks::THREE:
         {
             return clocking_scheme{
                 clock_name::ROW, row_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
         }
-        case FOUR:
+        case num_clks::FOUR:
         {
             return clocking_scheme{
                 clock_name::ROW, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
@@ -327,8 +321,6 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    using enum num_clks;
-
     static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
@@ -349,12 +341,12 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 
     switch (n)
     {
-        case THREE:
+        case num_clks::THREE:
         {
             return clocking_scheme{
                 clock_name::TWODDWAVE, twoddwave_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
         }
-        case FOUR:
+        case num_clks::FOUR:
         {
             return clocking_scheme{
                 clock_name::TWODDWAVE, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
@@ -376,8 +368,6 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
 template <typename Lyt>
 static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 {
-    using enum num_clks;
-
     // clang-format off
 
     static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
@@ -448,7 +438,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
         {
             switch (n)
             {
-                case THREE:
+                case num_clks::THREE:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            odd_row_twoddwave_hex_3_clock_function,
@@ -457,7 +447,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                                            3u,
                                            true};
                 }
-                case FOUR:
+                case num_clks::FOUR:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            odd_row_twoddwave_hex_4_clock_function,
@@ -472,7 +462,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
         {
             switch (n)
             {
-                case THREE:
+                case num_clks::THREE:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            even_row_twoddwave_hex_3_clock_function,
@@ -481,7 +471,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                                            3u,
                                            true};
                 }
-                case FOUR:
+                case num_clks::FOUR:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            even_row_twoddwave_hex_4_clock_function,
@@ -496,7 +486,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
         {
             switch (n)
             {
-                case THREE:
+                case num_clks::THREE:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            odd_column_twoddwave_hex_3_clock_function,
@@ -505,7 +495,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                                            3u,
                                            true};
                 }
-                case FOUR:
+                case num_clks::FOUR:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            odd_column_twoddwave_hex_4_clock_function,
@@ -520,7 +510,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
         {
             switch (n)
             {
-                case THREE:
+                case num_clks::THREE:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            even_column_twoddwave_hex_3_clock_function,
@@ -529,7 +519,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                                            3u,
                                            true};
                 }
-                case FOUR:
+                case num_clks::FOUR:
                 {
                     return clocking_scheme{clock_name::TWODDWAVE_HEX,
                                            even_column_twoddwave_hex_4_clock_function,

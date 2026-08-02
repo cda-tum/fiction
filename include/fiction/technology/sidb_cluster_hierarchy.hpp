@@ -259,12 +259,10 @@ struct sidb_cluster_projector_state
     template <sidb_charge_state cs>
     [[nodiscard]] constexpr uint64_t get_count() const noexcept
     {
-        using enum sidb_charge_state;
-
         switch (cs)
         {
-            case NEGATIVE: return multiset_conf >> 32ull;
-            case POSITIVE: return multiset_conf & 0xFFFFFFFF;
+            case sidb_charge_state::NEGATIVE: return multiset_conf >> 32ull;
+            case sidb_charge_state::POSITIVE: return multiset_conf & 0xFFFFFFFF;
             default: return get_cluster_size(cluster) - (multiset_conf >> 32ull) - (multiset_conf & 0xFFFFFFFF);
         }
     }
@@ -653,16 +651,14 @@ struct sidb_cluster_charge_state
      */
     constexpr void add_charge(const sidb_charge_state cs) noexcept
     {
-        using enum sidb_charge_state;
-
         switch (cs)
         {
-            case NEGATIVE:
+            case sidb_charge_state::NEGATIVE:
             {
                 neg_count++;
                 return;
             }
-            case POSITIVE:
+            case sidb_charge_state::POSITIVE:
             {
                 pos_count++;
                 return;
