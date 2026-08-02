@@ -34,7 +34,7 @@ using namespace fiction;
     std::string result = svg;
 
     // Remove all whitespace (spaces, tabs, newlines)
-    std::erase_if(result, ::isspace);
+    std::erase_if(result, [](const char ch) { return ::isspace(static_cast<unsigned char>(ch)); });
 
     return result;
 };

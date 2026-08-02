@@ -24,11 +24,13 @@ using lattice = sidb_100_cell_clk_lyt_siqad;
 // Helper function to compare string output with expected string
 bool compare_output(const std::string& output, const std::string& expected)
 {
+    const auto is_space = [](const char ch) { return ::isspace(static_cast<unsigned char>(ch)); };
+
     std::string clean_output = output;
-    std::erase_if(clean_output, ::isspace);
+    std::erase_if(clean_output, is_space);
 
     std::string clean_expected = expected;
-    std::erase_if(clean_expected, ::isspace);
+    std::erase_if(clean_expected, is_space);
 
     return clean_output == clean_expected;
 }
