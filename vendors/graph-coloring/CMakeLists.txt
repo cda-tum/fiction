@@ -2,7 +2,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.11)
 
 PROJECT(graph-coloring)
 
-SET(CMAKE_CXX_STANDARD 17)
+SET(CMAKE_CXX_STANDARD 20)
 
 ADD_LIBRARY(graph-coloring STATIC
         Source/coloring_algorithm.cpp
