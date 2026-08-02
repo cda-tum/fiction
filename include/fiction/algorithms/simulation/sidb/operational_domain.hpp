@@ -560,15 +560,19 @@ class operational_domain_impl
         std::vector<step_point> all_step_points{};
         all_step_points.reserve(all_index_combinations.size());
 
-        std::ranges::transform(all_index_combinations, std::back_inserter(all_step_points),
-                               [](const auto& comb) noexcept { return step_point{comb}; });
+        std::transform(all_index_combinations.cbegin(), all_index_combinations.cend(),
+                       std::back_inserter(all_step_points), [](const auto& comb) noexcept { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
         // faster on average because of the early termination condition. Thus, threads that mainly simulate
         // non-operational points will finish earlier and will be idle while other threads are still simulating the more
         // expensive operational points
-        std::ranges::shuffle(all_step_points, std::mt19937_64{std::random_device{}()});
+        //
+        // NOTE: std::ranges::shuffle on a vector<step_point> triggers a Clang <16 + libstdc++ >=12 concepts bug
+        // (constraint checking for std::ranges::subrange fails to resolve __begin for the custom iterator type),
+        // so the classic iterator-pair form is used here deliberately.
+        std::shuffle(all_step_points.begin(), all_step_points.end(), std::mt19937_64{std::random_device{}()});
 
         simulate_operational_status_in_parallel(all_step_points);
 
@@ -714,12 +718,15 @@ class operational_domain_impl
         const auto next_clockwise_point = [](std::vector<step_point>& neighborhood,
                                              const step_point&        backtrack) noexcept -> step_point
         {
-            assert(std::ranges::find(neighborhood, backtrack) != neighborhood.cend() &&
+            // NOTE: std::ranges::find/rotate on a vector<step_point> trigger a Clang <16 + libstdc++ >=12 concepts
+            // bug (constraint checking for std::ranges::subrange fails to resolve __begin for the custom iterator
+            // type), so the classic iterator-pair form is used here deliberately.
+            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
 
             while (neighborhood.back() != backtrack)
             {
-                std::ranges::rotate(neighborhood, neighborhood.begin() + 1);
+                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
             }
 
             return neighborhood.front();
