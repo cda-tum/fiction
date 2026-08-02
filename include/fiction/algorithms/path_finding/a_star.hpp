@@ -345,7 +345,7 @@ class a_star_impl
         // finally, add the source coordinate
         path.push_back(objective.source);
         // and reverse the path to bring it in proper order
-        std::reverse(std::begin(path), std::end(path));
+        std::ranges::reverse(path);
 
         return path;
     }

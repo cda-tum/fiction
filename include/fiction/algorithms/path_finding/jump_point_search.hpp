@@ -396,7 +396,7 @@ class jump_point_search_impl
         // finally, add the source coordinate
         path.push_back(objective.source);
         // and reverse the path to bring it in proper order
-        std::reverse(std::begin(path), std::end(path));
+        std::ranges::reverse(path);
 
         return fill_in_jumps(path);  // fill in the blanks that were skipped via jump points
     }
