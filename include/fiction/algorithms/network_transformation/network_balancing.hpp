@@ -102,7 +102,7 @@ class network_balancing_impl
 
         // gather PO levels
         const auto po_levels    = get_po_levels(ntk_depth);
-        const auto max_po_level = *std::max_element(po_levels.cbegin(), po_levels.cend());
+        const auto max_po_level = *std::ranges::max_element(po_levels);
 
         // add primary outputs to finalize the network
         ntk_topo.foreach_po(
@@ -171,7 +171,7 @@ class is_balanced_impl
         {
             const auto po_levels = get_po_levels(ntk_depth);
             // check whether POs with different depth levels exist
-            if (std::adjacent_find(po_levels.begin(), po_levels.end(), std::not_equal_to<>()) != po_levels.end())
+            if (std::ranges::adjacent_find(po_levels, std::not_equal_to<>()) != po_levels.end())
             {
                 balanced = false;
             }
