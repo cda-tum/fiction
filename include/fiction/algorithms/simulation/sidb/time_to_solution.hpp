@@ -105,11 +105,11 @@ void time_to_solution(const Lyt& lyt, const quicksim_params& quicksim_params,
 
     if (lyt.num_cells() == 0)
     {
-        st.single_runtime_exact = 0.0;
-        st.time_to_solution     = std::numeric_limits<double>::infinity();
-        st.acc                  = 0.0;
-        st.mean_single_runtime  = 0.0;
-        st.algorithm            = sidb_simulation_engine_name(tts_params.engine);
+        st = {.time_to_solution     = std::numeric_limits<double>::infinity(),
+              .acc                  = 0.0,
+              .mean_single_runtime  = 0.0,
+              .single_runtime_exact = 0.0,
+              .algorithm            = sidb_simulation_engine_name(tts_params.engine)};
 
         if (ps)
         {

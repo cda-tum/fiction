@@ -89,9 +89,8 @@ class color_routing_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        generate_edge_intersection_graph_params epg_params{};
-        epg_params.crossings  = ps.crossings;
-        epg_params.path_limit = ps.path_limit;
+        const generate_edge_intersection_graph_params epg_params{.crossings  = ps.crossings,
+                                                                 .path_limit = ps.path_limit};
 
         const auto edge_intersection_graph =
             generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
@@ -102,12 +101,12 @@ class color_routing_impl
             return false;
         }
 
-        determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{};
-        dvc_ps.engine                                 = ps.engine;
-        dvc_ps.sat_params.cliques                     = pst.epg_stats.cliques;
-        dvc_ps.sat_params.clique_size_color_frequency = !ps.partial_sat;
-        dvc_ps.sat_params.sat_search_tactic           = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING;
-        dvc_ps.sat_params.sat_engine                  = bill::solvers::glucose_41;
+        const determine_vertex_coloring_params<::fiction::edge_intersection_graph<Lyt>> dvc_ps{
+            .engine     = ps.engine,
+            .sat_params = {.sat_engine                  = bill::solvers::glucose_41,
+                           .sat_search_tactic           = graph_coloring_sat_search_tactic::LINEARLY_ASCENDING,
+                           .cliques                     = pst.epg_stats.cliques,
+                           .clique_size_color_frequency = !ps.partial_sat}};
 
         const auto vertex_coloring = determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
 

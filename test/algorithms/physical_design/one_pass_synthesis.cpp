@@ -30,14 +30,7 @@ namespace
 
 one_pass_synthesis_params configuration() noexcept
 {
-    one_pass_synthesis_params ps{};
-
-    ps.enable_and   = true;
-    ps.enable_not   = true;
-    ps.enable_or    = true;
-    ps.enable_wires = true;
-
-    return ps;
+    return one_pass_synthesis_params{.enable_wires = true, .enable_not = true, .enable_and = true, .enable_or = true};
 }
 
 one_pass_synthesis_params&& twoddwave(one_pass_synthesis_params&& ps) noexcept

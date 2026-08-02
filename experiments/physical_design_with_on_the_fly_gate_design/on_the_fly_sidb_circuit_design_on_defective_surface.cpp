@@ -47,15 +47,14 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
-    fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
-    design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
-    design_gate_params.canvas = {{24, 17}, {34, 28}};
-
-    design_gate_params.number_of_canvas_sidbs        = 3;
-    design_gate_params.operational_params.sim_engine = fiction::sidb_simulation_engine::QUICKEXACT;
-    design_gate_params.termination_cond =
-        fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+    fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{
+        .operational_params     = {.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32},
+                                   .sim_engine            = fiction::sidb_simulation_engine::QUICKEXACT},
+        .canvas                 = {{24, 17}, {34, 28}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond =
+            fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION};
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
@@ -121,8 +120,7 @@ int main()  // NOLINT
         const fiction::technology_mapping_params tech_map_params = fiction::all_standard_2_input_functions();
 
         // parameters for cut rewriting
-        mockturtle::cut_rewriting_params cut_params{};
-        cut_params.cut_enumeration_ps.cut_size = 4;
+        mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
 
         const mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
                                               mockturtle::xag_network,                    // the database network type
@@ -136,17 +134,15 @@ int main()  // NOLINT
         // perform technology mapping
         const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
 
-        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>> params{};
-
-        params.exact_design_parameters.scheme        = "ROW4";
-        params.exact_design_parameters.crossings     = true;
-        params.exact_design_parameters.border_io     = false;
-        params.exact_design_parameters.desynchronize = true;
-        params.exact_design_parameters.upper_bound_x = 11;         // 12 x 31 tiles
-        params.exact_design_parameters.upper_bound_y = 30;         // 12 x 31 tiles
-        params.exact_design_parameters.timeout       = 3'600'000;  // 1h in ms
-
-        params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
+        fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>> params{
+            .sidb_on_the_fly_gate_library_parameters = {.design_gate_params = design_gate_params},
+            .exact_design_parameters                 = {.scheme        = "ROW4",
+                                                        .upper_bound_x = 11,  // 12 x 31 tiles
+                                                        .upper_bound_y = 30,  // 12 x 31 tiles
+                                                        .crossings     = true,
+                                                        .border_io     = false,
+                                                        .desynchronize = true,
+                                                        .timeout       = 3'600'000}};  // 1h in ms
 
         fiction::on_the_fly_circuit_design_on_defective_surface_stats<gate_lyt> st{};
 

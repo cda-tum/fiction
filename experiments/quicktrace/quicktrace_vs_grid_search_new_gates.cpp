@@ -56,10 +56,10 @@ int main()  // NOLINT
     const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
-    params.additional_scanning_area = {100, 1000};
-    params.defect                   = stray_db;
-    params.operational_params       = is_op_params;
+    const defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{
+        .defect                   = stray_db,
+        .operational_params       = is_op_params,
+        .additional_scanning_area = {100, 1000}};
 
     for (const auto& [gate, truth_table] : gates)
     {

@@ -94,8 +94,7 @@ int main()  // NOLINT
         resynthesis_function{};
 
     // parameters for cut rewriting
-    mockturtle::cut_rewriting_params cut_params{};
-    cut_params.cut_enumeration_ps.cut_size = 4;
+    mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
 
     // instantiate a technology mapping library
     std::stringstream library_stream{};
@@ -130,17 +129,16 @@ int main()  // NOLINT
         fiction::sidb_surface_analysis<fiction::sidb_bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params exact_params{};
-    exact_params.scheme        = "ROW4";
-    exact_params.crossings     = true;
-    exact_params.border_io     = false;
-    exact_params.desynchronize = true;
-    exact_params.upper_bound_x = 11;  // 12 x 31 tiles
-    exact_params.upper_bound_y = 30;  // 12 x 31 tiles
-    // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
-    // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
-    exact_params.timeout = 3'600'000;  // 1h in ms
-    fiction::exact_physical_design_stats exact_stats{};
+    fiction::exact_physical_design_params exact_params{.scheme        = "ROW4",
+                                                       .upper_bound_x = 11,  // 12 x 31 tiles
+                                                       .upper_bound_y = 30,  // 12 x 31 tiles
+                                                       // .upper_bound_x = 12,    // 13 x 18 tiles
+                                                       // .upper_bound_y = 17,    // 13 x 18 tiles
+                                                       .crossings     = true,
+                                                       .border_io     = false,
+                                                       .desynchronize = true,
+                                                       .timeout       = 3'600'000};  // 1h in ms
+    fiction::exact_physical_design_stats  exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
                                             ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &

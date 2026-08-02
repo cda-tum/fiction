@@ -33,16 +33,14 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     lyt.assign_cell_type({6, 5, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({6, 7, 1}, sidb_technology::cell_type::NORMAL);
 
-    sidb_simulation_parameters sim_params{};
-    sim_params.base = 2;
+    const sidb_simulation_parameters sim_params{.base = 2};
 
     charge_distribution_surface cds{lyt, sim_params};
 
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-
-    op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 4.1, 6.0, 0.1},
-                                         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 4.1, 6.0, 0.1}};
+    operational_domain_params op_domain_params{
+        .operational_params = {.simulation_parameters = sim_params},
+        .sweep_dimensions   = {operational_domain_value_range{sweep_parameter::EPSILON_R, 4.1, 6.0, 0.1},
+                               operational_domain_value_range{sweep_parameter::LAMBDA_TF, 4.1, 6.0, 0.1}}};
 
     SECTION("Using the typical ground state as given CDS")
     {

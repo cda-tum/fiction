@@ -89,16 +89,9 @@ int main()  // NOLINT
     const critical_temperature_params ct_params{op_params};
 
     // defining the operational domain parameters
-    operational_domain_params op_domain_params{op_params};
-
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-
-    op_domain_params.sweep_dimensions[0].min  = 4.0;
-    op_domain_params.sweep_dimensions[0].max  = 6.0;
-    op_domain_params.sweep_dimensions[0].step = 0.2;
-    op_domain_params.sweep_dimensions[1].min  = 4.0;
-    op_domain_params.sweep_dimensions[1].max  = 6.0;
-    op_domain_params.sweep_dimensions[1].step = 0.2;
+    const operational_domain_params op_domain_params{
+        .operational_params = op_params,
+        .sweep_dimensions = {{sweep_parameter::EPSILON_R, 4.0, 6.0, 0.2}, {sweep_parameter::LAMBDA_TF, 4.0, 6.0, 0.2}}};
 
     const band_bending_resilience_params bbr_params{
         physical_population_stability_params{op_params.simulation_parameters}};
@@ -111,9 +104,8 @@ int main()  // NOLINT
 
     const std::vector<sidb_defect> defects = {si_vacancy, arsenic};
 
-    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
-    params.additional_scanning_area = {20, 20};
-    params.operational_params       = op_params;
+    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{.operational_params       = op_params,
+                                                                              .additional_scanning_area = {20, 20}};
 
     for (const auto& [gate_name, truth_table] : gates)
     {

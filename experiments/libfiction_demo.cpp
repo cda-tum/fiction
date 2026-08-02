@@ -155,8 +155,7 @@ int main(int argc, char* argv[])  // NOLINT
                                     mockturtle::xag_npn_db_kind::aig_complete>  // the kind of database to use
         resynthesis_function{};
 
-    mockturtle::cut_rewriting_params cut_params{};
-    cut_params.cut_enumeration_ps.cut_size = 4;
+    mockturtle::cut_rewriting_params cut_params{.cut_enumeration_ps = {.cut_size = 4}};
 
     // rewrite network cuts using the given re-synthesis function
     ntk = mockturtle::cut_rewriting(ntk, resynthesis_function, cut_params);
@@ -175,10 +174,10 @@ int main(int argc, char* argv[])  // NOLINT
     std::cout << "[i] fanout substitution" << std::endl;
 
     // set up parameters for fanout substitution
-    fiction::fanout_substitution_params fanout_params{};
-    fanout_params.strategy  = fiction::fanout_substitution_params::substitution_strategy::BREADTH;
-    fanout_params.degree    = 2;
-    fanout_params.threshold = 1;
+    fiction::fanout_substitution_params fanout_params{
+        .strategy  = fiction::fanout_substitution_params::substitution_strategy::BREADTH,
+        .degree    = 2,
+        .threshold = 1};
 
     // substitute high-degree output nodes by fanout nodes (converts network into a topology_network)
     auto top_ntk = fiction::fanout_substitution<fiction::tec_nt>(ntk, fanout_params);
@@ -208,9 +207,8 @@ int main(int argc, char* argv[])  // NOLINT
     std::cout << "[i] orthogonal physical design" << std::endl;
 
     // set up parameters for orthogonal physical design
-    fiction::orthogonal_physical_design_params ortho_params{};
-    ortho_params.number_of_clock_phases = fiction::num_clks::FOUR;
-    fiction::orthogonal_physical_design_stats ortho_stats{};
+    fiction::orthogonal_physical_design_params ortho_params{.number_of_clock_phases = fiction::num_clks::FOUR};
+    fiction::orthogonal_physical_design_stats  ortho_stats{};
 
     // perform layout generation with a scalable algorithm
     auto ortho_gate_lyt = fiction::orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
@@ -248,12 +246,11 @@ int main(int argc, char* argv[])  // NOLINT
         std::cout << "[i] SMT-based physical design" << std::endl;
 
         // set up parameters for SMT-based physical design
-        fiction::exact_physical_design_params exact_params{};
-        exact_params.scheme    = "2DDWave";
-        exact_params.crossings = true;
-        exact_params.border_io = true;
-        exact_params.timeout   = 180000;  // 3min in ms
-        fiction::exact_physical_design_stats exact_stats{};
+        fiction::exact_physical_design_params exact_params{.scheme    = "2DDWave",
+                                                           .crossings = true,
+                                                           .border_io = true,
+                                                           .timeout   = 180000};  // 3min in ms
+        fiction::exact_physical_design_stats  exact_stats{};
 
         // perform layout generation with an SMT-based exact algorithm
         auto exact_gate_lyt = fiction::exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
