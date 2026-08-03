@@ -11765,7 +11765,12 @@ static const char *__doc_fiction_energy_calculation_UPDATE_ENERGY =
 R"doc(The electrostatic potential energy of a given charge distribution is
 updated after it is changed.)doc";
 
-static const char *__doc_fiction_energy_dissipation_stats = R"doc()doc";
+static const char *__doc_fiction_energy_dissipation_stats =
+R"doc(Statistics for energy dissipation calculation.
+
+.. deprecated::
+    qca_energy_dissipation() is deprecated since version 0.7.1 and
+    will be removed in version 0.8.0.)doc";
 
 static const char *__doc_fiction_energy_dissipation_stats_fast = R"doc()doc";
 
@@ -12267,7 +12272,13 @@ base, it simulates very effectively for either base number (2 or 3).)doc";
 
 static const char *__doc_fiction_exact_sidb_simulation_engine_EXGS =
 R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
-that always has exponential runtime.)doc";
+that always has exponential runtime.
+
+.. deprecated::
+    exhaustive_ground_state_simulation() is deprecated since version
+    0.7.0 and will be moved to experiments/ in version 0.8.0 to ensure
+    continued reproducibility of old results. Please use quickexact()
+    instead.)doc";
 
 static const char *__doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
 R"doc(*QuickExact* is also an exact simulation engine that requires
@@ -12321,6 +12332,12 @@ guaranteed.
 @note This was the first exact simulation approach. However, it is
 replaced by *QuickExact* and *ClusterComplete* due to the much better
 runtimes and more functionality.
+
+.. deprecated::
+    exhaustive_ground_state_simulation() is deprecated since version
+    0.7.0 and will be moved to experiments/ in version 0.8.0 to ensure
+    continued reproducibility of old results. Please use quickexact()
+    instead.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -16552,6 +16569,10 @@ A* in terms of runtime. It is recommended to use A* (see `a_star`).
 
 @note JPS does not support wire crossings.
 
+.. deprecated::
+    jump_point_search() is deprecated since version 0.7.1 and will be
+    removed in version 0.8.0. Please use a_star() instead.
+
 Template parameter ``Path``:
     Type of the returned path.
 
@@ -19127,6 +19148,10 @@ Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
 As done in that publication, energy dissipation values are being given
 in meV for slow (25 GHz) and fast (100 GHz) clocking.
 
+.. deprecated::
+    qca_energy_dissipation() is deprecated since version 0.7.1 and
+    will be removed in version 0.8.0.
+
 Template parameter ``Lyt``:
     Gate-level layout type.
 
@@ -19423,8 +19448,12 @@ R"doc(Defines a range type utilizing iterators. It implements `begin()` and
 `end()` as well as `cbegin()` and `cend()` as member functions to work
 for range based for-loops.
 
-Template parameter ``Iterator``:
-    type for which the range should be created.)doc";
+Template parameter ``I``:
+    type for which the range should be created.
+
+.. deprecated::
+    range_t is deprecated since version 0.7.1 and will be removed in
+    version 0.8.0.)doc";
 
 static const char *__doc_fiction_range_t_b = R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
 
