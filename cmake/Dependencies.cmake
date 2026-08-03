@@ -57,7 +57,6 @@ FetchContent_Declare(
   alice
   GIT_REPOSITORY https://github.com/marcelwa/alice.git
   GIT_TAG 835fd886943673c73b94883d90a8d64259710c26 # Head of the master branch
-                                                   # as of 2026-08-02
 )
 FetchContent_MakeAvailable(alice)
 
@@ -74,8 +73,7 @@ set(MOCKTURTLE_TEST
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG c869608c7952686efa9c546cda58c4b29235db11 # Head of the mnt branch as
-                                                   # of 2026-08-02
+  GIT_TAG c869608c7952686efa9c546cda58c4b29235db11 # Head of the mnt branch
 )
 FetchContent_MakeAvailable(mockturtle)
 
