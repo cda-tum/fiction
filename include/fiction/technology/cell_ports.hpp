@@ -345,7 +345,7 @@ struct formatter<fiction::port_direction>
             }
         }
 
-        return format_to(ctx.out(), dir);
+        return format_to(ctx.out(), fmt::runtime(dir));
     }
 };
 // make port_list compatible with fmt::format
