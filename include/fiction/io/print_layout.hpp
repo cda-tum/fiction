@@ -12,15 +12,12 @@
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
-#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -80,18 +77,18 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // empty layout
     if (layout.num_gates() == 0ul && layout.num_wires() == 0ul)
     {
-        os << "[i] empty layout" << std::endl;
+        os << "[i] empty layout\n";
         return;
     }
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
     {
-        os << "[e] hexagonal layout printing is not supported" << std::endl;
+        os << "[e] hexagonal layout printing is not supported\n";
         return;
     }
     else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
     {
-        os << "[e] shifted cartesian layout printing is not supported" << std::endl;
+        os << "[e] shifted cartesian layout printing is not supported\n";
         return;
     }
 
@@ -250,8 +247,8 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         ++r_ctr;
     }
 
-    // flush stream
-    os << std::endl;
+    // terminate with a newline
+    os << "\n";
 }
 /**
  * Writes a simplified 2D representation of a cell-level layout to an output stream.
@@ -334,8 +331,8 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
         os << '\n';
     }
 
-    // flush stream
-    os << std::endl;
+    // terminate with a newline
+    os << "\n";
 }
 /**
  * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
@@ -521,8 +518,8 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
                 break;
             }
         }
-        // flush stream
-        os << std::endl;
+        // terminate with a newline
+        os << "\n";
     }
 }
 /**

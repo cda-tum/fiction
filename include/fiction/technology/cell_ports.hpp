@@ -343,6 +343,10 @@ struct formatter<fiction::port_direction>
                 dir = "NW";
                 break;
             }
+            default:
+            {
+                break;
+            }
         }
 
         return format_to(ctx.out(), fmt::runtime(dir));
