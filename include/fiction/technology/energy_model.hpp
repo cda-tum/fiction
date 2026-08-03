@@ -10,6 +10,7 @@
 #include <mockturtle/traits.hpp>
 
 #include <cstdint>
+#include <iostream>
 #include <ostream>
 
 #if (PROGRESS_BARS)

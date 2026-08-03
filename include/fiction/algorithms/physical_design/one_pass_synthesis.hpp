@@ -23,7 +23,6 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -53,6 +52,8 @@
 #include <pybind11/embed.h>
 #include <pybind11/eval.h>
 #include <pybind11/pytypes.h>
+
+#include <Python.h>         // NOLINT(misc-include-cleaner): provides PyExc_TimeoutError; must be included as a whole
 #pragma GCC diagnostic pop  // GCC
 #pragma warning(pop)        // MSVC
 
@@ -112,7 +113,7 @@ one_pass_synthesis_params
      * Flag to indicate that I/Os should be realized by designated wire segments (preferred).
      */
     bool io_pins = true;  // TODO thus far, io_ports have to be set to true
-#if !defined(__APPLE__)
+#ifndef __APPLE__
     /**
      * Number of threads to use for exploring the possible aspect ratios.
      *
@@ -342,7 +343,7 @@ class mugen_handler
                                       "enable_and"_a = ps.enable_and, "enable_or"_a = ps.enable_or,
                                       "enable_maj"_a = ps.enable_maj, "enable_crossings"_a = ps.crossings,
                                       "designated_pi"_a = ps.io_pins, "designated_po"_a = ps.io_pins,
-#if !defined(__APPLE__)
+#ifndef __APPLE__
                                       "nr_threads"_a = ps.num_threads,
 #endif
                                       "timeout"_a = ps.timeout);
@@ -724,10 +725,9 @@ template <typename Lyt, typename TT>
 class one_pass_synthesis_impl
 {
   public:
-    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
-                            one_pass_synthesis_stats& st) :
+    one_pass_synthesis_impl(const std::vector<TT>& spec, one_pass_synthesis_params p, one_pass_synthesis_stats& st) :
             tts{spec},
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             ari{ps.fixed_size ? static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y) : 0u}
     {}
@@ -751,7 +751,9 @@ class one_pass_synthesis_impl
         {
 
 #if (PROGRESS_BARS)
-            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
+            mockturtle::progress_bar bar(
+                "[i] examining layout aspect ratios: {:>2} × {:<2}");  // NOLINT(misc-const-correctness): operator() is
+                                                                       // non-const
 #endif
 
             const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
@@ -790,7 +792,7 @@ class one_pass_synthesis_impl
                     return layout;
                 }
                 // update timeout and retry
-                if (ps.timeout)
+                if (ps.timeout > 0)
                 {
                     update_timeout(handler, pst.time_total);
                 }
@@ -798,19 +800,19 @@ class one_pass_synthesis_impl
             catch (const pybind11::error_already_set& e)
             {
                 // timeout reached
-                if (e.matches(PyExc_TimeoutError))
+                if (e.matches(PyExc_TimeoutError))  // NOLINT(misc-include-cleaner)
                 {
                     return std::nullopt;
                 }
 
                 // unexpected error
-                std::cout << "[e] something unexpected happened in Python; this needs investigation" << std::endl;
+                std::cout << "[e] something unexpected happened in Python; this needs investigation" << "\n";
                 throw;
             }
             // unexpected exception
             catch (...)
             {
-                std::cout << "[e] something unexpected happened; this needs investigation" << std::endl;
+                std::cout << "[e] something unexpected happened; this needs investigation" << "\n";
                 throw;
             }
         }
@@ -860,7 +862,7 @@ class one_pass_synthesis_impl
         }
         catch (...)
         {
-            std::cout << "[e] Python module 'graphviz' could not be detected" << std::endl;
+            std::cout << "[e] Python module 'graphviz' could not be detected" << "\n";
             return false;
         }
 
@@ -872,7 +874,7 @@ class one_pass_synthesis_impl
         }
         catch (...)
         {
-            std::cout << "[e] Python module 'PySAT' could not be detected" << std::endl;
+            std::cout << "[e] Python module 'PySAT' could not be detected" << "\n";
             return false;
         }
         try
@@ -888,7 +890,7 @@ class one_pass_synthesis_impl
         {
             std::cout << fmt::format("[e] 'PySAT' version '{}' was detected, but version '{}' is specifically needed",
                                      e.detected(), REQUIRED_PYSAT_VERSION)
-                      << std::endl;
+                      << "\n";
             return false;
         }
 
@@ -899,7 +901,7 @@ class one_pass_synthesis_impl
         }
         catch (...)
         {
-            std::cout << "[e] Python module 'wrapt_timeout_decorator' could not be detected" << std::endl;
+            std::cout << "[e] Python module 'wrapt_timeout_decorator' could not be detected" << "\n";
             return false;
         }
 
@@ -912,7 +914,7 @@ class one_pass_synthesis_impl
         }
         catch (...)
         {
-            std::cout << "[e] The 'mugen' library could not be detected; it might have been moved" << std::endl;
+            std::cout << "[e] The 'mugen' library could not be detected; it might have been moved" << "\n";
         }
 
         return true;
@@ -988,16 +990,19 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
     {
         throw unsupported_clocking_scheme_exception();
     }
-    if (const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme); !clocking_scheme.has_value())
+    const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme);
+
+    if (!clocking_scheme.has_value())
     {
         throw unsupported_clocking_scheme_exception();
     }
-    else if (clocking_scheme->max_out_degree < 3 && ps.enable_maj)
+
+    if (clocking_scheme->max_out_degree < 3 && ps.enable_maj)
     {
         ps.enable_maj = false;
         std::cout << fmt::format("[w] disabling MAJ gates as they are not supported by the {} clocking scheme",
                                  ps.scheme)
-                  << std::endl;
+                  << "\n";
     }
 
     // tts cannot be empty

@@ -16,6 +16,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdint>
+#include <functional>
 #include <iterator>
 #include <optional>
 #include <type_traits>
@@ -48,7 +49,7 @@ class jump_point_search_impl
         assert(layout.is_within_bounds(objective.source) && layout.is_within_bounds(objective.target) &&
                "Both source and target coordinate have to be within the layout bounds");
 
-        do
+        while (!open_list.empty())
         {
             // get coordinate with lowest f-value
             const auto current = get_lowest_f_coord();
@@ -63,8 +64,7 @@ class jump_point_search_impl
 
             // expand from current coordinate
             expand(current);
-
-        } while (!open_list.empty());  // until the open list is empty
+        }
 
         return {};  // open list is empty, no path has been found
     }

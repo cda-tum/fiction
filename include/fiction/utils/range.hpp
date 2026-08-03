@@ -33,7 +33,7 @@ struct [[deprecated("range_t is deprecated")]] range_t
      *
      * @param range Begin and end iterator pair.
      */
-    constexpr explicit range_t(std::pair<I, I>&& range) : b{std::move(range.first)}, e{std::move(range.second)} {}
+    constexpr explicit range_t(std::pair<I, I>&& range) : b{std::move(range).first}, e{std::move(range).second} {}
     /**
      * Returns the iterator pointing to the begin of the represented range.
      *
