@@ -56,7 +56,11 @@ set(ALICE_TEST
 FetchContent_Declare(
   alice
   GIT_REPOSITORY https://github.com/marcelwa/alice.git
-  GIT_TAG master # Using master as per submodule
+  GIT_TAG
+    6b7f941ca44f38226f5e2545224fa1194940cd73 # master, pinned: includes the
+                                             # std::result_of->invoke_result_t
+  # fix required for C++20; floating on `master` hit stale GitHub info/refs
+  # caching in CI and fetched an older commit
 )
 FetchContent_MakeAvailable(alice)
 
