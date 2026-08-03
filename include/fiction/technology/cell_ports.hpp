@@ -85,6 +85,10 @@ struct port_direction
     /**
      * Cardinal direction.
      */
+    // `dir` below is stored and compared as a plain uint8_t at ~300 call sites across the code base;
+    // converting this to an enum class is a real module-modernization task, not a same-file cleanup,
+    // and is deferred to a follow-up PR.
+    // NOLINTNEXTLINE(cppcoreguidelines-use-enum-class)
     enum cardinal : uint8_t
     {
         /**

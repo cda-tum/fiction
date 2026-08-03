@@ -15,6 +15,12 @@ endif()
 # compiling with PCH enabled
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# With the Ninja generator, CMake >= 3.28 enables C++20 module dependency
+# scanning by default, which requires a `clang-scan-deps` binary matching the
+# compiler version. This project uses no C++20 modules, and CI images don't
+# always ship a matching `clang-scan-deps`, so disable it.
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
 # Set the project name and version
 project(
   fiction
