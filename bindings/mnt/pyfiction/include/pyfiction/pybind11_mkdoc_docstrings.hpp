@@ -18486,7 +18486,7 @@ static const char *__doc_fiction_port_direction =
 R"doc(A port direction is a relative (cardinal) direction of a port within a
 tile. Useful, when no exact port locations within a tile are needed.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal = R"doc(Cardinal direction.)doc";
+static const char *__doc_fiction_port_direction_cardinal = R"doc()doc";
 
 static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc(East direction.)doc";
 
@@ -23710,7 +23710,7 @@ static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinat
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
