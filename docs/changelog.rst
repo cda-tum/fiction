@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+Unreleased
+----------
+
+Changed
+#######
+- Build system:
+    - Bumped the required C++ standard from C++17 to C++20
+- Continuous integration:
+    - Updated the Ubuntu CI compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
+      ``clang++-15`` (Clang <16 has a known constraint-instantiation bug that breaks libstdc++'s
+      ``<ranges>`` implementation for non-trivial cases), and added ``clang++-19`` and ``clang++-20``
+
+Fixed
+#####
+- Code quality:
+    - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
+      as the format-string argument with no substitution args) that were surfaced by the C++20 bump
+      enabling ``fmt``'s ``consteval`` format-string checks
+
 v0.7.0 - 2026-07-31
 -------------------
 
