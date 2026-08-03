@@ -39,9 +39,12 @@ void read_fqca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): register the exception
+    // translators with the module; they are not meant to be thrown here
     py::exception<fiction::unsupported_character_exception>(m, "unsupported_character_exception");
     py::exception<fiction::undefined_cell_label_exception>(m, "undefined_cell_label_exception");
     py::exception<fiction::unrecognized_cell_definition_exception>(m, "unrecognized_cell_definition_exception");
+    // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     detail::read_fqca_layout<py_qca_layout>(m);
 }

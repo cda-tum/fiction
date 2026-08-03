@@ -144,7 +144,7 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 [tool.cibuildwheel]
 build = "cp3*"
 archs = "auto64"
-skip = ["*-musllinux*", "cp313t-*"]
+skip = ["*-musllinux*"]
 test-command = "python -c \"from mnt import pyfiction\""
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"

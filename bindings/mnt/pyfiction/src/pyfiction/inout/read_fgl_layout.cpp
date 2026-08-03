@@ -23,6 +23,8 @@ void read_fgl_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    // NOLINTNEXTLINE(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // translator with the module; it is not meant to be thrown here
     py::exception<fiction::fgl_parsing_error>(
         m, "fgl_parsing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h

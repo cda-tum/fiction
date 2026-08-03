@@ -52,6 +52,8 @@ void read_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    // NOLINTNEXTLINE(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // translator with the module; it is not meant to be thrown here
     py::exception<fiction::sqd_parsing_error>(
         m, "sqd_parsing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h

@@ -40,6 +40,8 @@ void write_fqca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    // NOLINTNEXTLINE(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // translator with the module; it is not meant to be thrown here
     py::exception<fiction::out_of_cell_names_exception>(
         m, "out_of_cell_names_exception",
         PyExc_IndexError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
