@@ -751,9 +751,8 @@ class one_pass_synthesis_impl
         {
 
 #if (PROGRESS_BARS)
-            mockturtle::progress_bar bar(
-                "[i] examining layout aspect ratios: {:>2} × {:<2}");  // NOLINT(misc-const-correctness): operator() is
-                                                                       // non-const
+            // NOLINTNEXTLINE(misc-const-correctness): operator() is non-const
+            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
 #endif
 
             const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
