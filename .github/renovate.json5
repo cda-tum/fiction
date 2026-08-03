@@ -155,21 +155,6 @@
       commitMessagePrefix: "⬆\uD83D\uDC0B",
     },
     {
-      matchManagers: [
-        "custom.regex"
-      ],
-      addLabels: [
-        "dependencies",
-        "C++",
-        "build_system"
-      ],
-      commitMessagePrefix: "⬆️📦",
-      // `:automergeDigest` (inherited from extends) would otherwise merge the
-      // alice/mockturtle git-refs updates unattended. A bump there changes the
-      // C++ core, so it gets reviewed like the tag-based updates above.
-      automerge: false,
-    },
-    {
       description: "Sphinx 8.2+ dropped support for Python <3.11, so keep this pin as-is to avoid breaking dependency resolution",
       matchManagers: [
         "pep621"
@@ -188,6 +173,22 @@
         "patch"
       ],
       automerge: true
+    },
+    {
+      // This rule is intentionally last: packageRules are applied in order and
+      // later rules override earlier ones, so this re-asserts automerge: false
+      // for custom.regex after the "patch versions" rule above would otherwise
+      // auto-merge patch-level CMake tag bumps unattended.
+      matchManagers: [
+        "custom.regex"
+      ],
+      addLabels: [
+        "dependencies",
+        "C++",
+        "build_system"
+      ],
+      commitMessagePrefix: "⬆️📦",
+      automerge: false,
     }
   ]
 }
