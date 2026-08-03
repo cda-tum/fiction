@@ -7571,6 +7571,19 @@ R"doc(Checks if all PI/POs are located at the layout's borders.
 Returns:
     Check summary as a one liner.)doc";
 
+static const char *__doc_fiction_detail_gate_level_drvs_impl_check_icon =
+R"doc(Returns the check icon corresponding to a check's outcome.
+
+Parameter ``chk``:
+    Result of the check.
+
+Parameter ``brk``:
+    Flag to indicate that a failure is design breaking. If it's not, a
+    warning icon is returned.
+
+Returns:
+    Escape color sequence for the given outcome.)doc";
+
 static const char *__doc_fiction_detail_gate_level_drvs_impl_clocked_data_flow_check =
 R"doc(Checks for proper clocking of connected tiles based on their assigned
 nodes.
