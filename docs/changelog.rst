@@ -23,6 +23,17 @@ Fixed
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
       enabling ``fmt``'s ``consteval`` format-string checks
+- Continuous integration:
+    - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
+      ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``
+      package names instead of full GitHub URLs, which the datasource requires to resolve tags
+    - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge by moving the
+      ``custom.regex`` package rule after the ``patch versions`` rule, so its ``automerge: false``
+      takes precedence
+    - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit that includes a
+      ``std::result_of``/``std::invoke_result_t`` fix required for C++20, instead of floating on
+      ``master``, which could resolve to a stale commit via GitHub's ``info/refs`` caching for
+      anonymous clones
 
 v0.7.0 - 2026-07-31
 -------------------

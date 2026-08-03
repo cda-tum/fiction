@@ -56,11 +56,9 @@ set(ALICE_TEST
 FetchContent_Declare(
   alice
   GIT_REPOSITORY https://github.com/marcelwa/alice.git
-  GIT_TAG
-    6b7f941ca44f38226f5e2545224fa1194940cd73 # master, pinned: includes the
-                                             # std::result_of->invoke_result_t
-  # fix required for C++20; floating on `master` hit stale GitHub info/refs
-  # caching in CI and fetched an older commit
+  GIT_TAG 6b7f941ca44f38226f5e2545224fa1194940cd73 # Head of the master branch,
+                                                   # includes the C++20
+  # std::result_of fix
 )
 FetchContent_MakeAvailable(alice)
 
@@ -77,7 +75,7 @@ set(MOCKTURTLE_TEST
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG mnt # Using mnt branch as per submodule
+  GIT_TAG c869608c7952686efa9c546cda58c4b29235db11 # Head of the mnt branch
 )
 FetchContent_MakeAvailable(mockturtle)
 
