@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+Unreleased
+----------
+
+Fixed
+#####
+- Continuous integration:
+    - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
+      ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``
+      package names instead of full GitHub URLs, which the datasource requires to resolve tags
+    - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge by moving the
+      ``custom.regex`` package rule after the ``patch versions`` rule, so its ``automerge: false``
+      takes precedence
+
 v0.7.0 - 2026-07-31
 -------------------
 
