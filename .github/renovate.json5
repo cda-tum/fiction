@@ -34,7 +34,7 @@
         "GIT_REPOSITORY https://github\\.com/nlohmann/json\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
       ],
       depNameTemplate: "nlohmann/json",
-      packageNameTemplate: "https://github.com/nlohmann/json",
+      packageNameTemplate: "nlohmann/json",
       datasourceTemplate: "github-tags",
     },
     {
@@ -47,7 +47,7 @@
         "GIT_REPOSITORY https://github\\.com/catchorg/Catch2\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
       ],
       depNameTemplate: "catchorg/Catch2",
-      packageNameTemplate: "https://github.com/catchorg/Catch2",
+      packageNameTemplate: "catchorg/Catch2",
       datasourceTemplate: "github-tags",
     },
     {
@@ -60,7 +60,7 @@
         "GIT_REPOSITORY https://github\\.com/greg7mdp/parallel-hashmap\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
       ],
       depNameTemplate: "greg7mdp/parallel-hashmap",
-      packageNameTemplate: "https://github.com/greg7mdp/parallel-hashmap",
+      packageNameTemplate: "greg7mdp/parallel-hashmap",
       datasourceTemplate: "github-tags",
     },
     {
@@ -73,7 +73,7 @@
         "GIT_REPOSITORY https://github\\.com/leethomason/tinyxml2\\.git\\s+GIT_TAG (?<currentValue>[0-9.]+)"
       ],
       depNameTemplate: "leethomason/tinyxml2",
-      packageNameTemplate: "https://github.com/leethomason/tinyxml2",
+      packageNameTemplate: "leethomason/tinyxml2",
       datasourceTemplate: "github-tags",
     },
     {
