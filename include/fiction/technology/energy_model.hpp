@@ -20,6 +20,11 @@
 namespace fiction
 {
 
+// this entire file implements the now-deprecated qca_energy_dissipation() and necessarily uses
+// energy_dissipation_stats throughout
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * Statistics for energy dissipation calculation.
  *
@@ -272,6 +277,8 @@ void qca_energy_dissipation(const Lyt& lyt, energy_dissipation_stats* pst = null
         *pst = st;
     }
 }
+
+#pragma GCC diagnostic pop
 
 }  // namespace fiction
 

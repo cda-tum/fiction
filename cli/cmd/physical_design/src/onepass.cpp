@@ -63,6 +63,10 @@ onepass_command::onepass_command(const environment::ptr& e) :
     //        toggle does not work yet
 }
 
+// this command's whole purpose is to invoke the deprecated one_pass_synthesis()
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 void onepass_command::execute()
 {
     // if no gate types are specified, enable them all
@@ -183,6 +187,8 @@ void onepass_command::execute()
 
     reset_flags();
 }
+
+#pragma GCC diagnostic pop
 
 nlohmann::json onepass_command::log() const
 {

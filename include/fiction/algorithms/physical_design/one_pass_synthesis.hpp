@@ -60,6 +60,11 @@
 namespace fiction
 {
 
+// this entire file implements the now-deprecated one_pass_synthesis() and necessarily uses
+// one_pass_synthesis_params/one_pass_synthesis_stats throughout
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 /**
  * Parameters for the one-pass synthesis algorithm.
  *
@@ -156,6 +161,7 @@ one_pass_synthesis_stats
 
 namespace detail
 {
+
 /**
  * A Python interpreter instance that is necessary to call Mugen, a library written in Python. This instance is
  * scoped and only need to exist. No operations are to be performed on this object. It handles creation and proper
@@ -1064,6 +1070,8 @@ std::optional<Lyt> one_pass_synthesis(const Ntk& ntk, const one_pass_synthesis_p
 
     return lyt;
 }
+
+#pragma GCC diagnostic pop
 
 }  // namespace fiction
 

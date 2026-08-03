@@ -25,6 +25,10 @@ energy_command::energy_command(const environment::ptr& e) :
                    "This command is deprecated since version 0.7.1 and will be removed in version 0.8.0.")
 {}
 
+// this command's whole purpose is to invoke the deprecated qca_energy_dissipation()
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+
 void energy_command::execute()
 {
     // reset energy values
@@ -45,6 +49,8 @@ void energy_command::execute()
 
     st.report(env->out());
 }
+
+#pragma GCC diagnostic pop
 
 nlohmann::json energy_command::log() const
 {
