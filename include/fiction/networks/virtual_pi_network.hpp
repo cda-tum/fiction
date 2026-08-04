@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <cstdlib>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -124,8 +123,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_pi(node const& n) const
     {
-        return std::find(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), n) !=
-               v_storage->virtual_inputs.cend();
+        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
     }
 
     /**
@@ -166,8 +164,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_ci(node const& n) const
     {
-        return std::find(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), n) !=
-               v_storage->virtual_inputs.cend();
+        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
     }
 
     /**
