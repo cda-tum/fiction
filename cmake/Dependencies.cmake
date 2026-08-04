@@ -56,7 +56,7 @@ set(ALICE_TEST
 FetchContent_Declare(
   alice
   GIT_REPOSITORY https://github.com/marcelwa/alice.git
-  GIT_TAG 835fd886943673c73b94883d90a8d64259710c26 # Head of the master branch
+  GIT_TAG 6b7f941ca44f38226f5e2545224fa1194940cd73 # Head of the master branch
 )
 FetchContent_MakeAvailable(alice)
 
