@@ -5,6 +5,7 @@
 #ifndef FICTION_STL_UTILS_HPP
 #define FICTION_STL_UTILS_HPP
 
+#include <algorithm>
 #include <ctime>
 #include <functional>
 #include <iterator>
@@ -105,19 +106,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      */
     iterator find(const T& val) noexcept
     {
-        auto first = begin(), last = end();
-
-        while (first != last)
-        {
-            if (*first == val)
-            {
-                return first;
-            }
-
-            ++first;
-        }
-
-        return last;
+        return std::ranges::find(this->c, val);
     }
     /**
      * Returns a `const_iterator` to the provided value if it is contained in the priority queue. Returns an iterator to
@@ -128,20 +117,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      */
     const_iterator find(const T& val) const noexcept
     {
-        auto       first = cbegin();
-        const auto last  = cend();
-
-        while (first != last)
-        {
-            if (*first == val)
-            {
-                return first;
-            }
-
-            ++first;
-        }
-
-        return last;
+        return std::ranges::find(this->c, val);
     }
     /**
      * Returns `true` if the provided value is stored in the queue and `false` otherwise.

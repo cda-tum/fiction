@@ -5,6 +5,7 @@
 #ifndef FICTION_HASH_HPP
 #define FICTION_HASH_HPP
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <functional>
@@ -50,10 +51,7 @@ struct hash<std::array<T, N>>
     std::size_t operator()(const std::array<T, N>& a) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : a)
-        {
-            fiction::hash_combine(h, e);
-        }
+        std::ranges::for_each(a, [&h](const auto& e) { fiction::hash_combine(h, e); });
 
         return h;
     }
@@ -69,10 +67,7 @@ struct hash<std::set<T>>
     std::size_t operator()(const std::set<T>& s) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : s)
-        {
-            fiction::hash_combine(h, e);
-        }
+        std::ranges::for_each(s, [&h](const auto& e) { fiction::hash_combine(h, e); });
 
         return h;
     }
@@ -88,10 +83,7 @@ struct hash<std::multiset<T>>
     std::size_t operator()(const std::multiset<T>& s) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : s)
-        {
-            fiction::hash_combine(h, e);
-        }
+        std::ranges::for_each(s, [&h](const auto& e) { fiction::hash_combine(h, e); });
 
         return h;
     }
