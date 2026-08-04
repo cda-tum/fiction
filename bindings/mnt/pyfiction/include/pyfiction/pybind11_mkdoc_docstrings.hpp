@@ -12682,10 +12682,13 @@ the second `1` in the first list, because the 2-element sub-sequence
 `[1,2]` is shared between the two ranges.
 
 Template parameter ``InputIt``:
-    must meet the requirements of `LegacyInputIterator`.
+    must meet the requirements of `LegacyRandomAccessIterator` (the
+    implementation subtracts from and adds to `last`/`s_last`, which
+    forward iterators do not support).
 
 Template parameter ``ForwardIt``:
-    must meet the requirements of `LegacyForwardIterator`.
+    must meet the requirements of `LegacyRandomAccessIterator` (see
+    above).
 
 Parameter ``first``:
     Begin of the range to examine.
@@ -12703,25 +12706,6 @@ Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
     `last` if no such shared sub-sequence exists.)doc";
-
-static const char *__doc_fiction_find_key_with_tolerance =
-R"doc(This function searches for a floating-point value specified by the
-`key` in the provided map `map`, applying a tolerance specified by
-`fiction::constants::ERROR_MARGIN`. Each key in the map is compared to
-the specified key within this tolerance.
-
-Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
-
-Parameter ``map``:
-    The map containing parameter points as keys and associated values.
-
-Parameter ``key``:
-    The parameter point to search for in the map.
-
-Returns:
-    An iterator to the found parameter point in the map, or
-    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_flat_top_hex = R"doc(\verbatim _____ / \ / \ \ / \_____/ \endverbatim)doc";
 
@@ -18193,7 +18177,14 @@ Template parameter ``Path``:
 
 static const char *__doc_fiction_path_collection_add = R"doc()doc";
 
-static const char *__doc_fiction_path_collection_contains = R"doc()doc";
+static const char *__doc_fiction_path_collection_contains =
+R"doc(Checks whether a given path is contained in the collection.
+
+Parameter ``p``:
+    Path to search for.
+
+Returns:
+    `true` iff `p` is contained in the collection.)doc";
 
 static const char *__doc_fiction_path_set =
 R"doc(A set of multiple paths in a layout.
@@ -19915,21 +19906,6 @@ Template parameter ``Lyt``:
 
 Returns:
     Ripple clocking scheme.)doc";
-
-static const char *__doc_fiction_round_to_n_decimal_places =
-R"doc(Rounds a number to a specified number of decimal places.
-
-Template parameter ``T``:
-    The type of the number to round.
-
-Parameter ``number``:
-    The number to round.
-
-Parameter ``n``:
-    The number of decimal places to round to.
-
-Returns:
-    The number rounded to n decimal places.)doc";
 
 static const char *__doc_fiction_route_path =
 R"doc(Establishes a wire routing along the given path in the given layout.
@@ -23728,15 +23704,6 @@ Parameter ``other``:
 
 Returns:
     `true` iff both sources and targets match.)doc";
-
-static const char *__doc_mockturtle_edge_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Edge to compare to.
-
-Returns:
-    `true` iff this edge is not equal to other.)doc";
 
 static const char *__doc_mockturtle_edge_source = R"doc()doc";
 
