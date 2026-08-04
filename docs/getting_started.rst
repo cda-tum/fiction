@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-The *fiction* framework provides a stand-alone CLI tool as well as a C++17 header-only library and a Python module which
+The *fiction* framework provides a stand-alone CLI tool as well as a C++20 header-only library and a Python module which
 can be used in external projects. Additionally, we provide an experimentation playground that can be used to quickly
 prototype new ideas or script evaluations.
 
@@ -82,7 +82,7 @@ them automatically. Should the repository have been cloned before, the commands:
 
   git submodule update --init --recursive
 
-will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are
+will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++20 compiler are
 required for the C++ part. If you want to work with the Python bindings, you need a Python 3.9+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is

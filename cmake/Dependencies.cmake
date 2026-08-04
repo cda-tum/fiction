@@ -67,7 +67,7 @@ set(ALICE_TEST
 FetchContent_Declare(
   alice
   GIT_REPOSITORY https://github.com/marcelwa/alice.git
-  GIT_TAG master # Using master as per submodule
+  GIT_TAG 6b7f941ca44f38226f5e2545224fa1194940cd73 # Head of the master branch
 )
 FetchContent_MakeAvailable(alice)
 
@@ -84,7 +84,7 @@ set(MOCKTURTLE_TEST
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG mnt # Using mnt branch as per submodule
+  GIT_TAG c869608c7952686efa9c546cda58c4b29235db11 # Head of the mnt branch
 )
 FetchContent_MakeAvailable(mockturtle)
 

@@ -7571,6 +7571,19 @@ R"doc(Checks if all PI/POs are located at the layout's borders.
 Returns:
     Check summary as a one liner.)doc";
 
+static const char *__doc_fiction_detail_gate_level_drvs_impl_check_icon =
+R"doc(Returns the check icon corresponding to a check's outcome.
+
+Parameter ``chk``:
+    Result of the check.
+
+Parameter ``brk``:
+    Flag to indicate that a failure is design breaking. If it's not, a
+    warning icon is returned.
+
+Returns:
+    Escape color sequence for the given outcome.)doc";
+
 static const char *__doc_fiction_detail_gate_level_drvs_impl_clocked_data_flow_check =
 R"doc(Checks for proper clocking of connected tiles based on their assigned
 nodes.
@@ -18473,7 +18486,7 @@ static const char *__doc_fiction_port_direction =
 R"doc(A port direction is a relative (cardinal) direction of a port within a
 tile. Useful, when no exact port locations within a tile are needed.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal = R"doc(Cardinal direction.)doc";
+static const char *__doc_fiction_port_direction_cardinal = R"doc()doc";
 
 static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc(East direction.)doc";
 
@@ -23697,7 +23710,7 @@ static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinat
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
