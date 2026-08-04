@@ -17,7 +17,8 @@ Changed
       ``std::ranges::max_element``) in place of hand-rolled loops; ``std::integral``/``std::floating_point``/
       ``std::random_access_iterator`` concepts in place of ``static_assert`` type checks; and a defaulted
       ``operator==`` on ``mockturtle::edge`` (relying on C++20 rewritten candidates instead of a
-      hand-written ``operator!=``)
+      hand-written ``operator!=``). Extended the same modernization to ``test/utils/routing_utils.cpp``
+      (``std::ranges`` and designated initializers)
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
