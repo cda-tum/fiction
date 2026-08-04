@@ -10,7 +10,6 @@
 #include <functional>
 #include <iterator>
 #include <queue>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -36,15 +35,9 @@ namespace fiction
  * @return Iterator in the range `[first, last)` to the first position of the first 2-element sub-sequence shared
  * between the two ranges, or `last` if no such shared sub-sequence exists.
  */
-template <class InputIt, class ForwardIt>
+template <std::input_iterator InputIt, std::forward_iterator ForwardIt>
 InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last) noexcept
 {
-    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
-                  "InputIt must meet the requirements of LegacyInputIterator");
-    static_assert(
-        std::is_base_of_v<std::forward_iterator_tag, typename std::iterator_traits<ForwardIt>::iterator_category>,
-        "ForwardIt must meet the requirements of LegacyForwardIterator");
-
     for (; first != last - 1; ++first)
     {
         for (ForwardIt it = s_first; it != s_last - 1; ++it)
@@ -106,7 +99,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      */
     iterator find(const T& val) noexcept
     {
-        return std::ranges::find(this->c, val);
+        return std::ranges::find(*this, val);
     }
     /**
      * Returns a `const_iterator` to the provided value if it is contained in the priority queue. Returns an iterator to
@@ -117,7 +110,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      */
     const_iterator find(const T& val) const noexcept
     {
-        return std::ranges::find(this->c, val);
+        return std::ranges::find(*this, val);
     }
     /**
      * Returns `true` if the provided value is stored in the queue and `false` otherwise.

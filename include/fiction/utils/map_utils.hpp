@@ -8,6 +8,7 @@
 #include "fiction/technology/constants.hpp"
 
 #include <algorithm>
+#include <concepts>
 
 namespace fiction
 {
@@ -23,10 +24,9 @@ namespace fiction
  * @return An iterator to the found parameter point in the map, or `map.cend()` if not found.
  */
 template <typename MapType>
+    requires std::floating_point<typename MapType::key_type>
 typename MapType::const_iterator find_key_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
-    static_assert(std::is_floating_point_v<typename MapType::key_type>, "Map key type must be floating-point");
-
     constexpr double tolerance = constants::ERROR_MARGIN;
 
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };

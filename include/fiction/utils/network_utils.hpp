@@ -35,20 +35,7 @@ struct edge
      * @param other Edge to compare to.
      * @return `true` iff both sources and targets match.
      */
-    bool operator==(const edge<Ntk>& other) const
-    {
-        return source == other.source && target == other.target;
-    }
-    /**
-     * Inequality operator.
-     *
-     * @param other Edge to compare to.
-     * @return `true` iff this edge is not equal to other.
-     */
-    bool operator!=(const edge<Ntk>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const edge<Ntk>& other) const = default;
 };
 }  // namespace mockturtle
 
