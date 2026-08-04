@@ -23,7 +23,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-#include <algorithm>
+#include <algorithm>  // NOLINT(misc-include-cleaner): provides std::ranges::adjacent_find
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -739,6 +739,8 @@ class one_pass_synthesis_impl
      * @param p Parameters.
      * @param st Statistics.
      */
+    // NOLINTNEXTLINE(modernize-pass-by-value): kept as a const reference to avoid passing the 96-byte
+    // one_pass_synthesis_params by value (see CodeQL "large object passed by value")
     one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
                             one_pass_synthesis_stats& st) :
             tts{spec},
