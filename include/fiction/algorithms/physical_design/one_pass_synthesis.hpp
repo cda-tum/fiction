@@ -23,6 +23,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <chrono>
 #include <cstddef>
@@ -731,6 +732,13 @@ template <typename Lyt, typename TT>
 class one_pass_synthesis_impl
 {
   public:
+    /**
+     * Standard constructor.
+     *
+     * @param spec Function specification.
+     * @param p Parameters.
+     * @param st Statistics.
+     */
     one_pass_synthesis_impl(const std::vector<TT>& spec, one_pass_synthesis_params p, one_pass_synthesis_stats& st) :
             tts{spec},
             ps{std::move(p)},
@@ -758,7 +766,7 @@ class one_pass_synthesis_impl
 
 #if (PROGRESS_BARS)
             // NOLINTNEXTLINE(misc-const-correctness): operator() is non-const
-            mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
+            mockturtle::progress_bar bar{"[i] examining layout aspect ratios: {:>2} × {:<2}"};
 #endif
 
             const auto aspect_ratio = typename Lyt::aspect_ratio{(*ari).x, (*ari).y, ps.crossings ? 1 : 0};
@@ -811,13 +819,13 @@ class one_pass_synthesis_impl
                 }
 
                 // unexpected error
-                std::cout << "[e] something unexpected happened in Python; this needs investigation" << "\n";
+                std::cerr << "[e] something unexpected happened in Python; this needs investigation" << "\n";
                 throw;
             }
             // unexpected exception
             catch (...)
             {
-                std::cout << "[e] something unexpected happened; this needs investigation" << "\n";
+                std::cerr << "[e] something unexpected happened; this needs investigation" << "\n";
                 throw;
             }
         }
@@ -995,7 +1003,7 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
     {
         throw unsupported_clocking_scheme_exception();
     }
-    const auto clocking_scheme = get_clocking_scheme<Lyt>(ps.scheme);
+    const auto clocking_scheme{get_clocking_scheme<Lyt>(ps.scheme)};
 
     if (!clocking_scheme.has_value())
     {
@@ -1013,8 +1021,8 @@ std::optional<Lyt> one_pass_synthesis(const std::vector<TT>& tts, one_pass_synth
     // tts cannot be empty
     assert(!tts.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(tts.begin(), tts.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == tts.end());
+    assert(std::ranges::adjacent_find(tts, [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) ==
+           tts.end());
 
     one_pass_synthesis_stats                 st{};
     detail::one_pass_synthesis_impl<Lyt, TT> p{tts, ps, st};

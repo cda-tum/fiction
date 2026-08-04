@@ -11779,11 +11779,7 @@ R"doc(The electrostatic potential energy of a given charge distribution is
 updated after it is changed.)doc";
 
 static const char *__doc_fiction_energy_dissipation_stats =
-R"doc(Statistics for energy dissipation calculation.
-
-.. deprecated::
-    qca_energy_dissipation() is deprecated since version 0.7.1 and
-    will be removed in version 0.8.0.)doc";
+R"doc(Statistics for energy dissipation calculation.)doc";
 
 static const char *__doc_fiction_energy_dissipation_stats_fast = R"doc()doc";
 
@@ -12289,7 +12285,7 @@ that always has exponential runtime.
 
 .. deprecated::
     exhaustive_ground_state_simulation() is deprecated since version
-    0.7.0 and will be moved to experiments/ in version 0.8.0 to ensure
+    0.7.1 and will be moved to experiments/ in version 0.8.0 to ensure
     continued reproducibility of old results. Please use quickexact()
     instead.)doc";
 
@@ -12348,7 +12344,7 @@ runtimes and more functionality.
 
 .. deprecated::
     exhaustive_ground_state_simulation() is deprecated since version
-    0.7.0 and will be moved to experiments/ in version 0.8.0 to ensure
+    0.7.1 and will be moved to experiments/ in version 0.8.0 to ensure
     continued reproducibility of old results. Please use quickexact()
     instead.
 

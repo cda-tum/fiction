@@ -27,8 +27,6 @@ namespace fiction
 
 /**
  * Statistics for energy dissipation calculation.
- *
- * @deprecated qca_energy_dissipation() is deprecated since version 0.7.1 and will be removed in version 0.8.0.
  */
 struct [[deprecated("energy dissipation calculation is deprecated")]] energy_dissipation_stats
 {
