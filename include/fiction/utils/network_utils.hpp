@@ -83,8 +83,8 @@ namespace fiction
  * @param fn Function object to apply to each edge in `ntk`.
  */
 template <typename Ntk, typename Fn>
-// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): fn is captured by two nested lambdas, so it cannot be
-// forwarded
+// fn is captured by two nested lambdas, so it cannot be forwarded
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_edge(const Ntk& ntk, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function.");
