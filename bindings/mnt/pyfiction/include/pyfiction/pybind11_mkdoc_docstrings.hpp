@@ -11778,8 +11778,7 @@ static const char *__doc_fiction_energy_calculation_UPDATE_ENERGY =
 R"doc(The electrostatic potential energy of a given charge distribution is
 updated after it is changed.)doc";
 
-static const char *__doc_fiction_energy_dissipation_stats =
-R"doc(Statistics for energy dissipation calculation.)doc";
+static const char *__doc_fiction_energy_dissipation_stats = R"doc(Statistics for energy dissipation calculation.)doc";
 
 static const char *__doc_fiction_energy_dissipation_stats_fast = R"doc()doc";
 
