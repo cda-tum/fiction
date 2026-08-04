@@ -85,7 +85,7 @@ class path_collection : public std::vector<Path>
 
     [[nodiscard]] bool contains(const Path& p) const noexcept
     {
-        return std::find(std::cbegin(*this), std::cend(*this), p) != std::cend(*this);
+        return std::ranges::find(*this, p) != std::cend(*this);
     }
 
   protected:

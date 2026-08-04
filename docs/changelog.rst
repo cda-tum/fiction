@@ -11,9 +11,10 @@ Unreleased
 Changed
 #######
 - Code quality:
-    - Adopted ``std::ranges`` algorithms (``std::ranges::for_each``, ``std::ranges::find``) in place of
-      hand-rolled loops in ``fiction/utils/hash.hpp`` and ``fiction/utils/stl_utils.hpp``, as the first
-      step of an incremental, module-by-module C++20 idiom adoption
+    - Adopted ``std::ranges`` algorithms (``std::ranges::for_each``, ``std::ranges::find``,
+      ``std::ranges::find_if``, ``std::ranges::all_of``, ``std::ranges::max_element``) in place of
+      hand-rolled loops across ``include/fiction/utils/``, as the first step of an incremental,
+      module-by-module C++20 idiom adoption
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
