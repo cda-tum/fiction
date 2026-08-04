@@ -51,7 +51,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
-    std::transform(tech_name.begin(), tech_name.end(), tech_name.begin(), ::tolower);
+    std::ranges::transform(tech_name, tech_name.begin(), ::tolower);
 
     /**
      * FCN cell technology.

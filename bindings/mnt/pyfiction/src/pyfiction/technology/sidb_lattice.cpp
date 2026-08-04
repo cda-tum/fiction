@@ -39,7 +39,7 @@ void sidb_lattice_cell_level_layout(nanobind::module_& m)
 
     // fetch technology name
     auto orientation = std::string{fiction::sidb_lattice_name<LatticeOrientation>};
-    std::transform(orientation.begin(), orientation.end(), orientation.begin(), ::tolower);
+    std::ranges::transform(orientation, orientation.begin(), ::tolower);
 
     using py_sidb_lattice = py_sidb_lattice<LatticeOrientation>;
 

@@ -36,11 +36,12 @@ void network_utils(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    // NOLINTNEXTLINE(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     py::exception<fiction::high_degree_fanin_exception>(
         m, "high_degree_fanin_exception",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
+    // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

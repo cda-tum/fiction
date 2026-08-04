@@ -23,11 +23,12 @@ void hexagonalization(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    // NOLINTNEXTLINE(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
     py::exception<fiction::hexagonalization_io_pin_routing_error>(
         m, "hexagonalization_io_pin_routing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
+    // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     py::enum_<fiction::hexagonalization_params::io_pin_extension_mode>(
         m, "hexagonalization_io_pin_extension_mode", DOC(fiction_hexagonalization_params_io_pin_extension_mode))
