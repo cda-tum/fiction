@@ -84,6 +84,12 @@ class path_collection : public std::vector<Path>
         this->push_back(p);
     }
 
+    /**
+     * Checks whether a given path is contained in the collection.
+     *
+     * @param p Path to search for.
+     * @return `true` iff `p` is contained in the collection.
+     */
     [[nodiscard]] bool contains(const Path& p) const noexcept
     {
         return std::ranges::find(*this, p) != std::cend(*this);

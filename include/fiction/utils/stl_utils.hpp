@@ -26,8 +26,9 @@ namespace fiction
  * iterator to index 2, i.e., the second `1` in the first list, because the 2-element sub-sequence `[1,2]` is shared
  * between the two ranges.
  *
- * @tparam InputIt must meet the requirements of `LegacyInputIterator`.
- * @tparam ForwardIt must meet the requirements of `LegacyForwardIterator`.
+ * @tparam InputIt must meet the requirements of `LegacyRandomAccessIterator` (the implementation subtracts from and
+ * adds to `last`/`s_last`, which forward iterators do not support).
+ * @tparam ForwardIt must meet the requirements of `LegacyRandomAccessIterator` (see above).
  * @param first Begin of the range to examine.
  * @param last End of the range to examine.
  * @param s_first Begin of the range to search for.
@@ -35,7 +36,7 @@ namespace fiction
  * @return Iterator in the range `[first, last)` to the first position of the first 2-element sub-sequence shared
  * between the two ranges, or `last` if no such shared sub-sequence exists.
  */
-template <std::input_iterator InputIt, std::forward_iterator ForwardIt>
+template <std::random_access_iterator InputIt, std::random_access_iterator ForwardIt>
 InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last) noexcept
 {
     for (; first != last - 1; ++first)

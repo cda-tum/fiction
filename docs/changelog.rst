@@ -15,8 +15,7 @@ Changed
       module-by-module modernization: ``std::ranges`` algorithms (``std::ranges::for_each``,
       ``std::ranges::find``, ``std::ranges::find_if``, ``std::ranges::all_of``,
       ``std::ranges::max_element``) in place of hand-rolled loops; ``std::integral``/``std::floating_point``/
-      ``std::input_iterator``/``std::forward_iterator`` concepts in place of ``static_assert`` type checks;
-      ``std::forward`` where a callback parameter is genuinely single-use; and a defaulted
+      ``std::random_access_iterator`` concepts in place of ``static_assert`` type checks; and a defaulted
       ``operator==`` on ``mockturtle::edge`` (relying on C++20 rewritten candidates instead of a
       hand-written ``operator!=``)
 - Build system:
