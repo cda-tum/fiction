@@ -3,17 +3,17 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <cstdint>
+
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void sidb_simulation_parameters(pybind11::module& m)
+void sidb_simulation_parameters(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::sidb_simulation_parameters>(m, "sidb_simulation_parameters",
                                                     DOC(fiction_sidb_simulation_parameters))
@@ -21,13 +21,13 @@ void sidb_simulation_parameters(pybind11::module& m)
              py::arg("mu_minus") = -0.32, py::arg("relative_permittivity") = 5.6, py::arg("screening_distance") = 5.0,
              DOC(fiction_sidb_simulation_parameters_sidb_simulation_parameters))
         .def(py::init<>(), DOC(fiction_sidb_simulation_parameters_sidb_simulation_parameters))
-        .def_readwrite("epsilon_r", &fiction::sidb_simulation_parameters::epsilon_r,
-                       DOC(fiction_sidb_simulation_parameters_epsilon_r))
-        .def_readwrite("lambda_tf", &fiction::sidb_simulation_parameters::lambda_tf,
-                       DOC(fiction_sidb_simulation_parameters_lambda_tf))
-        .def_readwrite("mu_minus", &fiction::sidb_simulation_parameters::mu_minus,
-                       DOC(fiction_sidb_simulation_parameters_mu_minus))
-        .def_readwrite("base", &fiction::sidb_simulation_parameters::base, DOC(fiction_sidb_simulation_parameters_base))
+        .def_rw("epsilon_r", &fiction::sidb_simulation_parameters::epsilon_r,
+                DOC(fiction_sidb_simulation_parameters_epsilon_r))
+        .def_rw("lambda_tf", &fiction::sidb_simulation_parameters::lambda_tf,
+                DOC(fiction_sidb_simulation_parameters_lambda_tf))
+        .def_rw("mu_minus", &fiction::sidb_simulation_parameters::mu_minus,
+                DOC(fiction_sidb_simulation_parameters_mu_minus))
+        .def_rw("base", &fiction::sidb_simulation_parameters::base, DOC(fiction_sidb_simulation_parameters_base))
         .def("k", &fiction::sidb_simulation_parameters::k, DOC(fiction_sidb_simulation_parameters_k))
         .def("mu_plus", &fiction::sidb_simulation_parameters::mu_plus, DOC(fiction_sidb_simulation_parameters_mu_plus));
 }

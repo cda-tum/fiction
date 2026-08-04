@@ -1,19 +1,19 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
 // Forward declarations of registration functions for algorithm sub-categories
-void register_path_finding(pybind11::module& m);
-void register_network_transformation(pybind11::module& m);
-void register_iter(pybind11::module& m);
-void register_properties(pybind11::module& m);
-void register_verification(pybind11::module& m);
-void register_simulation(pybind11::module& m);
-void register_physical_design(pybind11::module& m);
+void register_path_finding(nanobind::module_& m);
+void register_network_transformation(nanobind::module_& m);
+void register_iter(nanobind::module_& m);
+void register_properties(nanobind::module_& m);
+void register_verification(nanobind::module_& m);
+void register_simulation(nanobind::module_& m);
+void register_physical_design(nanobind::module_& m);
 // ... add others as we migrate them
 
-void register_algorithms(pybind11::module& m)
+void register_algorithms(nanobind::module_& m)
 {
     register_path_finding(m);
     register_network_transformation(m);

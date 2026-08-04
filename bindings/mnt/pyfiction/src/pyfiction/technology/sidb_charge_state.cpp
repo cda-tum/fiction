@@ -6,15 +6,15 @@
 
 #include <fiction/technology/sidb_charge_state.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
-void sidb_charge_state(pybind11::module& m)
+void sidb_charge_state(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::enum_<fiction::sidb_charge_state>(m, "sidb_charge_state", DOC(fiction_sidb_charge_state))
         .value("NEGATIVE", fiction::sidb_charge_state::NEGATIVE, DOC(fiction_sidb_charge_state_NEGATIVE))

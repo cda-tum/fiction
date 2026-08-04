@@ -15,13 +15,22 @@
 #include <fiction/utils/layout_utils.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -30,9 +39,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void charge_distribution_surface_layout(pybind11::module& m, const std::string& lattice = "")
+void charge_distribution_surface_layout(nanobind::module_& m, const std::string& lattice = "")
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     using py_cds = py_charge_distribution_surface_layout<Lyt>;
 
@@ -41,7 +50,7 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
      */
 
     py::class_<py_cds, Lyt>(m, fmt::format("charge_distribution_surface{}", lattice).c_str(),
-                            DOC(fiction_charge_distribution_surface), py::module_local())
+                            DOC(fiction_charge_distribution_surface))
         .def(py::init<const fiction::sidb_simulation_parameters&, const fiction::sidb_charge_state&>(),
              py::arg("params") = fiction::sidb_simulation_parameters{},
              py::arg("cs")     = fiction::sidb_charge_state::NEGATIVE)
@@ -210,15 +219,14 @@ void charge_distribution_surface_layout(pybind11::module& m, const std::string& 
 
 }  // namespace detail
 
-void charge_distribution_surfaces(pybind11::module& m)
+void charge_distribution_surfaces(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     /**
      * Dependent cell mode.
      */
-    py::enum_<fiction::dependent_cell_mode>(m, "dependent_cell_mode", DOC(fiction_dependent_cell_mode),
-                                            py::module_local())
+    py::enum_<fiction::dependent_cell_mode>(m, "dependent_cell_mode", DOC(fiction_dependent_cell_mode))
         .value("FIXED", fiction::dependent_cell_mode::FIXED, DOC(fiction_dependent_cell_mode_FIXED))
         .value("VARIABLE", fiction::dependent_cell_mode::VARIABLE, DOC(fiction_dependent_cell_mode_VARIABLE))
 
@@ -227,7 +235,7 @@ void charge_distribution_surfaces(pybind11::module& m)
     /**
      * Energy calculation.
      */
-    py::enum_<fiction::energy_calculation>(m, "energy_calculation", DOC(fiction_energy_calculation), py::module_local())
+    py::enum_<fiction::energy_calculation>(m, "energy_calculation", DOC(fiction_energy_calculation))
         .value("KEEP_OLD_ENERGY_VALUE", fiction::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                DOC(fiction_energy_calculation_KEEP_OLD_ENERGY_VALUE))
         .value("UPDATE_ENERGY", fiction::energy_calculation::UPDATE_ENERGY,
@@ -238,8 +246,7 @@ void charge_distribution_surfaces(pybind11::module& m)
     /**
      * Charge distribution mode.
      */
-    py::enum_<fiction::charge_distribution_mode>(m, "charge_distribution_mode", py::module_local(),
-                                                 DOC(fiction_charge_distribution_mode))
+    py::enum_<fiction::charge_distribution_mode>(m, "charge_distribution_mode", DOC(fiction_charge_distribution_mode))
         .value("UPDATE_CHARGE_DISTRIBUTION", fiction::charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION,
                DOC(fiction_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION))
         .value("KEEP_CHARGE_DISTRIBUTION", fiction::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION,
@@ -250,7 +257,7 @@ void charge_distribution_surfaces(pybind11::module& m)
     /**
      * Charge index mode.
      */
-    py::enum_<fiction::charge_index_mode>(m, "charge_index_mode", DOC(fiction_energy_calculation), py::module_local())
+    py::enum_<fiction::charge_index_mode>(m, "charge_index_mode", DOC(fiction_energy_calculation))
         .value("UPDATE_CHARGE_INDEX", fiction::charge_index_mode::UPDATE_CHARGE_INDEX,
                DOC(fiction_charge_index_mode_UPDATE_CHARGE_INDEX))
         .value("KEEP_CHARGE_INDEX", fiction::charge_index_mode::KEEP_CHARGE_INDEX,
@@ -262,7 +269,7 @@ void charge_distribution_surfaces(pybind11::module& m)
      * Charge distribution history.
      */
     py::enum_<fiction::charge_distribution_history>(m, "charge_distribution_history",
-                                                    DOC(fiction_charge_distribution_history), py::module_local())
+                                                    DOC(fiction_charge_distribution_history))
         .value("CONSIDER", fiction::charge_distribution_history::CONSIDER,
                DOC(fiction_charge_distribution_history_CONSIDER))
         .value("NEGLECT", fiction::charge_distribution_history::NEGLECT,
@@ -271,8 +278,8 @@ void charge_distribution_surfaces(pybind11::module& m)
     /**
      * Charge transition threshold bounds.
      */
-    py::enum_<fiction::charge_transition_threshold_bounds>(
-        m, "charge_transition_threshold_bounds", DOC(fiction_charge_transition_threshold_bounds), py::module_local())
+    py::enum_<fiction::charge_transition_threshold_bounds>(m, "charge_transition_threshold_bounds",
+                                                           DOC(fiction_charge_transition_threshold_bounds))
         .value("NEGATIVE_UPPER_BOUND", fiction::charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND,
                DOC(fiction_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND))
         .value("POSITIVE_LOWER_BOUND", fiction::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND,

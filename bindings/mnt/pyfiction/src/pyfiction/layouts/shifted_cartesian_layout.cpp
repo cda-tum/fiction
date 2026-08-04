@@ -8,20 +8,26 @@
 #include <fiction/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+
 namespace pyfiction
 {
 
-void shifted_cartesian_layout(pybind11::module& m)
+void shifted_cartesian_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * Shifted Cartesian layout.

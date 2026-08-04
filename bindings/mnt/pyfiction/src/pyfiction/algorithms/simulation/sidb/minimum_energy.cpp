@@ -3,10 +3,11 @@
 
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -15,9 +16,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void minimum_energy_impl(pybind11::module& m)
+void minimum_energy_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
@@ -27,7 +28,7 @@ void minimum_energy_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void minimum_energy(pybind11::module& m)
+void minimum_energy(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::minimum_energy_impl<py_charge_distribution_surface_100>(m);

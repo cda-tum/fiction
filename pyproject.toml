@@ -1,7 +1,8 @@
 [build-system]
 requires = [
     "scikit-build-core>=0.10.1",
-    "setuptools-scm>=8.1"
+    "setuptools-scm>=8.1",
+    "nanobind~=2.13.0"
 ]
 build-backend = "scikit_build_core.build"
 
@@ -63,6 +64,8 @@ ninja.version = ">=1.10"
 build-dir = "build/{wheel_tag}/{build_type}"
 # Explicitly set the package directory
 wheel.packages = ["bindings/mnt"]
+# Enable Stable ABI builds for CPython 3.12+
+wheel.py-api = "cp312"
 # Only build the Python bindings target
 build.targets = ["pyfiction"]
 # Only install the Python package component
@@ -141,7 +144,7 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 [tool.cibuildwheel]
 build = "cp3*"
 archs = "auto64"
-skip = "*-musllinux*"
+skip = ["*-musllinux*"]
 test-command = "python -c \"from mnt import pyfiction\""
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
@@ -164,6 +167,12 @@ repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --namespace-pkg 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
+
+[[tool.cibuildwheel.overrides]]
+# cp312-* wheels carry the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
+select = "cp312-*"
+inherit.repair-wheel-command = "append"
+repair-wheel-command = "uvx abi3audit --strict --report {wheel}"
 
 
 [tool.uv]
@@ -248,6 +257,7 @@ docstring-code-format = true
 build = [
     "scikit-build-core>=0.11.0",
     "setuptools-scm>=8.1",
+    "nanobind~=2.13.0",
 ]
 docs = [
     "setuptools-scm>=8.1",

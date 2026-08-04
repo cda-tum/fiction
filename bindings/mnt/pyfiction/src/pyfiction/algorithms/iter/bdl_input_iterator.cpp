@@ -4,11 +4,17 @@
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <cstdint>
 #include <string>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -17,9 +23,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
+void bdl_input_iterator_impl(nanobind::module_& m, const std::string& lattice)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::class_<fiction::bdl_input_iterator<Lyt>>(m, fmt::format("bdl_input_iterator_{}", lattice).c_str(),
                                                  DOC(fiction_bdl_input_iterator))
@@ -96,9 +102,9 @@ void bdl_input_iterator_impl(pybind11::module& m, const std::string& lattice)
 
 }  // namespace detail
 
-void bdl_input_iterator(pybind11::module& m)
+void bdl_input_iterator(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     /**
      * Input BDL configuration
@@ -117,10 +123,10 @@ void bdl_input_iterator(pybind11::module& m)
     py::class_<fiction::bdl_input_iterator_params>(m, "bdl_input_iterator_params",
                                                    DOC(fiction_bdl_input_iterator_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("bdl_wire_params", &fiction::bdl_input_iterator_params::bdl_wire_params,
-                       DOC(fiction_bdl_input_iterator_params_bdl_wire_params))
-        .def_readwrite("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,
-                       DOC(fiction_bdl_input_iterator_params_input_bdl_config));
+        .def_rw("bdl_wire_params", &fiction::bdl_input_iterator_params::bdl_wire_params,
+                DOC(fiction_bdl_input_iterator_params_bdl_wire_params))
+        .def_rw("input_bdl_config", &fiction::bdl_input_iterator_params::input_bdl_config,
+                DOC(fiction_bdl_input_iterator_params_input_bdl_config));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

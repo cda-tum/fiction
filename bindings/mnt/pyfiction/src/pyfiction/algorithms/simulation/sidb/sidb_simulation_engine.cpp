@@ -2,9 +2,11 @@
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -13,9 +15,9 @@ namespace detail
 {
 
 template <typename EngineType>
-void sidb_simulation_engine_name_impl(pybind11::module& m)
+void sidb_simulation_engine_name_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "sidb_simulation_engine_name",
@@ -25,9 +27,9 @@ void sidb_simulation_engine_name_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void sidb_simulation_engine(pybind11::module& m)
+void sidb_simulation_engine(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::sidb_simulation_engine>(m, "sidb_simulation_engine", DOC(fiction_sidb_simulation_engine))
         .value("EXGS", fiction::sidb_simulation_engine::EXGS, DOC(fiction_sidb_simulation_engine_EXGS))

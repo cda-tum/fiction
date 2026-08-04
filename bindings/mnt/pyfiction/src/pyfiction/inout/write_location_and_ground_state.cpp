@@ -8,10 +8,17 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -20,9 +27,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_location_and_ground_state(pybind11::module& m)
+void write_location_and_ground_state(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_location_and_ground_state",
@@ -33,7 +40,7 @@ void write_location_and_ground_state(pybind11::module& m)
 
 }  // namespace detail
 
-void write_location_and_ground_state(pybind11::module& m)
+void write_location_and_ground_state(nanobind::module_& m)
 {
     detail::write_location_and_ground_state<py_sidb_layout>(m);
 }

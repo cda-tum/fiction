@@ -4,11 +4,19 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <optional>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -17,9 +25,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_operational_impl(pybind11::module& m)
+void is_operational_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("is_operational",
           py::overload_cast<const Lyt&, const std::vector<py_tt>&, const fiction::is_operational_params&>(
@@ -78,9 +86,9 @@ void is_operational_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void is_operational(pybind11::module& m)
+void is_operational(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<fiction::operational_status>(m, "operational_status", DOC(fiction_operational_status))
         .value("OPERATIONAL", fiction::operational_status::OPERATIONAL, DOC(fiction_operational_status_OPERATIONAL))
@@ -106,17 +114,17 @@ void is_operational(pybind11::module& m)
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
-                       DOC(fiction_is_operational_params_simulation_parameters))
-        .def_readwrite("sim_engine", &fiction::is_operational_params::sim_engine,
-                       DOC(fiction_is_operational_params_sim_engine))
-        .def_readwrite("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params,
-                       DOC(fiction_is_operational_params_input_bdl_iterator_params))
-        .def_readwrite("op_condition", &fiction::is_operational_params::op_condition,
-                       DOC(fiction_is_operational_params_op_condition))
-        .def_readwrite("strategy_to_analyze_operational_status",
-                       &fiction::is_operational_params::strategy_to_analyze_operational_status,
-                       DOC(fiction_is_operational_params_strategy_to_analyze_operational_status));
+        .def_rw("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
+                DOC(fiction_is_operational_params_simulation_parameters))
+        .def_rw("sim_engine", &fiction::is_operational_params::sim_engine,
+                DOC(fiction_is_operational_params_sim_engine))
+        .def_rw("input_bdl_iterator_params", &fiction::is_operational_params::input_bdl_iterator_params,
+                DOC(fiction_is_operational_params_input_bdl_iterator_params))
+        .def_rw("op_condition", &fiction::is_operational_params::op_condition,
+                DOC(fiction_is_operational_params_op_condition))
+        .def_rw("strategy_to_analyze_operational_status",
+                &fiction::is_operational_params::strategy_to_analyze_operational_status,
+                DOC(fiction_is_operational_params_strategy_to_analyze_operational_status));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::is_operational_impl<py_sidb_100_lattice>(m);

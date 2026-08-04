@@ -7,10 +7,17 @@
 
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <sstream>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -19,9 +26,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void time_to_solution_impl(pybind11::module& m)
+void time_to_solution_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("time_to_solution", &fiction::time_to_solution<Lyt>, py::arg("lyt"), py::arg("quicksim_params"),
           py::arg("tts_params") = fiction::time_to_solution_params{}, py::arg("ps") = nullptr,
@@ -33,20 +40,20 @@ void time_to_solution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void time_to_solution(pybind11::module& m)
+void time_to_solution(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     /**
      * Parameters.
      */
     py::class_<fiction::time_to_solution_params>(m, "time_to_solution_params", DOC(fiction_time_to_solution_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("engine", &fiction::time_to_solution_params::engine, DOC(fiction_time_to_solution_params_engine))
-        .def_readwrite("repetitions", &fiction::time_to_solution_params::repetitions,
-                       DOC(fiction_time_to_solution_params_repetitions))
-        .def_readwrite("confidence_level", &fiction::time_to_solution_params::confidence_level,
-                       DOC(fiction_time_to_solution_params_confidence_level));
+        .def_rw("engine", &fiction::time_to_solution_params::engine, DOC(fiction_time_to_solution_params_engine))
+        .def_rw("repetitions", &fiction::time_to_solution_params::repetitions,
+                DOC(fiction_time_to_solution_params_repetitions))
+        .def_rw("confidence_level", &fiction::time_to_solution_params::confidence_level,
+                DOC(fiction_time_to_solution_params_confidence_level));
     /**
      * Statistics.
      */
@@ -62,15 +69,14 @@ void time_to_solution(pybind11::module& m)
             },
             "Returns a string representation of the statistics.")
         .def("report", &fiction::time_to_solution_stats::report, DOC(fiction_time_to_solution_stats_report))
-        .def_readonly("time_to_solution", &fiction::time_to_solution_stats::time_to_solution,
-                      DOC(fiction_time_to_solution_stats_time_to_solution))
-        .def_readonly("acc", &fiction::time_to_solution_stats::acc, DOC(fiction_time_to_solution_stats_acc))
-        .def_readonly("mean_single_runtime", &fiction::time_to_solution_stats::mean_single_runtime,
-                      DOC(fiction_time_to_solution_stats_mean_single_runtime))
-        .def_readonly("single_runtime_exact", &fiction::time_to_solution_stats::single_runtime_exact,
-                      DOC(fiction_time_to_solution_stats_single_runtime_exact))
-        .def_readonly("algorithm", &fiction::time_to_solution_stats::algorithm,
-                      DOC(fiction_time_to_solution_stats_algorithm))
+        .def_ro("time_to_solution", &fiction::time_to_solution_stats::time_to_solution,
+                DOC(fiction_time_to_solution_stats_time_to_solution))
+        .def_ro("acc", &fiction::time_to_solution_stats::acc, DOC(fiction_time_to_solution_stats_acc))
+        .def_ro("mean_single_runtime", &fiction::time_to_solution_stats::mean_single_runtime,
+                DOC(fiction_time_to_solution_stats_mean_single_runtime))
+        .def_ro("single_runtime_exact", &fiction::time_to_solution_stats::single_runtime_exact,
+                DOC(fiction_time_to_solution_stats_single_runtime_exact))
+        .def_ro("algorithm", &fiction::time_to_solution_stats::algorithm, DOC(fiction_time_to_solution_stats_algorithm))
 
         ;
 

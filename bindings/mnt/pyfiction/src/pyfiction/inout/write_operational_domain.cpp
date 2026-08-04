@@ -7,21 +7,31 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <sstream>
 #include <string>
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
 namespace detail
 {
-void write_operational_domain(pybind11::module& m)
+void write_operational_domain(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -45,9 +55,9 @@ void write_operational_domain(pybind11::module& m)
         py::arg("opdom"), py::arg("params") = fiction::write_operational_domain_params{});
 }
 
-void write_critical_temperature_domain(pybind11::module& m)
+void write_critical_temperature_domain(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
@@ -73,9 +83,9 @@ void write_critical_temperature_domain(pybind11::module& m)
 
 }  // namespace detail
 
-void write_operational_domain(pybind11::module& m)
+void write_operational_domain(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::enum_<fiction::write_operational_domain_params::sample_writing_mode>(
         m, "sample_writing_mode", DOC(fiction_write_operational_domain_params_sample_writing_mode))
@@ -89,12 +99,12 @@ void write_operational_domain(pybind11::module& m)
     py::class_<fiction::write_operational_domain_params>(m, "write_operational_domain_params",
                                                          DOC(fiction_write_operational_domain_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("operational_tag", &fiction::write_operational_domain_params::operational_tag,
-                       DOC(fiction_write_operational_domain_params_operational_tag))
-        .def_readwrite("non_operational_tag", &fiction::write_operational_domain_params::non_operational_tag,
-                       DOC(fiction_write_operational_domain_params_non_operational_tag))
-        .def_readwrite("writing_mode", &fiction::write_operational_domain_params::writing_mode,
-                       DOC(fiction_write_operational_domain_params_writing_mode));
+        .def_rw("operational_tag", &fiction::write_operational_domain_params::operational_tag,
+                DOC(fiction_write_operational_domain_params_operational_tag))
+        .def_rw("non_operational_tag", &fiction::write_operational_domain_params::non_operational_tag,
+                DOC(fiction_write_operational_domain_params_non_operational_tag))
+        .def_rw("writing_mode", &fiction::write_operational_domain_params::writing_mode,
+                DOC(fiction_write_operational_domain_params_writing_mode));
 
     detail::write_operational_domain(m);
     detail::write_critical_temperature_domain(m);

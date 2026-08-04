@@ -8,9 +8,15 @@
 #include <fiction/io/write_fgl_layout.hpp>
 #include <fiction/utils/name_utils.hpp>  // NOLINT(misc-include-cleaner): Required by write_fgl_layout.hpp.
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -19,9 +25,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_fgl_layout(pybind11::module& m)
+void write_fgl_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_fgl_layout",
@@ -31,7 +37,7 @@ void write_fgl_layout(pybind11::module& m)
 
 }  // namespace detail
 
-void write_fgl_layout(pybind11::module& m)
+void write_fgl_layout(nanobind::module_& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

@@ -250,12 +250,12 @@ bindings grows:
 
     bindings/mnt/pyfiction/
     ├── CMakeLists.txt
-    ├── pyfiction.cpp                              # top-level PYBIND11_MODULE entry point
+    ├── pyfiction.cpp                              # top-level NB_MODULE entry point
     └── src/pyfiction/
         ├── algorithms/
         │   ├── register_algorithms.cpp             # calls register_path_finding(m), etc.
         │   ├── path_finding/
-        │   │   ├── a_star.cpp                      # defines a_star(pybind11::module&)
+        │   │   ├── a_star.cpp                      # defines a_star(nanobind::module_&)
         │   │   └── register_path_finding.cpp        # calls a_star(m), distance(m), ...
         │   └── ...
         ├── layouts/
@@ -263,10 +263,10 @@ bindings grows:
         └── ...
 
 Each leaf ``.cpp`` file under ``src/pyfiction/<module>/<submodule>/`` defines exactly one binding function (e.g.
-``void a_star(pybind11::module& m)``) that binds a single class, function, or closely related group thereof. Each
+``void a_star(nanobind::module_& m)``) that binds a single class, function, or closely related group thereof. Each
 directory has a ``register_<name>.cpp`` that forward-declares and calls the binding functions of its leaf files (and
 the ``register_<name>`` functions of any nested submodule directories); the top-level ``pyfiction.cpp`` calls each
-top-level module's ``register_<module>(m)`` from its ``PYBIND11_MODULE`` block. New source files do not need to be
+top-level module's ``register_<module>(m)`` from its ``NB_MODULE`` block. New source files do not need to be
 added anywhere manually: ``CMakeLists.txt`` collects them automatically via ``file(GLOB_RECURSE
 FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so re-running ``cmake`` picks up new files on its own —
 you only need to wire the new function into the relevant ``register_<name>.cpp`` and, if needed, forward-declare it
@@ -278,6 +278,16 @@ there.
    not introduce new Python-level submodules (e.g. ``mnt.pyfiction.algorithms``) — all registration functions attach
    their bindings to the single top-level module object that is threaded through the call chain, matching the
    existing flat API that user scripts depend on.
+
+.. note::
+
+   The bindings are built with `nanobind <https://github.com/wjakob/nanobind>`_, which (unlike the previous
+   `pybind11 <https://github.com/pybind/pybind11>`_-based setup) is resolved as an installed Python package rather
+   than fetched by CMake. When configuring the ``pyfiction`` preset directly (e.g. for IDE-based iteration, outside
+   of ``pip install``), make sure the Python interpreter CMake picks up has ``nanobind`` installed — the project's
+   ``uv``-managed virtual environment already does, so pass
+   ``-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3`` (or the equivalent ``.venv\Scripts\python.exe`` on
+   Windows) if CMake would otherwise pick up a different interpreter.
 
 ---
 

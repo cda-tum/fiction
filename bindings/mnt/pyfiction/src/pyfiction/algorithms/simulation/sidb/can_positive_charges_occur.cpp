@@ -3,8 +3,13 @@
 
 #include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -13,9 +18,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void can_positive_charges_occur_impl(pybind11::module& m)
+void can_positive_charges_occur_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("can_positive_charges_occur", &fiction::can_positive_charges_occur<Lyt>, py::arg("lyt"),
           py::arg("sim_params"), DOC(fiction_can_positive_charges_occur));
@@ -23,7 +28,7 @@ void can_positive_charges_occur_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void can_positive_charges_occur(pybind11::module& m)
+void can_positive_charges_occur(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

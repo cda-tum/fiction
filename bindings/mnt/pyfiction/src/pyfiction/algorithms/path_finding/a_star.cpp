@@ -7,10 +7,16 @@
 #include <fiction/traits.hpp>
 #include <fiction/utils/routing_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -19,9 +25,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void a_star_impl(pybind11::module& m)
+void a_star_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "a_star",
@@ -42,13 +48,13 @@ void a_star_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void a_star(pybind11::module& m)
+void a_star(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::class_<fiction::a_star_params>(m, "a_star_params", DOC(fiction_a_star_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("crossings", &fiction::a_star_params::crossings, DOC(fiction_a_star_params_crossings));
+        .def_rw("crossings", &fiction::a_star_params::crossings, DOC(fiction_a_star_params_crossings));
 
     detail::a_star_impl<py_cartesian_obstruction_layout>(m);
     detail::a_star_impl<py_cartesian_gate_layout>(m);

@@ -3,7 +3,9 @@
 
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/pair.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -12,9 +14,9 @@ namespace detail
 {
 
 template <typename Ntk>
-void network_balancing_impl(pybind11::module& m)
+void network_balancing_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("network_balancing", &fiction::network_balancing<py_logic_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::network_balancing_params{}, DOC(fiction_network_balancing));
@@ -25,14 +27,14 @@ void network_balancing_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void network_balancing(pybind11::module& m)
+void network_balancing(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::class_<fiction::network_balancing_params>(m, "network_balancing_params", DOC(fiction_network_balancing_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("unify_outputs", &fiction::network_balancing_params::unify_outputs,
-                       DOC(fiction_network_balancing_params_unify_outputs))
+        .def_rw("unify_outputs", &fiction::network_balancing_params::unify_outputs,
+                DOC(fiction_network_balancing_params_unify_outputs))
 
         ;
 

@@ -3,10 +3,17 @@
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <sstream>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -15,9 +22,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void critical_temperature_impl(pybind11::module& m)
+void critical_temperature_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::critical_temperature_params{}, py::arg("stats") = nullptr,
@@ -30,9 +37,9 @@ void critical_temperature_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void critical_temperature(pybind11::module& m)
+void critical_temperature(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     /**
      * Critical temperature statistics.
@@ -50,13 +57,13 @@ void critical_temperature(pybind11::module& m)
             },
             "Returns a string representation of the statistics.")
         .def("report", &fiction::critical_temperature_stats::report, DOC(fiction_critical_temperature_stats_report))
-        .def_readonly("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
-                      DOC(fiction_critical_temperature_stats_algorithm_name))
-        .def_readonly("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
-                      DOC(fiction_critical_temperature_stats_num_valid_lyt))
-        .def_readonly("is_ground_state_transparent",
-                      &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
-                      DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
+        .def_ro("algorithm_name", &fiction::critical_temperature_stats::algorithm_name,
+                DOC(fiction_critical_temperature_stats_algorithm_name))
+        .def_ro("num_valid_lyt", &fiction::critical_temperature_stats::num_valid_lyt,
+                DOC(fiction_critical_temperature_stats_num_valid_lyt))
+        .def_ro("is_ground_state_transparent",
+                &fiction::critical_temperature_stats::energy_between_ground_state_and_first_erroneous,
+                DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
 
         ;
 
@@ -66,12 +73,12 @@ void critical_temperature(pybind11::module& m)
     py::class_<fiction::critical_temperature_params>(m, "critical_temperature_params",
                                                      DOC(fiction_critical_temperature_params))
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("operational_params", &fiction::critical_temperature_params::operational_params,
-                       DOC(fiction_critical_temperature_params))
-        .def_readwrite("confidence_level", &fiction::critical_temperature_params::confidence_level,
-                       DOC(fiction_critical_temperature_params_confidence_level))
-        .def_readwrite("max_temperature", &fiction::critical_temperature_params::max_temperature,
-                       DOC(fiction_critical_temperature_params_max_temperature));
+        .def_rw("operational_params", &fiction::critical_temperature_params::operational_params,
+                DOC(fiction_critical_temperature_params))
+        .def_rw("confidence_level", &fiction::critical_temperature_params::confidence_level,
+                DOC(fiction_critical_temperature_params_confidence_level))
+        .def_rw("max_temperature", &fiction::critical_temperature_params::max_temperature,
+                DOC(fiction_critical_temperature_params_max_temperature));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

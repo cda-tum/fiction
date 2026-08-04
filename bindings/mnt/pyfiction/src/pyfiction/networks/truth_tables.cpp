@@ -4,17 +4,16 @@
 
 #include "pyfiction/types.hpp"
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
+
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void truth_tables(pybind11::module& m)
+void truth_tables(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::class_<py_tt>(m, "dynamic_truth_table")
         .def(py::init<>(), "Default constructor. Constructs a truth table of 0 variables.")

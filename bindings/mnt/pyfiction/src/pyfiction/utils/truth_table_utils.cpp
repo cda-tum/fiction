@@ -6,13 +6,13 @@
 
 #include <fiction/utils/truth_table_utils.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/vector.h>  // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
-void truth_table_utils(pybind11::module& m)
+void truth_table_utils(nanobind::module_& m)
 {
     m.def("create_id_tt", &fiction::create_id_tt, DOC(fiction_create_id_tt));
     m.def("create_not_tt", &fiction::create_not_tt, DOC(fiction_create_not_tt));

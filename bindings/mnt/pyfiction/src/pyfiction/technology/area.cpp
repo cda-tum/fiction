@@ -8,7 +8,13 @@
 #include <fiction/technology/area.hpp>
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -17,9 +23,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void area(pybind11::module& m)
+void area(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     using tech = fiction::technology<Lyt>;
 
@@ -39,7 +45,7 @@ void area(pybind11::module& m)
 
 }  // namespace detail
 
-void area(pybind11::module& m)
+void area(nanobind::module_& m)
 {
     detail::area<py_qca_layout>(m);
     detail::area<py_inml_layout>(m);

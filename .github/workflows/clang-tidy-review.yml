@@ -37,6 +37,13 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake libreadline-dev libtbb-dev python3-dev
 
+      - name: Install nanobind
+        # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
+        # config discoverable via `python -m nanobind --cmake_dir` (see
+        # bindings/mnt/pyfiction/CMakeLists.txt); unlike the previous pybind11-based bindings,
+        # this isn't fetched by CMake and must be pip-installed ahead of time
+        run: python3 -m pip install --break-system-packages --disable-pip-version-check "nanobind~=2.13.0"
+
       - name: Setup Z3 Solver
         id: z3
         uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2

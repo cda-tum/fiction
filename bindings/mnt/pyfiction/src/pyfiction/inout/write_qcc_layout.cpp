@@ -7,16 +7,23 @@
 
 #include <fiction/io/write_qcc_layout.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
-void write_qcc_layout(pybind11::module& m)
+void write_qcc_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     m.def(
         "write_qcc_layout",
