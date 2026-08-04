@@ -11,10 +11,14 @@ Unreleased
 Changed
 #######
 - Code quality:
-    - Adopted ``std::ranges`` algorithms (``std::ranges::for_each``, ``std::ranges::find``,
-      ``std::ranges::find_if``, ``std::ranges::all_of``, ``std::ranges::max_element``) in place of
-      hand-rolled loops across ``include/fiction/utils/``, as the first step of an incremental,
-      module-by-module C++20 idiom adoption
+    - Adopted C++20 idioms across ``include/fiction/utils/`` as the first step of an incremental,
+      module-by-module modernization: ``std::ranges`` algorithms (``std::ranges::for_each``,
+      ``std::ranges::find``, ``std::ranges::find_if``, ``std::ranges::all_of``,
+      ``std::ranges::max_element``) in place of hand-rolled loops; ``std::integral``/``std::floating_point``/
+      ``std::input_iterator``/``std::forward_iterator`` concepts in place of ``static_assert`` type checks;
+      ``std::forward`` where a callback parameter is genuinely single-use; and a defaulted
+      ``operator==`` on ``mockturtle::edge`` (relying on C++20 rewritten candidates instead of a
+      hand-written ``operator!=``)
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
