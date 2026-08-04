@@ -10,11 +10,11 @@
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
 #include <vector>
 
 namespace mockturtle
@@ -82,6 +82,7 @@ namespace fiction
  * @param fn Function object to apply to each edge in `ntk`.
  */
 template <typename Ntk, typename Fn>
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): fn is invoked once per edge, so it cannot be forwarded
 void foreach_edge(const Ntk& ntk, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function.");
@@ -110,6 +111,7 @@ void foreach_edge(const Ntk& ntk, Fn&& fn)
  * @param fn Function object to apply to each outgoing edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): fn is invoked once per edge, so it cannot be forwarded
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_fanout_v<Ntk>, "Ntk does not implement the foreach_fanout function.");
@@ -132,6 +134,7 @@ void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
  * @param fn Function object to apply to each incoming edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): fn is invoked once per edge, so it cannot be forwarded
 void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
