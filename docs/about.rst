@@ -2,7 +2,7 @@ What is this about?
 ===================
 
 This code base provides a framework for **fi**\ eld-**c**\ oupled **t**\ echnology-**i**\ ndependent **o**\ pen **n**\ anocomputing
-in C++17 using the `EPFL Logic Synthesis Libraries <https://github.com/lsils/lstools-showcase>`_. Thereby, *fiction* focuses on the
+in C++20 using the `EPFL Logic Synthesis Libraries <https://github.com/lsils/lstools-showcase>`_. Thereby, *fiction* focuses on the
 logic synthesis, placement, routing, clocking, and verification of emerging nanotechnologies. As a promising class of post-CMOS technologies,
 `Field-coupled Nanocomputing (FCN) <https://www.springer.com/de/book/9783662437216>`_ devices like Quantum-dot Cellular
 Automata (QCA) in manifold forms (e.g. atomic or molecular), Nanomagnet Logic (NML) devices, Silicon Dangling Bonds (SiDBs),
