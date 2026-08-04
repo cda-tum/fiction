@@ -134,10 +134,14 @@ template <typename EngineType>
     {
         switch (engine)
         {
+            // EXGS is deprecated but must still be handled here for backwards compatibility
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
             case EngineType::EXGS:
             {
                 return "ExGS";
             }
+#pragma GCC diagnostic pop
             case EngineType::QUICKEXACT:
             {
                 return "QuickExact";

@@ -739,9 +739,10 @@ class one_pass_synthesis_impl
      * @param p Parameters.
      * @param st Statistics.
      */
-    one_pass_synthesis_impl(const std::vector<TT>& spec, one_pass_synthesis_params p, one_pass_synthesis_stats& st) :
+    one_pass_synthesis_impl(const std::vector<TT>& spec, const one_pass_synthesis_params& p,
+                            one_pass_synthesis_stats& st) :
             tts{spec},
-            ps{std::move(p)},
+            ps{p},  // need a copy because timeout will be altered
             pst{st},
             ari{ps.fixed_size ? static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y) : 0u}
     {}
