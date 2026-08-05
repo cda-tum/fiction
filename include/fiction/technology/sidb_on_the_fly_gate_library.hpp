@@ -760,7 +760,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {
             for (std::size_t j = 0; j < gate_x_size(); ++j)
             {
-                const auto cell = cell_list[i][j];
+                const auto cell = cell_list.at(i).at(j);
 
                 switch (cell)
                 {
