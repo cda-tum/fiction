@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -182,25 +183,21 @@ class hexagonal_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
-    {
-        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
-                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
-                      "odd_column_hex, even_column_hex");
-    }
+    explicit hexagonal_layout(const aspect_ratio& ar = {})
+        requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
+                 std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
+                 std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
+                 std::same_as<HexagonalCoordinateSystem, even_column_hex>
+            : strg{std::make_shared<hexagonal_layout_storage>(ar)}
+    {}
 
-    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)}
-    {
-        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
-                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
-                      "odd_column_hex, even_column_hex");
-    }
+    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s)
+        requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
+                 std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
+                 std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
+                 std::same_as<HexagonalCoordinateSystem, even_column_hex>
+            : strg{std::move(s)}
+    {}
     /**
      * Clones the layout returning a deep copy.
      *
@@ -928,20 +925,22 @@ class hexagonal_layout
             {{+1, -1, 0}, {+1, 0, -1}, {0, +1, -1}, {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}}};
 
         // for each direction
-        std::for_each(cube_directions.cbegin(), cube_directions.cend(),
-                      [this, &c, &fn](const auto& dir)
-                      {
-                          // convert given coordinate to the cube system, add direction, and convert back to offset
-                          auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
-                          // since cube coordinates don't carry the layer information, it has to be manually added
-                          neighbor.z = c.z;
+        std::ranges::for_each(cube_directions,
+                              [this, &c, &fn](const auto& dir)
+                              {
+                                  // convert given coordinate to the cube system, add direction, and convert back to
+                                  // offset
+                                  auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
+                                  // since cube coordinates don't carry the layer information, it has to be manually
+                                  // added
+                                  neighbor.z = c.z;
 
-                          // add neighboring coordinate if there was no over-/underflow
-                          if (is_within_bounds(neighbor))
-                          {
-                              std::invoke(std::forward<Fn>(fn), std::move(neighbor));
-                          }
-                      });
+                                  // add neighboring coordinate if there was no over-/underflow
+                                  if (is_within_bounds(neighbor))
+                                  {
+                                      std::invoke(std::forward<Fn>(fn), std::move(neighbor));
+                                  }
+                              });
     }
     /**
      * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with
@@ -1039,7 +1038,7 @@ class hexagonal_layout
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             cube_coord.x = offset_coord.x -
-                           static_cast<decltype(cube_coord.x)>((offset_coord.y + offset * (offset_coord.y & 1)) / 2);
+                           static_cast<decltype(cube_coord.x)>((offset_coord.y + (offset * (offset_coord.y & 1))) / 2);
             cube_coord.z = offset_coord.y;
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
@@ -1047,7 +1046,7 @@ class hexagonal_layout
         {
             cube_coord.x = offset_coord.x;
             cube_coord.z = offset_coord.y -
-                           static_cast<decltype(cube_coord.z)>((offset_coord.x + offset * (offset_coord.x & 1)) / 2);
+                           static_cast<decltype(cube_coord.z)>((offset_coord.x + (offset * (offset_coord.x & 1))) / 2);
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
 
@@ -1074,14 +1073,14 @@ class hexagonal_layout
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(
-                cube_coord.x + static_cast<int64_t>((cube_coord.z + offset * (cube_coord.z & 1)) / 2));
+                cube_coord.x + static_cast<int64_t>((cube_coord.z + (offset * (cube_coord.z & 1))) / 2));
             offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
         else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
             offset_coord.y = static_cast<decltype(offset_coord.y)>(
-                cube_coord.z + static_cast<int64_t>((cube_coord.x + offset * (cube_coord.x & 1)) / 2));
+                cube_coord.z + static_cast<int64_t>((cube_coord.x + (offset * (cube_coord.x & 1))) / 2));
         }
 
         return offset_coord;

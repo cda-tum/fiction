@@ -13,8 +13,10 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstdint>
 #include <exception>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -57,7 +59,7 @@ class clocking_scheme
      */
     explicit clocking_scheme(std::string_view n, clock_function f, const degree in_deg, const degree out_deg,
                              const clock_number cn = 4, const bool r = true) noexcept :
-            name{std::move(n)},
+            name{n},
             max_in_degree{in_deg},
             max_out_degree{out_deg},
             num_clocks{cn},
@@ -771,8 +773,7 @@ bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
     static constexpr const std::array<const char*, 4> linear_schemes{
         {clock_name::COLUMNAR, clock_name::ROW, clock_name::TWODDWAVE, clock_name::TWODDWAVE_HEX}};
 
-    return std::any_of(linear_schemes.cbegin(), linear_schemes.cend(),
-                       [&scheme](const auto& name) { return scheme == name; });
+    return std::ranges::any_of(linear_schemes, [&scheme](const auto& name) { return scheme == name; });
 }
 /**
  * Exception to be thrown when an unsupported clocking scheme is requested.
@@ -782,7 +783,7 @@ class unsupported_clocking_scheme_exception : public std::exception
   public:
     explicit unsupported_clocking_scheme_exception() noexcept : std::exception() {}
 
-    [[nodiscard]] const char* what() const noexcept
+    [[nodiscard]] const char* what() const noexcept override
     {
         return "given clocking scheme is unsupported";
     }
@@ -822,8 +823,8 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::SRS, srs_clocking<Lyt>()},
         {clock_name::BANCS, bancs_clocking<Lyt>()}};
 
-    std::string upper_name = name.data();
-    std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
+    std::string upper_name{name};
+    std::ranges::transform(upper_name, upper_name.begin(), ::toupper);
 
     if (const auto it = scheme_lookup.find(upper_name); it != scheme_lookup.cend())
     {
