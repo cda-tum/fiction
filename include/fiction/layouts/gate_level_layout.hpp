@@ -14,6 +14,7 @@
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/networks/events.hpp>
 #include <mockturtle/networks/storage.hpp>
@@ -23,10 +24,10 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
-#include <functional>
-#include <initializer_list>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -1005,7 +1006,8 @@ class gate_level_layout : public ClockedLayout
     {
         using iterator_type = decltype(strg->inputs.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, node>(
-            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); }, fn);
+            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); },
+            std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all primary output signals (including those that point to dead nodes) in the layout. Note
@@ -1021,7 +1023,7 @@ class gate_level_layout : public ClockedLayout
     {
         using iterator_type = decltype(strg->outputs.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, signal>(
-            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
+            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all nodes (excluding dead ones) in the layout.
@@ -1034,7 +1036,8 @@ class gate_level_layout : public ClockedLayout
     void foreach_node(Fn&& fn) const
     {
         auto r = mockturtle::range<node>(static_cast<node>(strg->nodes.size()));
-        mockturtle::detail::foreach_element_if(r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, fn);
+        mockturtle::detail::foreach_element_if(
+            r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all gates (excluding dead ones) in the layout. Uses `is_gate` to check whether a node is a
@@ -1049,7 +1052,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, fn);
+            r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all wires (excluding dead ones) in the layout. Uses `is_wire` to check whether a node is a
@@ -1064,7 +1067,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
+            r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all nodes that are incoming to a given one. Thereby, only incoming clocked zones (+/- one
@@ -1141,7 +1144,10 @@ class gate_level_layout : public ClockedLayout
      * @param n Node whose fanouts are desired.
      * @param fn Functor to apply to each of `n`'s fanouts.
      */
+    // fn is captured by reference into fanout_collector, which may be invoked up to three times below (once per
+    // adjacent tile); it is forwarded on each of those calls
     template <typename Fn, bool RespectClocking = true>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     void foreach_fanout(const node n, Fn&& fn) const
     {
         if (n <= 1)
@@ -1219,13 +1225,13 @@ class gate_level_layout : public ClockedLayout
     template <typename Fn>
     void foreach_ci(Fn&& fn) const
     {
-        foreach_pi(fn);
+        foreach_pi(std::forward<Fn>(fn));
     }
 
     template <typename Fn>
     void foreach_co(Fn&& fn) const
     {
-        foreach_po(fn);
+        foreach_po(std::forward<Fn>(fn));
     }
 
 #pragma endregion
