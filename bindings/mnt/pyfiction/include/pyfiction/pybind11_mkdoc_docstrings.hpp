@@ -12952,27 +12952,7 @@ Parameter ``n``:
 Parameter ``fn``:
     Functor to apply to each of `n`'s fanins.)doc";
 
-static const char *__doc_fiction_gate_level_layout_foreach_fanout =
-R"doc(Applies a function to all nodes that are outgoing from a given one.
-Thereby, only outgoing clocked zones (+/- one layer to include
-crossings) are being considered whose data flow connections are
-respectively established. That is, the given function is applied to
-all nodes that are connected to the one assigned to `t` as fanouts on
-neighboring tiles.
-
-Template parameter ``Fn``:
-    Functor type that has to comply with the restrictions imposed by
-    `mockturtle::foreach_element_transform`.
-
-Template parameter ``RespectClocking``:
-    Flag to indicate that the underlying clocking is to be respected
-    when evaluating fanouts.
-
-Parameter ``n``:
-    Node whose fanouts are desired.
-
-Parameter ``fn``:
-    Functor to apply to each of `n`'s fanouts.)doc";
+static const char *__doc_fiction_gate_level_layout_foreach_fanout = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_foreach_gate =
 R"doc(Applies a function to all gates (excluding dead ones) in the layout.
