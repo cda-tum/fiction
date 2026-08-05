@@ -13111,7 +13111,27 @@ Parameter ``n``:
 Parameter ``fn``:
     Functor to apply to each of `n`'s fanins.)doc";
 
-static const char *__doc_fiction_gate_level_layout_foreach_fanout = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_foreach_fanout =
+R"doc(Applies a function to all nodes that are outgoing from a given one.
+Thereby, only outgoing clocked zones (+/- one layer to include
+crossings) are being considered whose data flow connections are
+respectively established. That is, the given function is applied to
+all nodes that are connected to the one assigned to `t` as fanouts on
+neighboring tiles.
+
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
+
+Template parameter ``RespectClocking``:
+    Flag to indicate that the underlying clocking is to be respected
+    when evaluating fanouts.
+
+Parameter ``n``:
+    Node whose fanouts are desired.
+
+Parameter ``fn``:
+    Functor to apply to each of `n`'s fanouts.)doc";
 
 static const char *__doc_fiction_gate_level_layout_foreach_gate =
 R"doc(Applies a function to all gates (excluding dead ones) in the layout.
@@ -15024,6 +15044,251 @@ Template parameter ``CubeCoordinateType``:
     Internally, cube coordinates are needed for certain algorithms or
     calculations.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_above =
+R"doc(Returns the coordinate that is directly above a given coordinate `c`,
+i.e., the face whose z-dimension is higher by 1. If `c`'s z-dimension
+is already at maximum, `c` is returned instead.
+
+Parameter ``c``:
+    Coordinate whose above counterpart is desired.
+
+Returns:
+    Coordinate directly above `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_adjacent_coordinates =
+R"doc(Returns a container that contains all coordinates that are adjacent to
+a given one. Thereby, cardinal and ordinal directions are being
+considered, i.e., the container will contain all coordinates `ac` for
+which `is_adjacent(c, ac)` returns `true`.
+
+Coordinates that are outside of the layout bounds are not considered.
+Thereby, the size of the returned container is at most 6.
+
+Parameter ``c``:
+    Coordinate whose adjacent ones are desired.
+
+Returns:
+    A container that contains all of `c`'s adjacent coordinates.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_adjacent_opposite_coordinates =
+R"doc(Returns a container that contains all coordinates pairs of opposing
+adjacent coordinates with respect to a given one. In this hexagonal
+layout, the container content depends on the hexagonal orientation.
+
+In case of a pointy_top_hex orientation, the container will contain
+(`east(c)`, `west(c)`), (`north_east(c)`, `south_west(c)`),
+(`north_west(c)`, `south_east(c)`). In case of a flat_top_hex
+orientation, the container will contain (`north(c)`, `south(c)`),
+(`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
+instead.
+
+This function comes in handy when straight lines on the layout are to
+be examined.
+
+Coordinates outside of the layout bounds are not being considered.
+
+Parameter ``c``:
+    Coordinate whose opposite ones are desired.
+
+Returns:
+    A container that contains pairs of `c`'s opposing coordinates.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_area =
+R"doc(Returns the layout's number of faces depending on the coordinate type.
+
+Returns:
+    Area of layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_below =
+R"doc(Returns the coordinate that is directly below a given coordinate `c`,
+i.e., the face whose z-dimension is lower by 1. If `c`'s z-dimension
+is already at minimum, `c` is returned instead.
+
+Parameter ``c``:
+    Coordinate whose below counterpart is desired.
+
+Returns:
+    Coordinate directly below `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_clone =
+R"doc(Clones the layout returning a deep copy.
+
+Returns:
+    Deep copy of the layout.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_coord =
+R"doc(Creates and returns a coordinate in the layout from the given x-, y-,
+and z-values.
+
+@note This function is equivalent to calling `OffsetCoordinateType(x,
+y, z)`.
+
+Template parameter ``X``:
+    x-type.
+
+Template parameter ``Y``:
+    y-type.
+
+Template parameter ``Z``:
+    z-type.
+
+Parameter ``x``:
+    x-value.
+
+Parameter ``y``:
+    y-value.
+
+Parameter ``z``:
+    z-value.
+
+Returns:
+    A coordinate in the layout of type `OffsetCoordinateType`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_coordinates =
+R"doc(Returns a range of all coordinates accessible in the layout between
+`start` and `stop`. If no values are provided, all coordinates in the
+layout will be included. The returned iterator range points to the
+first and last coordinate, respectively. The range object can be used
+within a for-each loop. Incrementing the iterator is equivalent to
+nested for loops in the order z, y, x. Consequently, the iteration
+will happen inside out, i.e., x will be iterated first, then y, then
+z.
+
+Parameter ``start``:
+    First coordinate to include in the range of all coordinates.
+
+Parameter ``stop``:
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.
+
+Returns:
+    An iterator range from `start` to `stop`. If they are not
+    provided, the first/last coordinate is used as a default.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_east =
+R"doc(Returns the coordinate that is directly adjacent in eastern direction
+of a given coordinate `c`, i.e., the face whose x-dimension is higher
+by 1. If `c`'s x-dimension is already at maximum, `c` is returned
+instead.
+
+Parameter ``c``:
+    Coordinate whose eastern counterpart is desired.
+
+Returns:
+    Coordinate adjacent and east of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_eastern_border_of =
+R"doc(Returns the coordinate with the same y and z values as a given
+coordinate but that is located at the layout's eastern border.
+
+Parameter ``c``:
+    Coordinate whose border counterpart is desired.
+
+Returns:
+    The eastern border equivalent of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_foreach_adjacent_coordinate =
+R"doc(Applies a function to all coordinates adjacent to a given one in
+accordance with `adjacent_coordinates`. Thereby, cardinal and ordinal
+directions are being considered, i.e., the given function is applied
+to all coordinates ac for which `is_adjacent(c, ac)` returns `true`.
+
+Coordinates that are outside of the layout bounds are not considered.
+Thereby, at most 6 coordinates are touched.
+
+Template parameter ``Fn``:
+    Functor type.
+
+Parameter ``c``:
+    Coordinate whose adjacent ones are desired.
+
+Parameter ``fn``:
+    Functor to apply to each of `c`'s adjacent coordinates.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_foreach_adjacent_opposite_coordinates =
+R"doc(Applies a function to all opposing coordinate pairs adjacent to a
+given one. In this hexagonal layout, the function application depends
+on the hexagonal orientation.
+
+In case of a pointy_top_hex orientation, the function will apply to
+(`east(c)`, `west(c)`), (`north_east(c)`, `south_west(c)`),
+(`north_west(c)`, `south_east(c)`). In case of a flat_top_hex
+orientation, the function will apply to (`north(c)`, `south(c)`),
+(`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
+instead.
+
+This function comes in handy when straight lines on the layout are to
+be examined.
+
+Coordinates outside of the layout bounds are not being considered.
+
+Template parameter ``Fn``:
+    Functor type.
+
+Parameter ``c``:
+    Coordinate whose opposite adjacent ones are desired.
+
+Parameter ``fn``:
+    Functor to apply to each of `c`'s opposite adjacent coordinate
+    pairs.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_foreach_coordinate =
+R"doc(Applies a function to all coordinates accessible in the layout between
+`start` and `stop`. The iteration order is the same as for the
+coordinates function.
+
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
+
+Parameter ``fn``:
+    Functor to apply to each coordinate in the range.
+
+Parameter ``start``:
+    First coordinate to include in the range of all coordinates.
+
+Parameter ``stop``:
+    Last coordinate (exclusive) to include in the range of all
+    coordinates.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_foreach_ground_coordinate =
+R"doc(Applies a function to all coordinates accessible in the layout's
+ground layer between `start` and `stop`. The iteration order is the
+same as for the ground_coordinates function.
+
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element`.
+
+Parameter ``fn``:
+    Functor to apply to each coordinate in the range.
+
+Parameter ``start``:
+    First coordinate to include in the range of all ground
+    coordinates.
+
+Parameter ``stop``:
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_ground_coordinates =
+R"doc(Returns a range of all coordinates accessible in the layout's ground
+layer between `start` and `stop`. The iteration order is the same as
+for the coordinates function but without the z dimension.
+
+Parameter ``start``:
+    First coordinate to include in the range of all ground
+    coordinates.
+
+Parameter ``stop``:
+    Last coordinate (exclusive) to include in the range of all ground
+    coordinates.
+
+Returns:
+    An iterator range from `start` to `stop`. If they are not
+    provided, the first/last coordinate in the ground layer is used as
+    a default.)doc";
+
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout =
 R"doc(Standard constructor. The given aspect ratio points to the highest
 possible coordinate in the layout. That means in the even_column_hex
@@ -15033,11 +15298,452 @@ ASCII layout representation above `ar = (3,2)`. Consequently, with `ar
 Parameter ``ar``:
     Highest possible position in the layout.)doc";
 
+static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_2 = R"doc()doc";
+
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
 
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_dimension = R"doc()doc";
 
 static const char *__doc_fiction_hexagonal_layout_hexagonal_layout_storage_hexagonal_layout_storage = R"doc()doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_above =
+R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly above `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_adjacent_elevation_of =
+R"doc(Similar to is_adjacent_of but also considers `c1`'s elevation, i.e.,
+if `c2` is adjacent to `above(c1)` or `below(c1)`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is either adjacent of `c1` or `c1`'s elevations.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_adjacent_of =
+R"doc(Returns `true` iff coordinate `c2` is either north, north-east, east,
+south-east, south, south-west, west, or north-west of coordinate `c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly adjacent to `c1` in one of the six
+    different ordinal directions possible for the layout's hexagonal
+    orientation.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_at_any_border =
+R"doc(Returns whether the given coordinate is located at any of the layout's
+borders where x or y are either minimal or maximal.
+
+Parameter ``c``:
+    Coordinate to check for border location.
+
+Returns:
+    `true` iff `c` is located at any of the layout's borders.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_at_eastern_border =
+R"doc(Returns whether the given coordinate is located at the layout's
+eastern border where x is maximal.
+
+Parameter ``c``:
+    Coordinate to check for border location.
+
+Returns:
+    `true` iff `c` is located at the layout's northern border.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_at_northern_border =
+R"doc(Returns whether the given coordinate is located at the layout's
+northern border where y is minimal.
+
+Parameter ``c``:
+    Coordinate to check for border location.
+
+Returns:
+    `true` iff `c` is located at the layout's northern border.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_at_southern_border =
+R"doc(Returns whether the given coordinate is located at the layout's
+southern border where y is maximal.
+
+Parameter ``c``:
+    Coordinate to check for border location.
+
+Returns:
+    `true` iff `c` is located at the layout's southern border.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_at_western_border =
+R"doc(Returns whether the given coordinate is located at the layout's
+western border where x is minimal.
+
+Parameter ``c``:
+    Coordinate to check for border location.
+
+Returns:
+    `true` iff `c` is located at the layout's western border.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_below =
+R"doc(Returns `true` iff coordinate `c2` is directly below coordinate `c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly below `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_crossing_layer =
+R"doc(Returns whether the given coordinate is located in a crossing layer
+where z is not minimal.
+
+Parameter ``c``:
+    Coordinate to check for elevation.
+
+Returns:
+    `true` iff `c` is in a crossing layer.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_east_of =
+R"doc(Returns `true` iff coordinate `c2` is directly east of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly east of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_eastwards_of =
+R"doc(Returns `true` iff coordinate `c2` is somewhere east of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is somewhere east of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_ground_layer =
+R"doc(Returns whether the given coordinate is located in the ground layer
+where z is minimal.
+
+Parameter ``c``:
+    Coordinate to check for elevation.
+
+Returns:
+    `true` iff `c` is in ground layer.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_in_even_column =
+R"doc(Checks if the given coordinate is located in a column with an even
+index.
+
+Parameter ``c``:
+    Coordinate to check.
+
+Returns:
+    `true` iff `c` is located in an even column.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_in_even_row =
+R"doc(Checks if the given coordinate is located in a row with an even index.
+
+Parameter ``c``:
+    Coordinate to check.
+
+Returns:
+    `true` iff `c` is located in an even row.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_in_odd_column =
+R"doc(Checks if the given coordinate is located in a column with an odd
+index.
+
+Parameter ``c``:
+    Coordinate to check.
+
+Returns:
+    `true` iff `c` is located in an odd column.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_in_odd_row =
+R"doc(Checks if the given coordinate is located in a row with an odd index.
+
+Parameter ``c``:
+    Coordinate to check.
+
+Returns:
+    `true` iff `c` is located in an odd row.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_north_of =
+R"doc(Returns `true` iff coordinate `c2` is directly north of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly north of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_northwards_of =
+R"doc(Returns `true` iff coordinate `c2` is somewhere north of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is somewhere north of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_south_of =
+R"doc(Returns `true` iff coordinate `c2` is directly south of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly south of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_southwards_of =
+R"doc(Returns `true` iff coordinate `c2` is somewhere south of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is somewhere south of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_west_of =
+R"doc(Returns `true` iff coordinate `c2` is directly west of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is directly west of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_westwards_of =
+R"doc(Returns `true` iff coordinate `c2` is somewhere west of coordinate
+`c1`.
+
+Parameter ``c1``:
+    Base coordinate.
+
+Parameter ``c2``:
+    Coordinate to test for its location in relation to `c1`.
+
+Returns:
+    `true` iff `c2` is somewhere west of `c1`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_is_within_bounds =
+R"doc(Returns whether the given coordinate is located within the layout
+bounds.
+
+Parameter ``c``:
+    Coordinate to check for boundary.
+
+Returns:
+    `true` iff `c` is located within the layout bounds.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_north =
+R"doc(Returns the coordinate that is directly adjacent in northern direction
+of a given coordinate `c`, i.e., the face whose y-dimension is lower
+by 1. If `c`'s y-dimension is already at minimum, `c` is returned
+instead.
+
+Parameter ``c``:
+    Coordinate whose northern counterpart is desired.
+
+Returns:
+    Coordinate adjacent and north of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_north_east =
+R"doc(Returns the coordinate that is located in north-eastern direction of a
+given coordinate `c`. Depending on the hexagonal orientation of the
+layout, the dimension values of the returned coordinate may differ.
+
+Parameter ``c``:
+    Coordinate whose north-eastern counterpart is desired.
+
+Returns:
+    Coordinate directly north-eastern of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_north_west =
+R"doc(Returns the coordinate that is located in north-western direction of a
+given coordinate `c`. Depending on the hexagonal orientation of the
+layout, the dimension values of the returned coordinate may differ.
+
+Parameter ``c``:
+    Coordinate whose north-western counterpart is desired.
+
+Returns:
+    Coordinate directly north-western of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_northern_border_of =
+R"doc(Returns the coordinate with the same x and z values as a given
+coordinate but that is located at the layout's northern border.
+
+Parameter ``c``:
+    Coordinate whose border counterpart is desired.
+
+Returns:
+    The northern border equivalent of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_resize =
+R"doc(Updates the layout's dimensions, effectively resizing it.
+
+Parameter ``ar``:
+    New aspect ratio.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_south =
+R"doc(Returns the coordinate that is directly adjacent in southern direction
+of a given coordinate `c`, i.e., the face whose y-dimension is higher
+by 1. If `c`'s y-dimension is already at maximum, `c` is returned
+instead.
+
+Parameter ``c``:
+    Coordinate whose southern counterpart is desired.
+
+Returns:
+    Coordinate adjacent and south of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_south_east =
+R"doc(Returns the coordinate that is located in south-eastern direction of a
+given coordinate `c`. Depending on the hexagonal orientation of the
+layout, the dimension values of the returned coordinate may differ.
+
+Parameter ``c``:
+    Coordinate whose south-eastern counterpart is desired.
+
+Returns:
+    Coordinate directly south-eastern of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_south_west =
+R"doc(Returns the coordinate that is located in south-western direction of a
+given coordinate `c`. Depending on the hexagonal orientation of the
+layout, the dimension values of the returned coordinate may differ.
+
+Parameter ``c``:
+    Coordinate whose south-western counterpart is desired.
+
+Returns:
+    Coordinate directly south-western of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_southern_border_of =
+R"doc(Returns the coordinate with the same x and z values as a given
+coordinate but that is located at the layout's southern border.
+
+Parameter ``c``:
+    Coordinate whose border counterpart is desired.
+
+Returns:
+    The southern border equivalent of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_strg = R"doc()doc";
+
+static const char *__doc_fiction_hexagonal_layout_to_cube_coordinate =
+R"doc(Converts an offset coordinate to a cube coordinate.
+
+This implementation is adapted from
+https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
+
+Parameter ``offset_coord``:
+    Offset coordinate to convert.
+
+Returns:
+    Cube coordinate representing `offset_coord` in the layout's
+    hexagonal orientation.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_to_offset_coordinate =
+R"doc(Converts a cube coordinate to an offset coordinate.
+
+This implementation is adapted from
+https://www.redblobgames.com/grids/hexagons/codegen/output/lib.cpp
+
+Parameter ``cube_coord``:
+    Cube coordinate to convert.
+
+Returns:
+    Offset coordinate representing `cube_coord` in the layout's
+    hexagonal orientation.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_west =
+R"doc(Returns the coordinate that is directly adjacent in western direction
+of a given coordinate `c`, i.e., the face whose x-dimension is lower
+by 1. If `c`'s x-dimension is already at minimum, `c` is returned
+instead.
+
+Parameter ``c``:
+    Coordinate whose western counterpart is desired.
+
+Returns:
+    Coordinate adjacent and west of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_western_border_of =
+R"doc(Returns the coordinate with the same y and z values as a given
+coordinate but that is located at the layout's western border.
+
+Parameter ``c``:
+    Coordinate whose border counterpart is desired.
+
+Returns:
+    The western border equivalent of `c`.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_x =
+R"doc(Returns the layout's x-dimension, i.e., returns the biggest x-value
+that still belongs to the layout.
+
+Returns:
+    x-dimension.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_y =
+R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
+that still belongs to the layout.
+
+Returns:
+    y-dimension.)doc";
+
+static const char *__doc_fiction_hexagonal_layout_z =
+R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
+that still belongs to the layout.
+
+Returns:
+    z-dimension.)doc";
 
 static const char *__doc_fiction_hexagonalization =
 R"doc(Transforms a 2DDWave-clocked Cartesian layout into a hexagonal even
