@@ -42,6 +42,15 @@ Changed
       The unscoped ``cell_type`` enums (``cell_technologies.hpp``) and ``port_direction::cardinal``
       (``cell_ports.hpp``) are deliberately left untouched, as converting them to ``enum class`` is a
       separate, much larger refactor
+    - Started the incremental C++20 modernization of ``include/fiction/layouts/`` with its smallest,
+      lowest-connectivity slice (``coordinates.hpp``, ``tile_based_layout.hpp``,
+      ``synchronization_element_layout.hpp``): collapsed the hand-written ``operator==``/``operator!=``
+      pairs on ``offset::ucoord_t``, ``cube::coord_t``, and ``siqad::coord_t`` into defaulted
+      ``operator==``, and replaced ``coord_iterator``'s ``static_assert(std::is_same_v<...>)``
+      disjunction with an equivalent ``requires`` clause using ``std::same_as``. ``tile_based_layout.hpp``
+      and ``synchronization_element_layout.hpp`` have no ``std::algorithm``-with-iterator-pairs patterns,
+      no ``static_assert(std::is_*)`` over standard-library traits, and no aggregate-initialization
+      opportunities to modernize
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
@@ -60,6 +69,8 @@ Fixed
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
       the newly defaulted ``operator==`` (see above), by inlining the docstring text directly at the
       binding site
+    - Fixed the same issue for the ``pyfiction`` bindings of ``offset::ucoord_t``, ``cube::coord_t``, and
+      ``siqad::coord_t``'s ``operator!=`` after defaulting their ``operator==`` (see above)
 - Continuous integration:
     - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
       ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``
