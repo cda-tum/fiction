@@ -16,7 +16,9 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <limits>
+#include <string>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -752,19 +754,19 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
-        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) >
+        if (((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z)) >
             static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::max()))
         {
             return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::max()};
         }
 
-        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) <
+        if (((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z)) <
             static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::min()))
         {
             return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::min()};
         }
 
-        return {coord.x, coord.y * 2 + coord.z};
+        return {coord.x, ((coord.y * 2) + coord.z)};
     }
 
     return CoordinateType{};
@@ -782,9 +784,9 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
     if (coord.y >= 0)
     {
-        return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+        return {coord.x, (coord.y - (coord.y % 2)) / 2, coord.y % 2};
     }
-    return {coord.x, (coord.y + coord.y % 2) / 2, (-coord.y - 1) % 2 + 1};
+    return {coord.x, (coord.y + (coord.y % 2)) / 2, (((-coord.y - 1) % 2) + 1)};
 }
 
 }  // namespace siqad
@@ -827,7 +829,7 @@ uint64_t area(const CoordinateType& coord) noexcept
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
         return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
-               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+               ((2 * static_cast<uint64_t>(integral_abs(coord.y))) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
     }
 
     return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
