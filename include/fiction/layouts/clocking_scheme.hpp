@@ -5,7 +5,6 @@
 #ifndef FICTION_CLOCKING_SCHEME_HPP
 #define FICTION_CLOCKING_SCHEME_HPP
 
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>

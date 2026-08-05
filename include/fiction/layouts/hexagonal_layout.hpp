@@ -843,7 +843,7 @@ class hexagonal_layout
     {
         mockturtle::detail::foreach_element(
             coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -884,7 +884,7 @@ class hexagonal_layout
 
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
