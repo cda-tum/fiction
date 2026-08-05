@@ -3355,8 +3355,6 @@ a boundary.
 Template parameter ``CoordinateType``:
     Type of coordinate to enumerate.)doc";
 
-static const char *__doc_fiction_coord_iterator_aspect_ratio = R"doc()doc";
-
 static const char *__doc_fiction_coord_iterator_coord = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_coord_iterator =
@@ -3385,25 +3383,6 @@ Parameter ``dimension``:
 
 Parameter ``start``:
     Starting coordinate to enumerate first.)doc";
-
-static const char *__doc_fiction_coord_iterator_operator_eq = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_inc =
-R"doc(Increments the iterator, while keeping it within the boundary. Also
-defined on iterators that are out of bounds.
-
-Returns:
-    Reference to the incremented iterator.)doc";
-
-static const char *__doc_fiction_coord_iterator_operator_inc_2 = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_le = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_lt = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_mul = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_ne = R"doc()doc";
 
 static const char *__doc_fiction_cost_function_chi =
 R"doc(Calculates the cost function :math:` \chi = \sum_{i=1} w_{i} \cdot
@@ -4336,16 +4315,6 @@ Parameter ``other``:
 
 Returns:
     `true` iff this coordinate is "less than" the other coordinate.)doc";
-
-static const char *__doc_fiction_cube_coord_t_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are not identical.)doc";
 
 static const char *__doc_fiction_cube_coord_t_operator_sub =
 R"doc(Subtracts another coordinate from this one and returns the result.
@@ -17304,16 +17273,6 @@ Parameter ``other``:
 Returns:
     `true` iff this coordinate is "less than" the other coordinate.)doc";
 
-static const char *__doc_fiction_offset_ucoord_t_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    `true` iff both coordinates are not identical.)doc";
-
 static const char *__doc_fiction_offset_ucoord_t_operator_unsigned_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB): - 1 bit for the dead
@@ -21354,16 +21313,6 @@ Parameter ``other``:
 Returns:
     True iff this coordinate is "less than" the other coordinate.)doc";
 
-static const char *__doc_fiction_siqad_coord_t_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Parameter ``other``:
-    Right-hand side coordinate.
-
-Returns:
-    True iff both coordinates are not identical.)doc";
-
 static const char *__doc_fiction_siqad_coord_t_operator_sub =
 R"doc(Subtracts another coordinate from this one and returns the result.
 Does not modify this coordinate.
@@ -23635,9 +23584,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1048_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1064_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
