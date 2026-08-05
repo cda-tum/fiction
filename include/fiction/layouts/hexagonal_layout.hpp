@@ -846,7 +846,7 @@ class hexagonal_layout
     {
         mockturtle::detail::foreach_element(
             coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -886,7 +886,7 @@ class hexagonal_layout
 
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
@@ -1038,7 +1038,7 @@ class hexagonal_layout
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             cube_coord.x = offset_coord.x -
-                           static_cast<decltype(cube_coord.x)>((offset_coord.y + offset * (offset_coord.y & 1)) / 2);
+                           static_cast<decltype(cube_coord.x)>((offset_coord.y + (offset * (offset_coord.y & 1))) / 2);
             cube_coord.z = offset_coord.y;
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
@@ -1046,7 +1046,7 @@ class hexagonal_layout
         {
             cube_coord.x = offset_coord.x;
             cube_coord.z = offset_coord.y -
-                           static_cast<decltype(cube_coord.z)>((offset_coord.x + offset * (offset_coord.x & 1)) / 2);
+                           static_cast<decltype(cube_coord.z)>((offset_coord.x + (offset * (offset_coord.x & 1))) / 2);
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
 
@@ -1073,14 +1073,14 @@ class hexagonal_layout
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(
-                cube_coord.x + static_cast<int64_t>((cube_coord.z + offset * (cube_coord.z & 1)) / 2));
+                cube_coord.x + static_cast<int64_t>((cube_coord.z + (offset * (cube_coord.z & 1))) / 2));
             offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
         else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
             offset_coord.y = static_cast<decltype(offset_coord.y)>(
-                cube_coord.z + static_cast<int64_t>((cube_coord.x + offset * (cube_coord.x & 1)) / 2));
+                cube_coord.z + static_cast<int64_t>((cube_coord.x + (offset * (cube_coord.x & 1))) / 2));
         }
 
         return offset_coord;

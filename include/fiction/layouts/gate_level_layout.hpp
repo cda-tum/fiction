@@ -5,7 +5,9 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/algorithms/verification/design_rule_violations.hpp"
+#include "fiction/algorithms/verification/design_rule_violations.hpp"  // NOLINT(misc-include-cleaner): provides
+                                                                       // detail::gate_level_drvs_impl for the friend
+                                                                       // declaration below
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/mockturtle_utils.hpp"
