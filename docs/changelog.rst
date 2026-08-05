@@ -50,7 +50,13 @@ Changed
       disjunction with an equivalent ``requires`` clause using ``std::same_as``. ``tile_based_layout.hpp``
       and ``synchronization_element_layout.hpp`` have no ``std::algorithm``-with-iterator-pairs patterns,
       no ``static_assert(std::is_*)`` over standard-library traits, and no aggregate-initialization
-      opportunities to modernize
+      opportunities to modernize. Completed the rest of ``include/fiction/layouts/``: ``std::ranges``
+      algorithms in place of iterator-pair ``std::algorithm`` calls (``cell_level_layout.hpp``,
+      ``clocking_scheme.hpp``, ``hexagonal_layout.hpp``, ``gate_level_layout.hpp``), and a ``requires``
+      clause with ``std::same_as`` in place of a duplicated ``static_assert(std::is_same_v<...>)``
+      disjunction in both ``hexagonal_layout`` constructors. ``obstruction_layout.hpp``,
+      ``shifted_cartesian_layout.hpp``, ``bounding_box.hpp``, ``clocked_layout.hpp``, and
+      ``cartesian_layout.hpp`` had nothing applicable in any of the four modernization categories
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
@@ -64,6 +70,9 @@ Fixed
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
       enabling ``fmt``'s ``consteval`` format-string checks
+    - Fixed a ``std::string_view::data()`` call in ``clocking_scheme.hpp``'s ``get_clocking_scheme`` that
+      relied on null-termination it isn't guaranteed to have, surfaced by Clang-Tidy's whole-file linting
+      once the file was touched for the ``layouts/`` modernization pass
 - Python bindings:
     - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
