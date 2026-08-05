@@ -1672,7 +1672,7 @@ class gate_level_layout : public ClockedLayout
     template <typename>
     friend class detail::gate_level_drvs_impl;
 
-    inline void initialize_truth_table_cache()
+    void initialize_truth_table_cache()
     {
         /* reserve the second node for constant 1 */
         strg->nodes.emplace_back();
