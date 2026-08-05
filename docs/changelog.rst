@@ -28,6 +28,20 @@ Changed
       into concepts/defaulted comparisons; extended a designated initializer to
       ``test/networks/views/static_depth_view.cpp``, the only aggregate-initialization opportunity found in
       this module's tests
+    - Completed the incremental C++20 modernization of ``include/fiction/technology/`` and its tests.
+      Started with a low-connectivity subset (``sidb_charge_state.hpp``, ``sidb_lattice_orientations.hpp``,
+      ``constants.hpp``, ``technology_mapping_library.hpp``, ``cell_technologies.hpp``,
+      ``sidb_defects.hpp``): collapsed ``sidb_defect``'s hand-written ``operator==``/``operator!=`` into a
+      defaulted ``operator==``. Then extended to the rest of the directory: ``std::ranges`` algorithms in
+      place of iterator-pair ``std::algorithm`` calls (``charge_distribution_surface.hpp``,
+      ``sidb_cluster_hierarchy.hpp``, ``fcn_gate_library.hpp``, ``sidb_on_the_fly_gate_library.hpp``),
+      ``std::erase_if`` in place of an erase-remove idiom (``qca_one_library.hpp``), a ``requires`` clause
+      with ``std::same_as`` in place of two ``static_assert(std::is_same_v<...>)`` checks
+      (``sidb_surface_analysis.hpp``), and a designated initializer for a nested aggregate construction
+      (``sidb_cluster_hierarchy.hpp``) as well as in ``test/technology/is_sidb_gate_design_impossible.cpp``.
+      The unscoped ``cell_type`` enums (``cell_technologies.hpp``) and ``port_direction::cardinal``
+      (``cell_ports.hpp``) are deliberately left untouched, as converting them to ``enum class`` is a
+      separate, much larger refactor
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
@@ -41,6 +55,11 @@ Fixed
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
       enabling ``fmt``'s ``consteval`` format-string checks
+- Python bindings:
+    - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
+      symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
+      the newly defaulted ``operator==`` (see above), by inlining the docstring text directly at the
+      binding site
 - Continuous integration:
     - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
       ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``

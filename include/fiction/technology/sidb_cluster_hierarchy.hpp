@@ -35,6 +35,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -620,7 +621,7 @@ struct sidb_cluster_charge_state
                               const uint64_t total_num_sidbs) noexcept :
             neg_count{static_cast<decltype(neg_count)>(cs == sidb_charge_state::NEGATIVE)},
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
-            compositions{{{{singleton, static_cast<uint64_t>(*this)}}}}
+            compositions{{.proj_states = {{.cluster = singleton, .multiset_conf = static_cast<uint64_t>(*this)}}}}
     {
         compositions.front().pot_bounds.initialize_complete_potential_bounds(total_num_sidbs);
         compositions.front().pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
@@ -897,13 +898,12 @@ struct potential_projection_order
 
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
+            return *std::ranges::find_if(order, [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *std::find_if(order.crbegin(), order.crend(),
-                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
+            return *std::ranges::find_if(order | std::views::reverse,
+                                         [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
     }
     /**
@@ -921,8 +921,7 @@ struct potential_projection_order
     {
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.multiset == m_conf; });
+            return *std::ranges::find_if(order, [&](const potential_projection& pp) { return pp.multiset == m_conf; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {

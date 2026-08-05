@@ -52,8 +52,14 @@ void sidb_defects(nanobind::module_& m)
 
         // NOLINTNEXTLINE(misc-redundant-expression)
         .def(py::self == py::self, py::arg("rhs"), DOC(fiction_sidb_defect_operator_eq))
+        // `operator!=` is compiler-synthesized from the defaulted `operator==` (C++20 rewritten candidates), so
+        // `pybind11_mkdoc` no longer generates a docstring symbol for it; the docstring is inlined instead.
         // NOLINTNEXTLINE(misc-redundant-expression)
-        .def(py::self != py::self, py::arg("rhs"), DOC(fiction_sidb_defect_operator_ne))
+        .def(py::self != py::self, py::arg("rhs"),
+             "This operator compares two `sidb_defect` instances for inequality. It uses the `operator==` to "
+             "check if the two instances are equal and returns the negation of the result.\n\n"
+             "Parameter ``rhs``:\n"
+             "    `sidb_defect` instance to compare against.")
 
         ;
 

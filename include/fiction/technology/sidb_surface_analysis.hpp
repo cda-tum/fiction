@@ -7,16 +7,15 @@
 
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
 
+#include <concepts>
 #include <cstdint>
 #include <optional>
-#include <type_traits>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -58,6 +57,8 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
+    requires std::same_as<technology<CellLyt>, sidb_technology> &&
+             std::same_as<technology<CellLyt>, technology<GateLibrary>>
 [[nodiscard]] auto sidb_surface_analysis(
     const GateLyt& gate_lyt, const CellLyt& surface,
     const std::optional<std::pair<uint64_t, uint64_t>>& charged_defect_spacing_overwrite = std::nullopt,
@@ -67,13 +68,10 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(is_sidb_defect_surface_v<CellLyt>, "CellLyt is not an SiDB defect layout");
-    static_assert(std::is_same_v<technology<CellLyt>, sidb_technology>, "CellLyt is not an SiDB layout");
 
     static_assert(has_get_functional_implementations_v<GateLibrary>,
                   "GateLibrary does not implement the get_functional_implementations function");
     static_assert(has_get_gate_ports_v<GateLibrary>, "GateLibrary does not implement the get_gate_ports function");
-    static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
-                  "CellLyt and GateLibrary must implement the same technology");
 
     // fetch the port type used by the gate library
     using port_type = typename decltype(GateLibrary::get_gate_ports())::mapped_type::value_type::port_type;
