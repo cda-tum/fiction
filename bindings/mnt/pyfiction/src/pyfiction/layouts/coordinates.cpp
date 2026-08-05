@@ -74,7 +74,14 @@ void offset_coordinate(nanobind::module_& m)
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_ne))
+        // `operator!=` is compiler-synthesized from the defaulted `operator==` (C++20 rewritten candidates), so
+        // `pybind11_mkdoc` no longer generates a docstring symbol for it; the docstring is inlined instead.
+        .def(py::self != py::self, py::arg("other"),
+             "Compares against another coordinate for inequality. Respects the dead indicator.\n\n"
+             "Parameter ``other``:\n"
+             "    Right-hand side coordinate.\n\n"
+             "Returns:\n"
+             "    `true` iff both coordinates are not identical.")
         .def(py::self < py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_lt))
         .def(py::self > py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_gt))
         .def(py::self <= py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_le))
@@ -138,7 +145,14 @@ void cube_coordinate(nanobind::module_& m)
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ne))
+        // `operator!=` is compiler-synthesized from the defaulted `operator==` (C++20 rewritten candidates), so
+        // `pybind11_mkdoc` no longer generates a docstring symbol for it; the docstring is inlined instead.
+        .def(py::self != py::self, py::arg("other"),
+             "Compares against another coordinate for inequality. Respects the dead indicator.\n\n"
+             "Parameter ``other``:\n"
+             "    Right-hand side coordinate.\n\n"
+             "Returns:\n"
+             "    `true` iff both coordinates are not identical.")
         .def(py::self < py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_lt))
         .def(py::self > py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_gt))
         .def(py::self <= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_le))
@@ -205,7 +219,14 @@ void siqad_coordinate(nanobind::module_& m)
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_ne))
+        // `operator!=` is compiler-synthesized from the defaulted `operator==` (C++20 rewritten candidates), so
+        // `pybind11_mkdoc` no longer generates a docstring symbol for it; the docstring is inlined instead.
+        .def(py::self != py::self, py::arg("other"),
+             "Compares against another coordinate for inequality. Respects the dead indicator.\n\n"
+             "Parameter ``other``:\n"
+             "    Right-hand side coordinate.\n\n"
+             "Returns:\n"
+             "    True iff both coordinates are not identical.")
         .def(py::self < py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_lt))
         .def(py::self > py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_gt))
         .def(py::self <= py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_le))

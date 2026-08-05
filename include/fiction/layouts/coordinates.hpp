@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -194,10 +195,7 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
-    constexpr bool operator==(const ucoord_t& other) const noexcept
-    {
-        return d == other.d && z == other.z && y == other.y && x == other.x;
-    }
+    constexpr bool operator==(const ucoord_t& other) const noexcept = default;
     /**
      * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
      *
@@ -207,16 +205,6 @@ struct ucoord_t
     constexpr bool operator==(const uint64_t& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == other;
-    }
-    /**
-     * Compares against another coordinate for inequality. Respects the dead indicator.
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff both coordinates are not identical.
-     */
-    constexpr bool operator!=(const ucoord_t& other) const noexcept
-    {
-        return !(*this == other);
     }
     /**
      * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
@@ -433,20 +421,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept
-    {
-        return d == other.d && z == other.z && y == other.y && x == other.x;
-    }
-    /**
-     * Compares against another coordinate for inequality. Respects the dead indicator.
-     *
-     * @param other Right-hand side coordinate.
-     * @return `true` iff both coordinates are not identical.
-     */
-    constexpr bool operator!=(const coord_t& other) const noexcept
-    {
-        return !(*this == other);
-    }
+    constexpr bool operator==(const coord_t& other) const noexcept = default;
     /**
      * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
      * but y is smaller, or if z and y are equal but x is smaller.
@@ -678,20 +653,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept
-    {
-        return d == other.d && z == other.z && y == other.y && x == other.x;
-    }
-    /**
-     * Compares against another coordinate for inequality. Respects the dead indicator.
-     *
-     * @param other Right-hand side coordinate.
-     * @return True iff both coordinates are not identical.
-     */
-    constexpr bool operator!=(const coord_t& other) const noexcept
-    {
-        return !(*this == other);
-    }
+    constexpr bool operator==(const coord_t& other) const noexcept = default;
     /**
      * Determine whether this coordinate is "less than" another one. This is the case if y is smaller, or if y is equal
      * but z is smaller, or if z and y are equal but x is smaller.
@@ -939,15 +901,11 @@ class coord_iterator
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
      */
-    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
-            aspect_ratio{dimension},
-            coord{start}
+    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
+        requires std::same_as<CoordinateType, offset::ucoord_t> || std::same_as<CoordinateType, cube::coord_t> ||
+                     std::same_as<CoordinateType, siqad::coord_t>
+            : aspect_ratio{dimension}, coord{start}
     {
-        static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> ||
-                          std::is_same_v<CoordinateType, cube::coord_t> ||
-                          std::is_same_v<CoordinateType, siqad::coord_t>,
-                      "CoordinateType must be a supported coordinate");
-
         // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
         coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
         coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
