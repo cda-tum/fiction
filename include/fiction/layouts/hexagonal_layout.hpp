@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
-#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -183,21 +182,25 @@ class hexagonal_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit hexagonal_layout(const aspect_ratio& ar = {})
-        requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
-                 std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
-                 std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
-                 std::same_as<HexagonalCoordinateSystem, even_column_hex>
-            : strg{std::make_shared<hexagonal_layout_storage>(ar)}
-    {}
+    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
+    {
+        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
+                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
+                      "odd_column_hex, even_column_hex");
+    }
 
-    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s)
-        requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
-                 std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
-                 std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
-                 std::same_as<HexagonalCoordinateSystem, even_column_hex>
-            : strg{std::move(s)}
-    {}
+    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)}
+    {
+        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
+                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
+                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
+                      "odd_column_hex, even_column_hex");
+    }
     /**
      * Clones the layout returning a deep copy.
      *

@@ -1138,12 +1138,11 @@ class gate_level_layout : public ClockedLayout
      * @param n Node whose fanouts are desired.
      * @param fn Functor to apply to each of `n`'s fanouts.
      */
-    // `fn` is captured by reference into nested lambdas invoked zero to several times (once per fanout tile); it is
-    // forwarded exactly once at its actual call site further down, not at this outer parameter.
     template <typename Fn, bool RespectClocking = true>
-    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
-    void foreach_fanout(const node n, Fn&& fn) const
+    void foreach_fanout(const node n, Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward)
     {
+        // `fn` is captured by reference into nested lambdas invoked zero to several times (once per fanout tile); it
+        // is forwarded exactly once at its actual call site further down, not at this outer parameter.
         if (n <= 1)
         {  // const-0 or const-1
             return;
