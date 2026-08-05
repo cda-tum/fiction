@@ -10,8 +10,10 @@
 #include <mockturtle/views/fanout_view.hpp>
 #include <mockturtle/views/immutable_view.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
+#include <iterator>
 #include <queue>
 #include <unordered_map>
 #include <vector>
@@ -112,8 +114,7 @@ class bfs_topo_view<Ntk, false> : public mockturtle::immutable_view<Ntk>
      */
     uint32_t node_to_index(const node& n) const
     {
-        return static_cast<uint32_t>(
-            std::distance(std::cbegin(topo_order), std::find(std::cbegin(topo_order), std::cend(topo_order), n)));
+        return static_cast<uint32_t>(std::ranges::distance(topo_order.cbegin(), std::ranges::find(topo_order, n)));
     }
 
     /**

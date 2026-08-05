@@ -33,6 +33,8 @@ template <typename Ntk>
 class virtual_pi_network : public Ntk
 {
   public:
+    // name is part of a SFINAE detection idiom used across fiction::traits and cannot be renamed to satisfy
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_virtual_network_type = true;
 
     using storage = typename Ntk::storage;
