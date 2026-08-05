@@ -901,6 +901,11 @@ class coord_iterator
   public:
     using value_type = CoordinateType;
     /**
+     * Default constructor. Required so that coord_iterator satisfies `std::semiregular`, which in turn is required
+     * for it to serve as its own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
+     */
+    constexpr coord_iterator() noexcept = default;
+    /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
      * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated for offset or cubic
@@ -1012,7 +1017,9 @@ class coord_iterator
     }
 
   private:
-    const CoordinateType aspect_ratio;
+    // not const: std::input_or_output_iterator requires coord_iterator to be std::movable, which in turn requires
+    // it to be assignable
+    CoordinateType aspect_ratio;
 
     CoordinateType coord;
 };
@@ -1054,12 +1061,15 @@ struct hash<fiction::siqad::coord_t>
     }
 };
 
-// make coord_iterator compatible with STL iterator categories
+// make coord_iterator compatible with STL iterator categories; difference_type is required for coord_iterator to
+// satisfy std::input_or_output_iterator (e.g., for std::ranges::subrange CTAD)
 template <typename Coordinate>
 struct iterator_traits<fiction::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
+    using reference         = Coordinate;
+    using difference_type   = std::ptrdiff_t;
 };
 
 }  // namespace std

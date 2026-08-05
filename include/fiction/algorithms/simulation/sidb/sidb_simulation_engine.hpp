@@ -181,7 +181,7 @@ get_sidb_simulation_engine(const std::string_view& name) noexcept
         {"QUICKSIM", sidb_simulation_engine::QUICKSIM}};
 
     std::string upper_name{name};
-    std::transform(upper_name.begin(), upper_name.end(), upper_name.begin(), ::toupper);
+    std::ranges::transform(upper_name, upper_name.begin(), ::toupper);
 
     if (const auto it = engine_lookup.find(upper_name); it != engine_lookup.cend())
     {

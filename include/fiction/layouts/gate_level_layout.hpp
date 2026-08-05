@@ -9,7 +9,6 @@
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/mockturtle_utils.hpp"
-#include "fiction/utils/range.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
