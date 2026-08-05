@@ -21136,45 +21136,6 @@ Returns:
 
 static const char *__doc_fiction_sidb_skeleton_bestagon_library_sidb_skeleton_bestagon_library = R"doc()doc";
 
-static const char *__doc_fiction_sidb_surface_analysis =
-R"doc(Analyzes a given defective SiDB surface and matches it against gate
-tiles provided by a library. Any gate type that cannot be realized on
-a certain tile due to disturbances caused by defects gets blacklisted
-on said tile. The black list is then returned by this function.
-
-@note The given gate library must implement both the
-`get_functional_implementations()` and `get_gate_ports()` functions.
-
-Template parameter ``GateLibrary``:
-    FCN gate library type to fetch the gate descriptions from.
-
-Template parameter ``GateLyt``:
-    Gate-level layout type that specifies the tiling of the SiDB
-    surface.
-
-Template parameter ``CellLyt``:
-    SiDB cell-level layout type that is underlying to the SiDB defect
-    surface.
-
-Parameter ``gate_lyt``:
-    Gate-level layout instance that specifies the aspect ratio.
-
-Parameter ``surface``:
-    SiDB surface that instantiates the defects.
-
-Parameter ``charged_defect_spacing_overwrite``:
-    Override the default influence distance of charged atomic defects
-    on SiDBs with an optional pair of horizontal and vertical
-    distances.
-
-Parameter ``neutral_defect_spacing_overwrite``:
-    Override the default influence distance of neutral atomic defects
-    on SiDBs with an optional pair of horizontal and vertical
-    distances.
-
-Returns:
-    A black list of gate functions associated with tiles.)doc";
-
 static const char *__doc_fiction_sidb_technology =
 R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
 concept.)doc";
