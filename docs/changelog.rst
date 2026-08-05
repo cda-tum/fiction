@@ -52,11 +52,15 @@ Changed
       no ``static_assert(std::is_*)`` over standard-library traits, and no aggregate-initialization
       opportunities to modernize. Completed the rest of ``include/fiction/layouts/``: ``std::ranges``
       algorithms in place of iterator-pair ``std::algorithm`` calls (``cell_level_layout.hpp``,
-      ``clocking_scheme.hpp``, ``hexagonal_layout.hpp``, ``gate_level_layout.hpp``), and a ``requires``
-      clause with ``std::same_as`` in place of a duplicated ``static_assert(std::is_same_v<...>)``
-      disjunction in both ``hexagonal_layout`` constructors. ``obstruction_layout.hpp``,
-      ``shifted_cartesian_layout.hpp``, ``bounding_box.hpp``, ``clocked_layout.hpp``, and
-      ``cartesian_layout.hpp`` had nothing applicable in any of the four modernization categories
+      ``clocking_scheme.hpp``, ``hexagonal_layout.hpp``, ``gate_level_layout.hpp``). A ``requires``
+      clause with ``std::same_as`` was attempted for a duplicated
+      ``static_assert(std::is_same_v<...>)`` disjunction in both ``hexagonal_layout`` constructors but
+      reverted: the pyfiction docstring auto-gen bot's pinned ``clang==15.0.7`` Python parser failed to
+      associate Doxygen comments with the ~60 member functions declared after those constructors once
+      converted, breaking the fully Python-bound ``hexagonal_layout`` bindings' ReadTheDocs build.
+      ``obstruction_layout.hpp``, ``shifted_cartesian_layout.hpp``, ``bounding_box.hpp``,
+      ``clocked_layout.hpp``, and ``cartesian_layout.hpp`` had nothing applicable in any of the four
+      modernization categories
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
