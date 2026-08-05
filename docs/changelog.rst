@@ -23,7 +23,11 @@ Changed
       algorithms (``std::ranges::find``, ``std::ranges::find_if``, ``std::ranges::copy``,
       ``std::ranges::for_each``, ``std::ranges::sort``, ``std::ranges::distance``) in place of hand-rolled
       loops and iterator-pair algorithm calls in ``technology_network.hpp``, ``virtual_pi_network.hpp``,
-      ``views/bfs_topo_view.hpp``, and ``views/mutable_rank_view.hpp``
+      ``views/bfs_topo_view.hpp``, and ``views/mutable_rank_view.hpp``. This module has no
+      ``static_assert(std::is_*)`` type checks or hand-written ``operator==``/``operator!=`` to modernize
+      into concepts/defaulted comparisons; extended a designated initializer to
+      ``test/networks/views/static_depth_view.cpp``, the only aggregate-initialization opportunity found in
+      this module's tests
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
