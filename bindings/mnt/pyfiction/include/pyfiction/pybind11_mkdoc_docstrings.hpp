@@ -20606,14 +20606,6 @@ of the two instances are equal.
 Parameter ``rhs``:
     `sidb_defect` instance to compare against.)doc";
 
-static const char *__doc_fiction_sidb_defect_operator_ne =
-R"doc(This operator compares two `sidb_defect` instances for inequality. It
-uses the `operator==` to check if the two instances are equal and
-returns the negation of the result.
-
-Parameter ``rhs``:
-    `sidb_defect` instance to compare against.)doc";
-
 static const char *__doc_fiction_sidb_defect_sidb_defect = R"doc(Standard constructor.)doc";
 
 static const char *__doc_fiction_sidb_defect_surface = R"doc()doc";
