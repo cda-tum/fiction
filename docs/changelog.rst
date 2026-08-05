@@ -49,6 +49,11 @@ Fixed
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
       enabling ``fmt``'s ``consteval`` format-string checks
+- Python bindings:
+    - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
+      symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
+      the newly defaulted ``operator==`` (see above), by inlining the docstring text directly at the
+      binding site
 - Continuous integration:
     - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
       ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``
