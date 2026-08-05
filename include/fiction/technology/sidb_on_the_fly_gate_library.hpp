@@ -20,6 +20,7 @@
 
 #include <phmap.h>
 
+#include <algorithm>
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -596,8 +597,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         assert(!logic_cells.empty() && "No Logic cells are found");
 
-        if (std::any_of(logic_cells.cbegin(), logic_cells.cend(),
-                        [&](const auto& l_cell) { return sidbs_affected_by_defects.count(l_cell); }))
+        if (std::ranges::any_of(logic_cells,
+                                [&](const auto& l_cell) { return sidbs_affected_by_defects.count(l_cell); }))
         {
             return false;
         }
