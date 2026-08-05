@@ -28,6 +28,14 @@ Changed
       into concepts/defaulted comparisons; extended a designated initializer to
       ``test/networks/views/static_depth_view.cpp``, the only aggregate-initialization opportunity found in
       this module's tests
+    - Continued the incremental C++20 modernization in a low-connectivity subset of
+      ``include/fiction/technology/`` (``sidb_charge_state.hpp``, ``sidb_lattice_orientations.hpp``,
+      ``constants.hpp``, ``technology_mapping_library.hpp``, ``cell_technologies.hpp``,
+      ``sidb_defects.hpp``): collapsed ``sidb_defect``'s hand-written ``operator==``/``operator!=`` into a
+      defaulted ``operator==``. No other file in this subset has ``std::algorithm`` patterns,
+      ``static_assert(std::is_*)`` checks, or aggregate-initialization opportunities in its headers or
+      tests; the unscoped ``cell_type`` enums in ``cell_technologies.hpp`` are left untouched, as
+      converting them to ``enum class`` is a separate, much larger refactor
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
