@@ -19,6 +19,11 @@ Changed
       ``operator==`` on ``mockturtle::edge`` (relying on C++20 rewritten candidates instead of a
       hand-written ``operator!=``). Extended the same modernization to ``test/utils/routing_utils.cpp``
       (``std::ranges`` and designated initializers)
+    - Continued the incremental C++20 modernization in ``include/fiction/networks/``: ``std::ranges``
+      algorithms (``std::ranges::find``, ``std::ranges::find_if``, ``std::ranges::copy``,
+      ``std::ranges::for_each``, ``std::ranges::sort``, ``std::ranges::distance``) in place of hand-rolled
+      loops and iterator-pair algorithm calls in ``technology_network.hpp``, ``virtual_pi_network.hpp``,
+      ``views/bfs_topo_view.hpp``, and ``views/mutable_rank_view.hpp``
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
