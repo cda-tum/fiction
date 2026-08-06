@@ -92,34 +92,6 @@ target_link_system_libraries(libfiction INTERFACE
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/graph-coloring/Header/ DESTINATION include/graph-coloring)
 
-# Mugen (Python/C++ Hybrid)
-if (NOT WIN32)
-    option(FICTION_ENABLE_MUGEN "Enable the usage of Mugen, a Python3 library by Winston Haaswijk for FCN one-pass synthesis, and its dependencies" OFF)
-
-    if (FICTION_ENABLE_MUGEN)
-        target_compile_definitions(libfiction INTERFACE MUGEN)
-
-        if (NOT APPLE)
-            message(STATUS "Building glucose for Mugen")
-            add_custom_command(
-                    OUTPUT ${PROJECT_BINARY_DIR}/glucose-syrup
-                    COMMAND make
-                    COMMAND mv glucose-syrup ${PROJECT_BINARY_DIR}/glucose-syrup
-                    COMMAND make clean
-                    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/mugen/glucose-syrup-4.1/parallel/)
-
-            add_custom_target(glucose_syrup ALL DEPENDS ${PROJECT_BINARY_DIR}/glucose-syrup)
-        endif ()
-
-        target_link_system_libraries(libfiction INTERFACE pybind11::embed)
-
-        configure_file(${CMAKE_CURRENT_SOURCE_DIR}/mugen/mugen_info.hpp.in utils/mugen_info.hpp)
-        target_include_directories(libfiction INTERFACE $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>)
-
-        message(STATUS "Mugen was enabled. Please note that it relies on the Python3 libraries 'graphviz', 'PySAT v0.1.6.dev6', and 'wrapt_timeout_decorator' to be properly installed")
-    endif ()
-endif ()
-
 ################################################################################
 # System / Other Dependencies
 ################################################################################

@@ -66,17 +66,8 @@ jobs:
           save: true
           max-size: 10G
 
-      - name: Setup Python
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
-        with:
-          python-version: "3.14.x"
-          cache: "pip"
-
       - name: Setup mold
         uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
-
-      - name: Install pip packages
-        run: python -m pip install --disable-pip-version-check -r vendors/mugen/requirements.txt
 
       - name: Setup Z3 Solver
         id: z3

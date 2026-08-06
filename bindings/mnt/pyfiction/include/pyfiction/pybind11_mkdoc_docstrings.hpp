@@ -3358,6 +3358,11 @@ Template parameter ``CoordinateType``:
 static const char *__doc_fiction_coord_iterator_coord = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_coord_iterator =
+R"doc(Default constructor. Required so that coord_iterator satisfies
+`std::semiregular`, which in turn is required for it to serve as its
+own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).)doc";
+
+static const char *__doc_fiction_coord_iterator_coord_iterator_2 =
 R"doc(Standard constructor. Initializes the iterator with a starting
 position and the boundary within to enumerate.
 
@@ -9020,179 +9025,6 @@ Returns:
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
     indicating the reason if it is non-operational.)doc";
 
-static const char *__doc_fiction_detail_jump_point_search_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_closed_list = R"doc(Closed list that acts as a set of already visited coordinates.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f = R"doc(Stores a coordinate and its f-value.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_coord = R"doc(Coordinate.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_f = R"doc(f-value of the coordinate.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_operator_eq =
-R"doc(Equality operator that only compares the stored coordinates. This
-allows for a convenient lookup in the priority queue.
-
-Parameter ``other``:
-    Other coordinate_f to compare with.
-
-Returns:
-    `true` iff this coord value is equal to the other's.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_operator_gt =
-R"doc(Comparator for the priority queue. Compares only the f-values.
-
-Parameter ``other``:
-    Other coordinate_f to compare with.
-
-Returns:
-    `true` iff this f-value is greater than the other's.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_distance =
-R"doc(The distance functor that implements the heuristic estimation
-function.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_expand =
-R"doc(Expands the frontier of coordinates to visit next in the direction of
-the heuristic cost function.
-
-Parameter ``current``:
-    Coordinate that is currently examined.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_fill_in_jumps =
-R"doc(Completes a reconstructed path by filling in the jumps that were made
-during JPS.
-
-Parameter ``p``:
-    Incomplete path with jump gaps.
-
-Returns:
-    Completed interpolated path.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_g =
-R"doc(Returns the g-value of a coordinate by accessing the g_values map.
-Returns 0 if no entry exists.
-
-Parameter ``c``:
-    Coordinate whose g-value is desired.
-
-Returns:
-    g-value of coordinate c or 0 if no value has been stored.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_g_values =
-R"doc(Stores the g-cost for each coordinate c, i.e., the length of the
-shortest path from source to c found so far.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_get_lowest_f_coord =
-R"doc(Fetches and pops the coordinate with the lowest f-value from the open
-list priority queue.
-
-Returns:
-    Coordinate with the lowest f-value from the open list.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_interpolate =
-R"doc(Interpolates a straight line between two given coordinates using
-Bresenham's algorithm:
-http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-
-This function is repeatedly used in the fill_in_jumps function to
-interpolate the jump gaps.
-
-Parameter ``c1``:
-    Start coordinate.
-
-Parameter ``c2``:
-    Goal coordinate.
-
-Returns:
-    A straight path between c1 and c2.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_is_traversable =
-R"doc(Checks if coordinate c2 is directly reachable from coordinate c1. That
-is if the coordinates are not identical, if they are adjacent or if
-the clocking checks out, and if there is no obstacle in the way.
-
-Parameter ``c1``:
-    Start coordinate.
-
-Parameter ``c2``:
-    Goal coordinate.
-
-Returns:
-    `true` iff c2 is directly reachable from c1.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_is_visited =
-R"doc(Checks if a coordinate has been visited already.
-
-Parameter ``c``:
-    Coordinate to check.
-
-Returns:
-    `true` iff c has already been visited.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_jump =
-R"doc(Compute the next jump point starting from successor with current as
-its parent. The vector (current, successor) thus defines the direction
-in which to look for the jump point. A jump point has to be stepwise
-traversable from successor. That is, there must be a valid path
-through non-obstructed tiles.
-
-Parameter ``current``:
-    Parent coordinate.
-
-Parameter ``successor``:
-    Coordinate from which to look for the next jump point.
-
-Returns:
-    The next jump point or `std::nullopt` if no such coordinate is
-    available.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_jump_point_search_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_layout =
-R"doc(The layout in which the shortest path between `source` and `target` is
-to be found.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_no_improvement =
-R"doc(Checks if the given g-value is greater or equal than the stored
-g-value of the given coordinate. If that is the case, the new g-value
-does not improve the path.
-
-Parameter ``c``:
-    Coordinate to whose g-value is to be checked.
-
-Parameter ``g_val``:
-    g-value to compare to c's.
-
-Returns:
-    `true` iff the given g-value does not mean an improvement for the
-    given coordinate.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_objective = R"doc(The source-target coordinate pair.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_open_list =
-R"doc(Open list that contains all coordinates to process next sorted by
-their f-value.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_reconstruct_path =
-R"doc(Reconstruct the final path from the origin map that was created during
-the path finding algorithm.
-
-Returns:
-    The shortest path connecting source and target.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_run = R"doc()doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_set_g =
-R"doc(Updates the g-value of the given coordinate to the given value.
-
-Parameter ``c``:
-    Coordinate whose g-value is to be updated to g_val.
-
-Parameter ``g_val``:
-    New g-value for c.)doc";
-
 static const char *__doc_fiction_detail_layout_invalidity_reason =
 R"doc(Reason why the layout is not a valid gate implementation for the given
 Boolean function.)doc";
@@ -10078,16 +9910,6 @@ Parameter ``item``:
 
 Parameter ``priority``:
     The priority of the element.)doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_lyt = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_pst = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_qca_energy_dissipation_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_qcad_cell_pos = R"doc()doc";
 
@@ -11757,18 +11579,6 @@ static const char *__doc_fiction_energy_calculation_UPDATE_ENERGY =
 R"doc(The electrostatic potential energy of a given charge distribution is
 updated after it is changed.)doc";
 
-static const char *__doc_fiction_energy_dissipation_stats = R"doc()doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_fast = R"doc()doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_report = R"doc()doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_slow =
-R"doc(Energy dissipation information in meV for slow (25 GHz) and fast (100
-GHz) clocking.)doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_unknown = R"doc()doc";
-
 static const char *__doc_fiction_energy_distribution =
 R"doc(This class is used to store the energy distribution of an SiDB layout.
 The energy distribution is a map that contains the electrostatic
@@ -13121,27 +12931,7 @@ Parameter ``n``:
 Parameter ``fn``:
     Functor to apply to each of `n`'s fanins.)doc";
 
-static const char *__doc_fiction_gate_level_layout_foreach_fanout =
-R"doc(Applies a function to all nodes that are outgoing from a given one.
-Thereby, only outgoing clocked zones (+/- one layer to include
-crossings) are being considered whose data flow connections are
-respectively established. That is, the given function is applied to
-all nodes that are connected to the one assigned to `t` as fanouts on
-neighboring tiles.
-
-Template parameter ``Fn``:
-    Functor type that has to comply with the restrictions imposed by
-    `mockturtle::foreach_element_transform`.
-
-Template parameter ``RespectClocking``:
-    Flag to indicate that the underlying clocking is to be respected
-    when evaluating fanouts.
-
-Parameter ``n``:
-    Node whose fanouts are desired.
-
-Parameter ``fn``:
-    Functor to apply to each of `n`'s fanouts.)doc";
+static const char *__doc_fiction_gate_level_layout_foreach_fanout = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_foreach_gate =
 R"doc(Applies a function to all gates (excluding dead ones) in the layout.
@@ -16480,79 +16270,6 @@ static const char *__doc_fiction_is_tile_based_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_virtual_network_type = R"doc()doc";
 
-static const char *__doc_fiction_jump_point_search =
-R"doc(The Jump Point Search (JPS) path finding algorithm for shortest loop-
-less paths between a given source and target coordinate in a Cartesian
-layout. This function automatically detects whether the given layout
-implements a clocking interface (see `clocked_layout`) and respects
-the underlying information flow imposed by `layout`'s clocking scheme.
-
-JPS was proposed as an optimization of A* for shortest paths and
-offers better average complexity on uniform-cost grids that allow
-diagonal connections. It uses a heuristic distance function that
-estimates the remaining costs towards the target in every step. Thus,
-this heuristic function should neither be complex to calculate nor
-overestimating the remaining costs. Common heuristics to be used are
-the Manhattan and the Euclidean distance functions. See
-`distance_functor` for implementations. Since JPS assumes a unit-cost
-grid, the use of cost functions together with JPS is not possible.
-
-If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
-coordinates and connections.
-
-In certain cases it might be desirable to determine regular coordinate
-paths even if the layout implements a clocking interface. This can be
-achieved by static-casting the layout to a coordinate layout when
-calling this function:
-
-```
-{.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
-clk_lyt layout = ...;
-auto shortest_path = jump_point_search<path>(static_cast<cartesian_layout<>>(layout), {source, target});
-```
-
-JPS was introduced in \"Online Graph Pruning for Pathfinding on Grid
-Maps\" by Daniel Harabor and Alban Grastien in AAAI 2011.
-
-Parts of this implementation are based on
-https://github.com/qiao/PathFinding.js.
-
-@note The original JPS highly relies on diagonal paths in the grid
-which are not possible in most Cartesian grid-based FCN technologies.
-Therefore, this implementation disallows diagonal paths. Consequently,
-and due to non-uniform clocking schemes, JPS might perform worse than
-A* in terms of runtime. It is recommended to use A* (see `a_star`).
-
-@note JPS does not support wire crossings.
-
-Template parameter ``Path``:
-    Type of the returned path.
-
-Template parameter ``Lyt``:
-    Type of the layout to perform path finding on.
-
-Template parameter ``Dist``:
-    Distance value type to be used in the heuristic estimation
-    function.
-
-Parameter ``layout``:
-    The layout in which the shortest path between a source and target
-    is to be found.
-
-Parameter ``objective``:
-    Source-target coordinate pair.
-
-Parameter ``dist_fn``:
-    A distance functor that implements the desired heuristic
-    estimation function.
-
-Returns:
-    The shortest loop-less path in `layout` from `objective.source` to
-    `objective.target`.)doc";
-
 static const char *__doc_fiction_kink_induced_non_operational_input_patterns =
 R"doc(This function determines all input combinations for which kinks induce
 the SiDB layout to become non-operational. This means that the layout
@@ -19100,26 +18817,6 @@ Parameter ``scheme``:
 Returns:
     A shared pointer to the given `scheme`.)doc";
 
-static const char *__doc_fiction_qca_energy_dissipation =
-R"doc(Estimates the energy dissipation of a gate-level layout if it were to
-be converted to a QCA cell-level layout via the QCA ONE gate library.
-This estimation was proposed in \"An Energy-aware Model for the Logic
-Synthesis of Quantum-Dot Cellular Automata\" by Frank Sill Torres,
-Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
-
-As done in that publication, energy dissipation values are being given
-in meV for slow (25 GHz) and fast (100 GHz) clocking.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Parameter ``lyt``:
-    The gate-level layout whose energy dissipation is to be
-    calculated.
-
-Parameter ``pst``:
-    Statistics.)doc";
-
 static const char *__doc_fiction_qca_one_library =
 R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
 Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
@@ -19400,49 +19097,6 @@ Template parameter ``Cost``:
     Floating-point cost type.)doc";
 
 static const char *__doc_fiction_random_cost_functor_random_cost_functor = R"doc()doc";
-
-static const char *__doc_fiction_range_t =
-R"doc(Defines a range type utilizing iterators. It implements `begin()` and
-`end()` as well as `cbegin()` and `cend()` as member functions to work
-for range based for-loops.
-
-Template parameter ``Iterator``:
-    type for which the range should be created.)doc";
-
-static const char *__doc_fiction_range_t_b = R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
-
-static const char *__doc_fiction_range_t_begin =
-R"doc(Returns the iterator pointing to the begin of the represented range.
-
-Returns:
-    Begin iterator.)doc";
-
-static const char *__doc_fiction_range_t_cbegin =
-R"doc(Returns a const iterator pointing to the begin of the represented
-range.
-
-Returns:
-    const begin iterator.)doc";
-
-static const char *__doc_fiction_range_t_cend =
-R"doc(Returns a const iterator pointing to the end of the represented range.
-
-Returns:
-    const end iterator.)doc";
-
-static const char *__doc_fiction_range_t_e = R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
-
-static const char *__doc_fiction_range_t_end =
-R"doc(Returns the iterator pointing to the end of the represented range.
-
-Returns:
-    End iterator.)doc";
-
-static const char *__doc_fiction_range_t_range_t =
-R"doc(Standard constructor with forward reference.
-
-Parameter ``range``:
-    Begin and end iterator pair.)doc";
 
 static const char *__doc_fiction_read_fgl_layout =
 R"doc(Reads a gate-level layout from an FGL file provided as an input
@@ -23614,9 +23268,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1089_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1102_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1105_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1118_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 

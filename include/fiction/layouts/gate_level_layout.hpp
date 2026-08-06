@@ -5,7 +5,9 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/algorithms/verification/design_rule_violations.hpp"  // NOLINT(misc-include-cleaner): needed for the `detail::gate_level_drvs_impl` friend declaration below
+#include "fiction/algorithms/verification/design_rule_violations.hpp"  // NOLINT(misc-include-cleaner): provides
+                                                                       // detail::gate_level_drvs_impl for the friend
+                                                                       // declaration below
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/mockturtle_utils.hpp"
@@ -1138,8 +1140,11 @@ class gate_level_layout : public ClockedLayout
      * @param n Node whose fanouts are desired.
      * @param fn Functor to apply to each of `n`'s fanouts.
      */
+    // fn is captured by reference into fanout_collector, which may be invoked up to three times below (once per
+    // adjacent tile); it is forwarded on each of those calls
     template <typename Fn, bool RespectClocking = true>
-    void foreach_fanout(const node n, Fn&& fn) const  // NOLINT(cppcoreguidelines-missing-std-forward)
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
+    void foreach_fanout(const node n, Fn&& fn) const
     {
         // `fn` is captured by reference into nested lambdas invoked zero to several times (once per fanout tile); it
         // is forwarded exactly once at its actual call site further down, not at this outer parameter.
