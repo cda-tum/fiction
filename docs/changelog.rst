@@ -42,9 +42,18 @@ Changed
       The unscoped ``cell_type`` enums (``cell_technologies.hpp``) and ``port_direction::cardinal``
       (``cell_ports.hpp``) are deliberately left untouched, as converting them to ``enum class`` is a
       separate, much larger refactor
-    - Started the incremental C++20 modernization of ``include/fiction/io/``: ``std::ranges`` algorithms
-      in place of iterator-pair ``std::algorithm`` calls in ``network_reader.hpp`` and
-      ``write_location_and_ground_state.hpp``
+    - Completed the incremental C++20 modernization of ``include/fiction/io/`` and its tests:
+      ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls across
+      ``network_reader.hpp``, ``write_location_and_ground_state.hpp``, ``write_sqd_sim_result.hpp``,
+      ``write_qll_layout.hpp``, ``write_qcc_layout.hpp``, ``read_sqd_layout.hpp``,
+      ``read_fgl_layout.hpp``, ``dot_drawers.hpp``, and ``write_svg_layout.hpp``; ``std::erase_if`` in
+      place of the erase-remove idiom in ``test/io/write_location_and_ground_state.cpp`` and
+      ``test/io/write_svg_layout.cpp``; and designated initializers in
+      ``test/io/write_operational_domain.cpp`` and ``test/io/write_svg_layout.cpp``. This module has no
+      hand-written ``operator==``/``operator!=`` pairs or bit-field-bearing structs to modernize.
+      ``write_svg_layout.hpp``'s one ``static_assert(std::is_same_v<...>)`` was deliberately left as-is,
+      since it sits alongside custom-trait ``static_assert``\ s in the same function and converting only
+      one of three checks to a ``requires`` clause isn't a clear readability win
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
