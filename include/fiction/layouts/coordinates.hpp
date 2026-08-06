@@ -197,7 +197,10 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
-    constexpr bool operator==(const ucoord_t& other) const noexcept = default;
+    constexpr bool operator==(const ucoord_t& other) const noexcept
+    {
+        return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
     /**
      * Compares against another coordinate's `uint64_t` representation for equality. Respects the dead indicator.
      *
@@ -207,6 +210,16 @@ struct ucoord_t
     constexpr bool operator==(const uint64_t& other) const noexcept
     {
         return static_cast<uint64_t>(*this) == other;
+    }
+    /**
+     * Compares against another coordinate for inequality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate.
+     * @return `true` iff both coordinates are not identical.
+     */
+    constexpr bool operator!=(const ucoord_t& other) const noexcept
+    {
+        return !(*this == other);
     }
     /**
      * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
@@ -423,7 +436,20 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept = default;
+    constexpr bool operator==(const coord_t& other) const noexcept
+    {
+        return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate for inequality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate.
+     * @return `true` iff both coordinates are not identical.
+     */
+    constexpr bool operator!=(const coord_t& other) const noexcept
+    {
+        return !(*this == other);
+    }
     /**
      * Determine whether this coordinate is "less than" another one. This is the case if z is smaller, or if z is equal
      * but y is smaller, or if z and y are equal but x is smaller.
@@ -655,7 +681,20 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept = default;
+    constexpr bool operator==(const coord_t& other) const noexcept
+    {
+        return d == other.d && z == other.z && y == other.y && x == other.x;
+    }
+    /**
+     * Compares against another coordinate for inequality. Respects the dead indicator.
+     *
+     * @param other Right-hand side coordinate.
+     * @return True iff both coordinates are not identical.
+     */
+    constexpr bool operator!=(const coord_t& other) const noexcept
+    {
+        return !(*this == other);
+    }
     /**
      * Determine whether this coordinate is "less than" another one. This is the case if y is smaller, or if y is equal
      * but z is smaller, or if z and y are equal but x is smaller.
