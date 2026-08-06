@@ -11,6 +11,7 @@
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <phmap.h>
 
+#include <algorithm>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -377,7 +378,7 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_pi(const cell& c) const noexcept
     {
-        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), c) != strg->inputs.cend();
+        return std::ranges::find(strg->inputs, c) != strg->inputs.cend();
     }
     /**
      * Checks whether a given cell position is marked as primary output. This function does not check against the
@@ -389,7 +390,7 @@ class cell_level_layout : public ClockedLayout
      */
     [[nodiscard]] bool is_po(const cell& c) const noexcept
     {
-        return std::find(strg->outputs.cbegin(), strg->outputs.cend(), c) != strg->outputs.cend();
+        return std::ranges::find(strg->outputs, c) != strg->outputs.cend();
     }
     /**
      * Returns the underlying clock zone x-dimension size. That is, if this cell-level layout was obtained from the
