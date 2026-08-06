@@ -4316,6 +4316,16 @@ Parameter ``other``:
 Returns:
     `true` iff this coordinate is "less than" the other coordinate.)doc";
 
+static const char *__doc_fiction_cube_coord_t_operator_ne =
+R"doc(Compares against another coordinate for inequality. Respects the dead
+indicator.
+
+Parameter ``other``:
+    Right-hand side coordinate.
+
+Returns:
+    `true` iff both coordinates are not identical.)doc";
+
 static const char *__doc_fiction_cube_coord_t_operator_sub =
 R"doc(Subtracts another coordinate from this one and returns the result.
 Does not modify this coordinate.
@@ -17273,6 +17283,16 @@ Parameter ``other``:
 Returns:
     `true` iff this coordinate is "less than" the other coordinate.)doc";
 
+static const char *__doc_fiction_offset_ucoord_t_operator_ne =
+R"doc(Compares against another coordinate for inequality. Respects the dead
+indicator.
+
+Parameter ``other``:
+    Right-hand side coordinate.
+
+Returns:
+    `true` iff both coordinates are not identical.)doc";
+
 static const char *__doc_fiction_offset_ucoord_t_operator_unsigned_long =
 R"doc(Allows explicit conversion to `uint64_t`. Segments an unsigned 64-bit
 integer into four parts (from MSB to LSB): - 1 bit for the dead
@@ -21313,6 +21333,16 @@ Parameter ``other``:
 Returns:
     True iff this coordinate is "less than" the other coordinate.)doc";
 
+static const char *__doc_fiction_siqad_coord_t_operator_ne =
+R"doc(Compares against another coordinate for inequality. Respects the dead
+indicator.
+
+Parameter ``other``:
+    Right-hand side coordinate.
+
+Returns:
+    True iff both coordinates are not identical.)doc";
+
 static const char *__doc_fiction_siqad_coord_t_operator_sub =
 R"doc(Subtracts another coordinate from this one and returns the result.
 Does not modify this coordinate.
@@ -23584,9 +23614,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1050_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1089_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1066_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1105_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
