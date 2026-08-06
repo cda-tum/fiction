@@ -782,6 +782,11 @@ class unsupported_clocking_scheme_exception : public std::exception
   public:
     explicit unsupported_clocking_scheme_exception() noexcept : std::exception() {}
 
+    /**
+     * Returns the diagnostic message for an unsupported clocking scheme.
+     *
+     * @return A null-terminated diagnostic message.
+     */
     [[nodiscard]] const char* what() const noexcept override
     {
         return "given clocking scheme is unsupported";
@@ -823,7 +828,8 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
         {clock_name::BANCS, bancs_clocking<Lyt>()}};
 
     std::string upper_name{name};
-    std::ranges::transform(upper_name, upper_name.begin(), ::toupper);
+    std::ranges::transform(upper_name, upper_name.begin(), [](const char ch)
+                           { return static_cast<char>(std::toupper(static_cast<unsigned char>(ch))); });
 
     if (const auto it = scheme_lookup.find(upper_name); it != scheme_lookup.cend())
     {

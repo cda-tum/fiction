@@ -94,6 +94,13 @@ Fixed
     - Fixed a ``std::string_view::data()`` call in ``clocking_scheme.hpp``'s ``get_clocking_scheme`` that
       relied on null-termination it isn't guaranteed to have, surfaced by Clang-Tidy's whole-file linting
       once the file was touched for the ``layouts/`` modernization pass
+    - Fixed ``get_clocking_scheme`` passing plain ``char`` values (potentially negative on signed-``char``
+      platforms) directly to ``::toupper``, which is undefined behavior for arguments that aren't
+      representable as ``unsigned char`` or equal to ``EOF``, by casting through ``unsigned char`` in the
+      ``std::ranges::transform`` call
+    - Fixed a signed-integer overflow in ``coordinates.hpp``'s ``to_siqad_coord`` for the minimum
+      representable ``CoordinateType::y`` value, where negating it before taking the modulo was undefined
+      behavior; the SiQAD ``z`` value is now derived from ``coord.y % 2`` directly, without negation
 - Python bindings:
     - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from

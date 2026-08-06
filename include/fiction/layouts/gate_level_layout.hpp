@@ -274,6 +274,12 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
+    /**
+     * Check whether `n` is a primary input.
+     *
+     * @param n Node to be checked.
+     * @return `true` iff `n` is a PI.
+     */
     [[nodiscard]] bool is_pi(const node n) const noexcept
     {
         return std::ranges::find(strg->inputs, n) != strg->inputs.cend();
@@ -293,6 +299,12 @@ class gate_level_layout : public ClockedLayout
         return is_pi(get_node(t));
     }
 
+    /**
+     * Check whether `n` is a primary output.
+     *
+     * @param n Node to be checked.
+     * @return `true` iff `n` is a PO.
+     */
     [[nodiscard]] bool is_po(const node n) const noexcept
     {
         return std::ranges::find_if(strg->outputs, [this, &n](const auto& p)
@@ -1220,12 +1232,27 @@ class gate_level_layout : public ClockedLayout
         return data_flow;
     }
 
+    /**
+     * Applies a function to all combinational input nodes (including dead ones) in the layout. Alias for
+     * `foreach_pi`.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * `mockturtle::foreach_element_transform`.
+     * @param fn Functor to apply to each combinational input node.
+     */
     template <typename Fn>
     void foreach_ci(Fn&& fn) const
     {
         foreach_pi(std::forward<Fn>(fn));
     }
-
+    /**
+     * Applies a function to all combinational output signals (including those that point to dead nodes) in the
+     * layout. Alias for `foreach_po`.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * `mockturtle::foreach_element_transform`.
+     * @param fn Functor to apply to each combinational output signal.
+     */
     template <typename Fn>
     void foreach_co(Fn&& fn) const
     {
@@ -1597,6 +1624,9 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Custom node values
 
+    /**
+     * Resets the custom value of every node in the layout to 0.
+     */
     void clear_values() const noexcept
     {
         std::ranges::for_each(strg->nodes, [](auto& n) { n.data[0].h2 = 0; });
@@ -1626,6 +1656,9 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Visited flags
 
+    /**
+     * Resets the visited flag of every node in the layout to 0.
+     */
     void clear_visited() const
     {
         std::ranges::for_each(strg->nodes, [](auto& n) { n.data[1].h2 = 0; });
@@ -1670,6 +1703,10 @@ class gate_level_layout : public ClockedLayout
     template <typename>
     friend class detail::gate_level_drvs_impl;
 
+    /**
+     * Populates the truth table cache with the constant and elementary functions used by the fundamental gate
+     * creation functions (`create_not`, `create_and`, etc.).
+     */
     void initialize_truth_table_cache()
     {
         /* reserve the second node for constant 1 */
@@ -1750,6 +1787,15 @@ class gate_level_layout : public ClockedLayout
         }
     }
 
+    /**
+     * Creates a new node with the given `children` and cached truth table `literal`, assigns it to tile `t`, and
+     * notifies all `on_add` event listeners.
+     *
+     * @param children Fanin signals of the new node.
+     * @param literal Cached truth table literal representing the new node's function.
+     * @param t Tile to assign the new node to.
+     * @return Signal representing tile `t`, now hosting the newly created node.
+     */
     signal create_node_from_literal(const std::vector<signal>& children, uint32_t literal, const tile& t)
     {
         typename storage::element_type::node_type node_data;
@@ -1777,6 +1823,13 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
+    /**
+     * Check whether `s` is among the fanin signals of `n`.
+     *
+     * @param n Node to be checked.
+     * @param s Signal to look for among `n`'s children.
+     * @return `true` iff `s` is a child of `n`.
+     */
     [[nodiscard]] bool is_child(const node n, const signal& s) const noexcept
     {
         const auto& node_data = strg->nodes[n];

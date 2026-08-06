@@ -825,7 +825,7 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
     {
         return {coord.x, (coord.y - (coord.y % 2)) / 2, coord.y % 2};
     }
-    return {coord.x, (coord.y + (coord.y % 2)) / 2, ((-coord.y - 1) % 2) + 1};
+    return {coord.x, (coord.y + (coord.y % 2)) / 2, (coord.y % 2 == 0 ? 0 : 1)};
 }
 
 }  // namespace siqad
