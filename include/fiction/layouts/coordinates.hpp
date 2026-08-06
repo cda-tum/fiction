@@ -784,6 +784,10 @@ struct coord_t
 /**
  * Converts SiQAD coordinates to other coordinates (offset, cube).
  *
+ * @note When `CoordinateType` is `offset::ucoord_t`, a negative `coord.x` or a negative doubled-`y` result is
+ * copied into `offset::ucoord_t`'s unsigned bit fields as-is; this is a pre-existing characteristic of this
+ * conversion, unchanged by this modernization pass, not something introduced or fixed here.
+ *
  * @tparam CoordinateType The desired coordinate type.
  * @param coord SiQAD coordinate to convert.
  * @return Coordinate of type `CoordinateType`.
