@@ -1016,8 +1016,10 @@ class coord_iterator
     }
 
   private:
-    // not const: std::input_or_output_iterator requires coord_iterator to be std::movable, which in turn requires
-    // it to be assignable
+    /**
+     * Boundary within to enumerate. Not `const`: `std::input_or_output_iterator` requires `coord_iterator` to be
+     * `std::movable`, which in turn requires it to be assignable.
+     */
     CoordinateType aspect_ratio;
 
     CoordinateType coord;
@@ -1060,8 +1062,12 @@ struct hash<fiction::siqad::coord_t>
     }
 };
 
-// make coord_iterator compatible with STL iterator categories; difference_type is required for coord_iterator to
-// satisfy std::input_or_output_iterator (e.g., for std::ranges::subrange CTAD)
+/**
+ * Makes `coord_iterator` compatible with STL iterator categories. `reference` and `difference_type` are required
+ * for `coord_iterator` to satisfy `std::input_or_output_iterator` (e.g., for `std::ranges::subrange` CTAD).
+ *
+ * @tparam Coordinate Coordinate type enumerated by the `coord_iterator`.
+ */
 template <typename Coordinate>
 struct iterator_traits<fiction::coord_iterator<Coordinate>>
 {
