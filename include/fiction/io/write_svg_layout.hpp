@@ -13,6 +13,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -552,19 +553,19 @@ class write_sidb_layout_svg_impl
         {
             switch (charge_state.value())
             {
-                case (sidb_charge_state::POSITIVE):
+                case sidb_charge_state::POSITIVE:
                 {
                     fill_color   = fiction::detail::svg::POSITIVE_COLOR;
                     border_color = fiction::detail::svg::POSITIVE_COLOR;
                     break;
                 }
-                case (sidb_charge_state::NEGATIVE):
+                case sidb_charge_state::NEGATIVE:
                 {
                     fill_color   = fiction::detail::svg::NEGATIVE_COLOR;
                     border_color = fiction::detail::svg::NEGATIVE_COLOR;
                     break;
                 }
-                case (sidb_charge_state::NEUTRAL):
+                case sidb_charge_state::NEUTRAL:
                 {
                     fill_opacity = 0.0;
                     break;
@@ -631,7 +632,7 @@ class write_sidb_layout_svg_impl
         all_cells.reserve(lyt.num_cells());
         // collect all cells
         lyt.foreach_cell([&all_cells](const auto& cell) { all_cells.push_back(cell); });
-        std::sort(all_cells.begin(), all_cells.end());
+        std::ranges::sort(all_cells);
 
         for (const auto& cell : all_cells)
         {

@@ -5,19 +5,28 @@
 #ifndef FICTION_READ_FGL_LAYOUT_HPP
 #define FICTION_READ_FGL_LAYOUT_HPP
 
+// clang-format off
+// NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but clocked_layout.hpp's
+// get_clocking_scheme free function is looked up via two-phase name lookup at template instantiation time, so
+// removing any of these breaks the build despite the tool's "not used directly" heuristic
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
 #include "fiction/layouts/gate_level_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
+// NOLINTEND(misc-include-cleaner)
+// clang-format on
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
 
 #include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+#include <mockturtle/traits.hpp>
 #include <tinyxml2.h>
 
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstdint>
 #include <cstdlib>
 #include <fstream>
 #include <istream>
@@ -41,7 +50,7 @@ class fgl_parsing_error : public std::runtime_error
      *
      * @param msg The error message describing the parsing error.
      */
-    explicit fgl_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit fgl_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(std::string{msg}) {}
 };
 
 namespace detail
@@ -88,7 +97,7 @@ class read_fgl_layout_impl
 
         // set layout name
         auto* const name = layout->FirstChildElement("name");
-        if (name != nullptr && name->GetText())
+        if (name != nullptr && (name->GetText() != nullptr))
         {
             std::string layout_name = name->GetText();
             set_name(lyt, layout_name);
@@ -96,7 +105,7 @@ class read_fgl_layout_impl
 
         // check topology
         auto* const topology = layout->FirstChildElement("topology");
-        if (topology != nullptr && topology->GetText())
+        if (topology != nullptr && (topology->GetText() != nullptr))
         {
             const std::string                           topology_name = topology->GetText();
             static constexpr std::array<const char*, 4> shifted_cartesian{
@@ -111,8 +120,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a cartesian layout");
                 }
             }
-            else if (std::find(shifted_cartesian.cbegin(), shifted_cartesian.cend(), topology_name) !=
-                     shifted_cartesian.cend())
+            else if (std::ranges::find(shifted_cartesian, topology_name) != shifted_cartesian.cend())
             {
                 if constexpr (is_shifted_cartesian_layout_v<Lyt>)
                 {
@@ -152,7 +160,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: Lyt is not a shifted_cartesian layout");
                 }
             }
-            else if (std::find(hex.cbegin(), hex.cend(), topology_name) != hex.cend())
+            else if (std::ranges::find(hex, topology_name) != hex.cend())
             {
                 if constexpr (is_hexagonal_layout_v<Lyt>)
                 {
@@ -206,7 +214,7 @@ class read_fgl_layout_impl
         {
             auto* const size_x = size->FirstChildElement("x");
             int         x      = 0;
-            if (size_x != nullptr && size_x->GetText())
+            if (size_x != nullptr && (size_x->GetText() != nullptr))
             {
                 x = std::stoi(size_x->GetText());
             }
@@ -217,7 +225,7 @@ class read_fgl_layout_impl
 
             auto* const size_y = size->FirstChildElement("y");
             int         y      = 0;
-            if (size_y != nullptr && size_y->GetText())
+            if (size_y != nullptr && (size_y->GetText() != nullptr))
             {
                 y = std::stoi(size_y->GetText());
             }
@@ -228,7 +236,7 @@ class read_fgl_layout_impl
 
             auto* const size_z = size->FirstChildElement("z");
             int         z      = 0;
-            if (size_z != nullptr && size_z->GetText())
+            if (size_z != nullptr && (size_z->GetText() != nullptr))
             {
                 z = std::stoi(size_z->GetText());
             }
@@ -250,7 +258,7 @@ class read_fgl_layout_impl
         if (clocking != nullptr)
         {
             auto* const clocking_scheme_name = clocking->FirstChildElement("name");
-            if (clocking_scheme_name != nullptr && clocking_scheme_name->GetText())
+            if (clocking_scheme_name != nullptr && (clocking_scheme_name->GetText() != nullptr))
             {
                 const auto clocking_scheme = get_clocking_scheme<Lyt>(clocking_scheme_name->GetText());
                 if (clocking_scheme.has_value())
@@ -264,9 +272,9 @@ class read_fgl_layout_impl
                         for (const auto* clock_zone = clock_zones->FirstChildElement("zone"); clock_zone != nullptr;
                              clock_zone             = clock_zone->NextSiblingElement("zone"))
                         {
-                            auto* const clocking_zone_x = clock_zone->FirstChildElement("x");
-                            int         x_coord         = 0;
-                            if (clocking_zone_x != nullptr && clocking_zone_x->GetText())
+                            const auto* const clocking_zone_x = clock_zone->FirstChildElement("x");
+                            int               x_coord         = 0;
+                            if (clocking_zone_x != nullptr && (clocking_zone_x->GetText() != nullptr))
                             {
                                 x_coord = std::stoi(clocking_zone_x->GetText());
                             }
@@ -275,9 +283,9 @@ class read_fgl_layout_impl
                                 throw fgl_parsing_error("Error parsing FGL file: no element 'x' in 'zone'");
                             }
 
-                            auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
-                            int         y_coord         = 0;
-                            if (clocking_zone_y != nullptr && clocking_zone_y->GetText())
+                            const auto* const clocking_zone_y = clock_zone->FirstChildElement("y");
+                            int               y_coord         = 0;
+                            if (clocking_zone_y != nullptr && (clocking_zone_y->GetText() != nullptr))
                             {
                                 y_coord = std::stoi(clocking_zone_y->GetText());
                             }
@@ -286,9 +294,9 @@ class read_fgl_layout_impl
                                 throw fgl_parsing_error("Error parsing FGL file: no element 'y' in 'zone'");
                             }
 
-                            auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
-                            uint8_t     clock               = 0;
-                            if (clocking_zone_clock != nullptr && clocking_zone_clock->GetText())
+                            const auto* const clocking_zone_clock = clock_zone->FirstChildElement("clock");
+                            uint8_t           clock               = 0;
+                            if (clocking_zone_clock != nullptr && (clocking_zone_clock->GetText() != nullptr))
                             {
                                 clock = static_cast<uint8_t>(*clocking_zone_clock->GetText());
                             }
@@ -300,8 +308,8 @@ class read_fgl_layout_impl
                             lyt.assign_clock_number({x_coord, y_coord}, clock);
                         }
                     }
-                    else if (std::find(open_clocking_schemes.cbegin(), open_clocking_schemes.cend(),
-                                       static_cast<std::string>(clocking_scheme_name->GetText())) !=
+                    else if (std::ranges::find(open_clocking_schemes,
+                                               static_cast<std::string>(clocking_scheme_name->GetText())) !=
                              open_clocking_schemes.cend())
                     {
                         throw fgl_parsing_error("Error parsing FGL file: no element 'zones' in 'clocking'");
@@ -333,8 +341,8 @@ class read_fgl_layout_impl
             {
                 gate_storage gate{};
 
-                auto* const gate_id = gate_xml->FirstChildElement("id");
-                if (gate_id != nullptr && gate_id->GetText())
+                const auto* const gate_id = gate_xml->FirstChildElement("id");
+                if (gate_id != nullptr && (gate_id->GetText() != nullptr))
                 {
                     gate.id = std::stoi(gate_id->GetText());
                 }
@@ -343,8 +351,8 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: no element 'id' in 'gate'");
                 }
 
-                auto* const gate_type = gate_xml->FirstChildElement("type");
-                if (gate_type != nullptr && gate_type->GetText())
+                const auto* const gate_type = gate_xml->FirstChildElement("type");
+                if (gate_type != nullptr && (gate_type->GetText() != nullptr))
                 {
                     gate.type = gate_type->GetText();
                 }
@@ -355,8 +363,8 @@ class read_fgl_layout_impl
 
                 if (gate.type == "PI" || gate.type == "PO")
                 {
-                    auto* const pi_po_name = gate_xml->FirstChildElement("name");
-                    if (pi_po_name != nullptr && pi_po_name->GetText())
+                    const auto* const pi_po_name = gate_xml->FirstChildElement("name");
+                    if (pi_po_name != nullptr && (pi_po_name->GetText() != nullptr))
                     {
                         gate.name = pi_po_name->GetText();
                     }
@@ -366,7 +374,7 @@ class read_fgl_layout_impl
                     }
                 }
 
-                auto* const loc = gate_xml->FirstChildElement("loc");
+                const auto* const loc = gate_xml->FirstChildElement("loc");
                 if (loc == nullptr)
                 {
                     throw fgl_parsing_error("Error parsing FGL file: no element 'loc'");
@@ -375,8 +383,8 @@ class read_fgl_layout_impl
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
                 // get x-coordinate
-                auto* const loc_x = loc->FirstChildElement("x");
-                if (loc_x != nullptr && loc_x->GetText())
+                const auto* const loc_x = loc->FirstChildElement("x");
+                if (loc_x != nullptr && (loc_x->GetText() != nullptr))
                 {
                     gate.loc.x = static_cast<decltype(gate.loc.x)>(std::stoull(loc_x->GetText()));
                 }
@@ -386,8 +394,8 @@ class read_fgl_layout_impl
                 }
 
                 // get y-coordinate
-                auto* const loc_y = loc->FirstChildElement("y");
-                if (loc_y != nullptr && loc_y->GetText())
+                const auto* const loc_y = loc->FirstChildElement("y");
+                if (loc_y != nullptr && (loc_y->GetText() != nullptr))
                 {
                     gate.loc.y = static_cast<decltype(gate.loc.y)>(std::stoull(loc_y->GetText()));
                 }
@@ -397,8 +405,8 @@ class read_fgl_layout_impl
                 }
 
                 // get z-coordinate
-                auto* const loc_z = loc->FirstChildElement("z");
-                if (loc_z != nullptr && loc_z->GetText())
+                const auto* const loc_z = loc->FirstChildElement("z");
+                if (loc_z != nullptr && (loc_z->GetText() != nullptr))
                 {
                     gate.loc.z = static_cast<decltype(gate.loc.z)>(std::stoull(loc_z->GetText()));
                 }
@@ -407,7 +415,7 @@ class read_fgl_layout_impl
                     throw fgl_parsing_error("Error parsing FGL file: no element 'z' in 'loc'");
                 }
 
-                auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
+                const auto* const incoming_signals = gate_xml->FirstChildElement("incoming");
                 if (incoming_signals != nullptr)
                 {
                     for (const auto* incoming_signal                 = incoming_signals->FirstChildElement("signal");
@@ -416,8 +424,8 @@ class read_fgl_layout_impl
                         tile<Lyt> incoming{};
 
                         // get x-coordinate of incoming signal
-                        auto* const incoming_signal_x = incoming_signal->FirstChildElement("x");
-                        if (incoming_signal_x != nullptr && incoming_signal_x->GetText())
+                        const auto* const incoming_signal_x = incoming_signal->FirstChildElement("x");
+                        if (incoming_signal_x != nullptr && (incoming_signal_x->GetText() != nullptr))
                         {
                             incoming.x = static_cast<decltype(incoming.x)>(std::stoull(incoming_signal_x->GetText()));
                         }
@@ -427,8 +435,8 @@ class read_fgl_layout_impl
                         }
 
                         // get y-coordinate of incoming signal
-                        auto* const incoming_signal_y = incoming_signal->FirstChildElement("y");
-                        if (incoming_signal_y != nullptr && incoming_signal_y->GetText())
+                        const auto* const incoming_signal_y = incoming_signal->FirstChildElement("y");
+                        if (incoming_signal_y != nullptr && (incoming_signal_y->GetText() != nullptr))
                         {
                             incoming.y = static_cast<decltype(incoming.y)>(std::stoull(incoming_signal_y->GetText()));
                         }
@@ -438,8 +446,8 @@ class read_fgl_layout_impl
                         }
 
                         // get z-coordinate of incoming signal
-                        auto* const incoming_signal_z = incoming_signal->FirstChildElement("z");
-                        if (incoming_signal_z != nullptr && incoming_signal_z->GetText())
+                        const auto* const incoming_signal_z = incoming_signal->FirstChildElement("z");
+                        if (incoming_signal_z != nullptr && (incoming_signal_z->GetText() != nullptr))
                         {
                             incoming.z = static_cast<decltype(incoming.z)>(std::stoull(incoming_signal_z->GetText()));
                         }
@@ -457,7 +465,7 @@ class read_fgl_layout_impl
             }
 
             // sort gates ascending based on id
-            std::sort(gates.begin(), gates.end(), gate_storage::compare_by_id);
+            std::ranges::sort(gates, gate_storage::compare_by_id);
 
             for (const auto& gate : gates)
             {
@@ -506,7 +514,7 @@ class read_fgl_layout_impl
                             lyt.create_not(incoming_signal, location);
                         }
                     }
-                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    else if (std::ranges::all_of(gate.type, ::isxdigit))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -602,7 +610,7 @@ class read_fgl_layout_impl
                             lyt.create_ge(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    else if (std::ranges::all_of(gate.type, ::isxdigit))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -636,7 +644,7 @@ class read_fgl_layout_impl
                             lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
                         }
                     }
-                    else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                    else if (std::ranges::all_of(gate.type, ::isxdigit))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -651,7 +659,7 @@ class read_fgl_layout_impl
                             "Error parsing FGL file: unknown gate of type '{}' with 3 input signals", gate.type));
                     }
                 }
-                else if (std::all_of(gate.type.begin(), gate.type.end(), ::isxdigit))
+                else if (std::ranges::all_of(gate.type, ::isxdigit))
                 {
                     if constexpr (mockturtle::has_create_node_v<Lyt>)
                     {
@@ -786,7 +794,7 @@ void read_fgl_layout(Lyt& lyt, std::istream& is)
 template <typename Lyt>
 [[nodiscard]] Lyt read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {
@@ -812,7 +820,7 @@ template <typename Lyt>
 template <typename Lyt>
 void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 {
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {
