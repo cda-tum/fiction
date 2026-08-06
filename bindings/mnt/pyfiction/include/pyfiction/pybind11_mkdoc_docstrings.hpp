@@ -12805,9 +12805,9 @@ mockturtle's understanding of nodes and primary outputs.
 Parameter ``t``:
     Tile whose nodes are to be removed.)doc";
 
-static const char *__doc_fiction_gate_level_layout_clear_values = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_clear_values = R"doc(Resets the custom value of every node in the layout to 0.)doc";
 
-static const char *__doc_fiction_gate_level_layout_clear_visited = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_clear_visited = R"doc(Resets the visited flag of every node in the layout to 0.)doc";
 
 static const char *__doc_fiction_gate_level_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -12855,7 +12855,22 @@ static const char *__doc_fiction_gate_level_layout_create_nand = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_node = R"doc()doc";
 
-static const char *__doc_fiction_gate_level_layout_create_node_from_literal = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_create_node_from_literal =
+R"doc(Creates a new node with the given `children` and cached truth table
+`literal`, assigns it to tile `t`, and notifies all `on_add` event
+listeners.
+
+Parameter ``children``:
+    Fanin signals of the new node.
+
+Parameter ``literal``:
+    Cached truth table literal representing the new node's function.
+
+Parameter ``t``:
+    Tile to assign the new node to.
+
+Returns:
+    Signal representing tile `t`, now hosting the newly created node.)doc";
 
 static const char *__doc_fiction_gate_level_layout_create_nor = R"doc()doc";
 
@@ -12905,9 +12920,27 @@ Parameter ``n``:
 Returns:
     Number of fanouts to `n`.)doc";
 
-static const char *__doc_fiction_gate_level_layout_foreach_ci = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_foreach_ci =
+R"doc(Applies a function to all combinational input nodes (including dead
+ones) in the layout. Alias for `foreach_pi`.
 
-static const char *__doc_fiction_gate_level_layout_foreach_co = R"doc()doc";
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
+
+Parameter ``fn``:
+    Functor to apply to each combinational input node.)doc";
+
+static const char *__doc_fiction_gate_level_layout_foreach_co =
+R"doc(Applies a function to all combinational output signals (including
+those that point to dead nodes) in the layout. Alias for `foreach_po`.
+
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
+
+Parameter ``fn``:
+    Functor to apply to each combinational output signal.)doc";
 
 static const char *__doc_fiction_gate_level_layout_foreach_fanin =
 R"doc(Applies a function to all nodes that are incoming to a given one.
@@ -13417,7 +13450,10 @@ static const char *__doc_fiction_gate_level_layout_incr_value = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_index_to_node = R"doc()doc";
 
-static const char *__doc_fiction_gate_level_layout_initialize_truth_table_cache = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_initialize_truth_table_cache =
+R"doc(Populates the truth table cache with the constant and elementary
+functions used by the fundamental gate creation functions
+(`create_not`, `create_and`, etc.).)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_and = R"doc()doc";
 
@@ -13430,7 +13466,17 @@ Parameter ``n``:
 Returns:
     `true` iff `n` computes the identity.)doc";
 
-static const char *__doc_fiction_gate_level_layout_is_child = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_is_child =
+R"doc(Check whether `s` is among the fanin signals of `n`.
+
+Parameter ``n``:
+    Node to be checked.
+
+Parameter ``s``:
+    Signal to look for among `n`'s children.
+
+Returns:
+    `true` iff `s` is a child of `n`.)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_ci = R"doc()doc";
 
@@ -13584,7 +13630,14 @@ Parameter ``s``:
 Returns:
     `true` iff `s` is outgoing from `t`.)doc";
 
-static const char *__doc_fiction_gate_level_layout_is_pi = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_is_pi =
+R"doc(Check whether `n` is a primary input.
+
+Parameter ``n``:
+    Node to be checked.
+
+Returns:
+    `true` iff `n` is a PI.)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_pi_tile =
 R"doc(Check whether tile `t` hosts a primary input.
@@ -13595,7 +13648,14 @@ Parameter ``t``:
 Returns:
     `true` iff the node located at tile `t` is a PI.)doc";
 
-static const char *__doc_fiction_gate_level_layout_is_po = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_is_po =
+R"doc(Check whether `n` is a primary output.
+
+Parameter ``n``:
+    Node to be checked.
+
+Returns:
+    `true` iff `n` is a PO.)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_po_tile =
 R"doc(Check whether tile `t` hosts a primary output.
@@ -22166,7 +22226,11 @@ requested.)doc";
 
 static const char *__doc_fiction_unsupported_clocking_scheme_exception_unsupported_clocking_scheme_exception = R"doc()doc";
 
-static const char *__doc_fiction_unsupported_clocking_scheme_exception_what = R"doc()doc";
+static const char *__doc_fiction_unsupported_clocking_scheme_exception_what =
+R"doc(Returns the diagnostic message for an unsupported clocking scheme.
+
+Returns:
+    A null-terminated diagnostic message.)doc";
 
 static const char *__doc_fiction_unsupported_defect_index_exception =
 R"doc(Exception thrown when an unsupported defect index is encountered in
@@ -23268,9 +23332,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1102_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1099_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1118_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1115_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
