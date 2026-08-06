@@ -44,10 +44,14 @@ Changed
       separate, much larger refactor
     - Started the incremental C++20 modernization of ``include/fiction/layouts/`` with its smallest,
       lowest-connectivity slice (``coordinates.hpp``, ``tile_based_layout.hpp``,
-      ``synchronization_element_layout.hpp``): collapsed the hand-written ``operator==``/``operator!=``
-      pairs on ``offset::ucoord_t``, ``cube::coord_t``, and ``siqad::coord_t`` into defaulted
-      ``operator==``, and replaced ``coord_iterator``'s ``static_assert(std::is_same_v<...>)``
-      disjunction with an equivalent ``requires`` clause using ``std::same_as``. ``tile_based_layout.hpp``
+      ``synchronization_element_layout.hpp``): replaced ``coord_iterator``'s
+      ``static_assert(std::is_same_v<...>)`` disjunction with an equivalent ``requires`` clause using
+      ``std::same_as``. Collapsing ``offset::ucoord_t``, ``cube::coord_t``, and ``siqad::coord_t``'s
+      hand-written ``operator==``/``operator!=`` pairs into a defaulted ``operator==`` was attempted but
+      reverted: CI's g++-11 job (the project's explicit C++20 floor compiler) miscompiled a defaulted
+      comparison on ``offset::ucoord_t``/``siqad::coord_t``'s bit-field data members, producing wrong
+      layout-printing output, consistent with a known class of GCC bugs around defaulted comparison
+      operators on bit-field-containing structs in early C++20 support. ``tile_based_layout.hpp``
       and ``synchronization_element_layout.hpp`` have no ``std::algorithm``-with-iterator-pairs patterns,
       no ``static_assert(std::is_*)`` over standard-library traits, and no aggregate-initialization
       opportunities to modernize. Completed the rest of ``include/fiction/layouts/``: ``std::ranges``
@@ -82,8 +86,6 @@ Fixed
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
       the newly defaulted ``operator==`` (see above), by inlining the docstring text directly at the
       binding site
-    - Fixed the same issue for the ``pyfiction`` bindings of ``offset::ucoord_t``, ``cube::coord_t``, and
-      ``siqad::coord_t``'s ``operator!=`` after defaulting their ``operator==`` (see above)
 - Continuous integration:
     - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
       ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``
