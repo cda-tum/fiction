@@ -42,6 +42,9 @@ Changed
       The unscoped ``cell_type`` enums (``cell_technologies.hpp``) and ``port_direction::cardinal``
       (``cell_ports.hpp``) are deliberately left untouched, as converting them to ``enum class`` is a
       separate, much larger refactor
+    - Started the incremental C++20 modernization of ``include/fiction/io/``: ``std::ranges`` algorithms
+      in place of iterator-pair ``std::algorithm`` calls in ``network_reader.hpp`` and
+      ``write_location_and_ground_state.hpp``
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
@@ -55,6 +58,10 @@ Fixed
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
       enabling ``fmt``'s ``consteval`` format-string checks
+    - Fixed two ``std::string_view::data()`` calls in ``network_reader.hpp`` and
+      ``write_location_and_ground_state.hpp`` that relied on null-termination they aren't guaranteed to
+      have, surfaced by Clang-Tidy's whole-file linting once these files were touched for the ``io/``
+      modernization pass
 - Python bindings:
     - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
