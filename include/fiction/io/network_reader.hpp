@@ -56,8 +56,8 @@ class network_reader
         // checks for extension validity
         auto is_valid_extension = [&](const auto& p) -> bool
         {
-            return std::any_of(extensions.cbegin(), extensions.cend(),
-                               [&p](const auto& valid) { return std::filesystem::path(p).extension() == valid; });
+            return std::ranges::any_of(extensions, [&p](const auto& valid)
+                                       { return std::filesystem::path(p).extension() == valid; });
         };
 
         std::vector<std::string> paths{};
@@ -91,12 +91,12 @@ class network_reader
             }
             else
             {  // existing file but a weird one
-                out << "[e] given file name does not point to a regular file" << std::endl;
+                out << "[e] given file name does not point to a regular file" << "\n";
             }
         }
         else
         {  // path leads nowhere
-            out << "[e] given file name does not exist" << std::endl;
+            out << "[e] given file name does not exist" << "\n";
         }
 
         // handle collected files
@@ -121,15 +121,15 @@ class network_reader
             {
                 if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::aig_network>)
                 {
-                    out << "[e] AIGs do not support the full feature set of BLIF files" << std::endl;
+                    out << "[e] AIGs do not support the full feature set of BLIF files" << "\n";
                 }
                 else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::xag_network>)
                 {
-                    out << "[e] XAGs do not support the full feature set of BLIF files" << std::endl;
+                    out << "[e] XAGs do not support the full feature set of BLIF files" << "\n";
                 }
                 else if constexpr (std::is_same_v<typename Ntk::base_type, mockturtle::mig_network>)
                 {
-                    out << "[e] MIGs do not support the full feature set of BLIF files" << std::endl;
+                    out << "[e] MIGs do not support the full feature set of BLIF files" << "\n";
                 }
                 else
                 {
@@ -153,8 +153,8 @@ class network_reader
         // sort by network size to make the small ones go first
         if (sorted)
         {
-            std::sort(networks.begin(), networks.end(),
-                      [](const auto& n1, const auto& n2) { return n1->num_gates() < n2->num_gates(); });
+            std::ranges::sort(networks,
+                              [](const auto& n1, const auto& n2) { return n1->num_gates() < n2->num_gates(); });
         }
 
         return networks;
@@ -188,7 +188,7 @@ class network_reader
         {
             lorina::text_diagnostics client{};
             if (lorina::diagnostic_engine diag{&client};
-                rfun(file.data(), Reader{ntk}, &diag) == lorina::return_code::success)
+                rfun(std::string{file}, Reader{ntk}, &diag) == lorina::return_code::success)
             {
                 const auto name = std::filesystem::path{file}.stem().string();
 
@@ -201,12 +201,12 @@ class network_reader
             }
             else
             {
-                out << "[e] parsing error in " << file << std::endl;
+                out << "[e] parsing error in " << file << "\n";
             }
         }
         catch (...)
         {
-            out << "[e] " << file << " contains unsupported features" << std::endl;
+            out << "[e] " << file << " contains unsupported features" << "\n";
         }
     }
 };
