@@ -16,7 +16,6 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
-#include <exception>
 #include <fstream>
 #include <istream>
 #include <sstream>
@@ -35,7 +34,7 @@ namespace fiction
 class sqd_parsing_error : public std::runtime_error
 {
   public:
-    explicit sqd_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(msg.data()) {}
+    explicit sqd_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(std::string{msg}) {}
 };
 
 namespace detail
@@ -202,7 +201,7 @@ class read_sqd_layout_impl
             throw sqd_parsing_error("Error parsing SQD file: dimer has invalid dot index");
         }
 
-        const cell<Lyt> cell{n, m * 2 + l};
+        const cell<Lyt> cell{n, (m * 2) + l};
 
         update_bounding_box(cell);
 
@@ -347,7 +346,7 @@ class read_sqd_layout_impl
              {"unknown", sidb_defect_type::UNKNOWN}}};
 
         std::string name{label};
-        std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+        std::ranges::transform(name, name.begin(), ::tolower);
 
         const auto it = defect_name_to_type.find(name);
         return it == defect_name_to_type.cend() ? sidb_defect_type::UNKNOWN : it->second;
@@ -410,9 +409,9 @@ class read_sqd_layout_impl
                 lambda_tf = std::stod(lambda_tf_string);
             }
 
-            std::for_each(incl_cells.begin(), incl_cells.end(),
-                          [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
-                          { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
+            std::ranges::for_each(
+                incl_cells, [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
+                { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
         }
     }
 };
@@ -489,7 +488,7 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
     static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {
@@ -522,7 +521,7 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
     static_assert(is_sidb_lattice_v<Lyt>, "Lyt must be a lattice layout");
 
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {
