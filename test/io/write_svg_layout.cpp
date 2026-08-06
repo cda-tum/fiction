@@ -370,8 +370,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::LIGHT;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -389,8 +389,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::DARK;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -408,9 +408,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::DARK;
-            params.lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE;
+            write_sidb_layout_svg_params const params{
+                .color_background = write_sidb_layout_svg_params::color_mode::DARK,
+                .lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -437,8 +437,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::LIGHT;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
             write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -457,8 +457,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::DARK;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
             write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -491,8 +491,8 @@ TEMPLATE_TEST_CASE(
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::LIGHT;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -510,8 +510,8 @@ TEMPLATE_TEST_CASE(
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::DARK;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -538,8 +538,8 @@ TEMPLATE_TEST_CASE(
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::LIGHT;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
             write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -558,8 +558,8 @@ TEMPLATE_TEST_CASE(
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::DARK;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
             write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -591,8 +591,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::LIGHT;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
@@ -610,8 +610,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params params{};
-            params.color_background = write_sidb_layout_svg_params::color_mode::DARK;
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
             write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
