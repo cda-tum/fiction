@@ -19,22 +19,6 @@ if(FICTION_TEST)
   FetchContent_MakeAvailable(Catch2)
 endif()
 
-# pybind11 -- still needed for Mugen's embedded Python interpreter
-# (pybind11::embed in vendors/CMakeLists.txt), which is unrelated to the
-# pyfiction bindings below and doesn't have a nanobind equivalent (nanobind only
-# targets extension modules, not embedding a Python interpreter in an
-# executable).
-FetchContent_Declare(
-  pybind11
-  GIT_REPOSITORY https://github.com/pybind/pybind11.git
-  GIT_TAG v3.0.1)
-# Suppress warnings about removed FindPython modules in newer CMake versions
-if(POLICY CMP0148)
-  set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
-endif()
-set(PYBIND11_FINDPYTHON ON)
-FetchContent_MakeAvailable(pybind11)
-
 # Note: nanobind (used for the Python bindings) is *not* declared here. Unlike
 # the other dependencies in this file, it is resolved as an installed Python
 # build dependency rather than via FetchContent, and is only needed when
