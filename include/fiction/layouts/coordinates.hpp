@@ -896,6 +896,10 @@ uint64_t volume(const CoordinateType& coord) noexcept
 /**
  * An iterator type that allows to enumerate coordinates in order within a boundary.
  *
+ * @note Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t` are supported. This is enforced on the
+ * boundary-and-start constructor via a `requires` clause rather than on the class itself, so that the
+ * default constructor (required for `std::semiregular`) remains usable for any `CoordinateType`.
+ *
  * @tparam CoordinateType Type of coordinate to enumerate.
  */
 template <typename CoordinateType>
