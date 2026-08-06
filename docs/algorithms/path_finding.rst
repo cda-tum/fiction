@@ -84,13 +84,6 @@ A* Shortest Path
         .. autofunction:: mnt.pyfiction.a_star
         .. autofunction:: mnt.pyfiction.a_star_distance
 
-Jump Point Search Shortest Path in a Cartesian Grid
----------------------------------------------------
-
-**Header:** ``fiction/algorithms/path_finding/jump_point_search.hpp``
-
-.. doxygenfunction:: fiction::jump_point_search
-
 k Shortest Paths
 ----------------
 

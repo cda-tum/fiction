@@ -205,19 +205,6 @@ This scalable approach only works on logic networks which are AOIGs (MAJ gates d
 `2DDWave <https://ieeexplore.ieee.org/document/1717097>`_ and the algorithm can only be slightly parameterized
 (see ``ortho -h``).
 
-SAT-based one-pass synthesis (``onepass``)
-##########################################
-
-The idea of the one-pass synthesis is to combine logic synthesis and physical design into a single run and, thereby,
-obtain even smaller layouts than possible with the SMT-based exact placement & routing approach. The backend of this
-algorithm was developed by Winston Haaswijk as the Python3 library `Mugen <https://github.com/whaaswijk/mugen>`_.
-It utilizes the SAT solver `Glucose <https://www.labri.fr/perso/lsimon/glucose/>`_ to solve instances of said combined
-physical design problem. Given a clocking scheme and a set of gate types to use, this algorithm finds the true minimum
-FCN circuit implementation of some specification under the provided parameters. For more information, see
-`the paper <https://ieeexplore.ieee.org/abstract/document/9371573>`_.
-
-The possible parameters are similar to the ones used for ``exact``. See ``onepass -h`` for a full list.
-
 Graph-oriented layout design (``gold``)
 #######################################
 
@@ -312,15 +299,6 @@ Those can themselves be either logic networks or gate layout (``-g/-n <index>``)
 
 Logical equivalence is checked with a SAT solver via miter structures and Tseitin transformation.
 For more information, see `the paper <https://ieeexplore.ieee.org/abstract/document/9218641>`_.
-
-Energy dissipation (``energy``)
--------------------------------
-
-A `physical model <https://ieeexplore.ieee.org/document/8246526>`_ for calculating the energy dissipation on the gate-level
-abstraction using the `QCA ONE library <https://ieeexplore.ieee.org/document/7538997/>`_ has been proposed. Thereby, information
-about the cells' function within a gate can be utilized to obtain switching energy consumption. The respective value can be
-printed using command ``energy``. Note that this assumes that the gate-level layout can be physically synthesized using the
-QCA ONE gate library.
 
 Physical synthesis (``cell``)
 -----------------------------

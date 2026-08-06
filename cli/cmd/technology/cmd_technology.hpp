@@ -10,7 +10,6 @@
 // NOLINTBEGIN(misc-include-cleaner)
 #include "include/area.hpp"
 #include "include/cell.hpp"
-#include "include/energy.hpp"
 // NOLINTEND(misc-include-cleaner)
 
 namespace alice
@@ -21,7 +20,6 @@ constexpr inline auto FICTION_CLI_CATEGORY_TECHNOLOGY = "Technology";
 // technology commands
 ALICE_ADD_COMMAND(area, FICTION_CLI_CATEGORY_TECHNOLOGY)
 ALICE_ADD_COMMAND(cell, FICTION_CLI_CATEGORY_TECHNOLOGY)
-ALICE_ADD_COMMAND(energy, FICTION_CLI_CATEGORY_TECHNOLOGY)
 
 }  // namespace alice
 

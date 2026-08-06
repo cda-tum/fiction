@@ -13,9 +13,6 @@
 #endif
 #include "include/gold.hpp"
 #include "include/hex.hpp"
-#if (MUGEN)
-#include "include/onepass.hpp"
-#endif
 #include "include/optimize.hpp"
 #include "include/ortho.hpp"
 // NOLINTEND(misc-include-cleaner)
@@ -31,9 +28,6 @@ ALICE_ADD_COMMAND(exact, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 #endif
 ALICE_ADD_COMMAND(gold, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 ALICE_ADD_COMMAND(hex, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
-#if (MUGEN)
-ALICE_ADD_COMMAND(onepass, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
-#endif
 ALICE_ADD_COMMAND(optimize, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 ALICE_ADD_COMMAND(ortho, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 

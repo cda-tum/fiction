@@ -49,6 +49,19 @@ Changed
       ``clang++-15`` (Clang <16 has a known constraint-instantiation bug that breaks libstdc++'s
       ``<ranges>`` implementation for non-trivial cases), and added ``clang++-19`` and ``clang++-20``
 
+Removed
+#######
+- Removed Mugen support: the vendored Glucose SAT solver (``vendors/mugen/``), the ``onepass`` CLI
+  command, and ``one_pass_synthesis()``. It was never enabled by default (opt-in via
+  ``FICTION_ENABLE_MUGEN``), depended on an unmaintained vendored solver plus Python 2-era
+  dependencies, and had no CI coverage beyond a single conditionally-compiled test. Use
+  ``exact_physical_design()`` instead
+- Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+- Removed ``jump_point_search()``. Use ``a_star()`` instead
+- Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
+  ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
+  change in usage
+
 Fixed
 #####
 - Code quality:

@@ -15,7 +15,9 @@
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <limits>
+#include <string>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -790,19 +792,19 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
-        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) >
+        if ((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z) >
             static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::max()))
         {
             return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::max()};
         }
 
-        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) <
+        if ((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z) <
             static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::min()))
         {
             return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::min()};
         }
 
-        return {coord.x, coord.y * 2 + coord.z};
+        return {coord.x, (coord.y * 2) + coord.z};
     }
 
     return CoordinateType{};
@@ -820,9 +822,9 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
     if (coord.y >= 0)
     {
-        return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+        return {coord.x, (coord.y - (coord.y % 2)) / 2, coord.y % 2};
     }
-    return {coord.x, (coord.y + coord.y % 2) / 2, (-coord.y - 1) % 2 + 1};
+    return {coord.x, (coord.y + (coord.y % 2)) / 2, ((-coord.y - 1) % 2) + 1};
 }
 
 }  // namespace siqad
@@ -865,7 +867,7 @@ uint64_t area(const CoordinateType& coord) noexcept
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
         return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
-               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+               ((2 * static_cast<uint64_t>(integral_abs(coord.y))) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
     }
 
     return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
@@ -900,6 +902,11 @@ class coord_iterator
 {
   public:
     using value_type = CoordinateType;
+    /**
+     * Default constructor. Required so that coord_iterator satisfies `std::semiregular`, which in turn is required
+     * for it to serve as its own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
+     */
+    constexpr coord_iterator() noexcept = default;
     /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
@@ -1012,7 +1019,9 @@ class coord_iterator
     }
 
   private:
-    const CoordinateType aspect_ratio;
+    // not const: std::input_or_output_iterator requires coord_iterator to be std::movable, which in turn requires
+    // it to be assignable
+    CoordinateType aspect_ratio;
 
     CoordinateType coord;
 };
@@ -1054,12 +1063,15 @@ struct hash<fiction::siqad::coord_t>
     }
 };
 
-// make coord_iterator compatible with STL iterator categories
+// make coord_iterator compatible with STL iterator categories; difference_type is required for coord_iterator to
+// satisfy std::input_or_output_iterator (e.g., for std::ranges::subrange CTAD)
 template <typename Coordinate>
 struct iterator_traits<fiction::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
+    using reference         = Coordinate;
+    using difference_type   = std::ptrdiff_t;
 };
 
 }  // namespace std
