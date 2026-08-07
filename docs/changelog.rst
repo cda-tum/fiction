@@ -10,6 +10,18 @@ Unreleased
 
 Changed
 #######
+- Parallelized ``operational_domain_flood_fill``. Previously, only the initial random sampling ran in
+  parallel while the flood fill itself explored the parameter space on a single thread, which could make
+  it slower in wall-clock time than a grid search on machines with many cores despite needing far fewer
+  simulations. The exploration now runs on a pool of ``std::jthread`` workers that share a single work
+  queue, using ``std::stop_source``/``std::stop_token`` and the C++20
+  ``std::condition_variable_any::wait`` stop-token overload for shutdown. One mutex guards the queue, the
+  set of already-scheduled points, and the active-worker count, while the physical simulation itself runs
+  without any lock held. Tracking scheduled points also removes a pre-existing inefficiency of the serial
+  version, in which the same parameter point could be enqueued repeatedly. The result is independent of
+  the order of exploration and therefore unchanged by the parallelization. Also modernized
+  ``simulate_operational_status_in_parallel`` to ``std::jthread`` and ``std::ranges``, and added the
+  ``std::shuffle`` that flood fill was missing for load balancing across its sampling threads
 - Code quality:
     - Adopted C++20 idioms across ``include/fiction/utils/`` as the first step of an incremental,
       module-by-module modernization: ``std::ranges`` algorithms (``std::ranges::for_each``,
