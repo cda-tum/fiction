@@ -204,7 +204,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // actual printing
     for (const auto r_ctr : std::views::iota(std::size_t{0}, reprs.size()))
     {
-        const auto& row = reprs[r_ctr];
+        const auto& row{reprs[r_ctr]};
 
         for (const auto& d : y_dirs[r_ctr])
         {
@@ -214,7 +214,7 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
 
         for (const auto c_ctr : std::views::iota(std::size_t{0}, row.size()))
         {
-            const auto& gate = row[c_ctr];
+            const auto& gate{row[c_ctr]};
 
             const auto t = tile<Lyt>{c_ctr, r_ctr};
 

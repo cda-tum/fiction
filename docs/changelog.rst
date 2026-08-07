@@ -137,6 +137,19 @@ Fixed
     - Fixed a signed-integer overflow in ``coordinates.hpp``'s ``to_siqad_coord`` for the minimum
       representable ``CoordinateType::y`` value, where negating it before taking the modulo was undefined
       behavior; the SiQAD ``z`` value is now derived from ``coord.y % 2`` directly, without negation
+    - Fixed CodeRabbit and Clang-Tidy findings surfaced on the ``io/`` modernization PR: plain ``char``
+      values (potentially negative on signed-``char`` platforms) passed directly to ``::isdigit``,
+      ``::isxdigit``, and ``::tolower`` in ``dot_drawers.hpp``, ``read_fgl_layout.hpp``, and
+      ``read_sqd_layout.hpp``, which is undefined behavior for non-``unsigned char``/non-``EOF``
+      arguments; two more ``std::string_view::data()`` calls relying on unguaranteed null-termination in
+      ``read_fqca_layout.hpp`` and ``read_sidb_surface_defects.hpp``; a non-null-terminated
+      ``std::string_view::data()`` passed to ``paths.emplace_back()`` in ``network_reader.hpp``; unused
+      ``cell_technologies.hpp``, ``sstream``, and ``cstdint`` includes in ``read_fqca_layout.hpp`` and
+      ``write_location_and_ground_state.hpp``; a missing ``<iterator>`` include for
+      ``std::istreambuf_iterator`` in ``read_sidb_surface_defects.hpp``; an oversized ``int`` base type
+      for the two-value ``fqca_section`` enum in ``read_fqca_layout.hpp``; and brace-init/Doxygen
+      documentation gaps on declarations touched by the modernization in ``dot_drawers.hpp``,
+      ``read_sqd_layout.hpp``, ``print_layout.hpp``, and ``write_fgl_layout.hpp``
 - Python bindings:
     - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from

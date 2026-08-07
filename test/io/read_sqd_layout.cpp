@@ -589,7 +589,7 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
     layout.foreach_sidb_defect(
         [&defect_positions](const auto& cd)
         {
-            const auto& [cell, defect] = cd;
+            const auto& [cell, defect]{cd};
 
             CHECK(defect_positions.count(cell) > 0);
 

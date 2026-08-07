@@ -34,6 +34,11 @@ namespace fiction
 class sqd_parsing_error : public std::runtime_error
 {
   public:
+    /**
+     * Constructs a `sqd_parsing_error` with the given error message.
+     *
+     * @param msg Error message.
+     */
     explicit sqd_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(std::string{msg}) {}
 };
 
@@ -346,7 +351,8 @@ class read_sqd_layout_impl
              {"unknown", sidb_defect_type::UNKNOWN}}};
 
         std::string name{label};
-        std::ranges::transform(name, name.begin(), ::tolower);
+        std::ranges::transform(name, name.begin(),
+                               [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
         const auto it = defect_name_to_type.find(name);
         return it == defect_name_to_type.cend() ? sidb_defect_type::UNKNOWN : it->second;

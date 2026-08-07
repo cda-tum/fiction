@@ -506,7 +506,8 @@ class read_fgl_layout_impl
                             lyt.create_not(incoming_signal, location);
                         }
                     }
-                    else if (std::ranges::all_of(gate.type, ::isxdigit))
+                    else if (std::ranges::all_of(gate.type,
+                                                 [](const unsigned char c) { return std::isxdigit(c) != 0; }))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -602,7 +603,8 @@ class read_fgl_layout_impl
                             lyt.create_ge(incoming_signal_1, incoming_signal_2, location);
                         }
                     }
-                    else if (std::ranges::all_of(gate.type, ::isxdigit))
+                    else if (std::ranges::all_of(gate.type,
+                                                 [](const unsigned char c) { return std::isxdigit(c) != 0; }))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -636,7 +638,8 @@ class read_fgl_layout_impl
                             lyt.create_maj(incoming_signal_1, incoming_signal_2, incoming_signal_3, location);
                         }
                     }
-                    else if (std::ranges::all_of(gate.type, ::isxdigit))
+                    else if (std::ranges::all_of(gate.type,
+                                                 [](const unsigned char c) { return std::isxdigit(c) != 0; }))
                     {
                         if constexpr (mockturtle::has_create_node_v<Lyt>)
                         {
@@ -651,7 +654,7 @@ class read_fgl_layout_impl
                             "Error parsing FGL file: unknown gate of type '{}' with 3 input signals", gate.type));
                     }
                 }
-                else if (std::ranges::all_of(gate.type, ::isxdigit))
+                else if (std::ranges::all_of(gate.type, [](const unsigned char c) { return std::isxdigit(c) != 0; }))
                 {
                     if constexpr (mockturtle::has_create_node_v<Lyt>)
                     {

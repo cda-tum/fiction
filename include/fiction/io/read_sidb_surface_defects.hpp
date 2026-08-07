@@ -15,6 +15,7 @@
 #include <exception>
 #include <fstream>
 #include <istream>
+#include <iterator>
 #include <regex>
 #include <stdexcept>
 #include <string>
@@ -205,7 +206,7 @@ sidb_defect_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::
 template <typename Lyt>
 sidb_defect_surface<Lyt> read_sidb_surface_defects(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {

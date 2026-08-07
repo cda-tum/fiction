@@ -96,7 +96,7 @@ class write_fgl_layout_impl
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;
-        const std::string layout_name = get_name(lyt);
+        const std::string layout_name{get_name(lyt)};
 
         // check if topology matches Lyt
         std::string topology{};
@@ -157,7 +157,7 @@ class write_fgl_layout_impl
             {
                 for (uint64_t y = 0; y <= lyt.y(); ++y)
                 {
-                    const int clock = clocking_scheme({x, y});
+                    const int clock{clocking_scheme({x, y})};
                     os << fmt::format(fcn::CLOCK_ZONE, x, y, clock);
                 }
             }

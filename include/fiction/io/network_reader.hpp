@@ -70,7 +70,7 @@ class network_reader
                 // collect valid files only
                 if (is_valid_extension(filename))
                 {
-                    paths.emplace_back(filename.data());
+                    paths.emplace_back(filename);
                 }
             }
 
