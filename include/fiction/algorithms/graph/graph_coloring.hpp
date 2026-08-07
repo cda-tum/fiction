@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <memory>
 #include <numeric>
 #include <optional>
@@ -207,8 +208,8 @@ class sat_coloring_handler
             graph{g},
             ps{p},
             pst{st},
-            largest_clique{std::max_element(ps.cliques.cbegin(), ps.cliques.cend(),
-                                            [](const auto& c1, const auto& c2) { return c1.size() < c2.size(); })},
+            largest_clique{std::ranges::max_element(ps.cliques, [](const auto& c1, const auto& c2)
+                                                    { return c1.size() < c2.size(); })},
             q{largest_clique == ps.cliques.cend() ? 1 : (largest_clique->size() ? largest_clique->size() : 1)}
     {}
 
@@ -297,8 +298,8 @@ class sat_coloring_handler
         std::iota(potential_chromatic_numbers.begin(), potential_chromatic_numbers.end(), h / 2);
 
         // binary search for the chromatic number, i.e., the lower bound of potential ones
-        std::ignore = std::lower_bound(
-            potential_chromatic_numbers.cbegin(), potential_chromatic_numbers.cend(), h,
+        std::ignore = std::ranges::lower_bound(
+            potential_chromatic_numbers, h,
             [this, &most_recent_sat_instance](const auto& k1, [[maybe_unused]] const auto& k2)
             {
                 if (const auto [sat, instance] = check_k_coloring(k1); sat == bill::result::states::satisfiable)
@@ -384,15 +385,15 @@ class sat_coloring_handler
          */
         explicit solver_instance(const Graph& graph, const std::size_t num_colors) : k{num_colors}
         {
-            std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                          [this, &num_colors](const auto& vp)
-                          {
-                              const auto& v = vp.first;
-                              for (std::size_t c = 0; c < num_colors; ++c)
-                              {
-                                  variables[{v, c}] = solver.add_variable();
-                              }
-                          });
+            std::ranges::for_each(graph.begin_vertices(), graph.end_vertices(),
+                                  [this, &num_colors](const auto& vp)
+                                  {
+                                      const auto& v = vp.first;
+                                      for (std::size_t c = 0; c < num_colors; ++c)
+                                      {
+                                          variables[{v, c}] = solver.add_variable();
+                                      }
+                                  });
         }
         /**
          * Default constructor is not available.
@@ -415,21 +416,21 @@ class sat_coloring_handler
     void at_least_one_color_per_vertex(const solver_instance_ptr& instance) const
     {
         // for each vertex
-        std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [&instance](const auto& vp)
-                      {
-                          const auto& v = vp.first;
+        std::ranges::for_each(graph.begin_vertices(), graph.end_vertices(),
+                              [&instance](const auto& vp)
+                              {
+                                  const auto& v = vp.first;
 
-                          std::vector<bill::var_type> vc(instance->k, 0);
+                                  std::vector<bill::var_type> vc(instance->k, 0);
 
-                          // for each color
-                          for (std::size_t c = 0; c < instance->k; ++c)
-                          {
-                              vc[c] = instance->variables[{v, c}];
-                          }
+                                  // for each color
+                                  for (std::size_t c = 0; c < instance->k; ++c)
+                                  {
+                                      vc[c] = instance->variables[{v, c}];
+                                  }
 
-                          bill::at_least_one(vc, instance->solver);
-                      });
+                                  bill::at_least_one(vc, instance->solver);
+                              });
     }
 
     void at_most_one_color_per_vertex(const solver_instance_ptr& instance) const
@@ -441,15 +442,16 @@ class sat_coloring_handler
             for (std::size_t c2 = c1 + 1; c2 < instance->k; ++c2)
             {
                 // for each vertex
-                std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                              [&instance, &c1, &c2](const auto& vp)
-                              {
-                                  const auto& v = vp.first;
-                                  // not vertex has color 1 OR not vertex has color 2
-                                  instance->solver.add_clause(
-                                      {{bill::lit_type{instance->variables[{v, c1}], bill::negative_polarity},
-                                        bill::lit_type{instance->variables[{v, c2}], bill::negative_polarity}}});
-                              });
+                std::ranges::for_each(
+                    graph.begin_vertices(), graph.end_vertices(),
+                    [&instance, &c1, &c2](const auto& vp)
+                    {
+                        const auto& v = vp.first;
+                        // not vertex has color 1 OR not vertex has color 2
+                        instance->solver.add_clause(
+                            {{bill::lit_type{instance->variables[{v, c1}], bill::negative_polarity},
+                              bill::lit_type{instance->variables[{v, c2}], bill::negative_polarity}}});
+                    });
             }
         }
     }
@@ -457,21 +459,21 @@ class sat_coloring_handler
     void exclude_identical_adjacent_colors(const solver_instance_ptr& instance) const
     {
         // for each edge
-        std::for_each(graph.begin_edges(), graph.end_edges(),
-                      [&instance](const auto& e)
-                      {
-                          // source and target of edge e
-                          const auto& [v1, v2] = e.first;
+        std::ranges::for_each(graph.begin_edges(), graph.end_edges(),
+                              [&instance](const auto& e)
+                              {
+                                  // source and target of edge e
+                                  const auto& [v1, v2] = e.first;
 
-                          // for each color
-                          for (std::size_t c = 0; c < instance->k; ++c)
-                          {
-                              // not vertex 1 has color c OR not vertex 2 has color c
-                              instance->solver.add_clause(
-                                  {{bill::lit_type{instance->variables[{v1, c}], bill::negative_polarity},
-                                    bill::lit_type{instance->variables[{v2, c}], bill::negative_polarity}}});
-                          }
-                      });
+                                  // for each color
+                                  for (std::size_t c = 0; c < instance->k; ++c)
+                                  {
+                                      // not vertex 1 has color c OR not vertex 2 has color c
+                                      instance->solver.add_clause(
+                                          {{bill::lit_type{instance->variables[{v1, c}], bill::negative_polarity},
+                                            bill::lit_type{instance->variables[{v2, c}], bill::negative_polarity}}});
+                                  }
+                              });
     }
 
     void color_frequency_equal_to_largest_clique_size(const solver_instance_ptr& instance) const
@@ -486,18 +488,19 @@ class sat_coloring_handler
             color_c_in_each_clique.reserve(ps.cliques.size());
 
             // for each clique
-            std::for_each(ps.cliques.cbegin(), ps.cliques.cend(),
-                          [&instance, &c, &color_c_in_each_clique](const auto& clique)
-                          {
-                              std::vector<bill::lit_type> vc{};
-                              vc.reserve(clique.size());
+            std::ranges::for_each(ps.cliques,
+                                  [&instance, &c, &color_c_in_each_clique](const auto& clique)
+                                  {
+                                      std::vector<bill::lit_type> vc{};
+                                      vc.reserve(clique.size());
 
-                              // for each vertex in clique
-                              std::for_each(clique.cbegin(), clique.cend(), [&instance, &c, &vc](const auto& v)
-                                            { vc.push_back({instance->variables[{v, c}], bill::positive_polarity}); });
+                                      // for each vertex in clique
+                                      std::ranges::for_each(
+                                          clique, [&instance, &c, &vc](const auto& v)
+                                          { vc.push_back({instance->variables[{v, c}], bill::positive_polarity}); });
 
-                              color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
-                          });
+                                      color_c_in_each_clique.push_back(bill::add_tseytin_or(instance->solver, vc));
+                                  });
 
             same_color_in_each_clique.push_back(bill::add_tseytin_and(instance->solver, color_c_in_each_clique));
         }
@@ -533,7 +536,7 @@ class sat_coloring_handler
         }
         else  // without clique information, at least the first vertex can be painted
         {
-            std::ignore = std::find_if(
+            std::ignore = std::ranges::find_if(
                 graph.begin_vertices(), graph.end_vertices(),
                 [this, &instance, &clique_first_ordering](const auto& vp)
                 {
@@ -544,35 +547,34 @@ class sat_coloring_handler
                     // create a clique first vertex ordering
                     clique_first_ordering.push_back(v);
 
-                    std::ignore = std::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
-                                               [&instance, &clique_first_ordering](const auto& av)
-                                               {
-                                                   // assign color 1 to an adjacent vertex
-                                                   instance->solver.add_clause(bill::lit_type{
-                                                       instance->variables[{av, 1}], bill::positive_polarity});
+                    std::ignore = std::ranges::find_if(graph.begin_adjacent(v), graph.end_adjacent(v),
+                                                       [&instance, &clique_first_ordering](const auto& av)
+                                                       {
+                                                           // assign color 1 to an adjacent vertex
+                                                           instance->solver.add_clause(bill::lit_type{
+                                                               instance->variables[{av, 1}], bill::positive_polarity});
 
-                                                   // create a clique first vertex ordering
-                                                   clique_first_ordering.push_back(av);
+                                                           // create a clique first vertex ordering
+                                                           clique_first_ordering.push_back(av);
 
-                                                   return true;  // abort loop after first iteration
-                                               });
+                                                           return true;  // abort loop after first iteration
+                                                       });
 
                     return true;  // abort loop after first iteration
                 });
         }
 
         // thus far, the ordering only contains the clique vertices; add the missing ones in an arbitrary order
-        std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [&clique_first_ordering](const auto& vp)
-                      {
-                          const auto& v = vp.first;
-                          // if vertex v is not yet in the ordering
-                          if (std::find(clique_first_ordering.cbegin(), clique_first_ordering.cend(), v) ==
-                              clique_first_ordering.cend())
-                          {
-                              clique_first_ordering.push_back(v);
-                          }
-                      });
+        std::ranges::for_each(graph.begin_vertices(), graph.end_vertices(),
+                              [&clique_first_ordering](const auto& vp)
+                              {
+                                  const auto& v = vp.first;
+                                  // if vertex v is not yet in the ordering
+                                  if (std::ranges::find(clique_first_ordering, v) == clique_first_ordering.cend())
+                                  {
+                                      clique_first_ordering.push_back(v);
+                                  }
+                              });
 
         return clique_first_ordering;
     }
@@ -648,26 +650,26 @@ class sat_coloring_handler
         std::unordered_map<Color, std::size_t> color_frequency{};
 
         // for each vertex
-        std::for_each(graph.begin_vertices(), graph.end_vertices(),
-                      [&instance, &model, &coloring, &color_frequency](const auto& vp)
-                      {
-                          const auto& v = vp.first;
-                          // for each color
-                          for (std::size_t c = 0; c < instance->k; ++c)
-                          {
-                              // if vertex v is colored with color c
-                              if (model.at(instance->variables.at({v, c})) == bill::lbool_type::true_)
+        std::ranges::for_each(graph.begin_vertices(), graph.end_vertices(),
+                              [&instance, &model, &coloring, &color_frequency](const auto& vp)
                               {
-                                  // paint the vertex
-                                  coloring[v] = c;
-                                  // increment the color frequency
-                                  color_frequency[c]++;
-                              }
-                          }
-                      });
+                                  const auto& v = vp.first;
+                                  // for each color
+                                  for (std::size_t c = 0; c < instance->k; ++c)
+                                  {
+                                      // if vertex v is colored with color c
+                                      if (model.at(instance->variables.at({v, c})) == bill::lbool_type::true_)
+                                      {
+                                          // paint the vertex
+                                          coloring[v] = c;
+                                          // increment the color frequency
+                                          color_frequency[c]++;
+                                      }
+                                  }
+                              });
 
-        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend(),
-                                             [](const auto& cf1, const auto& cf2) { return cf1.second < cf2.second; });
+        if (const auto it = std::ranges::max_element(color_frequency, [](const auto& cf1, const auto& cf2)
+                                                     { return cf1.second < cf2.second; });
             it != color_frequency.cend())
         {
             pst.most_frequent_color = it->first;
@@ -824,8 +826,8 @@ class graph_coloring_impl
      * @param node Node ID to convert between graph structures.
      * @return Corresponding node ID in the Brian Crites graph.
      */
-    template <typename GraphProxy = Graph,
-              typename            = std::enable_if_t<!std::is_same_v<typename GraphProxy::vertex_id_type, std::string>>>
+    template <typename GraphProxy = Graph>
+        requires(!std::same_as<typename GraphProxy::vertex_id_type, std::string>)
     [[nodiscard]] std::string convert_node_index(const typename Graph::vertex_id_type& node) const noexcept
     {
         return std::to_string(node);
@@ -841,31 +843,33 @@ class graph_coloring_impl
         brian_crites_graph translated_graph{};
 
         // iterate over all vertices of the original graph
-        std::for_each(g.begin_vertices(), g.end_vertices(),
-                      [this, &g, &translated_graph](const auto& v_pair)
-                      {
-                          const auto v1 = v_pair.first;
+        std::ranges::for_each(g.begin_vertices(), g.end_vertices(),
+                              [this, &g, &translated_graph](const auto& v_pair)
+                              {
+                                  const auto v1 = v_pair.first;
 
-                          // if v does not have any adjacent vertices
-                          if (g.begin_adjacent(v1) == g.end_adjacent(v1))
-                          {
-                              // create an isolated vertex in the brian_crites_graph
-                              translated_graph[convert_node_index(v1)] = {};
-                          }
-                          else
-                          {
-                              // iterate over all vertices v2 adjacent to v1
-                              std::for_each(
-                                  g.begin_adjacent(v1), g.end_adjacent(v1),
-                                  [this, &translated_graph, &v1](const auto& v2)
+                                  // if v does not have any adjacent vertices
+                                  if (g.begin_adjacent(v1) == g.end_adjacent(v1))
                                   {
-                                      // add an edge in the brian_crites_graph that leads from v1 to v2
-                                      translated_graph[convert_node_index(v1)].push_back(convert_node_index(v2));
-                                      // and ones that leads from v2 to v1
-                                      translated_graph[convert_node_index(v2)].push_back(convert_node_index(v1));
-                                  });
-                          }
-                      });
+                                      // create an isolated vertex in the brian_crites_graph
+                                      translated_graph[convert_node_index(v1)] = {};
+                                  }
+                                  else
+                                  {
+                                      // iterate over all vertices v2 adjacent to v1
+                                      std::ranges::for_each(g.begin_adjacent(v1), g.end_adjacent(v1),
+                                                            [this, &translated_graph, &v1](const auto& v2)
+                                                            {
+                                                                // add an edge in the brian_crites_graph that leads from
+                                                                // v1 to v2
+                                                                translated_graph[convert_node_index(v1)].push_back(
+                                                                    convert_node_index(v2));
+                                                                // and ones that leads from v2 to v1
+                                                                translated_graph[convert_node_index(v2)].push_back(
+                                                                    convert_node_index(v1));
+                                                            });
+                                  }
+                              });
 
         return translated_graph;
     }
@@ -883,18 +887,17 @@ class graph_coloring_impl
         // determine the color frequency alongside; index represents the color, value its frequency
         std::vector<Color> color_frequency(pst.chromatic_number, Color{0});
 
-        std::for_each(bc_coloring.cbegin(), bc_coloring.cend(),
-                      [this,  // NOLINT(clang-diagnostic-unused-lambda-capture): false positive
-                       &v_coloring, &color_frequency](const auto& c_pair)
-                      {
-                          // convert color
-                          v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);
-                          // increment the color frequency
-                          color_frequency[static_cast<std::size_t>(c_pair.second)]++;
-                      });
+        std::ranges::for_each(bc_coloring,
+                              [this,  // NOLINT(clang-diagnostic-unused-lambda-capture): false positive
+                               &v_coloring, &color_frequency](const auto& c_pair)
+                              {
+                                  // convert color
+                                  v_coloring[convert_node_index(c_pair.first)] = static_cast<Color>(c_pair.second);
+                                  // increment the color frequency
+                                  color_frequency[static_cast<std::size_t>(c_pair.second)]++;
+                              });
 
-        if (const auto it = std::max_element(color_frequency.cbegin(), color_frequency.cend());
-            it != color_frequency.cend())
+        if (const auto it = std::ranges::max_element(color_frequency); it != color_frequency.cend())
         {
             // get index from iterator; index represents the color
             pst.most_frequent_color = static_cast<Color>(it - color_frequency.cbegin());
@@ -966,16 +969,16 @@ class graph_coloring_impl
             return false;
         }
 
-        return std::none_of(graph.begin_vertices(), graph.end_vertices(),
-                            [this, &v_coloring](const auto& vp1)
-                            {
-                                const auto v1 = vp1.first;
+        return std::ranges::none_of(graph.begin_vertices(), graph.end_vertices(),
+                                    [this, &v_coloring](const auto& vp1)
+                                    {
+                                        const auto v1 = vp1.first;
 
-                                return static_cast<bool>(
-                                    std::any_of(graph.begin_adjacent(v1), graph.end_adjacent(v1),
-                                                [&v_coloring, c1 = v_coloring.at(v1)](const auto& v2)
-                                                { return c1 == v_coloring.at(v2); }));
-                            });
+                                        return static_cast<bool>(
+                                            std::ranges::any_of(graph.begin_adjacent(v1), graph.end_adjacent(v1),
+                                                                [&v_coloring, c1 = v_coloring.at(v1)](const auto& v2)
+                                                                { return c1 == v_coloring.at(v2); }));
+                                    });
     }
 };
 

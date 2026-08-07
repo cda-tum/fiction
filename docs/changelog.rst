@@ -78,6 +78,18 @@ Changed
       ``static_assert(std::is_same_v<...>)`` was deliberately left as-is, since it sits alongside
       custom-trait ``static_assert``\ s in the same function and converting only one of three checks to a
       ``requires`` clause isn't a clear readability win.
+    - Started the incremental C++20 modernization of ``include/fiction/algorithms/`` with a pilot slice
+      across its five smallest subdirectories (``graph/``, ``iter/``, ``optimization/``, ``properties/``,
+      ``verification/``): ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
+      (``generate_edge_intersection_graph.hpp``, ``graph_coloring.hpp``, ``mincross.hpp``,
+      ``bdl_input_iterator.hpp``, ``critical_path_length_and_throughput.hpp``, ``virtual_miter.hpp``), and
+      a ``requires`` clause with ``std::same_as`` in place of an ``std::enable_if_t``/``std::is_same_v``
+      SFINAE constraint (``graph_coloring.hpp``). ``aspect_ratio_iterator.hpp`` and
+      ``gray_code_iterator.hpp``'s hand-written comparison operators were deliberately left as-is: they
+      compare derived/partial state (dereferenced iterators, a single cached field) rather than performing
+      plain memberwise equality, so defaulting them would silently change behavior.
+      ``simulated_annealing.hpp``, ``count_gate_types.hpp``, ``design_rule_violations.hpp``, and
+      ``equivalence_checking.hpp`` had nothing applicable in any of the four modernization categories.
 
       Then extended beyond those four categories to the remaining candidates surfaced by a full-module
       survey: C++17 ``if``-init statements collapsing the ``tinyxml2`` "look up an XML element, then check
