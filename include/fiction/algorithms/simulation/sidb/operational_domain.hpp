@@ -650,7 +650,7 @@ class operational_domain_impl
         std::size_t active_workers = 0;
 
         // requesting a stop signals that the flood fill is complete, which wakes up all waiting workers
-        std::stop_source stop_src{};
+        const std::stop_source stop_src{};
 
         // a utility function that gathers the neighbors of `sp` that are not already known. This is the expensive part
         // of the discovery, so it is deliberately called without holding `queue_mutex`

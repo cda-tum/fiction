@@ -20,8 +20,11 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
+#include <functional>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -1189,16 +1192,10 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
-    op_domain_params.sweep_dimensions[0].min  = 0.5;
-    op_domain_params.sweep_dimensions[0].max  = 4.25;
-    op_domain_params.sweep_dimensions[0].step = 0.25;
-
-    op_domain_params.sweep_dimensions[1].min  = 0.5;
-    op_domain_params.sweep_dimensions[1].max  = 4.25;
-    op_domain_params.sweep_dimensions[1].step = 0.25;
+    op_domain_params.sweep_dimensions = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
 
     // ground truth to compare the flood fill results against
     const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
@@ -1217,8 +1214,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     REQUIRE(operational_points.size() == 80);
 
-    std::sort(operational_points.begin(), operational_points.end(),
-              [](const auto& lhs, const auto& rhs) { return lhs.get_parameters() < rhs.get_parameters(); });
+    std::ranges::sort(operational_points, std::ranges::less{}, &parameter_point::get_parameters);
 
     // seeding the flood fill with a known operational point and taking no random samples makes it fully
     // deterministic, so any run-to-run difference can only stem from the parallelization
@@ -1240,8 +1236,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
         op_domain.for_each([&result](const auto& coord, const auto& op_value)
                            { result.emplace_back(coord, std::get<0>(op_value)); });
 
-        std::sort(result.begin(), result.end(), [](const auto& lhs, const auto& rhs)
-                  { return lhs.first.get_parameters() < rhs.first.get_parameters(); });
+        std::ranges::sort(result, std::ranges::less{}, [](const auto& entry) { return entry.first.get_parameters(); });
 
         // every point the parallel flood fill reports must match the ground truth
         for (const auto& [pp, status] : result)
@@ -1249,7 +1244,12 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
             const auto ground_truth = grid_search_domain.contains(pp);
 
             REQUIRE(ground_truth.has_value());
-            CHECK(status == std::get<0>(ground_truth.value()));
+
+            // the `REQUIRE` above already aborts on an empty optional, but the static analyzer cannot see that
+            if (ground_truth.has_value())
+            {
+                CHECK(status == std::get<0>(*ground_truth));
+            }
         }
 
         // the single operational island is connected, so flood fill must find all 80 of its points
@@ -1266,13 +1266,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
         {
             // the explored set does not depend on the order of exploration, so every run must produce the exact same
             // result regardless of how the work happened to be distributed among the threads
-            REQUIRE(result.size() == reference->size());
-
-            for (std::size_t j = 0; j < result.size(); ++j)
-            {
-                CHECK(result[j].first == (*reference)[j].first);
-                CHECK(result[j].second == (*reference)[j].second);
-            }
+            CHECK(result == *reference);
         }
     }
 }
