@@ -43,8 +43,8 @@
 #include <optional>
 #include <queue>
 #include <random>
+#include <ranges>
 #include <stdexcept>
-#include <stop_token>
 #include <thread>
 #include <tuple>
 #include <type_traits>
@@ -643,14 +643,14 @@ class operational_domain_impl
         std::deque<step_point>       queue{};
         phmap::btree_set<step_point> scheduled{};
 
-        std::mutex                  queue_mutex{};
-        std::condition_variable_any queue_cv{};
+        std::mutex              queue_mutex{};
+        std::condition_variable queue_cv{};
 
         // the number of workers that popped a step point but have not yet reported back their discovered neighbors
         std::size_t active_workers = 0;
 
-        // requesting a stop signals that the flood fill is complete, which wakes up all waiting workers
-        const std::stop_source stop_src{};
+        // set once the flood fill is complete, which lets all waiting workers terminate
+        bool finished = false;
 
         // a utility function that gathers the neighbors of `sp` that are not already known. This is the expensive part
         // of the discovery, so it is deliberately called without holding `queue_mutex`
@@ -692,14 +692,16 @@ class operational_domain_impl
         // if random sampling did not find a single operational point, there is nothing to flood fill
         if (!queue.empty())
         {
-            const auto worker = [&](const std::stop_token& stop_token) noexcept
+            const auto worker = [&]() noexcept
             {
                 while (true)
                 {
                     std::unique_lock lock{queue_mutex};
 
-                    // returns false iff a stop has been requested, i.e., iff the flood fill is complete
-                    if (!queue_cv.wait(lock, stop_token, [&queue]() noexcept { return !queue.empty(); }))
+                    queue_cv.wait(lock, [&queue, &finished]() noexcept { return !queue.empty() || finished; });
+
+                    // the queue can only be empty here once the flood fill is complete
+                    if (queue.empty())
                     {
                         return;
                     }
@@ -726,37 +728,29 @@ class operational_domain_impl
 
                     // the flood fill is complete only once the queue has run dry and no worker is left that could
                     // still discover new points
-                    const auto complete = queue.empty() && active_workers == 0;
+                    finished = queue.empty() && active_workers == 0;
 
-                    if (!complete && !queue.empty())
+                    if (finished || !queue.empty())
                     {
                         queue_cv.notify_all();
-                    }
-
-                    lock.unlock();
-
-                    // signal completion only after the lock has been released: requesting a stop synchronously runs
-                    // the stop callbacks that `queue_cv.wait` registered, which must not happen under `queue_mutex`
-                    if (complete)
-                    {
-                        stop_src.request_stop();
                     }
                 }
             };
 
             const auto num_workers = std::max(number_of_threads, std::size_t{1});
 
-            std::vector<std::jthread> workers{};
+            std::vector<std::thread> workers{};
             workers.reserve(num_workers);
 
             for (std::size_t i = 0; i < num_workers; ++i)
             {
-                // a nullary callable, so that `std::jthread` does not inject its own per-thread stop token. All
-                // workers must observe the one shared stop source
-                workers.emplace_back([&worker, stop_token = stop_src.get_token()]() noexcept { worker(stop_token); });
+                workers.emplace_back(worker);
             }
 
-            // the `std::jthread` destructors join all workers here
+            for (auto& w : workers)
+            {
+                w.join();
+            }
         }
 
         log_stats();
@@ -1438,7 +1432,7 @@ class operational_domain_impl
 
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
-        std::vector<std::jthread> threads{};
+        std::vector<std::thread> threads{};
         threads.reserve(num_threads);
 
         // launch threads, each with its own slice of random step points
@@ -1461,7 +1455,11 @@ class operational_domain_impl
                 });
         }
 
-        // the `std::jthread` destructors join all threads here
+        // wait for all threads to complete
+        for (auto& thread : threads)
+        {
+            thread.join();
+        }
     }
     /**
      * Performs random sampling to find any operational parameter combination. This function is useful if a single
