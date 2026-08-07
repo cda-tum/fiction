@@ -3352,6 +3352,12 @@ static const char *__doc_fiction_coord_iterator =
 R"doc(An iterator type that allows to enumerate coordinates in order within
 a boundary.
 
+@note Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t`
+are supported. This is enforced on the boundary-and-start constructor
+via a `requires` clause rather than on the class itself, so that the
+default constructor (required for `std::semiregular`) remains usable
+for any `CoordinateType`.
+
 Template parameter ``CoordinateType``:
     Type of coordinate to enumerate.)doc";
 
@@ -23332,9 +23338,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1105_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1109_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1121_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1125_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
