@@ -42,6 +42,29 @@ Changed
       The unscoped ``cell_type`` enums (``cell_technologies.hpp``) and ``port_direction::cardinal``
       (``cell_ports.hpp``) are deliberately left untouched, as converting them to ``enum class`` is a
       separate, much larger refactor
+    - Started the incremental C++20 modernization of ``include/fiction/layouts/`` with its smallest,
+      lowest-connectivity slice (``coordinates.hpp``, ``tile_based_layout.hpp``,
+      ``synchronization_element_layout.hpp``): replaced ``coord_iterator``'s
+      ``static_assert(std::is_same_v<...>)`` disjunction with an equivalent ``requires`` clause using
+      ``std::same_as``. Collapsing ``offset::ucoord_t``, ``cube::coord_t``, and ``siqad::coord_t``'s
+      hand-written ``operator==``/``operator!=`` pairs into a defaulted ``operator==`` was attempted but
+      reverted: CI's g++-11 job (the project's explicit C++20 floor compiler) miscompiled a defaulted
+      comparison on ``offset::ucoord_t``/``siqad::coord_t``'s bit-field data members, producing wrong
+      layout-printing output, consistent with a known class of GCC bugs around defaulted comparison
+      operators on bit-field-containing structs in early C++20 support. ``tile_based_layout.hpp``
+      and ``synchronization_element_layout.hpp`` have no ``std::algorithm``-with-iterator-pairs patterns,
+      no ``static_assert(std::is_*)`` over standard-library traits, and no aggregate-initialization
+      opportunities to modernize. Completed the rest of ``include/fiction/layouts/``: ``std::ranges``
+      algorithms in place of iterator-pair ``std::algorithm`` calls (``cell_level_layout.hpp``,
+      ``clocking_scheme.hpp``, ``hexagonal_layout.hpp``, ``gate_level_layout.hpp``). A ``requires``
+      clause with ``std::same_as`` was attempted for a duplicated
+      ``static_assert(std::is_same_v<...>)`` disjunction in both ``hexagonal_layout`` constructors but
+      reverted: the pyfiction docstring auto-gen bot's pinned ``clang==15.0.7`` Python parser failed to
+      associate Doxygen comments with the ~60 member functions declared after those constructors once
+      converted, breaking the fully Python-bound ``hexagonal_layout`` bindings' ReadTheDocs build.
+      ``obstruction_layout.hpp``, ``shifted_cartesian_layout.hpp``, ``bounding_box.hpp``,
+      ``clocked_layout.hpp``, and ``cartesian_layout.hpp`` had nothing applicable in any of the four
+      modernization categories
     - Completed the incremental C++20 modernization of ``include/fiction/io/`` and its tests:
       ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls across
       ``network_reader.hpp``, ``write_location_and_ground_state.hpp``, ``write_sqd_sim_result.hpp``,
@@ -84,6 +107,16 @@ Fixed
       ``write_location_and_ground_state.hpp`` that relied on null-termination they aren't guaranteed to
       have, surfaced by Clang-Tidy's whole-file linting once these files were touched for the ``io/``
       modernization pass
+    - Fixed a ``std::string_view::data()`` call in ``clocking_scheme.hpp``'s ``get_clocking_scheme`` that
+      relied on null-termination it isn't guaranteed to have, surfaced by Clang-Tidy's whole-file linting
+      once the file was touched for the ``layouts/`` modernization pass
+    - Fixed ``get_clocking_scheme`` passing plain ``char`` values (potentially negative on signed-``char``
+      platforms) directly to ``::toupper``, which is undefined behavior for arguments that aren't
+      representable as ``unsigned char`` or equal to ``EOF``, by casting through ``unsigned char`` in the
+      ``std::ranges::transform`` call
+    - Fixed a signed-integer overflow in ``coordinates.hpp``'s ``to_siqad_coord`` for the minimum
+      representable ``CoordinateType::y`` value, where negating it before taking the modulo was undefined
+      behavior; the SiQAD ``z`` value is now derived from ``coord.y % 2`` directly, without negation
 - Python bindings:
     - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
