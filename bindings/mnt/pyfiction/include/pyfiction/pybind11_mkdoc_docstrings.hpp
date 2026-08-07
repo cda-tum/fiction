@@ -3352,6 +3352,12 @@ static const char *__doc_fiction_coord_iterator =
 R"doc(An iterator type that allows to enumerate coordinates in order within
 a boundary.
 
+@note Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t`
+are supported. This is enforced on the boundary-and-start constructor
+via a `requires` clause rather than on the class itself, so that the
+default constructor (required for `std::semiregular`) remains usable
+for any `CoordinateType`.
+
 Template parameter ``CoordinateType``:
     Type of coordinate to enumerate.)doc";
 
@@ -21209,7 +21215,11 @@ Parameter ``sdm``:
 
 static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
-static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
+static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error =
+R"doc(Constructs a `sqd_parsing_error` with the given error message.
+
+Parameter ``msg``:
+    Error message.)doc";
 
 static const char *__doc_fiction_squared_euclidean_distance =
 R"doc(The squared Euclidean distance :math:`D` between two layout
@@ -21578,7 +21588,15 @@ Template parameter ``DrawHexTT``:
     Flag to toggle the representation of truth tables for unknown
     functions in hexadecimal notation.)doc";
 
-static const char *__doc_fiction_technology_dot_drawer_is_node_number = R"doc()doc";
+static const char *__doc_fiction_technology_dot_drawer_is_node_number =
+R"doc(Checks whether a string represents a non-negative integer, i.e.,
+consists exclusively of digits.
+
+Parameter ``s``:
+    String to check.
+
+Returns:
+    `true` iff `s` is non-empty and consists exclusively of digits.)doc";
 
 static const char *__doc_fiction_technology_dot_drawer_node_fillcolor = R"doc()doc";
 
@@ -23332,9 +23350,9 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1105_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1109_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1121_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1125_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 

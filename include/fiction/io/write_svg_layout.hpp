@@ -13,6 +13,7 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -552,19 +553,19 @@ class write_sidb_layout_svg_impl
         {
             switch (charge_state.value())
             {
-                case (sidb_charge_state::POSITIVE):
+                case sidb_charge_state::POSITIVE:
                 {
                     fill_color   = fiction::detail::svg::POSITIVE_COLOR;
                     border_color = fiction::detail::svg::POSITIVE_COLOR;
                     break;
                 }
-                case (sidb_charge_state::NEGATIVE):
+                case sidb_charge_state::NEGATIVE:
                 {
                     fill_color   = fiction::detail::svg::NEGATIVE_COLOR;
                     border_color = fiction::detail::svg::NEGATIVE_COLOR;
                     break;
                 }
-                case (sidb_charge_state::NEUTRAL):
+                case sidb_charge_state::NEUTRAL:
                 {
                     fill_opacity = 0.0;
                     break;
@@ -631,7 +632,7 @@ class write_sidb_layout_svg_impl
         all_cells.reserve(lyt.num_cells());
         // collect all cells
         lyt.foreach_cell([&all_cells](const auto& cell) { all_cells.push_back(cell); });
-        std::sort(all_cells.begin(), all_cells.end());
+        std::ranges::sort(all_cells);
 
         for (const auto& cell : all_cells)
         {
@@ -740,7 +741,7 @@ class write_qca_layout_svg_impl
 
     std::ostream& os;
 
-    write_qca_layout_svg_params ps;
+    const write_qca_layout_svg_params ps;
 
     /**
      * Alias for an SVG description of a tile containing also its clock zone.
@@ -993,41 +994,15 @@ class write_qca_layout_svg_impl
         // Delete empty tiles in simple designs
         if (ps.simple)
         {
-            std::vector<coordinate<Lyt>> empty_tiles{};
-
-            // Find empty tiles via missing cell-descriptions for their coordinates
-            for (const auto& [coord, tdscr] : coord_to_tile)
-            {
-                if (coord_to_cells.count(coord) == 0)
-                {
-                    empty_tiles.emplace_back(coord);
-                }
-            }
-
-            // Delete empty tiles
-            for (const auto& coord : empty_tiles)
-            {
-                coord_to_tile.erase(coord);
-            }
+            // Delete tiles with missing cell-descriptions for their coordinates
+            std::erase_if(coord_to_tile,
+                          [&coord_to_cells](const auto& item) { return coord_to_cells.count(item.first) == 0; });
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                std::vector<coordinate<Lyt>> empty_latches{};
-
-                // Find empty latches via missing cell-descriptions for their coordinates
-                for (const auto& [coord, ldscr] : coord_to_latch_tile)
-                {
-                    if (coord_to_latch_cells.count(coord) == 0)
-                    {
-                        empty_latches.emplace_back(coord);
-                    }
-                }
-
-                // Delete empty latches
-                for (const auto& coord : empty_latches)
-                {
-                    coord_to_latch_tile.erase(coord);
-                }
+                // Delete latches with missing cell-descriptions for their coordinates
+                std::erase_if(coord_to_latch_tile, [&coord_to_latch_cells](const auto& item)
+                              { return coord_to_latch_cells.count(item.first) == 0; });
             }
         }
 
