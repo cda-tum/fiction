@@ -1561,11 +1561,13 @@ class operational_domain_impl
         const auto emplace = [&neighbors](const auto x, const auto y) noexcept
         { neighbors.emplace_back(std::vector<std::size_t>{x, y}); };
 
-        const auto x = sp.step_values[0];
-        const auto y = sp.step_values[1];
+        // both containers hold exactly two elements in the 2-dimensional case asserted above, so the first and the
+        // last element are the x and the y dimension, respectively
+        const auto x = sp.step_values.front();
+        const auto y = sp.step_values.back();
 
-        const auto num_x_indices = indices[0].size();
-        const auto num_y_indices = indices[1].size();
+        const auto num_x_indices = indices.front().size();
+        const auto num_y_indices = indices.back().size();
 
         const auto decr_x = (x > 0) ? x - 1 : x;
         const auto incr_x = (x + 1 < num_x_indices) ? x + 1 : x;
@@ -1677,6 +1679,7 @@ class operational_domain_impl
      * function might invoke undefined behavior.
      * @param contour The step points visited by the contour trace that encloses `starting_point`.
      */
+    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, as in the calling `contour_tracing`
     void infer_operational_status_in_enclosing_contour(const step_point&                   starting_point,
                                                        const phmap::btree_set<step_point>& contour) noexcept
     {

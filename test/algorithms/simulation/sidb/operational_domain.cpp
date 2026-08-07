@@ -1085,16 +1085,10 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
-
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
-    op_domain_params.sweep_dimensions[0].min  = 0.5;
-    op_domain_params.sweep_dimensions[0].max  = 4.25;
-    op_domain_params.sweep_dimensions[0].step = 0.25;
-
-    op_domain_params.sweep_dimensions[1].min  = 0.5;
-    op_domain_params.sweep_dimensions[1].max  = 4.25;
-    op_domain_params.sweep_dimensions[1].step = 0.25;
+    op_domain_params.sweep_dimensions = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
 
     // ground truth to compare the contour tracing results against
     const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
@@ -1125,7 +1119,12 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
             const auto ground_truth = grid_search_domain.contains(pp);
 
             REQUIRE(ground_truth.has_value());
-            CHECK(std::get<0>(ground_truth.value()) == operational_status::OPERATIONAL);
+
+            // the `REQUIRE` above already aborts on an empty optional, but the static analyzer cannot see that
+            if (ground_truth.has_value())
+            {
+                CHECK(std::get<0>(*ground_truth) == operational_status::OPERATIONAL);
+            }
         }
 
         // inferred points are never added to the operational domain, so every reported status must match the ground
