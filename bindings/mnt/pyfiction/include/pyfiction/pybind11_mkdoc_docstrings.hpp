@@ -7887,6 +7887,18 @@ static const char *__doc_fiction_detail_graph_coloring_impl_ps = R"doc(Parameter
 
 static const char *__doc_fiction_detail_graph_coloring_impl_pst = R"doc(Statistics.)doc";
 
+static const char *__doc_fiction_detail_graph_coloring_impl_requires =
+R"doc(Converts the given node ID of a Graph to the corresponding one used in
+Brian Crites' graph structure. This function is automatically removed
+from overload resolution if both graphs use std::string because it
+would clash with the function above.
+
+Parameter ``node``:
+    Node ID to convert between graph structures.
+
+Returns:
+    Corresponding node ID in the Brian Crites graph.)doc";
+
 static const char *__doc_fiction_detail_graph_coloring_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_graph_oriented_layout_design_impl =
