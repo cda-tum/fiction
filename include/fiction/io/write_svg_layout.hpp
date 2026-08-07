@@ -741,7 +741,7 @@ class write_qca_layout_svg_impl
 
     std::ostream& os;
 
-    write_qca_layout_svg_params ps;
+    const write_qca_layout_svg_params ps;
 
     /**
      * Alias for an SVG description of a tile containing also its clock zone.
@@ -994,41 +994,15 @@ class write_qca_layout_svg_impl
         // Delete empty tiles in simple designs
         if (ps.simple)
         {
-            std::vector<coordinate<Lyt>> empty_tiles{};
-
-            // Find empty tiles via missing cell-descriptions for their coordinates
-            for (const auto& [coord, tdscr] : coord_to_tile)
-            {
-                if (coord_to_cells.count(coord) == 0)
-                {
-                    empty_tiles.emplace_back(coord);
-                }
-            }
-
-            // Delete empty tiles
-            for (const auto& coord : empty_tiles)
-            {
-                coord_to_tile.erase(coord);
-            }
+            // Delete tiles with missing cell-descriptions for their coordinates
+            std::erase_if(coord_to_tile,
+                          [&coord_to_cells](const auto& item) { return coord_to_cells.count(item.first) == 0; });
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                std::vector<coordinate<Lyt>> empty_latches{};
-
-                // Find empty latches via missing cell-descriptions for their coordinates
-                for (const auto& [coord, ldscr] : coord_to_latch_tile)
-                {
-                    if (coord_to_latch_cells.count(coord) == 0)
-                    {
-                        empty_latches.emplace_back(coord);
-                    }
-                }
-
-                // Delete empty latches
-                for (const auto& coord : empty_latches)
-                {
-                    coord_to_latch_tile.erase(coord);
-                }
+                // Delete latches with missing cell-descriptions for their coordinates
+                std::erase_if(coord_to_latch_tile, [&coord_to_latch_cells](const auto& item)
+                              { return coord_to_latch_cells.count(item.first) == 0; });
             }
         }
 

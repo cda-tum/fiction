@@ -14,9 +14,11 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <fstream>
 #include <ostream>
+#include <ranges>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -57,7 +59,7 @@ class write_location_and_ground_state_impl
             // write the column headers
             os << "x [nm]; y [nm];";
 
-            for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
+            for (const auto i : std::views::iota(std::size_t{0}, ground_state_layouts.size()))
             {
                 os << fmt::format("GS_{};", i);
             }

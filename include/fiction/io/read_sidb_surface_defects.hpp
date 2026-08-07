@@ -65,8 +65,8 @@ namespace sidb_defects
 
 /* Regex */
 
-static const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
-static const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
+inline const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
+inline const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
 
 /**
  * Maps indices in the data format to defect types.
