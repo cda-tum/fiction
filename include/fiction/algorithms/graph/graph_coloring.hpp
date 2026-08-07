@@ -5,17 +5,21 @@
 #ifndef FICTION_GRAPH_COLORING_HPP
 #define FICTION_GRAPH_COLORING_HPP
 
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/hash.hpp"  // NOLINT(misc-include-cleaner): provides std::hash<std::pair<...>> used by variables' unordered_map
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>
-#include <bill/sat/solver.hpp>
+#include <bill/sat/interface/types.hpp>
+#include <bill/sat/solver.hpp>  // NOLINT(misc-include-cleaner): umbrella header pulling in the solver backends
 #include <bill/sat/tseytin.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
 #include <cassert>
 #include <concepts>
+#include <cstddef>
+#include <cstdint>
+#include <map>
 #include <memory>
 #include <numeric>
 #include <optional>
@@ -48,7 +52,7 @@ class vertex_coloring : public std::unordered_map<typename Graph::vertex_id_type
  * An enumeration of coloring engines to use for the graph coloring. All but SAT are using the graph-coloring library by
  * Brian Crites.
  */
-enum class graph_coloring_engine
+enum class graph_coloring_engine : std::uint8_t
 {
     /**
      * Optimal coloring for chordal graphs proposed in \"Register Allocation via Coloring of Chordal Graphs\" by Jens
@@ -82,7 +86,7 @@ enum class graph_coloring_engine
 /**
  * An enumeration of search tactics to use for the SAT-based graph coloring to determine a min-coloring.
  */
-enum class graph_coloring_sat_search_tactic
+enum class graph_coloring_sat_search_tactic : std::uint8_t
 {
     /**
      * Ascend linearly by checking for \f$k = 1, 2, 3, \dots\f$ until SAT. If at least one clique is passed, \f$k\f$
@@ -210,7 +214,14 @@ class sat_coloring_handler
             pst{st},
             largest_clique{std::ranges::max_element(ps.cliques, [](const auto& c1, const auto& c2)
                                                     { return c1.size() < c2.size(); })},
-            q{largest_clique == ps.cliques.cend() ? 1 : (largest_clique->size() ? largest_clique->size() : 1)}
+            q{[this]() -> std::size_t
+              {
+                  if (largest_clique == ps.cliques.cend())
+                  {
+                      return 1;
+                  }
+                  return largest_clique->size() != 0 ? largest_clique->size() : 1;
+              }()}
     {}
 
     result_instance check_k_coloring(const std::size_t k) const noexcept
@@ -293,7 +304,7 @@ class sat_coloring_handler
         }
 
         // create a vector of h / 2 + 1 numbers
-        std::vector<std::size_t> potential_chromatic_numbers(h / 2 + 1);
+        std::vector<std::size_t> potential_chromatic_numbers((h / 2) + 1);
         // fill the vector with the range of numbers [2^(h-1), 2^h]
         std::iota(potential_chromatic_numbers.begin(), potential_chromatic_numbers.end(), h / 2);
 
@@ -724,7 +735,7 @@ class graph_coloring_impl
                         sat_coloring_handler<Graph, Color, bill::solvers::bsat2>{graph, ps.sat_params, pst}.color();
                     break;
                 }
-#if !defined(BILL_WINDOWS_PLATFORM)
+#ifndef BILL_WINDOWS_PLATFORM
                 case bill::solvers::maple:
                 {
                     coloring =

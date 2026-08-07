@@ -16,6 +16,7 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <vector>
