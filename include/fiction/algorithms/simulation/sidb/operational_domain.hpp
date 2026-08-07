@@ -359,8 +359,8 @@ struct operational_domain_params
      * dimension, the second dimension is the y dimension, etc.
      */
     std::vector<operational_domain_value_range> sweep_dimensions{
-        operational_domain_value_range{sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
-        operational_domain_value_range{sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1}};
+        operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.1},
+        operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.1}};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -889,7 +889,9 @@ class operational_domain_impl
                     else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
                     {
                         // perform a heuristic simulation
-                        const quicksim_params qs_params{simulation_parameters, 500, 0.6};
+                        const quicksim_params qs_params{.simulation_parameters = simulation_parameters,
+                                                        .iteration_steps       = 500,
+                                                        .alpha                 = 0.6};
 
                         if (const auto result = quicksim(lyt, qs_params); result.has_value())
                         {
@@ -1231,7 +1233,7 @@ class operational_domain_impl
         if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
         {
             const auto ct = critical_temperature_gate_based(
-                layout, truth_table, critical_temperature_params{op_params_set_dimension_values});
+                layout, truth_table, critical_temperature_params{.operational_params = op_params_set_dimension_values});
 
             return operational(ct);
         }
@@ -1646,9 +1648,8 @@ class operational_domain_impl
                     const int64_t dz = static_cast<int64_t>(z) + z_offset;
 
                     // check if the new coordinate is within the bounds
-                    if ((dx >= 0 && dx < static_cast<int64_t>(num_x_indices)) &&
-                        (dy >= 0 && dy < static_cast<int64_t>(num_y_indices)) &&
-                        (dz >= 0 && dz < static_cast<int64_t>(num_z_indices)))
+                    if ((dx >= 0 && std::cmp_less(dx, num_x_indices)) &&
+                        (dy >= 0 && std::cmp_less(dy, num_y_indices)) && (dz >= 0 && std::cmp_less(dz, num_z_indices)))
                     {
                         emplace(static_cast<uint64_t>(dx), static_cast<uint64_t>(dy), static_cast<uint64_t>(dz));
                     }
