@@ -1057,6 +1057,90 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     }
 }
 
+TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operational-domain]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{24, 0}, "BDL wire"};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    // output perturber
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base = 2;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+
+    // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
+    op_domain_params.sweep_dimensions[0].min  = 0.5;
+    op_domain_params.sweep_dimensions[0].max  = 4.25;
+    op_domain_params.sweep_dimensions[0].step = 0.25;
+
+    op_domain_params.sweep_dimensions[1].min  = 0.5;
+    op_domain_params.sweep_dimensions[1].max  = 4.25;
+    op_domain_params.sweep_dimensions[1].step = 0.25;
+
+    // ground truth to compare the contour tracing results against
+    const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
+
+    // the random samples are drawn from an unseeded generator; repeat to make the assertions meaningful
+    for (auto i = 0; i < 5; ++i)
+    {
+        operational_domain_stats op_domain_stats{};
+
+        detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt, operational_domain> impl{
+            lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
+
+        const auto op_domain = impl.contour_tracing(50);
+
+        const auto inferred_points = impl.inferred_operational_parameter_points();
+
+        // the contour must have been traced at all
+        REQUIRE(op_domain_stats.num_operational_parameter_combinations > 0);
+
+        // once a contour has been traced, the area it encloses must be marked as inferred operational so that further
+        // samples landing inside it do not trigger another trace of the very same contour
+        CHECK(!inferred_points.empty());
+
+        // the inference must not leak out of the traced contour, i.e., it must never assume a non-operational
+        // parameter point to be operational
+        for (const auto& pp : inferred_points)
+        {
+            const auto ground_truth = grid_search_domain.contains(pp);
+
+            REQUIRE(ground_truth.has_value());
+            CHECK(std::get<0>(ground_truth.value()) == operational_status::OPERATIONAL);
+        }
+
+        // inferred points are never added to the operational domain, so every reported status must match the ground
+        // truth
+        op_domain.for_each(
+            [&grid_search_domain](const auto& coord, const auto& op_value)
+            {
+                const auto ground_truth = grid_search_domain.contains(coord);
+
+                REQUIRE(ground_truth.has_value());
+                CHECK(std::get<0>(op_value) == std::get<0>(ground_truth.value()));
+            });
+    }
+}
+
 TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domain]")
 {
     using layout = sidb_cell_clk_lyt_siqad;
