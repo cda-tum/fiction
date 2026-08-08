@@ -20,8 +20,11 @@
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
+#include <functional>
 #include <optional>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -1158,6 +1161,113 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
                 REQUIRE(ground_truth.has_value());
                 CHECK(std::get<0>(op_value) == std::get<0>(ground_truth.value()));
             });
+    }
+}
+
+TEST_CASE("Parallel flood fill yields deterministic results", "[operational-domain]")
+{
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{24, 0}, "BDL wire"};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    // output perturber
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    sidb_simulation_parameters sim_params{};
+    sim_params.base = 2;
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sim_params;
+    // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
+    op_domain_params.sweep_dimensions = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
+
+    // ground truth to compare the flood fill results against
+    const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
+
+    // collect all operational parameter points of the ground truth in a deterministic order
+    std::vector<parameter_point> operational_points{};
+
+    grid_search_domain.for_each(
+        [&operational_points](const auto& coord, const auto& op_value)
+        {
+            if (std::get<0>(op_value) == operational_status::OPERATIONAL)
+            {
+                operational_points.push_back(coord);
+            }
+        });
+
+    REQUIRE(operational_points.size() == 80);
+
+    std::ranges::sort(operational_points, std::ranges::less{}, &parameter_point::get_parameters);
+
+    // seeding the flood fill with a known operational point and taking no random samples makes it fully
+    // deterministic, so any run-to-run difference can only stem from the parallelization
+    const auto& seed_point = operational_points.front();
+
+    std::optional<std::vector<std::pair<parameter_point, operational_status>>> reference{};
+
+    for (auto i = 0; i < 10; ++i)
+    {
+        operational_domain_stats op_domain_stats{};
+
+        detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt, operational_domain> impl{
+            lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
+
+        const auto op_domain = impl.flood_fill(0, seed_point);
+
+        std::vector<std::pair<parameter_point, operational_status>> result{};
+
+        op_domain.for_each([&result](const auto& coord, const auto& op_value)
+                           { result.emplace_back(coord, std::get<0>(op_value)); });
+
+        std::ranges::sort(result, std::ranges::less{}, [](const auto& entry) { return entry.first.get_parameters(); });
+
+        // every point the parallel flood fill reports must match the ground truth
+        for (const auto& [pp, status] : result)
+        {
+            const auto ground_truth = grid_search_domain.contains(pp);
+
+            REQUIRE(ground_truth.has_value());
+
+            // the `REQUIRE` above already aborts on an empty optional, but the static analyzer cannot see that
+            if (ground_truth.has_value())
+            {
+                CHECK(status == std::get<0>(*ground_truth));
+            }
+        }
+
+        // the single operational island is connected, so flood fill must find all 80 of its points
+        CHECK(op_domain_stats.num_operational_parameter_combinations == 80);
+
+        // no parameter point may be simulated twice
+        CHECK(op_domain_stats.num_evaluated_parameter_combinations == op_domain.size());
+
+        if (!reference.has_value())
+        {
+            reference = result;
+        }
+        else
+        {
+            // the explored set does not depend on the order of exploration, so every run must produce the exact same
+            // result regardless of how the work happened to be distributed among the threads
+            CHECK(result == *reference);
+        }
     }
 }
 
