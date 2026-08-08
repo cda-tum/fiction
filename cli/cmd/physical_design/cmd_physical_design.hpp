@@ -15,6 +15,7 @@
 #include "include/hex.hpp"
 #include "include/optimize.hpp"
 #include "include/ortho.hpp"
+#include "include/plane.hpp"
 // NOLINTEND(misc-include-cleaner)
 
 namespace alice
@@ -30,6 +31,7 @@ ALICE_ADD_COMMAND(gold, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 ALICE_ADD_COMMAND(hex, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 ALICE_ADD_COMMAND(optimize, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 ALICE_ADD_COMMAND(ortho, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
+ALICE_ADD_COMMAND(plane, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 
 }  // namespace alice
 
