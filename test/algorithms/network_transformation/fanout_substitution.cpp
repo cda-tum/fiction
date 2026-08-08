@@ -13,6 +13,7 @@
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
+#include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
 
 #include <type_traits>

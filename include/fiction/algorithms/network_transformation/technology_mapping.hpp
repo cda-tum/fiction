@@ -10,6 +10,7 @@
 #include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 
+#include <lorina/common.hpp>
 #include <lorina/genlib.hpp>
 #include <mockturtle/algorithms/mapper.hpp>
 #include <mockturtle/io/genlib_reader.hpp>
@@ -127,13 +128,7 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params and_or_not() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv  = true;
-    params.and2 = true;
-    params.or2  = true;
-
-    return params;
+    return technology_mapping_params{.inv = true, .and2 = true, .or2 = true};
 }
 /**
  * Auxiliary function to create technology mapping parameters for AND, OR, NOT, and MAJ gates.
@@ -142,14 +137,7 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params and_or_not_maj() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv  = true;
-    params.and2 = true;
-    params.or2  = true;
-    params.maj3 = true;
-
-    return params;
+    return technology_mapping_params{.inv = true, .and2 = true, .or2 = true, .maj3 = true};
 }
 /**
  * Auxiliary function to create technology mapping parameters for AND, OR, NAND, NOR, XOR, XNOR, and NOT gates.
@@ -158,18 +146,13 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params all_standard_2_input_functions() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv = true;
-
-    params.and2  = true;
-    params.nand2 = true;
-    params.or2   = true;
-    params.nor2  = true;
-    params.xor2  = true;
-    params.xnor2 = true;
-
-    return params;
+    return technology_mapping_params{.inv   = true,
+                                     .and2  = true,
+                                     .nand2 = true,
+                                     .or2   = true,
+                                     .nor2  = true,
+                                     .xor2  = true,
+                                     .xnor2 = true};
 }
 /**
  * Auxiliary function to create technology mapping parameters for AND, OR, NAND, NOR, XOR, XNOR, LE, GE, LT, GT,
@@ -179,22 +162,17 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params all_2_input_functions() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv = true;
-
-    params.and2  = true;
-    params.nand2 = true;
-    params.or2   = true;
-    params.nor2  = true;
-    params.xor2  = true;
-    params.xnor2 = true;
-    params.lt2   = true;
-    params.gt2   = true;
-    params.le2   = true;
-    params.ge2   = true;
-
-    return params;
+    return technology_mapping_params{.inv   = true,
+                                     .and2  = true,
+                                     .nand2 = true,
+                                     .or2   = true,
+                                     .nor2  = true,
+                                     .xor2  = true,
+                                     .xnor2 = true,
+                                     .lt2   = true,
+                                     .gt2   = true,
+                                     .le2   = true,
+                                     .ge2   = true};
 }
 /**
  * Auxiliary function to create technology mapping parameters for AND3, XOR_AND, OR_AND, ONEHOT, MAJ3, GAMBLE, DOT, MUX,
@@ -204,21 +182,16 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params all_standard_3_input_functions() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv = true;
-
-    params.and3    = true;
-    params.xor_and = true;
-    params.or_and  = true;
-    params.onehot  = true;
-    params.maj3    = true;
-    params.gamble  = true;
-    params.dot     = true;
-    params.mux     = true;
-    params.and_xor = true;
-
-    return params;
+    return technology_mapping_params{.inv     = true,
+                                     .and3    = true,
+                                     .xor_and = true,
+                                     .or_and  = true,
+                                     .onehot  = true,
+                                     .maj3    = true,
+                                     .gamble  = true,
+                                     .dot     = true,
+                                     .mux     = true,
+                                     .and_xor = true};
 }
 /**
  * Auxiliary function to create technology mapping parameters for all supported standard functions.
@@ -227,28 +200,22 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params all_supported_standard_functions() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv = true;
-
-    params.and2  = true;
-    params.nand2 = true;
-    params.or2   = true;
-    params.nor2  = true;
-    params.xor2  = true;
-    params.xnor2 = true;
-
-    params.and3    = true;
-    params.xor_and = true;
-    params.or_and  = true;
-    params.onehot  = true;
-    params.maj3    = true;
-    params.gamble  = true;
-    params.dot     = true;
-    params.mux     = true;
-    params.and_xor = true;
-
-    return params;
+    return technology_mapping_params{.inv     = true,
+                                     .and2    = true,
+                                     .nand2   = true,
+                                     .or2     = true,
+                                     .nor2    = true,
+                                     .xor2    = true,
+                                     .xnor2   = true,
+                                     .and3    = true,
+                                     .xor_and = true,
+                                     .or_and  = true,
+                                     .onehot  = true,
+                                     .maj3    = true,
+                                     .gamble  = true,
+                                     .dot     = true,
+                                     .mux     = true,
+                                     .and_xor = true};
 }
 /**
  * Auxiliary function to create technology mapping parameters for all supported functions.
@@ -257,32 +224,26 @@ struct technology_mapping_params
  */
 [[nodiscard]] inline technology_mapping_params all_supported_functions() noexcept
 {
-    technology_mapping_params params{};
-
-    params.inv = true;
-
-    params.and2  = true;
-    params.nand2 = true;
-    params.or2   = true;
-    params.nor2  = true;
-    params.xor2  = true;
-    params.xnor2 = true;
-    params.lt2   = true;
-    params.gt2   = true;
-    params.le2   = true;
-    params.ge2   = true;
-
-    params.and3    = true;
-    params.xor_and = true;
-    params.or_and  = true;
-    params.onehot  = true;
-    params.maj3    = true;
-    params.gamble  = true;
-    params.dot     = true;
-    params.mux     = true;
-    params.and_xor = true;
-
-    return params;
+    return technology_mapping_params{.inv     = true,
+                                     .and2    = true,
+                                     .nand2   = true,
+                                     .or2     = true,
+                                     .nor2    = true,
+                                     .xor2    = true,
+                                     .xnor2   = true,
+                                     .lt2     = true,
+                                     .gt2     = true,
+                                     .le2     = true,
+                                     .ge2     = true,
+                                     .and3    = true,
+                                     .xor_and = true,
+                                     .or_and  = true,
+                                     .onehot  = true,
+                                     .maj3    = true,
+                                     .gamble  = true,
+                                     .dot     = true,
+                                     .mux     = true,
+                                     .and_xor = true};
 }
 /**
  * Statistics for technology mapping.

@@ -78,19 +78,6 @@ Changed
       ``static_assert(std::is_same_v<...>)`` was deliberately left as-is, since it sits alongside
       custom-trait ``static_assert``\ s in the same function and converting only one of three checks to a
       ``requires`` clause isn't a clear readability win.
-    - Started the incremental C++20 modernization of ``include/fiction/algorithms/`` with a pilot slice
-      across its five smallest subdirectories (``graph/``, ``iter/``, ``optimization/``, ``properties/``,
-      ``verification/``): ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
-      (``generate_edge_intersection_graph.hpp``, ``graph_coloring.hpp``, ``mincross.hpp``,
-      ``bdl_input_iterator.hpp``, ``critical_path_length_and_throughput.hpp``, ``virtual_miter.hpp``), and
-      a ``requires`` clause with ``std::same_as`` in place of an ``std::enable_if_t``/``std::is_same_v``
-      SFINAE constraint (``graph_coloring.hpp``). ``aspect_ratio_iterator.hpp`` and
-      ``gray_code_iterator.hpp``'s hand-written comparison operators were deliberately left as-is: they
-      compare derived/partial state (dereferenced iterators, a single cached field) rather than performing
-      plain memberwise equality, so defaulting them would silently change behavior.
-      ``simulated_annealing.hpp``, ``count_gate_types.hpp``, ``design_rule_violations.hpp``, and
-      ``equivalence_checking.hpp`` had nothing applicable in any of the four modernization categories.
-
       Then extended beyond those four categories to the remaining candidates surfaced by a full-module
       survey: C++17 ``if``-init statements collapsing the ``tinyxml2`` "look up an XML element, then check
       it and its text for null" two-statement pattern into one throughout ``read_fgl_layout.hpp``
@@ -109,6 +96,45 @@ Changed
       generator in ``write_qca_layout.hpp`` and an index-as-iterator refactor flagged by existing
       ``// TODO`` comments in ``tt_reader.hpp`` were surveyed but deliberately left alone as
       out-of-proportion, purely stylistic risk for no real C++20 gain
+    - Started the incremental C++20 modernization of ``include/fiction/algorithms/`` with a pilot slice
+      across its five smallest subdirectories (``graph/``, ``iter/``, ``optimization/``, ``properties/``,
+      ``verification/``): ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
+      (``generate_edge_intersection_graph.hpp``, ``graph_coloring.hpp``, ``mincross.hpp``,
+      ``bdl_input_iterator.hpp``, ``critical_path_length_and_throughput.hpp``, ``virtual_miter.hpp``), and
+      a ``requires`` clause with ``std::same_as`` in place of an ``std::enable_if_t``/``std::is_same_v``
+      SFINAE constraint (``graph_coloring.hpp``). ``aspect_ratio_iterator.hpp`` and
+      ``gray_code_iterator.hpp``'s hand-written comparison operators were deliberately left as-is: they
+      compare derived/partial state (dereferenced iterators, a single cached field) rather than performing
+      plain memberwise equality, so defaulting them would silently change behavior.
+      ``simulated_annealing.hpp``, ``count_gate_types.hpp``, ``design_rule_violations.hpp``, and
+      ``equivalence_checking.hpp`` had nothing applicable in any of the four modernization categories.
+      Fixed 16 Clang-Tidy whole-file findings surfaced once these files were touched: missing
+      ``<cstddef>``/``<cstdint>``/``<map>`` includes, an explicit ``std::uint8_t`` base type for two
+      ``graph_coloring.hpp`` enums, a nested ternary in a member-initializer list, missing parentheses
+      around ``h / 2 + 1``, an ``#ifndef`` in place of ``#if !defined(...)``, an unused
+      ``<mockturtle/traits.hpp>`` include, and a ``<bill/sat/interface/types.hpp>`` include for symbols
+      that were only pulled in transitively before.
+
+      Continued into ``network_transformation/`` and ``path_finding/`` (11 more files): designated
+      initializers for the ``technology_mapping_params`` builder functions in ``technology_mapping.hpp``;
+      ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
+      (``network_balancing.hpp``, ``a_star.hpp``, ``k_shortest_paths.hpp``); and a ``requires`` clause
+      with ``std::integral``/``std::floating_point`` in place of
+      ``static_assert(std::is_integral_v<...>)``/``static_assert(std::is_floating_point_v<...>)`` checks
+      (``cost.hpp``, ``distance.hpp``, ``a_star.hpp``). ``delete_virtual_pis.hpp``,
+      ``fanout_substitution.hpp``, ``network_conversion.hpp``, ``enumerate_all_paths.hpp``, and
+      ``distance_map.hpp`` had nothing applicable in any of the four modernization categories. Fixed the
+      whole-file Clang-Tidy findings this surfaced: missing ``<cassert>``/``<cstddef>``/``<cstdint>``/
+      ``<vector>`` includes and several unused includes (``<cstdlib>`` in ``delete_virtual_pis.hpp``;
+      ``<mockturtle/algorithms/cleanup.hpp>``, ``fiction/traits.hpp``, and ``<utility>`` in
+      ``network_balancing.hpp``; ``fiction/types.hpp`` in ``network_conversion.hpp``; ``<iterator>`` in
+      ``a_star.hpp``; ``<type_traits>`` in ``cost.hpp`` and ``distance.hpp``); a missing
+      ``<lorina/common.hpp>`` include for ``lorina::return_code`` in ``technology_mapping.hpp``; and two
+      missing-parentheses precedence findings in ``distance.hpp`` and ``distance_map.hpp``. Removing the
+      unused ``fiction/types.hpp`` include from ``network_conversion.hpp`` broke
+      ``test/algorithms/network_transformation/fanout_substitution.cpp``, which relied on it transitively
+      for ``mockturtle::mig_network``; fixed by including ``<mockturtle/networks/mig.hpp>`` directly in
+      the test instead of restoring the unused library include.
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
