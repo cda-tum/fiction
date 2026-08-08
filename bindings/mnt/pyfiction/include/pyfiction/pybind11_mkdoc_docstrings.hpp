@@ -9220,17 +9220,38 @@ operational domain with multiple islands is investigated.
 
 The function starts at the given starting point and performs flood
 fill to mark all points that are reachable from the starting point
-until it encounters the non-operational edges.
+until it encounters the traced contour.
+
+The flood fill expands over the von Neumann (4-connected)
+neighborhood, while the given contour is a closed 8-connected curve.
+Since a 4-connected path cannot cross an 8-connected closed curve, the
+inference is guaranteed to stay within the area enclosed by the
+contour. Points on the contour itself are marked, but not expanded
+from.
 
 Note that no physical simulation is conducted by this function!
 
 Parameter ``starting_point``:
     Step point at which to start the inference. If `starting_point` is
-    non-operational, this function might invoke undefined behavior.)doc";
+    non-operational, this function might invoke undefined behavior.
+
+Parameter ``contour``:
+    The step points visited by the contour trace that encloses
+    `starting_point`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_inferred_op_domain =
 R"doc(All the points inferred (assumed) to be operational but not actually
 simulated.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_inferred_operational_parameter_points =
+R"doc(Returns the parameter points that were inferred (assumed) to be
+operational because they are enclosed by a contour traced by
+`contour_tracing`. These points have not been simulated and are,
+therefore, not part of the returned operational domain. They are
+exposed to enable inspection of the enclosure inference.
+
+Returns:
+    The parameter points that have been inferred to be operational.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -9481,6 +9502,21 @@ Returns:
 static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_values = R"doc(All dimension values.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_von_neumann_neighborhood_2d =
+R"doc(Returns the 2D von Neumann neighborhood of the step point at `sp = (x,
+y)`. The 2D von Neumann neighborhood is the set of all points that are
+adjacent to `(x, y)` in the plane excluding the diagonals. Thereby,
+the 2D von Neumann neighborhood contains up to 4 points as points
+outside of the parameter range are not gathered. The points are
+returned in no particular order.
+
+Parameter ``sp``:
+    Step point to get the 2D von Neumann neighborhood of.
+
+Returns:
+    The 2D von Neumann neighborhood of the step point at `sp = (x,
+    y)`.)doc";
 
 static const char *__doc_fiction_detail_optimize_output_positions =
 R"doc(Utility function that moves outputs from the last row to the previous

@@ -119,6 +119,14 @@ Removed
 
 Fixed
 #####
+- Fixed the enclosure inference of ``operational_domain_contour_tracing``, which had never been active: an
+  inverted guard in ``infer_operational_status_in_enclosing_contour`` left the set of points assumed to be
+  operational by enclosure permanently empty, so every random sample landing in an already traced operational
+  island triggered another trace of the very same contour. Additionally, the inference's flood fill is now
+  bounded by the traced contour and expands over the von Neumann (4-connected) neighborhood instead of the
+  Moore (8-connected) one. Since a 4-connected path cannot cross an 8-connected closed curve, the inference is
+  now guaranteed to stay inside the traced contour and can no longer suppress the tracing of other operational
+  islands
 - Code quality:
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
