@@ -56,8 +56,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
         wlyt.foreach_sidb_defect(
             [&rlyt](const auto& cd)
             {
-                const auto& wc = cd.first;
-                const auto& wd = cd.second;
+                const auto& [wc, wd]{cd};
 
                 const auto& rd = rlyt.get_sidb_defect(wc);
 

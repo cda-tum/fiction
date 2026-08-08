@@ -96,7 +96,7 @@ class write_fgl_layout_impl
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;
-        std::string layout_name = get_name(lyt);
+        const std::string layout_name{get_name(lyt)};
 
         // check if topology matches Lyt
         std::string topology{};
@@ -157,7 +157,7 @@ class write_fgl_layout_impl
             {
                 for (uint64_t y = 0; y <= lyt.y(); ++y)
                 {
-                    int clock = clocking_scheme({x, y});
+                    const int clock{clocking_scheme({x, y})};
                     os << fmt::format(fcn::CLOCK_ZONE, x, y, clock);
                 }
             }
@@ -301,9 +301,9 @@ class write_fgl_layout_impl
                     os << fmt::format(fcn::GATE, gate_id, kitty::to_hex(node_fun), "", coord.x, coord.y, coord.z);
 
                     os << fcn::OPEN_INCOMING;
-                    for (std::size_t i = 0; i < signals.size(); i++)
+                    for (const auto& sig : signals)
                     {
-                        os << fmt::format(fcn::SIGNAL, signals[i].x, signals[i].y, signals[i].z);
+                        os << fmt::format(fcn::SIGNAL, sig.x, sig.y, sig.z);
                     }
                     os << fcn::CLOSE_INCOMING;
                 }

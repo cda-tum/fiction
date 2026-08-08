@@ -21258,7 +21258,11 @@ Parameter ``sdm``:
 
 static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
-static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
+static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error =
+R"doc(Constructs a `sqd_parsing_error` with the given error message.
+
+Parameter ``msg``:
+    Error message.)doc";
 
 static const char *__doc_fiction_squared_euclidean_distance =
 R"doc(The squared Euclidean distance :math:`D` between two layout
@@ -21627,7 +21631,15 @@ Template parameter ``DrawHexTT``:
     Flag to toggle the representation of truth tables for unknown
     functions in hexadecimal notation.)doc";
 
-static const char *__doc_fiction_technology_dot_drawer_is_node_number = R"doc()doc";
+static const char *__doc_fiction_technology_dot_drawer_is_node_number =
+R"doc(Checks whether a string represents a non-negative integer, i.e.,
+consists exclusively of digits.
+
+Parameter ``s``:
+    String to check.
+
+Returns:
+    `true` iff `s` is non-empty and consists exclusively of digits.)doc";
 
 static const char *__doc_fiction_technology_dot_drawer_node_fillcolor = R"doc()doc";
 
