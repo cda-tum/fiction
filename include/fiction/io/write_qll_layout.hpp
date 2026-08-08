@@ -90,7 +90,7 @@ inline constexpr const char* PIN =
 inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-static const std::unordered_map<inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
+inline const std::unordered_map<inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
     {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
     {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
     {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
@@ -162,7 +162,7 @@ class write_qll_layout_impl
     {
         std::vector<cell<Lyt>> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
-        std::sort(pi_list.begin(), pi_list.end(), [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(pi_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
 
         return pi_list;
     }
@@ -171,7 +171,7 @@ class write_qll_layout_impl
     {
         std::vector<cell<Lyt>> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
-        std::sort(po_list.begin(), po_list.end(), [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(po_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
 
         return po_list;
     }

@@ -100,6 +100,38 @@ Changed
       ``obstruction_layout.hpp``, ``shifted_cartesian_layout.hpp``, ``bounding_box.hpp``,
       ``clocked_layout.hpp``, and ``cartesian_layout.hpp`` had nothing applicable in any of the four
       modernization categories
+    - Completed a full C++20 modernization of ``include/fiction/io/`` and its tests, first with the four
+      categories established for the other modules: ``std::ranges`` algorithms in place of iterator-pair
+      ``std::algorithm`` calls across ``network_reader.hpp``, ``write_location_and_ground_state.hpp``,
+      ``write_sqd_sim_result.hpp``, ``write_qll_layout.hpp``, ``write_qcc_layout.hpp``,
+      ``read_sqd_layout.hpp``, ``read_fgl_layout.hpp``, ``dot_drawers.hpp``, and ``write_svg_layout.hpp``;
+      ``std::erase_if`` in place of the erase-remove idiom in
+      ``test/io/write_location_and_ground_state.cpp`` and ``test/io/write_svg_layout.cpp``; and
+      designated initializers in ``test/io/write_operational_domain.cpp`` and
+      ``test/io/write_svg_layout.cpp``. This module has no hand-written ``operator==``/``operator!=``
+      pairs or bit-field-bearing structs to modernize. ``write_svg_layout.hpp``'s one
+      ``static_assert(std::is_same_v<...>)`` was deliberately left as-is, since it sits alongside
+      custom-trait ``static_assert``\ s in the same function and converting only one of three checks to a
+      ``requires`` clause isn't a clear readability win.
+
+      Then extended beyond those four categories to the remaining candidates surfaced by a full-module
+      survey: C++17 ``if``-init statements collapsing the ``tinyxml2`` "look up an XML element, then check
+      it and its text for null" two-statement pattern into one throughout ``read_fgl_layout.hpp``
+      (bringing it in line with ``read_sqd_layout.hpp``'s existing convention); ``std::views::iota`` in
+      place of manually incremented loop counters in ``print_layout.hpp`` and
+      ``write_location_and_ground_state.hpp``; plain range-based ``for`` loops in place of vector index
+      loops in ``read_fgl_layout.hpp`` and ``write_fgl_layout.hpp``; ``std::erase_if`` on associative
+      containers (a case the erase-remove-idiom pass had missed, since it isn't shaped like
+      ``remove_if``/``.erase()``) in ``write_svg_layout.hpp``; ``static``\ →\ ``inline`` on namespace-scope
+      ``fmt::text_style``, ``std::regex``, and ``std::unordered_map`` constants in ``print_layout.hpp``,
+      ``read_fqca_layout.hpp``, ``read_sidb_surface_defects.hpp``, ``write_qcc_layout.hpp``,
+      ``write_qll_layout.hpp``, and ``write_sqd_layout.hpp`` to avoid per-translation-unit duplication;
+      structured bindings in place of ``.first``/``.second`` access in ``test/io/read_sqd_layout.cpp`` and
+      ``test/io/write_sqd_layout.cpp``; and const-correctness fixes for never-reassigned locals in
+      ``write_fgl_layout.hpp`` and ``write_svg_layout.hpp``. A hand-rolled nested-loop corner-offset
+      generator in ``write_qca_layout.hpp`` and an index-as-iterator refactor flagged by existing
+      ``// TODO`` comments in ``tt_reader.hpp`` were surveyed but deliberately left alone as
+      out-of-proportion, purely stylistic risk for no real C++20 gain
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
@@ -134,6 +166,10 @@ Fixed
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
       enabling ``fmt``'s ``consteval`` format-string checks
+    - Fixed two ``std::string_view::data()`` calls in ``network_reader.hpp`` and
+      ``write_location_and_ground_state.hpp`` that relied on null-termination they aren't guaranteed to
+      have, surfaced by Clang-Tidy's whole-file linting once these files were touched for the ``io/``
+      modernization pass
     - Fixed a ``std::string_view::data()`` call in ``clocking_scheme.hpp``'s ``get_clocking_scheme`` that
       relied on null-termination it isn't guaranteed to have, surfaced by Clang-Tidy's whole-file linting
       once the file was touched for the ``layouts/`` modernization pass
@@ -144,6 +180,19 @@ Fixed
     - Fixed a signed-integer overflow in ``coordinates.hpp``'s ``to_siqad_coord`` for the minimum
       representable ``CoordinateType::y`` value, where negating it before taking the modulo was undefined
       behavior; the SiQAD ``z`` value is now derived from ``coord.y % 2`` directly, without negation
+    - Fixed CodeRabbit and Clang-Tidy findings surfaced on the ``io/`` modernization PR: plain ``char``
+      values (potentially negative on signed-``char`` platforms) passed directly to ``::isdigit``,
+      ``::isxdigit``, and ``::tolower`` in ``dot_drawers.hpp``, ``read_fgl_layout.hpp``, and
+      ``read_sqd_layout.hpp``, which is undefined behavior for non-``unsigned char``/non-``EOF``
+      arguments; two more ``std::string_view::data()`` calls relying on unguaranteed null-termination in
+      ``read_fqca_layout.hpp`` and ``read_sidb_surface_defects.hpp``; a non-null-terminated
+      ``std::string_view::data()`` passed to ``paths.emplace_back()`` in ``network_reader.hpp``; unused
+      ``cell_technologies.hpp``, ``sstream``, and ``cstdint`` includes in ``read_fqca_layout.hpp`` and
+      ``write_location_and_ground_state.hpp``; a missing ``<iterator>`` include for
+      ``std::istreambuf_iterator`` in ``read_sidb_surface_defects.hpp``; an oversized ``int`` base type
+      for the two-value ``fqca_section`` enum in ``read_fqca_layout.hpp``; and brace-init/Doxygen
+      documentation gaps on declarations touched by the modernization in ``dot_drawers.hpp``,
+      ``read_sqd_layout.hpp``, ``print_layout.hpp``, and ``write_fgl_layout.hpp``
 - Python bindings:
     - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
       symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from

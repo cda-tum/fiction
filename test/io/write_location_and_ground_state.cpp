@@ -3,18 +3,20 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
-#include <algorithm>
+#include <cctype>
 #include <sstream>
 #include <string>
 
@@ -26,10 +28,10 @@ using lattice = sidb_100_cell_clk_lyt_siqad;
 bool compare_output(const std::string& output, const std::string& expected)
 {
     std::string clean_output = output;
-    clean_output.erase(std::remove_if(clean_output.begin(), clean_output.end(), ::isspace), clean_output.end());
+    std::erase_if(clean_output, ::isspace);
 
     std::string clean_expected = expected;
-    clean_expected.erase(std::remove_if(clean_expected.begin(), clean_expected.end(), ::isspace), clean_expected.end());
+    std::erase_if(clean_expected, ::isspace);
 
     return clean_output == clean_expected;
 }

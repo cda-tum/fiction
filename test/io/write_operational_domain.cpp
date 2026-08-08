@@ -102,7 +102,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("custom operational tags")
     {
-        const write_operational_domain_params params = {.operational_tag = "True", .non_operational_tag = "False"};
+        const write_operational_domain_params params{.operational_tag = "True", .non_operational_tag = "False"};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,True", "0,1,False"};
 
@@ -119,8 +119,8 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("skip non-operational samples")
     {
-        write_operational_domain_params params{};
-        params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+        write_operational_domain_params const params{
+            .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
 
@@ -257,8 +257,8 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     }
     SECTION("custom operational tags")
     {
-        const write_operational_domain_params params = {.operational_tag     = "operational",
-                                                        .non_operational_tag = "non-operational"};
+        const write_operational_domain_params params{.operational_tag     = "operational",
+                                                     .non_operational_tag = "non-operational"};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
                                              "0.3,0.4,non-operational", "1.2,1.4,operational",
@@ -277,8 +277,8 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
     SECTION("skip non-operational samples")
     {
-        write_operational_domain_params params{};
-        params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+        write_operational_domain_params const params{
+            .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
 
@@ -326,8 +326,8 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
         }
         SECTION("custom operational tags")
         {
-            const write_operational_domain_params params = {.operational_tag     = "operational",
-                                                            .non_operational_tag = "non-operational"};
+            const write_operational_domain_params params{.operational_tag     = "operational",
+                                                         .non_operational_tag = "non-operational"};
 
             const std::set<std::string> expected{"epsilon_r,operational status,critical temperature",
                                                  "0.1,operational,50.3", "0.3,non-operational,0", "1.2,operational,400",
@@ -346,8 +346,8 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 
         SECTION("skip non-operational samples")
         {
-            write_operational_domain_params params{};
-            params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+            write_operational_domain_params const params{
+                .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
             const std::set<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
                                                  "1.2,1,400"};
@@ -394,8 +394,8 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
         }
         SECTION("custom operational tags")
         {
-            const write_operational_domain_params params = {.operational_tag     = "operational",
-                                                            .non_operational_tag = "non-operational"};
+            const write_operational_domain_params params{.operational_tag     = "operational",
+                                                         .non_operational_tag = "non-operational"};
 
             const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
                                                  "0.1,0.2,operational,50.3", "0.3,0.4,non-operational,0",
@@ -414,8 +414,8 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 
         SECTION("skip non-operational samples")
         {
-            write_operational_domain_params params{};
-            params.writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+            write_operational_domain_params const params{
+                .writing_mode = write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
             const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
                                                  "0.1,0.2,1,50.3", "1.2,1.4,1,400"};
