@@ -11,12 +11,12 @@
 #include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
 
-#include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/views/depth_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 
-#include <type_traits>
+#include <cstdint>
 
 using namespace fiction;
 
@@ -54,9 +54,9 @@ TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 {
     const auto tec = blueprints::multi_output_and_network<technology_network>();
 
-    const fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
-    const fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
-    const fanout_substitution_params ps_random{fanout_substitution_params::substitution_strategy::RANDOM};
+    const fanout_substitution_params ps_depth{.strategy = fanout_substitution_params::substitution_strategy::DEPTH};
+    const fanout_substitution_params ps_breadth{.strategy = fanout_substitution_params::substitution_strategy::BREADTH};
+    const fanout_substitution_params ps_random{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
 
     substitute(tec, ps_depth, tec.size() + 3);
     substitute(tec, ps_breadth, tec.size() + 3);
@@ -68,9 +68,9 @@ TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
     const auto tec = blueprints::maj4_network<technology_network>();
     CHECK(!is_fanout_substituted(tec));
 
-    const fanout_substitution_params ps_depth{fanout_substitution_params::substitution_strategy::DEPTH};
-    const fanout_substitution_params ps_breadth{fanout_substitution_params::substitution_strategy::BREADTH};
-    const fanout_substitution_params ps_random{fanout_substitution_params::substitution_strategy::RANDOM};
+    const fanout_substitution_params ps_depth{.strategy = fanout_substitution_params::substitution_strategy::DEPTH};
+    const fanout_substitution_params ps_breadth{.strategy = fanout_substitution_params::substitution_strategy::BREADTH};
+    const fanout_substitution_params ps_random{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
 
     substitute(tec, ps_depth, tec.size() + 7);
     substitute(tec, ps_breadth, tec.size() + 7);
@@ -87,9 +87,15 @@ TEST_CASE("Degree and threshold in fanout substitution", "[fanout-substitution]"
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
-    const fanout_substitution_params ps_31{fanout_substitution_params::substitution_strategy::BREADTH, 3, 1};
-    const fanout_substitution_params ps_22{fanout_substitution_params::substitution_strategy::DEPTH, 2, 2};
-    const fanout_substitution_params ps_32{fanout_substitution_params::substitution_strategy::RANDOM, 3, 2};
+    const fanout_substitution_params ps_31{.strategy  = fanout_substitution_params::substitution_strategy::BREADTH,
+                                           .degree    = 3,
+                                           .threshold = 1};
+    const fanout_substitution_params ps_22{.strategy  = fanout_substitution_params::substitution_strategy::DEPTH,
+                                           .degree    = 2,
+                                           .threshold = 2};
+    const fanout_substitution_params ps_32{.strategy  = fanout_substitution_params::substitution_strategy::RANDOM,
+                                           .degree    = 3,
+                                           .threshold = 2};
 
     substitute(aig, ps_31, aig.size() + 35);
     substitute(aig, ps_22, aig.size() + 34);
@@ -102,7 +108,7 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
     SECTION("Fixed seed yields deterministic behavior")
     {
-        fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
+        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
         ps.seed = 42;
 
         // expect no exceptions and consistent substitution
@@ -111,7 +117,7 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
     SECTION("Different seeds produce different results")
     {
-        fanout_substitution_params ps{fanout_substitution_params::substitution_strategy::RANDOM};
+        fanout_substitution_params ps{.strategy = fanout_substitution_params::substitution_strategy::RANDOM};
 
         // compute baseline depth using seed = 1
         ps.seed               = 1;

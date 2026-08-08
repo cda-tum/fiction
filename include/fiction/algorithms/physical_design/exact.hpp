@@ -694,7 +694,7 @@ class exact_impl
         template <typename Fn>
         void apply_to_added_tiles(Fn&& fn)
         {
-            std::ranges::for_each(check_point->added_tiles, fn);
+            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), fn);
         }
         /**
          * Applies a given function to all updated tiles in the current solver check point.
@@ -705,7 +705,7 @@ class exact_impl
         template <typename Fn>
         void apply_to_updated_tiles(Fn&& fn)
         {
-            std::ranges::for_each(check_point->updated_tiles, fn);
+            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), fn);
         }
         /**
          * Applies a given function to all added and updated tiles in the current solver check point.
@@ -1475,8 +1475,8 @@ class exact_impl
             {
                 const auto paths = all_incoming_edge_paths(network, n);
 
-                const auto longest_path = std::ranges::max_element(paths, [](const auto& p1, const auto& p2)
-                                                                   { return p1.size() < p2.size(); });
+                const auto longest_path = std::max_element(
+                    paths.cbegin(), paths.cend(), [](const auto& p1, const auto& p2) { return p1.size() < p2.size(); });
 
                 if (longest_path == paths.cend())
                 {

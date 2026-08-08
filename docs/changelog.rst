@@ -136,27 +136,46 @@ Changed
       for ``mockturtle::mig_network``; fixed by including ``<mockturtle/networks/mig.hpp>`` directly in
       the test instead of restoring the unused library include.
 
-      Continued into 8 of the 11 files of ``physical_design/`` (the remaining three —
-      ``apply_gate_library.hpp``, ``on_the_fly_sidb_circuit_design.hpp``, and ``wiring_reduction.hpp`` —
-      had nothing applicable in any of the four modernization categories; ``apply_gate_library.hpp``'s
-      four ``static_assert(std::is_same_v<...>)`` checks were deliberately left as-is since each sits
-      alongside several custom-trait ``static_assert``\ s in the same function, matching the judgment call
-      already made for ``write_svg_layout.hpp`` in the ``io/`` pass): designated initializers for
-      nested-aggregate parameter construction (``color_routing.hpp``,
+      Continued into 7 of the 11 files of ``physical_design/`` (the remaining four —
+      ``apply_gate_library.hpp``, ``on_the_fly_sidb_circuit_design.hpp``, ``wiring_reduction.hpp``, and
+      ``exact.hpp`` — had nothing applicable in any of the four modernization categories, or were deferred;
+      ``apply_gate_library.hpp``'s four ``static_assert(std::is_same_v<...>)`` checks were deliberately
+      left as-is since each sits alongside several custom-trait ``static_assert``\ s in the same function,
+      matching the judgment call already made for ``write_svg_layout.hpp`` in the ``io/`` pass;
+      ``exact.hpp``'s three ``std::ranges`` conversions were reverted after CI's Clang-Tidy run surfaced
+      ~20 unrelated pre-existing findings in this 3300-line file — bounds/exception-safety/threading
+      checks disproportionate to a mechanical modernization pass — deferring it to a dedicated future PR):
+      designated initializers for nested-aggregate parameter construction (``color_routing.hpp``,
       ``graph_oriented_layout_design.hpp``); ``std::ranges`` algorithms in place of iterator-pair
       ``std::algorithm`` calls (``color_routing.hpp``, ``determine_clocking.hpp``, ``orthogonal.hpp``,
       ``design_sidb_gates.hpp``, ``hexagonalization.hpp``, ``post_layout_optimization.hpp``,
-      ``graph_oriented_layout_design.hpp``, ``exact.hpp``). Fixed the whole-file Clang-Tidy findings this
-      surfaced: missing ``<cstddef>``/``<cstdint>``/``<optional>``/``<cassert>``/``<iterator>`` includes;
+      ``graph_oriented_layout_design.hpp``); and pass-by-value plus ``std::move`` in place of a
+      const-reference constructor parameter that was unconditionally copied into a same-type member
+      (``network_conversion.hpp``, discovered as a Clang-Tidy finding once the file was re-touched here).
+      Fixed the whole-file Clang-Tidy findings this surfaced: missing
+      ``<cstddef>``/``<cstdint>``/``<optional>``/``<cassert>``/``<iterator>``/``<utility>`` includes;
       several unused includes (``fiction/traits.hpp`` mistakenly removed and then restored, ``<map>``, and
       ``<utility>`` in ``color_routing.hpp``; ``fiction/io/print_layout.hpp`` and ``<set>`` in
       ``orthogonal.hpp``); missing direct includes for symbols only pulled in transitively before
       (``<bill/sat/interface/common.hpp>`` for ``bill::solvers`` in ``color_routing.hpp``;
       ``fiction/networks/technology_network.hpp`` and ``<mockturtle/views/names_view.hpp>`` in
       ``orthogonal.hpp``); redundant ``typename`` on non-dependent-in-context member-type accesses
-      (``determine_clocking.hpp``, ``graph_oriented_layout_design.hpp``); and a ``bill/sat/solver.hpp``
+      (``determine_clocking.hpp``, ``graph_oriented_layout_design.hpp``); a ``bill/sat/solver.hpp``
       umbrella-header false positive suppressed with the same ``NOLINT`` pattern already used in
-      ``graph_coloring.hpp`` (``determine_clocking.hpp``).
+      ``graph_coloring.hpp`` (``determine_clocking.hpp``); and a
+      ``misc-const-correctness``/``mockturtle::progress_bar`` false positive (the check misses that
+      ``bar``'s non-const ``operator()`` is invoked from inside a nested lambda) suppressed with
+      ``NOLINTNEXTLINE`` (``orthogonal.hpp``). Reverted the ``<lorina/common.hpp>`` include added for
+      ``technology_mapping.hpp`` in the previous batch: CI's Clang-Tidy build flagged it as unused,
+      unlike this branch's own local Debug builds, most likely because ``lorina::return_code``'s only use
+      site is inside an ``assert()`` and the two build configurations differ in whether ``NDEBUG`` (and
+      thus the macro's expansion) is defined.
+
+      Touching ``network_conversion.hpp`` a second time also caused CI's cumulative whole-PR-diff Clang-Tidy
+      pass to re-surface findings in ``test/algorithms/network_transformation/fanout_substitution.cpp``
+      (touched for the ``mockturtle::mig_network`` include fix, above): positional aggregate construction
+      of ``fanout_substitution_params`` converted to designated initializers across the file's test cases,
+      plus the same category of missing/unused-include fixes as elsewhere in this pass.
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:

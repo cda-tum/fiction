@@ -477,6 +477,7 @@ class orthogonal_impl
 
 #if (PROGRESS_BARS)
         // initialize a progress bar
+        // NOLINTNEXTLINE(misc-const-correctness): bar(i) is called via a non-const operator() in the lambda below
         mockturtle::progress_bar bar{ctn.color_ntk.size(), "[i] arranging layout: |{0}|"};
 #endif
 
