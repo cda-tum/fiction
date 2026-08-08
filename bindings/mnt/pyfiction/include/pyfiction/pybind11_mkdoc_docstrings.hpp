@@ -11840,6 +11840,30 @@ Template parameter ``Lyt``:
 Returns:
     ESR clocking scheme.)doc";
 
+static const char *__doc_fiction_euclidean_distance =
+R"doc(The Euclidean distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = \sqrt{(x_1 - x_2)^2 + (y_1 - y_2)^2}`
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Floating-point type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Euclidean distance between `source` and `target`.)doc";
+
 static const char *__doc_fiction_euclidean_distance_functor =
 R"doc(A pre-defined distance functor that uses the Euclidean distance.
 
@@ -16425,6 +16449,30 @@ Parameter ``lyt``:
 Returns:
     Number of magnets as counted by MagCAD.)doc";
 
+static const char *__doc_fiction_manhattan_distance =
+R"doc(The Manhattan distance :math:`D` between two layout coordinates
+:math:`(x_1, y_1)` and :math:`(x_2, y_2)` given by
+
+:math:`D = |x_1 - x_2| + |y_1 - y_2|`
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Dist``:
+    Integral type for the distance.
+
+Parameter ``lyt``:
+    Layout.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Manhattan distance between `source` and `target`.)doc";
+
 static const char *__doc_fiction_manhattan_distance_functor =
 R"doc(A pre-defined distance functor that uses the Manhattan distance.
 
@@ -19096,6 +19144,26 @@ Parameter ``coordinate2``:
 
 Returns:
     Randomly generated coordinate.)doc";
+
+static const char *__doc_fiction_random_cost =
+R"doc(Random cost between two layout coordinates that returns a random value
+between 0 and 1.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Cost``:
+    Floating-point type for the cost.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Random cost between `source` and `target`, i.e., a random number
+    between 0 and 1.)doc";
 
 static const char *__doc_fiction_random_cost_functor =
 R"doc(A pre-defined cost functor that uses random costs.
@@ -22102,6 +22170,24 @@ static const char *__doc_fiction_undefined_cell_label_exception_undefined_cell_l
 static const char *__doc_fiction_undefined_cell_label_exception_undefined_label = R"doc()doc";
 
 static const char *__doc_fiction_undefined_cell_label_exception_which = R"doc()doc";
+
+static const char *__doc_fiction_unit_cost =
+R"doc(Unit cost between two layout coordinates that always returns 1.
+
+Template parameter ``Lyt``:
+    Coordinate layout type.
+
+Template parameter ``Cost``:
+    Integral type for the cost.
+
+Parameter ``source``:
+    Source coordinate.
+
+Parameter ``target``:
+    Target coordinate.
+
+Returns:
+    Unit cost between `source` and `target`, i.e., 1.)doc";
 
 static const char *__doc_fiction_unit_cost_functor =
 R"doc(A pre-defined cost functor that uses unit costs.
