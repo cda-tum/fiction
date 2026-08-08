@@ -10,7 +10,7 @@
 
 #include <phmap.h>
 
-#include <cstdint>
+#include <cstddef>
 #include <functional>
 #include <utility>
 #include <vector>
@@ -157,7 +157,7 @@ class distance_map_functor : public distance_functor<Lyt, Dist>
      */
     [[nodiscard]] static constexpr std::size_t coordinate_index(const Lyt& lyt, const coordinate<Lyt>& c) noexcept
     {
-        return c.y * (lyt.x() + 1) + c.x;
+        return (c.y * (lyt.x() + 1)) + c.x;
     }
 };
 /**

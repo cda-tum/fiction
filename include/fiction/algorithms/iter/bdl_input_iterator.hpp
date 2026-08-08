@@ -10,6 +10,7 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <iterator>
@@ -398,8 +399,8 @@ class bdl_input_iterator
         for (const auto& wire : input_bdl_wires)
         {
             // Find the first BDL pair in the wire with type INPUT
-            auto start_bdl_it = std::find_if(wire.pairs.cbegin(), wire.pairs.cend(), [](const bdl_pair<cell<Lyt>>& bdl)
-                                             { return bdl.type == sidb_technology::cell_type::INPUT; });
+            auto start_bdl_it = std::ranges::find_if(wire.pairs, [](const bdl_pair<cell<Lyt>>& bdl)
+                                                     { return bdl.type == sidb_technology::cell_type::INPUT; });
 
             // If no INPUT type BDL pair is found, skip this wire
             if (start_bdl_it == wire.pairs.cend())
@@ -411,13 +412,13 @@ class bdl_input_iterator
 
             // Find the BDL pair with the maximum distance from the start BDL pair
             const auto max_bdl_it =
-                std::max_element(wire.pairs.cbegin(), wire.pairs.cend(),
-                                 [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
-                                 {
-                                     double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
-                                     double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
-                                     return distance_a < distance_b;
-                                 });
+                std::ranges::max_element(wire.pairs,
+                                         [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
+                                         {
+                                             double distance_a = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper);
+                                             double distance_b = sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper);
+                                             return distance_a < distance_b;
+                                         });
 
             // If a valid BDL pair is found, add it to the end BDLs collection
             if (max_bdl_it != wire.pairs.cend())

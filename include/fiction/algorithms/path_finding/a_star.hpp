@@ -15,9 +15,9 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <functional>
-#include <iterator>
 #include <limits>
 #include <type_traits>
 #include <vector>
@@ -345,7 +345,7 @@ class a_star_impl
         // finally, add the source coordinate
         path.push_back(objective.source);
         // and reverse the path to bring it in proper order
-        std::reverse(std::begin(path), std::end(path));
+        std::ranges::reverse(path);
 
         return path;
     }
@@ -422,11 +422,11 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * @return Minimum path length between `source` and `target` in `layout`.
  */
 template <typename Lyt, typename Dist = uint64_t>
+    requires(std::integral<Dist> || std::floating_point<Dist>)
 [[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
                                    const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_arithmetic_v<Dist>, "Dist is not an arithmetic type");
 
     const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
 

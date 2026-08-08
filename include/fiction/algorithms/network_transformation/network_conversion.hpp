@@ -6,7 +6,6 @@
 #define FICTION_NETWORK_CONVERSION_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
@@ -14,7 +13,11 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
+#include <cassert>
+#include <cstdint>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
@@ -34,7 +37,7 @@ template <typename NtkDest, typename NtkSrc>
 class convert_network_impl<NtkDest, NtkSrc, true>
 {
   public:
-    explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
+    explicit convert_network_impl(NtkSrc ntk_src) : ntk{std::move(ntk_src)} {}
 
     NtkDest run()
     {
