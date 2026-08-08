@@ -2,7 +2,7 @@
 requires = [
     "scikit-build-core>=0.10.1",
     "setuptools-scm>=8.1",
-    "nanobind~=2.13.0"
+    "nanobind~=2.14.0"
 ]
 build-backend = "scikit_build_core.build"
 
@@ -257,7 +257,7 @@ docstring-code-format = true
 build = [
     "scikit-build-core>=0.11.0",
     "setuptools-scm>=8.1",
-    "nanobind~=2.13.0",
+    "nanobind~=2.14.0",
 ]
 docs = [
     "setuptools-scm>=8.1",
