@@ -9162,6 +9162,13 @@ random non-operational points as well as all operational points that
 are reachable via flood fill from the found operational points plus a
 one pixel wide border around the domain.
 
+Both phases are parallelized. The flood fill itself uses a pool of
+worker threads that share a single work queue, since the points to
+explore are only discovered as the exploration proceeds. Each step
+point is scheduled at most once, so no parameter point is simulated
+twice. The result does not depend on the order in which the points are
+explored and is, therefore, independent of the thread scheduling.
+
 Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
 

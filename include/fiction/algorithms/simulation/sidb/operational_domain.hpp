@@ -31,15 +31,19 @@
 #include <atomic>
 #include <cassert>
 #include <cmath>
+#include <condition_variable>
 #include <cstdint>
 #include <cstdlib>
+#include <deque>
 #include <functional>
 #include <iterator>
 #include <limits>
+#include <mutex>
 #include <numeric>
 #include <optional>
 #include <queue>
 #include <random>
+#include <ranges>
 #include <stdexcept>
 #include <thread>
 #include <tuple>
@@ -602,6 +606,11 @@ class operational_domain_impl
      * operational points that are reachable via flood fill from the found operational points plus a one pixel wide
      * border around the domain.
      *
+     * Both phases are parallelized. The flood fill itself uses a pool of worker threads that share a single work
+     * queue, since the points to explore are only discovered as the exploration proceeds. Each step point is scheduled
+     * at most once, so no parameter point is simulated twice. The result does not depend on the order in which the
+     * points are explored and is, therefore, independent of the thread scheduling.
+     *
      * @param samples Maximum number of random samples to be taken before flood fill.
      * @param given_parameter_point Optional parameter point in the parameter space. If it lies within the
      * operational region, it is used as a starting point for flood fill.
@@ -623,66 +632,124 @@ class operational_domain_impl
             step_point_samples.push_back(to_step_point(given_parameter_point.value()));
         }
 
+        // the samples are generated in lexicographic order, which distributes poorly over the slice-based thread
+        // assignment; shuffle them for better load balancing. The order is irrelevant for the flood fill itself
+        std::ranges::shuffle(step_point_samples, std::mt19937_64{std::random_device{}()});
+
         simulate_operational_status_in_parallel(step_point_samples);
 
-        // a queue of (x, y[, z]) dimension step points to be evaluated
-        std::queue<step_point> queue{};
+        // a queue of (x, y[, z]) dimension step points to be evaluated, and the set of step points that have already
+        // been scheduled for evaluation. Both are guarded by `queue_mutex` together with `active_workers` below
+        std::deque<step_point>       queue{};
+        phmap::btree_set<step_point> scheduled{};
 
-        // a utility function that adds the adjacent points to the queue for further evaluation
-        const auto queue_next_points = [this, &queue](const step_point& sp)
+        std::mutex              queue_mutex{};
+        std::condition_variable queue_cv{};
+
+        // the number of workers that popped a step point but have not yet reported back their discovered neighbors
+        std::size_t active_workers = 0;
+
+        // set once the flood fill is complete, which lets all waiting workers terminate
+        bool finished = false;
+
+        // a utility function that gathers the neighbors of `sp` that are not already known. This is the expensive part
+        // of the discovery, so it is deliberately called without holding `queue_mutex`
+        const auto unknown_neighborhood = [this](const step_point& sp) noexcept
         {
-            if (num_dimensions == 2)
+            std::vector<step_point> unknown{};
+
+            const auto neighborhood = num_dimensions == 2 ? moore_neighborhood_2d(sp) : moore_neighborhood_3d(sp);
+
+            std::ranges::copy_if(neighborhood, std::back_inserter(unknown),
+                                 [this](const auto& m) noexcept { return !op_domain.contains(to_parameter_point(m)); });
+
+            return unknown;
+        };
+
+        // a utility function that adds the given step points to the queue for further evaluation. Each step point is
+        // scheduled at most once, which ensures that no parameter point is simulated twice. Must be called under lock
+        const auto schedule_points = [&queue, &scheduled](const std::vector<step_point>& step_points) noexcept
+        {
+            for (const auto& sp : step_points)
             {
-                for (const auto& m : moore_neighborhood_2d(sp))
+                if (scheduled.insert(sp).second)
                 {
-                    if (!op_domain.contains(to_parameter_point(m)))
-                    {
-                        queue.push(m);
-                    }
-                }
-            }
-            else  // num_dimensions == 3
-            {
-                for (const auto& m : moore_neighborhood_3d(sp))
-                {
-                    if (!op_domain.contains(to_parameter_point(m)))
-                    {
-                        queue.push(m);
-                    }
+                    queue.push_back(sp);
                 }
             }
         };
 
-        // add the neighbors of each operational point to the queue
+        // seed the queue with the neighbors of each operational sample
         op_domain.for_each(
-            [this, &queue_next_points](const auto& param_point, const auto& status)
+            [this, &schedule_points, &unknown_neighborhood](const auto& param_point, const auto& status) noexcept
             {
                 if (std::get<0>(status) == operational_status::OPERATIONAL)
                 {
-                    queue_next_points(to_step_point(param_point));
+                    schedule_points(unknown_neighborhood(to_step_point(param_point)));
                 }
             });
 
-        // for each point in the queue
-        while (!queue.empty())
+        // if random sampling did not find a single operational point, there is nothing to flood fill
+        if (!queue.empty())
         {
-            // fetch the step point and remove it from the queue
-            const auto sp = queue.front();
-            queue.pop();
-
-            // if the point has already been sampled, continue with the next
-            if (op_domain.contains(to_parameter_point(sp)))
+            const auto worker = [&]() noexcept
             {
-                continue;
+                while (true)
+                {
+                    std::unique_lock lock{queue_mutex};
+
+                    queue_cv.wait(lock, [&queue, &finished]() noexcept { return !queue.empty() || finished; });
+
+                    // the queue can only be empty here once the flood fill is complete
+                    if (queue.empty())
+                    {
+                        return;
+                    }
+
+                    // fetch the step point and remove it from the queue
+                    const auto sp = queue.front();
+                    queue.pop_front();
+
+                    ++active_workers;
+
+                    lock.unlock();
+
+                    // determine the operational status and, if the point is operational, its yet unknown neighbors.
+                    // No lock is held here, which is what enables the parallelism in the first place
+                    const auto discovered = is_step_point_operational(sp) == operational_status::OPERATIONAL ?
+                                                unknown_neighborhood(sp) :
+                                                std::vector<step_point>{};
+
+                    lock.lock();
+
+                    schedule_points(discovered);
+
+                    --active_workers;
+
+                    // the flood fill is complete only once the queue has run dry and no worker is left that could
+                    // still discover new points
+                    finished = queue.empty() && active_workers == 0;
+
+                    if (finished || !queue.empty())
+                    {
+                        queue_cv.notify_all();
+                    }
+                }
+            };
+
+            const auto num_workers = std::max(number_of_threads, std::size_t{1});
+
+            std::vector<std::thread> workers{};
+            workers.reserve(num_workers);
+
+            for (std::size_t i = 0; i < num_workers; ++i)
+            {
+                workers.emplace_back(worker);
             }
 
-            // check if the point is operational
-            const auto operational_status = is_step_point_operational(sp);
-
-            // if the point is operational, add its eight neighbors to the queue
-            if (operational_status == operational_status::OPERATIONAL)
+            for (auto& w : workers)
             {
-                queue_next_points(sp);
+                w.join();
             }
         }
 
@@ -1382,21 +1449,16 @@ class operational_domain_impl
             threads.emplace_back(
                 [this, start, end, &step_points]
                 {
-                    for (auto it = step_points.cbegin() + static_cast<int64_t>(start);
-                         it != step_points.cbegin() + static_cast<int64_t>(end); ++it)
-                    {
-                        is_step_point_operational(*it);
-                    }
+                    std::ranges::for_each(std::ranges::subrange{step_points.cbegin() + static_cast<int64_t>(start),
+                                                                step_points.cbegin() + static_cast<int64_t>(end)},
+                                          [this](const auto& sp) { is_step_point_operational(sp); });
                 });
         }
 
         // wait for all threads to complete
         for (auto& thread : threads)
         {
-            if (thread.joinable())
-            {
-                thread.join();
-            }
+            thread.join();
         }
     }
     /**
