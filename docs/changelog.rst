@@ -117,20 +117,25 @@ Changed
 
       Continued into ``network_transformation/`` and ``path_finding/`` (11 more files): designated
       initializers for the ``technology_mapping_params`` builder functions in ``technology_mapping.hpp``;
-      ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
-      (``network_balancing.hpp``, ``a_star.hpp``, ``k_shortest_paths.hpp``); and a ``requires`` clause
-      with ``std::integral``/``std::floating_point`` in place of
+      and ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
+      (``network_balancing.hpp``, ``a_star.hpp``, ``k_shortest_paths.hpp``). A ``requires`` clause with
+      ``std::integral``/``std::floating_point`` in place of
       ``static_assert(std::is_integral_v<...>)``/``static_assert(std::is_floating_point_v<...>)`` checks
-      (``cost.hpp``, ``distance.hpp``, ``a_star.hpp``). ``delete_virtual_pis.hpp``,
-      ``fanout_substitution.hpp``, ``network_conversion.hpp``, ``enumerate_all_paths.hpp``, and
-      ``distance_map.hpp`` had nothing applicable in any of the four modernization categories. Fixed the
-      whole-file Clang-Tidy findings this surfaced: missing ``<cassert>``/``<cstddef>``/``<cstdint>``/
-      ``<vector>`` includes and several unused includes (``<cstdlib>`` in ``delete_virtual_pis.hpp``;
-      ``<mockturtle/algorithms/cleanup.hpp>``, ``fiction/traits.hpp``, and ``<utility>`` in
-      ``network_balancing.hpp``; ``fiction/types.hpp`` in ``network_conversion.hpp``; ``<iterator>`` in
-      ``a_star.hpp``; ``<type_traits>`` in ``cost.hpp`` and ``distance.hpp``); a missing
-      ``<lorina/common.hpp>`` include for ``lorina::return_code`` in ``technology_mapping.hpp``; and two
-      missing-parentheses precedence findings in ``distance.hpp`` and ``distance_map.hpp``. Removing the
+      was attempted for ``cost.hpp``, ``distance.hpp``, and ``a_star.hpp``'s free functions, but reverted:
+      these functions (``manhattan_distance``, ``euclidean_distance``, ``squared_euclidean_distance``,
+      ``twoddwave_distance``, ``chebyshev_distance``, ``a_star_distance``) are bound in pyfiction, and the
+      ``requires`` clause broke the pyfiction docstring auto-gen bot's ability to match the generated
+      docstring symbols to their binding call sites, failing the compiled-extension build — the same
+      failure mode already documented for ``hexagonalization.hpp`` in the ``layouts/`` pass.
+      ``delete_virtual_pis.hpp``, ``fanout_substitution.hpp``, ``network_conversion.hpp``,
+      ``enumerate_all_paths.hpp``, and ``distance_map.hpp`` had nothing applicable in any of the four
+      modernization categories. Fixed the whole-file Clang-Tidy findings this surfaced: missing
+      ``<cassert>``/``<cstddef>``/``<cstdint>``/``<vector>`` includes and several unused includes
+      (``<cstdlib>`` in ``delete_virtual_pis.hpp``; ``<mockturtle/algorithms/cleanup.hpp>``,
+      ``fiction/traits.hpp``, and ``<utility>`` in ``network_balancing.hpp``; ``fiction/types.hpp`` in
+      ``network_conversion.hpp``; ``<iterator>`` in ``a_star.hpp``); a missing ``<lorina/common.hpp>``
+      include for ``lorina::return_code`` in ``technology_mapping.hpp`` (later reverted — see below); and
+      two missing-parentheses precedence findings in ``distance.hpp`` and ``distance_map.hpp``. Removing the
       unused ``fiction/types.hpp`` include from ``network_conversion.hpp`` broke
       ``test/algorithms/network_transformation/fanout_substitution.cpp``, which relied on it transitively
       for ``mockturtle::mig_network``; fixed by including ``<mockturtle/networks/mig.hpp>`` directly in

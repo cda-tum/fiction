@@ -7,10 +7,10 @@
 
 #include "fiction/traits.hpp"
 
-#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <random>
+#include <type_traits>
 
 namespace fiction
 {
@@ -25,11 +25,11 @@ namespace fiction
  * @return Unit cost between `source` and `target`, i.e., 1.
  */
 template <typename Lyt, typename Cost = uint8_t>
-    requires std::integral<Cost>
 [[nodiscard]] constexpr Cost unit_cost([[maybe_unused]] const coordinate<Lyt>& source,
                                        [[maybe_unused]] const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::is_integral_v<Cost>, "Cost is not an integral type");
 
     return static_cast<Cost>(1);
 }
@@ -43,11 +43,11 @@ template <typename Lyt, typename Cost = uint8_t>
  * @return Random cost between `source` and `target`, i.e., a random number between 0 and 1.
  */
 template <typename Lyt, typename Cost = double>
-    requires std::floating_point<Cost>
 [[nodiscard]] Cost random_cost([[maybe_unused]] const coordinate<Lyt>& source,
                                [[maybe_unused]] const coordinate<Lyt>& target) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
+    static_assert(std::is_floating_point_v<Cost>, "Cost is not a floating-point type");
 
     static std::default_random_engine           engine{std::random_device{}()};
     static std::uniform_real_distribution<Cost> distr{0, 1};
