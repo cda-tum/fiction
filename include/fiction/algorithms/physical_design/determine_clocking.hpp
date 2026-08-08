@@ -10,7 +10,7 @@
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>
 #include <bill/sat/interface/types.hpp>
-#include <bill/sat/solver.hpp>
+#include <bill/sat/solver.hpp>  // NOLINT(misc-include-cleaner): umbrella header pulling in the solver backends
 #include <bill/sat/tseytin.hpp>
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -123,7 +123,7 @@ class sat_clocking_handler
     /**
      * Number of clocks in layout's clocking scheme.
      */
-    const typename Lyt::clock_number_t number_of_clocks;
+    const Lyt::clock_number_t number_of_clocks;
     /**
      * The solver used to find a solution to the clocking problem.
      */
@@ -212,8 +212,8 @@ class sat_clocking_handler
 
                 // for each of t's predecessors (disregarding clocking)
                 const auto incoming_tiles = layout.template incoming_data_flow<false>(t1);
-                std::for_each(
-                    incoming_tiles.cbegin(), incoming_tiles.cend(),
+                std::ranges::for_each(
+                    incoming_tiles,
                     [this, &t1](const auto& t2)
                     {
                         // for each combination of possible clock numbers
@@ -222,8 +222,8 @@ class sat_clocking_handler
                             for (typename Lyt::clock_number_t c2 = 0; c2 < number_of_clocks; ++c2)
                             {
                                 // if c2 is not c1's incoming clock number
-                                if (!(static_cast<typename Lyt::clock_number_t>((c2 + typename Lyt::clock_number_t{1}) %
-                                                                                number_of_clocks) == c1))
+                                if (!(static_cast<Lyt::clock_number_t>((c2 + typename Lyt::clock_number_t{1}) %
+                                                                       number_of_clocks) == c1))
                                 {
                                     // not tile t1 has clock c1 OR not tile t2 has clock c2
                                     solver.add_clause({{bill::lit_type{variables[{t1, c1}], bill::negative_polarity},
@@ -361,7 +361,7 @@ class determine_clocking_impl
             {
                 return sat_clocking_handler<Lyt, bill::solvers::bsat2>{layout}.determine_clocks();
             }
-#if !defined(BILL_WINDOWS_PLATFORM)
+#ifndef BILL_WINDOWS_PLATFORM
             case bill::solvers::maple:
             {
                 return sat_clocking_handler<Lyt, bill::solvers::maple>{layout}.determine_clocks();

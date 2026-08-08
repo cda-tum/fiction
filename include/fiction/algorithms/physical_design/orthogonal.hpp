@@ -6,8 +6,8 @@
 #define FICTION_ORTHOGONAL_HPP
 
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
-#include "fiction/io/print_layout.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/name_utils.hpp"
@@ -19,12 +19,15 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
 #include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
+#include <iostream>
 #include <optional>
-#include <set>
+#include <ostream>
 #include <vector>
 
 #if (PROGRESS_BARS)
@@ -136,23 +139,23 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
             const auto finc = fanin_edges(ctn.color_ntk, n);
 
             // if any incoming edge is colored east, color them all east, and south otherwise
-            const auto color = std::any_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(), [&ctn](const auto& fe)
-                                           { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
+            const auto color = std::ranges::any_of(finc.fanin_edges, [&ctn](const auto& fe)
+                                                   { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }) ?
                                    ctn.color_east :
                                    ctn.color_south;
 
-            std::for_each(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                          [&ctn, &color](const auto& fe) { recursively_paint_edges(ctn, fe, color); });
+            std::ranges::for_each(finc.fanin_edges,
+                                  [&ctn, &color](const auto& fe) { recursively_paint_edges(ctn, fe, color); });
 
             // if all incoming edges are colored east, paint the node east as well
-            if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                            [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }))
+            if (std::ranges::all_of(finc.fanin_edges,
+                                    [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_east; }))
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_east);
             }
             // else, if all incoming edges are colored south, paint the node south as well
-            else if (std::all_of(finc.fanin_edges.cbegin(), finc.fanin_edges.cend(),
-                                 [&ctn](const auto& fe) { return ctn.color_ntk.edge_color(fe) == ctn.color_south; }))
+            else if (std::ranges::all_of(finc.fanin_edges, [&ctn](const auto& fe)
+                                         { return ctn.color_ntk.edge_color(fe) == ctn.color_south; }))
             {
                 ctn.color_ntk.paint(mockturtle::node<Ntk>{n}, ctn.color_south);
             }
@@ -389,8 +392,7 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
                 const auto n_s     = node2pos[po];
                 auto       po_tile = static_cast<tile<Lyt>>(n_s);
 
-                const auto multi_output_node =
-                    std::find(output_nodes.cbegin(), output_nodes.cend(), po) != output_nodes.cend();
+                const auto multi_output_node = std::ranges::find(output_nodes, po) != output_nodes.cend();
 
                 // determine PO orientation
                 if (!is_eastern_po_orientation_available(ctn, po) || multi_output_node)
@@ -454,7 +456,7 @@ class orthogonal_impl
         ctn.color_ntk.foreach_po(
             [&](const auto& po)
             {
-                if (std::find(output_nodes.cbegin(), output_nodes.cend(), po) != output_nodes.cend())
+                if (std::ranges::find(output_nodes, po) != output_nodes.cend())
                 {
                     multi_output_nodes.push_back(po);
                     ++num_multi_output_nodes;
@@ -600,9 +602,9 @@ class orthogonal_impl
                         node2pos[n] = connect_and_place(layout, t, ctn.color_ntk, n, pre1_t, pre2_t, fc.constant_fanin);
                     }
 
-                    if (ctn.color_ntk.is_po(n) && (!is_eastern_po_orientation_available(ctn, n) ||
-                                                   std::find(multi_output_nodes.cbegin(), multi_output_nodes.cend(),
-                                                             n) != multi_output_nodes.cend()))
+                    if (ctn.color_ntk.is_po(n) &&
+                        (!is_eastern_po_orientation_available(ctn, n) ||
+                         std::ranges::find(multi_output_nodes, n) != multi_output_nodes.cend()))
                     {
                         ++latest_pos.y;
                     }

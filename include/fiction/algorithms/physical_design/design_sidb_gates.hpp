@@ -841,8 +841,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     design_sidb_gates_stats                 st{};
     detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params, st};

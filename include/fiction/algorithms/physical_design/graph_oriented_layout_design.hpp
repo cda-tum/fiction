@@ -36,6 +36,7 @@
 #include <functional>
 #include <future>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <mutex>
 #include <optional>
@@ -512,8 +513,8 @@ template <typename Ntk, bool CiToCo = false, bool Randomize = false>
 class topo_view : public mockturtle::immutable_view<Ntk>
 {
   public:
-    using node   = typename Ntk::node;
-    using signal = typename Ntk::signal;
+    using node   = Ntk::node;
+    using signal = Ntk::signal;
 
     explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :
             mockturtle::immutable_view<Ntk>(ntk),
@@ -534,8 +535,8 @@ class topo_view : public mockturtle::immutable_view<Ntk>
 
     [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
-        auto it = std::find(topo_order.begin(), topo_order.end(), n);
-        return uint32_t(std::distance(topo_order.begin(), it));
+        auto it = std::ranges::find(topo_order, n);
+        return uint32_t(std::ranges::distance(topo_order.begin(), it));
     }
 
     [[nodiscard]] node index_to_node(const uint32_t idx) const
@@ -931,8 +932,7 @@ class graph_oriented_layout_design_impl
             }
 
             // check if timeout is reached or solution found
-            timeout_limit_reached =
-                std::none_of(ssg_vec.cbegin(), ssg_vec.cend(), [](const auto& ssg) { return ssg.frontier_flag; });
+            timeout_limit_reached = std::ranges::none_of(ssg_vec, [](const auto& ssg) { return ssg.frontier_flag; });
 
             const auto end = std::chrono::high_resolution_clock::now();
             const auto duration_ms =
@@ -2067,9 +2067,8 @@ class graph_oriented_layout_design_impl
 
                 if (apply_plo)
                 {
-                    fiction::post_layout_optimization_params plo_params{};
-                    plo_params.optimize_pos_only   = true;
-                    plo_params.planar_optimization = ps.planar;
+                    const fiction::post_layout_optimization_params plo_params{.optimize_pos_only   = true,
+                                                                              .planar_optimization = ps.planar};
 
                     fiction::post_layout_optimization(layout, plo_params);
                 }

@@ -135,6 +135,28 @@ Changed
       ``test/algorithms/network_transformation/fanout_substitution.cpp``, which relied on it transitively
       for ``mockturtle::mig_network``; fixed by including ``<mockturtle/networks/mig.hpp>`` directly in
       the test instead of restoring the unused library include.
+
+      Continued into 8 of the 11 files of ``physical_design/`` (the remaining three —
+      ``apply_gate_library.hpp``, ``on_the_fly_sidb_circuit_design.hpp``, and ``wiring_reduction.hpp`` —
+      had nothing applicable in any of the four modernization categories; ``apply_gate_library.hpp``'s
+      four ``static_assert(std::is_same_v<...>)`` checks were deliberately left as-is since each sits
+      alongside several custom-trait ``static_assert``\ s in the same function, matching the judgment call
+      already made for ``write_svg_layout.hpp`` in the ``io/`` pass): designated initializers for
+      nested-aggregate parameter construction (``color_routing.hpp``,
+      ``graph_oriented_layout_design.hpp``); ``std::ranges`` algorithms in place of iterator-pair
+      ``std::algorithm`` calls (``color_routing.hpp``, ``determine_clocking.hpp``, ``orthogonal.hpp``,
+      ``design_sidb_gates.hpp``, ``hexagonalization.hpp``, ``post_layout_optimization.hpp``,
+      ``graph_oriented_layout_design.hpp``, ``exact.hpp``). Fixed the whole-file Clang-Tidy findings this
+      surfaced: missing ``<cstddef>``/``<cstdint>``/``<optional>``/``<cassert>``/``<iterator>`` includes;
+      several unused includes (``fiction/traits.hpp`` mistakenly removed and then restored, ``<map>``, and
+      ``<utility>`` in ``color_routing.hpp``; ``fiction/io/print_layout.hpp`` and ``<set>`` in
+      ``orthogonal.hpp``); missing direct includes for symbols only pulled in transitively before
+      (``<bill/sat/interface/common.hpp>`` for ``bill::solvers`` in ``color_routing.hpp``;
+      ``fiction/networks/technology_network.hpp`` and ``<mockturtle/views/names_view.hpp>`` in
+      ``orthogonal.hpp``); redundant ``typename`` on non-dependent-in-context member-type accesses
+      (``determine_clocking.hpp``, ``graph_oriented_layout_design.hpp``); and a ``bill/sat/solver.hpp``
+      umbrella-header false positive suppressed with the same ``NOLINT`` pattern already used in
+      ``graph_coloring.hpp`` (``determine_clocking.hpp``).
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
