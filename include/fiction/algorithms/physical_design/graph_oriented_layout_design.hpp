@@ -513,7 +513,13 @@ template <typename Ntk, bool CiToCo = false, bool Randomize = false>
 class topo_view : public mockturtle::immutable_view<Ntk>
 {
   public:
-    using node   = Ntk::node;
+    /**
+     * Node type of the underlying network.
+     */
+    using node = Ntk::node;
+    /**
+     * Signal type of the underlying network.
+     */
     using signal = Ntk::signal;
 
     explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :

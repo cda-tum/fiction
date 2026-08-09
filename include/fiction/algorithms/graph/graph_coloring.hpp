@@ -309,19 +309,19 @@ class sat_coloring_handler
         std::iota(potential_chromatic_numbers.begin(), potential_chromatic_numbers.end(), h / 2);
 
         // binary search for the chromatic number, i.e., the lower bound of potential ones
-        std::ignore = std::ranges::lower_bound(
-            potential_chromatic_numbers, h,
-            [this, &most_recent_sat_instance](const auto& k1, [[maybe_unused]] const auto& k2)
-            {
-                if (const auto [sat, instance] = check_k_coloring(k1); sat == bill::result::states::satisfiable)
-                {
-                    most_recent_sat_instance = {k1, instance};
+        std::ignore = std::ranges::partition_point(potential_chromatic_numbers,
+                                                   [this, &most_recent_sat_instance](const auto& k1)
+                                                   {
+                                                       if (const auto [sat, instance] = check_k_coloring(k1);
+                                                           sat == bill::result::states::satisfiable)
+                                                       {
+                                                           most_recent_sat_instance = {k1, instance};
 
-                    return false;
-                }
+                                                           return false;
+                                                       }
 
-                return true;
-            });
+                                                       return true;
+                                                   });
 
         return most_recent_sat_instance;
     }
@@ -908,7 +908,11 @@ class graph_coloring_impl
                                   color_frequency[static_cast<std::size_t>(c_pair.second)]++;
                               });
 
-        if (const auto it = std::ranges::max_element(color_frequency); it != color_frequency.cend())
+        // the explicit comparator keeps the `Color` requirements at `operator<` instead of `std::ranges::less`'s
+        // stricter `std::totally_ordered_with`
+        if (const auto it =
+                std::ranges::max_element(color_frequency, [](const Color& c1, const Color& c2) { return c1 < c2; });
+            it != color_frequency.cend())
         {
             // get index from iterator; index represents the color
             pst.most_frequent_color = static_cast<Color>(it - color_frequency.cbegin());

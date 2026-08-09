@@ -91,7 +91,8 @@ class yen_k_shortest_paths_impl
                 for (const auto& p : k_shortest_paths)
                 {
                     // if the root path is equal to a previous partial path
-                    if (p.size() >= i &&
+                    // p[i] and p[i + 1] are accessed below, so p must hold at least i + 2 coordinates
+                    if (p.size() > static_cast<std::size_t>(i) + 1 &&
                         std::ranges::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
                     {
                         // block the connection that was already used in the previous shortest path

@@ -16,7 +16,6 @@
 #include <cassert>
 #include <cstdint>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 #if (PROGRESS_BARS)
@@ -37,7 +36,7 @@ template <typename NtkDest, typename NtkSrc>
 class convert_network_impl<NtkDest, NtkSrc, true>
 {
   public:
-    explicit convert_network_impl(NtkSrc ntk_src) : ntk{std::move(ntk_src)} {}
+    explicit convert_network_impl(const NtkSrc& ntk_src) : ntk{ntk_src} {}
 
     NtkDest run()
     {
