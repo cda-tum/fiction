@@ -154,14 +154,18 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 
         std::istringstream is{os.str()};
 
+        std::set<std::string> emitted{};
+
         std::size_t num_lines = 0;
 
         for (std::string line{}; std::getline(is, line); ++num_lines)
         {
-            CHECK(expected.contains(line));
+            emitted.insert(line);
         }
 
-        // the header plus one line per sample; without this, the loop above would pass vacuously
+        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
+        // row cannot mask a missing one
+        CHECK(emitted == expected);
         CHECK(num_lines == expected.size());
     }
 
@@ -184,14 +188,18 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 
         std::istringstream is{os.str()};
 
+        std::set<std::string> emitted{};
+
         std::size_t num_lines = 0;
 
         for (std::string line{}; std::getline(is, line); ++num_lines)
         {
-            CHECK(expected.contains(line));
+            emitted.insert(line);
         }
 
-        // the header plus one line per sample; without this, the loop above would pass vacuously
+        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
+        // row cannot mask a missing one
+        CHECK(emitted == expected);
         CHECK(num_lines == expected.size());
     }
 
@@ -214,14 +222,18 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 
         std::istringstream is{os.str()};
 
+        std::set<std::string> emitted{};
+
         std::size_t num_lines = 0;
 
         for (std::string line{}; std::getline(is, line); ++num_lines)
         {
-            CHECK(expected.contains(line));
+            emitted.insert(line);
         }
 
-        // the header plus one line per sample; without this, the loop above would pass vacuously
+        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
+        // row cannot mask a missing one
+        CHECK(emitted == expected);
         CHECK(num_lines == expected.size());
     }
 }
