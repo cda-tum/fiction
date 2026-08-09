@@ -10,6 +10,21 @@ Unreleased
 
 Changed
 #######
+- Parallelized ``operational_domain_flood_fill``. Previously, only the initial random sampling ran in
+  parallel while the flood fill itself explored the parameter space on a single thread, which could make
+  it slower in wall-clock time than a grid search on machines with many cores despite needing far fewer
+  simulations. The exploration now runs on a pool of worker threads that share a single work queue. One
+  mutex guards the queue, the
+  set of already-scheduled points, and the active-worker count, while the physical simulation itself runs
+  without any lock held. Tracking scheduled points also removes a pre-existing inefficiency of the serial
+  version, in which the same parameter point could be enqueued repeatedly. The result is independent of
+  the order of exploration and therefore unchanged by the parallelization. Also added the
+  ``std::shuffle`` that flood fill was missing for load balancing across its sampling threads.
+  ``std::jthread`` with ``std::stop_source``/``std::stop_token`` and the C++20
+  ``std::condition_variable_any::wait`` stop-token overload were used at first and then reverted:
+  Apple's ``libc++`` still gates ``<stop_token>`` and ``std::jthread`` behind ``-fexperimental-library``,
+  so both macOS CI jobs failed to compile them. A single portable implementation was preferred over a
+  feature-detected second copy of the termination logic
 - Code quality:
     - Adopted C++20 idioms across ``include/fiction/utils/`` as the first step of an incremental,
       module-by-module modernization: ``std::ranges`` algorithms (``std::ranges::for_each``,
@@ -203,6 +218,14 @@ Removed
 
 Fixed
 #####
+- Fixed the enclosure inference of ``operational_domain_contour_tracing``, which had never been active: an
+  inverted guard in ``infer_operational_status_in_enclosing_contour`` left the set of points assumed to be
+  operational by enclosure permanently empty, so every random sample landing in an already traced operational
+  island triggered another trace of the very same contour. Additionally, the inference's flood fill is now
+  bounded by the traced contour and expands over the von Neumann (4-connected) neighborhood instead of the
+  Moore (8-connected) one. Since a 4-connected path cannot cross an 8-connected closed curve, the inference is
+  now guaranteed to stay inside the traced contour and can no longer suppress the tracing of other operational
+  islands
 - Code quality:
     - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
       as the format-string argument with no substitution args) that were surfaced by the C++20 bump
