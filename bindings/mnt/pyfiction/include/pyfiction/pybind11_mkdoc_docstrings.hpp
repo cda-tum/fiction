@@ -9463,33 +9463,6 @@ static const char *__doc_fiction_detail_operational_domain_impl_step_point = R"d
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_2 = R"doc(Forward-declare step_point.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_eq =
-R"doc(Equality operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` iff the step points are equal.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_lt =
-R"doc(Less than operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` if this step point is less than to the other.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` iff the step points are not equal.)doc";
-
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point = R"doc(Standard default constructor.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point_2 =
@@ -17966,15 +17939,6 @@ Parameter ``other``:
 
 Returns:
     `true` iff the parameter points are equal.)doc";
-
-static const char *__doc_fiction_parameter_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` if the parameter points are not equal.)doc";
 
 static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Default constructor.)doc";
 

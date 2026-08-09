@@ -10,6 +10,26 @@ Unreleased
 
 Changed
 #######
+- Completed the incremental C++20 modernization for the operational domain module
+  (``operational_domain.hpp``, ``sidb_simulation_domain.hpp``, ``write_operational_domain.hpp``):
+  collapsed ``step_point``'s hand-written ``operator==``/``operator!=``/``operator<`` into a single
+  defaulted ``operator<=>`` (which also yields ``==`` and the relational operators via C++20's rewritten
+  candidates) and dropped ``parameter_point::operator!=`` for the same reason, keeping its tolerance-based
+  ``operator==`` and expressing it with ``std::ranges::equal``; ``std::ranges`` algorithms
+  (``std::ranges::transform``, ``std::ranges::shuffle``, ``std::ranges::find``, ``std::ranges::rotate``,
+  ``std::ranges::lower_bound``, ``std::ranges::for_each``) in place of iterator-pair calls; designated
+  initializers for ``operational_domain_value_range``, ``quicksim_params``, and
+  ``critical_temperature_params``; and ``std::cmp_less`` in place of a signed/unsigned cast comparison in
+  the 3D Moore neighborhood. The ``static_assert(is_cell_level_layout_v<Lyt>)`` /
+  ``has_sidb_technology_v<Lyt>`` triples on the public entry points are deliberately left as they are:
+  converting them to ``requires`` clauses is what broke the pyfiction docstring bot's pinned
+  ``clang==15.0.7`` parser during the ``layouts/`` pass, and ``kitty`` provides no ``is_truth_table_v``
+  alias to simplify the third check. ``std::iota`` is likewise kept, as ``std::ranges::iota`` is C++23.
+  Additionally replaced every unchecked ``operator[]`` in these headers with bounds-checked ``at()``,
+  reserved the result vector in ``to_parameter_point``, made the ``mockturtle::stopwatch`` guards and the
+  writer's parameter references ``const``, and stopped passing a possibly non-null-terminated
+  ``std::string_view::data()`` to ``std::ofstream``. Together these take the module's clang-tidy report
+  from 92 warnings to zero
 - Parallelized ``operational_domain_flood_fill``. Previously, only the initial random sampling ran in
   parallel while the flood fill itself explored the parameter space on a single thread, which could make
   it slower in wall-clock time than a grid search on machines with many cores despite needing far fewer

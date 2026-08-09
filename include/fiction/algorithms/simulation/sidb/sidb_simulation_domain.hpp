@@ -7,6 +7,7 @@
 
 #include "fiction/utils/phmap_utils.hpp"
 
+#include <algorithm>
 #include <cstdio>
 #include <optional>
 #include <tuple>
@@ -74,8 +75,8 @@ class sidb_simulation_domain
         // copy for thread-safety
         const auto domain_values_copy = domain_values;
 
-        std::for_each(domain_values_copy.cbegin(), domain_values_copy.cend(),
-                      [&fn](const auto& pair) { std::invoke(std::forward<Fn>(fn), pair.first, pair.second); });
+        std::ranges::for_each(domain_values_copy,
+                              [&fn](const auto& pair) { std::invoke(std::forward<Fn>(fn), pair.first, pair.second); });
     }
     /**
      * Checks whether a specified key exists in the given map and retrieves its associated value if present.
