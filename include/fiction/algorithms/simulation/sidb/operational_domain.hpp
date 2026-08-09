@@ -78,35 +78,8 @@ struct parameter_point
      */
     [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
     {
-        // Check if sizes are equal
-        if (parameters.size() != other.parameters.size())
-        {
-            return false;
-        }
-
-        // Define tolerance for comparison
-        constexpr auto tolerance = constants::ERROR_MARGIN;
-
-        // Compare each element with tolerance
-        for (std::size_t i = 0; i < parameters.size(); ++i)
-        {
-            if (std::fabs(parameters[i] - other.parameters[i]) >= tolerance)
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
-    /**
-     * Inequality operator.
-     *
-     * @param other Other parameter point to compare with.
-     * @return `true` if the parameter points are not equal.
-     */
-    bool operator!=(const parameter_point& other) const noexcept
-    {
-        return !(*this == other);
+        return std::ranges::equal(parameters, other.parameters, [](const auto lhs, const auto rhs) noexcept
+                                  { return std::fabs(lhs - rhs) < constants::ERROR_MARGIN; });
     }
     /**
      * Support for structured bindings.
@@ -116,14 +89,9 @@ struct parameter_point
      * @throws std::out_of_range if the index is out of bounds.
      */
     template <std::size_t I>
-    auto get() const
+    [[nodiscard]] auto get() const
     {
-        if (I >= parameters.size())
-        {
-            throw std::out_of_range("Index out of bounds for parameter_point");
-        }
-
-        return parameters[I];
+        return parameters.at(I);
     }
     /**
      * Returns the parameter values for each dimension.
@@ -413,14 +381,14 @@ inline void validate_sweep_parameters(const operational_domain_params& params)
 {
     for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
     {
-        if (params.sweep_dimensions[d].max < params.sweep_dimensions[d].min)
+        if (params.sweep_dimensions.at(d).max < params.sweep_dimensions.at(d).min)
         {
             throw std::invalid_argument(
                 fmt::format("Invalid sweep dimension: 'max' value is smaller than 'min' value for "
                             "dimension {}",
                             d));
         }
-        if (params.sweep_dimensions[d].step <= 0.0)
+        if (params.sweep_dimensions.at(d).step <= 0.0)
         {
             throw std::invalid_argument(
                 fmt::format("Invalid sweep dimension: 'step' size is negative or 0 for dimension {}", d));
@@ -475,29 +443,29 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            op_domain.add_dimension(params.sweep_dimensions[d].dimension);
+            op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
 
             // generate the step points for the dimension
             indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
-            std::iota(indices[d].begin(), indices[d].end(), 0ul);
+            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
 
             // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
             // ignored in the operational domain calculation
-            if ((params.sweep_dimensions[d].min +
-                 static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
-                    params.sweep_dimensions[d].max >
+            if ((params.sweep_dimensions.at(d).min +
+                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
+                    params.sweep_dimensions.at(d).max >
                 constants::ERROR_MARGIN)
             {
-                indices[d].pop_back();
+                indices.at(d).pop_back();
             }
 
             values.emplace_back();
 
             // generate the values for the dimension
-            for (const auto i : indices[d])
+            for (const auto i : indices.at(d))
             {
-                values[d].push_back(params.sweep_dimensions[d].min +
-                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
+                values.at(d).push_back(params.sweep_dimensions.at(d).min +
+                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
             }
         }
     }
@@ -523,29 +491,29 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            op_domain.add_dimension(params.sweep_dimensions[d].dimension);
+            op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
 
             // generate the step points for the dimension
             indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
-            std::iota(indices[d].begin(), indices[d].end(), 0ul);
+            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
 
             // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
             // ignored in the operational domain calculation
-            if ((params.sweep_dimensions[d].min +
-                 static_cast<double>(indices[d].size() - 1) * params.sweep_dimensions[d].step) -
-                    params.sweep_dimensions[d].max >
+            if ((params.sweep_dimensions.at(d).min +
+                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
+                    params.sweep_dimensions.at(d).max >
                 constants::ERROR_MARGIN)
             {
-                indices[d].pop_back();
+                indices.at(d).pop_back();
             }
 
             values.emplace_back();
 
             // generate the values for the dimension
-            for (const auto i : indices[d])
+            for (const auto i : indices.at(d))
             {
-                values[d].push_back(params.sweep_dimensions[d].min +
-                                    (static_cast<double>(i) * params.sweep_dimensions[d].step));
+                values.at(d).push_back(params.sweep_dimensions.at(d).min +
+                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
             }
         }
     }
@@ -557,22 +525,22 @@ class operational_domain_impl
      */
     [[nodiscard]] OpDomain grid_search() noexcept
     {
-        mockturtle::stopwatch stop{stats.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         const auto all_index_combinations = cartesian_combinations(indices);
 
         std::vector<step_point> all_step_points{};
         all_step_points.reserve(all_index_combinations.size());
 
-        std::transform(all_index_combinations.cbegin(), all_index_combinations.cend(),
-                       std::back_inserter(all_step_points), [](const auto& comb) noexcept { return step_point{comb}; });
+        std::ranges::transform(all_index_combinations, std::back_inserter(all_step_points),
+                               [](const auto& comb) noexcept { return step_point{comb}; });
 
         // shuffle the step points to simulate in random order. This helps with load-balancing since
         // operational/non-operational points are usually clustered. However, non-operational points can be simulated
         // faster on average because of the early termination condition. Thus, threads that mainly simulate
         // non-operational points will finish earlier and will be idle while other threads are still simulating the more
         // expensive operational points
-        std::shuffle(all_step_points.begin(), all_step_points.end(), std::mt19937_64{std::random_device{}()});
+        std::ranges::shuffle(all_step_points, std::mt19937_64{std::random_device{}()});
 
         simulate_operational_status_in_parallel(all_step_points);
 
@@ -589,7 +557,7 @@ class operational_domain_impl
      */
     [[nodiscard]] OpDomain random_sampling(const std::size_t samples) noexcept
     {
-        mockturtle::stopwatch stop{stats.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         const auto step_point_samples = generate_random_step_points(samples);
 
@@ -616,6 +584,7 @@ class operational_domain_impl
      * operational region, it is used as a starting point for flood fill.
      * @return The (partial) operational domain of the layout.
      */
+    // NOLINTBEGIN(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
     [[nodiscard]] OpDomain
     flood_fill(const std::size_t                     samples,
                const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
@@ -623,7 +592,7 @@ class operational_domain_impl
         assert((num_dimensions == 2 || num_dimensions == 3) &&
                "Flood fill is only supported for two and three dimensions");
 
-        mockturtle::stopwatch stop{stats.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         auto step_point_samples = generate_random_step_points(samples);
 
@@ -757,6 +726,7 @@ class operational_domain_impl
 
         return op_domain;
     }
+    // NOLINTEND(bugprone-exception-escape)
     /**
      * Performs contour tracing to determine the operational domain. The algorithm first performs a random sampling of
      * up to the specified number of samples. It stops random sampling once it finds a single operational point, from
@@ -768,11 +738,12 @@ class operational_domain_impl
      * @param samples Maximum number of random samples to be taken before contour tracing.
      * @return The (partial) operational domain of the layout.
      */
+    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
     [[nodiscard]] OpDomain contour_tracing(const std::size_t samples) noexcept
     {
         assert(num_dimensions == 2 && "Contour tracing is only supported for two dimensions");
 
-        mockturtle::stopwatch stop{stats.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         const auto step_point_samples = generate_random_step_points(samples);
 
@@ -781,12 +752,12 @@ class operational_domain_impl
         const auto next_clockwise_point = [](std::vector<step_point>& neighborhood,
                                              const step_point&        backtrack) noexcept -> step_point
         {
-            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
+            assert(std::ranges::find(neighborhood, backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
 
             while (neighborhood.back() != backtrack)
             {
-                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
+                std::ranges::rotate(neighborhood, neighborhood.begin() + 1);
             }
 
             return neighborhood.front();
@@ -820,8 +791,8 @@ class operational_domain_impl
             // operational area `starting_point` is located in
             phmap::btree_set<step_point> contour{contour_starting_point};
 
-            const auto x = current_contour_point.step_values[0];
-            const auto y = current_contour_point.step_values[1];
+            const auto x = current_contour_point.step_values.at(0);
+            const auto y = current_contour_point.step_values.at(1);
 
             auto backtrack_point = x == 0 ? current_contour_point : step_point{{x - 1, y}};
 
@@ -876,7 +847,7 @@ class operational_domain_impl
     {
         sidb_simulation_domain<parameter_point, uint64_t> suitable_params_domain{};
 
-        mockturtle::stopwatch stop{stats.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         // Cartesian product of all step point indices
         const auto all_index_combinations = cartesian_combinations(indices);
@@ -935,7 +906,7 @@ class operational_domain_impl
 
                     for (auto d = 0u; d < num_dimensions; ++d)
                     {
-                        set_dimension_value(simulation_parameters, param_point.get_parameters()[d], d);
+                        set_dimension_value(simulation_parameters, param_point.get_parameters().at(d), d);
                     }
 
                     auto sim_results = sidb_simulation_result<Lyt>{};
@@ -1004,8 +975,8 @@ class operational_domain_impl
         std::vector<parameter_point> parameter_points{};
         parameter_points.reserve(inferred_op_domain.size());
 
-        std::transform(inferred_op_domain.cbegin(), inferred_op_domain.cend(), std::back_inserter(parameter_points),
-                       [this](const auto& sp) { return to_parameter_point(sp); });
+        std::ranges::transform(inferred_op_domain, std::back_inserter(parameter_points),
+                               [this](const auto& sp) { return to_parameter_point(sp); });
 
         return parameter_points;
     }
@@ -1102,35 +1073,13 @@ class operational_domain_impl
          */
         std::vector<std::size_t> step_values;
         /**
-         * Equality operator.
+         * Three-way comparison operator. Compares the step values lexicographically, which also yields the equality,
+         * inequality, and relational operators via C++20's rewritten candidates.
          *
          * @param other Other step point to compare with.
-         * @return `true` iff the step points are equal.
+         * @return The lexicographical ordering of the two step points' step values.
          */
-        [[nodiscard]] bool operator==(const step_point& other) const noexcept
-        {
-            return step_values == other.step_values;
-        }
-        /**
-         * Inequality operator.
-         *
-         * @param other Other step point to compare with.
-         * @return `true` iff the step points are not equal.
-         */
-        [[nodiscard]] bool operator!=(const step_point& other) const noexcept
-        {
-            return !(*this == other);
-        }
-        /**
-         * Less than operator.
-         *
-         * @param other Other step point to compare with.
-         * @return `true` if this step point is less than to the other.
-         */
-        [[nodiscard]] bool operator<(const step_point& other) const noexcept
-        {
-            return step_values < other.step_values;
-        }
+        [[nodiscard]] auto operator<=>(const step_point& other) const = default;
     };
     /**
      * Converts a step point to a parameter point.
@@ -1141,9 +1090,11 @@ class operational_domain_impl
     [[nodiscard]] parameter_point to_parameter_point(const step_point& sp) const noexcept
     {
         std::vector<double> parameter_values{};
+        parameter_values.reserve(num_dimensions);
+
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            parameter_values.push_back(values[d][sp.step_values[d]]);
+            parameter_values.push_back(values.at(d).at(sp.step_values.at(d)));
         }
 
         return parameter_point{parameter_values};
@@ -1162,15 +1113,15 @@ class operational_domain_impl
         for (auto d = 0u; d < num_dimensions; ++d)
         {
             // Ensure the parameter is within the valid range
-            [[maybe_unused]] const auto min_val = values[d].front();
-            [[maybe_unused]] const auto max_val = values[d].back();
+            [[maybe_unused]] const auto min_val = values.at(d).front();
+            [[maybe_unused]] const auto max_val = values.at(d).back();
 
-            assert(pp.get_parameters()[d] >= min_val && pp.get_parameters()[d] <= max_val &&
+            assert(pp.get_parameters().at(d) >= min_val && pp.get_parameters().at(d) <= max_val &&
                    "Parameter point is outside of the value range");
 
-            const auto it = std::lower_bound(values[d].cbegin(), values[d].cend(), pp.get_parameters()[d]);
+            const auto it = std::ranges::lower_bound(values.at(d), pp.get_parameters().at(d));
 
-            const auto dis = std::distance(values[d].cbegin(), it);
+            const auto dis = std::distance(values.at(d).cbegin(), it);
 
             step_values.push_back(static_cast<std::size_t>(dis));
         }
@@ -1187,8 +1138,8 @@ class operational_domain_impl
         assert(dimension < num_dimensions && "Invalid dimension");
 
         return static_cast<std::size_t>(
-            std::round((params.sweep_dimensions[dimension].max - params.sweep_dimensions[dimension].min) /
-                       params.sweep_dimensions[dimension].step));
+            std::round((params.sweep_dimensions.at(dimension).max - params.sweep_dimensions.at(dimension).min) /
+                       params.sweep_dimensions.at(dimension).step));
     }
     /**
      * Helper function that sets the value of a sweep dimension in the simulation parameters.
@@ -1200,7 +1151,7 @@ class operational_domain_impl
     void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
                              const std::size_t dim) const noexcept
     {
-        switch (params.sweep_dimensions[dim].dimension)
+        switch (params.sweep_dimensions.at(dim).dimension)
         {
             case sweep_parameter::EPSILON_R:
             {
@@ -1244,6 +1195,7 @@ class operational_domain_impl
 
         const auto param_point = to_parameter_point(sp);
 
+        // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, as in the enclosing algorithms
         const auto operational = [this, &param_point](const std::optional<double>& ct_value = std::nullopt) noexcept
         {
             if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
@@ -1281,7 +1233,7 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            set_dimension_value(sim_params, values[d][sp.step_values[d]], d);
+            set_dimension_value(sim_params, values.at(d).at(sp.step_values.at(d)), d);
         }
 
         auto op_params_set_dimension_values                  = params.operational_params;
@@ -1347,7 +1299,7 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            set_dimension_value(sim_params, param_point.get_parameters()[d], d);
+            set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
         }
 
         lyt.assign_physical_parameters(sim_params);
@@ -1392,7 +1344,7 @@ class operational_domain_impl
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
-            distributions.emplace_back(0, indices[d].size() - 1);
+            distributions.emplace_back(0, indices.at(d).size() - 1);
         }
 
         // container for the random samples
@@ -1406,7 +1358,7 @@ class operational_domain_impl
             // sample all dimensions
             for (auto d = 0u; d < num_dimensions; ++d)
             {
-                dimension_samples.push_back(distributions[d](generator));
+                dimension_samples.push_back(distributions.at(d)(generator));
             }
 
             step_point_samples.insert(step_point{dimension_samples});
@@ -1507,9 +1459,9 @@ class operational_domain_impl
         auto latest_operational_point = starting_point;
 
         // move towards the left border of the parameter range
-        for (std::size_t x = starting_point.step_values[0]; x > 0; --x)
+        for (std::size_t x = starting_point.step_values.at(0); x > 0; --x)
         {
-            const auto y = starting_point.step_values[1];
+            const auto y = starting_point.step_values.at(1);
 
             const auto left_step = step_point{{x, y}};
 
@@ -1549,11 +1501,11 @@ class operational_domain_impl
         const auto emplace = [&neighbors](const auto x, const auto y) noexcept
         { neighbors.emplace_back(std::vector<std::size_t>{x, y}); };
 
-        const auto x = sp.step_values[0];
-        const auto y = sp.step_values[1];
+        const auto x = sp.step_values.at(0);
+        const auto y = sp.step_values.at(1);
 
-        const auto num_x_indices = indices[0].size();
-        const auto num_y_indices = indices[1].size();
+        const auto num_x_indices = indices.at(0).size();
+        const auto num_y_indices = indices.at(1).size();
 
         const auto decr_x = (x > 0) ? x - 1 : x;
         const auto incr_x = (x + 1 < num_x_indices) ? x + 1 : x;
@@ -1681,13 +1633,13 @@ class operational_domain_impl
         const auto emplace = [&neighbors](const auto x, const auto y, const auto z) noexcept
         { neighbors.emplace_back(std::vector<std::size_t>{x, y, z}); };
 
-        const auto x = sp.step_values[0];
-        const auto y = sp.step_values[1];
-        const auto z = sp.step_values[2];
+        const auto x = sp.step_values.at(0);
+        const auto y = sp.step_values.at(1);
+        const auto z = sp.step_values.at(2);
 
-        const auto num_x_indices = indices[0].size();
-        const auto num_y_indices = indices[1].size();
-        const auto num_z_indices = indices[2].size();
+        const auto num_x_indices = indices.at(0).size();
+        const auto num_y_indices = indices.at(1).size();
+        const auto num_z_indices = indices.at(2).size();
 
         // add neighbors in no particular order
 

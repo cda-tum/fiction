@@ -8,6 +8,7 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 
+#include <cstddef>
 #include <set>
 #include <sstream>
 #include <string>
@@ -132,6 +133,108 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
         {
             CHECK(expected.contains(line));
         }
+    }
+}
+
+TEST_CASE("Write operational domain with one and three sweep dimensions", "[write-operational-domain]")
+{
+    SECTION("one sweep dimension")
+    {
+        operational_domain opdom{};
+
+        opdom.add_dimension(sweep_parameter::EPSILON_R);
+
+        opdom.add_value(parameter_point{{0.1}}, {operational_status::OPERATIONAL});
+        opdom.add_value(parameter_point{{0.3}}, {operational_status::NON_OPERATIONAL});
+
+        const std::set<std::string> expected{"epsilon_r,operational status", "0.1,1", "0.3,0"};
+
+        std::ostringstream os{};
+        write_operational_domain(opdom, os);
+
+        std::istringstream is{os.str()};
+
+        std::set<std::string> emitted{};
+
+        std::size_t num_lines = 0;
+
+        for (std::string line{}; std::getline(is, line); ++num_lines)
+        {
+            emitted.insert(line);
+        }
+
+        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
+        // row cannot mask a missing one
+        CHECK(emitted == expected);
+        CHECK(num_lines == expected.size());
+    }
+
+    SECTION("three sweep dimensions")
+    {
+        operational_domain opdom{};
+
+        opdom.add_dimension(sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sweep_parameter::MU_MINUS);
+
+        opdom.add_value(parameter_point{{0.1, 0.2, -0.3}}, {operational_status::OPERATIONAL});
+        opdom.add_value(parameter_point{{0.4, 0.5, -0.6}}, {operational_status::NON_OPERATIONAL});
+
+        const std::set<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status", "0.1,0.2,-0.3,1",
+                                             "0.4,0.5,-0.6,0"};
+
+        std::ostringstream os{};
+        write_operational_domain(opdom, os);
+
+        std::istringstream is{os.str()};
+
+        std::set<std::string> emitted{};
+
+        std::size_t num_lines = 0;
+
+        for (std::string line{}; std::getline(is, line); ++num_lines)
+        {
+            emitted.insert(line);
+        }
+
+        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
+        // row cannot mask a missing one
+        CHECK(emitted == expected);
+        CHECK(num_lines == expected.size());
+    }
+
+    SECTION("three sweep dimensions with critical temperature")
+    {
+        critical_temperature_domain opdom{};
+
+        opdom.add_dimension(sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sweep_parameter::MU_MINUS);
+
+        opdom.add_value(parameter_point{{0.1, 0.2, -0.3}}, {operational_status::OPERATIONAL, 50.3});
+        opdom.add_value(parameter_point{{0.4, 0.5, -0.6}}, {operational_status::NON_OPERATIONAL, 0.0});
+
+        const std::set<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status,critical temperature",
+                                             "0.1,0.2,-0.3,1,50.3", "0.4,0.5,-0.6,0,0"};
+
+        std::ostringstream os{};
+        write_operational_domain(opdom, os);
+
+        std::istringstream is{os.str()};
+
+        std::set<std::string> emitted{};
+
+        std::size_t num_lines = 0;
+
+        for (std::string line{}; std::getline(is, line); ++num_lines)
+        {
+            emitted.insert(line);
+        }
+
+        // the emitted rows must be exactly the expected ones, and the line count must match so that a duplicated
+        // row cannot mask a missing one
+        CHECK(emitted == expected);
+        CHECK(num_lines == expected.size());
     }
 }
 
