@@ -58,25 +58,12 @@ struct bdl_pair
     {}
 
     /**
-     * Equality operator.
+     * Equality operator. Also provides `operator!=` via `= default`.
      *
      * @param other The other BDL pair to compare with.
      * @return `true` if this BDL pair is equal to the other, `false` otherwise.
      */
-    [[nodiscard]] constexpr bool operator==(const bdl_pair<CellType>& other) const noexcept
-    {
-        return type == other.type && upper == other.upper && lower == other.lower;
-    }
-    /**
-     * Inequality operator.
-     *
-     * @param other The other BDL pair to compare with.
-     * @return `true` if this BDL pair is not equal to the other, `false` otherwise.
-     */
-    [[nodiscard]] constexpr bool operator!=(const bdl_pair<CellType>& other) const noexcept
-    {
-        return !(*this == other);
-    }
+    [[nodiscard]] constexpr bool operator==(const bdl_pair<CellType>& other) const noexcept = default;
     /**
      * Less than operator.
      *
@@ -287,7 +274,7 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
         // compute pairwise distances
         auto pairwise_distances = compute_pairwise_dot_distances();
         // sort pairwise distances
-        std::sort(pairwise_distances.begin(), pairwise_distances.end(), dot_distance_comparator);
+        std::ranges::sort(pairwise_distances, dot_distance_comparator);
         // pair unique dots with the smallest distance
         std::unordered_set<cell<Lyt>> paired_dots{};
         paired_dots.reserve(dots.size());
@@ -337,7 +324,7 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
         }
 
         // Sort the vector of BDL pairs using the less than operator for BDL pairs
-        std::sort(bdl_pairs.begin(), bdl_pairs.end());
+        std::ranges::sort(bdl_pairs);
 
         return bdl_pairs;
     };
@@ -390,9 +377,9 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
         std::vector<bdl_pair<cell<Lyt>>> all_bdls{};
         all_bdls.reserve(input_bdl.size() + output_bdls.size() + normal_bdls.size());
 
-        std::copy(input_bdl.cbegin(), input_bdl.cend(), std::back_inserter(all_bdls));
-        std::copy(output_bdls.cbegin(), output_bdls.cend(), std::back_inserter(all_bdls));
-        std::copy(normal_bdls.cbegin(), normal_bdls.cend(), std::back_inserter(all_bdls));
+        std::ranges::copy(input_bdl, std::back_inserter(all_bdls));
+        std::ranges::copy(output_bdls, std::back_inserter(all_bdls));
+        std::ranges::copy(normal_bdls, std::back_inserter(all_bdls));
 
         return all_bdls;
     }

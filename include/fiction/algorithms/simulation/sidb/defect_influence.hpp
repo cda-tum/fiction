@@ -225,8 +225,8 @@ class defect_influence_impl
         // Get all possible defect positions within the grid spanned by nw_cell and se_cell
         auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
 
-        // Shuffle the vector using std::shuffle
-        std::shuffle(all_possible_defect_positions.begin(), all_possible_defect_positions.end(), generator);
+        // Shuffle the vector using std::ranges::shuffle
+        std::ranges::shuffle(all_possible_defect_positions, generator);
 
         // Determine how many positions to sample (use the smaller of samples or the total number of positions)
         const auto min_iterations = std::min(all_possible_defect_positions.size(), samples);
@@ -309,12 +309,12 @@ class defect_influence_impl
         const auto next_clockwise_point = [](std::vector<typename Lyt::cell>& neighborhood,
                                              const typename Lyt::cell&        backtrack) noexcept -> typename Lyt::cell
         {
-            assert(std::find(neighborhood.cbegin(), neighborhood.cend(), backtrack) != neighborhood.cend() &&
+            assert(std::ranges::find(neighborhood, backtrack) != neighborhood.cend() &&
                    "The backtrack point must be part of the neighborhood");
 
             while (neighborhood.back() != backtrack)
             {
-                std::rotate(neighborhood.begin(), neighborhood.begin() + 1, neighborhood.end());
+                std::ranges::rotate(neighborhood, neighborhood.begin() + 1);
             }
 
             return neighborhood.front();
@@ -371,8 +371,7 @@ class defect_influence_impl
             auto current_neighborhood = moore_neighborhood(current_contour_point);
 
             // if the backtrack point is not part of the neighborhood, continue with the next starting point
-            if (std::find(current_neighborhood.cbegin(), current_neighborhood.cend(), backtrack_point) ==
-                current_neighborhood.cend())
+            if (std::ranges::find(current_neighborhood, backtrack_point) == current_neighborhood.cend())
             {
                 continue;
             }
@@ -665,8 +664,8 @@ class defect_influence_impl
 
             for (const auto& gs_defect : ground_states_defect)
             {
-                const auto same_ground_state_was_found = std::any_of(
-                    ground_states.cbegin(), ground_states.cend(), [&gs_defect](const auto& gs)
+                const auto same_ground_state_was_found = std::ranges::any_of(
+                    ground_states, [&gs_defect](const auto& gs)
                     { return gs.get_charge_index_and_base().first == gs_defect.get_charge_index_and_base().first; });
 
                 if (!same_ground_state_was_found)

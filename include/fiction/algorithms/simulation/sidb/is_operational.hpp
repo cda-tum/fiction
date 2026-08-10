@@ -34,6 +34,7 @@
 #include <cstdint>
 #include <limits>
 #include <optional>
+#include <ranges>
 #include <set>
 #include <utility>
 #include <vector>
@@ -975,26 +976,27 @@ class is_operational_impl
     [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution_surface<Lyt>& ground_state,
                                                                const uint64_t current_input_index) const noexcept
     {
-        return std::any_of(input_bdl_wires.crbegin(), input_bdl_wires.crend(),
-                           [this, &ground_state, &current_input_index, i = 0u](const auto& wire) mutable
-                           {
-                               const auto current_bit_set = (current_input_index & (uint64_t{1ull} << i++)) != 0ull;
-                               return std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
-                                                  [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
-                                                  {
-                                                      if (bdl.type == sidb_technology::INPUT)
-                                                      {
-                                                          return false;  // Skip processing for input type.
-                                                      }
+        return std::ranges::any_of(
+            input_bdl_wires | std::views::reverse,
+            [this, &ground_state, &current_input_index, i = 0u](const auto& wire) mutable
+            {
+                const auto current_bit_set = (current_input_index & (uint64_t{1ull} << i++)) != 0ull;
+                return std::ranges::any_of(wire.pairs,
+                                           [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
+                                           {
+                                               if (bdl.type == sidb_technology::INPUT)
+                                               {
+                                                   return false;  // Skip processing for input type.
+                                               }
 
-                                                      if (current_bit_set)
-                                                      {
-                                                          return !encodes_bit_one(ground_state, bdl, wire.port);
-                                                      }
+                                               if (current_bit_set)
+                                               {
+                                                   return !encodes_bit_one(ground_state, bdl, wire.port);
+                                               }
 
-                                                      return !encodes_bit_zero(ground_state, bdl, wire.port);
-                                                  });
-                           });
+                                               return !encodes_bit_zero(ground_state, bdl, wire.port);
+                                           });
+            });
     }
 
     /**
@@ -1102,8 +1104,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
@@ -1168,8 +1170,8 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     if (canvas_lyt.has_value())
     {
@@ -1227,8 +1229,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     detail::is_operational_impl<Lyt, TT> p{lyt, spec, params};
 
@@ -1279,8 +1281,8 @@ operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is
 
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     if (canvas_lyt.has_value())
     {
@@ -1354,8 +1356,8 @@ kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
 
@@ -1410,8 +1412,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
 
@@ -1483,8 +1485,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
@@ -1531,8 +1533,8 @@ template <typename Lyt, typename TT>
 
     assert(!spec.empty());
     // all elements in spec must have the same number of variables
-    assert(std::adjacent_find(spec.cbegin(), spec.cend(), [](const auto& a, const auto& b)
-                              { return a.num_vars() != b.num_vars(); }) == spec.cend());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.cend());
 
     is_operational_params params_with_rejecting_kinks = params;
     params_with_rejecting_kinks.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;

@@ -967,8 +967,7 @@ class clustercomplete_impl
             }
         }
 
-        std::shuffle(work_from_top_cluster.begin(), work_from_top_cluster.end(),
-                     std::mt19937_64{std::random_device{}()});
+        std::ranges::shuffle(work_from_top_cluster, std::mt19937_64{std::random_device{}()});
 
         return work_from_top_cluster;
     }

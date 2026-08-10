@@ -192,7 +192,7 @@ class displacement_robustness_domain_impl
         }
 
         // Shuffle the layouts vector to have random displaced layouts
-        std::shuffle(layouts.begin(), layouts.end(), generator);
+        std::ranges::shuffle(layouts, generator);
 
         displacement_robustness_domain<Lyt> domain{};
 
@@ -498,7 +498,7 @@ class displacement_robustness_domain_impl
     {
         auto all_possible_sidb_displacement = cartesian_combinations(all_possible_sidb_displacements);
 
-        std::shuffle(all_possible_sidb_displacement.begin(), all_possible_sidb_displacement.end(), generator);
+        std::ranges::shuffle(all_possible_sidb_displacement, generator);
 
         std::vector<Lyt> layouts{};
         layouts.reserve(all_possible_sidb_displacement.size());

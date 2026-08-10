@@ -26,6 +26,7 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdint>
@@ -511,8 +512,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     critical_temperature_stats st{};
 
