@@ -10985,6 +10985,8 @@ static const char *__doc_fiction_detail_write_qll_layout_impl_sorted_po_list = R
 
 static const char *__doc_fiction_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
 
+static const char *__doc_fiction_detail_write_qll_layout_impl_tech_name = R"doc()doc";
+
 static const char *__doc_fiction_detail_write_qll_layout_impl_write_components = R"doc()doc";
 
 static const char *__doc_fiction_detail_write_qll_layout_impl_write_header = R"doc()doc";
