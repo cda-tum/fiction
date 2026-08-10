@@ -8,7 +8,6 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/physical_population_stability.hpp"
 
-#include <algorithm>
 #include <cassert>
 #include <limits>
 #include <optional>

@@ -224,8 +224,9 @@ Changed
       ``defect_influence.hpp``, ``detect_bdl_pairs.hpp``, ``detect_bdl_wires.hpp``,
       ``displacement_robustness_domain.hpp``, ``energy_distribution.hpp``,
       ``equivalence_check_for_simulation_results.hpp``, ``ground_state_space.hpp``, ``is_operational.hpp``,
-      ``occupation_probability_of_excited_states.hpp``, ``physical_population_stability.hpp``, and
-      ``sidb_simulation_result.hpp``; ``std::erase``/``std::erase_if`` in place of the erase-remove idiom
+      ``occupation_probability_of_excited_states.hpp``, ``physical_population_stability.hpp``,
+      ``sidb_simulation_result.hpp``, and ``verify_logic_match.hpp``; ``std::erase``/``std::erase_if`` in place
+      of the erase-remove idiom
       (``detect_bdl_wires.hpp``, ``quickexact.hpp``); and a defaulted ``operator==`` on ``bdl_pair`` in place of
       its hand-written memberwise ``operator==``/``operator!=`` pair (``detect_bdl_pairs.hpp``). ``bdl_pair``'s
       ordering operators were left as hand-written, since they order only by ``upper``/``lower`` and ignore

@@ -12,7 +12,6 @@
 
 #include <kitty/traits.hpp>
 
-#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <vector>

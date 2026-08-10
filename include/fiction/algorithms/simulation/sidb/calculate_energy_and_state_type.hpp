@@ -30,7 +30,7 @@ namespace fiction
 /**
  * Label to categorize ground and excited states of an SiDB layout.
  */
-enum class state_type
+enum class state_type : uint8_t
 {
     /**
      * A state is accepted if the charge distribution encodes the desired logic.
