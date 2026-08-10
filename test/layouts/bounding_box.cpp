@@ -364,8 +364,8 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
     SECTION("two cell and two defect, exclude defects")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
-        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
