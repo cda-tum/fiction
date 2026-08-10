@@ -1232,28 +1232,7 @@ class write_mol_qca_layout_svg_impl
             }
             if (!is_sync_elem)
             {
-                const uint64_t idx = [&ct]
-                {
-                    if (Lyt::technology::is_normal_cell1(ct))
-                    {
-                        return uint64_t{0};
-                    }
-                    if (Lyt::technology::is_normal_cell2(ct))
-                    {
-                        return uint64_t{1};
-                    }
-                    if (Lyt::technology::is_normal_cell3(ct))
-                    {
-                        return uint64_t{2};
-                    }
-                    if (Lyt::technology::is_normal_cell4(ct))
-                    {
-                        return uint64_t{3};
-                    }
-                    return uint64_t{0};
-                }();
-
-                cell_color = cell_colors.at(idx);
+                cell_color = cell_colors.at(Lyt::technology::cell_clock_number(ct));
             }
 
             if (ps.simple)
@@ -1370,7 +1349,7 @@ class write_mol_qca_layout_svg_impl
  *
  * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
  *
- * @tparam Lyt Cell-level QCA layout type.
+ * @tparam Lyt Cell-level molQCA layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.

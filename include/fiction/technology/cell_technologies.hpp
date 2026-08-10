@@ -140,6 +140,12 @@ struct qca_technology
     qca_technology() = delete;
 };
 
+/**
+ * Molecular Quantum-dot Cellular Automata (molQCA) technology implementation of the FCN concept.
+ *
+ * MolQCA normal cell symbols encode their SCERPA clock phase directly. The helper predicates below keep phase handling
+ * centralized for writers and gate libraries that need to translate cell symbols into simulator-specific metadata.
+ */
 struct mol_qca_technology
 {
     /**
@@ -232,6 +238,33 @@ struct mol_qca_technology
     [[nodiscard]] static constexpr bool is_normal_cell4(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL4;
+    }
+
+    /**
+     * Returns the SCERPA clock number encoded by a molQCA normal cell type.
+     *
+     * Non-normal cell types do not encode a clock phase and are mapped to phase 0 for callers that need a deterministic
+     * fallback.
+     *
+     * @param c Cell type to inspect.
+     * @return Clock number in the range 0 to 3.
+     */
+    [[nodiscard]] static constexpr uint64_t cell_clock_number(const cell_type& c) noexcept
+    {
+        if (is_normal_cell2(c))
+        {
+            return 1u;
+        }
+        if (is_normal_cell3(c))
+        {
+            return 2u;
+        }
+        if (is_normal_cell4(c))
+        {
+            return 3u;
+        }
+
+        return 0u;
     }
 
     [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept

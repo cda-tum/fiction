@@ -16782,7 +16782,14 @@ static const char *__doc_fiction_missing_sidb_position_exception_missing_sidb_po
 
 static const char *__doc_fiction_missing_sidb_position_exception_where = R"doc()doc";
 
-static const char *__doc_fiction_mol_qca_technology = R"doc()doc";
+static const char *__doc_fiction_mol_qca_technology =
+R"doc(Molecular Quantum-dot Cellular Automata (molQCA) technology
+implementation of the FCN concept.
+
+MolQCA normal cell symbols encode their SCERPA clock phase directly.
+The helper predicates below keep phase handling centralized for
+writers and gate libraries that need to translate cell symbols into
+simulator-specific metadata.)doc";
 
 static const char *__doc_fiction_mol_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
 
@@ -16844,6 +16851,18 @@ static const char *__doc_fiction_mol_qca_technology_is_normal_cell3 = R"doc()doc
 
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell4 = R"doc()doc";
 
+static const char *__doc_fiction_mol_qca_technology_cell_clock_number =
+R"doc(Returns the SCERPA clock number encoded by a molQCA normal cell type.
+
+Non-normal cell types do not encode a clock phase and are mapped to
+phase 0 for callers that need a deterministic fallback.
+
+Parameter ``c``:
+    Cell type to inspect.
+
+Returns:
+    Clock number in the range 0 to 3.)doc";
+
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell_mode = R"doc()doc";
 
 static const char *__doc_fiction_mol_qca_technology_is_output_cell = R"doc()doc";
@@ -16867,7 +16886,26 @@ simulations using the SCERPA tool, and tiles represent uniform
 More information and the open-source implementation are available at
 https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
 
-static const char *__doc_fiction_molecular_qca_library_determine_port_routing = R"doc()doc";
+static const char *__doc_fiction_molecular_qca_library_determine_port_routing =
+R"doc(Determines the 10x10 molQCA connector positions used by the gate tile
+at `t`.
+
+Connector coordinates are placed at the center of the respective tile
+borders: north `(4, 0)`, east `(9, 4)`, south `(5, 9)`, and west `(0,
+5)`. Primary inputs and outputs without explicit incoming or outgoing
+signals are assigned to the west and east borders, respectively.
+
+Template parameter ``Lyt``:
+    Gate-level layout type.
+
+Parameter ``lyt``:
+    Layout that hosts tile `t`.
+
+Parameter ``t``:
+    Tile whose port routing is determined.
+
+Returns:
+    Incoming and outgoing molQCA connector positions for `t`.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_molecular_qca_library = R"doc()doc";
 
@@ -23000,7 +23038,7 @@ May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
-    Cell-level QCA layout type.
+    Cell-level molQCA layout type.
 
 Parameter ``lyt``:
     The layout to be written.
@@ -23289,16 +23327,13 @@ simulator for the mQCA technology platform.
 This overload uses an output stream to write into.
 
 Template parameter ``Lyt``:
-    Cell-level QCA or iNML layout type.
+    Cell-level QCA, molQCA, or iNML layout type.
 
 Parameter ``lyt``:
     The layout to be written.
 
 Parameter ``os``:
-    The output stream to write into.
-
-Parameter ``ps``:
-    Parameters.)doc";
+    The output stream to write into.)doc";
 
 static const char *__doc_fiction_write_qll_layout_2 =
 R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
@@ -23310,17 +23345,14 @@ simulator for the mQCA technology platform.
 This overload uses a file name to create and write into.
 
 Template parameter ``Lyt``:
-    Cell-level iNML layout type.
+    Cell-level QCA, molQCA, or iNML layout type.
 
 Parameter ``lyt``:
     The layout to be written.
 
 Parameter ``filename``:
     The file name to create and write into. Should preferably use the
-    `.qll` extension.
-
-Parameter ``ps``:
-    Parameters.)doc";
+    `.qll` extension.)doc";
 
 static const char *__doc_fiction_write_sidb_layout_svg =
 R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
@@ -23598,4 +23630,3 @@ static const char *__doc_std_tuple_size = R"doc()doc";
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
 #endif
-

@@ -105,6 +105,18 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
     }
 
   private:
+    /**
+     * Determines the 10x10 molQCA connector positions used by the gate tile at `t`.
+     *
+     * Connector coordinates are placed at the center of the respective tile borders: north `(4, 0)`, east `(9, 4)`,
+     * south `(5, 9)`, and west `(0, 5)`. Primary inputs and outputs without explicit incoming or outgoing signals are
+     * assigned to the west and east borders, respectively.
+     *
+     * @tparam Lyt Gate-level layout type.
+     * @param lyt Layout that hosts tile `t`.
+     * @param t Tile whose port routing is determined.
+     * @return Incoming and outgoing molQCA connector positions for `t`.
+     */
     template <typename Lyt>
     [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {

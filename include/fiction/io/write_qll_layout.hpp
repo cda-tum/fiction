@@ -152,6 +152,10 @@ class write_qll_layout_impl
         {
             return "MolFCN";
         }
+        else if constexpr (has_mol_qca_technology_v<Lyt>)
+        {
+            return "MolFCN";
+        }
         else
         {
             return "?";
@@ -382,32 +386,13 @@ class write_qll_layout_impl
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
-                        const int idx = [&type]
-                        {
-                            if (Lyt::technology::is_normal_cell1(type))
-                            {
-                                return 0;
-                            }
-                            if (Lyt::technology::is_normal_cell2(type))
-                            {
-                                return 1;
-                            }
-                            if (Lyt::technology::is_normal_cell3(type))
-                            {
-                                return 2;
-                            }
-                            if (Lyt::technology::is_normal_cell4(type))
-                            {
-                                return 3;
-                            }
-                            return 0;
-                        }();
+                        const auto phase = mol_qca_technology::cell_clock_number(type);
 
                         // write normal cell
                         if (mol_qca_technology::is_normal_cell(type))
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
-                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, idx);
+                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
                         // constant cells are handled as input pins
@@ -422,7 +407,7 @@ class write_qll_layout_impl
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
                                               (c.z * 2) + 1);
-                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, idx);
+                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
                     }
@@ -446,10 +431,9 @@ class write_qll_layout_impl
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Cell-level QCA or iNML layout type.
+ * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
- * @param ps Parameters.
  */
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os)
@@ -469,10 +453,9 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Cell-level iNML layout type.
+ * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
- * @param ps Parameters.
  */
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
