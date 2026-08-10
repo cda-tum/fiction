@@ -11,6 +11,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/molecular_qca_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
