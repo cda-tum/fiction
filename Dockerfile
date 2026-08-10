@@ -1,4 +1,4 @@
-FROM ubuntu:24.04
+FROM ubuntu:26.04
 
 # Optional argument to run the "make" command in parallel with the specified NUMBER_OF_JOBS
 ARG NUMBER_OF_JOBS=4
@@ -45,17 +45,7 @@ COPY --chown=appuser:appuser . fiction/
 
 # Build fiction
 RUN . venv/bin/activate \
-    && cmake -S fiction -B fiction/build \
-      -DCMAKE_BUILD_TYPE=Release \
-      -DFICTION_CLI=ON \
-      -DFICTION_TEST=OFF \
-      -DFICTION_EXPERIMENTS=OFF \
-      -DFICTION_Z3=ON \
-      -DFICTION_ALGLIB=ON \
-      -DFICTION_ENABLE_MUGEN=OFF \
-      -DFICTION_PROGRESS_BARS=ON \
-      -DFICTION_WARNINGS_AS_ERRORS=OFF \
-      -DMOCKTURTLE_EXAMPLES=OFF \
+    && cmake -S fiction --preset deploy \
       -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold \
     && cmake --build fiction/build --config Release -j${NUMBER_OF_JOBS}
 

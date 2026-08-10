@@ -36,7 +36,8 @@ ExternalProject_Add(
     && cd ${JEMALLOC_SOURCE_DIR} && ./autogen.sh
     --prefix=${JEMALLOC_INSTALL_DIR} && rm VERSION
   BUILD_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make ${PARALLEL_BUILD_ARGS}
-  INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make -j1 install)
+  INSTALL_COMMAND cd ${JEMALLOC_SOURCE_DIR} && make -j1 install
+  BUILD_BYPRODUCTS ${JEMALLOC_INSTALL_DIR}/lib/libjemalloc.a)
 
 # Create an imported target (works on all platforms).
 add_library(jemalloc STATIC IMPORTED)

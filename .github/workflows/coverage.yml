@@ -25,16 +25,20 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 defaults:
   run:
     shell: bash
 
 env:
-  BUILD_TYPE: Debug
   Z3_VERSION: 4.13.4
 
 jobs:
   build_and_test:
+    permissions:
+      contents: read # required to check out the repository
+
     strategy:
       matrix:
         os: [ubuntu-24.04]
@@ -45,10 +49,14 @@ jobs:
 
     steps:
       - name: Install Dependencies
-        run: sudo apt-get update && sudo apt-get install -yq ${{matrix.compiler}} lcov ninja-build
+        env:
+          COMPILER: ${{ matrix.compiler }}
+        run: sudo apt-get update && sudo apt-get install -yq "$COMPILER" lcov ninja-build
 
       - name: Clone Repository
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
@@ -58,23 +66,12 @@ jobs:
           save: true
           max-size: 10G
 
-      - name: Setup Python
-        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-        with:
-          python-version: "3.14.x"
-          cache: "pip"
-
       - name: Setup mold
-        uses: rui314/setup-mold@v1
-
-      - name: Install pip packages
-        uses: BSFishy/pip-action@v1
-        with:
-          requirements: ${{github.workspace}}/vendors/mugen/requirements.txt
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@8156b32632230f11cf9c5a50becb33d73e2fb4e5 # v1.7.1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{env.Z3_VERSION}}
           platform: linux
@@ -83,39 +80,28 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
       - name: Configure CMake
+        env:
+          COMPILER: ${{ matrix.compiler }}
         run: >
-          cmake -S ${{github.workspace}} -B ${{github.workspace}}/build -G Ninja
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-          -DFICTION_CLI=OFF
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=OFF
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_ENABLE_MUGEN=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DFICTION_ENABLE_COVERAGE=ON
-          -DMOCKTURTLE_EXAMPLES=OFF
+          cmake -S . --preset coverage
+          -DCMAKE_CXX_COMPILER="$COMPILER"
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/build --config $BUILD_TYPE --parallel 4
+        run: cmake --build --preset coverage --parallel 4
 
       - name: Test
-        working-directory: ${{github.workspace}}/build
-        run: ctest -C $BUILD_TYPE --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset coverage --repeat until-pass:3 --parallel 4
 
       - name: Generate Coverage Report
         run: |
-          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d ${{github.workspace}}/build/ --ignore-errors mismatch --ignore-errors gcov
-          lcov --gcov-tool gcov-13 -e lcov.info "${{github.workspace}}/include*" -o lcov_filtered.info
+          lcov --gcov-tool gcov-13 -t "fiction-coverage" -o lcov.info -c -d build-coverage/ --ignore-errors mismatch --ignore-errors gcov
+          lcov --gcov-tool gcov-13 -e lcov.info "$GITHUB_WORKSPACE/include*" -o lcov_filtered.info
           lcov -l lcov_filtered.info
 
       - name: Upload report to Codecov
-        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de # v5.5.2
+        uses: codecov/codecov-action@fb8b3582c8e4def4969c97caa2f19720cb33a72f # v7.0.0
         with:
-          files: ${{github.workspace}}/lcov_filtered.info
+          files: lcov_filtered.info
           fail_ci_if_error: true
           verbose: true
           token: ${{ secrets.CODECOV_TOKEN }}

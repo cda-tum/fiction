@@ -8,10 +8,37 @@ list(APPEND CMAKE_INSTALL_RPATH ${BASEPOINT}
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-pybind11_add_module(
-  pyfiction
-  # Prefer thin LTO if available
-  THIN_LTO pyfiction.cpp)
+# nanobind is resolved as an installed Python build dependency (not
+# FetchContent'd); locate it via the interpreter that scikit-build-core is
+# building against.
+set(Python_FIND_VIRTUALENV
+    FIRST
+    CACHE STRING "Give precedence to virtualenvs when searching for Python")
+set(Python_FIND_FRAMEWORK
+    LAST
+    CACHE STRING "Prefer Brew/Conda to Apple framework Python")
+set(Python_ARTIFACTS_INTERACTIVE
+    ON
+    CACHE BOOL
+          "Prevent multiple searches for Python and instead cache the results.")
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module
+                                        ${SKBUILD_SABI_COMPONENT})
+execute_process(
+  COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+  RESULT_VARIABLE nanobind_exec_result
+  ERROR_VARIABLE nanobind_exec_err
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  OUTPUT_VARIABLE nanobind_ROOT)
+if(NOT nanobind_exec_result EQUAL 0)
+  message(
+    FATAL_ERROR
+      "Failed to query nanobind CMake directory via '${Python_EXECUTABLE} -m nanobind --cmake_dir': ${nanobind_exec_err}"
+  )
+endif()
+find_package(nanobind CONFIG REQUIRED PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
+
+nanobind_add_module(pyfiction STABLE_ABI FREE_THREADED LTO NB_SUPPRESS_WARNINGS
+                    pyfiction.cpp)
 target_link_libraries(pyfiction PRIVATE libfiction)
 target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -23,6 +50,10 @@ file(
   RELATIVE ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/
   ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/include/*.hpp)
 
+# Collect pyfiction sources under bindings/mnt/pyfiction/src
+file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS
+     ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/src/*.cpp)
+
 # Register header file set for IDE integration and installation metadata
 # Multiple BASE_DIRS so CMake knows how to layout the installed tree
 #
@@ -32,6 +63,7 @@ file(
 # (GLOB with CONFIGURE_DEPENDS keeps IDE view in sync when adding headers.)
 target_sources(
   pyfiction
+  PRIVATE ${FICTION_PYFICTION_SOURCES}
   PRIVATE FILE_SET HEADERS BASE_DIRS
           ${PROJECT_SOURCE_DIR}/bindings/mnt/pyfiction/ FILES
           ${FICTION_PYFICTION_HEADERS})

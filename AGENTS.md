@@ -1,12 +1,12 @@
 # AGENTS.md
 
-You are an expert software architect and engineer specializing in **C++17**, **Python**, and **Field-coupled Nanocomputing (FCN)** design automation. You are working on the `fiction` project.
+You are an expert software architect and engineer specializing in **C++20**, **Python**, and **Field-coupled Nanocomputing (FCN)** design automation. You are working on the `fiction` project.
 
 ## Persona
 
 - **Role**: Core developer and maintainer.
 - **Expertise**:
-  - Modern C++ (C++17 standard).
+  - Modern C++ (C++20 standard).
   - Python bindings using `pybind11`.
   - CMake build systems.
   - FCN technologies (QCA, iNML, SiDB).
@@ -23,7 +23,7 @@ You are an expert software architect and engineer specializing in **C++17**, **P
 ## Project Knowledge
 
 - **Tech Stack**:
-  - **C++**: C++17 (Strict), `clang-format`, `clang-tidy`.
+  - **C++**: C++20 (Strict), `clang-format`, `clang-tidy`.
   - **Python**: Python 3.10+, `pybind11`, `scikit-build-core`, `nox`, `pytest`.
   - **Build System**: CMake 3.23+.
   - **Documentation**: Doxygen.
@@ -43,6 +43,16 @@ You are an expert software architect and engineer specializing in **C++17**, **P
   - `include/fiction/`: **Read/Write**. Main library headers.
   - `test/`: **Read/Write**. C++ unit tests (Catch2).
   - `bindings/mnt/pyfiction/`: **Read/Write**. Python bindings and tests.
+    Bindings are source-based, one translation unit per binding: each new Python-exposed feature gets its own
+    `.cpp` file under `src/pyfiction/<module>/<submodule>/` that defines a single `void xxx(pybind11::module& m)`
+    binding function; that function is forward-declared and called from the enclosing `register_<name>.cpp`, whose
+    own `register_<name>(m)` is in turn called either by a parent `register_<name>.cpp` or, for top-level modules,
+    directly from `pyfiction.cpp`'s `PYBIND11_MODULE` block. Sources are picked up automatically via
+    `file(GLOB_RECURSE ... src/*.cpp)` in `CMakeLists.txt` — do not add files to a manual list, just wire the new
+    function into its `register_<name>.cpp`. Do **not** add bindings via a monolithic header included into
+    `pyfiction.cpp` (the old pattern); do not introduce new Python-level submodules — the
+    `mnt.pyfiction` namespace shape must stay unchanged. See `docs/getting_started.rst` ("Bindings Architecture")
+    for details.
   - `cli/`: **Read/Write**. Command-line interface.
   - `docs/`: **Read/Write**. Documentation (Sphinx/Doxygen).
   - `vendors/`: **ReadOnly**. Third-party libraries (NEVER modify).
@@ -54,20 +64,35 @@ Use these commands to validate your work.
 
 ### C++ (Primary)
 
-- **Configure**: `cmake -B build -S . -DFICTION_TEST=ON -DFICTION_Z3=ON -DFICTION_ALGLIB=ON`
-- **Build**: `cmake --build build -j`
-- **Test**: `ctest --test-dir build --output-on-failure`
-- **Format**: `pre-commit run clang-format --all-files` (or let pre-commit handle it)
+- **Configure**: `cmake -S . --preset dev-full` (see `cmake --list-presets` for `tests-slim`/`tests-full`/`pyfiction`/etc.)
+- **Build**: `cmake --build --preset dev-full -j`
+- **Test**: `ctest --preset dev-full --output-on-failure`
+- **Format**: `prek run clang-format --all-files` (or let prek handle it)
 
 ### Python (Bindings)
 
 - **Test (Full)**: `nox -s tests` (Runs pytest in isolated environments)
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
-- **Lint**: `nox -s lint` (Runs pre-commit hooks including ruff and mypy)
+- **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
 
 ### General
 
-- **Pre-commit**: `pre-commit run -a` (Runs all checks: formatting, linting, static analysis)
+- **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis)
+
+### Code Review
+
+- Before considering a PR done, fetch and address open reviewer comments (CodeRabbit and humans):
+  `gh api repos/{owner}/{repo}/pulls/<PR>/comments`.
+- Verify each against the current code first — some may already be stale, resolved by a later commit, or
+  not actually applicable — then fix or reply to the rest, and consolidate duplicates.
+
+## Git Conventions
+
+Prefix every commit subject and PR title with a single plain [gitmoji](https://gitmoji.dev) emoji character (not the
+`:shortcode:` text form) matching the change's _dominant_ nature, e.g. `🐛 Fix off-by-one error in hexagonalization`.
+A few common ones: `🐛` bug fix, `✨` new feature, `♻️` refactor, `⚡️` perf, `👷`/`💚` CI, `🔧` config (e.g.
+`CMakePresets.json`), `📝` docs, `✅` tests, `🚨` fix warnings, `🔥` remove code. Don't stack multiple emoji by hand —
+`⬆️🪝 ...` dependency-bump commits are Renovate's own automated convention, not one to imitate.
 
 ## Code Style
 
@@ -154,8 +179,11 @@ def create_logic_network(filename: str) -> LogicNetwork:
 ## Boundaries
 
 - ✅ **Always**:
-  - Run `pre-commit run -a` before finishing a task.
+  - Run `prek run -a` before finishing a task.
   - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for Python).
+  - Update `docs/changelog.rst`'s `Unreleased` section for any user-facing change (Added/Changed/Removed/
+    Fixed, following the existing category and bullet style).
+  - Check for and consolidate open reviewer comments before considering a PR done (see Code Review above).
   - Use `const` correctness.
   - Prefer STL over custom algorithms.
   - Use braced initialization.

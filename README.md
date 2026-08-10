@@ -20,7 +20,7 @@
   </picture>
 </p>
 
-This code base provides a C++17 framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen
+This code base provides a C++20 framework for **fi**eld-**c**oupled **t**echnology-**i**ndependent **o**pen
 **n**anocomputing developed as part of the _Munich Nanotech Toolkit_ (_MNT_) by the
 [Chair for Design Automation](https://www.cda.cit.tum.de/) at the [Technical University of Munich](https://www.tum.de/).
 Within _fiction_, algorithms for logic synthesis, placement, routing, clocking, verification, and simulation for

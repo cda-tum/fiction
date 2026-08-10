@@ -1,13 +1,14 @@
 [build-system]
 requires = [
     "scikit-build-core>=0.10.1",
-    "setuptools-scm>=8.1"
+    "setuptools-scm>=8.1",
+    "nanobind~=2.13.0"
 ]
 build-backend = "scikit_build_core.build"
 
 [project]
 name = "mnt.pyfiction"
-version = "0.6.12"
+dynamic = ["version"]
 description = "Design Automation for Field-coupled Nanotechnologies"
 readme = "README.md"
 authors = [
@@ -63,10 +64,14 @@ ninja.version = ">=1.10"
 build-dir = "build/{wheel_tag}/{build_type}"
 # Explicitly set the package directory
 wheel.packages = ["bindings/mnt"]
+# Enable Stable ABI builds for CPython 3.12+
+wheel.py-api = "cp312"
 # Only build the Python bindings target
 build.targets = ["pyfiction"]
 # Only install the Python package component
 install.components = ["fiction_Python"]
+
+metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 
 sdist.exclude = [
     "**/.git",
@@ -107,7 +112,7 @@ FICTION_PROGRESS_BARS = "OFF"
 FICTION_CLI = "OFF"
 FICTION_TEST = "OFF"
 FICTION_EXPERIMENTS = "OFF"
-FICTION_ENABLE_IPO = "ON"
+FICTION_ENABLE_IPO = "OFF"
 FICTION_ENABLE_PCH = "OFF"
 FICTION_ENABLE_UNITY_BUILD = "OFF"
 FICTION_Z3 = "ON"
@@ -120,6 +125,9 @@ if.abi-flags = "t"
 if.platform-system = "win32"
 inherit.cmake.define = "append"
 cmake.define.DISABLE_GIL = "1"
+
+
+[tool.setuptools_scm]
 
 
 [tool.pytest]
@@ -135,9 +143,8 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 build = "cp3*"
-enable = ["cpython-freethreading"]
 archs = "auto64"
-skip = "*-musllinux*"
+skip = ["*-musllinux*"]
 test-command = "python -c \"from mnt import pyfiction\""
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
@@ -154,13 +161,18 @@ repair-wheel-command = [
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [tool.cibuildwheel.windows]
-before-build = "pip install delvewheel>=1.7.3"
-repair-wheel-command = "delvewheel repair -v -w {dest_dir} {wheel} --namespace-pkg mnt"
-environment = { CMAKE_GENERATOR = "Ninja" }
+before-build = "uv pip install delvewheel>=1.11.2"
+repair-wheel-command = "delvewheel repair -w {dest_dir} {wheel} --namespace-pkg mnt --ignore-existing"
 
 [[tool.cibuildwheel.overrides]]
 select = "*-macosx_arm64"
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
+
+[[tool.cibuildwheel.overrides]]
+# cp312-* wheels carry the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
+select = "cp312-*"
+inherit.repair-wheel-command = "append"
+repair-wheel-command = "uvx abi3audit --strict --report {wheel}"
 
 
 [tool.uv]
@@ -217,6 +229,7 @@ ignore = [
     "TD004", # Missing colon in TODO
     "FIX002", # Line contains TODO
     "RUF067", # `__init__` module should only contain docstrings and re-exports
+    "COM812", # rule may cause conflicts when used with the formatter
 ]
 future-annotations = true
 
@@ -244,6 +257,7 @@ docstring-code-format = true
 build = [
     "scikit-build-core>=0.11.0",
     "setuptools-scm>=8.1",
+    "nanobind~=2.13.0",
 ]
 docs = [
     "setuptools-scm>=8.1",
@@ -251,7 +265,7 @@ docs = [
     "sphinx==8.2.3; python_version >= '3.11'",
     "breathe==4.36.0",
     "sphinx-rtd-theme==3.1.0",
-    "sphinx-tabs==3.4.7",
+    "sphinx-tabs==3.5.0",
 ]
 test = [
     "pytest>=9.0.1",

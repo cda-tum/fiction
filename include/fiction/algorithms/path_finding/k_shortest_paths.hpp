@@ -6,6 +6,7 @@
 #define FICTION_K_SHORTEST_PATHS_HPP
 
 #include "fiction/algorithms/path_finding/a_star.hpp"
+#include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
@@ -13,6 +14,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <utility>
@@ -89,7 +91,9 @@ class yen_k_shortest_paths_impl
                 for (const auto& p : k_shortest_paths)
                 {
                     // if the root path is equal to a previous partial path
-                    if (p.size() >= i && std::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
+                    // p[i] and p[i + 1] are accessed below, so p must hold at least i + 2 coordinates
+                    if (p.size() > static_cast<std::size_t>(i) + 1 &&
+                        std::ranges::equal(root_path.cbegin(), root_path.cend(), p.cbegin(), p.cbegin() + i))
                     {
                         // block the connection that was already used in the previous shortest path
                         layout.obstruct_connection(p[i], p[i + 1]);
@@ -145,8 +149,8 @@ class yen_k_shortest_paths_impl
 
             // fetch and remove the lowest cost path from the candidates and add it to k_shortest_paths
             if (const auto lowest_cost_path_it =
-                    std::min_element(shortest_path_candidates.cbegin(), shortest_path_candidates.cend(),
-                                     [](const auto& p1, const auto& p2) { return path_cost(p1) < path_cost(p2); });
+                    std::ranges::min_element(shortest_path_candidates, [](const auto& p1, const auto& p2)
+                                             { return path_cost(p1) < path_cost(p2); });
                 lowest_cost_path_it != shortest_path_candidates.cend())
             {
                 k_shortest_paths.add(*lowest_cost_path_it);

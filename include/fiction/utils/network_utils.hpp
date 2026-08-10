@@ -10,11 +10,11 @@
 #include <mockturtle/traits.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <optional>
 #include <stdexcept>
-#include <type_traits>
 #include <vector>
 
 namespace mockturtle
@@ -34,20 +34,7 @@ struct edge
      * @param other Edge to compare to.
      * @return `true` iff both sources and targets match.
      */
-    bool operator==(const edge<Ntk>& other) const
-    {
-        return source == other.source && target == other.target;
-    }
-    /**
-     * Inequality operator.
-     *
-     * @param other Edge to compare to.
-     * @return `true` iff this edge is not equal to other.
-     */
-    bool operator!=(const edge<Ntk>& other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const edge<Ntk>& other) const = default;
 };
 }  // namespace mockturtle
 
@@ -82,6 +69,8 @@ namespace fiction
  * @param fn Function object to apply to each edge in `ntk`.
  */
 template <typename Ntk, typename Fn>
+// fn is captured by two nested lambdas, so it cannot be forwarded
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_edge(const Ntk& ntk, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_node_v<Ntk>, "Ntk does not implement the foreach_node function.");
@@ -110,6 +99,8 @@ void foreach_edge(const Ntk& ntk, Fn&& fn)
  * @param fn Function object to apply to each outgoing edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
+// fn is invoked once per outgoing edge, so it cannot be forwarded
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_fanout_v<Ntk>, "Ntk does not implement the foreach_fanout function.");
@@ -132,6 +123,8 @@ void foreach_outgoing_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& 
  * @param fn Function object to apply to each incoming edge of `n` in `ntk`.
  */
 template <typename Ntk, typename Fn>
+// fn is invoked once per incoming edge, so it cannot be forwarded
+// NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
 void foreach_incoming_edge(const Ntk& ntk, const mockturtle::node<Ntk>& n, Fn&& fn)
 {
     static_assert(mockturtle::has_foreach_fanin_v<Ntk>, "Ntk does not implement the foreach_fanin function.");
@@ -449,13 +442,13 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
     {
         auto fos = fanouts(ntk, n);
         // if all inverse predecessors are already discovered
-        if (std::all_of(fos.cbegin(), fos.cend(), is_discovered))
+        if (std::ranges::all_of(fos, is_discovered))
         {
             set_discovered(n);
 
             // determine successor's maximum level
-            const auto post_l = std::max_element(fos.cbegin(), fos.cend(), [&](const auto& n1, const auto& n2)
-                                                 { return get_inv_level(n1) < get_inv_level(n2); });
+            const auto post_l = std::ranges::max_element(fos, [&](const auto& n1, const auto& n2)
+                                                         { return get_inv_level(n1) < get_inv_level(n2); });
 
             // if there are no successors, the level of current node is 0, else it is 1 higher than theirs
             set_inv_level(n, post_l != fos.cend() ? std::max(get_inv_level(n), get_inv_level(*post_l) + 1u) : 0u);

@@ -19,16 +19,16 @@ class TestCoordinates(unittest.TestCase):
         t1 = offset_coordinate(1, 2, 0)
         t2 = offset_coordinate(1, 2)
 
-        self.assertTrue(t1.x == 1)
-        self.assertTrue(t1.y == 2)
-        self.assertTrue(t1.z == 0)
+        self.assertEqual(t1.x, 1)
+        self.assertEqual(t1.y, 2)
+        self.assertEqual(t1.z, 0)
 
-        self.assertTrue(t0 < t1)
-        self.assertTrue(t1 > t0)
-        self.assertTrue(t1 >= t0)
-        self.assertTrue(t0 <= t1)
-        self.assertTrue(t1 == t2)
-        self.assertTrue(t2 == t1)
+        self.assertLess(t0, t1)
+        self.assertGreater(t1, t0)
+        self.assertGreaterEqual(t1, t0)
+        self.assertLessEqual(t0, t1)
+        self.assertEqual(t1, t2)
+        self.assertEqual(t2, t1)
 
         self.assertEqual(offset_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
 
@@ -47,16 +47,16 @@ class TestCoordinates(unittest.TestCase):
         t1 = cube_coordinate(1, 2, 0)
         t2 = cube_coordinate(1, 2)
 
-        self.assertTrue(t1.x == 1)
-        self.assertTrue(t1.y == 2)
-        self.assertTrue(t1.z == 0)
+        self.assertEqual(t1.x, 1)
+        self.assertEqual(t1.y, 2)
+        self.assertEqual(t1.z, 0)
 
-        self.assertTrue(t0 < t1)
-        self.assertTrue(t1 > t0)
-        self.assertTrue(t1 >= t0)
-        self.assertTrue(t0 <= t1)
-        self.assertTrue(t1 == t2)
-        self.assertTrue(t2 == t1)
+        self.assertLess(t0, t1)
+        self.assertGreater(t1, t0)
+        self.assertGreaterEqual(t1, t0)
+        self.assertLessEqual(t0, t1)
+        self.assertEqual(t1, t2)
+        self.assertEqual(t2, t1)
 
         self.assertEqual(cube_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
 
@@ -75,16 +75,16 @@ class TestCoordinates(unittest.TestCase):
         t1 = siqad_coordinate(1, 2, 0)
         t2 = siqad_coordinate(1, 2)
 
-        self.assertTrue(t1.x == 1)
-        self.assertTrue(t1.y == 2)
-        self.assertTrue(t1.z == 0)
+        self.assertEqual(t1.x, 1)
+        self.assertEqual(t1.y, 2)
+        self.assertEqual(t1.z, 0)
 
-        self.assertTrue(t0 < t1)
-        self.assertTrue(t1 > t0)
-        self.assertTrue(t1 >= t0)
-        self.assertTrue(t0 <= t1)
-        self.assertTrue(t1 == t2)
-        self.assertTrue(t2 == t1)
+        self.assertLess(t0, t1)
+        self.assertGreater(t1, t0)
+        self.assertGreaterEqual(t1, t0)
+        self.assertLessEqual(t0, t1)
+        self.assertEqual(t1, t2)
+        self.assertEqual(t2, t1)
 
         self.assertEqual(siqad_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
 

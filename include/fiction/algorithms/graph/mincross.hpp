@@ -289,7 +289,7 @@ class mincross_impl
                     return;
                 }
 
-                std::sort(positions.begin(), positions.end());
+                std::ranges::sort(positions);
 
                 if (positions.size() == 1)
                 {
@@ -322,7 +322,7 @@ class mincross_impl
                         {
                             const double w = (positions[lm] * static_cast<double>(rspan)) +
                                              (positions[rm] * static_cast<double>(lspan));
-                            median_map[n] = w / (lspan + rspan);
+                            median_map[n]  = w / (lspan + rspan);
                         }
                     }
                 }
@@ -341,24 +341,24 @@ class mincross_impl
         auto rank = fanout_ntk.get_ranks(r);
 
         // Sort by median value
-        std::sort(rank.begin(), rank.end(),
-                  [this, order](auto const& n1, auto const& n2)
-                  {
-                      const double m1 = median_map[n1];
-                      const double m2 = median_map[n2];
+        std::ranges::sort(rank,
+                          [this, order](auto const& n1, auto const& n2)
+                          {
+                              const double m1 = median_map[n1];
+                              const double m2 = median_map[n2];
 
-                      // Handle -1 (no connections) as infinity to push to the back
-                      if (m1 == -1)
-                      {
-                          return false;
-                      }
-                      if (m2 == -1)
-                      {
-                          return true;
-                      }
+                              // Handle -1 (no connections) as infinity to push to the back
+                              if (m1 == -1)
+                              {
+                                  return false;
+                              }
+                              if (m2 == -1)
+                              {
+                                  return true;
+                              }
 
-                      return order == median_sorting::DESCENDING ? (m1 > m2) : (m1 < m2);
-                  });
+                              return order == median_sorting::DESCENDING ? (m1 > m2) : (m1 < m2);
+                          });
 
         // Re-assign sorted rank and update rank positions
         fanout_ntk.set_ranks(r, rank);

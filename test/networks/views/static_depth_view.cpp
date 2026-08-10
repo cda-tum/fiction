@@ -97,8 +97,7 @@ TEST_CASE("Compute depth and levels for AIG with inverter costs", "[static-depth
     const auto              f4 = aig.create_nand(f2, f3);
     aig.create_po(f4);
 
-    depth_view_params ps;
-    ps.count_complements = true;
+    const depth_view_params ps{.count_complements = true};
     const static_depth_view depth_aig{aig, {}, ps};
     CHECK(depth_aig.depth() == 6);
     CHECK(depth_aig.level(aig.get_node(a)) == 0);

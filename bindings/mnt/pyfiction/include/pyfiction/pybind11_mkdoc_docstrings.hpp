@@ -3352,14 +3352,23 @@ static const char *__doc_fiction_coord_iterator =
 R"doc(An iterator type that allows to enumerate coordinates in order within
 a boundary.
 
+@note Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t`
+are supported. This is enforced on the boundary-and-start constructor
+via a `requires` clause rather than on the class itself, so that the
+default constructor (required for `std::semiregular`) remains usable
+for any `CoordinateType`.
+
 Template parameter ``CoordinateType``:
     Type of coordinate to enumerate.)doc";
-
-static const char *__doc_fiction_coord_iterator_aspect_ratio = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_coord = R"doc()doc";
 
 static const char *__doc_fiction_coord_iterator_coord_iterator =
+R"doc(Default constructor. Required so that coord_iterator satisfies
+`std::semiregular`, which in turn is required for it to serve as its
+own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).)doc";
+
+static const char *__doc_fiction_coord_iterator_coord_iterator_2 =
 R"doc(Standard constructor. Initializes the iterator with a starting
 position and the boundary within to enumerate.
 
@@ -3385,25 +3394,6 @@ Parameter ``dimension``:
 
 Parameter ``start``:
     Starting coordinate to enumerate first.)doc";
-
-static const char *__doc_fiction_coord_iterator_operator_eq = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_inc =
-R"doc(Increments the iterator, while keeping it within the boundary. Also
-defined on iterators that are out of bounds.
-
-Returns:
-    Reference to the incremented iterator.)doc";
-
-static const char *__doc_fiction_coord_iterator_operator_inc_2 = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_le = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_lt = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_mul = R"doc()doc";
-
-static const char *__doc_fiction_coord_iterator_operator_ne = R"doc()doc";
 
 static const char *__doc_fiction_cost_function_chi =
 R"doc(Calculates the cost function :math:` \chi = \sum_{i=1} w_{i} \cdot
@@ -7571,6 +7561,19 @@ R"doc(Checks if all PI/POs are located at the layout's borders.
 Returns:
     Check summary as a one liner.)doc";
 
+static const char *__doc_fiction_detail_gate_level_drvs_impl_check_icon =
+R"doc(Returns the check icon corresponding to a check's outcome.
+
+Parameter ``chk``:
+    Result of the check.
+
+Parameter ``brk``:
+    Flag to indicate that a failure is design breaking. If it's not, a
+    warning icon is returned.
+
+Returns:
+    Escape color sequence for the given outcome.)doc";
+
 static const char *__doc_fiction_detail_gate_level_drvs_impl_clocked_data_flow_check =
 R"doc(Checks for proper clocking of connected tiles based on their assigned
 nodes.
@@ -7883,6 +7886,18 @@ Returns:
 static const char *__doc_fiction_detail_graph_coloring_impl_ps = R"doc(Parameters.)doc";
 
 static const char *__doc_fiction_detail_graph_coloring_impl_pst = R"doc(Statistics.)doc";
+
+static const char *__doc_fiction_detail_graph_coloring_impl_requires =
+R"doc(Converts the given node ID of a Graph to the corresponding one used in
+Brian Crites' graph structure. This function is automatically removed
+from overload resolution if both graphs use std::string because it
+would clash with the function above.
+
+Parameter ``node``:
+    Node ID to convert between graph structures.
+
+Returns:
+    Corresponding node ID in the Brian Crites graph.)doc";
 
 static const char *__doc_fiction_detail_graph_coloring_impl_run = R"doc()doc";
 
@@ -9028,179 +9043,6 @@ Returns:
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the second element
     indicating the reason if it is non-operational.)doc";
 
-static const char *__doc_fiction_detail_jump_point_search_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_closed_list = R"doc(Closed list that acts as a set of already visited coordinates.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f = R"doc(Stores a coordinate and its f-value.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_coord = R"doc(Coordinate.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_f = R"doc(f-value of the coordinate.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_operator_eq =
-R"doc(Equality operator that only compares the stored coordinates. This
-allows for a convenient lookup in the priority queue.
-
-Parameter ``other``:
-    Other coordinate_f to compare with.
-
-Returns:
-    `true` iff this coord value is equal to the other's.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_coordinate_f_operator_gt =
-R"doc(Comparator for the priority queue. Compares only the f-values.
-
-Parameter ``other``:
-    Other coordinate_f to compare with.
-
-Returns:
-    `true` iff this f-value is greater than the other's.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_distance =
-R"doc(The distance functor that implements the heuristic estimation
-function.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_expand =
-R"doc(Expands the frontier of coordinates to visit next in the direction of
-the heuristic cost function.
-
-Parameter ``current``:
-    Coordinate that is currently examined.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_fill_in_jumps =
-R"doc(Completes a reconstructed path by filling in the jumps that were made
-during JPS.
-
-Parameter ``p``:
-    Incomplete path with jump gaps.
-
-Returns:
-    Completed interpolated path.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_g =
-R"doc(Returns the g-value of a coordinate by accessing the g_values map.
-Returns 0 if no entry exists.
-
-Parameter ``c``:
-    Coordinate whose g-value is desired.
-
-Returns:
-    g-value of coordinate c or 0 if no value has been stored.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_g_values =
-R"doc(Stores the g-cost for each coordinate c, i.e., the length of the
-shortest path from source to c found so far.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_get_lowest_f_coord =
-R"doc(Fetches and pops the coordinate with the lowest f-value from the open
-list priority queue.
-
-Returns:
-    Coordinate with the lowest f-value from the open list.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_interpolate =
-R"doc(Interpolates a straight line between two given coordinates using
-Bresenham's algorithm:
-http://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-
-This function is repeatedly used in the fill_in_jumps function to
-interpolate the jump gaps.
-
-Parameter ``c1``:
-    Start coordinate.
-
-Parameter ``c2``:
-    Goal coordinate.
-
-Returns:
-    A straight path between c1 and c2.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_is_traversable =
-R"doc(Checks if coordinate c2 is directly reachable from coordinate c1. That
-is if the coordinates are not identical, if they are adjacent or if
-the clocking checks out, and if there is no obstacle in the way.
-
-Parameter ``c1``:
-    Start coordinate.
-
-Parameter ``c2``:
-    Goal coordinate.
-
-Returns:
-    `true` iff c2 is directly reachable from c1.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_is_visited =
-R"doc(Checks if a coordinate has been visited already.
-
-Parameter ``c``:
-    Coordinate to check.
-
-Returns:
-    `true` iff c has already been visited.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_jump =
-R"doc(Compute the next jump point starting from successor with current as
-its parent. The vector (current, successor) thus defines the direction
-in which to look for the jump point. A jump point has to be stepwise
-traversable from successor. That is, there must be a valid path
-through non-obstructed tiles.
-
-Parameter ``current``:
-    Parent coordinate.
-
-Parameter ``successor``:
-    Coordinate from which to look for the next jump point.
-
-Returns:
-    The next jump point or `std::nullopt` if no such coordinate is
-    available.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_jump_point_search_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_layout =
-R"doc(The layout in which the shortest path between `source` and `target` is
-to be found.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_no_improvement =
-R"doc(Checks if the given g-value is greater or equal than the stored
-g-value of the given coordinate. If that is the case, the new g-value
-does not improve the path.
-
-Parameter ``c``:
-    Coordinate to whose g-value is to be checked.
-
-Parameter ``g_val``:
-    g-value to compare to c's.
-
-Returns:
-    `true` iff the given g-value does not mean an improvement for the
-    given coordinate.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_objective = R"doc(The source-target coordinate pair.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_open_list =
-R"doc(Open list that contains all coordinates to process next sorted by
-their f-value.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_reconstruct_path =
-R"doc(Reconstruct the final path from the origin map that was created during
-the path finding algorithm.
-
-Returns:
-    The shortest path connecting source and target.)doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_run = R"doc()doc";
-
-static const char *__doc_fiction_detail_jump_point_search_impl_set_g =
-R"doc(Updates the g-value of the given coordinate to the given value.
-
-Parameter ``c``:
-    Coordinate whose g-value is to be updated to g_val.
-
-Parameter ``g_val``:
-    New g-value for c.)doc";
-
 static const char *__doc_fiction_detail_layout_invalidity_reason =
 R"doc(Reason why the layout is not a valid gate implementation for the given
 Boolean function.)doc";
@@ -9332,6 +9174,13 @@ random non-operational points as well as all operational points that
 are reachable via flood fill from the found operational points plus a
 one pixel wide border around the domain.
 
+Both phases are parallelized. The flood fill itself uses a pool of
+worker threads that share a single work queue, since the points to
+explore are only discovered as the exploration proceeds. Each step
+point is scheduled at most once, so no parameter point is simulated
+twice. The result does not depend on the order in which the points are
+explored and is, therefore, independent of the thread scheduling.
+
 Parameter ``samples``:
     Maximum number of random samples to be taken before flood fill.
 
@@ -9390,17 +9239,38 @@ operational domain with multiple islands is investigated.
 
 The function starts at the given starting point and performs flood
 fill to mark all points that are reachable from the starting point
-until it encounters the non-operational edges.
+until it encounters the traced contour.
+
+The flood fill expands over the von Neumann (4-connected)
+neighborhood, while the given contour is a closed 8-connected curve.
+Since a 4-connected path cannot cross an 8-connected closed curve, the
+inference is guaranteed to stay within the area enclosed by the
+contour. Points on the contour itself are marked, but not expanded
+from.
 
 Note that no physical simulation is conducted by this function!
 
 Parameter ``starting_point``:
     Step point at which to start the inference. If `starting_point` is
-    non-operational, this function might invoke undefined behavior.)doc";
+    non-operational, this function might invoke undefined behavior.
+
+Parameter ``contour``:
+    The step points visited by the contour trace that encloses
+    `starting_point`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_inferred_op_domain =
 R"doc(All the points inferred (assumed) to be operational but not actually
 simulated.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_inferred_operational_parameter_points =
+R"doc(Returns the parameter points that were inferred (assumed) to be
+operational because they are enclosed by a contour traced by
+`contour_tracing`. These points have not been simulated and are,
+therefore, not part of the returned operational domain. They are
+exposed to enable inspection of the enclosure inference.
+
+Returns:
+    The parameter points that have been inferred to be operational.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
@@ -9593,33 +9463,6 @@ static const char *__doc_fiction_detail_operational_domain_impl_step_point = R"d
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_2 = R"doc(Forward-declare step_point.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_eq =
-R"doc(Equality operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` iff the step points are equal.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_lt =
-R"doc(Less than operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` if this step point is less than to the other.)doc";
-
-static const char *__doc_fiction_detail_operational_domain_impl_step_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other step point to compare with.
-
-Returns:
-    `true` iff the step points are not equal.)doc";
-
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point = R"doc(Standard default constructor.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_step_point_step_point_2 =
@@ -9651,6 +9494,21 @@ Returns:
 static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_values = R"doc(All dimension values.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_von_neumann_neighborhood_2d =
+R"doc(Returns the 2D von Neumann neighborhood of the step point at `sp = (x,
+y)`. The 2D von Neumann neighborhood is the set of all points that are
+adjacent to `(x, y)` in the plane excluding the diagonals. Thereby,
+the 2D von Neumann neighborhood contains up to 4 points as points
+outside of the parameter range are not gathered. The points are
+returned in no particular order.
+
+Parameter ``sp``:
+    Step point to get the 2D von Neumann neighborhood of.
+
+Returns:
+    The 2D von Neumann neighborhood of the step point at `sp = (x,
+    y)`.)doc";
 
 static const char *__doc_fiction_detail_optimize_output_positions =
 R"doc(Utility function that moves outputs from the last row to the previous
@@ -10086,16 +9944,6 @@ Parameter ``item``:
 
 Parameter ``priority``:
     The priority of the element.)doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_lyt = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_pst = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_qca_energy_dissipation_impl = R"doc()doc";
-
-static const char *__doc_fiction_detail_qca_energy_dissipation_impl_run = R"doc()doc";
 
 static const char *__doc_fiction_detail_qcad_cell_pos = R"doc()doc";
 
@@ -11765,18 +11613,6 @@ static const char *__doc_fiction_energy_calculation_UPDATE_ENERGY =
 R"doc(The electrostatic potential energy of a given charge distribution is
 updated after it is changed.)doc";
 
-static const char *__doc_fiction_energy_dissipation_stats = R"doc()doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_fast = R"doc()doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_report = R"doc()doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_slow =
-R"doc(Energy dissipation information in meV for slow (25 GHz) and fast (100
-GHz) clocking.)doc";
-
-static const char *__doc_fiction_energy_dissipation_stats_unknown = R"doc()doc";
-
 static const char *__doc_fiction_energy_distribution =
 R"doc(This class is used to store the energy distribution of an SiDB layout.
 The energy distribution is a map that contains the electrostatic
@@ -12669,10 +12505,13 @@ the second `1` in the first list, because the 2-element sub-sequence
 `[1,2]` is shared between the two ranges.
 
 Template parameter ``InputIt``:
-    must meet the requirements of `LegacyInputIterator`.
+    must meet the requirements of `LegacyRandomAccessIterator` (the
+    implementation subtracts from and adds to `last`/`s_last`, which
+    forward iterators do not support).
 
 Template parameter ``ForwardIt``:
-    must meet the requirements of `LegacyForwardIterator`.
+    must meet the requirements of `LegacyRandomAccessIterator` (see
+    above).
 
 Parameter ``first``:
     Begin of the range to examine.
@@ -12690,25 +12529,6 @@ Returns:
     Iterator in the range `[first, last)` to the first position of the
     first 2-element sub-sequence shared between the two ranges, or
     `last` if no such shared sub-sequence exists.)doc";
-
-static const char *__doc_fiction_find_key_with_tolerance =
-R"doc(This function searches for a floating-point value specified by the
-`key` in the provided map `map`, applying a tolerance specified by
-`fiction::constants::ERROR_MARGIN`. Each key in the map is compared to
-the specified key within this tolerance.
-
-Template parameter ``MapType``:
-    The type of the map containing parameter points as keys.
-
-Parameter ``map``:
-    The map containing parameter points as keys and associated values.
-
-Parameter ``key``:
-    The parameter point to search for in the map.
-
-Returns:
-    An iterator to the found parameter point in the map, or
-    `map.cend()` if not found.)doc";
 
 static const char *__doc_fiction_flat_top_hex = R"doc(\verbatim _____ / \ / \ \ / \_____/ \endverbatim)doc";
 
@@ -13019,9 +12839,9 @@ mockturtle's understanding of nodes and primary outputs.
 Parameter ``t``:
     Tile whose nodes are to be removed.)doc";
 
-static const char *__doc_fiction_gate_level_layout_clear_values = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_clear_values = R"doc(Resets the custom value of every node in the layout to 0.)doc";
 
-static const char *__doc_fiction_gate_level_layout_clear_visited = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_clear_visited = R"doc(Resets the visited flag of every node in the layout to 0.)doc";
 
 static const char *__doc_fiction_gate_level_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -13069,7 +12889,22 @@ static const char *__doc_fiction_gate_level_layout_create_nand = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_create_node = R"doc()doc";
 
-static const char *__doc_fiction_gate_level_layout_create_node_from_literal = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_create_node_from_literal =
+R"doc(Creates a new node with the given `children` and cached truth table
+`literal`, assigns it to tile `t`, and notifies all `on_add` event
+listeners.
+
+Parameter ``children``:
+    Fanin signals of the new node.
+
+Parameter ``literal``:
+    Cached truth table literal representing the new node's function.
+
+Parameter ``t``:
+    Tile to assign the new node to.
+
+Returns:
+    Signal representing tile `t`, now hosting the newly created node.)doc";
 
 static const char *__doc_fiction_gate_level_layout_create_nor = R"doc()doc";
 
@@ -13119,9 +12954,27 @@ Parameter ``n``:
 Returns:
     Number of fanouts to `n`.)doc";
 
-static const char *__doc_fiction_gate_level_layout_foreach_ci = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_foreach_ci =
+R"doc(Applies a function to all combinational input nodes (including dead
+ones) in the layout. Alias for `foreach_pi`.
 
-static const char *__doc_fiction_gate_level_layout_foreach_co = R"doc()doc";
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
+
+Parameter ``fn``:
+    Functor to apply to each combinational input node.)doc";
+
+static const char *__doc_fiction_gate_level_layout_foreach_co =
+R"doc(Applies a function to all combinational output signals (including
+those that point to dead nodes) in the layout. Alias for `foreach_po`.
+
+Template parameter ``Fn``:
+    Functor type that has to comply with the restrictions imposed by
+    `mockturtle::foreach_element_transform`.
+
+Parameter ``fn``:
+    Functor to apply to each combinational output signal.)doc";
 
 static const char *__doc_fiction_gate_level_layout_foreach_fanin =
 R"doc(Applies a function to all nodes that are incoming to a given one.
@@ -13145,27 +12998,7 @@ Parameter ``n``:
 Parameter ``fn``:
     Functor to apply to each of `n`'s fanins.)doc";
 
-static const char *__doc_fiction_gate_level_layout_foreach_fanout =
-R"doc(Applies a function to all nodes that are outgoing from a given one.
-Thereby, only outgoing clocked zones (+/- one layer to include
-crossings) are being considered whose data flow connections are
-respectively established. That is, the given function is applied to
-all nodes that are connected to the one assigned to `t` as fanouts on
-neighboring tiles.
-
-Template parameter ``Fn``:
-    Functor type that has to comply with the restrictions imposed by
-    `mockturtle::foreach_element_transform`.
-
-Template parameter ``RespectClocking``:
-    Flag to indicate that the underlying clocking is to be respected
-    when evaluating fanouts.
-
-Parameter ``n``:
-    Node whose fanouts are desired.
-
-Parameter ``fn``:
-    Functor to apply to each of `n`'s fanouts.)doc";
+static const char *__doc_fiction_gate_level_layout_foreach_fanout = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_foreach_gate =
 R"doc(Applies a function to all gates (excluding dead ones) in the layout.
@@ -13651,7 +13484,10 @@ static const char *__doc_fiction_gate_level_layout_incr_value = R"doc()doc";
 
 static const char *__doc_fiction_gate_level_layout_index_to_node = R"doc()doc";
 
-static const char *__doc_fiction_gate_level_layout_initialize_truth_table_cache = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_initialize_truth_table_cache =
+R"doc(Populates the truth table cache with the constant and elementary
+functions used by the fundamental gate creation functions
+(`create_not`, `create_and`, etc.).)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_and = R"doc()doc";
 
@@ -13664,7 +13500,17 @@ Parameter ``n``:
 Returns:
     `true` iff `n` computes the identity.)doc";
 
-static const char *__doc_fiction_gate_level_layout_is_child = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_is_child =
+R"doc(Check whether `s` is among the fanin signals of `n`.
+
+Parameter ``n``:
+    Node to be checked.
+
+Parameter ``s``:
+    Signal to look for among `n`'s children.
+
+Returns:
+    `true` iff `s` is a child of `n`.)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_ci = R"doc()doc";
 
@@ -13818,7 +13664,14 @@ Parameter ``s``:
 Returns:
     `true` iff `s` is outgoing from `t`.)doc";
 
-static const char *__doc_fiction_gate_level_layout_is_pi = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_is_pi =
+R"doc(Check whether `n` is a primary input.
+
+Parameter ``n``:
+    Node to be checked.
+
+Returns:
+    `true` iff `n` is a PI.)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_pi_tile =
 R"doc(Check whether tile `t` hosts a primary input.
@@ -13829,7 +13682,14 @@ Parameter ``t``:
 Returns:
     `true` iff the node located at tile `t` is a PI.)doc";
 
-static const char *__doc_fiction_gate_level_layout_is_po = R"doc()doc";
+static const char *__doc_fiction_gate_level_layout_is_po =
+R"doc(Check whether `n` is a primary output.
+
+Parameter ``n``:
+    Node to be checked.
+
+Returns:
+    `true` iff `n` is a PO.)doc";
 
 static const char *__doc_fiction_gate_level_layout_is_po_tile =
 R"doc(Check whether tile `t` hosts a primary output.
@@ -16504,79 +16364,6 @@ static const char *__doc_fiction_is_tile_based_layout = R"doc()doc";
 
 static const char *__doc_fiction_is_virtual_network_type = R"doc()doc";
 
-static const char *__doc_fiction_jump_point_search =
-R"doc(The Jump Point Search (JPS) path finding algorithm for shortest loop-
-less paths between a given source and target coordinate in a Cartesian
-layout. This function automatically detects whether the given layout
-implements a clocking interface (see `clocked_layout`) and respects
-the underlying information flow imposed by `layout`'s clocking scheme.
-
-JPS was proposed as an optimization of A* for shortest paths and
-offers better average complexity on uniform-cost grids that allow
-diagonal connections. It uses a heuristic distance function that
-estimates the remaining costs towards the target in every step. Thus,
-this heuristic function should neither be complex to calculate nor
-overestimating the remaining costs. Common heuristics to be used are
-the Manhattan and the Euclidean distance functions. See
-`distance_functor` for implementations. Since JPS assumes a unit-cost
-grid, the use of cost functions together with JPS is not possible.
-
-If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
-coordinates and connections.
-
-In certain cases it might be desirable to determine regular coordinate
-paths even if the layout implements a clocking interface. This can be
-achieved by static-casting the layout to a coordinate layout when
-calling this function:
-
-```
-{.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
-clk_lyt layout = ...;
-auto shortest_path = jump_point_search<path>(static_cast<cartesian_layout<>>(layout), {source, target});
-```
-
-JPS was introduced in \"Online Graph Pruning for Pathfinding on Grid
-Maps\" by Daniel Harabor and Alban Grastien in AAAI 2011.
-
-Parts of this implementation are based on
-https://github.com/qiao/PathFinding.js.
-
-@note The original JPS highly relies on diagonal paths in the grid
-which are not possible in most Cartesian grid-based FCN technologies.
-Therefore, this implementation disallows diagonal paths. Consequently,
-and due to non-uniform clocking schemes, JPS might perform worse than
-A* in terms of runtime. It is recommended to use A* (see `a_star`).
-
-@note JPS does not support wire crossings.
-
-Template parameter ``Path``:
-    Type of the returned path.
-
-Template parameter ``Lyt``:
-    Type of the layout to perform path finding on.
-
-Template parameter ``Dist``:
-    Distance value type to be used in the heuristic estimation
-    function.
-
-Parameter ``layout``:
-    The layout in which the shortest path between a source and target
-    is to be found.
-
-Parameter ``objective``:
-    Source-target coordinate pair.
-
-Parameter ``dist_fn``:
-    A distance functor that implements the desired heuristic
-    estimation function.
-
-Returns:
-    The shortest loop-less path in `layout` from `objective.source` to
-    `objective.target`.)doc";
-
 static const char *__doc_fiction_kink_induced_non_operational_input_patterns =
 R"doc(This function determines all input combinations for which kinks induce
 the SiDB layout to become non-operational. This means that the layout
@@ -17934,6 +17721,30 @@ static const char *__doc_fiction_operational_status_NON_OPERATIONAL = R"doc(The 
 
 static const char *__doc_fiction_operational_status_OPERATIONAL = R"doc(The layout is operational.)doc";
 
+static const char *__doc_fiction_operator_lshift =
+R"doc(Streams an effort mode to an output stream.
+
+Parameter ``os``:
+    Output stream.
+
+Parameter ``mode``:
+    Effort mode to stream.
+
+Returns:
+    Output stream.)doc";
+
+static const char *__doc_fiction_operator_lshift_2 =
+R"doc(Streams a cost objective to an output stream.
+
+Parameter ``os``:
+    Output stream.
+
+Parameter ``cost``:
+    Cost objective to stream.
+
+Returns:
+    Output stream.)doc";
+
 static const char *__doc_fiction_orthogonal =
 R"doc(A scalable placement & routing approach based on orthogonal graph
 drawing as originally proposed in \"Scalable Design for Field-coupled
@@ -18129,15 +17940,6 @@ Parameter ``other``:
 Returns:
     `true` iff the parameter points are equal.)doc";
 
-static const char *__doc_fiction_parameter_point_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Other parameter point to compare with.
-
-Returns:
-    `true` if the parameter points are not equal.)doc";
-
 static const char *__doc_fiction_parameter_point_parameter_point = R"doc(Default constructor.)doc";
 
 static const char *__doc_fiction_parameter_point_parameter_point_2 =
@@ -18156,7 +17958,14 @@ Template parameter ``Path``:
 
 static const char *__doc_fiction_path_collection_add = R"doc()doc";
 
-static const char *__doc_fiction_path_collection_contains = R"doc()doc";
+static const char *__doc_fiction_path_collection_contains =
+R"doc(Checks whether a given path is contained in the collection.
+
+Parameter ``p``:
+    Path to search for.
+
+Returns:
+    `true` iff `p` is contained in the collection.)doc";
 
 static const char *__doc_fiction_path_set =
 R"doc(A set of multiple paths in a layout.
@@ -18449,7 +18258,7 @@ static const char *__doc_fiction_port_direction =
 R"doc(A port direction is a relative (cardinal) direction of a port within a
 tile. Useful, when no exact port locations within a tile are needed.)doc";
 
-static const char *__doc_fiction_port_direction_cardinal = R"doc(Cardinal direction.)doc";
+static const char *__doc_fiction_port_direction_cardinal = R"doc()doc";
 
 static const char *__doc_fiction_port_direction_cardinal_EAST = R"doc(East direction.)doc";
 
@@ -19093,26 +18902,6 @@ Parameter ``scheme``:
 Returns:
     A shared pointer to the given `scheme`.)doc";
 
-static const char *__doc_fiction_qca_energy_dissipation =
-R"doc(Estimates the energy dissipation of a gate-level layout if it were to
-be converted to a QCA cell-level layout via the QCA ONE gate library.
-This estimation was proposed in \"An Energy-aware Model for the Logic
-Synthesis of Quantum-Dot Cellular Automata\" by Frank Sill Torres,
-Robert Wille, Philipp Niemann, and Rolf Drechsler in TCAD 2018.
-
-As done in that publication, energy dissipation values are being given
-in meV for slow (25 GHz) and fast (100 GHz) clocking.
-
-Template parameter ``Lyt``:
-    Gate-level layout type.
-
-Parameter ``lyt``:
-    The gate-level layout whose energy dissipation is to be
-    calculated.
-
-Parameter ``pst``:
-    Statistics.)doc";
-
 static const char *__doc_fiction_qca_one_library =
 R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
 Methodology for Standard Cell Design for QCA\" by Dayane Alfenas Reis,
@@ -19393,49 +19182,6 @@ Template parameter ``Cost``:
     Floating-point cost type.)doc";
 
 static const char *__doc_fiction_random_cost_functor_random_cost_functor = R"doc()doc";
-
-static const char *__doc_fiction_range_t =
-R"doc(Defines a range type utilizing iterators. It implements `begin()` and
-`end()` as well as `cbegin()` and `cend()` as member functions to work
-for range based for-loops.
-
-Template parameter ``Iterator``:
-    type for which the range should be created.)doc";
-
-static const char *__doc_fiction_range_t_b = R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
-
-static const char *__doc_fiction_range_t_begin =
-R"doc(Returns the iterator pointing to the begin of the represented range.
-
-Returns:
-    Begin iterator.)doc";
-
-static const char *__doc_fiction_range_t_cbegin =
-R"doc(Returns a const iterator pointing to the begin of the represented
-range.
-
-Returns:
-    const begin iterator.)doc";
-
-static const char *__doc_fiction_range_t_cend =
-R"doc(Returns a const iterator pointing to the end of the represented range.
-
-Returns:
-    const end iterator.)doc";
-
-static const char *__doc_fiction_range_t_e = R"doc(Iterators pointing to the begin and the end of the represented range.)doc";
-
-static const char *__doc_fiction_range_t_end =
-R"doc(Returns the iterator pointing to the end of the represented range.
-
-Returns:
-    End iterator.)doc";
-
-static const char *__doc_fiction_range_t_range_t =
-R"doc(Standard constructor with forward reference.
-
-Parameter ``range``:
-    Begin and end iterator pair.)doc";
 
 static const char *__doc_fiction_read_fgl_layout =
 R"doc(Reads a gate-level layout from an FGL file provided as an input
@@ -19878,21 +19624,6 @@ Template parameter ``Lyt``:
 
 Returns:
     Ripple clocking scheme.)doc";
-
-static const char *__doc_fiction_round_to_n_decimal_places =
-R"doc(Rounds a number to a specified number of decimal places.
-
-Template parameter ``T``:
-    The type of the number to round.
-
-Parameter ``number``:
-    The number to round.
-
-Parameter ``n``:
-    The number of decimal places to round to.
-
-Returns:
-    The number rounded to n decimal places.)doc";
 
 static const char *__doc_fiction_route_path =
 R"doc(Establishes a wire routing along the given path in the given layout.
@@ -20593,14 +20324,6 @@ of the two instances are equal.
 Parameter ``rhs``:
     `sidb_defect` instance to compare against.)doc";
 
-static const char *__doc_fiction_sidb_defect_operator_ne =
-R"doc(This operator compares two `sidb_defect` instances for inequality. It
-uses the `operator==` to check if the two instances are equal and
-returns the negation of the result.
-
-Parameter ``rhs``:
-    `sidb_defect` instance to compare against.)doc";
-
 static const char *__doc_fiction_sidb_defect_sidb_defect = R"doc(Standard constructor.)doc";
 
 static const char *__doc_fiction_sidb_defect_surface = R"doc()doc";
@@ -21131,45 +20854,6 @@ Returns:
 
 static const char *__doc_fiction_sidb_skeleton_bestagon_library_sidb_skeleton_bestagon_library = R"doc()doc";
 
-static const char *__doc_fiction_sidb_surface_analysis =
-R"doc(Analyzes a given defective SiDB surface and matches it against gate
-tiles provided by a library. Any gate type that cannot be realized on
-a certain tile due to disturbances caused by defects gets blacklisted
-on said tile. The black list is then returned by this function.
-
-@note The given gate library must implement both the
-`get_functional_implementations()` and `get_gate_ports()` functions.
-
-Template parameter ``GateLibrary``:
-    FCN gate library type to fetch the gate descriptions from.
-
-Template parameter ``GateLyt``:
-    Gate-level layout type that specifies the tiling of the SiDB
-    surface.
-
-Template parameter ``CellLyt``:
-    SiDB cell-level layout type that is underlying to the SiDB defect
-    surface.
-
-Parameter ``gate_lyt``:
-    Gate-level layout instance that specifies the aspect ratio.
-
-Parameter ``surface``:
-    SiDB surface that instantiates the defects.
-
-Parameter ``charged_defect_spacing_overwrite``:
-    Override the default influence distance of charged atomic defects
-    on SiDBs with an optional pair of horizontal and vertical
-    distances.
-
-Parameter ``neutral_defect_spacing_overwrite``:
-    Override the default influence distance of neutral atomic defects
-    on SiDBs with an optional pair of horizontal and vertical
-    distances.
-
-Returns:
-    A black list of gate functions associated with tiles.)doc";
-
 static const char *__doc_fiction_sidb_technology =
 R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
 concept.)doc";
@@ -21550,7 +21234,11 @@ Parameter ``sdm``:
 
 static const char *__doc_fiction_sqd_parsing_error = R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
-static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error = R"doc()doc";
+static const char *__doc_fiction_sqd_parsing_error_sqd_parsing_error =
+R"doc(Constructs a `sqd_parsing_error` with the given error message.
+
+Parameter ``msg``:
+    Error message.)doc";
 
 static const char *__doc_fiction_squared_euclidean_distance =
 R"doc(The squared Euclidean distance :math:`D` between two layout
@@ -21919,7 +21607,15 @@ Template parameter ``DrawHexTT``:
     Flag to toggle the representation of truth tables for unknown
     functions in hexadecimal notation.)doc";
 
-static const char *__doc_fiction_technology_dot_drawer_is_node_number = R"doc()doc";
+static const char *__doc_fiction_technology_dot_drawer_is_node_number =
+R"doc(Checks whether a string represents a non-negative integer, i.e.,
+consists exclusively of digits.
+
+Parameter ``s``:
+    String to check.
+
+Returns:
+    `true` iff `s` is non-empty and consists exclusively of digits.)doc";
 
 static const char *__doc_fiction_technology_dot_drawer_node_fillcolor = R"doc()doc";
 
@@ -22311,6 +22007,24 @@ Returns:
     A uniquely identified node in a decorated cluster hierarchy that
     follows the "general tree" structure.)doc";
 
+static const char *__doc_fiction_to_string =
+R"doc(Converts an effort mode to a string representation.
+
+Parameter ``mode``:
+    Effort mode to convert.
+
+Returns:
+    String representation of the effort mode.)doc";
+
+static const char *__doc_fiction_to_string_2 =
+R"doc(Converts a cost objective to a string representation.
+
+Parameter ``cost``:
+    Cost objective to convert.
+
+Returns:
+    String representation of the cost objective.)doc";
+
 static const char *__doc_fiction_to_unique_sidb_cluster =
 R"doc(This recursive function is used to convert a binary cluster hierarchy,
 as for instance returned by `sidb_cluster_hierarchy` function that
@@ -22549,7 +22263,11 @@ requested.)doc";
 
 static const char *__doc_fiction_unsupported_clocking_scheme_exception_unsupported_clocking_scheme_exception = R"doc()doc";
 
-static const char *__doc_fiction_unsupported_clocking_scheme_exception_what = R"doc()doc";
+static const char *__doc_fiction_unsupported_clocking_scheme_exception_what =
+R"doc(Returns the diagnostic message for an unsupported clocking scheme.
+
+Returns:
+    A null-terminated diagnostic message.)doc";
 
 static const char *__doc_fiction_unsupported_defect_index_exception =
 R"doc(Exception thrown when an unsupported defect index is encountered in
@@ -23651,11 +23369,11 @@ static const char *__doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *__doc_fmt_formatter_parse_2 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1090_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1109_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_layouts_coordinates_hpp_1106_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1125_8 = R"doc()doc";
 
-static const char *__doc_fmt_unnamed_struct_at_home_runner_work_fiction_fiction_include_fiction_technology_cell_ports_hpp_291_8 = R"doc()doc";
+static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
 
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
@@ -23673,15 +23391,6 @@ Parameter ``other``:
 
 Returns:
     `true` iff both sources and targets match.)doc";
-
-static const char *__doc_mockturtle_edge_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    Edge to compare to.
-
-Returns:
-    `true` iff this edge is not equal to other.)doc";
 
 static const char *__doc_mockturtle_edge_source = R"doc()doc";
 

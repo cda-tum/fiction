@@ -6,7 +6,6 @@
 #define FICTION_NETWORK_CONVERSION_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/name_utils.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
@@ -14,7 +13,10 @@
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/views/topo_view.hpp>
 
+#include <cassert>
+#include <cstdint>
 #include <type_traits>
+#include <vector>
 
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>

@@ -9,5 +9,4 @@ benchmarks/trindade16/* linguist-vendored
 vendors/* linguist-detectable=false
 vendors/combinations/* linguist-detectable=false
 vendors/graph-coloring/* linguist-detectable=false
-vendors/mugen/* linguist-detectable=false
 vendors/undirected_graph/* linguist-detectable=false

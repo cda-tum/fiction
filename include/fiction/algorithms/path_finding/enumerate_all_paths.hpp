@@ -10,6 +10,8 @@
 
 #include <phmap.h>
 
+#include <cassert>
+
 namespace fiction
 {
 

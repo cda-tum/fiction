@@ -5,11 +5,11 @@
 #ifndef FICTION_STL_UTILS_HPP
 #define FICTION_STL_UTILS_HPP
 
+#include <algorithm>
 #include <ctime>
 #include <functional>
 #include <iterator>
 #include <queue>
-#include <type_traits>
 #include <vector>
 
 namespace fiction
@@ -26,8 +26,9 @@ namespace fiction
  * iterator to index 2, i.e., the second `1` in the first list, because the 2-element sub-sequence `[1,2]` is shared
  * between the two ranges.
  *
- * @tparam InputIt must meet the requirements of `LegacyInputIterator`.
- * @tparam ForwardIt must meet the requirements of `LegacyForwardIterator`.
+ * @tparam InputIt must meet the requirements of `LegacyRandomAccessIterator` (the implementation subtracts from and
+ * adds to `last`/`s_last`, which forward iterators do not support).
+ * @tparam ForwardIt must meet the requirements of `LegacyRandomAccessIterator` (see above).
  * @param first Begin of the range to examine.
  * @param last End of the range to examine.
  * @param s_first Begin of the range to search for.
@@ -35,15 +36,9 @@ namespace fiction
  * @return Iterator in the range `[first, last)` to the first position of the first 2-element sub-sequence shared
  * between the two ranges, or `last` if no such shared sub-sequence exists.
  */
-template <class InputIt, class ForwardIt>
+template <std::random_access_iterator InputIt, std::random_access_iterator ForwardIt>
 InputIt find_first_two_of(InputIt first, InputIt last, ForwardIt s_first, ForwardIt s_last) noexcept
 {
-    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
-                  "InputIt must meet the requirements of LegacyInputIterator");
-    static_assert(
-        std::is_base_of_v<std::forward_iterator_tag, typename std::iterator_traits<ForwardIt>::iterator_category>,
-        "ForwardIt must meet the requirements of LegacyForwardIterator");
-
     for (; first != last - 1; ++first)
     {
         for (ForwardIt it = s_first; it != s_last - 1; ++it)
@@ -105,19 +100,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      */
     iterator find(const T& val) noexcept
     {
-        auto first = begin(), last = end();
-
-        while (first != last)
-        {
-            if (*first == val)
-            {
-                return first;
-            }
-
-            ++first;
-        }
-
-        return last;
+        return std::ranges::find(*this, val);
     }
     /**
      * Returns a `const_iterator` to the provided value if it is contained in the priority queue. Returns an iterator to
@@ -128,20 +111,7 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
      */
     const_iterator find(const T& val) const noexcept
     {
-        auto       first = cbegin();
-        const auto last  = cend();
-
-        while (first != last)
-        {
-            if (*first == val)
-            {
-                return first;
-            }
-
-            ++first;
-        }
-
-        return last;
+        return std::ranges::find(*this, val);
     }
     /**
      * Returns `true` if the provided value is stored in the queue and `false` otherwise.

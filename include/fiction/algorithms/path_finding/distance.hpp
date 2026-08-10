@@ -88,7 +88,7 @@ template <typename Lyt, typename Dist = uint64_t>
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
-    return static_cast<Dist>(x * x + y * y);
+    return static_cast<Dist>((x * x) + (y * y));
 }
 /**
  * The 2DDWave distance \f$D\f$ between two layout coordinates \f$s = (x_1, y_1)\f$ and \f$t = (x_2, y_2)\f$ given

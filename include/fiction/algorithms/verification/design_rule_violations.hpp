@@ -13,10 +13,14 @@
 #include <mockturtle/traits.hpp>
 #include <nlohmann/json.hpp>
 
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <iostream>
 #include <ostream>
 #include <sstream>
 #include <string>
-#include <vector>
+#include <utility>
 
 namespace fiction
 {
@@ -183,10 +187,12 @@ class gate_level_drvs_impl
 
         *ps.out << fmt::format(
                        "\n[i] DRVs: {}, Warnings: {}",
-                       (pst.drvs != 0u ? fmt::format(fmt::fg(fmt::color::red), std::to_string(pst.drvs)) : ZERO_ISSUES),
-                       (pst.warnings != 0u ? fmt::format(fmt::fg(fmt::color::yellow), std::to_string(pst.warnings)) :
-                                             ZERO_ISSUES))
-                << std::endl;
+                       (pst.drvs != 0u ? fmt::format(fmt::fg(fmt::color::red), fmt::runtime(std::to_string(pst.drvs))) :
+                                         ZERO_ISSUES),
+                       (pst.warnings != 0u ?
+                            fmt::format(fmt::fg(fmt::color::yellow), fmt::runtime(std::to_string(pst.warnings))) :
+                            ZERO_ISSUES))
+                << "\n";
 
         pst.report["DRVs"]     = pst.drvs;
         pst.report["Warnings"] = pst.warnings;
@@ -270,6 +276,26 @@ class gate_level_drvs_impl
         report[n] = lyt.node_to_index(n);
     }
     /**
+     * Returns the check icon corresponding to a check's outcome.
+     *
+     * @param chk Result of the check.
+     * @param brk Flag to indicate that a failure is design breaking. If it's not, a warning icon is returned.
+     * @return Escape color sequence for the given outcome.
+     */
+    static const std::string& check_icon(const bool chk, const bool brk) noexcept
+    {
+        if (chk)
+        {
+            return CHECK_PASSED;
+        }
+        if (brk)
+        {
+            return CHECK_FAILED;
+        }
+
+        return WARNING;
+    }
+    /**
      * Generates a summarizing one liner for a design rule check.
      *
      * @param msg Message to output in success case. For failure, a "not" will be added as a prefix.
@@ -279,8 +305,7 @@ class gate_level_drvs_impl
      */
     std::string summary(std::string&& msg, const bool chk, const bool brk) const noexcept
     {
-        return fmt::format(" [{}] {}{}", chk ? CHECK_PASSED : (brk ? CHECK_FAILED : WARNING), chk ? "" : "not ",
-                           std::move(msg));
+        return fmt::format(" [{}] {}{}", check_icon(chk, brk), chk ? "" : "not ", std::move(msg));
     }
     /**
      * Checks for nodes that are not placed but still alive.
