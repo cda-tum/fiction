@@ -7,6 +7,7 @@
 
 #include "fiction/traits.hpp"
 
+#include <cstdint>
 #include <functional>
 #include <random>
 #include <type_traits>
