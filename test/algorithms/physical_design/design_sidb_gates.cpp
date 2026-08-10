@@ -29,6 +29,8 @@
 
 using namespace fiction;
 
+// NOLINTBEGIN(modernize-use-designated-initializers): compact aggregate fixtures keep these tests readable.
+
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
           "[design-sidb-gates]")
 {
@@ -658,5 +660,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
               operational_status::OPERATIONAL);
     }
 }
+
+// NOLINTEND(modernize-use-designated-initializers)
 
 #endif

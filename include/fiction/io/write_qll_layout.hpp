@@ -148,11 +148,7 @@ class write_qll_layout_impl
         {
             return "iNML";
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
-        {
-            return "MolFCN";
-        }
-        else if constexpr (has_mol_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             return "MolFCN";
         }

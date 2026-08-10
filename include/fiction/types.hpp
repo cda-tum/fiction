@@ -182,7 +182,8 @@ constexpr const char* sidb_cell_name = "dots";
 template <class Tech>
 inline constexpr const char* tech_cell_name = []
 {
-    if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology> ||
+                  std::is_same_v<std::decay_t<Tech>, mol_qca_technology>)
     {
         return qca_cell_name;
     }
@@ -193,10 +194,6 @@ inline constexpr const char* tech_cell_name = []
     else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb_technology>)
     {
         return sidb_cell_name;
-    }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, mol_qca_technology>)
-    {
-        return qca_cell_name;
     }
     else
     {

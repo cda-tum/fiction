@@ -48,7 +48,8 @@ void cell_command::execute()
     }
 
     const auto lib_orig = library;
-    std::transform(library.begin(), library.end(), library.begin(), ::toupper);
+    std::ranges::transform(library, library.begin(),
+                           [](const unsigned char c) { return static_cast<char>(std::toupper(c)); });
 
     if (library == "QCA-ONE" || library == "QCAONE" || library == "QCA ONE")
     {

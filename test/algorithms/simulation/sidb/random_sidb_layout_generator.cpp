@@ -20,6 +20,8 @@
 
 using namespace fiction;
 
+// NOLINTBEGIN(modernize-use-designated-initializers): compact aggregate fixtures keep these tests readable.
+
 TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generator]")
 {
     SECTION("empty parameters")
@@ -933,3 +935,5 @@ TEST_CASE("Random cube::coord_t layout generation with defects", "[random-sidb-l
         FAIL("Expected random SiDB layout generation to succeed");
     }
 }
+
+// NOLINTEND(modernize-use-designated-initializers)

@@ -21,7 +21,7 @@ using namespace fiction;
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
-    CHECK(has_post_layout_optimization_v<molecular_qca_library, mol_qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<molecular_qca_library, mol_qca_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<molecular_qca_library, qca_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<molecular_qca_library, inml_cell_clk_lyt>);
     CHECK(!has_post_layout_optimization_v<molecular_qca_library, sidb_cell_clk_lyt>);

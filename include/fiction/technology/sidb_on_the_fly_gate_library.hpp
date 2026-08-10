@@ -18,6 +18,7 @@
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
+#include <algorithm>
 #include <phmap.h>
 
 #include <array>
