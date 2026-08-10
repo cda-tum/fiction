@@ -16791,6 +16791,18 @@ The helper predicates below keep phase handling centralized for
 writers and gate libraries that need to translate cell symbols into
 simulator-specific metadata.)doc";
 
+static const char *__doc_fiction_mol_qca_technology_cell_clock_number =
+R"doc(Returns the SCERPA clock number encoded by a molQCA normal cell type.
+
+Non-normal cell types do not encode a clock phase and are mapped to
+phase 0 for callers that need a deterministic fallback.
+
+Parameter ``c``:
+    Cell type to inspect.
+
+Returns:
+    Clock number in the range 0 to 3.)doc";
+
 static const char *__doc_fiction_mol_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
 
 static const char *__doc_fiction_mol_qca_technology_cell_mark_EMPTY = R"doc()doc";
@@ -16850,18 +16862,6 @@ static const char *__doc_fiction_mol_qca_technology_is_normal_cell2 = R"doc()doc
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell3 = R"doc()doc";
 
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell4 = R"doc()doc";
-
-static const char *__doc_fiction_mol_qca_technology_cell_clock_number =
-R"doc(Returns the SCERPA clock number encoded by a molQCA normal cell type.
-
-Non-normal cell types do not encode a clock phase and are mapped to
-phase 0 for callers that need a deterministic fallback.
-
-Parameter ``c``:
-    Cell type to inspect.
-
-Returns:
-    Clock number in the range 0 to 3.)doc";
 
 static const char *__doc_fiction_mol_qca_technology_is_normal_cell_mode = R"doc()doc";
 
@@ -23038,7 +23038,7 @@ May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
-    Cell-level molQCA layout type.
+    Cell-level QCA layout type.
 
 Parameter ``lyt``:
     The layout to be written.
@@ -23231,7 +23231,7 @@ May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
-    Cell-level QCA layout type.
+    Cell-level molQCA layout type.
 
 Parameter ``lyt``:
     The layout to be written.
@@ -23630,3 +23630,4 @@ static const char *__doc_std_tuple_size = R"doc()doc";
 #if defined(__GNUG__)
 #pragma GCC diagnostic pop
 #endif
+
