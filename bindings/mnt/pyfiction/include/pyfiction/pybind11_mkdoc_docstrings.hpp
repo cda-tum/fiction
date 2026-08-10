@@ -23038,7 +23038,7 @@ May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
-    Cell-level QCA layout type.
+    Cell-level molQCA layout type.
 
 Parameter ``lyt``:
     The layout to be written.
@@ -23231,7 +23231,7 @@ May throw an `unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Template parameter ``Lyt``:
-    Cell-level molQCA layout type.
+    Cell-level QCA layout type.
 
 Parameter ``lyt``:
     The layout to be written.
