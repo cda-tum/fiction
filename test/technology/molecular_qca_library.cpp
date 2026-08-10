@@ -30,6 +30,34 @@ TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
     CHECK(!has_get_gate_ports_v<molecular_qca_library>);
 }
 
+TEST_CASE("Molecular QCA technology helpers", "[molecular-qca-library]")
+{
+    CHECK(mol_qca_technology::is_empty_cell(mol_qca_technology::cell_type::EMPTY));
+    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL1));
+    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL2));
+    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL3));
+    CHECK(mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::NORMAL4));
+    CHECK(!mol_qca_technology::is_normal_cell(mol_qca_technology::cell_type::INPUT));
+
+    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL1) == 0);
+    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL2) == 1);
+    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL3) == 2);
+    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::NORMAL4) == 3);
+    CHECK(mol_qca_technology::cell_clock_number(mol_qca_technology::cell_type::OUTPUT) == 0);
+
+    CHECK(mol_qca_technology::is_input_cell(mol_qca_technology::cell_type::INPUT));
+    CHECK(mol_qca_technology::is_output_cell(mol_qca_technology::cell_type::OUTPUT));
+    CHECK(mol_qca_technology::is_const_0_cell(mol_qca_technology::cell_type::CONST_0));
+    CHECK(mol_qca_technology::is_const_1_cell(mol_qca_technology::cell_type::CONST_1));
+    CHECK(mol_qca_technology::is_constant_cell(mol_qca_technology::cell_type::CONST_0));
+    CHECK(mol_qca_technology::is_constant_cell(mol_qca_technology::cell_type::CONST_1));
+
+    CHECK(mol_qca_technology::is_normal_cell_mode(mol_qca_technology::cell_mode::NORMAL));
+    CHECK(mol_qca_technology::is_rotated_cell_mode(mol_qca_technology::cell_mode::ROTATED));
+    CHECK(mol_qca_technology::is_vertical_cell_mode(mol_qca_technology::cell_mode::VERTICAL));
+    CHECK(mol_qca_technology::is_crossover_cell_mode(mol_qca_technology::cell_mode::CROSSOVER));
+}
+
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
