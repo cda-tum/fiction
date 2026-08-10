@@ -216,6 +216,30 @@ Changed
       (touched for the ``mockturtle::mig_network`` include fix, above): positional aggregate construction
       of ``fanout_substitution_params`` converted to designated initializers across the file's test cases,
       plus the same category of missing/unused-include fixes as elsewhere in this pass.
+
+      Completed the module with the last remaining subdirectory, ``simulation/sidb/`` (``operational_domain.hpp``
+      and ``sidb_simulation_domain.hpp`` were already modernized separately): ``std::ranges`` algorithms in place
+      of iterator-pair ``std::algorithm`` calls across ``band_bending_resilience.hpp``,
+      ``calculate_energy_and_state_type.hpp``, ``clustercomplete.hpp``, ``critical_temperature.hpp``,
+      ``defect_influence.hpp``, ``detect_bdl_pairs.hpp``, ``detect_bdl_wires.hpp``,
+      ``displacement_robustness_domain.hpp``, ``energy_distribution.hpp``,
+      ``equivalence_check_for_simulation_results.hpp``, ``ground_state_space.hpp``, ``is_operational.hpp``,
+      ``occupation_probability_of_excited_states.hpp``, ``physical_population_stability.hpp``,
+      ``sidb_simulation_result.hpp``, and ``verify_logic_match.hpp``; ``std::erase``/``std::erase_if`` in place
+      of the erase-remove idiom
+      (``detect_bdl_wires.hpp``, ``quickexact.hpp``); and a defaulted ``operator==`` on ``bdl_pair`` in place of
+      its hand-written memberwise ``operator==``/``operator!=`` pair (``detect_bdl_pairs.hpp``). ``bdl_pair``'s
+      ordering operators were left as hand-written, since they order only by ``upper``/``lower`` and ignore
+      ``type``, making them partial- rather than memberwise comparisons, the same judgment call already applied
+      to ``aspect_ratio_iterator.hpp``/``gray_code_iterator.hpp`` in the pilot slice. ``quicksim.hpp`` and
+      ``random_sidb_layout_generator.hpp`` each have one ``std::find``/``std::any_of`` call using an execution
+      policy, which C++20 ``std::ranges`` algorithms do not support, so both were left as-is; ``minimum_energy.hpp``'s
+      ``std::min_element`` was left as well, since its public API takes a generic iterator pair rather than a
+      container. ``can_positive_charges_occur.hpp``, ``defect_clearance.hpp``, ``exhaustive_ground_state_simulation.hpp``,
+      ``is_ground_state.hpp``, ``operational_domain_ratio.hpp``, ``physically_valid_parameters.hpp``, and
+      ``potential_to_distance_conversion.hpp`` had nothing applicable in any of the four modernization categories.
+      This completes the incremental C++20 modernization of ``include/fiction/algorithms/`` and, with it, the whole
+      codebase.
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:

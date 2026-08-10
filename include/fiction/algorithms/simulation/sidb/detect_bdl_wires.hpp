@@ -203,7 +203,7 @@ struct bdl_wire
         pairs.push_back(pair);
 
         // Sort the BDL pairs by the x-coordinate of the lower SiDB
-        std::sort(pairs.begin(), pairs.end());
+        std::ranges::sort(pairs);
         update_direction();
     }
     /**
@@ -213,12 +213,9 @@ struct bdl_wire
      */
     void erase_bdl_pair(const bdl_pair<cell<Lyt>>& pair) noexcept
     {
-        // Find the position of the pair to be removed
-        const auto it = std::remove(pairs.cbegin(), pairs.cend(), pair);
         // If the pair was found, erase it
-        if (it != pairs.cend())
+        if (std::erase(pairs, pair) > 0)
         {
-            pairs.erase(it, pairs.cend());
             update_direction();
         }
     }
@@ -233,7 +230,7 @@ struct bdl_wire
     [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
     find_bdl_pair_by_type(const sidb_technology::cell_type& t) const noexcept
     {
-        const auto it = std::find_if(pairs.cbegin(), pairs.cend(), [&t](const auto& bdl) { return bdl.type == t; });
+        const auto it = std::ranges::find_if(pairs, [&t](const auto& bdl) { return bdl.type == t; });
 
         if (it != pairs.cend())
         {
@@ -257,18 +254,17 @@ struct bdl_wire
         }
 
         // a wire without input or output cells does not have a port
-        if (std::all_of(pairs.cbegin(), pairs.cend(),
-                        [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; }))
+        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; }))
         {
             port.dir = port_direction::NONE;
             return;
         }
 
-        const auto input_exists = std::any_of(pairs.cbegin(), pairs.cend(), [](const auto& bdl)
-                                              { return bdl.type == sidb_technology::cell_type::INPUT; });
+        const auto input_exists =
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::INPUT; });
 
-        const auto output_exists = std::any_of(pairs.cbegin(), pairs.cend(), [](const auto& bdl)
-                                               { return bdl.type == sidb_technology::cell_type::OUTPUT; });
+        const auto output_exists =
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::OUTPUT; });
 
         // input and output cells are present
         if (input_exists && output_exists)
@@ -538,14 +534,14 @@ class detect_bdl_wires_impl
     find_bdl_neighbor_above(const bdl_pair<cell<Lyt>>& given_bdl, const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
                             const double inter_bdl_distance) const noexcept
     {
-        const auto it =
-            std::find_if(bdl_pairs.cbegin(), bdl_pairs.cend(),
-                         [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
-                         {
-                             return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
-                                    (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
-                                     !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl);
-                         });
+        const auto it = std::ranges::find_if(
+            bdl_pairs,
+            [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
+            {
+                return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
+                       (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
+                        !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl);
+            });
 
         if (it != bdl_pairs.cend())
         {
@@ -575,14 +571,14 @@ class detect_bdl_wires_impl
     find_bdl_neighbor_below(const bdl_pair<cell<Lyt>>& given_bdl, const std::set<bdl_pair<cell<Lyt>>>& bdl_pairs,
                             const double inter_bdl_distance) const noexcept
     {
-        const auto it =
-            std::find_if(bdl_pairs.cbegin(), bdl_pairs.cend(),
-                         [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
-                         {
-                             return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
-                                    (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
-                                     given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl);
-                         });
+        const auto it = std::ranges::find_if(
+            bdl_pairs,
+            [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
+            {
+                return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
+                       (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
+                        given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl);
+            });
 
         if (it != bdl_pairs.cend())
         {
@@ -620,21 +616,16 @@ class detect_bdl_wires_impl
 
         for (const auto& wire : bdl_wires)
         {
-            if (std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
-                            [&type](const auto& bdl) { return bdl.type == type; }))
+            if (std::ranges::any_of(wire.pairs, [&type](const auto& bdl) { return bdl.type == type; }))
             {
                 if (filtered_out_bdl_pair_type.has_value())
                 {
-                    if (std::any_of(wire.pairs.cbegin(), wire.pairs.cend(),
-                                    [&filtered_out_bdl_pair_type](const auto& bdl)
-                                    { return bdl.type == filtered_out_bdl_pair_type.value(); }))
+                    if (std::ranges::any_of(wire.pairs, [&filtered_out_bdl_pair_type](const auto& bdl)
+                                            { return bdl.type == filtered_out_bdl_pair_type.value(); }))
                     {
                         auto wire_copy = wire;
-                        wire_copy.pairs.erase(
-                            std::remove_if(wire_copy.pairs.begin(), wire_copy.pairs.end(),
-                                           [&filtered_out_bdl_pair_type](const auto& bdl)
-                                           { return bdl.type == filtered_out_bdl_pair_type.value(); }),
-                            wire_copy.pairs.cend());
+                        std::erase_if(wire_copy.pairs, [&filtered_out_bdl_pair_type](const auto& bdl)
+                                      { return bdl.type == filtered_out_bdl_pair_type.value(); });
                         filtered_wires.push_back(wire_copy);
                     }
                     else

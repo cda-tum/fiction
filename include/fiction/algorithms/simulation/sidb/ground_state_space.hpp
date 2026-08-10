@@ -109,7 +109,7 @@ struct ground_state_space_results
         const double gss_runtime = mockturtle::to_seconds(runtime);
         os << fmt::format("[i] Ground State Space took {:.4f} {}seconds",
                           gss_runtime > 1.0 ? gss_runtime : gss_runtime * 1000, gss_runtime > 1.0 ? "" : "milli")
-           << std::endl;
+           << '\n';
     }
 };
 
@@ -162,7 +162,10 @@ class ground_state_space_impl
 
         const uint64_t max_multisets = maximum_top_level_multisets(top_cluster->num_sidbs());
 
-        return ground_state_space_results{top_cluster, time_counter, max_multisets, projector_state_count};
+        return ground_state_space_results{.top_cluster                 = top_cluster,
+                                          .runtime                     = time_counter,
+                                          .maximum_top_level_multisets = max_multisets,
+                                          .projector_state_count       = projector_state_count};
     }
 
   private:
@@ -445,7 +448,8 @@ class ground_state_space_impl
 
             for (const uint64_t sidb_ix : other_c->sidbs)
             {
-                update_external_potential_projection(pst, sidb_cluster_receptor_state{other_c, sidb_ix});
+                update_external_potential_projection(
+                    pst, sidb_cluster_receptor_state{.cluster = other_c, .sidb_ix = sidb_ix});
             }
         }
     }
@@ -758,7 +762,7 @@ class ground_state_space_impl
         // perform potential bound analysis on every multiset in the charge space
         for (const sidb_cluster_charge_state& m : c->charge_space)
         {
-            const sidb_cluster_projector_state pst{c, static_cast<uint64_t>(m)};
+            const sidb_cluster_projector_state pst{.cluster = c, .multiset_conf = static_cast<uint64_t>(m)};
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_MULTISET>(pst))
             {
@@ -790,7 +794,7 @@ class ground_state_space_impl
         // make a pass over the clustering and see if the charge spaces contain invalid cluster charge states
         for (const sidb_cluster_ptr& c : clustering)
         {
-            if (!skip_cluster.has_value() || c->uid != skip_cluster.value())
+            if (!skip_cluster.has_value() || c->uid != *skip_cluster)
             {
                 fixpoint &= check_charge_space(c);
             }
@@ -814,7 +818,7 @@ class ground_state_space_impl
             {
                 const auto ccs = static_cast<uint64_t>(m);
 
-                const sidb_cluster_projector_state pst{child, ccs};
+                const sidb_cluster_projector_state pst{.cluster = child, .multiset_conf = ccs};
 
                 complete_potential_bounds_store complete_pot_store{};
                 complete_pot_store.initialize_complete_potential_bounds(top_cluster->num_sidbs());
@@ -906,7 +910,7 @@ class ground_state_space_impl
         {
             for (const uint64_t sidb_ix : child->sidbs)
             {
-                const sidb_cluster_receptor_state child_rst{child, sidb_ix};
+                const sidb_cluster_receptor_state child_rst{.cluster = child, .sidb_ix = sidb_ix};
                 subtract_sibling_pot_from_received_ext_pot_bound<bound_direction::LOWER>(parent, child_rst);
                 subtract_sibling_pot_from_received_ext_pot_bound<bound_direction::UPPER>(parent, child_rst);
             }
@@ -998,7 +1002,7 @@ class ground_state_space_impl
         for (const sidb_cluster_charge_state& m_part : cur_child->charge_space)
         {
             m.compositions.front().proj_states.emplace_back(
-                sidb_cluster_projector_state{cur_child, static_cast<uint64_t>(m_part)});
+                sidb_cluster_projector_state{.cluster = cur_child, .multiset_conf = static_cast<uint64_t>(m_part)});
             m += m_part;
 
             fill_merged_charge_state_space(parent, cur_child_ix + 1, m);
@@ -1072,7 +1076,7 @@ class ground_state_space_impl
         {
             for (const uint64_t sidb_ix : non_child->sidbs)
             {
-                const sidb_cluster_receptor_state rst{non_child, sidb_ix};
+                const sidb_cluster_receptor_state rst{.cluster = non_child, .sidb_ix = sidb_ix};
 
                 merge_pot_projection_bounds<bound_direction::LOWER>(parent, rst);
                 merge_pot_projection_bounds<bound_direction::UPPER>(parent, rst);
@@ -1129,9 +1133,8 @@ class ground_state_space_impl
 
         // find the parent with the minimum cluster size
         const sidb_cluster_ptr& min_parent =
-            (*std::min_element(clustering.cbegin(), clustering.cend(),
-                               [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
-                               { return c1->get_parent()->num_sidbs() < c2->get_parent()->num_sidbs(); }))
+            (*std::ranges::min_element(clustering, [](const sidb_cluster_ptr& c1, const sidb_cluster_ptr& c2)
+                                       { return c1->get_parent()->num_sidbs() < c2->get_parent()->num_sidbs(); }))
                 ->get_parent();
 
         for (const sidb_cluster_ptr& c : min_parent->children)
