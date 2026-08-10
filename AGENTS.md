@@ -62,6 +62,12 @@ You are an expert software architect and engineer specializing in **C++20**, **P
 
 Use these commands to validate your work.
 
+### Planning
+
+- Use `PLANS.md` for long-running, interruption-prone, or PR-streamlining work.
+- Keep active plans current: update scope, next steps, validation results, blockers, and decisions as the work changes.
+- Prefer direct implementation without an exec plan for small, single-pass fixes.
+
 ### C++ (Primary)
 
 - **Configure**: `cmake -S . -B build`
