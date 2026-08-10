@@ -194,6 +194,10 @@ inline constexpr const char* tech_cell_name = []
     {
         return sidb_cell_name;
     }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, mol_qca_technology>)
+    {
+        return qca_cell_name;
+    }
     else
     {
         return "?";

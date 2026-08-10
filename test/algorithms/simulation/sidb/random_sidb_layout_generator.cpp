@@ -38,7 +38,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -63,7 +63,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -88,7 +88,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -113,7 +113,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -141,7 +141,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -168,7 +168,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -197,7 +197,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -233,7 +233,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -262,7 +262,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -291,7 +291,7 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 }
@@ -314,7 +314,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -348,7 +348,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -373,7 +373,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -401,7 +401,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -428,7 +428,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -457,7 +457,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -491,7 +491,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -520,7 +520,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -543,7 +543,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -576,7 +576,7 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -607,7 +607,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -630,7 +630,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -653,7 +653,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -678,7 +678,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -703,7 +703,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -729,7 +729,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -764,7 +764,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 }
@@ -791,7 +791,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -842,7 +842,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 
@@ -881,7 +881,7 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         }
         else
         {
-            CHECK(false);
+            FAIL("Expected random SiDB layout generation to succeed");
         }
     }
 }
@@ -930,6 +930,6 @@ TEST_CASE("Random cube::coord_t layout generation with defects", "[random-sidb-l
     }
     else
     {
-        CHECK(false);
+        FAIL("Expected random SiDB layout generation to succeed");
     }
 }

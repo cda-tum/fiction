@@ -955,7 +955,7 @@ Returns:
     otherwise `false`.)doc";
 
 static const char *__doc_fiction_bdl_pair_operator_eq =
-R"doc(Equality operator.
+R"doc(Equality operator. Also provides `operator!=` via `= default`.
 
 Parameter ``other``:
     The other BDL pair to compare with.
@@ -1001,16 +1001,6 @@ Parameter ``other``:
 
 Returns:
     `true` if this BDL pair is less than the other, `false` otherwise.)doc";
-
-static const char *__doc_fiction_bdl_pair_operator_ne =
-R"doc(Inequality operator.
-
-Parameter ``other``:
-    The other BDL pair to compare with.
-
-Returns:
-    `true` if this BDL pair is not equal to the other, `false`
-    otherwise.)doc";
 
 static const char *__doc_fiction_bdl_pair_type =
 R"doc(The type of the SiDBs in the pair. BDL SiDBs must be of the same type.

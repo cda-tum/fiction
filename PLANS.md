@@ -55,12 +55,12 @@ because its mergeability check cannot run.
 The latest fetched `upstream/main` is `b02d4104`, which merged C++20 modernization changes in SiDB simulation code.
 
 **Plan**
-- [ ] Merge current `upstream/main` into `molQCA_lib` and resolve conflicts.
-- [ ] Address non-outdated actionable review feedback:
+- [x] Merge current `upstream/main` into `molQCA_lib` and resolve conflicts.
+- [x] Address non-outdated actionable review feedback:
   - `include/fiction/io/write_svg_layout.hpp`: fix the MolQCA SVG cell-type scope issue.
   - `include/fiction/types.hpp`: add MolQCA handling to `tech_cell_name`.
-  - `test/algorithms/simulation/sidb/random_sidb_layout_generator.cpp`: restore strong `REQUIRE` assertions for
-    generated-layout optionals.
+  - `test/algorithms/simulation/sidb/random_sidb_layout_generator.cpp`: restore strong failures for generated-layout
+    optionals.
   - `test/technology/molecular_qca_library.cpp`: improve documentation/comment density for the large test helper or
     function flagged by code scanning.
 - [ ] Re-check outdated review comments after the merge and fix any that become current again.
@@ -95,6 +95,9 @@ prek run -a
 - 2026-08-10: Merged `main` once, fixed `write_qll_layout.hpp`, pushed merge commit `b54cce81`.
 - 2026-08-10: Added repository exec-plan guidance in `PLANS.md` and pushed `e2a9e245`.
 - 2026-08-10: Fetched current PR status: PR is still conflicting because `upstream/main` advanced to `b02d4104`.
+- 2026-08-10: Merged `upstream/main` again; resolved one conflict in `is_operational.hpp`.
+- 2026-08-10: Applied focused fixes for current actionable PR comments in MolQCA SVG writing, type naming, random SiDB
+  layout tests, CLI SVG output, and MolQCA library test documentation.
 
 ## Active Plan Template
 

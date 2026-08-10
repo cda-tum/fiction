@@ -256,8 +256,9 @@ class critical_temperature_impl
 #endif  // FICTION_ALGLIB_ENABLED
         else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
-                                            params.alpha};
+            const quicksim_params qs_params{.simulation_parameters = params.operational_params.simulation_parameters,
+                                            .iteration_steps       = params.iteration_steps,
+                                            .alpha                 = params.alpha};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -466,8 +467,9 @@ class critical_temperature_impl
             assert(params.operational_params.simulation_parameters.base == 2 &&
                    "QuickSim does not support base-3 simulation");
 
-            const quicksim_params qs_params{params.operational_params.simulation_parameters, params.iteration_steps,
-                                            params.alpha};
+            const quicksim_params qs_params{.simulation_parameters = params.operational_params.simulation_parameters,
+                                            .iteration_steps       = params.iteration_steps,
+                                            .alpha                 = params.alpha};
 
             if (const auto result = quicksim<Lyt>(*bdl_iterator, qs_params))
             {
@@ -511,8 +513,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
 
     assert(!spec.empty());
     // all elements in tts must have the same number of variables
-    assert(std::adjacent_find(spec.begin(), spec.end(),
-                              [](const auto& a, const auto& b) { return a.num_vars() != b.num_vars(); }) == spec.end());
+    assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
+                                      { return a.num_vars() != b.num_vars(); }) == spec.end());
 
     critical_temperature_stats st{};
 

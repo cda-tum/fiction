@@ -330,8 +330,10 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 
     auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
+    // Expected 10x10 MolQCA gate patterns for each logical tile type used by the blueprint.
     // clang-format off
 
+    // Boundary tiles are represented by dedicated primary input and output port templates.
     static constexpr const molecular_qca_library::fcn_gate primary_input_port{
     molecular_qca_library::cell_list_to_gate<char>(
     {{
@@ -362,6 +364,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
+    // Inverters can appear in straight and bent forms depending on the local tile neighborhood.
     static constexpr const molecular_qca_library::fcn_gate straight_inverter{
     molecular_qca_library::cell_list_to_gate<char>(
     {{
@@ -392,6 +395,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
+    // AND and OR gates are encoded as majority gates with fixed 0 and 1 polarization inputs, respectively.
     static constexpr const molecular_qca_library::fcn_gate conjunction{
     molecular_qca_library::cell_list_to_gate<char>(
     {{
@@ -437,6 +441,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
+    // Fanout and bent-wire templates cover the remaining internal routing cases in this blueprint.
     static constexpr const molecular_qca_library::fcn_gate fanout{
     molecular_qca_library::cell_list_to_gate<char>(
     {{
@@ -469,10 +474,12 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 
     // clang-format on
 
+    // Primary I/O ports are matched with the rotation implied by their border orientation.
     CHECK(molecular_qca_library::set_up_gate(layout, {0, 2}) == molecular_qca_library::rotate_90(primary_input_port));
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 0}) == molecular_qca_library::rotate_90(primary_input_port));
 
+    // Internal tiles must resolve to the exact gate template and rotation dictated by their port routing.
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_270(straight_inverter));
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == bent_wire);
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == fanout);

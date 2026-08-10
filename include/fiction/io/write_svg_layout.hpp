@@ -446,7 +446,12 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
                                            "style=\"fill:#{0};stroke:#000000;\" />\n"
                                            "</g>";
 
-// molQCA
+/**
+ * @brief MolQCA-specific SVG color codes, geometry constants, and cell templates.
+ *
+ * This group defines the clock-zone colors, intra-cell spacing, offsets, and SVG glyphs used by the MolQCA layout
+ * writer.
+ */
 inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL     = "ffe700";
 inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL     = "65ff00";
 inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL     = "0071ff";
@@ -1261,7 +1266,7 @@ class write_mol_qca_layout_svg_impl
             }
             // crossings are not yet implemented in this technology
             else if (const auto ac = lyt.above(c), bc = lyt.below(c);
-                     ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && lyt.is_empty_cell(bc)))
+                     ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && !lyt.is_empty_cell(bc)))
             {
                 throw unsupported_cell_type_exception(c);
             }
@@ -1286,12 +1291,12 @@ class write_mol_qca_layout_svg_impl
         }
         else if (Lyt::technology::is_const_0_cell(ct))
         {
-            cell_color       = "#000000";
+            cell_color       = "000000";
             cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST0;
         }
         else if (Lyt::technology::is_const_1_cell(ct))
         {
-            cell_color       = "#000000";
+            cell_color       = "000000";
             cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST1;
         }
         else
