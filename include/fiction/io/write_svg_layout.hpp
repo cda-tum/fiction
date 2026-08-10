@@ -1218,8 +1218,12 @@ class write_mol_qca_layout_svg_impl
         if (lyt.is_empty_cell(c))
         {
             // skip empty cells
+            return std::make_pair(cell_description, cell_color);
         }
-        else if (const auto ct = lyt.get_cell_type(c); Lyt::technology::is_normal_cell(ct))
+
+        const auto ct = lyt.get_cell_type(c);
+
+        if (Lyt::technology::is_normal_cell(ct))
         {
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
@@ -1349,7 +1353,7 @@ class write_mol_qca_layout_svg_impl
  *
  * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
  *
- * @tparam Lyt Cell-level molQCA layout type.
+ * @tparam Lyt Cell-level QCA layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
@@ -1401,7 +1405,7 @@ void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, cons
  *
  * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
  *
- * @tparam Lyt Cell-level QCA layout type.
+ * @tparam Lyt Cell-level molQCA layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
  * @param ps Parameters.
