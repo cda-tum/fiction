@@ -26,6 +26,7 @@ Checks: |
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
   -misc-use-anonymous-namespace,
+  -misc-use-internal-linkage,
   modernize-*,
   -modernize-use-trailing-return-type,
   performance-*,

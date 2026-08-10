@@ -9,10 +9,11 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
@@ -667,19 +668,19 @@ class write_sidb_layout_svg_impl
         {
             switch (charge_state.value())
             {
-                case (sidb_charge_state::POSITIVE):
+                case sidb_charge_state::POSITIVE:
                 {
                     fill_color   = fiction::detail::svg::POSITIVE_COLOR;
                     border_color = fiction::detail::svg::POSITIVE_COLOR;
                     break;
                 }
-                case (sidb_charge_state::NEGATIVE):
+                case sidb_charge_state::NEGATIVE:
                 {
                     fill_color   = fiction::detail::svg::NEGATIVE_COLOR;
                     border_color = fiction::detail::svg::NEGATIVE_COLOR;
                     break;
                 }
-                case (sidb_charge_state::NEUTRAL):
+                case sidb_charge_state::NEUTRAL:
                 {
                     fill_opacity = 0.0;
                     break;
@@ -746,7 +747,7 @@ class write_sidb_layout_svg_impl
         all_cells.reserve(lyt.num_cells());
         // collect all cells
         lyt.foreach_cell([&all_cells](const auto& cell) { all_cells.push_back(cell); });
-        std::sort(all_cells.begin(), all_cells.end());
+        std::ranges::sort(all_cells);
 
         for (const auto& cell : all_cells)
         {
@@ -855,7 +856,7 @@ class write_qca_layout_svg_impl
 
     std::ostream& os;
 
-    write_qca_layout_svg_params ps;
+    const write_qca_layout_svg_params ps;
 
     /**
      * Alias for an SVG description of a tile containing also its clock zone.
@@ -980,7 +981,7 @@ class write_qca_layout_svg_impl
                     const auto desc_col = generate_description_color(c);
 
                     bool is_sync_elem = false;
-                    // Current cell-description can now be appended to the description of all cells
+                    // The current cell-description can now be appended to the description of all cells
                     if constexpr (has_synchronization_elements_v<Lyt>)
                     {
                         if (lyt.is_synchronization_element(c))
@@ -1032,39 +1033,33 @@ class write_qca_layout_svg_impl
         static constexpr const std::array<const char*, 4> text_colors{
             {svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_12_TEXT, svg::CLOCK_ZONE_34_TEXT, svg::CLOCK_ZONE_34_TEXT}};
 
-        // Adds all non-empty cells from the layout to their correct tiles; it generates the "body"
-        // of all the tile-descriptions to be used later
+        // Capture only references that are actually used
         lyt.foreach_cell_position(
-            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells, &coord_to_latch_tile](const auto& c)
+            [this, &coord_to_tile, &coord_to_cells, &coord_to_latch_cells](const auto& c)
             {
                 const auto clock_zone = lyt.get_clock_number(c);
                 const auto tile_coords =
                     coordinate<Lyt>{std::ceil(c.x / lyt.get_tile_size_x()), std::ceil(c.y / lyt.get_tile_size_y())};
+
                 std::string current_cells{};
+                bool        is_sync_elem = false;
 
-                bool is_sync_elem = false;
-
+                // Handle synchronization elements
                 if constexpr (has_synchronization_elements_v<Lyt>)
                 {
-                    if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                    const auto latch_delay = lyt.get_synchronization_element(c);
+                    if (latch_delay > 0)
                     {
                         if (auto latch_it = coord_to_latch_cells.find(tile_coords);
                             latch_it != coord_to_latch_cells.end())
                         {
                             current_cells = latch_it->second;
                         }
-                        else
-                        {
-                            // If this is called then there is no tile for the current cell yet
-                            // It also makes sure that all required tiles are created
-                            coord_to_latch_tile[tile_coords] = {svg::LATCH, clock_zone,
-                                                                static_cast<uint32_t>(latch_delay)};
-                        }
-
                         is_sync_elem = true;
                     }
                 }
 
+                // Handle normal cells
                 if (!is_sync_elem)
                 {
                     if (auto cell_it = coord_to_cells.find(tile_coords); cell_it != coord_to_cells.end())
@@ -1081,23 +1076,20 @@ class write_qca_layout_svg_impl
 
                 // Represent the x- and y-coordinates inside the c's tile
                 const coordinate<Lyt> in_tile{c.x % lyt.get_tile_size_x(), c.y % lyt.get_tile_size_y()};
+                const auto            desc_col = generate_description_color(c);
 
-                // Determines cell type and color
-                const auto desc_col = generate_description_color(c);
-
-                // Only add cell description if the cell is not empty
-                if (!(lyt.is_empty_cell(c)))
+                // Only add a cell description if the cell is not empty
+                if (!lyt.is_empty_cell(c))
                 {
-                    //  Current cell-description can now be appended to the description of all cells in the current tile
                     if constexpr (has_synchronization_elements_v<Lyt>)
                     {
-                        if (const auto latch_delay = lyt.get_synchronization_element(c); latch_delay > 0)
+                        const auto latch_delay = lyt.get_synchronization_element(c);
+                        if (latch_delay > 0)
                         {
                             coord_to_latch_cells[tile_coords] = current_cells.append(
                                 fmt::format(fmt::runtime(desc_col.first), desc_col.second,
                                             svg::STARTING_OFFSET_LATCH_CELL_X + (in_tile.x * svg::CELL_DISTANCE),
                                             svg::STARTING_OFFSET_LATCH_CELL_Y + (in_tile.y * svg::CELL_DISTANCE)));
-
                             is_sync_elem = true;
                         }
                     }
@@ -1117,41 +1109,15 @@ class write_qca_layout_svg_impl
         // Delete empty tiles in simple designs
         if (ps.simple)
         {
-            std::vector<coordinate<Lyt>> empty_tiles{};
-
-            // Find empty tiles via missing cell-descriptions for their coordinates
-            for (const auto& [coord, tdscr] : coord_to_tile)
-            {
-                if (coord_to_cells.count(coord) == 0)
-                {
-                    empty_tiles.emplace_back(coord);
-                }
-            }
-
-            // Delete empty tiles
-            for (const auto& coord : empty_tiles)
-            {
-                coord_to_tile.erase(coord);
-            }
+            // Delete tiles with missing cell-descriptions for their coordinates
+            std::erase_if(coord_to_tile,
+                          [&coord_to_cells](const auto& item) { return coord_to_cells.count(item.first) == 0; });
 
             if constexpr (has_synchronization_elements_v<Lyt>)
             {
-                std::vector<coordinate<Lyt>> empty_latches{};
-
-                // Find empty latches via missing cell-descriptions for their coordinates
-                for (const auto& [coord, ldscr] : coord_to_latch_tile)
-                {
-                    if (auto cell_it = coord_to_latch_cells.find(coord); cell_it == coord_to_latch_cells.end())
-                    {
-                        empty_latches.emplace_back(coord);
-                    }
-                }
-
-                // Delete empty latches
-                for (const auto& coord : empty_latches)
-                {
-                    coord_to_latch_tile.erase(coord);
-                }
+                // Delete latches with missing cell-descriptions for their coordinates
+                std::erase_if(coord_to_latch_tile, [&coord_to_latch_cells](const auto& item)
+                              { return coord_to_latch_cells.count(item.first) == 0; });
             }
         }
 

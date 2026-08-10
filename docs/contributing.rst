@@ -54,6 +54,7 @@ Core Guidelines
 * Keep your code clean. Remove any debug statements, left-over comments, or code unrelated to your contribution.
 * Follow the style and conventions used throughout the project.
 * Run :code:`clang-format` and :code:`clang-tidy` to check your code for style and linting errors before committing.
+* We recommend installing `prek <https://prek.j178.dev/>`_ and running :code:`prek install` once so that formatting and linting checks run automatically before every commit.
 
 Pull Request Workflow
 #####################

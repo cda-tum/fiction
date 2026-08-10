@@ -1,7 +1,7 @@
 # Python bindings for the _fiction_ library
 
 This directory contains Python bindings for the _fiction_ library built
-with [pybind11](https://github.com/pybind/pybind11).
+with [nanobind](https://github.com/wjakob/nanobind).
 
 ## Installation
 

@@ -6,6 +6,7 @@
 #define FICTION_MATH_UTILS_HPP
 
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <cstdlib>
 #include <numeric>
@@ -27,10 +28,9 @@ namespace fiction
  * @return The number rounded to n decimal places.
  */
 template <typename T>
+    requires std::integral<T> || std::floating_point<T>
 [[nodiscard]] inline T round_to_n_decimal_places(const T number, const uint64_t n) noexcept
 {
-    static_assert(std::is_arithmetic_v<T>, "T is not a number type");
-
     const auto factor = std::pow(10.0, static_cast<double>(n));
     return static_cast<T>(std::round(static_cast<double>(number) * factor) / factor);
 }
@@ -41,11 +41,9 @@ template <typename T>
  * @param n The number to take the absolute value of.
  * @return |n|.
  */
-template <typename T>
+template <std::integral T>
 [[nodiscard]] inline T integral_abs(const T n) noexcept
 {
-    static_assert(std::is_integral_v<T>, "T is not an integral number type");
-
     if constexpr (std::is_unsigned_v<T>)
     {
         return n;

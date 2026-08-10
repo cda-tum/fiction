@@ -208,7 +208,7 @@ class mincross_impl
         if (pass % 2 == 0)
         {
             // Upward pass: from rank 1 to max_rank
-            for (auto r = 1; r <= max_rank; ++r)
+            for (uint32_t r = 1; r <= max_rank; ++r)
             {
                 if (r == 0 && ps.fixed_pis)
                 {
@@ -289,7 +289,7 @@ class mincross_impl
                     return;
                 }
 
-                std::sort(positions.begin(), positions.end());
+                std::ranges::sort(positions);
 
                 if (positions.size() == 1)
                 {
@@ -322,7 +322,7 @@ class mincross_impl
                         {
                             const double w = (positions[lm] * static_cast<double>(rspan)) +
                                              (positions[rm] * static_cast<double>(lspan));
-                            median_map[n] = w / (lspan + rspan);
+                            median_map[n]  = w / (lspan + rspan);
                         }
                     }
                 }
@@ -333,32 +333,32 @@ class mincross_impl
      * Reorders the nodes in a given rank according to computed medians.
      *
      * @param r The rank index.
-     * @param reverse If `true`, sorts in descending order of medians.
+     * @param order Sorting order of medians.
      */
-    void reorder(const uint32_t r, median_sorting order)
+    void reorder(const uint32_t r, const median_sorting order)
     {
         // Get the nodes at rank r
         auto rank = fanout_ntk.get_ranks(r);
 
         // Sort by median value
-        std::sort(rank.begin(), rank.end(),
-                  [this, order](auto const& n1, auto const& n2)
-                  {
-                      const double m1 = median_map[n1];
-                      const double m2 = median_map[n2];
+        std::ranges::sort(rank,
+                          [this, order](auto const& n1, auto const& n2)
+                          {
+                              const double m1 = median_map[n1];
+                              const double m2 = median_map[n2];
 
-                      // Handle -1 (no connections) as infinity to push to the back
-                      if (m1 == -1)
-                      {
-                          return false;
-                      }
-                      if (m2 == -1)
-                      {
-                          return true;
-                      }
+                              // Handle -1 (no connections) as infinity to push to the back
+                              if (m1 == -1)
+                              {
+                                  return false;
+                              }
+                              if (m2 == -1)
+                              {
+                                  return true;
+                              }
 
-                      return order == median_sorting::DESCENDING ? (m1 > m2) : (m1 < m2);
-                  });
+                              return order == median_sorting::DESCENDING ? (m1 > m2) : (m1 < m2);
+                          });
 
         // Re-assign sorted rank and update rank positions
         fanout_ntk.set_ranks(r, rank);
@@ -367,9 +367,9 @@ class mincross_impl
     /**
      * Performs pairwise transpositions within ranks to further reduce crossings.
      *
-     * @param reverse If `true`, applies reversed heuristic for tie-breaking.
+     * @param order Sorting heuristic for tie-breaking.
      */
-    void transpose(median_sorting order)
+    void transpose(const median_sorting order)
     {
         std::vector<uint8_t> candidate(fanout_ntk.depth() + 1, 1);
         uint32_t             delta          = 0;
@@ -407,10 +407,10 @@ class mincross_impl
      * Performs a single transposition pass for rank `r`.
      *
      * @param r Rank index.
-     * @param reverse If `true`, applies reversed heuristic for tie-breaking.
+     * @param order Sorting heuristic for tie-breaking.
      * @return The number of crossings reduced.
      */
-    uint32_t transpose_step(const uint32_t r, median_sorting order)
+    uint32_t transpose_step(const uint32_t r, const median_sorting order)
     {
         auto rank = fanout_ntk.get_ranks(r);
 

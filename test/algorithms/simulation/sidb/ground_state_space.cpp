@@ -5,6 +5,8 @@
 #if (FICTION_ALGLIB_ENABLED)
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
@@ -13,6 +15,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/constants.hpp>
+#include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_cluster_hierarchy.hpp>
 #include <fiction/types.hpp>
 
@@ -114,7 +117,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
-    CHECK(gss_res.maximum_top_level_multisets - gss_res.top_cluster->charge_space.size() == 7);
+    CHECK(gss_res.maximum_top_level_multisets == gss_res.top_cluster->charge_space.size() + 7);
 
     CHECK(gss_res.top_cluster->sidbs.size() == 7);
 

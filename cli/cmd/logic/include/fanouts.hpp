@@ -39,6 +39,10 @@ class fanouts_command final : public command
      */
     uint32_t seed{0u};
     /**
+     * Strategy as integer for CLI11 compatibility
+     */
+    int strategy_int{0};
+    /**
      * Parameters.
      */
     fiction::fanout_substitution_params ps{};

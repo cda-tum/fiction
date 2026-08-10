@@ -5,14 +5,16 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/algorithms/verification/design_rule_violations.hpp"
+#include "fiction/algorithms/verification/design_rule_violations.hpp"  // NOLINT(misc-include-cleaner): provides
+                                                                       // detail::gate_level_drvs_impl for the friend
+                                                                       // declaration below
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/mockturtle_utils.hpp"
-#include "fiction/utils/range.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/networks/events.hpp>
 #include <mockturtle/networks/storage.hpp>
@@ -22,10 +24,10 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
-#include <functional>
-#include <initializer_list>
 #include <memory>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -272,9 +274,15 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
+    /**
+     * Check whether `n` is a primary input.
+     *
+     * @param n Node to be checked.
+     * @return `true` iff `n` is a PI.
+     */
     [[nodiscard]] bool is_pi(const node n) const noexcept
     {
-        return std::find(strg->inputs.cbegin(), strg->inputs.cend(), n) != strg->inputs.cend();
+        return std::ranges::find(strg->inputs, n) != strg->inputs.cend();
     }
     [[nodiscard]] bool is_ci(const node n) const noexcept
     {
@@ -291,10 +299,16 @@ class gate_level_layout : public ClockedLayout
         return is_pi(get_node(t));
     }
 
+    /**
+     * Check whether `n` is a primary output.
+     *
+     * @param n Node to be checked.
+     * @return `true` iff `n` is a PO.
+     */
     [[nodiscard]] bool is_po(const node n) const noexcept
     {
-        return std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
-                            [this, &n](const auto& p) { return this->get_node(p.index) == n; }) != strg->outputs.cend();
+        return std::ranges::find_if(strg->outputs, [this, &n](const auto& p)
+                                    { return this->get_node(p.index) == n; }) != strg->outputs.cend();
     }
 
     [[nodiscard]] bool is_co(const node n) const noexcept
@@ -713,8 +727,7 @@ class gate_level_layout : public ClockedLayout
         // n's children
         auto& children = strg->nodes[n].children;
         // decrease ref-count of children
-        std::for_each(children.cbegin(), children.cend(),
-                      [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
+        std::ranges::for_each(children, [this](const auto& c) { strg->nodes[get_node(c.index)].data[0].h1--; });
         // clear n's children
         children.clear();
 
@@ -724,8 +737,7 @@ class gate_level_layout : public ClockedLayout
             if (!t.is_dead())
             {
                 // if n lived on a tile that was marked as PO, update it with the new tile t
-                std::replace(strg->outputs.begin(), strg->outputs.end(), static_cast<signal>(old_t),
-                             static_cast<signal>(t));
+                std::ranges::replace(strg->outputs, static_cast<signal>(old_t), static_cast<signal>(t));
             }
 
             // clear n's position
@@ -737,10 +749,9 @@ class gate_level_layout : public ClockedLayout
         }
 
         // assign new children
-        std::copy(new_children.cbegin(), new_children.cend(), std::back_inserter(children));
+        std::ranges::copy(new_children, std::back_inserter(children));
         // increase ref-count to new children
-        std::for_each(new_children.cbegin(), new_children.cend(),
-                      [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
+        std::ranges::for_each(new_children, [this](const auto& nc) { strg->nodes[get_node(nc)].data[0].h1++; });
 
         return static_cast<signal>(t);
     }
@@ -799,9 +810,8 @@ class gate_level_layout : public ClockedLayout
                     }
 
                     // find PO entry and remove it if present
-                    if (const auto po_it =
-                            std::find_if(strg->outputs.cbegin(), strg->outputs.cend(),
-                                         [this, &n](const auto& p) { return this->get_node(p.index) == n; });
+                    if (const auto po_it = std::ranges::find_if(strg->outputs, [this, &n](const auto& p)
+                                                                { return this->get_node(p.index) == n; });
                         po_it != strg->outputs.cend())
                     {
                         strg->outputs.erase(po_it);
@@ -1004,7 +1014,8 @@ class gate_level_layout : public ClockedLayout
     {
         using iterator_type = decltype(strg->inputs.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, node>(
-            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); }, fn);
+            strg->inputs.cbegin(), strg->inputs.cend(), [](const auto& i) { return static_cast<node>(i); },
+            std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all primary output signals (including those that point to dead nodes) in the layout. Note
@@ -1020,7 +1031,7 @@ class gate_level_layout : public ClockedLayout
     {
         using iterator_type = decltype(strg->outputs.cbegin());
         mockturtle::detail::foreach_element_transform<iterator_type, signal>(
-            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, fn);
+            strg->outputs.cbegin(), strg->outputs.end(), [](const auto& o) { return o.index; }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all nodes (excluding dead ones) in the layout.
@@ -1033,7 +1044,8 @@ class gate_level_layout : public ClockedLayout
     void foreach_node(Fn&& fn) const
     {
         auto r = mockturtle::range<node>(static_cast<node>(strg->nodes.size()));
-        mockturtle::detail::foreach_element_if(r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, fn);
+        mockturtle::detail::foreach_element_if(
+            r.begin(), r.end(), [this](const auto& n) { return !is_dead(n); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all gates (excluding dead ones) in the layout. Uses `is_gate` to check whether a node is a
@@ -1048,7 +1060,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, fn);
+            r.begin(), r.end(), [this](const auto n) { return is_gate(n) && !is_dead(n); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all wires (excluding dead ones) in the layout. Uses `is_wire` to check whether a node is a
@@ -1063,7 +1075,7 @@ class gate_level_layout : public ClockedLayout
     {
         auto r = mockturtle::range<node>(2u, static_cast<node>(strg->nodes.size()));  // start from 2 to avoid constants
         mockturtle::detail::foreach_element_if(
-            r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, fn);
+            r.begin(), r.end(), [this](const auto n) { return is_wire(n) && !is_dead(n); }, std::forward<Fn>(fn));
     }
     /**
      * Applies a function to all nodes that are incoming to a given one. Thereby, only incoming clocked zones (+/- one
@@ -1140,9 +1152,14 @@ class gate_level_layout : public ClockedLayout
      * @param n Node whose fanouts are desired.
      * @param fn Functor to apply to each of `n`'s fanouts.
      */
+    // fn is captured by reference into fanout_collector, which may be invoked up to three times below (once per
+    // adjacent tile); it is forwarded on each of those calls
     template <typename Fn, bool RespectClocking = true>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward)
     void foreach_fanout(const node n, Fn&& fn) const
     {
+        // `fn` is captured by reference into nested lambdas invoked zero to several times (once per fanout tile); it
+        // is forwarded exactly once at its actual call site further down, not at this outer parameter.
         if (n <= 1)
         {  // const-0 or const-1
             return;
@@ -1215,16 +1232,31 @@ class gate_level_layout : public ClockedLayout
         return data_flow;
     }
 
+    /**
+     * Applies a function to all combinational input nodes (including dead ones) in the layout. Alias for
+     * `foreach_pi`.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * `mockturtle::foreach_element_transform`.
+     * @param fn Functor to apply to each combinational input node.
+     */
     template <typename Fn>
     void foreach_ci(Fn&& fn) const
     {
-        foreach_pi(fn);
+        foreach_pi(std::forward<Fn>(fn));
     }
-
+    /**
+     * Applies a function to all combinational output signals (including those that point to dead nodes) in the
+     * layout. Alias for `foreach_po`.
+     *
+     * @tparam Fn Functor type that has to comply with the restrictions imposed by
+     * `mockturtle::foreach_element_transform`.
+     * @param fn Functor to apply to each combinational output signal.
+     */
     template <typename Fn>
     void foreach_co(Fn&& fn) const
     {
-        foreach_po(fn);
+        foreach_po(std::forward<Fn>(fn));
     }
 
 #pragma endregion
@@ -1592,9 +1624,12 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Custom node values
 
+    /**
+     * Resets the custom value of every node in the layout to 0.
+     */
     void clear_values() const noexcept
     {
-        std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[0].h2 = 0; });
+        std::ranges::for_each(strg->nodes, [](auto& n) { n.data[0].h2 = 0; });
     }
 
     [[nodiscard]] uint32_t value(const node n) const
@@ -1621,9 +1656,12 @@ class gate_level_layout : public ClockedLayout
 
 #pragma region Visited flags
 
+    /**
+     * Resets the visited flag of every node in the layout to 0.
+     */
     void clear_visited() const
     {
-        std::for_each(strg->nodes.begin(), strg->nodes.end(), [](auto& n) { n.data[1].h2 = 0; });
+        std::ranges::for_each(strg->nodes, [](auto& n) { n.data[1].h2 = 0; });
     }
 
     [[nodiscard]] auto visited(const node n) const
@@ -1665,7 +1703,11 @@ class gate_level_layout : public ClockedLayout
     template <typename>
     friend class detail::gate_level_drvs_impl;
 
-    inline void initialize_truth_table_cache()
+    /**
+     * Populates the truth table cache with the constant and elementary functions used by the fundamental gate
+     * creation functions (`create_not`, `create_and`, etc.).
+     */
+    void initialize_truth_table_cache()
     {
         /* reserve the second node for constant 1 */
         strg->nodes.emplace_back();
@@ -1745,10 +1787,19 @@ class gate_level_layout : public ClockedLayout
         }
     }
 
+    /**
+     * Creates a new node with the given `children` and cached truth table `literal`, assigns it to tile `t`, and
+     * notifies all `on_add` event listeners.
+     *
+     * @param children Fanin signals of the new node.
+     * @param literal Cached truth table literal representing the new node's function.
+     * @param t Tile to assign the new node to.
+     * @return Signal representing tile `t`, now hosting the newly created node.
+     */
     signal create_node_from_literal(const std::vector<signal>& children, uint32_t literal, const tile& t)
     {
         typename storage::element_type::node_type node_data;
-        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
+        std::ranges::copy(children, std::back_inserter(node_data.children));
         node_data.data[1].h1 = literal;
 
         const auto n = static_cast<node>(strg->nodes.size());
@@ -1772,10 +1823,17 @@ class gate_level_layout : public ClockedLayout
         return static_cast<signal>(t);
     }
 
+    /**
+     * Check whether `s` is among the fanin signals of `n`.
+     *
+     * @param n Node to be checked.
+     * @param s Signal to look for among `n`'s children.
+     * @return `true` iff `s` is a child of `n`.
+     */
     [[nodiscard]] bool is_child(const node n, const signal& s) const noexcept
     {
         const auto& node_data = strg->nodes[n];
-        return std::find(node_data.children.cbegin(), node_data.children.cend(), s) != node_data.children.cend();
+        return std::ranges::find(node_data.children, s) != node_data.children.cend();
     }
 };
 

@@ -5,6 +5,7 @@
 #ifndef FICTION_HASH_HPP
 #define FICTION_HASH_HPP
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <functional>
@@ -47,13 +48,16 @@ namespace std
 template <typename T, std::size_t N>
 struct hash<std::array<T, N>>
 {
+    /**
+     * Computes the hash value of a given `std::array`.
+     *
+     * @param a Array to hash.
+     * @return Hash value of `a`.
+     */
     std::size_t operator()(const std::array<T, N>& a) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : a)
-        {
-            fiction::hash_combine(h, e);
-        }
+        std::ranges::for_each(a, [&h](const auto& e) { fiction::hash_combine(h, e); });
 
         return h;
     }
@@ -66,13 +70,16 @@ struct hash<std::array<T, N>>
 template <typename T>
 struct hash<std::set<T>>
 {
+    /**
+     * Computes the hash value of a given `std::set`.
+     *
+     * @param s Set to hash.
+     * @return Hash value of `s`.
+     */
     std::size_t operator()(const std::set<T>& s) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : s)
-        {
-            fiction::hash_combine(h, e);
-        }
+        std::ranges::for_each(s, [&h](const auto& e) { fiction::hash_combine(h, e); });
 
         return h;
     }
@@ -85,13 +92,16 @@ struct hash<std::set<T>>
 template <typename T>
 struct hash<std::multiset<T>>
 {
+    /**
+     * Computes the hash value of a given `std::multiset`.
+     *
+     * @param s Multiset to hash.
+     * @return Hash value of `s`.
+     */
     std::size_t operator()(const std::multiset<T>& s) const noexcept
     {
         std::size_t h = 0;
-        for (const auto& e : s)
-        {
-            fiction::hash_combine(h, e);
-        }
+        std::ranges::for_each(s, [&h](const auto& e) { fiction::hash_combine(h, e); });
 
         return h;
     }

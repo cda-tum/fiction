@@ -9,13 +9,13 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <phmap.h>
 
-#include <vector>
+#include <iterator>
+#include <stdexcept>
 
 namespace fiction
 {
@@ -128,11 +128,9 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
                         // gather adjacent cell positions
                         auto adjacent_cells = lyt.adjacent_coordinates(c);
                         // remove all empty cells
-                        adjacent_cells.erase(std::remove_if(adjacent_cells.begin(), adjacent_cells.end(),
-                                                            [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); }),
-                                             adjacent_cells.end());
+                        std::erase_if(adjacent_cells, [&lyt](const auto& ac) { return lyt.is_empty_cell(ac); });
                         // if there is at most one neighbor left
-                        if (std::distance(adjacent_cells.cbegin(), adjacent_cells.cend()) <= 1)
+                        if (std::ranges::distance(adjacent_cells) <= 1)
                         {
                             // change cell mode to via
                             lyt.assign_cell_mode(c, qca_technology::cell_mode::VERTICAL);

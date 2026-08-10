@@ -8,7 +8,7 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
@@ -90,7 +90,7 @@ inline constexpr const char* PIN =
 inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-static const std::unordered_map<inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
+inline const std::unordered_map<inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
     {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
     {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
     {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
@@ -142,19 +142,19 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    static constexpr std::string_view tech_name = []
+    const char* tech_name = []()
     {
         if constexpr (has_inml_technology_v<Lyt>)
         {
-            return std::string_view{"iNML"};
+            return "iNML";
         }
-        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt>)
         {
-            return std::string_view{"MolFCN"};
+            return "MolFCN";
         }
         else
         {
-            return std::string_view{"?"};
+            return "?";
         }
     }();
 
@@ -162,7 +162,7 @@ class write_qll_layout_impl
     {
         std::vector<cell<Lyt>> pi_list{};
         lyt.foreach_pi([&pi_list](const auto& pi) { pi_list.push_back(pi); });
-        std::sort(pi_list.begin(), pi_list.end(), [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(pi_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
 
         return pi_list;
     }
@@ -171,7 +171,7 @@ class write_qll_layout_impl
     {
         std::vector<cell<Lyt>> po_list{};
         lyt.foreach_po([&po_list](const auto& po) { po_list.push_back(po); });
-        std::sort(po_list.begin(), po_list.end(), [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
+        std::ranges::sort(po_list, [](const auto& c1, const auto& c2) { return c1.y < c2.y; });
 
         return po_list;
     }
@@ -477,7 +477,7 @@ void write_qll_layout(const Lyt& lyt, std::ostream& os)
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 {
-    std::ofstream os{std::string(filename), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

@@ -504,7 +504,7 @@ class post_layout_optimization_impl
                     });
 
                 // sort the gate tiles using the custom comparator
-                std::sort(gate_tiles.begin(), gate_tiles.end(), compare_gate_tiles<Lyt>);
+                std::ranges::sort(gate_tiles, compare_gate_tiles<Lyt>);
 
                 max_non_po = tile<Lyt>{0, 0};
                 // determine minimal border for POs
@@ -648,8 +648,8 @@ class post_layout_optimization_impl
                 {
                     const auto front = in_flow.front();
 
-                    if (std::find(deleted_coords.cbegin(), deleted_coords.cend(), front) == deleted_coords.cend() ||
-                        std::find(moved_tiles.cbegin(), moved_tiles.cend(), front) != moved_tiles.cend())
+                    if (std::ranges::find(deleted_coords, front) == deleted_coords.cend() ||
+                        std::ranges::find(moved_tiles, front) != moved_tiles.cend())
                     {
                         lyt.move_node(lyt.get_node(outgoing_tile), outgoing_tile,
                                       {lyt.make_signal(lyt.get_node(ground)), lyt.make_signal(lyt.get_node(front))});
@@ -1089,12 +1089,8 @@ class post_layout_optimization_impl
         // determine minimum coordinates for new placements
         if (!fanins.empty())
         {
-            min_x =
-                std::max_element(fanins.cbegin(), fanins.cend(), [](const auto& a, const auto& b) { return a.x < b.x; })
-                    ->x;
-            min_y =
-                std::max_element(fanins.cbegin(), fanins.cend(), [](const auto& a, const auto& b) { return a.y < b.y; })
-                    ->y;
+            min_x = std::ranges::max_element(fanins, [](const auto& a, const auto& b) { return a.x < b.x; })->x;
+            min_y = std::ranges::max_element(fanins, [](const auto& a, const auto& b) { return a.y < b.y; })->y;
         }
 
         const auto max_x        = old_pos.x;

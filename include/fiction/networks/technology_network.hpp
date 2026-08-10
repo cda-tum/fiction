@@ -5,7 +5,19 @@
 #ifndef FICTION_TECHNOLOGY_NETWORK_HPP
 #define FICTION_TECHNOLOGY_NETWORK_HPP
 
+#include <kitty/constructors.hpp>
+#include <kitty/dynamic_truth_table.hpp>
+#include <kitty/operations.hpp>
 #include <mockturtle/networks/klut.hpp>
+#include <mockturtle/utils/algorithm.hpp>
+
+#include <algorithm>
+#include <cassert>
+#include <cstdint>
+#include <iterator>
+#include <memory>
+#include <utility>
+#include <vector>
 
 namespace fiction
 {
@@ -57,8 +69,8 @@ class technology_network : public mockturtle::klut_network
      */
     [[nodiscard]] bool is_po(const node& n) const
     {
-        return std::find_if(_storage->outputs.cbegin(), _storage->outputs.cend(), [this, &n](const auto& p)
-                            { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
+        return std::ranges::find_if(_storage->outputs, [this, &n](const auto& p)
+                                    { return this->get_node(p.index) == n; }) != _storage->outputs.cend();
     }
 
 #pragma endregion
@@ -189,24 +201,18 @@ class technology_network : public mockturtle::klut_network
     signal _create_node(const std::vector<signal>& children, uint32_t literal)
     {
         storage::element_type::node_type node_data;
-        std::copy(children.begin(), children.end(), std::back_inserter(node_data.children));
+        std::ranges::copy(children, std::back_inserter(node_data.children));
         node_data.data[1].h1 = literal;
 
         const auto index = _storage->nodes.size();
         _storage->nodes.push_back(node_data);
 
         /* increase ref-count to children */
-        for (auto c : children)
-        {
-            _storage->nodes[c].data[0].h1++;
-        }
+        std::ranges::for_each(children, [this](const auto& c) { _storage->nodes[c].data[0].h1++; });
 
         set_value(index, 0);
 
-        for (auto const& fn : _events->on_add)
-        {
-            (*fn)(index);
-        }
+        std::ranges::for_each(_events->on_add, [&index](const auto& fn) { (*fn)(index); });
 
         return index;
     }

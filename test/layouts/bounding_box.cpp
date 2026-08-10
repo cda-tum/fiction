@@ -138,7 +138,7 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
 TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_cell_clk_lyt_siqad,
                    sidb_111_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
 TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[bounding-box]",
                    sidb_defect_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_siqad, sidb_defect_100_cell_clk_lyt_siqad)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -273,7 +273,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
 
 TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-box]", sidb_defect_cell_clk_lyt)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -319,7 +319,7 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
 TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bounding-box]", sidb_cell_clk_lyt_cube,
                    sidb_111_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_cube)
 {
-    SECTION("empyt layout")
+    SECTION("empty layout")
     {
         const TestType lyt{};
 
@@ -359,5 +359,21 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
 
         CHECK(nw == cell<TestType>{-3, 0});
         CHECK(se == cell<TestType>{2, 0});
+    }
+
+    SECTION("two cell and two defect, exclude defects")
+    {
+        sidb_defect_surface<TestType> lyt{TestType{}};
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
+        lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
+        lyt.assign_sidb_defect({2, 0}, sidb_defect{});
+
+        const bounding_box_2d bb{static_cast<TestType>(lyt)};  // NOLINT(cppcoreguidelines-slicing)
+        const auto            nw = bb.get_min();
+        const auto            se = bb.get_max();
+
+        CHECK(nw == cell<TestType>{1, 0, 0});
+        CHECK(se == cell<TestType>{2, 0, 0});
     }
 }

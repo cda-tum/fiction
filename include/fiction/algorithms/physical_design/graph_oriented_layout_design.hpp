@@ -36,12 +36,14 @@
 #include <functional>
 #include <future>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <mutex>
 #include <optional>
 #include <queue>
 #include <random>
 #include <stdexcept>
+#include <string_view>
 #include <thread>
 #include <tuple>
 #include <unordered_map>
@@ -62,7 +64,7 @@ struct graph_oriented_layout_design_params
      * generated and the strategies employed, balancing between runtime efficiency and the likelihood of finding optimal
      * solutions.
      */
-    enum effort_mode : std::uint8_t
+    enum class effort_mode : std::uint8_t
     {
         /**
          * HIGH_EFFICIENCY mode generates 2 search space graphs. This option minimizes runtime but may not always yield
@@ -95,7 +97,7 @@ struct graph_oriented_layout_design_params
     /**
      * The effort mode used. Defaults to HIGH_EFFORT.
      */
-    effort_mode mode = HIGH_EFFORT;
+    effort_mode mode = effort_mode::HIGH_EFFORT;
     /**
      * Number of expansions for each vertex that should be explored. For each partial layout, `num_vertex_expansions`
      * positions will be checked for the next node/gate to be placed. A lower value requires less runtime, but the
@@ -121,7 +123,7 @@ struct graph_oriented_layout_design_params
      * The `cost_objective` enum defines various cost objectives that can be used in the graph-oriented layout design
      * process. Each cost objective represents a different metric used to expand a vertex in the search space graph.
      */
-    enum cost_objective : std::uint8_t
+    enum class cost_objective : std::uint8_t
     {
         /**
          * AREA: Optimizes for the total area of the layout, aiming to minimize the space required for the design.
@@ -148,7 +150,7 @@ struct graph_oriented_layout_design_params
     /**
      * The cost objective used. Defaults to AREA
      */
-    cost_objective cost = AREA;
+    cost_objective cost = cost_objective::AREA;
     /**
      * BETA feature:
      * Flag to enable or disable multithreading during the execution of the layout design algorithm.
@@ -202,6 +204,93 @@ struct graph_oriented_layout_design_params
      */
     bool randomize_tiles_to_skip_between_pis = false;
 };
+
+/**
+ * Converts an effort mode to a string representation.
+ *
+ * @param mode Effort mode to convert.
+ * @return String representation of the effort mode.
+ */
+[[nodiscard]] inline std::string_view to_string(const graph_oriented_layout_design_params::effort_mode mode) noexcept
+{
+    switch (mode)
+    {
+        case graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY:
+        {
+            return "HIGH_EFFICIENCY";
+        }
+        case graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT:
+        {
+            return "HIGH_EFFORT";
+        }
+        case graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT:
+        {
+            return "HIGHEST_EFFORT";
+        }
+        case graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT:
+        {
+            return "MAXIMUM_EFFORT";
+        }
+    }
+
+    return "";
+}
+/**
+ * Streams an effort mode to an output stream.
+ *
+ * @param os Output stream.
+ * @param mode Effort mode to stream.
+ * @return Output stream.
+ */
+inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_design_params::effort_mode mode)
+{
+    return os << to_string(mode);
+}
+/**
+ * Converts a cost objective to a string representation.
+ *
+ * @param cost Cost objective to convert.
+ * @return String representation of the cost objective.
+ */
+[[nodiscard]] inline std::string_view to_string(const graph_oriented_layout_design_params::cost_objective cost) noexcept
+{
+    switch (cost)
+    {
+        case graph_oriented_layout_design_params::cost_objective::AREA:
+        {
+            return "AREA";
+        }
+        case graph_oriented_layout_design_params::cost_objective::WIRES:
+        {
+            return "WIRES";
+        }
+        case graph_oriented_layout_design_params::cost_objective::CROSSINGS:
+        {
+            return "CROSSINGS";
+        }
+        case graph_oriented_layout_design_params::cost_objective::ACP:
+        {
+            return "ACP";
+        }
+        case graph_oriented_layout_design_params::cost_objective::CUSTOM:
+        {
+            return "CUSTOM";
+        }
+    }
+
+    return "";
+}
+/**
+ * Streams a cost objective to an output stream.
+ *
+ * @param os Output stream.
+ * @param cost Cost objective to stream.
+ * @return Output stream.
+ */
+inline std::ostream& operator<<(std::ostream& os, const graph_oriented_layout_design_params::cost_objective cost)
+{
+    return os << to_string(cost);
+}
 /**
  * This struct stores statistics about the graph-oriented layout design process.
  */
@@ -272,14 +361,16 @@ struct nested_vector_hash
      */
     std::size_t operator()(const coord_vec_type<Lyt>& vec) const
     {
-        std::size_t       hash  = 0ul;
-        const std::size_t prime = 0x9e3779b9;
+        static constexpr std::size_t prime = 0x9e3779b9;
+
+        std::size_t hash = 0ul;
         for (const auto& tile : vec)
         {
             hash ^= std::hash<uint64_t>{}(tile.x) + prime + (hash << 6u) + (hash >> 2u);
             hash ^= std::hash<uint64_t>{}(tile.y) + prime + (hash << 6u) + (hash >> 2u);
             hash ^= std::hash<uint64_t>{}(tile.z) + prime + (hash << 6u) + (hash >> 2u);
         }
+
         return hash;
     }
 };
@@ -422,8 +513,14 @@ template <typename Ntk, bool CiToCo = false, bool Randomize = false>
 class topo_view : public mockturtle::immutable_view<Ntk>
 {
   public:
-    using node   = typename Ntk::node;
-    using signal = typename Ntk::signal;
+    /**
+     * Node type of the underlying network.
+     */
+    using node = Ntk::node;
+    /**
+     * Signal type of the underlying network.
+     */
+    using signal = Ntk::signal;
 
     explicit topo_view(const Ntk& ntk, const uint32_t seed_val = 42) :
             mockturtle::immutable_view<Ntk>(ntk),
@@ -444,8 +541,8 @@ class topo_view : public mockturtle::immutable_view<Ntk>
 
     [[nodiscard]] uint32_t node_to_index(const node& n) const
     {
-        auto it = std::find(topo_order.begin(), topo_order.end(), n);
-        return uint32_t(std::distance(topo_order.begin(), it));
+        auto it = std::ranges::find(topo_order, n);
+        return uint32_t(std::ranges::distance(topo_order.begin(), it));
     }
 
     [[nodiscard]] node index_to_node(const uint32_t idx) const
@@ -746,7 +843,7 @@ class graph_oriented_layout_design_impl
                                    {
                                        if (auto result = process_ssg(*ssg_ptr); result)
                                        {
-                                           const std::lock_guard<std::mutex> lock(update_best_layout_mutex);
+                                           const std::scoped_lock lock(update_best_layout_mutex);
                                            best_lyt = std::move(*result);
                                            restore_names(ssg_ptr->network, best_lyt);
                                            update_stats(best_lyt);
@@ -768,8 +865,7 @@ class graph_oriented_layout_design_impl
                     {
                         if (f.valid())
                         {
-                            using namespace std::chrono_literals;
-                            if (f.wait_for(0ms) == std::future_status::ready)
+                            if (f.wait_for(std::chrono::milliseconds{0}) == std::future_status::ready)
                             {
                                 if (auto r = f.get())
                                 {
@@ -842,8 +938,7 @@ class graph_oriented_layout_design_impl
             }
 
             // check if timeout is reached or solution found
-            timeout_limit_reached =
-                std::none_of(ssg_vec.cbegin(), ssg_vec.cend(), [](const auto& ssg) { return ssg.frontier_flag; });
+            timeout_limit_reached = std::ranges::none_of(ssg_vec, [](const auto& ssg) { return ssg.frontier_flag; });
 
             const auto end = std::chrono::high_resolution_clock::now();
             const auto duration_ms =
@@ -1785,7 +1880,7 @@ class graph_oriented_layout_design_impl
         {
             const auto bb = bounding_box_2d(layout);
             cost          = (layout.num_crossings() + 1) *
-                   (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
+                            (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::CUSTOM)
         {
@@ -1978,9 +2073,8 @@ class graph_oriented_layout_design_impl
 
                 if (apply_plo)
                 {
-                    fiction::post_layout_optimization_params plo_params{};
-                    plo_params.optimize_pos_only   = true;
-                    plo_params.planar_optimization = ps.planar;
+                    const fiction::post_layout_optimization_params plo_params{.optimize_pos_only   = true,
+                                                                              .planar_optimization = ps.planar};
 
                     fiction::post_layout_optimization(layout, plo_params);
                 }

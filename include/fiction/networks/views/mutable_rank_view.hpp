@@ -126,7 +126,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
      * @param ntk Reference to the network.
      * @param ranks A vector of vectors specifying initial ranks for the nodes within the network.
      */
-    explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& ranks) :
+    explicit mutable_rank_view(const Ntk& ntk, const std::vector<std::vector<node>>& init_ranks_vec) :
             fiction::static_depth_view<Ntk>{ntk},
             ranks{this->depth() + 1},
             max_rank_width{0}
@@ -140,7 +140,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 
         rank_pos.rehash(this->size());
 
-        init_ranks(ranks);
+        init_ranks(init_ranks_vec);
     }
 
     /**
@@ -264,13 +264,13 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
         assert(rank.size() == nodes.size());
         auto sort_rank  = rank;
         auto sort_nodes = nodes;
-        std::sort(sort_rank.begin(), sort_rank.end());
-        std::sort(sort_nodes.begin(), sort_nodes.end());
+        std::ranges::sort(sort_rank);
+        std::ranges::sort(sort_nodes);
         assert(sort_rank == sort_nodes);
 
         // assign new ranks
         rank = nodes;
-        std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
     }
 
     /**
@@ -381,8 +381,8 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
 
         auto& rank = ranks[level];
 
-        std::sort(rank.begin(), rank.end(), cmp);
-        std::for_each(rank.cbegin(), rank.cend(), [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
+        std::ranges::sort(rank, cmp);
+        std::ranges::for_each(rank, [this, i = 0u](auto const& n) mutable { rank_pos[n] = i++; });
     }
 
     /**
@@ -469,8 +469,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
         pis.reserve(this->num_pis());
 
         fiction::static_depth_view<Ntk>::foreach_pi([&pis](auto const& pi) { pis.push_back(pi); });
-        std::sort(pis.begin(), pis.end(),
-                  [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
 
@@ -523,8 +522,7 @@ class mutable_rank_view<Ntk, false> : public fiction::static_depth_view<Ntk>
         pis.reserve(this->num_pis());
 
         fiction::static_depth_view<Ntk>::foreach_ci([&pis](auto const& pi) { pis.push_back(pi); });
-        std::sort(pis.begin(), pis.end(),
-                  [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
+        std::ranges::sort(pis, [this](auto const& n1, auto const& n2) { return rank_pos.at(n1) < rank_pos.at(n2); });
         mockturtle::detail::foreach_element(pis.cbegin(), pis.cend(), std::forward<Fn>(fn));
     }
     /**

@@ -2,42 +2,120 @@
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
     "config:recommended",
-    ":gitSignOff"
+    ":gitSignOff",
+    "helpers:pinGitHubActionDigestsToSemver",
+    ":automergeDigest",
+    ":automergeStableNonMajor",
+    ":combinePatchMinorReleases",
+    ":configMigration",
+    ":enablePreCommit",
+    ":prConcurrentLimitNone",
+    ":prHourlyLimitNone"
   ],
-  prHourlyLimit: 10,
   enabledManagers: [
-    "git-submodules",
     "github-actions",
     "pre-commit",
     "pep621",
     "dockerfile",
+    "custom.regex",
   ],
-  "git-submodules": {
-    "enabled": true
-  },
-  "pre-commit": {
-    enabled: true
-  },
+  customManagers: [
+    {
+      // Renovate has no native manager for CMake FetchContent, so the pinned
+      // GIT_TAG versions in cmake/Dependencies.cmake are tracked via regex
+      // managers instead, one per dependency, matching the GIT_REPOSITORY on
+      // the preceding line to disambiguate between blocks.
+      customType: "regex",
+      description: "Update the nlohmann_json revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/nlohmann/json\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+      ],
+      depNameTemplate: "nlohmann/json",
+      packageNameTemplate: "nlohmann/json",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
+      description: "Update the Catch2 revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/catchorg/Catch2\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+      ],
+      depNameTemplate: "catchorg/Catch2",
+      packageNameTemplate: "catchorg/Catch2",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
+      description: "Update the parallel-hashmap revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/greg7mdp/parallel-hashmap\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+      ],
+      depNameTemplate: "greg7mdp/parallel-hashmap",
+      packageNameTemplate: "greg7mdp/parallel-hashmap",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      customType: "regex",
+      description: "Update the tinyxml2 revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/leethomason/tinyxml2\\.git\\s+GIT_TAG (?<currentValue>[0-9.]+)"
+      ],
+      depNameTemplate: "leethomason/tinyxml2",
+      packageNameTemplate: "leethomason/tinyxml2",
+      datasourceTemplate: "github-tags",
+    },
+    {
+      // alice and mockturtle are pinned to a commit SHA that tracks the head
+      // of a branch (rather than a release tag), so these use the git-refs
+      // datasource against that branch instead of github-tags.
+      customType: "regex",
+      description: "Update the alice revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/marcelwa/alice\\.git\\s+GIT_TAG (?<currentDigest>[0-9a-f]{40})"
+      ],
+      depNameTemplate: "marcelwa/alice",
+      packageNameTemplate: "https://github.com/marcelwa/alice",
+      currentValueTemplate: "master",
+      datasourceTemplate: "git-refs",
+    },
+    {
+      customType: "regex",
+      description: "Update the mockturtle revision pinned for CMake FetchContent",
+      managerFilePatterns: [
+        "cmake/Dependencies.cmake"
+      ],
+      matchStrings: [
+        "GIT_REPOSITORY https://github\\.com/marcelwa/mockturtle\\.git\\s+GIT_TAG (?<currentDigest>[0-9a-f]{40})"
+      ],
+      depNameTemplate: "marcelwa/mockturtle",
+      packageNameTemplate: "https://github.com/marcelwa/mockturtle",
+      currentValueTemplate: "mnt",
+      datasourceTemplate: "git-refs",
+    }
+  ],
   lockFileMaintenance: {
-    "enabled": true
-    // "automerge": true, disabled due to endless update loops caused by setuptools_scm
+    enabled: true,
+    automerge: true
   },
-  configMigration: true,
   schedule: [
     "every weekend"
   ],
   packageRules: [
-    {
-      matchManagers: [
-        "git-submodules"
-      ],
-      addLabels: [
-        "dependencies",
-        "submodules"
-      ],
-      commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
-      "groupName": "Submodules",
-    },
     {
       matchManagers: [
         "github-actions"
@@ -46,7 +124,6 @@
         "github_actions"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC68\u200D\uD83D\uDCBB",
-      "groupName": "GitHub Actions",
     },
     {
       matchManagers: [
@@ -56,7 +133,7 @@
         "pre-commit"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83E\uDE9D",
-      "groupName": "Pre-Commit Hooks",
+      versioning: "pep440"
     },
     {
       matchManagers: [
@@ -67,7 +144,6 @@
         "python"
       ],
       commitMessagePrefix: "⬆\uFE0F\uD83D\uDC0D",
-      "groupName": "Python Dependencies",
     },
     {
       matchManagers: [
@@ -77,14 +153,42 @@
         "docker"
       ],
       commitMessagePrefix: "⬆\uD83D\uDC0B",
-      "groupName": "Dockerfile",
     },
     {
-      "description": "Automerge patch updates",
-      "matchUpdateTypes": [
+      description: "Sphinx 8.2+ dropped support for Python <3.11, so keep this pin as-is to avoid breaking dependency resolution",
+      matchManagers: [
+        "pep621"
+      ],
+      matchDepNames: [
+        "sphinx"
+      ],
+      matchCurrentVersion: "8.1.3",
+      enabled: false
+    },
+    {
+      description: "Group and automerge all patch updates",
+      groupName: "patch versions",
+      groupSlug: "all-patch",
+      matchUpdateTypes: [
         "patch"
       ],
-      "automerge": true
+      automerge: true
+    },
+    {
+      // This rule is intentionally last: packageRules are applied in order and
+      // later rules override earlier ones, so this re-asserts automerge: false
+      // for custom.regex after the "patch versions" rule above would otherwise
+      // auto-merge patch-level CMake tag bumps unattended.
+      matchManagers: [
+        "custom.regex"
+      ],
+      addLabels: [
+        "dependencies",
+        "C++",
+        "build_system"
+      ],
+      commitMessagePrefix: "⬆️📦",
+      automerge: false,
     }
   ]
 }

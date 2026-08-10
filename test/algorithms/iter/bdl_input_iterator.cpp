@@ -19,7 +19,7 @@
 
 using namespace fiction;
 
-TEST_CASE("Traits", "[bdl-input-iterator]")
+TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
 {
     using layout = sidb_100_cell_clk_lyt_siqad;
 

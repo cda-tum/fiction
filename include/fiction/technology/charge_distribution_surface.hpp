@@ -390,7 +390,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cds Other `charge_distribution_surface`.
      */
-    charge_distribution_surface(const charge_distribution_surface<Lyt>& cds) :
+    charge_distribution_surface(const charge_distribution_surface& cds) :  // NOLINT(*-explicit-constructor)
             Lyt(cds),
             strg{std::make_shared<charge_distribution_storage>(*cds.strg)}
     {}
@@ -408,6 +408,22 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         return *this;
     }
+    /**
+     * Move constructor.
+     *
+     * @param other charge_distribution_surface to move from.
+     */
+    charge_distribution_surface(charge_distribution_surface&& other) noexcept = default;
+    /**
+     * Move assignment operator.
+     *
+     * @param other charge_distribution_surface to move from.
+     */
+    charge_distribution_surface& operator=(charge_distribution_surface&& other) noexcept = default;
+    /**
+     * Destructor.
+     */
+    ~charge_distribution_surface() = default;
     /**
      * Clones the current charge distribution surface and returns a deep copy.
      *
@@ -529,8 +545,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] bool charge_exists(const sidb_charge_state cs) const noexcept
     {
-        return std::any_of(strg->cell_charge.cbegin(), strg->cell_charge.cend(),
-                           [&cs](const sidb_charge_state c) { return c == cs; });
+        return std::ranges::any_of(strg->cell_charge, [&cs](const sidb_charge_state c) { return c == cs; });
     }
     /**
      * This function searches the index of an SiDB.
@@ -540,10 +555,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] int64_t cell_to_index(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c);
-            it != strg->sidb_order.cend())
+        if (const auto it = std::ranges::find(strg->sidb_order, c); it != strg->sidb_order.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->sidb_order.cbegin(), it));
+            return static_cast<int64_t>(std::ranges::distance(strg->sidb_order.begin(), it));
         }
 
         return -1;
@@ -647,8 +661,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void add_sidb_defect_to_potential_landscape(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
     {
         // check if defect is not placed on SiDB position
-        if (!is_charged_defect_type(defect) ||
-            std::find(strg->sidb_order.cbegin(), strg->sidb_order.cend(), c) != strg->sidb_order.cend())
+        if (!is_charged_defect_type(defect) || std::ranges::find(strg->sidb_order, c) != strg->sidb_order.cend())
         {
             return;
         }
@@ -663,8 +676,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
                     const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
-                                     static_cast<double>(defect.charge);
-                    const auto ix = static_cast<uint64_t>(cell_to_index(c1));
+                                      static_cast<double>(defect.charge);
+                    const auto ix   = static_cast<uint64_t>(cell_to_index(c1));
 
                     strg->local_pot_caused_by_defects[ix] += pot;
                     strg->local_int_pot[ix] += pot;
@@ -1210,7 +1223,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             collect += strg->local_int_pot_at_defect[c] * static_cast<double>(defect.charge);
         }
 
-        strg->system_energy = collect_ext + 0.5 * collect;
+        strg->system_energy = collect_ext + (0.5 * collect);
     }
     /**
      * This function returns the currently stored system's total electrostatic potential energy in eV.
@@ -1555,8 +1568,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
 
             const auto dist_min =
-                std::accumulate(negative_indices.begin(), negative_indices.end(), std::numeric_limits<double>::max(),
-                                [&](const double acc, const uint64_t occ)
+                std::accumulate(negative_indices.begin(), negative_indices.end(),
+                                std::numeric_limits<double>::infinity(), [&](const double acc, const uint64_t occ)
                                 { return std::min(acc, this->get_nm_distance_by_indices(unocc, occ)); });
 
             index_vector.push_back(unocc);
@@ -1641,13 +1654,12 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         // sort all SiDBs that can be positively charged by the defined < relation
-        std::sort(strg->three_state_cells.begin(), strg->three_state_cells.end());
+        std::ranges::sort(strg->three_state_cells);
 
         // collect all SiDBs that are not among the SiDBs that can be positively charged
         for (const auto& c : strg->sidb_order)
         {
-            if (std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), c) ==
-                    strg->three_state_cells.end() &&
+            if (std::ranges::find(strg->three_state_cells, c) == strg->three_state_cells.end() &&
                 c != strg->dependent_cell)
             {
                 strg->sidb_order_without_three_state_cells.push_back(c);
@@ -1655,7 +1667,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         // sort all SiDBs that cannot be positively charged by the defined < relation
-        std::sort(strg->sidb_order_without_three_state_cells.begin(), strg->sidb_order_without_three_state_cells.end());
+        std::ranges::sort(strg->sidb_order_without_three_state_cells);
 
         // if SiDBs exist that can be positively charged, 3-state simulation is required
         if (required)
@@ -1723,10 +1735,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] int64_t three_state_cell_to_index(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = std::find(strg->three_state_cells.cbegin(), strg->three_state_cells.cend(), c);
-            it != strg->three_state_cells.cend())
+        if (const auto it = std::ranges::find(strg->three_state_cells, c); it != strg->three_state_cells.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->three_state_cells.cbegin(), it));
+            return static_cast<int64_t>(std::ranges::distance(strg->three_state_cells.begin(), it));
         }
 
         return -1;
@@ -1740,11 +1751,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      */
     [[nodiscard]] int64_t two_state_cell_to_index(const typename Lyt::cell& c) const noexcept
     {
-        if (const auto it = std::find(strg->sidb_order_without_three_state_cells.cbegin(),
-                                      strg->sidb_order_without_three_state_cells.cend(), c);
+        if (const auto it = std::ranges::find(strg->sidb_order_without_three_state_cells, c);
             it != strg->sidb_order_without_three_state_cells.cend())
         {
-            return static_cast<int64_t>(std::distance(strg->sidb_order_without_three_state_cells.cbegin(), it));
+            return static_cast<int64_t>(std::ranges::distance(strg->sidb_order_without_three_state_cells.begin(), it));
         }
 
         return -1;
@@ -2175,7 +2185,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             combined_vector.emplace_back(strg->sidb_order[i], strg->cell_charge[i]);
         }
 
-        std::sort(combined_vector.begin(), combined_vector.end());
+        std::ranges::sort(combined_vector);
 
         for (size_t i = 0; i < combined_vector.size(); i++)
         {
@@ -2205,7 +2215,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         strg->sidb_order.reserve(this->num_cells());
         strg->cell_charge.reserve(this->num_cells());
         this->foreach_cell([this](const auto& c1) { strg->sidb_order.push_back(c1); });
-        std::sort(strg->sidb_order.begin(), strg->sidb_order.end());
+        std::ranges::sort(strg->sidb_order);
         this->foreach_cell([this, &cs](const auto&) { strg->cell_charge.push_back(cs); });
 
         strg->max_charge_index = static_cast<uint64_t>(
@@ -2445,7 +2455,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
-        for (uint64_t i = 0; static_cast<int64_t>(i) <= counter; ++i)
+        for (uint64_t i = 0; std::cmp_less_equal(i, counter); ++i)
         {
             this->assign_charge_state_by_index(i, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
         }

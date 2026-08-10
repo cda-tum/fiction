@@ -27,6 +27,11 @@ template <typename Lyt>
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not based on SiDB technology");
 
+    if (source == target)
+    {
+        return 0.0;
+    }
+
     const auto pos_c1 = sidb_nm_position<Lyt>(lyt, source);
     const auto pos_c2 = sidb_nm_position<Lyt>(lyt, target);
 

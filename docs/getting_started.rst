@@ -1,7 +1,7 @@
 Getting started
 ===============
 
-The *fiction* framework provides a stand-alone CLI tool as well as a C++17 header-only library and a Python module which
+The *fiction* framework provides a stand-alone CLI tool as well as a C++20 header-only library and a Python module which
 can be used in external projects. Additionally, we provide an experimentation playground that can be used to quickly
 prototype new ideas or script evaluations.
 
@@ -82,7 +82,7 @@ them automatically. Should the repository have been cloned before, the commands:
 
   git submodule update --init --recursive
 
-will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++17 compiler are
+will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++20 compiler are
 required for the C++ part. If you want to work with the Python bindings, you need a Python 3.9+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
@@ -107,6 +107,36 @@ Configure and build with CMake:
 
 Several options can be toggled during the build. For a more interactive interface, please refer to ``ccmake`` for a
 full list of supported customizations.
+
+.. _cmake-presets:
+
+CMake Presets
+#############
+
+The repository ships a `CMakePresets.json <https://github.com/cda-tum/fiction/blob/main/CMakePresets.json>`_ with a
+curated set of configurations for common tasks, so that you do not have to remember all relevant ``-D`` flags
+yourself. List them with:
+
+.. code-block:: console
+
+  $ cmake --list-presets
+
+Noteworthy presets include ``dev`` (a quick Debug build with only the CLI and tests enabled), ``dev-full`` (the same,
+but with Z3 and ALGLIB also enabled), ``dev-asan`` (``dev`` with sanitizers), ``tests-slim``/``tests-full``
+(test-only builds, without/with all optional components, for the fastest edit-compile-test loop), ``pyfiction``
+(mirrors the ``pyproject.toml`` configuration for iterating on the Python bindings directly with CMake), and
+``release`` (an optimized, IPO-enabled build). The ``ci-*`` and ``coverage`` presets provide the shared baseline
+configuration used by the corresponding GitHub Actions workflows; each job layers a few compiler- and
+platform-specific ``-D`` overrides on top, so reproducing a specific failing job locally may require adding those
+too, e.g.:
+
+.. code-block:: console
+
+  $ cmake -S . --preset ci-debug
+  $ cmake --build --preset ci-debug
+  $ ctest --preset ci-debug
+
+Any preset can still be combined with additional ``-D`` overrides on the command line.
 
 Run the CLI:
 
@@ -207,6 +237,58 @@ If you are using Windows, you can use the following commands instead:
     $ python3 -m venv venv
     $ venv\Scripts\activate.bat
 
+.. _bindings-architecture:
+
+Bindings Architecture
+#####################
+
+If you want to add or extend Python bindings, the code under ``bindings/mnt/pyfiction/`` follows a source-based
+layout, one translation unit per binding, chosen to keep compile time and memory usage manageable as the number of
+bindings grows:
+
+.. code-block:: text
+
+    bindings/mnt/pyfiction/
+    ├── CMakeLists.txt
+    ├── pyfiction.cpp                              # top-level NB_MODULE entry point
+    └── src/pyfiction/
+        ├── algorithms/
+        │   ├── register_algorithms.cpp             # calls register_path_finding(m), etc.
+        │   ├── path_finding/
+        │   │   ├── a_star.cpp                      # defines a_star(nanobind::module_&)
+        │   │   └── register_path_finding.cpp        # calls a_star(m), distance(m), ...
+        │   └── ...
+        ├── layouts/
+        │   └── ...
+        └── ...
+
+Each leaf ``.cpp`` file under ``src/pyfiction/<module>/<submodule>/`` defines exactly one binding function (e.g.
+``void a_star(nanobind::module_& m)``) that binds a single class, function, or closely related group thereof. Each
+directory has a ``register_<name>.cpp`` that forward-declares and calls the binding functions of its leaf files (and
+the ``register_<name>`` functions of any nested submodule directories); the top-level ``pyfiction.cpp`` calls each
+top-level module's ``register_<module>(m)`` from its ``NB_MODULE`` block. New source files do not need to be
+added anywhere manually: ``CMakeLists.txt`` collects them automatically via ``file(GLOB_RECURSE
+FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so re-running ``cmake`` picks up new files on its own —
+you only need to wire the new function into the relevant ``register_<name>.cpp`` and, if needed, forward-declare it
+there.
+
+.. note::
+
+   The Python-facing ``mnt.pyfiction`` namespace must not change shape when adding new bindings. In particular, do
+   not introduce new Python-level submodules (e.g. ``mnt.pyfiction.algorithms``) — all registration functions attach
+   their bindings to the single top-level module object that is threaded through the call chain, matching the
+   existing flat API that user scripts depend on.
+
+.. note::
+
+   The bindings are built with `nanobind <https://github.com/wjakob/nanobind>`_, which (unlike the previous
+   `pybind11 <https://github.com/pybind/pybind11>`_-based setup) is resolved as an installed Python package rather
+   than fetched by CMake. When configuring the ``pyfiction`` preset directly (e.g. for IDE-based iteration, outside
+   of ``pip install``), make sure the Python interpreter CMake picks up has ``nanobind`` installed — the project's
+   ``uv``-managed virtual environment already does, so pass
+   ``-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3`` (or the equivalent ``.venv\Scripts\python.exe`` on
+   Windows) if CMake would otherwise pick up a different interpreter.
+
 ---
 
 Advanced Configuration
@@ -232,22 +314,6 @@ Follow the `installation instructions <https://github.com/Z3Prover/z3/blob/maste
 Finally, before building *fiction*, pass ``-DFICTION_Z3=ON`` to the ``cmake`` call. It should be able to find
 Z3's include path and link against the binary automatically if installed correctly. Otherwise, you can use
 ``-DZ3_ROOT=<path_to_z3_root>`` to set Z3's root directory that is to be searched for the installed solver.
-
-SAT-based ``onepass`` synthesis
-###############################
-
-The :ref:`one-pass synthesis algorithm <onepass>` is embedded via the Python3 script
-`Mugen <https://github.com/whaaswijk/mugen>`_ by Winston Haaswijk using `pybind11 <https://github.com/pybind/pybind11>`_.
-It has some further Python dependencies that can be installed via ``pip3``:
-
-.. code-block:: console
-
-    (venv) $ pip install -r libs/mugen/requirements.txt
-
-The Python integration is experimental and may cause issues on some systems. It is currently not available on Windows
-and some macOS versions due to issues with ``python-sat``. Mugen requires at least Python 3.7!
-
-Finally, before building *fiction*, pass ``-DFICTION_ENABLE_MUGEN=ON`` to the ``cmake`` call.
 
 .. _abc-cmake:
 
@@ -357,9 +423,6 @@ While enabling jemalloc through the above CMake is not beneficial to every appli
 
 .. note::
    Windows users need to install jemalloc manually. It can be done by following `these steps <https://github.com/jemalloc/jemalloc/blob/dev/INSTALL.md#building-for-windows>`_.
-
-.. note::
-   Usage of jemalloc in *fiction* is not tested on macOS with the g++ compiler.
 
 Uninstall
 ---------

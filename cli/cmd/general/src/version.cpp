@@ -4,7 +4,7 @@
 
 #include "cmd/general/include/version.hpp"
 
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>

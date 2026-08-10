@@ -9,7 +9,7 @@
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl_utils.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -163,7 +163,7 @@ inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
 inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 // maps defect types to their respective string representation
-static const std::unordered_map<sidb_defect_type, const char*> defect_type_to_name{
+inline const std::unordered_map<sidb_defect_type, const char*> defect_type_to_name{
     {{sidb_defect_type::NONE, "H-Si"},
      {sidb_defect_type::DB, "DB"},
      {sidb_defect_type::SI_VACANCY, "Vacancy"},

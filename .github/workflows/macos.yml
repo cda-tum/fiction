@@ -8,7 +8,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   pull_request:
@@ -18,7 +17,6 @@ on:
       - "**/*.cpp"
       - "**/*.cmake"
       - "**/CMakeLists.txt"
-      - "libs/**"
       - ".github/workflows/macos.yml"
       - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
   merge_group:
@@ -27,66 +25,48 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 defaults:
   run:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.0
+  Z3_VERSION: 4.13.4
 
 jobs:
   build_and_test:
+    permissions:
+      contents: read # required to check out the repository
+
     strategy:
       matrix:
-        os: [macos-13, macos-14, macos-15]
-        compiler: [g++-13, g++-14, clang++]
-        include:
-          - compiler: clang++
-            ccompiler: clang
-          - compiler: g++-13
-            ccompiler: gcc-13
-          - compiler: g++-14
-            ccompiler: gcc-14
-        exclude:
-          - os: macos-14
-            compiler: g++-13
-          - os: macos-14
-            compiler: g++-14
-          - os: macos-15
-            compiler: g++-13
-          - os: macos-15
-            compiler: g++-14
+        os: [macos-14, macos-15]
+        compiler: [clang++]
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          submodules: recursive
+          persist-credentials: false
 
       - name: Setup Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.14.x"
 
       - name: Install building tools
-        if: matrix.os != 'macos-13'
         run: brew install autoconf
 
       # Setup TBB for parallel STL algorithms via Homebrew
       - name: Setup TBB
         run: brew install tbb
 
-      - name: Setup XCode version
-        if: matrix.os == 'macos-13'
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: "^14.2"
-
       - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@v1.2
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.os}}-${{matrix.compiler}}"
           variant: ccache
@@ -95,67 +75,37 @@ jobs:
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@v1
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
           version: ${{env.Z3_VERSION}}
 
       # Build and test pipeline for Debug mode
-      - name: Create Build Environment (Debug)
-        run: cmake -E make_directory ${{github.workspace}}/build_debug
 
       - name: Configure CMake (Debug)
-        working-directory: ${{github.workspace}}/build_debug
+        env:
+          COMPILER: ${{ matrix.compiler }}
         run: >
-          cmake ${{github.workspace}}
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Debug
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
+          cmake -S . --preset ci-debug
+          -DCMAKE_CXX_COMPILER="$COMPILER"
 
       - name: Build (Debug)
-        working-directory: ${{github.workspace}}/build_debug
-        run: cmake --build . --config Debug -j4 # all macOS runners provide at least 3 cores
+        run: cmake --build --preset ci-debug --parallel 3
 
       - name: Test (Debug)
-        working-directory: ${{github.workspace}}/build_debug
-        run: ctest -C Debug --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-debug --verbose --repeat until-pass:3 --parallel 3
 
       # Build and test pipeline for Release mode
-      - name: Create Build Environment (Release)
-        run: cmake -E make_directory ${{github.workspace}}/build_release
 
       - name: Configure CMake (Release)
-        working-directory: ${{github.workspace}}/build_release
+        env:
+          COMPILER: ${{ matrix.compiler }}
         run: >
-          cmake ${{github.workspace}}
-          -DCMAKE_CXX_COMPILER=${{matrix.compiler}}
-          -DCMAKE_BUILD_TYPE=Release
-          -DFICTION_ENABLE_UNITY_BUILD=ON
-          -DFICTION_ENABLE_PCH=ON
-          ${{ !startsWith(matrix.compiler, 'g++-') && '-DFICTION_ENABLE_JEMALLOC=ON' || '' }}
-          -DFICTION_CLI=ON
-          -DFICTION_TEST=ON
-          -DFICTION_BENCHMARK=OFF
-          -DFICTION_EXPERIMENTS=ON
-          -DFICTION_Z3=ON
-          -DFICTION_ALGLIB=ON
-          -DFICTION_PROGRESS_BARS=OFF
-          -DFICTION_WARNINGS_AS_ERRORS=OFF
-          -DMOCKTURTLE_EXAMPLES=OFF
+          cmake -S . --preset ci-release
+          -DCMAKE_CXX_COMPILER="$COMPILER"
+          -DFICTION_ENABLE_JEMALLOC=ON
 
       - name: Build (Release)
-        working-directory: ${{github.workspace}}/build_release
-        run: cmake --build . --config Release -j4 # all macOS runners provide at least 3 cores
+        run: cmake --build --preset ci-release --parallel 3
 
       - name: Test (Release)
-        working-directory: ${{github.workspace}}/build_release
-        run: ctest -C Release --verbose --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-release --verbose --repeat until-pass:3 --parallel 3

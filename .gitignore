@@ -42,7 +42,13 @@
 
 # Build directories
 cmake-build-*
-build/
+build*
+docs/_build/
+docs/html/
+*/_dep/
+
+# Cache files
+.cache/
 
 # IDE files
 *.directory
@@ -51,6 +57,7 @@ build/
 
 # Experiment files
 *.json
+!CMakePresets.json
 *.csv
 
 # Coverage files
@@ -67,3 +74,6 @@ venv/
 *.tar.*
 *.7z
 *.rar
+
+# AI agent scratch files (plans, tech-debt notes, review write-ups) - never tracked
+.ai/

@@ -11,7 +11,7 @@
 #include "fiction/technology/sidb_nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl_utils.hpp"
-#include "utils/version_info.hpp"
+#include "fiction/utils/version_info.hpp"
 
 #include <fmt/chrono.h>
 #include <fmt/format.h>
@@ -92,6 +92,9 @@ inline constexpr const char* DIST_ENERGY =
         {typeid(uint64_t), [](const std::any& v) { return std::to_string(std::any_cast<uint64_t>(v)); }},
         {typeid(float), [](const std::any& v) { return std::to_string(std::any_cast<float>(v)); }},
         {typeid(double), [](const std::any& v) { return std::to_string(std::any_cast<double>(v)); }},
+        // `long double` isn't portable across platforms, but this map must round-trip whatever type was actually
+        // stored in the `std::any`, and callers are free to pass a `long double`.
+        // NOLINTNEXTLINE(google-runtime-float)
         {typeid(long double), [](const std::any& v) { return std::to_string(std::any_cast<long double>(v)); }},
         {typeid(std::string), [](const std::any& v) { return std::any_cast<std::string>(v); }},
         {typeid(const char*), [](const std::any& v) { return std::string(std::any_cast<const char*>(v)); }},
@@ -166,7 +169,7 @@ class write_sqd_sim_result_impl
         lyt.foreach_cell([&cells](const cell<Lyt>& c) { cells.push_back(c); });
 
         // sort the cells by their position using their respective operator<
-        std::sort(cells.begin(), cells.end());
+        std::ranges::sort(cells);
 
         return cells;
     }
@@ -195,17 +198,16 @@ class write_sqd_sim_result_impl
                           sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
         // additional simulation parameters
-        std::for_each(sim_result.additional_simulation_parameters.cbegin(),
-                      sim_result.additional_simulation_parameters.cend(),
-                      [this](const auto& p)
-                      {
-                          const auto& [name, value] = p;
+        std::ranges::for_each(sim_result.additional_simulation_parameters,
+                              [this](const auto& p)
+                              {
+                                  const auto& [name, value] = p;
 
-                          if (value.has_value())
-                          {
-                              os << fmt::format(siqad::ADD_SIM_PARAM, name, any_to_string(value), name);
-                          }
-                      });
+                                  if (value.has_value())
+                                  {
+                                      os << fmt::format(siqad::ADD_SIM_PARAM, name, any_to_string(value), name);
+                                  }
+                              });
 
         os << siqad::CLOSE_SIM_PARAMS;
     }
@@ -217,13 +219,13 @@ class write_sqd_sim_result_impl
     {
         os << siqad::OPEN_PHYSLOC;
 
-        std::for_each(ordered_cells.cbegin(), ordered_cells.cend(),
-                      [this](const auto& c)
-                      {
-                          const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(Lyt{}, c);
-                          os << fmt::format(siqad::DBDOT, nm_x * 10,
-                                            nm_y * 10);  // convert nm to Angstrom
-                      });
+        std::ranges::for_each(ordered_cells,
+                              [this](const auto& c)
+                              {
+                                  const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(Lyt{}, c);
+                                  os << fmt::format(siqad::DBDOT, nm_x * 10,
+                                                    nm_y * 10);  // convert nm to Angstrom
+                              });
 
         os << siqad::CLOSE_PHYSLOC;
     }
@@ -240,25 +242,25 @@ class write_sqd_sim_result_impl
         ordered_surface_pointers.reserve(sim_result.charge_distributions.size());
 
         // obtain pointers to all the surfaces
-        std::for_each(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend(),
-                      [&ordered_surface_pointers](const auto& surface)
-                      { ordered_surface_pointers.push_back(&surface); });
+        std::ranges::for_each(sim_result.charge_distributions, [&ordered_surface_pointers](const auto& surface)
+                              { ordered_surface_pointers.push_back(&surface); });
 
         // sort the surface references by their system energy
-        std::sort(ordered_surface_pointers.begin(), ordered_surface_pointers.end(), [](const auto& a, const auto& b)
-                  { return a->get_electrostatic_potential_energy() < b->get_electrostatic_potential_energy(); });
+        std::ranges::sort(
+            ordered_surface_pointers, [](const auto& a, const auto& b)
+            { return a->get_electrostatic_potential_energy() < b->get_electrostatic_potential_energy(); });
 
         // write the distributions to the output stream
-        std::for_each(
-            ordered_surface_pointers.cbegin(), ordered_surface_pointers.cend(),
+        std::ranges::for_each(
+            ordered_surface_pointers,
             [this](const auto& surface)
             {
                 // obtain the charges in the same order as the cells
                 std::vector<sidb_charge_state> ordered_charges{};
                 ordered_charges.reserve(ordered_cells.size());
 
-                std::for_each(ordered_cells.cbegin(), ordered_cells.cend(), [&ordered_charges, &surface](const auto& c)
-                              { ordered_charges.push_back(surface->get_charge_state(c)); });
+                std::ranges::for_each(ordered_cells, [&ordered_charges, &surface](const auto& c)
+                                      { ordered_charges.push_back(surface->get_charge_state(c)); });
 
                 os << fmt::format(
                     siqad::DIST_ENERGY,

@@ -260,15 +260,6 @@ If parallelism or execution policies are not available, this will expand to::
 .. doxygendefine:: FICTION_EXECUTION_POLICY_PAR_UNSEQ
 
 
-Ranges
-------
-
-**Header:** ``fiction/utils/range.hpp``
-
-.. doxygenstruct:: fiction::range_t
-   :members:
-
-
 Hashing
 -------
 

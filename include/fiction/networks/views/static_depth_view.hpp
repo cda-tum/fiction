@@ -12,6 +12,7 @@
 
 #include <cassert>
 #include <cstdint>
+#include <utility>
 
 #include <parallel_hashmap/phmap.h>
 
@@ -68,10 +69,7 @@ template <typename Ntk, typename NodeCostFn>
 class static_depth_view<Ntk, NodeCostFn, true> : public Ntk
 {
   public:
-    explicit static_depth_view(Ntk const& ntk, depth_view_params const& ps = {}) : Ntk(ntk)
-    {
-        (void)ps;
-    }
+    explicit static_depth_view(Ntk const& ntk, [[maybe_unused]] depth_view_params const& params = {}) : Ntk(ntk) {}
 };
 
 /**
@@ -94,13 +92,13 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * Initializes an empty `fiction::static_depth_view` object, sets up base class properties,
      * and ensures that the network type (Ntk) satisfies required interface methods.
      *
-     * @param cost_fn Optional cost function to compute node costs.
-     * @param ps Optional parameters for depth view construction
+     * @param node_cost_fn Optional cost function to compute node costs.
+     * @param params Optional parameters for depth view construction
      */
-    explicit static_depth_view(NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
+    explicit static_depth_view(NodeCostFn const& node_cost_fn = {}, depth_view_params const& params = {}) :
             Ntk(),
-            ps(ps),
-            cost_fn(cost_fn)
+            ps(params),
+            cost_fn(node_cost_fn)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -121,13 +119,14 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * interface methods.
      *
      * @param ntk The network on which to construct the depth view.
-     * @param cost_fn Optional function to compute node costs.
-     * @param ps Optional parameters for depth view construction.
+     * @param node_cost_fn Optional function to compute node costs.
+     * @param params Optional parameters for depth view construction.
      */
-    explicit static_depth_view(Ntk const& ntk, NodeCostFn const& cost_fn = {}, depth_view_params const& ps = {}) :
+    explicit static_depth_view(Ntk const& ntk, NodeCostFn const& node_cost_fn = {},
+                               depth_view_params const& params = {}) :
             Ntk(ntk),
-            ps(ps),
-            cost_fn(cost_fn)
+            ps(params),
+            cost_fn(node_cost_fn)
     {
         static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
         static_assert(mockturtle::has_size_v<Ntk>, "Ntk does not implement the size method");
@@ -148,7 +147,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      *
      * @param other The other `fiction::static_depth_view` object to be copied.
      */
-    static_depth_view(static_depth_view<Ntk, NodeCostFn, false> const& other) :
+    static_depth_view(static_depth_view const& other) :
             Ntk(other),
             ps(other.ps),
             levels(other.levels),
@@ -164,7 +163,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
      * @param other The source `fiction::static_depth_view` object whose contents are being copied.
      * @return A reference to the current object, enabling chain assignments.
      */
-    static_depth_view<Ntk, NodeCostFn, false>& operator=(static_depth_view<Ntk, NodeCostFn, false> const& other)
+    static_depth_view& operator=(static_depth_view const& other)
     {
         // Check for self-assignment
         if (this == &other)
@@ -188,6 +187,57 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
         crit_path = other.crit_path;
         ntk_depth = other.ntk_depth;
         cost_fn   = other.cost_fn;
+
+        // Return the current object
+        return *this;
+    }
+
+    /**
+     * Move constructor creates a new `fiction::static_depth_view` by moving the content of another
+     * `fiction::static_depth_view`.
+     *
+     * @param other The other `fiction::static_depth_view` object to be moved.
+     */
+    static_depth_view(static_depth_view&& other) noexcept :
+            Ntk(std::move(other)),
+            ps(other.ps),  // trivially copyable
+            levels(std::move(other.levels)),
+            crit_path(std::move(other.crit_path)),
+            ntk_depth(other.ntk_depth),
+            cost_fn(std::move(other.cost_fn))
+    {}
+
+    /**
+     * Move assignment operator for moving `fiction::static_depth_view` content of another
+     * `fiction::static_depth_view` object.
+     *
+     * @param other The source `fiction::static_depth_view` object whose contents are being moved.
+     * @return A reference to the current object, enabling chain assignments.
+     */
+    static_depth_view& operator=(static_depth_view&& other) noexcept
+    {
+        // Check for self-assignment
+        if (this == &other)
+        {
+            return *this;
+        }
+
+        // move the base class
+        this->_storage = std::move(other._storage);
+        this->_events  = std::move(other._events);
+
+        // move the virtual storage
+        if constexpr (has_is_virtual_pi_v<Ntk>)
+        {
+            this->v_storage = std::move(other.v_storage);
+        }
+
+        // move
+        ps        = other.ps;  // trivially copyable
+        levels    = std::move(other.levels);
+        crit_path = std::move(other.crit_path);
+        ntk_depth = other.ntk_depth;
+        cost_fn   = std::move(other.cost_fn);
 
         // Return the current object
         return *this;
@@ -233,7 +283,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
     /**
      * Set the depth of the network.
      */
-    void set_depth(uint32_t level)
+    void set_depth(const uint32_t level)
     {
         ntk_depth = level;
     }
@@ -268,7 +318,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                 auto clevel = levels[f];
                                 if (ps.count_complements && this->is_complemented(f))
                                 {
-                                    clevel++;
+                                    ++clevel;
                                 }
                                 level = std::max(level, clevel);
                             });
@@ -312,7 +362,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                 auto clevel = compute_levels(this->get_node(f));
                                 if (ps.count_complements && this->is_complemented(f))
                                 {
-                                    clevel++;
+                                    ++clevel;
                                 }
                                 level = std::max(level, clevel);
                             });
@@ -332,7 +382,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                 auto clevel = compute_levels(this->get_node(f));
                 if (ps.count_complements && this->is_complemented(f))
                 {
-                    clevel++;
+                    ++clevel;
                 }
                 ntk_depth = std::max(ntk_depth, clevel);
             });
@@ -345,7 +395,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                     auto clevel = compute_levels(this->get_node(f));
                     if (ps.count_complements && this->is_complemented(f))
                     {
-                        clevel++;
+                        ++clevel;
                     }
                     ntk_depth = std::max(ntk_depth, clevel);
                 });
@@ -391,7 +441,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
                                     auto       offset = cost_fn(*this, n);
                                     if (ps.count_complements && this->is_complemented(f))
                                     {
-                                        offset++;
+                                        ++offset;
                                     }
                                     if (levels[cn] + offset == lvl && !crit_path[cn])
                                     {

@@ -35,6 +35,7 @@
 #include <iterator>
 #include <limits>
 #include <memory>
+#include <ranges>
 #include <utility>
 #include <vector>
 
@@ -620,7 +621,7 @@ struct sidb_cluster_charge_state
                               const uint64_t total_num_sidbs) noexcept :
             neg_count{static_cast<decltype(neg_count)>(cs == sidb_charge_state::NEGATIVE)},
             pos_count{static_cast<decltype(pos_count)>(cs == sidb_charge_state::POSITIVE)},
-            compositions{{{{singleton, static_cast<uint64_t>(*this)}}}}
+            compositions{{.proj_states = {{.cluster = singleton, .multiset_conf = static_cast<uint64_t>(*this)}}}}
     {
         compositions.front().pot_bounds.initialize_complete_potential_bounds(total_num_sidbs);
         compositions.front().pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
@@ -897,13 +898,12 @@ struct potential_projection_order
 
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
+            return *std::ranges::find_if(order, [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
-            return *std::find_if(order.crbegin(), order.crend(),
-                                 [&](const potential_projection& pp) { return pp.multiset != bound_m; });
+            return *std::ranges::find_if(order | std::views::reverse,
+                                         [&](const potential_projection& pp) { return pp.multiset != bound_m; });
         }
     }
     /**
@@ -921,8 +921,7 @@ struct potential_projection_order
     {
         if constexpr (bound == bound_direction::LOWER)
         {
-            return *std::find_if(order.cbegin(), order.cend(),
-                                 [&](const potential_projection& pp) { return pp.multiset == m_conf; });
+            return *std::ranges::find_if(order, [&](const potential_projection& pp) { return pp.multiset == m_conf; });
         }
         else if constexpr (bound == bound_direction::UPPER)
         {
@@ -1155,7 +1154,7 @@ struct sidb_cluster
  * @param pst Projector state of which the corresponding compositions are requested.
  * @return The compositions associated with the multiset charge configuration of the projecting cluster.
  */
-[[nodiscard]] static const std::vector<sidb_charge_space_composition>&
+[[nodiscard]] inline const std::vector<sidb_charge_space_composition>&
 get_projector_state_compositions(const sidb_cluster_projector_state& pst) noexcept
 {
     return std::ref(pst.cluster->charge_space.find(sidb_cluster_charge_state{pst.multiset_conf})->compositions);
@@ -1219,17 +1218,16 @@ to_unique_sidb_cluster(const uint64_t total_sidbs, const sidb_binary_cluster_hie
  * @param n A node from a binary cluster hierarchy, as for instance returned by parsing ALGLIB's result.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-[[nodiscard]] static sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
+[[nodiscard]] inline sidb_cluster_ptr to_sidb_cluster(const sidb_binary_cluster_hierarchy_node& n) noexcept
 {
-    uint64_t uid = n.c.size();
 
-    if (uid != 1)
+    if (uint64_t uid = n.c.size(); uid != 1)
     {
         return to_unique_sidb_cluster(n.c.size(), n, uid);
     }
 
     // to avoid weird shared pointer deallocation behaviour, give a parent to a singleton cluster hierarchy
-    sidb_cluster_ptr parent =
+    auto parent =
         std::make_shared<sidb_cluster>(std::vector{*n.c.cbegin()}, std::vector<uint64_t>{},
                                        sidb_clustering{std::make_shared<sidb_cluster>(
                                            std::vector{*n.c.cbegin()}, std::vector<uint64_t>{}, sidb_clustering{}, 0)},

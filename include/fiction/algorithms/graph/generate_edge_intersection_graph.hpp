@@ -16,6 +16,7 @@
 #include <phmap.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <vector>
@@ -95,44 +96,45 @@ class generate_edge_intersection_graph_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        std::for_each(objectives.cbegin(), objectives.cend(),
-                      [this](const auto& obj)
-                      {
-                          path_collection<clk_path> obj_paths{};
+        std::ranges::for_each(objectives,
+                              [this](const auto& obj)
+                              {
+                                  path_collection<clk_path> obj_paths{};
 
-                          if (!ps.path_limit.has_value())
-                          {
-                              // enumerate all paths for the current objective
-                              obj_paths = enumerate_all_paths<clk_path>(obstruction_layout{layout},
-                                                                        {obj.source, obj.target}, {ps.crossings});
-                          }
-                          else
-                          {
-                              // enumerate k paths for the current objective
-                              obj_paths = yen_k_shortest_paths<clk_path>(
-                                  obstruction_layout{layout}, {obj.source, obj.target}, *ps.path_limit, {ps.crossings});
-                          }
+                                  if (!ps.path_limit.has_value())
+                                  {
+                                      // enumerate all paths for the current objective
+                                      obj_paths = enumerate_all_paths<clk_path>(
+                                          obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
+                                  }
+                                  else
+                                  {
+                                      // enumerate k paths for the current objective
+                                      obj_paths = yen_k_shortest_paths<clk_path>(obstruction_layout{layout},
+                                                                                 {obj.source, obj.target},
+                                                                                 *ps.path_limit, {ps.crossings});
+                                  }
 
-                          // assign a unique label to each path and create a corresponding node in the graph
-                          initiate_objective_nodes(obj_paths);
+                                  // assign a unique label to each path and create a corresponding node in the graph
+                                  initiate_objective_nodes(obj_paths);
 
-                          // if there are no paths, the objective could not be fulfilled
-                          if (obj_paths.empty())
-                          {
-                              pst.number_of_unroutable_objectives++;
-                          }
-                          else if (obj_paths.size() > 1)
-                          {
-                              // since all paths of the same objective have intersections by definition, create
-                              // edges between all of them by iterating over all possible combinations of size 2
-                              connect_clique(obj_paths);
-                          }
-                          // for each previously stored path, create an edge if there is an intersection
-                          create_intersection_edges(obj_paths);
+                                  // if there are no paths, the objective could not be fulfilled
+                                  if (obj_paths.empty())
+                                  {
+                                      pst.number_of_unroutable_objectives++;
+                                  }
+                                  else if (obj_paths.size() > 1)
+                                  {
+                                      // since all paths of the same objective have intersections by definition, create
+                                      // edges between all of them by iterating over all possible combinations of size 2
+                                      connect_clique(obj_paths);
+                                  }
+                                  // for each previously stored path, create an edge if there is an intersection
+                                  create_intersection_edges(obj_paths);
 
-                          // add the collection to all paths gathered thus far
-                          all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
-                      });
+                                  // add the collection to all paths gathered thus far
+                                  all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
+                              });
 
         // store size of the generated graph
         pst.num_vertices = graph.size_vertices();
@@ -205,8 +207,8 @@ class generate_edge_intersection_graph_impl
             }
 
             // else, check if any of the remaining coordinates occur in the stored path
-            return std::any_of(std::cbegin(other) + 1, std::cend(other) - 1,
-                               [this](const auto& c) { return path_elements.count(c) > 0; });
+            return std::ranges::any_of(std::cbegin(other) + 1, std::cend(other) - 1,
+                                       [this](const auto& c) { return path_elements.count(c) > 0; });
         }
         /**
          * Like has_intersection_with but allows paths to share crossings, i.e., single-tile intersections.
@@ -274,13 +276,13 @@ class generate_edge_intersection_graph_impl
     {
         std::vector<std::size_t> clique{};
 
-        std::for_each(objective_paths.begin(), objective_paths.end(),
-                      [this, &clique](auto& p)
-                      {
-                          p.label = node_id++;
-                          graph.insert_vertex(p.label, p);
-                          clique.push_back(p.label);
-                      });
+        std::ranges::for_each(objective_paths,
+                              [this, &clique](auto& p)
+                              {
+                                  p.label = node_id++;
+                                  graph.insert_vertex(p.label, p);
+                                  clique.push_back(p.label);
+                              });
 
         if (!clique.empty())
         {
@@ -312,19 +314,20 @@ class generate_edge_intersection_graph_impl
      */
     void create_intersection_edges(path_collection<clk_path>& objective_paths) noexcept
     {
-        std::for_each(objective_paths.cbegin(), objective_paths.cend(),
-                      [this](const auto& obj_p)
-                      {
-                          std::for_each(all_paths.cbegin(), all_paths.cend(),
-                                        [this, &obj_p](const auto& stored_p)
-                                        {
-                                            if (ps.crossings ? obj_p.has_overlap_with(stored_p) :
-                                                               obj_p.has_intersection_with(stored_p))
-                                            {
-                                                graph.insert_edge(obj_p.label, stored_p.label, edge_id++);
-                                            }
-                                        });
-                      });
+        std::ranges::for_each(objective_paths,
+                              [this](const auto& obj_p)
+                              {
+                                  std::ranges::for_each(all_paths,
+                                                        [this, &obj_p](const auto& stored_p)
+                                                        {
+                                                            if (ps.crossings ? obj_p.has_overlap_with(stored_p) :
+                                                                               obj_p.has_intersection_with(stored_p))
+                                                            {
+                                                                graph.insert_edge(obj_p.label, stored_p.label,
+                                                                                  edge_id++);
+                                                            }
+                                                        });
+                              });
     }
 };
 

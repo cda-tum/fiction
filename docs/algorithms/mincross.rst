@@ -19,7 +19,7 @@ based on the median positions of their fanin and fanout connections.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``include/fiction/algorithms/graph/mincross.hpp``
+        **Header:** ``fiction/algorithms/graph/mincross.hpp``
 
         .. doxygenstruct:: fiction::mincross_params
            :members:

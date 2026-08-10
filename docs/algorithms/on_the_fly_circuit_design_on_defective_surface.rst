@@ -24,7 +24,7 @@ This algorithm is designed to create SiDB circuits on a clocked surface, accommo
 This iterative approach ensures that the designed SiDB circuits can effectively handle defects present on the surface.
 
 
-**Header:** ``fiction/algorithms/physical_design/on_the_fly_circuit_design.hpp``
+**Header:** ``fiction/algorithms/physical_design/on_the_fly_sidb_circuit_design.hpp``
 
 .. doxygenstruct:: fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params
    :members:
