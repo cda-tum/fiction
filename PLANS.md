@@ -55,6 +55,7 @@ because its mergeability check cannot run.
 The latest fetched `upstream/main` is `b02d4104`, which merged C++20 modernization changes in SiDB simulation code.
 
 **Plan**
+
 - [x] Merge current `upstream/main` into `molQCA_lib` and resolve conflicts.
 - [x] Address non-outdated actionable review feedback:
   - `include/fiction/io/write_svg_layout.hpp`: fix the MolQCA SVG cell-type scope issue.
@@ -83,15 +84,18 @@ prek run -a
 ```
 
 **Decisions**
+
 - Use only `cmake -S . -B build` and `cmake --build build -j 4` for local build validation.
 - Treat `ctest` reporting no tests in the default `build` configuration as a validation limitation, not as test
   coverage.
 
 **Open Questions**
+
 - Whether the code-scanning "poorly documented large function" warning should be fixed by splitting the function or by
   adding focused comments depends on the current test structure after merging `main`.
 
 **Progress Log**
+
 - 2026-08-10: Merged `main` once, fixed `write_qll_layout.hpp`, pushed merge commit `b54cce81`.
 - 2026-08-10: Added repository exec-plan guidance in `PLANS.md` and pushed `e2a9e245`.
 - 2026-08-10: Fetched current PR status: PR is still conflicting because `upstream/main` advanced to `b02d4104`.
@@ -116,6 +120,7 @@ List the files, modules, or workflows expected to change. Also list explicit non
 Summarize what is already known: branch, PR, failing checks, conflicts, relevant commits, and any local constraints.
 
 **Plan**
+
 - [ ] Step with a concrete edit, investigation, or validation target.
 - [ ] Step with a concrete edit, investigation, or validation target.
 - [ ] Step with a concrete edit, investigation, or validation target.
@@ -142,6 +147,7 @@ Record meaningful technical choices and why they were made.
 List missing information that blocks or meaningfully changes the plan.
 
 **Progress Log**
+
 - YYYY-MM-DD: Short factual entry.
 ````
 
