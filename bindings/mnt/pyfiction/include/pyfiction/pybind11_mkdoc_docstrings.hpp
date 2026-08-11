@@ -1065,8 +1065,8 @@ wire.
 
 Parameter ``t``:
     Type of BDL pair to search for
-    (`sidb_technology::INPUT`,
-    `sidb_technology::OUTPUT`, etc.).
+    (`sidb_technology::cell_type::INPUT`,
+    `sidb_technology::cell_type::OUTPUT`, etc.).
 
 Returns:
     Optional containing the first BDL pair with the specified type
@@ -16874,7 +16874,9 @@ static const char *__doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"do
 static const char *__doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
 static const char *__doc_fiction_molecular_qca_library =
-R"doc(This MolQCA gate library corresponds to the physically simulated
+R"doc(SIM(7)-MolPDK molecular QCA gate library.
+
+This MolQCA gate library corresponds to the physically simulated
 standard-cell library SIM(7)-MolPDK, introduced in \"Bridging the Gap
 Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
 Physically Simulated Standard-Cell Library\" by B. Hien, D. Quinci, Y.
@@ -16887,7 +16889,7 @@ More information and the open-source implementation are available at
 https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_determine_port_routing =
-R"doc(Determines the 10x10 molQCA connector positions used by the gate tile
+R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
 at `t`.
 
 Connector coordinates are placed at the center of the respective tile
@@ -16907,10 +16909,12 @@ Parameter ``t``:
 Returns:
     Incoming and outgoing molQCA connector positions for `t`.)doc";
 
-static const char *__doc_fiction_molecular_qca_library_molecular_qca_library = R"doc()doc";
+static const char *__doc_fiction_molecular_qca_library_molecular_qca_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
 static const char *__doc_fiction_molecular_qca_library_set_up_gate =
-R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
+
+Overrides the corresponding function in fcn_gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to choose the correct fcn_gate representation for
 that tile. May it be a gate or wires. Rotation and special marks like
@@ -19080,8 +19084,7 @@ schemes. Tiles in QCA ONE are :math:`5 \times 5` QCA cells.)doc";
 static const char *__doc_fiction_qca_one_library_determine_port_routing = R"doc()doc";
 
 static const char *__doc_fiction_qca_one_library_post_layout_optimization =
-R"doc(Post-layout optimization that assigns the via cell mode to wire
-crossings.
+R"doc(Post-layout optimization that assigns via cell mode to wire crossings.
 
 Template parameter ``CellLyt``:
     Cell-level layout type.
