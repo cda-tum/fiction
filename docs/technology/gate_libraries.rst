@@ -42,6 +42,17 @@ QCA ONE Library
    :members:
 
 
+.. _molQCA:
+
+Molecular QCA Library
+---------------------
+
+**Header:** ``fiction/technology/molecular_qca_library.hpp``
+
+.. doxygenclass:: fiction::molecular_qca_library
+   :members:
+
+
 iNML ToPoliNano Library
 -----------------------
 

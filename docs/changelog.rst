@@ -8,6 +8,11 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Added the ``molecular_qca_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK molecular QCA
+  standard-cell library to gate-level layouts, including QLL/SVG export support and C++ tests.
+
 Changed
 #######
 - Completed the incremental C++20 modernization for the operational domain module

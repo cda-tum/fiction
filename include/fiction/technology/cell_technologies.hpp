@@ -311,6 +311,7 @@ struct mol_qca_technology
     {
         return m == cell_mode::CROSSOVER;
     }
+
     /**
      * Default width of a molQCA cell.
      */
@@ -449,6 +450,7 @@ struct inml_technology
     {
         return true;
     }
+
     /**
      * Default width of a iNML cell in NMLSim.
      */
@@ -547,6 +549,7 @@ struct sidb_technology
     {
         return true;
     }
+
     /**
      * Default width of a SiDB in SiQAD (https://github.com/siqad/siqad).
      * Dots are considered to be 0-dimensional entities for simulation purposes.

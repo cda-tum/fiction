@@ -20,6 +20,8 @@ namespace fiction
 {
 
 /**
+ * @brief SIM(7)-MolPDK molecular QCA gate library.
+ *
  * This MolQCA gate library corresponds to the physically simulated standard-cell library SIM(7)-MolPDK, introduced
  * in \"Bridging the Gap Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A Physically Simulated
  * Standard-Cell Library\" by B. Hien, D. Quinci, Y. Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published
@@ -32,8 +34,13 @@ namespace fiction
 class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10>
 {
   public:
+    /**
+     * Deleted constructor to prevent instantiation.
+     */
     explicit molecular_qca_library() = delete;
     /**
+     * @brief Maps a gate-level tile to its MolQCA standard-cell implementation.
+     *
      * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
@@ -106,7 +113,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
 
   private:
     /**
-     * Determines the 10x10 molQCA connector positions used by the gate tile at `t`.
+     * @brief Determines the 10x10 MolQCA connector positions used by the gate tile at `t`.
      *
      * Connector coordinates are placed at the center of the respective tile borders: north `(4, 0)`, east `(9, 4)`,
      * south `(5, 9)`, and west `(0, 5)`. Primary inputs and outputs without explicit incoming or outgoing signals are
