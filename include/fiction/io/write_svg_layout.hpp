@@ -465,10 +465,10 @@ inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
  * MolQCA glyph templates draw the visible 10x10 cell body at these SVG-local coordinates. Keep the layout translation
  * offsets derived from those anchors so glyph-origin changes do not leave unexplained magic numbers behind.
  */
-inline constexpr const double MOL_QCA_GLYPH_ANCHOR_X          = 92.93404;
-inline constexpr const double MOL_QCA_GLYPH_ANCHOR_Y          = 56.46016;
-inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_X  = STARTING_OFFSET_CELL_X + MOL_QCA_GLYPH_ANCHOR_X;
-inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_Y  = STARTING_OFFSET_CELL_Y + MOL_QCA_GLYPH_ANCHOR_Y;
+inline constexpr const double MOL_QCA_GLYPH_ANCHOR_X         = 92.93404;
+inline constexpr const double MOL_QCA_GLYPH_ANCHOR_Y         = 56.46016;
+inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_X = STARTING_OFFSET_CELL_X + MOL_QCA_GLYPH_ANCHOR_X;
+inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_Y = STARTING_OFFSET_CELL_Y + MOL_QCA_GLYPH_ANCHOR_Y;
 
 inline constexpr const char* MOL_QCA_VIA = "<g\n"
                                            "    style=\"fill:#{0};\"\n"
