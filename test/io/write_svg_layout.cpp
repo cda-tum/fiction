@@ -636,5 +636,6 @@ TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-s
     std::ostringstream                layout_stream{};
     const write_qca_layout_svg_params params{.simple = true};
 
-    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream, params), unsupported_cell_type_exception);
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream, params),
+                    unsupported_cell_type_exception<coordinate<mol_qca_cell_clk_lyt>>);
 }
