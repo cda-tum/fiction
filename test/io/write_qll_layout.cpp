@@ -71,12 +71,12 @@ TEST_CASE("Abort on non-pin iNML layouts", "[qll]")
     inml_cell_clk_lyt layout{{4, 4}, "Non-pin layout"};
 
     // add two normal cells to span a bounding boy
-    layout.assign_cell_type({0, 0}, fiction::inml_technology::NORMAL);
-    layout.assign_cell_type({4, 4}, fiction::inml_technology::NORMAL);
+    layout.assign_cell_type({0, 0}, fiction::inml_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 4}, fiction::inml_technology::cell_type::NORMAL);
 
     // add I/O cells inside the bounding box such that they are not located at the borders
-    layout.assign_cell_type({1, 1}, fiction::inml_technology::INPUT);
-    layout.assign_cell_type({2, 2}, fiction::inml_technology::OUTPUT);
+    layout.assign_cell_type({1, 1}, fiction::inml_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 2}, fiction::inml_technology::cell_type::OUTPUT);
 
     // this layout should throw an exception
     CHECK_THROWS_AS(write_qll_layout(layout, layout_stream), std::invalid_argument);
