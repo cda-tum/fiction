@@ -16900,6 +16900,10 @@ signals are assigned to the west and east borders, respectively.
 Template parameter ``Lyt``:
     Gate-level layout type.
 
+Template parameter ``RespectClocking``:
+    Whether to respect the layout clocking while tracing incoming and
+    outgoing signals.
+
 Parameter ``lyt``:
     Layout that hosts tile `t`.
 
