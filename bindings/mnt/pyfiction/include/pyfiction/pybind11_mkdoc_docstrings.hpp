@@ -16911,6 +16911,24 @@ Returns:
 
 static const char *__doc_fiction_molecular_qca_library_molecular_qca_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
+static const char *__doc_fiction_molecular_qca_library_set_up_1_to_3_fanout =
+R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
+tile.
+
+1-to-3 fan-outs always drive all three non-input sides. Their
+orientation is therefore determined by the single incoming connector
+side alone.
+
+Parameter ``p``:
+    Incoming and outgoing connector positions for the fan-out tile.
+
+Returns:
+    1-to-3 fan-out gate matching `p`'s incoming connector.
+
+Throws:
+    std::out_of_range If `p` does not describe a supported 1-to-3 fan-
+    out orientation.)doc";
+
 static const char *__doc_fiction_molecular_qca_library_set_up_gate =
 R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
 
