@@ -729,14 +729,12 @@ TEST_CASE("Reject unsupported MolQCA SVG cell types", "[write-mol-qca-layout-svg
 
     std::ostringstream layout_stream{};
 
-    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream),
-                    unsupported_cell_type_exception<offset::ucoord_t>);
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream), unsupported_cell_type_exception<offset::ucoord_t>);
 }
 
 TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]")
 {
     const mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA SVG"};
 
-    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"),
-                    std::ofstream::failure);
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"), std::ofstream::failure);
 }
