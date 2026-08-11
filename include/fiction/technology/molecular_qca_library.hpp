@@ -158,8 +158,20 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
             p.out.emplace(0u, 5u);
         }
 
+        bool is_wire_or_inverter = false;
+
+        const auto n = lyt.get_node(t);
+        if constexpr (fiction::has_is_buf_v<Lyt>)
+        {
+            is_wire_or_inverter = is_wire_or_inverter || lyt.is_buf(n);
+        }
+        if constexpr (fiction::has_is_inv_v<Lyt>)
+        {
+            is_wire_or_inverter = is_wire_or_inverter || lyt.is_inv(n);
+        }
+
         // fallback for tiles with no connectors (e.g., primary inputs/outputs on one side)
-        if (const auto n = lyt.get_node(t); !lyt.is_wire(n) && !lyt.is_inv(n))
+        if (!is_wire_or_inverter)
         {
             if (lyt.has_no_incoming_signal(t))
             {
@@ -587,11 +599,14 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         // identity orientation
         {{{port_position(4, 0)}, {port_position(9, 4), port_position(5, 9), port_position(0, 5)}}, FAN_OUT_1_3},
         // rotated 90°
-        {{{port_position(9, 4)}, {port_position(5, 9), port_position(0, 5), port_position(4, 0)}}, FAN_OUT_1_3},
+        {{{port_position(9, 4)}, {port_position(5, 9), port_position(0, 5), port_position(4, 0)}},
+         rotate_90(FAN_OUT_1_3)},
         // rotated 180°
-        {{{port_position(5, 9)}, {port_position(0, 5), port_position(4, 0), port_position(9, 4)}}, FAN_OUT_1_3},
+        {{{port_position(5, 9)}, {port_position(0, 5), port_position(4, 0), port_position(9, 4)}},
+         rotate_180(FAN_OUT_1_3)},
         // rotated 270°
-        {{{port_position(0, 5)}, {port_position(4, 0), port_position(9, 4), port_position(5, 9)}}, FAN_OUT_1_3},
+        {{{port_position(0, 5)}, {port_position(4, 0), port_position(9, 4), port_position(5, 9)}},
+         rotate_270(FAN_OUT_1_3)},
     };
 
     /**

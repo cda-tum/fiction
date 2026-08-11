@@ -382,29 +382,29 @@ class write_qll_layout_impl
                     {
                         const auto mode = lyt.get_cell_mode(c);
 
-                        const auto phase = mol_qca_technology::cell_clock_number(type);
-
                         // write normal cell
                         if (mol_qca_technology::is_normal_cell(type))
                         {
+                            const auto phase = mol_qca_technology::cell_clock_number(type);
+
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
                             os << qll::CLOSE_LAYOUT_ITEM;
+
+                            // write via cell
+                            if (mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
+                            {
+                                os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                                  (c.z * 2) + 1);
+                                os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
+                                os << qll::CLOSE_LAYOUT_ITEM;
+                            }
                         }
                         // constant cells are handled as input pins
                         else if (mol_qca_technology::is_constant_cell(type))
                         {
                             const auto const_name = mol_qca_technology::is_const_0_cell(type) ? "const0" : "const1";
                             os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
-                        }
-
-                        // write via cell
-                        if (mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
-                        {
-                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
-                                              (c.z * 2) + 1);
-                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
-                            os << qll::CLOSE_LAYOUT_ITEM;
                         }
                     }
                 }

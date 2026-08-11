@@ -1224,11 +1224,7 @@ class write_mol_qca_layout_svg_impl
         {
             cell_color = cell_colors.at(Lyt::technology::cell_clock_number(ct));
 
-            if (ps.simple)
-            {
-                cell_description = svg::MOL_QCA_SIMPLE_CELL;
-            }
-            else if (c.z != 0 && Lyt::technology::is_vertical_cell_mode(lyt.get_cell_mode(c)))
+            if (c.z != 0 && Lyt::technology::is_vertical_cell_mode(lyt.get_cell_mode(c)))
             {
                 cell_description = svg::MOL_QCA_VIA;
             }
@@ -1241,6 +1237,10 @@ class write_mol_qca_layout_svg_impl
             else if (c.z != 0)
             {
                 // skip non-ground layer cells
+            }
+            else if (ps.simple)
+            {
+                cell_description = svg::MOL_QCA_SIMPLE_CELL;
             }
             else
             {

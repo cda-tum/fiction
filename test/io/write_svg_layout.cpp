@@ -625,4 +625,16 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
             REQUIRE(normalized_generated_svg == normalized_expected_svg);
         }
     }
-};
+}
+
+TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-svg]")
+{
+    mol_qca_cell_clk_lyt layout{{0, 0, 1}, "unsupported molQCA crossing"};
+    layout.assign_cell_type({0, 0, 0}, mol_qca_technology::cell_type::NORMAL1);
+    layout.assign_cell_type({0, 0, 1}, mol_qca_technology::cell_type::NORMAL2);
+
+    std::ostringstream layout_stream{};
+    const write_qca_layout_svg_params params{.simple = true};
+
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream, params), unsupported_cell_type_exception);
+}
