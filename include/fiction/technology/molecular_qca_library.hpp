@@ -62,11 +62,13 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {
             if constexpr (fiction::has_is_fanout_v<GateLyt>)
             {
-                if (lyt.is_fanout(n))
+                const auto fanout_size = lyt.template fanout_size<false>(n);
+
+                if (fanout_size > 1u)
                 {
                     p = determine_port_routing<GateLyt, false>(lyt, t);
 
-                    if (p.out.size() == 3u)
+                    if (fanout_size == 3u)
                     {
                         return set_up_1_to_3_fanout(p);
                     }
