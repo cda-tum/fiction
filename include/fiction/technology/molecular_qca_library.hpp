@@ -66,7 +66,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
                 {
                     p = determine_port_routing<GateLyt, false>(lyt, t);
 
-                    if (lyt.fanout_size(n) == 3)
+                    if (p.out.size() == 3u)
                     {
                         return set_up_1_to_3_fanout(p);
                     }
@@ -206,40 +206,43 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
     /**
      * @brief Selects the MolQCA 1-to-3 fan-out implementation for a routed gate tile.
      *
-     * 1-to-3 fan-outs always drive all three non-input sides. Their orientation is therefore determined by the single
-     * incoming connector side alone.
+     * 1-to-3 fan-outs always drive all three non-input sides. Their orientation is therefore determined by the missing
+     * outgoing connector side, which is the incoming side of the physical fan-out cell.
      *
      * @param p Incoming and outgoing connector positions for the fan-out tile.
-     * @return 1-to-3 fan-out gate matching `p`'s incoming connector.
+     * @return 1-to-3 fan-out gate matching `p`'s missing outgoing connector.
      * @throws std::out_of_range If `p` does not describe a supported 1-to-3 fan-out orientation.
      */
     [[nodiscard]] static fcn_gate set_up_1_to_3_fanout(const port_list<port_position>& p)
     {
-        if (p.inp.size() != 1u || p.out.size() != 3u)
+        if (p.out.size() != 3u)
         {
             throw std::out_of_range{"unsupported MolQCA 1-to-3 fan-out port count"};
         }
 
-        const auto input_port = *p.inp.begin();
+        const auto north = port_position(4u, 0u);
+        const auto east  = port_position(9u, 4u);
+        const auto south = port_position(5u, 9u);
+        const auto west  = port_position(0u, 5u);
 
-        if (input_port == port_position(4u, 0u))
+        if (!p.out.contains(north))
         {
             return FAN_OUT_1_3;
         }
-        if (input_port == port_position(9u, 4u))
+        if (!p.out.contains(east))
         {
             return rotate_90(FAN_OUT_1_3);
         }
-        if (input_port == port_position(5u, 9u))
+        if (!p.out.contains(south))
         {
             return rotate_180(FAN_OUT_1_3);
         }
-        if (input_port == port_position(0u, 5u))
+        if (!p.out.contains(west))
         {
             return rotate_270(FAN_OUT_1_3);
         }
 
-        throw std::out_of_range{"unsupported MolQCA 1-to-3 fan-out input port"};
+        throw std::out_of_range{"unsupported MolQCA 1-to-3 fan-out output ports"};
     }
 
     // clang-format off
