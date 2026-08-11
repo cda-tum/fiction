@@ -16920,14 +16920,14 @@ R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
 tile.
 
 1-to-3 fan-outs always drive all three non-input sides. Their
-orientation is therefore determined by the single incoming connector
-side alone.
+orientation is therefore determined by the missing outgoing connector
+side, which is the incoming side of the physical fan-out cell.
 
 Parameter ``p``:
     Incoming and outgoing connector positions for the fan-out tile.
 
 Returns:
-    1-to-3 fan-out gate matching `p`'s incoming connector.
+    1-to-3 fan-out gate matching `p`'s missing outgoing connector.
 
 Throws:
     std::out_of_range If `p` does not describe a supported 1-to-3 fan-
