@@ -62,17 +62,11 @@ You are an expert software architect and engineer specializing in **C++20**, **P
 
 Use these commands to validate your work.
 
-### Planning
-
-- Use `PLANS.md` for long-running, interruption-prone, or PR-streamlining work.
-- Keep active plans current: update scope, next steps, validation results, blockers, and decisions as the work changes.
-- Prefer direct implementation without an exec plan for small, single-pass fixes.
-
 ### C++ (Primary)
 
-- **Configure**: `cmake -S . -B build`
-- **Build**: `cmake --build build -j 4`
-- **Test**: `ctest --test-dir build --output-on-failure -j 4`
+- **Configure**: `cmake -S . --preset dev-full` (see `cmake --list-presets` for `tests-slim`/`tests-full`/`pyfiction`/etc.)
+- **Build**: `cmake --build --preset dev-full -j`
+- **Test**: `ctest --preset dev-full --output-on-failure`
 - **Format**: `prek run clang-format --all-files` (or let prek handle it)
 
 ### Python (Bindings)
