@@ -153,7 +153,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
     SECTION("one cell")
     {
         TestType lyt{};
-        lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -166,9 +166,9 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
     SECTION("three cells as input, switched correct order")
     {
         TestType lyt{};
-        lyt.assign_cell_type({0, 1, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 0, 1}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 8, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({10, 0, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({5, 8, 0}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -181,8 +181,8 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
     SECTION("two cells as input, on the same height in y-direction")
     {
         TestType lyt{};
-        lyt.assign_cell_type({-3, 0, 1}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0, 1}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({-3, 0, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({3, 0, 1}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -195,10 +195,10 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
     SECTION("four cells as input, three on the same dimer")
     {
         TestType lyt{};
-        lyt.assign_cell_type({3, 0, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 3, 1}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 3, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 3, 1}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({0, 3, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({5, 3, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({10, 3, 1}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -211,10 +211,10 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
     SECTION("four cells as input, two on the same dimer")
     {
         TestType lyt{};
-        lyt.assign_cell_type({0, 0, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 0, 1}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({-2, 4, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 4, 1}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({1, 0, 1}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({-2, 4, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 4, 1}, TestType::technology::NORMAL);
 
         const bounding_box_2d bb{lyt};
         const auto            nw = bb.get_min();
@@ -243,7 +243,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
     SECTION("one cell and one defect")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
 
         const bounding_box_2d bb{lyt};
@@ -257,8 +257,8 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
     SECTION("two cell and two defect")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({-2, 0, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({-2, 0, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0, 1}, sidb_defect{});
 
@@ -288,7 +288,7 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
     SECTION("one cell and one defect")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
 
         const bounding_box_2d bb{lyt};
@@ -302,8 +302,8 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
     SECTION("two cell and two defect")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({3, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
@@ -334,7 +334,7 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
     SECTION("one cell and one defect")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
         const bounding_box_2d bb{lyt};
@@ -348,8 +348,8 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
     SECTION("two cell and two defect, include defects")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
@@ -364,8 +364,8 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
     SECTION("two cell and two defect, exclude defects")
     {
         sidb_defect_surface<TestType> lyt{TestType{}};
-        lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 0}, TestType::technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 0}, TestType::technology::NORMAL);
+        lyt.assign_cell_type({2, 0}, TestType::technology::NORMAL);
         lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 

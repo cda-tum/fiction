@@ -1065,8 +1065,8 @@ wire.
 
 Parameter ``t``:
     Type of BDL pair to search for
-    (`sidb_technology::cell_type::INPUT`,
-    `sidb_technology::cell_type::OUTPUT`, etc.).
+    (`sidb_technology::INPUT`,
+    `sidb_technology::OUTPUT`, etc.).
 
 Returns:
     Optional containing the first BDL pair with the specified type

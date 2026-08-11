@@ -605,7 +605,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         for (const auto& l_cells : logic_cells)
         {
-            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb_technology::cell_type::LOGIC);
+            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb_technology::LOGIC);
         }
 
         const auto status =
@@ -760,25 +760,34 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {
             for (std::size_t j = 0; j < gate_x_size(); ++j)
             {
-                const auto cell_char = cell_list.at(i).at(j);
-                const auto cell_type = static_cast<typename Lyt::technology::cell_type>(cell_char);
+                const auto cell = cell_list.at(i).at(j);
 
-                switch (cell_type)
+                switch (cell)
                 {
-                    case Lyt::technology::cell_type::NORMAL:
+                    case 'x':  // normal cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::NORMAL);
                         break;
-                    case Lyt::technology::cell_type::INPUT:
+                    }
+                    case 'i':  // input cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::INPUT);
                         break;
-                    case Lyt::technology::cell_type::OUTPUT:
+                    }
+                    case 'o':  // output cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::OUTPUT);
                         break;
-                    case Lyt::technology::cell_type::LOGIC:
+                    }
+                    case 'l':  // output cell
+                    {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::LOGIC);
                         break;
-                    case Lyt::technology::cell_type::EMPTY:
-                    default: break;
+                    }
+                    case ' ':
+                    {
+                        break;
+                    }
                 }
                 counter += 1;
             }
