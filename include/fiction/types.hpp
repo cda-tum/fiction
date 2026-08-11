@@ -22,7 +22,6 @@
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
-#include <mockturtle/io/write_dot.hpp>
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
@@ -74,6 +73,7 @@ inline constexpr const char* tec_name = "TEC";
 
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
+// NOLINTBEGIN(readability-avoid-nested-conditional-operator)
 template <class Ntk>
 inline constexpr const char* ntk_type_name = std::is_same_v<std::decay_t<Ntk>, aig_nt> ? aig_name :
                                              std::is_same_v<std::decay_t<Ntk>, xag_nt> ? xag_name :
@@ -160,6 +160,7 @@ inline constexpr const char* sidb_lattice_name =
     std::is_same_v<std::decay_t<Orientation>, sidb_100_lattice> ? sidb_100_name :
     std::is_same_v<std::decay_t<Orientation>, sidb_111_lattice> ? sidb_111_name :
                                                                   "?";
+// NOLINTEND(readability-avoid-nested-conditional-operator)
 
 /**
  * FCN cell-level layouts.

@@ -8,6 +8,7 @@
 #include "fiction/utils/version_info.hpp"
 
 #include <fiction/io/write_svg_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
@@ -637,5 +638,5 @@ TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-s
     const write_qca_layout_svg_params params{.simple = true};
 
     CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream, params),
-                    unsupported_cell_type_exception<coordinate<mol_qca_cell_clk_lyt>>);
+                    unsupported_cell_type_exception<offset::ucoord_t>);
 }

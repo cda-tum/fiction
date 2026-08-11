@@ -18,7 +18,7 @@ struct qca_technology
     /**
      * Possible types of QCA cells.
      */
-    enum cell_type : uint8_t
+    enum cell_type : uint8_t  // NOLINT(cppcoreguidelines-use-enum-class)
     {
         /**
          * Symbol used for empty QCA cells.
@@ -341,7 +341,7 @@ struct inml_technology
     /**
      * Possible types of iNML cells.
      */
-    enum cell_type : uint8_t
+    enum cell_type : uint8_t  // NOLINT(cppcoreguidelines-use-enum-class)
     {
         /**
          * Symbol used for empty iNML cells.
@@ -480,7 +480,7 @@ struct sidb_technology
     /**
      * Possible types of SiDB cells.
      */
-    enum cell_type : uint8_t
+    enum cell_type : uint8_t  // NOLINT(cppcoreguidelines-use-enum-class)
     {
         /**
          * Symbol used for empty SiDB cells.
