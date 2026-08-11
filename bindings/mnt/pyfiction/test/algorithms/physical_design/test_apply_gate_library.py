@@ -3,6 +3,7 @@ import unittest
 
 from mnt.pyfiction import (
     apply_bestagon_library,
+    apply_mol_qca_library,
     apply_qca_one_library,
     apply_topolinano_library,
     exact_hexagonal,
@@ -22,6 +23,12 @@ class TestApplyGateLibrary(unittest.TestCase):
         layout = orthogonal(network)
 
         apply_qca_one_library(layout)
+
+    def test_apply_mol_qca_library(self):
+        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+        layout = orthogonal(network)
+
+        apply_mol_qca_library(layout)
 
     def test_apply_bestagon_library(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")

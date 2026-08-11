@@ -104,6 +104,10 @@ using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology>;
  */
 using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
 /**
+ * MolQCA cell layout.
+ */
+using py_mol_qca_layout = py_cartesian_cell_layout<fiction::mol_qca_technology>;
+/**
  * SiDB cell layout.
  */
 using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;

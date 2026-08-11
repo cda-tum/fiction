@@ -11,7 +11,7 @@ Unreleased
 Added
 #####
 - Added the ``molecular_qca_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK molecular QCA
-  standard-cell library to gate-level layouts, including QLL/SVG export support and C++ tests.
+  standard-cell library to gate-level layouts, including QLL/SVG export support, Python bindings, and tests.
 
 Changed
 #######

@@ -1,6 +1,13 @@
 import unittest
 
-from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_technology
+from mnt.pyfiction import (
+    inml_technology,
+    mol_qca_layout,
+    mol_qca_technology,
+    qca_layout,
+    qca_technology,
+    sidb_technology,
+)
 
 
 class TestCellTechnology(unittest.TestCase):
@@ -25,6 +32,19 @@ class TestCellTechnology(unittest.TestCase):
         self.assertEqual(str(inml.cell_type.INVERTER_MAGNET), "cell_type.INVERTER_MAGNET")
         self.assertEqual(str(inml.cell_type.CROSSWIRE_MAGNET), "cell_type.CROSSWIRE_MAGNET")
         self.assertEqual(str(inml.cell_type.FANOUT_COUPLER_MAGNET), "cell_type.FANOUT_COUPLER_MAGNET")
+
+    def test_mol_qca_technology(self):
+        mol_qca = mol_qca_technology
+
+        self.assertEqual(str(mol_qca.cell_type.EMPTY), "cell_type.EMPTY")
+        self.assertEqual(str(mol_qca.cell_type.NORMAL1), "cell_type.NORMAL1")
+        self.assertEqual(str(mol_qca.cell_type.NORMAL2), "cell_type.NORMAL2")
+        self.assertEqual(str(mol_qca.cell_type.NORMAL3), "cell_type.NORMAL3")
+        self.assertEqual(str(mol_qca.cell_type.NORMAL4), "cell_type.NORMAL4")
+        self.assertEqual(str(mol_qca.cell_type.INPUT), "cell_type.INPUT")
+        self.assertEqual(str(mol_qca.cell_type.OUTPUT), "cell_type.OUTPUT")
+        self.assertEqual(str(mol_qca.cell_type.CONST_0), "cell_type.CONST_0")
+        self.assertEqual(str(mol_qca.cell_type.CONST_1), "cell_type.CONST_1")
 
     def test_sidb_technology(self):
         sidb = sidb_technology
@@ -125,6 +145,18 @@ class TestQCACellLevelLayout(unittest.TestCase):
         self.assertFalse(layout.is_empty_cell((1, 2)))
         self.assertFalse(layout.is_empty_cell((3, 2)))
         self.assertFalse(layout.is_empty_cell((4, 2)))
+
+
+class TestMolQCACellLevelLayout(unittest.TestCase):
+    def test_cell_type_assignment(self):
+        layout = mol_qca_layout((1, 0), "OPEN", "molQCA")
+
+        layout.assign_cell_type((0, 0), mol_qca_technology.cell_type.NORMAL1)
+        layout.assign_cell_type((1, 0), mol_qca_technology.cell_type.NORMAL2)
+
+        self.assertEqual(layout.get_cells_by_type(mol_qca_technology.cell_type.NORMAL1), [(0, 0)])
+        self.assertEqual(layout.num_cells_of_given_type(mol_qca_technology.cell_type.NORMAL2), 1)
+        self.assertEqual(layout.get_layout_name(), "molQCA")
 
 
 if __name__ == "__main__":
