@@ -64,6 +64,11 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
             {
                 if (lyt.is_fanout(n))
                 {
+                    if (lyt.fanout_size(n) == 3)
+                    {
+                        return set_up_1_to_3_fanout(p);
+                    }
+
                     return FANOUT_MAP.at(p);
                 }
             }
@@ -193,6 +198,45 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         }
 
         return p;
+    }
+
+    /**
+     * @brief Selects the MolQCA 1-to-3 fan-out implementation for a routed gate tile.
+     *
+     * 1-to-3 fan-outs always drive all three non-input sides. Their orientation is therefore determined by the single
+     * incoming connector side alone.
+     *
+     * @param p Incoming and outgoing connector positions for the fan-out tile.
+     * @return 1-to-3 fan-out gate matching `p`'s incoming connector.
+     * @throws std::out_of_range If `p` does not describe a supported 1-to-3 fan-out orientation.
+     */
+    [[nodiscard]] static fcn_gate set_up_1_to_3_fanout(const port_list<port_position>& p)
+    {
+        if (p.inp.size() != 1u || p.out.size() != 3u)
+        {
+            throw std::out_of_range{"unsupported MolQCA 1-to-3 fan-out port count"};
+        }
+
+        const auto input_port = *p.inp.begin();
+
+        if (input_port == port_position(4u, 0u))
+        {
+            return FAN_OUT_1_3;
+        }
+        if (input_port == port_position(9u, 4u))
+        {
+            return rotate_90(FAN_OUT_1_3);
+        }
+        if (input_port == port_position(5u, 9u))
+        {
+            return rotate_180(FAN_OUT_1_3);
+        }
+        if (input_port == port_position(0u, 5u))
+        {
+            return rotate_270(FAN_OUT_1_3);
+        }
+
+        throw std::out_of_range{"unsupported MolQCA 1-to-3 fan-out input port"};
     }
 
     // clang-format off
@@ -578,7 +622,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {{{port_position(5, 9), port_position(4, 0)}, {port_position(9, 4)}}, rotate_270(DISJUNCTION_D)},
         {{{port_position(5, 9), port_position(9, 4)}, {port_position(4, 0)}}, rotate_270(DISJUNCTION_R)}};
     /**
-     * Lookup table for fan-out rotations. Maps ports to corresponding fan-out gates.
+     * Lookup table for 1-to-2 fan-out rotations. Maps ports to corresponding fan-out gates.
      */
     static inline const port_gate_map FANOUT_MAP = {
         // fanout 2
@@ -601,19 +645,6 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {{{port_position(5, 9)}, {port_position(9, 4), port_position(4, 0)}}, rotate_270(FAN_OUT_1_2)},
         {{{port_position(4, 0)}, {port_position(5, 9), port_position(9, 4)}}, rotate_270(FAN_OUT_1_2_R)},
         {{{port_position(9, 4)}, {port_position(5, 9), port_position(4, 0)}}, rotate_270(FAN_OUT_1_2_D)},
-
-        // fanout 3
-        // identity orientation
-        {{{port_position(4, 0)}, {port_position(9, 4), port_position(5, 9), port_position(0, 5)}}, FAN_OUT_1_3},
-        // rotated 90°
-        {{{port_position(9, 4)}, {port_position(5, 9), port_position(0, 5), port_position(4, 0)}},
-         rotate_90(FAN_OUT_1_3)},
-        // rotated 180°
-        {{{port_position(5, 9)}, {port_position(0, 5), port_position(4, 0), port_position(9, 4)}},
-         rotate_180(FAN_OUT_1_3)},
-        // rotated 270°
-        {{{port_position(0, 5)}, {port_position(4, 0), port_position(9, 4), port_position(5, 9)}},
-         rotate_270(FAN_OUT_1_3)},
     };
 
     /**
