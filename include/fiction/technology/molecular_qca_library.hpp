@@ -56,7 +56,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
         const auto n = lyt.get_node(t);
-        const auto p = determine_port_routing(lyt, t);
+        auto       p = determine_port_routing(lyt, t);
 
         try
         {
@@ -64,6 +64,8 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
             {
                 if (lyt.is_fanout(n))
                 {
+                    p = determine_port_routing<GateLyt, false>(lyt, t);
+
                     if (lyt.fanout_size(n) == 3)
                     {
                         return set_up_1_to_3_fanout(p);
@@ -125,47 +127,48 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
      * assigned to the west and east borders, respectively.
      *
      * @tparam Lyt Gate-level layout type.
+     * @tparam RespectClocking Whether to respect the layout clocking while tracing incoming and outgoing signals.
      * @param lyt Layout that hosts tile `t`.
      * @param t Tile whose port routing is determined.
      * @return Incoming and outgoing molQCA connector positions for `t`.
      */
-    template <typename Lyt>
+    template <typename Lyt, bool RespectClocking = true>
     [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
     {
         port_list<port_position> p{};
 
         // determine incoming connector ports for 10×10 tiles
-        if (lyt.has_northern_incoming_signal(t))
+        if (lyt.template has_northern_incoming_signal<RespectClocking>(t))
         {
             p.inp.emplace(4u, 0u);
         }
-        if (lyt.has_eastern_incoming_signal(t))
+        if (lyt.template has_eastern_incoming_signal<RespectClocking>(t))
         {
             p.inp.emplace(9u, 4u);
         }
-        if (lyt.has_southern_incoming_signal(t))
+        if (lyt.template has_southern_incoming_signal<RespectClocking>(t))
         {
             p.inp.emplace(5u, 9u);
         }
-        if (lyt.has_western_incoming_signal(t))
+        if (lyt.template has_western_incoming_signal<RespectClocking>(t))
         {
             p.inp.emplace(0u, 5u);
         }
 
         // determine outgoing connector ports (same regions)
-        if (lyt.has_northern_outgoing_signal(t))
+        if (lyt.template has_northern_outgoing_signal<RespectClocking>(t))
         {
             p.out.emplace(4u, 0u);
         }
-        if (lyt.has_eastern_outgoing_signal(t))
+        if (lyt.template has_eastern_outgoing_signal<RespectClocking>(t))
         {
             p.out.emplace(9u, 4u);
         }
-        if (lyt.has_southern_outgoing_signal(t))
+        if (lyt.template has_southern_outgoing_signal<RespectClocking>(t))
         {
             p.out.emplace(5u, 9u);
         }
-        if (lyt.has_western_outgoing_signal(t))
+        if (lyt.template has_western_outgoing_signal<RespectClocking>(t))
         {
             p.out.emplace(0u, 5u);
         }
@@ -185,12 +188,12 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         // fallback for tiles with no connectors (e.g., primary inputs/outputs on one side)
         if (!is_wire_or_inverter)
         {
-            if (lyt.has_no_incoming_signal(t))
+            if (lyt.template has_no_incoming_signal<RespectClocking>(t))
             {
                 // place on left edge
                 p.inp.emplace(0u, 5u);
             }
-            if (lyt.has_no_outgoing_signal(t))
+            if (lyt.template has_no_outgoing_signal<RespectClocking>(t))
             {
                 // place on right edge
                 p.out.emplace(9u, 4u);
