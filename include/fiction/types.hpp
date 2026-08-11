@@ -138,7 +138,7 @@ inline constexpr const char* tech_impl_name = std::is_same_v<std::decay_t<Tech>,
                                               std::is_same_v<std::decay_t<Tech>, mol_qca_technology> ? mol_qca_name :
                                               std::is_same_v<std::decay_t<Tech>, inml_technology>    ? inml_name :
                                               std::is_same_v<std::decay_t<Tech>, sidb_technology>    ? sidb_name :
-                                                                                                        "?";
+                                                                                                       "?";
 
 constexpr const char* qca_cell_name  = "cells";
 constexpr const char* inml_cell_name = "magnets";
@@ -146,11 +146,11 @@ constexpr const char* sidb_cell_name = "dots";
 
 template <class Tech>
 inline constexpr const char* tech_cell_name =
-    std::is_same_v<std::decay_t<Tech>, qca_technology> ||
-            std::is_same_v<std::decay_t<Tech>, mol_qca_technology> ? qca_cell_name :
-    std::is_same_v<std::decay_t<Tech>, inml_technology>            ? inml_cell_name :
-    std::is_same_v<std::decay_t<Tech>, sidb_technology>            ? sidb_cell_name :
-                                                                     "?";
+    std::is_same_v<std::decay_t<Tech>, qca_technology> || std::is_same_v<std::decay_t<Tech>, mol_qca_technology> ?
+        qca_cell_name :
+    std::is_same_v<std::decay_t<Tech>, inml_technology> ? inml_cell_name :
+    std::is_same_v<std::decay_t<Tech>, sidb_technology> ? sidb_cell_name :
+                                                          "?";
 
 constexpr const char* sidb_100_name = "100";
 constexpr const char* sidb_111_name = "111";
@@ -173,8 +173,7 @@ using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 using stacked_qca_cell_clk_lyt     = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
 
-using mol_qca_cell_clk_lyt =
-    cell_level_layout<mol_qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+using mol_qca_cell_clk_lyt = cell_level_layout<mol_qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using mol_qca_cell_clk_lyt_ptr = std::shared_ptr<mol_qca_cell_clk_lyt>;
 
 using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;

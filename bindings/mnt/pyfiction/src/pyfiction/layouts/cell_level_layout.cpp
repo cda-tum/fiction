@@ -67,14 +67,10 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     cell_type.value("EMPTY", Technology::cell_type::EMPTY);
     if constexpr (std::is_same_v<Technology, fiction::mol_qca_technology>)
     {
-        cell_type.value("NORMAL1", Technology::cell_type::NORMAL1,
-                        DOC(fiction_mol_qca_technology_cell_type_NORMAL1));
-        cell_type.value("NORMAL2", Technology::cell_type::NORMAL2,
-                        DOC(fiction_mol_qca_technology_cell_type_NORMAL2));
-        cell_type.value("NORMAL3", Technology::cell_type::NORMAL3,
-                        DOC(fiction_mol_qca_technology_cell_type_NORMAL3));
-        cell_type.value("NORMAL4", Technology::cell_type::NORMAL4,
-                        DOC(fiction_mol_qca_technology_cell_type_NORMAL4));
+        cell_type.value("NORMAL1", Technology::cell_type::NORMAL1, DOC(fiction_mol_qca_technology_cell_type_NORMAL1));
+        cell_type.value("NORMAL2", Technology::cell_type::NORMAL2, DOC(fiction_mol_qca_technology_cell_type_NORMAL2));
+        cell_type.value("NORMAL3", Technology::cell_type::NORMAL3, DOC(fiction_mol_qca_technology_cell_type_NORMAL3));
+        cell_type.value("NORMAL4", Technology::cell_type::NORMAL4, DOC(fiction_mol_qca_technology_cell_type_NORMAL4));
     }
     else
     {
@@ -90,10 +86,8 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     }
     else if constexpr (std::is_same_v<Technology, fiction::mol_qca_technology>)
     {
-        cell_type.value("CONST_0", Technology::cell_type::CONST_0,
-                        DOC(fiction_mol_qca_technology_cell_type_CONST_0));
-        cell_type.value("CONST_1", Technology::cell_type::CONST_1,
-                        DOC(fiction_mol_qca_technology_cell_type_CONST_1));
+        cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_mol_qca_technology_cell_type_CONST_0));
+        cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_mol_qca_technology_cell_type_CONST_1));
     }
     else if constexpr (std::is_same_v<Technology, fiction::inml_technology>)
     {

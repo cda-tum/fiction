@@ -296,42 +296,41 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
 
     static constexpr const molecular_qca_library::fcn_gate fanout_1_3{
-        molecular_qca_library::cell_list_to_gate<char>(
-            {{{' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-              {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-              {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-              {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-              {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
-              {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
-              {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-              {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-              {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-              {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}}})};
+        molecular_qca_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+                                                         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+                                                         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+                                                         {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+                                                         {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+                                                         {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+                                                         {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+                                                         {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}}})};
 
-    auto northern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
-    const auto north_pi        = northern_input_layout.create_pi("x", {1, 0});
-    const auto north_fanout    = northern_input_layout.create_buf(north_pi, {1, 1});
+    auto       northern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    const auto north_pi              = northern_input_layout.create_pi("x", {1, 0});
+    const auto north_fanout          = northern_input_layout.create_buf(north_pi, {1, 1});
     northern_input_layout.create_po(north_fanout, "e", {2, 1});
     northern_input_layout.create_po(north_fanout, "s", {1, 2});
     northern_input_layout.create_po(north_fanout, "w", {0, 1});
 
-    auto eastern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
-    const auto east_pi        = eastern_input_layout.create_pi("x", {2, 1});
-    const auto east_fanout    = eastern_input_layout.create_buf(east_pi, {1, 1});
+    auto       eastern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    const auto east_pi              = eastern_input_layout.create_pi("x", {2, 1});
+    const auto east_fanout          = eastern_input_layout.create_buf(east_pi, {1, 1});
     eastern_input_layout.create_po(east_fanout, "s", {1, 2});
     eastern_input_layout.create_po(east_fanout, "w", {0, 1});
     eastern_input_layout.create_po(east_fanout, "n", {1, 0});
 
-    auto southern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
-    const auto south_pi        = southern_input_layout.create_pi("x", {1, 2});
-    const auto south_fanout    = southern_input_layout.create_buf(south_pi, {1, 1});
+    auto       southern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    const auto south_pi              = southern_input_layout.create_pi("x", {1, 2});
+    const auto south_fanout          = southern_input_layout.create_buf(south_pi, {1, 1});
     southern_input_layout.create_po(south_fanout, "w", {0, 1});
     southern_input_layout.create_po(south_fanout, "n", {1, 0});
     southern_input_layout.create_po(south_fanout, "e", {2, 1});
 
-    auto western_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
-    const auto west_pi        = western_input_layout.create_pi("x", {0, 1});
-    const auto west_fanout    = western_input_layout.create_buf(west_pi, {1, 1});
+    auto       western_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    const auto west_pi              = western_input_layout.create_pi("x", {0, 1});
+    const auto west_fanout          = western_input_layout.create_buf(west_pi, {1, 1});
     western_input_layout.create_po(west_fanout, "n", {1, 0});
     western_input_layout.create_po(west_fanout, "e", {2, 1});
     western_input_layout.create_po(west_fanout, "s", {1, 2});

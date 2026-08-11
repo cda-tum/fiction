@@ -452,12 +452,12 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
  * This group defines the clock-zone colors, intra-cell spacing, offsets, and SVG glyphs used by the MolQCA layout
  * writer.
  */
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL     = "ffe700";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL     = "65ff00";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL     = "0071ff";
-inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL     = "f800ff";
-inline constexpr const char* PI_CELL_MOL_QCA               = "cccccc";
-inline constexpr const char* PO_CELL_MOL_QCA               = "4a4a4a";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL = "ffe700";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL = "65ff00";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL = "0071ff";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL = "f800ff";
+inline constexpr const char* PI_CELL_MOL_QCA           = "cccccc";
+inline constexpr const char* PO_CELL_MOL_QCA           = "4a4a4a";
 
 inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
 
@@ -1291,12 +1291,11 @@ class write_mol_qca_layout_svg_impl
                     const auto desc_col = generate_description_color(c);
 
                     // Current cell-description can now be appended to the description of all cells
-                    cell_descriptions
-                        << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
-                                       svg::STARTING_OFFSET_TILE_X + svg::MOL_QCA_STARTING_OFFSET_CELL_X +
-                                           (c.x * svg::MOL_QCA_CELL_DISTANCE),
-                                       svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y +
-                                           (c.y * svg::MOL_QCA_CELL_DISTANCE));
+                    cell_descriptions << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                                     svg::STARTING_OFFSET_TILE_X + svg::MOL_QCA_STARTING_OFFSET_CELL_X +
+                                                         (c.x * svg::MOL_QCA_CELL_DISTANCE),
+                                                     svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y +
+                                                         (c.y * svg::MOL_QCA_CELL_DISTANCE));
                 }
             });
 
