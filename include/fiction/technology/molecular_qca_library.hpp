@@ -68,7 +68,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
                     // routing can hide valid 1-to-3 branches because clocking schemes usually expose only a subset of
                     // outgoing directions from a tile.
                     const auto fanout_size = lyt.template fanout_size<false>(n);
-                    p = determine_port_routing<GateLyt, false>(lyt, t);
+                    p                      = determine_port_routing<GateLyt, false>(lyt, t);
 
                     if (fanout_size == 3u)
                     {
