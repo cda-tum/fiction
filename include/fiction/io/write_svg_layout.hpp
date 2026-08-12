@@ -462,8 +462,8 @@ inline constexpr const char* PO_CELL_MOL_QCA           = "4a4a4a";
 inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
 
 /**
- * MolQCA glyph templates draw the visible 10x10 cell body at these SVG-local coordinates. Keep the layout translation
- * offsets derived from those anchors so glyph-origin changes do not leave unexplained magic numbers behind.
+ * MolQCA glyph templates draw the visible 10x10 cell body at these SVG-local coordinates. The layout translation
+ * offsets below are derived from those anchors to keep their origin visible instead of using unexplained magic numbers.
  */
 inline constexpr const double MOL_QCA_GLYPH_ANCHOR_X         = 92.93404;
 inline constexpr const double MOL_QCA_GLYPH_ANCHOR_Y         = 56.46016;

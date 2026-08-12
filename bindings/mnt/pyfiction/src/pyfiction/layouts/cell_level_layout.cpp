@@ -54,6 +54,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     std::ranges::transform(tech_name, tech_name.begin(), ::tolower);
     if constexpr (std::is_same_v<Technology, fiction::mol_qca_technology>)
     {
+        // Keep the Python technology name readable by preserving the word boundary in molQCA.
         tech_name = "mol_qca";
     }
 
