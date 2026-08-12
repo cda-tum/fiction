@@ -8,6 +8,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
@@ -294,6 +295,12 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 {
     using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using clock_number_t = gate_layout::clock_number_t;
+    using orientation_exception = unsupported_gate_orientation_exception<offset::ucoord_t, port_position>;
+
+    static constexpr auto input_clock  = static_cast<clock_number_t>(0);
+    static constexpr auto fanout_clock = static_cast<clock_number_t>(1);
+    static constexpr auto output_clock = static_cast<clock_number_t>(2);
 
     static constexpr const molecular_qca_library::fcn_gate fanout_1_3{
         molecular_qca_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -308,6 +315,11 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
                                                          {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}}})};
 
     auto       northern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    northern_input_layout.assign_clock_number({1, 0}, input_clock);
+    northern_input_layout.assign_clock_number({1, 1}, fanout_clock);
+    northern_input_layout.assign_clock_number({2, 1}, output_clock);
+    northern_input_layout.assign_clock_number({1, 2}, output_clock);
+    northern_input_layout.assign_clock_number({0, 1}, output_clock);
     const auto north_pi              = northern_input_layout.create_pi("x", {1, 0});
     const auto north_fanout          = northern_input_layout.create_buf(north_pi, {1, 1});
     northern_input_layout.create_po(north_fanout, "e", {2, 1});
@@ -315,6 +327,11 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     northern_input_layout.create_po(north_fanout, "w", {0, 1});
 
     auto       eastern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    eastern_input_layout.assign_clock_number({2, 1}, input_clock);
+    eastern_input_layout.assign_clock_number({1, 1}, fanout_clock);
+    eastern_input_layout.assign_clock_number({1, 2}, output_clock);
+    eastern_input_layout.assign_clock_number({0, 1}, output_clock);
+    eastern_input_layout.assign_clock_number({1, 0}, output_clock);
     const auto east_pi              = eastern_input_layout.create_pi("x", {2, 1});
     const auto east_fanout          = eastern_input_layout.create_buf(east_pi, {1, 1});
     eastern_input_layout.create_po(east_fanout, "s", {1, 2});
@@ -322,6 +339,11 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     eastern_input_layout.create_po(east_fanout, "n", {1, 0});
 
     auto       southern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    southern_input_layout.assign_clock_number({1, 2}, input_clock);
+    southern_input_layout.assign_clock_number({1, 1}, fanout_clock);
+    southern_input_layout.assign_clock_number({0, 1}, output_clock);
+    southern_input_layout.assign_clock_number({1, 0}, output_clock);
+    southern_input_layout.assign_clock_number({2, 1}, output_clock);
     const auto south_pi              = southern_input_layout.create_pi("x", {1, 2});
     const auto south_fanout          = southern_input_layout.create_buf(south_pi, {1, 1});
     southern_input_layout.create_po(south_fanout, "w", {0, 1});
@@ -329,6 +351,11 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     southern_input_layout.create_po(south_fanout, "e", {2, 1});
 
     auto       western_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
+    western_input_layout.assign_clock_number({0, 1}, input_clock);
+    western_input_layout.assign_clock_number({1, 1}, fanout_clock);
+    western_input_layout.assign_clock_number({1, 0}, output_clock);
+    western_input_layout.assign_clock_number({2, 1}, output_clock);
+    western_input_layout.assign_clock_number({1, 2}, output_clock);
     const auto west_pi              = western_input_layout.create_pi("x", {0, 1});
     const auto west_fanout          = western_input_layout.create_buf(west_pi, {1, 1});
     western_input_layout.create_po(west_fanout, "n", {1, 0});
@@ -342,6 +369,31 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
           molecular_qca_library::rotate_180(fanout_1_3));
     CHECK(molecular_qca_library::set_up_gate(western_input_layout, {1, 1}) ==
           molecular_qca_library::rotate_270(fanout_1_3));
+
+    auto       clocked_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<gate_layout>()};
+    const auto clocked_pi     = clocked_layout.create_pi("x", {1, 0});
+    const auto clocked_fanout = clocked_layout.create_buf(clocked_pi, {1, 1});
+    clocked_layout.create_po(clocked_fanout, "e", {2, 1});
+    clocked_layout.create_po(clocked_fanout, "s", {1, 2});
+    clocked_layout.create_po(clocked_fanout, "w", {0, 1});
+
+    const auto clocked_fanout_node = clocked_layout.get_node({1, 1});
+    CHECK(clocked_layout.is_fanout(clocked_fanout_node));
+    CHECK(clocked_layout.fanout_size(clocked_fanout_node) == 2u);
+    CHECK(clocked_layout.template fanout_size<false>(clocked_fanout_node) == 3u);
+    CHECK(molecular_qca_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
+
+    auto missing_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<gate_layout>()};
+    const auto non_adjacent_pi      = missing_input_layout.create_pi("x", {0, 0});
+    const auto missing_input_fanout = missing_input_layout.create_buf(non_adjacent_pi, {1, 1});
+    missing_input_layout.create_po(missing_input_fanout, "e", {2, 1});
+    missing_input_layout.create_po(missing_input_fanout, "s", {1, 2});
+    missing_input_layout.create_po(missing_input_fanout, "w", {0, 1});
+
+    const auto missing_input_fanout_node = missing_input_layout.get_node({1, 1});
+    CHECK(missing_input_layout.is_fanout(missing_input_fanout_node));
+    CHECK(missing_input_layout.template fanout_size<false>(missing_input_fanout_node) == 3u);
+    CHECK_THROWS_AS((molecular_qca_library::set_up_gate(missing_input_layout, {1, 1})), orientation_exception);
 }
 
 TEST_CASE("Setting up majority gate", "[molecular-qca-library]")

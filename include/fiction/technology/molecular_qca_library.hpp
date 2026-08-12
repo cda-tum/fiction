@@ -62,10 +62,12 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         {
             if constexpr (fiction::has_is_fanout_v<GateLyt>)
             {
-                const auto fanout_size = lyt.template fanout_size<false>(n);
-
-                if (fanout_size > 1u)
+                if (lyt.is_fanout(n))
                 {
+                    // Fan-out orientation is determined from all physically connected fan-out branches. Clocking-aware
+                    // routing can hide valid 1-to-3 branches because clocking schemes usually expose only a subset of
+                    // outgoing directions from a tile.
+                    const auto fanout_size = lyt.template fanout_size<false>(n);
                     p = determine_port_routing<GateLyt, false>(lyt, t);
 
                     if (fanout_size == 3u)
@@ -217,7 +219,7 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
      */
     [[nodiscard]] static fcn_gate set_up_1_to_3_fanout(const port_list<port_position>& p)
     {
-        if (p.out.size() != 3u)
+        if (p.inp.size() != 1u || p.out.size() != 3u)
         {
             throw std::out_of_range{"unsupported MolQCA 1-to-3 fan-out port count"};
         }
@@ -227,19 +229,19 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         const auto south = port_position(5u, 9u);
         const auto west  = port_position(0u, 5u);
 
-        if (!p.out.contains(north))
+        if (p.inp.contains(north) && !p.out.contains(north))
         {
             return FAN_OUT_1_3;
         }
-        if (!p.out.contains(east))
+        if (p.inp.contains(east) && !p.out.contains(east))
         {
             return rotate_90(FAN_OUT_1_3);
         }
-        if (!p.out.contains(south))
+        if (p.inp.contains(south) && !p.out.contains(south))
         {
             return rotate_180(FAN_OUT_1_3);
         }
-        if (!p.out.contains(west))
+        if (p.inp.contains(west) && !p.out.contains(west))
         {
             return rotate_270(FAN_OUT_1_3);
         }
