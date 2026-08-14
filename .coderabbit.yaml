@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "en-US"
+
+reviews:
+  profile: "chill"
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+
+  # Keep in sync with `exclude:` in .pre-commit-config.yaml and `ignore:` in
+  # .github/workflows/clang-tidy-review.yml
+  path_filters:
+    - "!vendors/**"
+    - "!benchmarks/**"
+    - "!docs/_build/**"
+    - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+
+  path_instructions:
+    - path: "include/fiction/**"
+      instructions: >-
+        Header-only C++20. Identifier naming, casing, and formatting are enforced by
+        .clang-tidy and .clang-format, and the Clang-Tidy Review workflow already reports
+        them on every pull request; do not comment on them. Do review contracts, template
+        constraints, compile-time cost, and Doxygen coverage: every public symbol needs a
+        Doxygen block.
+    - path: "bindings/mnt/pyfiction/**"
+      instructions: >-
+        Python bindings built with nanobind, not pybind11. One translation unit per
+        binding, wired into the enclosing register_<name>.cpp. Sources are collected by
+        file(GLOB_RECURSE ...); do not suggest adding them to a manual CMake list. Do not
+        suggest new Python-level submodules; the mnt.pyfiction namespace shape is fixed.
+    - path: "test/**"
+      instructions: >-
+        Catch2. Test file base names must be unique across the whole test tree because
+        CMake derives target names from them. Flag tests that assert on iteration order or
+        tie-breaking that the documentation does not promise. Do not suggest merging or
+        parameterizing existing test cases.
+    - path: "experiments/**"
+      instructions: >-
+        Reproduction code for published papers. Do not suggest refactors, modernization,
+        generalization, naming changes, or performance improvements. Report only
+        correctness problems and compilation breakage.
+    - path: "docs/changelog.rst"
+      instructions: >-
+        Entries are intentionally detailed and deliberately record approaches that were
+        tried and reverted, together with the reason. Do not suggest shortening them.
+    - path: "docs/**"
+      instructions: >-
+        reStructuredText built by Sphinx, with Doxygen directives for the C++ API. A new
+        page needs a matching entry in a toctree in docs/index.rst.
+
+  tools:
+    # The Clang-Tidy Review workflow already reports C++ static-analysis findings on every
+    # pull request; a second C++ reviewer duplicates threads without adding signal.
+    cppcheck:
+      enabled: false
+
+chat:
+  auto_reply: true
