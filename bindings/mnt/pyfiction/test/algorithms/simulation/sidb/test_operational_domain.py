@@ -12,6 +12,7 @@ from mnt.pyfiction import (
     critical_temperature_domain_grid_search,
     critical_temperature_domain_random_sampling,
     input_bdl_configuration,
+    operational_analysis_strategy,
     operational_condition,
     operational_domain,
     operational_domain_contour_tracing,
@@ -91,6 +92,73 @@ class TestOperationalDomain(unittest.TestCase):
             stats_single.num_evaluated_parameter_combinations,
             stats_default.num_evaluated_parameter_combinations,
         )
+
+    def test_three_dimensional_operational_domain_sketch(self) -> None:
+        """The sketch and the boundary-following strategies work over three sweep dimensions."""
+        # a wire with two canvas cells, so that the sketch has a canvas to enumerate
+        lyt = sidb_100_lattice()
+
+        lyt.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
+        lyt.assign_cell_type((2, 1, 0), sidb_technology.cell_type.INPUT)
+
+        lyt.assign_cell_type((6, 2, 0), sidb_technology.cell_type.NORMAL)
+        lyt.assign_cell_type((8, 3, 0), sidb_technology.cell_type.NORMAL)
+        lyt.assign_cell_type((12, 4, 0), sidb_technology.cell_type.NORMAL)
+        lyt.assign_cell_type((14, 5, 0), sidb_technology.cell_type.NORMAL)
+
+        lyt.assign_cell_type((11, 7, 0), sidb_technology.cell_type.LOGIC)
+        lyt.assign_cell_type((13, 13, 0), sidb_technology.cell_type.LOGIC)
+
+        lyt.assign_cell_type((14, 15, 0), sidb_technology.cell_type.NORMAL)
+        lyt.assign_cell_type((12, 16, 0), sidb_technology.cell_type.NORMAL)
+
+        lyt.assign_cell_type((8, 17, 0), sidb_technology.cell_type.OUTPUT)
+        lyt.assign_cell_type((6, 18, 0), sidb_technology.cell_type.OUTPUT)
+
+        lyt.assign_cell_type((2, 19, 0), sidb_technology.cell_type.NORMAL)
+
+        params = operational_domain_params()
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.base = 2
+        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+        params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
+
+        params.sweep_dimensions = [
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.7, 0.1),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.2, 0.1),
+            operational_domain_value_range(sweep_parameter.MU_MINUS, -0.32, -0.30, 0.02),
+        ]
+
+        # 3 x 3 x 2 parameter points
+        stats_grid = operational_domain_stats()
+        operational_domain_grid_search(lyt, [create_id_tt()], params, stats_grid)
+        self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 18)
+
+        # flood fill and contour tracing both accept three dimensions
+        operational_domain_flood_fill(lyt, [create_id_tt()], 4, params)
+        operational_domain_contour_tracing(lyt, [create_id_tt()], 4, params)
+
+    def test_operational_domain_sketch_preconditions(self) -> None:
+        """The sketch is rejected when it cannot filter anything."""
+        lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
+
+        params = operational_domain_params()
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
+        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+        params.sweep_dimensions = [
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.5, 5.6, 0.1),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.0, 5.1, 0.1),
+        ]
+
+        # the layout has no LOGIC cells, so there is no canvas for the filtering steps to enumerate
+        with self.assertRaises(ValueError):
+            operational_domain_grid_search(lyt, [create_or_tt()], params)
+
+        # tolerating kinks leaves the filtering steps undefined
+        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+        with self.assertRaises(ValueError):
+            operational_domain_grid_search(lyt, [create_or_tt()], params)
 
     def test_operational_domain_XOR_gate_100_lattice(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")
