@@ -101,10 +101,6 @@ struct technology_mapping_params
      * 2-input greater-or-equal gate.
      */
     bool ge2{false};
-    /**
-     * Half-adder gate.
-     */
-    bool ha{false};
 
     // 3-input functions
 
@@ -316,7 +312,7 @@ class technology_mapping_impl
             mapped_ntk = perform_mapping<3>(gate_library);
         }
         else if (params.and2 || params.nand2 || params.or2 || params.nor2 || params.xor2 || params.xnor2 ||
-                 params.lt2 || params.gt2 || params.le2 || params.ge2 || params.ha)
+                 params.lt2 || params.gt2 || params.le2 || params.ge2)
         {
             mapped_ntk = perform_mapping<2>(gate_library);
         }
@@ -460,10 +456,6 @@ class technology_mapping_impl
         if (params.ge2)
         {
             library_stream << fiction::GATE_GE2;
-        }
-        if (params.ha)
-        {
-            library_stream << fiction::GATE_HA;
         }
         // 3-input functions
         if (params.maj3)
