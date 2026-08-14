@@ -84,9 +84,9 @@ When working with CodeRabbit:
 
 * **Review the review.** Language models skew conservative and will sometimes push toward overcomplicated code. Verify each finding against the current code, and disagree in writing when it is wrong — that is a normal outcome, not a problem.
 * **Respond to comments rather than silently resolving them.** CodeRabbit learns from replies, and a resolved-but-unanswered thread hides the reasoning from human reviewers. Leave resolution to the reviewer.
-* **Re-request a pass** with :code:`@coderabbitai review` after a substantial push, or :code:`@coderabbitai full review` after a rebase. When you tag a human in a thread, tag CodeRabbit too, or it will not participate.
+* **Re-request a pass** with :code:`@coderabbitai review` after a substantial push, or :code:`@coderabbitai full review` after a rebase. When you need a CodeRabbit response in a thread, mention :code:`@coderabbitai`.
 * **Do not enable a second AI reviewer** on the same pull request. CodeRabbit performs noticeably worse when another review bot is active on the same diff.
-* **Apply reviewer code suggestions through GitHub's batch flow** ("Add suggestion to batch" → "Commit suggestions") so authorship is attributed to the reviewer.
+* **Apply reviewer code suggestions through GitHub's batch flow** ("Add suggestion to batch" → "Commit suggestions"). Each suggestion's author is recorded as a co-author of the resulting commit, and the person committing the batch is the committer and also a co-author.
 * **Avoid force-pushing or squashing locally while a review is open.** It detaches existing comments from their lines. Maintainers squash on merge.
 
 :code:`.coderabbit.yaml` in the repository root configures which paths are reviewed and what CodeRabbit should not comment on. Update it rather than repeating the same correction by hand.

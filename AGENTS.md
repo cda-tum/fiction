@@ -169,10 +169,12 @@ enforces the following:
   - Keep plans, notes, and analyses in `.ai/` (gitignored). Never write them to the
     repository root and never commit them.
 - ⚠️ **Ask First**:
-  - Before adding new third-party dependencies to `vendors/` or `CMakeLists.txt`.
+  - Before adding a new third-party dependency, whether vendored under `vendors/` or
+    fetched from `CMakeLists.txt`.
   - Before changing major build configurations.
 - 🚫 **Never**:
-  - Modify files in `vendors/`.
+  - Modify the contents of an existing `vendors/` source tree. Adding a new one is the
+    ask-first case above; editing what is already there is not.
   - Edit generated files by hand, including
     `bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`.
   - Commit secrets or large binary files.

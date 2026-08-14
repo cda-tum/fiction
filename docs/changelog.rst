@@ -11,20 +11,14 @@ Unreleased
 Changed
 #######
 - Algorithms:
-    - Parallelized ``operational_domain_flood_fill``. The exploration now runs on a pool of worker
-      threads sharing a single work queue, which also stops the same parameter point from being enqueued
-      repeatedly. Results are independent of exploration order and therefore unchanged
+    - Parallelized ``operational_domain_flood_fill`` over a pool of worker threads. The result is
+      independent of exploration order and therefore unchanged
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Code quality:
-    - Modernized the entire code base for C++20, module by module: ``std::ranges`` algorithms in place of
-      iterator-pair calls, concepts and ``requires`` clauses in place of ``static_assert`` type checks,
-      defaulted comparison operators, designated initializers, and ``std::erase``/``std::erase_if`` in
-      place of the erase-remove idiom
-    - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module,
-      taking its ``clang-tidy`` report from 92 warnings to zero
-    - Addressed the ``clang-tidy`` findings surfaced by the modernization passes: missing and unused
-      includes, explicit enum base types, and operator-precedence parentheses
+    - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
+      defaulted comparison operators, and designated initializers throughout
+    - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
@@ -49,20 +43,20 @@ Fixed
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
 - Code quality:
     - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
-    - Fixed ``std::string_view::data()`` calls that relied on null-termination they are not guaranteed to
-      have
+    - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``
+      does not guarantee
     - Fixed plain ``char`` values being passed to ``::toupper``, ``::tolower``, ``::isdigit``, and
       ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
     - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
-- Python bindings:
-    - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
-      longer emitted now that the operator is compiler-synthesized
 - Continuous integration:
     - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
       instead of full GitHub URLs, which the datasource requires to resolve tags
     - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
     - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit carrying a C++20 fix,
       instead of floating on ``master``
+- Python bindings:
+    - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
+      longer emitted now that the operator is compiler-synthesized
 
 v0.7.0 - 2026-07-31
 -------------------
