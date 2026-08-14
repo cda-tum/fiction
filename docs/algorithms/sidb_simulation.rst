@@ -294,12 +294,16 @@ Operational Domain Computation
         ``LOGIC`` cells, since the filtering steps enumerate the charge configurations of the canvas those
         cells define; without either, it is rejected with ``std::invalid_argument``.
 
-        The sketch combines with any of the four strategies. With flood fill it traces the boundary of the
-        sketch region rather than of the operational region, which is sound because the former contains the
-        latter. Note, though, that the frontier only stops where a filter proves non-operationality, so when
-        the sketch region fills the swept range the flood fill visits every point and costs more than a grid
-        search over the same range. Prefer grid search with the sketch unless the sketch region is known to
-        cover only part of the range.
+        The sketch combines with any of the four strategies, but pairs best with the exhaustive ones. Grid
+        search and random sampling place their samples independently of the result, so the sketch simply makes
+        each of them cheaper. Flood fill and contour tracing instead follow the boundary of the *sketch*
+        region rather than of the operational region. That is sound, since the former contains the latter, but
+        it is only useful when the initial random sampling lands inside the region: over a three-dimensional
+        range, a sample count that suffices in two dimensions frequently misses the region altogether and
+        returns almost nothing. Where the sketch region does fill the swept range, the frontier never stops
+        and the flood fill visits every point anyway, at a higher per-point cost than a grid search. Prefer
+        grid search with the sketch, and raise the sample count substantially before combining the sketch with
+        flood fill or contour tracing in three dimensions.
 
         .. doxygenfunction:: fiction::operational_domain_grid_search
         .. doxygenfunction:: fiction::operational_domain_random_sampling
