@@ -105,7 +105,7 @@ namespace detail
  *
  * @tparam OpDomain The type of the operational domain.
  * @param opdom The operational domain to be written. It represents a mapping between sets of simulation parameters
- * (defined as a pair of sweep parameters for the X, Y, and Z dimensions) and a tuple containing detailed  information
+ * (one to three sweep parameters, written as the X, Y, and Z columns) and a tuple containing detailed information
  * about the SiDB layout associated with those simulation parameters.
  * @param os The output stream where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an

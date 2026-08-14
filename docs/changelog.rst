@@ -19,6 +19,12 @@ Added
       ``displacement_robustness_domain_params``, defaulting to the number of hardware threads, which
       leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
       lets a computation leave cores free
+    - ``operational_domain_contour_tracing`` now supports three or more sweep dimensions, where it
+      collects the boundary surface instead of walking a closed curve. ``operational_domain_flood_fill``
+      no longer caps at three dimensions
+- Experiments:
+    - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
+      operational domain sketch over a three-dimensional parameter space
 - Python bindings:
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
     - Exposed ``number_of_threads`` on ``operational_domain_params`` and
@@ -65,6 +71,9 @@ Removed
 Fixed
 #####
 - Algorithms:
+    - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a layout
+      without ``LOGIC`` cells now throws instead of silently falling back to a full simulation of the
+      entire parameter space
     - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
       robustness helpers, which derive their slice size by dividing by a worker count that is zero when
       there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it

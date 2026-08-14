@@ -281,6 +281,26 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::operational_domain_stats
            :members:
 
+        Four strategies sample the parameter space. Grid search and random sampling place their samples
+        independently and accept any number of sweep dimensions. Flood fill and contour tracing follow the
+        shape of the operational region and therefore need a neighborhood to expand over, which requires at
+        least two dimensions. In two dimensions, contour tracing walks the boundary as a closed curve; in
+        three or more, where the boundary is a surface, it collects the boundary instead.
+
+        Setting ``strategy_to_analyze_operational_status`` to ``FILTER_ONLY`` computes the *operational
+        domain sketch*: each parameter point is classified by filtering alone, without physical simulation.
+        This is dramatically faster and never rejects a point that is operational, but it does report some
+        non-operational points as operational. The sketch requires ``REJECT_KINKS`` and a layout with
+        ``LOGIC`` cells, since the filtering steps enumerate the charge configurations of the canvas those
+        cells define; without either, it is rejected with ``std::invalid_argument``.
+
+        The sketch combines with any of the four strategies. With flood fill it traces the boundary of the
+        sketch region rather than of the operational region, which is sound because the former contains the
+        latter. Note, though, that the frontier only stops where a filter proves non-operationality, so when
+        the sketch region fills the swept range the flood fill visits every point and costs more than a grid
+        search over the same range. Prefer grid search with the sketch unless the sketch region is known to
+        cover only part of the range.
+
         .. doxygenfunction:: fiction::operational_domain_grid_search
         .. doxygenfunction:: fiction::operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill

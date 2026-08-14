@@ -55,7 +55,7 @@ namespace fiction
 {
 
 /**
- * The parameter point holds parameter values in the x and y dimension.
+ * The parameter point holds one parameter value per sweep dimension.
  */
 struct parameter_point
 {
@@ -551,8 +551,9 @@ class operational_domain_impl
         }
     }
     /**
-     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search always
-     * has quadratic complexity. The operational status is computed for each parameter combination.
+     * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search
+     * evaluates the product of the step counts of all sweep dimensions. The operational status is computed for each
+     * parameter combination.
      *
      * @return The operational domain of the layout.
      */
@@ -1213,8 +1214,8 @@ class operational_domain_impl
      */
     const std::vector<Lyt> input_pattern_layouts;
     /**
-     * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
-     * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
+     * A step point holds one step value per sweep dimension, each from 0 to the maximum number of steps in that
+     * dimension. A step point does not hold the actual parameter values, but the step values.
      *
      * See `operational_domain::parameter_point` for a point that holds the actual parameter values.
      */
@@ -1442,7 +1443,7 @@ class operational_domain_impl
             return std::get<0>(*op_value);
         }
 
-        // fetch the x and y dimension values
+        // fetch the parameter values of all sweep dimensions
         const auto param_point = to_parameter_point(sp);
 
         const auto operational = [this, &param_point]()
@@ -1941,9 +1942,10 @@ class operational_domain_impl
  * inputs of the truth table.
  *
  * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
- * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
- * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
- * number of operational checks on the layout, where each operational check consists of up to \f$2^n\f$ exact ground
+ * sweeping all sweep dimensions. Since grid search is exhaustive, the algorithm is guaranteed
+ * to find the operational domain, if it exists within the parameter range. However, the algorithm performs one
+ * operational check per parameter combination, i.e., the product of the step counts of all sweep dimensions, where
+ * each operational check consists of up to \f$2^n\f$ exact ground
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
@@ -1955,7 +1957,8 @@ class operational_domain_impl
  * @param st Statistics of the process.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * dimensions is accepted.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
@@ -2007,7 +2010,8 @@ template <typename Lyt, typename TT>
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * dimensions is accepted.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
@@ -2065,7 +2069,9 @@ template <typename Lyt, typename TT>
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
+ * any number.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain
@@ -2126,7 +2132,9 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
+ * any number.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
@@ -2163,9 +2171,10 @@ template <typename Lyt, typename TT>
  * temperature for each specific parameter point.
  *
  * This algorithm uses a grid search to find the operational domain. The grid search is performed by exhaustively
- * sweeping the parameter space in the x and y dimensions. Since grid search is exhaustive, the algorithm is guaranteed
- * to find the operational domain, if it exists within the parameter range. However, the algorithm performs a quadratic
- * number of operational checks on the layout, where each operational check consists of up to \f$2^n\f$ exact ground
+ * sweeping all sweep dimensions. Since grid search is exhaustive, the algorithm is guaranteed
+ * to find the operational domain, if it exists within the parameter range. However, the algorithm performs one
+ * operational check per parameter combination, i.e., the product of the step counts of all sweep dimensions, where
+ * each operational check consists of up to \f$2^n\f$ exact ground
  * state simulations, where \f$n\f$ is the number of inputs of the layout. Each exact ground state simulation has
  * exponential complexity in of itself. Therefore, the algorithm is only feasible for small layouts with few inputs.
  *
@@ -2178,7 +2187,8 @@ template <typename Lyt, typename TT>
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * dimensions is accepted.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2225,7 +2235,8 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Any number of sweep
+ * dimensions is accepted.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2278,7 +2289,9 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
+ * any number.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2339,7 +2352,9 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
  * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
- * is requested without rejecting kinks or on a layout without `LOGIC` cells.
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells. Flood fill and contour
+ * tracing additionally require at least two sweep dimensions; grid search and random sampling accept
+ * any number.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
