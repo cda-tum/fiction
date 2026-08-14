@@ -28,8 +28,6 @@ template <typename Lyt, typename Cost = uint8_t>
 [[nodiscard]] constexpr Cost unit_cost([[maybe_unused]] const coordinate<Lyt>& source,
                                        [[maybe_unused]] const coordinate<Lyt>& target) noexcept
 {
-    // do not convert the `static_assert` type checks of this file's free functions into `requires` clauses; see the
-    // note on `manhattan_distance` in `distance.hpp` for why the pyfiction docstring generator forbids it
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Cost>, "Cost is not an integral type");
 

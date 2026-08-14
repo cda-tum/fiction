@@ -424,8 +424,6 @@ template <typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
                                    const coordinate<Lyt>& target) noexcept
 {
-    // do not convert these `static_assert` type checks into a `requires` clause; see the note on `manhattan_distance`
-    // in `distance.hpp` for why the pyfiction docstring generator forbids it
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_arithmetic_v<Dist>, "Dist is not an arithmetic type");
 

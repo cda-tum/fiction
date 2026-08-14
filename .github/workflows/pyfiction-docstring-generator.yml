@@ -47,10 +47,15 @@ jobs:
 
       - name: Run pybind11_mkdoc
         working-directory: ${{ github.workspace }}
+        # -std=c++20 is required: pybind11_mkdoc defaults to -std=c++11 when no -std is given
+        # (read_args() in mkdoc_lib.py), which makes it parse this C++20 code base as C++11. Constructs
+        # it cannot parse there abort the declaration list and silently drop the Doxygen comments of
+        # every declaration that follows -- a `requires` clause is one such construct
         run: >
           python3
           -m pybind11_mkdoc
           -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+          -std=c++20
           -D FICTION_Z3_SOLVER
           -D FICTION_ALGLIB_ENABLED
           `find include/fiction -name "*.hpp" -print`
