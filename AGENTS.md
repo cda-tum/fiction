@@ -17,8 +17,14 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
   description why the existing one does not fit.
 - Test the documented contract, not provisional implementation choices. A test that pins
   down an internal detail blocks the next refactor without protecting a user.
+- **Work in your own git worktree, always.** Create it with
+  `git worktree add .ai/worktrees/<task> -b <branch>` and work there, never directly in the
+  primary checkout. Two agents that share a working directory overwrite each other's
+  uncommitted edits and switch the branch under each other, and neither notices. `.ai/` is
+  gitignored, so the worktree stays out of `git status`. Remove it with
+  `git worktree remove` when the task is done.
 - Inspect the working tree before editing, and never revert or overwrite a change you did
-  not make.
+  not make. If you find edits you did not write, stop and ask instead of reverting them.
 - Remove scaffolding before handoff: debug output, commented-out code, and `NOLINT`
   suppressions. A suppression that has to stay names the technical reason in a comment.
 - Warn when you spot a sub-par design decision, including in existing code, and say what
@@ -166,8 +172,8 @@ enforces the following:
     `docs/AGENTS.md` for the entry style.
   - Satisfy every box in `.github/pull_request_template.md` before calling a PR done.
   - Use `const` correctness and braced initialization.
-  - Keep plans, notes, and analyses in `.ai/` (gitignored). Never write them to the
-    repository root and never commit them.
+  - Keep plans, notes, analyses, and worktrees in `.ai/` (gitignored). Never write them to
+    the repository root and never commit them.
 - ⚠️ **Ask First**:
   - Before adding a new third-party dependency, whether vendored under `vendors/` or
     fetched from `CMakeLists.txt`.
