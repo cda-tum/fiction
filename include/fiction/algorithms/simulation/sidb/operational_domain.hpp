@@ -79,7 +79,23 @@ struct parameter_point
     [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
     {
         return std::ranges::equal(parameters, other.parameters, [](const auto lhs, const auto rhs) noexcept
-                                  { return std::fabs(lhs - rhs) < constants::ERROR_MARGIN; });
+                                  { return quantize(lhs) == quantize(rhs); });
+    }
+    /**
+     * Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide cells that both this type's equality and
+     * its `std::hash` specialization are defined on.
+     *
+     * Comparing parameter values with a tolerance, as in `std::fabs(lhs - rhs) < constants::ERROR_MARGIN`, does not
+     * yield an equivalence relation: it is not transitive, and two values that compare equal can still fall on
+     * opposite sides of a cell boundary and therefore hash differently. That breaks the invariant every hash-based
+     * container relies on, namely that equal keys hash equally. Deciding both on the same quantized value restores it.
+     *
+     * @param value Parameter value to quantize.
+     * @return The index of the cell `value` falls into.
+     */
+    [[nodiscard]] static int64_t quantize(const double value) noexcept
+    {
+        return static_cast<int64_t>(std::llround(value / constants::ERROR_MARGIN));
     }
     /**
      * Support for structured bindings.
@@ -2270,8 +2286,10 @@ struct hash<fiction::parameter_point>
         size_t hash_value = 0;
         for (const auto& parameter : pp.get_parameters())
         {
-            // hash the double values with tolerance
-            fiction::hash_combine(hash_value, static_cast<size_t>(parameter / fiction::constants::ERROR_MARGIN));
+            // hash the cell the parameter value falls into, which is what `parameter_point::operator==` compares.
+            // Casting the quotient straight to `size_t` would be undefined for the negative values that a `MU_MINUS`
+            // sweep produces
+            fiction::hash_combine(hash_value, fiction::parameter_point::quantize(parameter));
         }
 
         return hash_value;

@@ -24,6 +24,7 @@
 #include <functional>
 #include <optional>
 #include <stdexcept>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -128,6 +129,35 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     SECTION("Structured bindings - invalid index")
     {
         REQUIRE_THROWS_AS(p1.get<3>(), std::out_of_range);
+    }
+
+    SECTION("Equal parameter points hash equally")
+    {
+        // every hash-based container relies on this invariant. Comparing with a tolerance does not establish it on
+        // its own, since two values within the tolerance can still fall either side of a cell boundary
+        const std::hash<parameter_point> hash{};
+
+        REQUIRE(p1 == p3);
+        CHECK(hash(p1) == hash(p3));
+        CHECK(hash(p1) == hash(p2));
+    }
+
+    SECTION("Negative parameter values are hashable")
+    {
+        // a `MU_MINUS` sweep produces negative values throughout. Casting them straight to an unsigned type is
+        // undefined behavior
+        const parameter_point negative({-0.32, -0.5, -1.0});
+
+        const std::hash<parameter_point> hash{};
+
+        CHECK(hash(negative) == hash(parameter_point{{-0.32, -0.5, -1.0}}));
+        CHECK(hash(negative) != hash(parameter_point{{0.32, 0.5, 1.0}}));
+
+        // and they must survive a round trip through a hash-based container
+        const std::unordered_set<parameter_point> points{negative, parameter_point{{-0.28, -0.5, -1.0}}};
+
+        CHECK(points.size() == 2);
+        CHECK(points.count(negative) == 1);
     }
 }
 
