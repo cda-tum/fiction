@@ -378,15 +378,39 @@ namespace detail
 {
 
 /**
- * This function validates the given sweep parameters for the operational domain computation. It checks if the minimum
- * value of any sweep dimension is larger than the corresponding maximum value. Additionally, it checks if the step size
- * of any sweep dimension is negative or zero.
+ * This function validates the given parameters for the operational domain computation. It checks if the minimum
+ * value of any sweep dimension is larger than the corresponding maximum value, and if the step size of any sweep
+ * dimension is negative or zero. Additionally, it checks the preconditions of the operational domain sketch.
  *
+ * The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`, determines the operational status by filtering
+ * alone. It has two preconditions: the filtering steps are only defined when kinks are rejected, and they enumerate
+ * the charge configurations of the canvas, which the layout's `LOGIC` cells define. If either is unmet, the sketch
+ * evaluates nothing and silently falls back to a full simulation of the entire parameter space. Since that is the
+ * exhaustive cost the sketch exists to avoid, an unmet precondition is rejected instead of being absorbed.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout the operational domain is computed for.
  * @param params The operational domain parameters to validate.
- * @throws std::invalid_argument if the sweep parameters are invalid.
+ * @throws std::invalid_argument if the parameters are invalid.
  */
-inline void validate_sweep_parameters(const operational_domain_params& params)
+template <typename Lyt>
+void validate_operational_domain_params(const Lyt& lyt, const operational_domain_params& params)
 {
+    if (params.operational_params.strategy_to_analyze_operational_status ==
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY)
+    {
+        if (params.operational_params.op_condition != is_operational_params::operational_condition::REJECT_KINKS)
+        {
+            throw std::invalid_argument("The operational domain sketch requires that kinks are rejected: the "
+                                        "filtering steps are only defined for 'REJECT_KINKS'");
+        }
+        if (lyt.num_cells_of_given_type(technology<Lyt>::cell_type::LOGIC) == 0)
+        {
+            throw std::invalid_argument("The operational domain sketch requires a canvas: the layout has no 'LOGIC' "
+                                        "cells for the filtering steps to enumerate");
+        }
+    }
+
     for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
     {
         if (params.sweep_dimensions.at(d).max < params.sweep_dimensions.at(d).min)
@@ -435,12 +459,9 @@ class operational_domain_impl
             input_pattern_layouts{generate_bdl_input_pattern_layouts(
                 lyt, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
+        // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` cells, so this may only
+        // be empty for the strategies that do not need a canvas
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
-
-        assert(((params.operational_params.strategy_to_analyze_operational_status !=
-                 is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
-                (logic_cells.size() > 0)) &&
-               "No logic cells found in the layout");
 
         // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
         // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
@@ -1835,7 +1856,8 @@ class operational_domain_impl
  * @param ps Parameters for the operational domain computation.
  * @param st Statistics of the process.
  * @return The operational domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1852,7 +1874,7 @@ template <typename Lyt, typename TT>
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                     st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
@@ -1886,7 +1908,8 @@ template <typename Lyt, typename TT>
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
@@ -1899,7 +1922,7 @@ template <typename Lyt, typename TT>
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                     st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
@@ -1943,7 +1966,8 @@ template <typename Lyt, typename TT>
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain
@@ -1960,7 +1984,7 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     }
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                     st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
@@ -2003,7 +2027,8 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The operational domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
@@ -2021,7 +2046,7 @@ template <typename Lyt, typename TT>
     }
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                     st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
@@ -2054,7 +2079,8 @@ template <typename Lyt, typename TT>
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2067,7 +2093,7 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                              st{};
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
@@ -2100,7 +2126,8 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2113,7 +2140,7 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                              st{};
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
@@ -2152,7 +2179,8 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2170,7 +2198,7 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
     }
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                              st{};
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
@@ -2212,7 +2240,8 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * @param params Operational domain computation parameters.
  * @param stats Operational domain computation statistics.
  * @return The critical temperature domain of the layout.
- * @throws std::invalid_argument if the given sweep parameters are invalid.
+ * @throws std::invalid_argument if the given sweep parameters are invalid, or if the operational domain sketch
+ * is requested without rejecting kinks or on a layout without `LOGIC` cells.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] critical_temperature_domain
@@ -2230,7 +2259,7 @@ critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT
     }
 
     // this may throw an `std::invalid_argument` exception
-    detail::validate_sweep_parameters(params);
+    detail::validate_operational_domain_params(lyt, params);
 
     operational_domain_stats                                              st{};
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};

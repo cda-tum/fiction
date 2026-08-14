@@ -200,6 +200,54 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         }
     }
 
+    SECTION("operational domain sketch preconditions")
+    {
+        // the sketch determines the operational status by filtering alone. Its filtering steps are only defined when
+        // kinks are rejected, and they enumerate the charge configurations of the canvas that the layout's `LOGIC`
+        // cells define. Without either, the sketch would silently fall back to a full simulation of the whole
+        // parameter space, which is the exhaustive cost it exists to avoid
+        const auto and_gate = blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>();
+
+        const sidb_100_cell_clk_lyt_siqad and_lat{and_gate};
+
+        REQUIRE(and_lat.num_cells_of_given_type(sidb_technology::cell_type::LOGIC) > 0);
+
+        operational_domain_params sketch_params{};
+        sketch_params.operational_params.strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+        sketch_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        sketch_params.sweep_dimensions                = {
+            {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.6, .step = 0.1},
+            {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.1, .step = 0.1}};
+
+        SECTION("kinks must be rejected")
+        {
+            auto tolerating_params = sketch_params;
+            tolerating_params.operational_params.op_condition =
+                is_operational_params::operational_condition::TOLERATE_KINKS;
+
+            CHECK_THROWS_AS(operational_domain_grid_search(and_lat, std::vector{create_and_tt()}, tolerating_params),
+                            std::invalid_argument);
+            CHECK_THROWS_AS(
+                operational_domain_random_sampling(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
+                std::invalid_argument);
+            CHECK_THROWS_AS(operational_domain_flood_fill(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
+                            std::invalid_argument);
+        }
+
+        SECTION("the layout must have canvas cells")
+        {
+            // `lat` is the empty layout declared above and therefore has no `LOGIC` cells
+            CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, sketch_params),
+                            std::invalid_argument);
+        }
+
+        SECTION("both preconditions met")
+        {
+            CHECK_NOTHROW(operational_domain_grid_search(and_lat, std::vector{create_and_tt()}, sketch_params));
+        }
+    }
+
     SECTION("invalid sweep dimensions")
     {
         operational_domain_params invalid_params_1{};
