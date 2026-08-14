@@ -612,6 +612,11 @@ class operational_domain_impl
         std::deque<step_point>       queue{};
         phmap::btree_set<step_point> scheduled{};
 
+        // this termination logic is hand-rolled rather than built on `std::jthread` with
+        // `std::stop_source`/`std::stop_token` and the C++20 `std::condition_variable_any::wait` stop-token overload.
+        // Apple's libc++ still gates `<stop_token>` and `std::jthread` behind `-fexperimental-library`, so both macOS
+        // CI jobs fail to compile them. A single portable implementation was preferred over a feature-detected second
+        // copy. Revisit once the macOS runners ship a libc++ that enables them by default
         std::mutex              queue_mutex{};
         std::condition_variable queue_cv{};
 
@@ -1811,6 +1816,11 @@ template <typename Lyt, typename TT>
                                                                 const operational_domain_params& params = {},
                                                                 operational_domain_stats*        stats  = nullptr)
 {
+    // do not convert the `static_assert` type checks in this file's public entry points into `requires` clauses: the
+    // pyfiction docstring generator parses this header as C++11 (see the note on `manhattan_distance` in
+    // `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that drops the Doxygen comments of
+    // the declarations that follow. `kitty` also provides no `is_truth_table_v` alias that would simplify the third
+    // check
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
