@@ -9,6 +9,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -372,6 +373,111 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
         operational_domain_grid_search(lyt, std::vector{create_or_tt()}, op_domain_params, &op_domain_stats);
 
     check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+}
+
+TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
+{
+    // the sketch determines the operational status by filtering alone, which is a property of a single parameter
+    // point and therefore independent of how many dimensions are swept. These cases pin that contract in three
+    // dimensions, where the third dimension is the only remaining sweep parameter, `MU_MINUS`
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    operational_domain_params params{};
+    params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
+
+    // 3 x 3 x 2 parameter points
+    constexpr std::size_t num_parameter_points = 18;
+
+    auto simulation_params = params;
+    simulation_params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+
+    auto sketch_params = params;
+    sketch_params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+    const auto simulated = operational_domain_grid_search(lat, std::vector{create_and_tt()}, simulation_params);
+
+    REQUIRE(simulated.size() == num_parameter_points);
+
+    SECTION("grid search yields a superset of the simulated operational domain")
+    {
+        // the sketch never rejects an operational point, it only fails to reject some non-operational ones. So every
+        // point that is operational under simulation must be operational in the sketch. This is the sketch's actual
+        // guarantee; the number of points it marks operational depends on how well the filters bite and is not a
+        // contract
+        operational_domain_stats stats{};
+
+        const auto sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params, &stats);
+
+        CHECK(sketch.size() == num_parameter_points);
+        CHECK(stats.num_evaluated_parameter_combinations == num_parameter_points);
+
+        simulated.for_each(
+            [&sketch](const auto& parameter_point, const auto& status)
+            {
+                if (std::get<0>(status) == operational_status::OPERATIONAL)
+                {
+                    const auto sketched = sketch.contains(parameter_point);
+
+                    REQUIRE(sketched.has_value());
+                    CHECK(std::get<0>(sketched.value()) == operational_status::OPERATIONAL);
+                }
+            });
+    }
+
+    SECTION("random sampling agrees with a direct operational check")
+    {
+        const auto sketch = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 8, sketch_params);
+
+        CHECK(sketch.size() <= 8);
+
+        const auto input_wires = detect_bdl_wires(
+            lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+        const auto output_wires =
+            detect_bdl_wires(lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                             bdl_wire_selection::OUTPUT);
+
+        sketch.for_each(
+            [&](const auto& parameter_point, const auto& status)
+            {
+                auto point_params = sketch_params.operational_params;
+
+                point_params.simulation_parameters.epsilon_r = parameter_point.get_parameters().at(0);
+                point_params.simulation_parameters.lambda_tf = parameter_point.get_parameters().at(1);
+                point_params.simulation_parameters.mu_minus  = parameter_point.get_parameters().at(2);
+
+                const auto [expected, _] =
+                    is_operational(lat, std::vector{create_and_tt()}, point_params, input_wires, output_wires);
+
+                CHECK(std::get<0>(status) == expected);
+            });
+    }
+
+    SECTION("flood fill yields a subset of the grid-searched sketch")
+    {
+        // flood fill traces the boundary of the sketch region rather than of the operational region, which is sound
+        // because the sketch region is a superset of the operational one. It can only miss a component that no
+        // random sample landed in, which is the failure mode it already has under simulation
+        const auto grid_sketch  = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
+        const auto flood_sketch = operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 4, sketch_params);
+
+        CHECK(flood_sketch.size() <= num_parameter_points);
+
+        flood_sketch.for_each(
+            [&grid_sketch](const auto& parameter_point, const auto& status)
+            {
+                const auto grid_status = grid_sketch.contains(parameter_point);
+
+                REQUIRE(grid_status.has_value());
+                CHECK(std::get<0>(status) == std::get<0>(grid_status.value()));
+            });
+    }
 }
 
 TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]")
