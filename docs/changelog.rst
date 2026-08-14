@@ -8,9 +8,20 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Algorithms:
+    - Added an ``is_operational`` overload that takes one layout per input pattern, and
+      ``generate_bdl_input_pattern_layouts`` to generate them
+- Python bindings:
+    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
+
 Changed
 #######
 - Algorithms:
+    - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
+      layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
+      gates are dominated by the physical simulation and gain little
     - Parallelized ``operational_domain_flood_fill`` over a pool of worker threads. The result is
       independent of exploration order and therefore unchanged
 - Build system:

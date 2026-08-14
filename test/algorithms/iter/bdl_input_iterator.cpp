@@ -10,6 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -228,13 +229,15 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const detect_bdl_wires_params params{2.0};
+    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
     SECTION("SiQAD coordinates, encode input 0 with the absence of perturbers")
     {
         bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
-            lat, bdl_input_iterator_params{
-                     params, bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
+            lat,
+            bdl_input_iterator_params{
+                .bdl_wire_params  = params,
+                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -298,7 +301,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("SiQAD coordinates")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{params}};
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -487,6 +490,73 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                     CHECK(false);
                 }
             }
+        }
+    }
+}
+
+TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
+{
+    const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    const bdl_input_iterator_params params{.bdl_wire_params =
+                                               detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};
+
+    SECTION("One layout per input pattern, matching the iterator")
+    {
+        const auto layouts = generate_bdl_input_pattern_layouts(lat, params);
+
+        REQUIRE(layouts.size() == 4);
+
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
+
+        for (uint64_t i = 0; i < layouts.size(); ++i, ++bii)
+        {
+            const auto& expected = *bii;
+
+            CHECK(layouts[i].num_cells() == expected.num_cells());
+
+            expected.foreach_cell([&layouts, &expected, i](const auto& c)
+                                  { CHECK(layouts[i].get_cell_type(c) == expected.get_cell_type(c)); });
+        }
+    }
+
+    SECTION("Pre-detected input wires yield the same layouts")
+    {
+        const auto input_wires = detect_bdl_wires(lat, params.bdl_wire_params, bdl_wire_selection::INPUT);
+
+        const auto layouts            = generate_bdl_input_pattern_layouts(lat, params);
+        const auto layouts_with_wires = generate_bdl_input_pattern_layouts(lat, params, input_wires);
+
+        REQUIRE(layouts.size() == layouts_with_wires.size());
+
+        for (uint64_t i = 0; i < layouts.size(); ++i)
+        {
+            layouts[i].foreach_cell([&layouts, &layouts_with_wires, i](const auto& c)
+                                    { CHECK(layouts_with_wires[i].get_cell_type(c) == layouts[i].get_cell_type(c)); });
+        }
+    }
+
+    SECTION("The layouts are independent deep copies")
+    {
+        // a shallow copy would make all entries share cell storage, which passes every other check here but
+        // corrupts the layouts as soon as they are read concurrently
+        auto layouts = generate_bdl_input_pattern_layouts(lat, params);
+
+        REQUIRE(layouts.size() == 4);
+
+        const cell<sidb_100_cell_clk_lyt_siqad> probe{100, 100, 0};
+
+        REQUIRE(layouts[0].get_cell_type(probe) == sidb_technology::cell_type::EMPTY);
+
+        layouts[0].assign_cell_type(probe, sidb_technology::cell_type::NORMAL);
+
+        CHECK(layouts[0].get_cell_type(probe) == sidb_technology::cell_type::NORMAL);
+
+        for (uint64_t i = 1; i < layouts.size(); ++i)
+        {
+            CHECK(layouts[i].get_cell_type(probe) == sidb_technology::cell_type::EMPTY);
         }
     }
 }
