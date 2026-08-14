@@ -269,13 +269,7 @@ class is_operational_impl
             number_of_output_wires{output_bdl_wires.size()},
             number_of_input_wires{input_bdl_wires.size()},
             canvas_lyt{c_lyt}
-    {
-        if (params.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
-        {
-            output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                                params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
-        }
-    }
+    {}
 
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
