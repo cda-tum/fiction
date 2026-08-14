@@ -160,8 +160,6 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
     {
         operational_domain_params zero_dimensional_params{};
         operational_domain_params one_dimensional_params{};
-        operational_domain_params three_dimensional_params{};
-        operational_domain_params four_dimensional_params{};
 
         // 0-dimensional
         zero_dimensional_params.sweep_dimensions = {};
@@ -169,21 +167,11 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         // 1-dimensional
         one_dimensional_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R}};
 
-        // 3-dimensional
-        three_dimensional_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R},
-                                                     {.dimension = sweep_parameter::LAMBDA_TF},
-                                                     {.dimension = sweep_parameter::MU_MINUS}};
-
-        // 4-dimensional
-        four_dimensional_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R},
-                                                    {.dimension = sweep_parameter::LAMBDA_TF},
-                                                    {.dimension = sweep_parameter::MU_MINUS},
-                                                    {.dimension = sweep_parameter::EPSILON_R}};
-
         SECTION("flood_fill")
         {
-            // flood fill operates on 2-dimensional and 3-dimensional parameter spaces
-            for (const auto& params : {zero_dimensional_params, one_dimensional_params, four_dimensional_params})
+            // flood fill needs a neighborhood to expand over, so it requires at least two dimensions. Three and more
+            // are supported; the three-dimensional cases are covered on an actual gate below
+            for (const auto& params : {zero_dimensional_params, one_dimensional_params})
             {
                 CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
@@ -191,9 +179,8 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         }
         SECTION("contour_tracing")
         {
-            // contour tracing operates only on 2-dimensional parameter spaces
-            for (const auto& params :
-                 {zero_dimensional_params, one_dimensional_params, three_dimensional_params, four_dimensional_params})
+            // contour tracing needs a boundary to trace, so it requires at least two dimensions
+            for (const auto& params : {zero_dimensional_params, one_dimensional_params})
             {
                 CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
@@ -476,6 +463,67 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
 
                 REQUIRE(grid_status.has_value());
                 CHECK(std::get<0>(status) == std::get<0>(grid_status.value()));
+            });
+    }
+}
+
+TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
+{
+    // in three dimensions the boundary of the operational region is a surface rather than a curve, so it is collected
+    // by a breadth-first search over the operational points that border a non-operational one instead of being walked
+    // in clockwise order. What the algorithm promises is unchanged: every point it reports was either simulated or
+    // enclosed by the traced boundary
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    operational_domain_params params{};
+    params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
+
+    const auto exhaustive = operational_domain_grid_search(lat, std::vector{create_and_tt()}, params);
+
+    REQUIRE(exhaustive.size() == 50);
+
+    SECTION("agrees with the grid search on every point it reports")
+    {
+        operational_domain_stats stats{};
+
+        const auto traced = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, params, &stats);
+
+        // tracing only samples the boundary and its surroundings, so it must not cover the whole space
+        CHECK(traced.size() <= exhaustive.size());
+        CHECK(stats.num_evaluated_parameter_combinations <= exhaustive.size());
+
+        traced.for_each(
+            [&exhaustive](const auto& parameter_point, const auto& status)
+            {
+                const auto expected = exhaustive.contains(parameter_point);
+
+                REQUIRE(expected.has_value());
+                CHECK(std::get<0>(status) == std::get<0>(expected.value()));
+            });
+    }
+
+    SECTION("carries the operational domain sketch")
+    {
+        auto sketch_params                            = params;
+        sketch_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        sketch_params.operational_params.strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+        const auto grid_sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
+        const auto traced_sketch =
+            operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, sketch_params);
+
+        traced_sketch.for_each(
+            [&grid_sketch](const auto& parameter_point, const auto& status)
+            {
+                const auto expected = grid_sketch.contains(parameter_point);
+
+                REQUIRE(expected.has_value());
+                CHECK(std::get<0>(status) == std::get<0>(expected.value()));
             });
     }
 }

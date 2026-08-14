@@ -622,8 +622,7 @@ class operational_domain_impl
     flood_fill(const std::size_t                     samples,
                const std::optional<parameter_point>& given_parameter_point = std::nullopt) noexcept
     {
-        assert((num_dimensions == 2 || num_dimensions == 3) &&
-               "Flood fill is only supported for two and three dimensions");
+        assert(num_dimensions >= 2 && "Flood fill is only supported for two or more dimensions");
 
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -665,7 +664,7 @@ class operational_domain_impl
         {
             std::vector<step_point> unknown{};
 
-            const auto neighborhood = num_dimensions == 2 ? moore_neighborhood_2d(sp) : moore_neighborhood_3d(sp);
+            const auto neighborhood = moore_neighborhood(sp);
 
             std::ranges::copy_if(neighborhood, std::back_inserter(unknown),
                                  [this](const auto& m) noexcept { return !op_domain.contains(to_parameter_point(m)); });
@@ -779,7 +778,23 @@ class operational_domain_impl
     // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
     [[nodiscard]] OpDomain contour_tracing(const std::size_t samples) noexcept
     {
-        assert(num_dimensions == 2 && "Contour tracing is only supported for two dimensions");
+        assert(num_dimensions >= 2 && "Contour tracing is only supported for two or more dimensions");
+
+        // Moore contour tracing walks a closed curve by repeatedly taking the next neighbor in clockwise order. That
+        // ordering exists only in the plane, so three or more dimensions, where the boundary is a surface rather than
+        // a curve, need the boundary-collecting variant instead
+        return num_dimensions == 2 ? trace_contour_curve(samples) : trace_boundary_surface(samples);
+    }
+    /**
+     * Traces the contour of the operational domain in two dimensions by Moore contour tracing.
+     *
+     * @param samples Maximum number of random samples to be taken before contour tracing.
+     * @return The (partial) operational domain of the layout.
+     */
+    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
+    [[nodiscard]] OpDomain trace_contour_curve(const std::size_t samples) noexcept
+    {
+        assert(num_dimensions == 2 && "Moore contour tracing is only supported for two dimensions");
 
         const mockturtle::stopwatch stop{stats.time_total};
 
@@ -863,6 +878,108 @@ class operational_domain_impl
 
                 current_neighborhood = moore_neighborhood_2d(current_contour_point);
                 next_point           = next_clockwise_point(current_neighborhood, backtrack_point);
+            }
+
+            infer_operational_status_in_enclosing_contour(starting_point, contour);
+        }
+
+        log_stats();
+
+        return op_domain;
+    }
+    /**
+     * Traces the boundary surface of the operational domain in three or more dimensions.
+     *
+     * This serves the same purpose as the two-dimensional Moore contour trace — sample only the boundary of an
+     * operational region and infer its interior — but collects the boundary instead of walking it. A closed curve can
+     * be walked because its neighbors admit a cyclic order; a closed surface cannot, so the boundary is gathered by a
+     * breadth-first search over the operational points that have at least one non-operational Moore neighbor. The
+     * resulting set is closed under the Moore neighborhood, which is what the interior inference requires.
+     *
+     * @param samples Maximum number of random samples to be taken before tracing.
+     * @return The (partial) operational domain of the layout.
+     */
+    // NOLINTNEXTLINE(bugprone-exception-escape): only allocation can throw, which is fatal to the algorithm anyway
+    [[nodiscard]] OpDomain trace_boundary_surface(const std::size_t samples) noexcept
+    {
+        assert(num_dimensions >= 3 && "Boundary surface tracing is intended for three or more dimensions");
+
+        const mockturtle::stopwatch stop{stats.time_total};
+
+        const auto step_point_samples = generate_random_step_points(samples);
+
+        simulate_operational_status_in_parallel(step_point_samples);
+
+        // a step point is on the boundary if it is operational and borders a non-operational point or the edge of the
+        // parameter range. The latter is implied: `moore_neighborhood` does not gather points outside the range, so a
+        // point at the edge has fewer than `3^n - 1` neighbors
+        const auto is_boundary_point = [this](const step_point& sp) noexcept
+        {
+            const auto neighborhood = moore_neighborhood(sp);
+
+            if (neighborhood.size() < static_cast<std::size_t>(std::pow(3, num_dimensions)) - 1)
+            {
+                return true;
+            }
+
+            return std::ranges::any_of(neighborhood, [this](const auto& m) noexcept
+                                       { return is_step_point_operational(m) == operational_status::NON_OPERATIONAL; });
+        };
+
+        for (const auto& starting_point : step_point_samples)
+        {
+            // if the current starting point is non-operational, skip to the next one
+            const auto domain_value = op_domain.contains(to_parameter_point(starting_point));
+            if (domain_value.has_value())
+            {
+                if (std::get<0>(domain_value.value()) == operational_status::NON_OPERATIONAL)
+                {
+                    continue;
+                }
+            }
+
+            // if the current step point has been inferred as operational, skip to the next one
+            if (is_step_point_inferred_operational(starting_point))
+            {
+                continue;
+            }
+
+            // find an operational point on the boundary starting from the randomly determined starting point
+            const auto boundary_starting_point = find_operational_contour_step_point(starting_point);
+
+            // all step points visited by the boundary trace; they form a closed surface that encloses the operational
+            // region `starting_point` is located in
+            phmap::btree_set<step_point> contour{};
+
+            std::queue<step_point>       queue{};
+            phmap::btree_set<step_point> visited{boundary_starting_point};
+
+            queue.push(boundary_starting_point);
+
+            while (!queue.empty())
+            {
+                const auto sp = queue.front();
+                queue.pop();
+
+                if (!is_boundary_point(sp))
+                {
+                    continue;
+                }
+
+                contour.insert(sp);
+
+                for (const auto& m : moore_neighborhood(sp))
+                {
+                    if (!visited.insert(m).second)
+                    {
+                        continue;
+                    }
+
+                    if (is_step_point_operational(m) == operational_status::OPERATIONAL)
+                    {
+                        queue.push(m);
+                    }
+                }
             }
 
             infer_operational_status_in_enclosing_contour(starting_point, contour);
@@ -1505,17 +1622,18 @@ class operational_domain_impl
      */
     [[nodiscard]] step_point find_operational_contour_step_point(const step_point& starting_point) noexcept
     {
-        assert(num_dimensions == 2 && "Contour tracing is only supported for two dimensions");
-        assert(starting_point.step_values.size() == 2 && "Given step point must have 2 dimensions");
+        assert(starting_point.step_values.size() == num_dimensions &&
+               "Given step point must match the number of dimensions");
 
         auto latest_operational_point = starting_point;
 
-        // move towards the left border of the parameter range
+        // move towards the lower border of the first dimension, holding all other dimensions fixed
         for (std::size_t x = starting_point.step_values.at(0); x > 0; --x)
         {
-            const auto y = starting_point.step_values.at(1);
+            auto left_step_values  = starting_point.step_values;
+            left_step_values.at(0) = x;
 
-            const auto left_step = step_point{{x, y}};
+            const auto left_step = step_point{left_step_values};
 
             const auto operational_status = is_step_point_operational(left_step);
 
@@ -1610,116 +1728,96 @@ class operational_domain_impl
         return neighbors;
     }
     /**
-     * Returns the 2D von Neumann neighborhood of the step point at `sp = (x, y)`. The 2D von Neumann neighborhood is
-     * the set of all points that are adjacent to `(x, y)` in the plane excluding the diagonals. Thereby, the 2D von
-     * Neumann neighborhood contains up to 4 points as points outside of the parameter range are not gathered. The
-     * points are returned in no particular order.
+     * Returns the von Neumann neighborhood of the given step point. The von Neumann neighborhood is the set of all
+     * points that differ from `sp` by one step in exactly one dimension, i.e., the axis-aligned neighbors excluding
+     * the diagonals. It contains up to `2n` points for `n` sweep dimensions, as points outside of the parameter range
+     * are not gathered. The points are returned in no particular order.
      *
-     * @param sp Step point to get the 2D von Neumann neighborhood of.
-     * @return The 2D von Neumann neighborhood of the step point at `sp = (x, y)`.
+     * @param sp Step point to get the von Neumann neighborhood of.
+     * @return The von Neumann neighborhood of `sp`.
      */
-    [[nodiscard]] std::vector<step_point> von_neumann_neighborhood_2d(const step_point& sp) const noexcept
+    [[nodiscard]] std::vector<step_point> von_neumann_neighborhood(const step_point& sp) const noexcept
     {
-        assert(num_dimensions == 2 && "2D von Neumann neighborhood is only supported for 2 dimensions");
-        assert(sp.step_values.size() == 2 && "Given step point must have 2 dimensions");
+        assert(sp.step_values.size() == num_dimensions && "Given step point must match the number of dimensions");
 
         std::vector<step_point> neighbors{};
-        neighbors.reserve(4);
+        neighbors.reserve(2 * num_dimensions);
 
-        const auto emplace = [&neighbors](const auto x, const auto y) noexcept
-        { neighbors.emplace_back(std::vector<std::size_t>{x, y}); };
-
-        // both containers hold exactly two elements in the 2-dimensional case asserted above, so the first and the
-        // last element are the x and the y dimension, respectively
-        const auto x = sp.step_values.front();
-        const auto y = sp.step_values.back();
-
-        const auto num_x_indices = indices.front().size();
-        const auto num_y_indices = indices.back().size();
-
-        const auto decr_x = (x > 0) ? x - 1 : x;
-        const auto incr_x = (x + 1 < num_x_indices) ? x + 1 : x;
-        const auto decr_y = (y > 0) ? y - 1 : y;
-        const auto incr_y = (y + 1 < num_y_indices) ? y + 1 : y;
-
-        // right
-        if (x != incr_x)
+        for (auto d = 0u; d < num_dimensions; ++d)
         {
-            emplace(incr_x, y);
-        }
-        // down
-        if (y != decr_y)
-        {
-            emplace(x, decr_y);
-        }
-        // left
-        if (x != decr_x)
-        {
-            emplace(decr_x, y);
-        }
-        // up
-        if (y != incr_y)
-        {
-            emplace(x, incr_y);
+            const auto step = sp.step_values.at(d);
+
+            if (step > 0)
+            {
+                auto decremented  = sp.step_values;
+                decremented.at(d) = step - 1;
+                neighbors.emplace_back(decremented);
+            }
+            if (step + 1 < indices.at(d).size())
+            {
+                auto incremented  = sp.step_values;
+                incremented.at(d) = step + 1;
+                neighbors.emplace_back(incremented);
+            }
         }
 
         return neighbors;
     }
     /**
-     * Returns the 3D Moore neighborhood of the step point at `sp = (x, y, z)`. The 3D Moore neighborhood is the set of
-     * all points that are adjacent to `(x, y, z)` in the 3D space including the diagonals. Thereby, the 3D Moore
-     * neighborhood contains up to 26 points as points outside of the parameter range are not gathered. The points are
-     * returned in no particular order.
+     * Returns the Moore neighborhood of the given step point. The Moore neighborhood is the set of all points that
+     * differ from `sp` by at most one step in every dimension, i.e., the adjacent points including the diagonals. It
+     * contains up to `3^n - 1` points for `n` sweep dimensions, as points outside of the parameter range are not
+     * gathered. The points are returned in no particular order.
      *
-     * @param sp Step point to get the 3D Moore neighborhood of.
-     * @return The 3D Moore neighborhood of the step point at `sp = (x, y, z)`.
+     * `moore_neighborhood_2d` returns the same set for two dimensions, but in clockwise order, which the 2D contour
+     * trace depends on. This function cannot replace it: there is no canonical cyclic ordering of the neighbors in
+     * three or more dimensions.
+     *
+     * @param sp Step point to get the Moore neighborhood of.
+     * @return The Moore neighborhood of `sp`.
      */
-    [[nodiscard]] std::vector<step_point> moore_neighborhood_3d(const step_point& sp) const noexcept
+    [[nodiscard]] std::vector<step_point> moore_neighborhood(const step_point& sp) const noexcept
     {
-        assert(num_dimensions == 3 && "3D Moore neighborhood is only supported for 3 dimensions");
-        assert(sp.step_values.size() == 3 && "Given step point must have 3 dimensions");
+        assert(sp.step_values.size() == num_dimensions && "Given step point must match the number of dimensions");
+
+        // 3^n offsets, one of which is the center point itself
+        const auto num_offsets = static_cast<std::size_t>(std::pow(3, num_dimensions));
 
         std::vector<step_point> neighbors{};
-        neighbors.reserve(26);
+        neighbors.reserve(num_offsets - 1);
 
-        const auto emplace = [&neighbors](const auto x, const auto y, const auto z) noexcept
-        { neighbors.emplace_back(std::vector<std::size_t>{x, y, z}); };
-
-        const auto x = sp.step_values.at(0);
-        const auto y = sp.step_values.at(1);
-        const auto z = sp.step_values.at(2);
-
-        const auto num_x_indices = indices.at(0).size();
-        const auto num_y_indices = indices.at(1).size();
-        const auto num_z_indices = indices.at(2).size();
-
-        // add neighbors in no particular order
-
-        // iterate over all combinations of (-1, 0, 1) offsets for x, y, and z
-        for (const int64_t x_offset : {-1, 0, 1})
+        // enumerate the offset vectors in {-1, 0, 1}^n as a mixed-radix counter over base 3
+        for (std::size_t offset_index = 0; offset_index < num_offsets; ++offset_index)
         {
-            for (const int64_t y_offset : {-1, 0, 1})
+            auto neighbor    = sp.step_values;
+            auto remainder   = offset_index;
+            bool is_center   = true;
+            bool is_in_range = true;
+
+            for (auto d = 0u; d < num_dimensions; ++d)
             {
-                for (const int64_t z_offset : {-1, 0, 1})
+                const auto offset = static_cast<int64_t>(remainder % 3) - 1;
+                remainder /= 3;
+
+                if (offset != 0)
                 {
-                    // skip the center cell
-                    if (x_offset == 0 && y_offset == 0 && z_offset == 0)
-                    {
-                        continue;
-                    }
-
-                    // calculate new coordinate
-                    const int64_t dx = static_cast<int64_t>(x) + x_offset;
-                    const int64_t dy = static_cast<int64_t>(y) + y_offset;
-                    const int64_t dz = static_cast<int64_t>(z) + z_offset;
-
-                    // check if the new coordinate is within the bounds
-                    if ((dx >= 0 && std::cmp_less(dx, num_x_indices)) &&
-                        (dy >= 0 && std::cmp_less(dy, num_y_indices)) && (dz >= 0 && std::cmp_less(dz, num_z_indices)))
-                    {
-                        emplace(static_cast<uint64_t>(dx), static_cast<uint64_t>(dy), static_cast<uint64_t>(dz));
-                    }
+                    is_center = false;
                 }
+
+                const auto step = static_cast<int64_t>(sp.step_values.at(d)) + offset;
+
+                if (step < 0 || std::cmp_greater_equal(step, indices.at(d).size()))
+                {
+                    is_in_range = false;
+                    break;
+                }
+
+                neighbor.at(d) = static_cast<std::size_t>(step);
+            }
+
+            if (!is_center && is_in_range)
+            {
+                neighbors.emplace_back(neighbor);
             }
         }
 
@@ -1735,10 +1833,11 @@ class operational_domain_impl
      * The function starts at the given starting point and performs flood fill to mark all points that are reachable
      * from the starting point until it encounters the traced contour.
      *
-     * The flood fill expands over the von Neumann (4-connected) neighborhood, while the given contour is a closed
-     * 8-connected curve. Since a 4-connected path cannot cross an 8-connected closed curve, the inference is
-     * guaranteed to stay within the area enclosed by the contour. Points on the contour itself are marked, but not
-     * expanded from.
+     * The flood fill expands over the von Neumann neighborhood, which connects `2n` points for `n` sweep dimensions,
+     * while the given contour is closed under the Moore neighborhood, which connects `3^n - 1`. A `2n`-connected path
+     * cannot cross a `(3^n - 1)`-connected closed boundary, so the inference is guaranteed to stay within the region
+     * the contour encloses. In two dimensions this is the familiar pairing of a 4-connected path against an
+     * 8-connected closed curve. Points on the contour itself are marked, but not expanded from.
      *
      * Note that no physical simulation is conducted by this function!
      *
@@ -1750,7 +1849,6 @@ class operational_domain_impl
     void infer_operational_status_in_enclosing_contour(const step_point&                   starting_point,
                                                        const phmap::btree_set<step_point>& contour) noexcept
     {
-        assert(num_dimensions == 2 && "This function is only supported for two dimensions");
         assert(is_step_point_operational(starting_point) == operational_status::OPERATIONAL &&
                "starting_point must be within the operational domain");
 
@@ -1760,7 +1858,7 @@ class operational_domain_impl
             return;
         }
 
-        // a queue of (x, y) dimension step points to be marked as inferred operational
+        // a queue of step points to be marked as inferred operational
         std::queue<step_point> queue{};
 
         // mark the starting point as inferred operational and use it to seed the flood fill
@@ -1780,7 +1878,7 @@ class operational_domain_impl
                 continue;
             }
 
-            for (const auto& m : von_neumann_neighborhood_2d(sp))
+            for (const auto& m : von_neumann_neighborhood(sp))
             {
                 // if the point has already been inferred as operational, continue with the next
                 if (is_step_point_inferred_operational(m))
@@ -1978,9 +2076,9 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
+    if (params.sweep_dimensions.size() < 2)
     {
-        throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
+        throw std::invalid_argument("Flood fill is only applicable to 2 or more dimensions");
     }
 
     // this may throw an `std::invalid_argument` exception
@@ -2040,9 +2138,9 @@ template <typename Lyt, typename TT>
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() != 2)
+    if (params.sweep_dimensions.size() < 2)
     {
-        throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
+        throw std::invalid_argument("Contour tracing is only applicable to 2 or more dimensions");
     }
 
     // this may throw an `std::invalid_argument` exception
@@ -2192,9 +2290,9 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
+    if (params.sweep_dimensions.size() < 2)
     {
-        throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
+        throw std::invalid_argument("Flood fill is only applicable to 2 or more dimensions");
     }
 
     // this may throw an `std::invalid_argument` exception
@@ -2253,9 +2351,9 @@ critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() != 2)
+    if (params.sweep_dimensions.size() < 2)
     {
-        throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
+        throw std::invalid_argument("Contour tracing is only applicable to 2 or more dimensions");
     }
 
     // this may throw an `std::invalid_argument` exception
