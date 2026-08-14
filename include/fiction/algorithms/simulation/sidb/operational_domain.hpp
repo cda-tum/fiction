@@ -1816,10 +1816,11 @@ template <typename Lyt, typename TT>
                                                                 const operational_domain_params& params = {},
                                                                 operational_domain_stats*        stats  = nullptr)
 {
-    // do not convert the `static_assert` type checks in this file's public entry points into `requires` clauses:
-    // pybind11_mkdoc's pinned `clang==15.0.7` parser (see .github/workflows/pyfiction-docstring-generator.yml) then
-    // fails to associate the Doxygen comments of the declarations that follow, breaking the pyfiction docs build.
-    // `kitty` also provides no `is_truth_table_v` alias that would simplify the third check
+    // do not convert the `static_assert` type checks in this file's public entry points into `requires` clauses: the
+    // pyfiction docstring generator parses this header as C++11 (see the note on `manhattan_distance` in
+    // `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that drops the Doxygen comments of
+    // the declarations that follow. `kitty` also provides no `is_truth_table_v` alias that would simplify the third
+    // check
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");

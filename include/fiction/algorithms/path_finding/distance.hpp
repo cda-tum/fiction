@@ -34,10 +34,13 @@ template <typename Lyt, typename Dist = uint64_t>
                                                 const coordinate<Lyt>& target) noexcept
 {
     // do not convert the `static_assert` type checks of this file's free functions into `requires` clauses with
-    // `std::integral`/`std::floating_point`: these functions are bound in pyfiction, and the clause breaks
-    // pybind11_mkdoc's pinned `clang==15.0.7` parser (see .github/workflows/pyfiction-docstring-generator.yml) when
-    // matching generated docstring symbols to their binding call sites, failing the compiled-extension build. The
-    // same applies to `cost.hpp` and `a_star.hpp`
+    // `std::integral`/`std::floating_point`. The pyfiction docstring generator
+    // (.github/workflows/pyfiction-docstring-generator.yml) runs pybind11_mkdoc with neither `-I include` nor an
+    // `-std` flag, so it parses these headers as C++11 with unresolved project includes. A `requires` clause is a
+    // syntax error there, and it aborts the enclosing declaration list, dropping the Doxygen comments of everything
+    // declared after it. Passing `-std=c++20` alone makes this worse, not better: it cut the generated docstrings
+    // from 3292 to 1769 on CI. Fixing the include path is the prerequisite for revisiting it. The same applies to
+    // `cost.hpp` and `a_star.hpp`
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
 
