@@ -184,6 +184,11 @@ class hexagonal_layout
      */
     explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
     {
+        // do not convert this `static_assert` disjunction, or its twin in the constructor below, into a `requires`
+        // clause: pybind11_mkdoc's pinned `clang==15.0.7` parser (see
+        // .github/workflows/pyfiction-docstring-generator.yml) then fails to associate the Doxygen comments of the
+        // ~60 member functions declared after these constructors, breaking the fully bound `hexagonal_layout`
+        // bindings' ReadTheDocs build
         static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||

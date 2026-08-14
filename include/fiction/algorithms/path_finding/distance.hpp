@@ -33,6 +33,11 @@ template <typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] constexpr Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
+    // do not convert the `static_assert` type checks of this file's free functions into `requires` clauses with
+    // `std::integral`/`std::floating_point`: these functions are bound in pyfiction, and the clause breaks
+    // pybind11_mkdoc's pinned `clang==15.0.7` parser (see .github/workflows/pyfiction-docstring-generator.yml) when
+    // matching generated docstring symbols to their binding call sites, failing the compiled-extension build. The
+    // same applies to `cost.hpp` and `a_star.hpp`
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
 
