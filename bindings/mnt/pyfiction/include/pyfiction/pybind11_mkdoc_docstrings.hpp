@@ -659,6 +659,21 @@ starting pair. The resulting last BDL pairs are stored in
 @note Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
 accessible within the scope.)doc";
 
+static const char *__doc_fiction_bdl_input_iterator_determine_upper_input_closer_to_wire_end =
+R"doc(Determines, for each input BDL pair, whether its upper dot is closer
+to the end of its wire than its lower dot.
+
+`set_all_inputs` needs only this comparison, not the distances
+themselves, and both operands are fixed for this object's lifetime.
+Evaluating it once here keeps the two `sidb_nm_distance` calls per
+input pair out of every increment.
+
+@note Assumes that `input_pairs` and `last_bdl_for_each_wire` are
+already initialized.
+
+Returns:
+    One flag per input BDL pair, indexed like `input_pairs`.)doc";
+
 static const char *__doc_fiction_bdl_input_iterator_get_current_input_index =
 R"doc(Returns the current input index.
 
@@ -884,6 +899,14 @@ index. The input index is interpreted as a binary number, where the
 BDL pair. If the bit is `1`, the lower BDL dot is set and the upper
 BDL dot removed. If the bit is `0`, the upper BDL dot is removed and
 the lower BDL dot set.)doc";
+
+static const char *__doc_fiction_bdl_input_iterator_upper_input_closer_to_wire_end =
+R"doc(For each input BDL pair, whether its upper dot is closer to the end of
+its wire than its lower dot.
+
+This only depends on `input_pairs` and `last_bdl_for_each_wire`, both
+of which are fixed for this object's lifetime, so it is determined
+once here instead of on every increment in `set_all_inputs`.)doc";
 
 static const char *__doc_fiction_bdl_pair =
 R"doc(A Binary-dot Logic (BDL) pair is a pair of SiDBs that are close to
@@ -3844,7 +3867,11 @@ Returns:
     The critical temperature domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Flood fill and contour
+    tracing additionally require at least two sweep dimensions; grid
+    search and random sampling accept any number.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_critical_temperature_domain = R"doc(Default constructor.)doc";
 
@@ -3909,7 +3936,11 @@ Returns:
     The critical temperature domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Flood fill and contour
+    tracing additionally require at least two sweep dimensions; grid
+    search and random sampling accept any number.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_get_dimension =
 R"doc(Returns a specific dimension by index.
@@ -3936,16 +3967,16 @@ combinations for which the layout is logically operational, along with
 the critical temperature for each specific parameter point.
 
 This algorithm uses a grid search to find the operational domain. The
-grid search is performed by exhaustively sweeping the parameter space
-in the x and y dimensions. Since grid search is exhaustive, the
-algorithm is guaranteed to find the operational domain, if it exists
-within the parameter range. However, the algorithm performs a
-quadratic number of operational checks on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+grid search is performed by exhaustively sweeping all sweep
+dimensions. Since grid search is exhaustive, the algorithm is
+guaranteed to find the operational domain, if it exists within the
+parameter range. However, the algorithm performs one operational check
+per parameter combination, i.e., the product of the step counts of all
+sweep dimensions, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -3970,7 +4001,10 @@ Returns:
     The critical temperature domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Any number of sweep
+    dimensions is accepted.)doc";
 
 static const char *__doc_fiction_critical_temperature_domain_maximum_ct =
 R"doc(Finds the maximum critical temperature in the domain.
@@ -4026,7 +4060,10 @@ Returns:
     The critical temperature domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Any number of sweep
+    dimensions is accepted.)doc";
 
 static const char *__doc_fiction_critical_temperature_gate_based =
 R"doc(This algorithm performs temperature-aware SiDB simulation as proposed
@@ -4063,8 +4100,8 @@ Returns:
     The critical temperature (unit: K).)doc";
 
 static const char *__doc_fiction_critical_temperature_gate_based_2 =
-R"doc(*Gate-based Critical Temperature* simulation of an SiDB layout from its
-pre-generated input pattern layouts.
+R"doc(*Gate-based Critical Temperature* simulation of an SiDB layout from
+its pre-generated input pattern layouts.
 
 This overload takes one layout per input pattern together with the BDL
 detection results, instead of deriving all of them from the layout.
@@ -4542,6 +4579,15 @@ the layout.)doc";
 static const char *__doc_fiction_defect_influence_params_influence_definition_OPERATIONALITY_CHANGE =
 R"doc(Influence is considered as the ability to change the operational
 status of the layout.)doc";
+
+static const char *__doc_fiction_defect_influence_params_number_of_threads =
+R"doc(Number of worker threads to distribute the defect positions over.
+Defaults to the number of hardware threads, which is the behavior this
+setting replaces. Values below `1` are treated as `1`.
+
+Pinning it makes wall-clock comparisons reproducible across runs and
+machines, and allows a defect influence computation to leave cores
+free for other work.)doc";
 
 static const char *__doc_fiction_defect_influence_params_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
@@ -6031,6 +6077,36 @@ static const char *__doc_fiction_detail_critical_temperature_impl_critical_tempe
 
 static const char *__doc_fiction_detail_critical_temperature_impl_critical_temperature_impl = R"doc()doc";
 
+static const char *__doc_fiction_detail_critical_temperature_impl_critical_temperature_impl_2 =
+R"doc(Constructor to initialize the algorithm with a pre-generated input
+configuration.
+
+None of the BDL detection results depend on the simulation parameters,
+so a caller that simulates the same layout under many parameter
+settings can determine them once and pass them to every call. The
+layouts and the detection results are not copied, are only read, and
+must outlive this object; the same ones may be shared by concurrently
+running instances.
+
+Parameter ``input_pattern_lyts``:
+    One layout per input pattern, indexed by input pattern, as
+    generated by `generate_bdl_input_pattern_layouts`.
+
+Parameter ``ps``:
+    Parameters for the critical temperature algorithm.
+
+Parameter ``st``:
+    Statistics of the process.
+
+Parameter ``output_pairs``:
+    Output BDL pairs of the layout.
+
+Parameter ``input_wires``:
+    BDL input wires of the layout.
+
+Parameter ``output_wires``:
+    BDL output wires of the layout.)doc";
+
 static const char *__doc_fiction_detail_critical_temperature_impl_determine_critical_temperature =
 R"doc(The *Critical Temperature* is determined.
 
@@ -6055,6 +6131,11 @@ R"doc(Returns the critical temperature.
 Returns:
     The critical temperature (unit: K).)doc";
 
+static const char *__doc_fiction_detail_critical_temperature_impl_input_pattern_layouts =
+R"doc(Pre-generated layouts, one per input pattern, or `nullptr` if the BDL
+input iterator is used instead. Not owned by this object and only ever
+read.)doc";
+
 static const char *__doc_fiction_detail_critical_temperature_impl_is_ground_state_transparent =
 R"doc(The energy difference between the ground state and the first erroneous
 state is determined. Additionally, the state type of the ground state
@@ -6074,24 +6155,47 @@ Returns:
 
 static const char *__doc_fiction_detail_critical_temperature_impl_layout = R"doc(SiDB cell-level layout.)doc";
 
+static const char *__doc_fiction_detail_critical_temperature_impl_layout_with_input_pattern =
+R"doc(Returns the layout with the given input pattern applied.
+
+Reads from the pre-generated input pattern layouts if they were
+supplied, and drives the BDL input iterator to the requested pattern
+otherwise.
+
+Parameter ``input_pattern``:
+    The input pattern to apply.
+
+Returns:
+    The layout with `input_pattern` applied.)doc";
+
 static const char *__doc_fiction_detail_critical_temperature_impl_non_gate_based_simulation =
 R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
 given Boolean function.)doc";
 
 static const char *__doc_fiction_detail_critical_temperature_impl_params = R"doc(Parameters for the critical_temperature algorithm.)doc";
 
-static const char *__doc_fiction_detail_critical_temperature_impl_physical_simulation_of_bdl_iterator =
+static const char *__doc_fiction_detail_critical_temperature_impl_physical_simulation_of_layout =
 R"doc(This function conducts physical simulation of the given layout (gate
 layout with certain input combination). The simulation results are
 stored in the `sim_result_100` variable.
 
-Parameter ``bdl_iterator``:
-    A reference to a BDL input iterator representing the gate layout
-    at a given input combination. The simulation is performed based on
-    the configuration represented by the iterator.
+Parameter ``lyt_with_input_pattern``:
+    The SiDB layout with a given input combination applied.
 
 Returns:
     Simulation results.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_pre_detected_input_bdl_wires =
+R"doc(Pre-detected input BDL wires, or `nullptr` if they are to be detected
+here. Not owned by this object.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_pre_detected_output_bdl_pairs =
+R"doc(Pre-detected output BDL pairs, or `nullptr` if they are to be detected
+here. Not owned by this object.)doc";
+
+static const char *__doc_fiction_detail_critical_temperature_impl_pre_detected_output_bdl_wires =
+R"doc(Pre-detected output BDL wires, or `nullptr` if they are to be detected
+here. Not owned by this object.)doc";
 
 static const char *__doc_fiction_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
@@ -6197,7 +6301,9 @@ static const char *__doc_fiction_detail_defect_influence_impl_num_evaluated_defe
 
 static const char *__doc_fiction_detail_defect_influence_impl_num_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
-static const char *__doc_fiction_detail_defect_influence_impl_num_threads = R"doc(Number of available hardware threads.)doc";
+static const char *__doc_fiction_detail_defect_influence_impl_num_threads =
+R"doc(Number of worker threads to distribute the defect positions over,
+taken from the parameters and floored at `1`.)doc";
 
 static const char *__doc_fiction_detail_defect_influence_impl_nw_bb_layout = R"doc(The north-west cell of the bounding box of the layout.)doc";
 
@@ -8800,6 +8906,37 @@ Parameter ``spec``:
 
 static const char *__doc_fiction_detail_is_operational_impl_bii = R"doc(Iterator that iterates over all possible input states.)doc";
 
+static const char *__doc_fiction_detail_is_operational_impl_canvas_cds =
+R"doc(The charge distribution surface of the canvas layout, enumerated by
+`is_physical_validity_feasible`. It is built on first use and reused
+afterwards, since the canvas does not change over this object's
+lifetime. Empty until then, so that the strategies that never inspect
+the canvas do not pay for it.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_canvas_charge_distribution =
+R"doc(Returns the charge distribution surface of the canvas layout,
+constructing it on first use.
+
+Constructing it means computing the potential matrix over the canvas
+SiDBs, which `is_physical_validity_feasible` would otherwise repeat on
+each of its calls even though the canvas is fixed. The caller is
+responsible for resetting the charge index; the base number and the
+dependent cell are set here and stay valid.
+
+Returns:
+    The canvas charge distribution surface.)doc";
+
+static const char *__doc_fiction_detail_is_operational_impl_canvas_filtering_applicable =
+R"doc(Whether the canvas-based filtering steps can be applied. They need a
+canvas to enumerate, they are skipped by `SIMULATION_ONLY`, and they
+are only defined for `REJECT_KINKS`.
+
+This is the single place the condition is decided. The entry points
+build a canvas whenever the layout has `LOGIC` cells and leave it to
+`run()` to determine whether the filtering applies, so that the same
+layout and the same parameters take the same path regardless of which
+overload the caller reached.)doc";
+
 static const char *__doc_fiction_detail_is_operational_impl_canvas_lyt = R"doc(Layout consisting of all canvas SiDBs.)doc";
 
 static const char *__doc_fiction_detail_is_operational_impl_check_existence_of_kinks_in_input_wires =
@@ -9303,8 +9440,9 @@ Returns:
 
 static const char *__doc_fiction_detail_operational_domain_impl_grid_search =
 R"doc(Performs a grid search over the specified parameter ranges with the
-specified step sizes. The grid search always has quadratic complexity.
-The operational status is computed for each parameter combination.
+specified step sizes. The grid search evaluates the product of the
+step counts of all sweep dimensions. The operational status is
+computed for each parameter combination.
 
 Returns:
     The operational domain of the layout.)doc";
@@ -9339,12 +9477,14 @@ The function starts at the given starting point and performs flood
 fill to mark all points that are reachable from the starting point
 until it encounters the traced contour.
 
-The flood fill expands over the von Neumann (4-connected)
-neighborhood, while the given contour is a closed 8-connected curve.
-Since a 4-connected path cannot cross an 8-connected closed curve, the
-inference is guaranteed to stay within the area enclosed by the
-contour. Points on the contour itself are marked, but not expanded
-from.
+The flood fill expands over the von Neumann neighborhood, which
+connects `2n` points for `n` sweep dimensions, while the given contour
+is closed under the Moore neighborhood, which connects `3^n - 1`. A
+`2n`-connected path cannot cross a `(3^n - 1)`-connected closed
+boundary, so the inference is guaranteed to stay within the region the
+contour encloses. In two dimensions this is the familiar pairing of a
+4-connected path against an 8-connected closed curve. Points on the
+contour itself are marked, but not expanded from.
 
 Note that no physical simulation is conducted by this function!
 
@@ -9439,6 +9579,25 @@ can occur during the computation, each value is temporarily held in an
 atomic variable and written to the statistics object only after the
 computation has finished.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood =
+R"doc(Returns the Moore neighborhood of the given step point. The Moore
+neighborhood is the set of all points that differ from `sp` by at most
+one step in every dimension, i.e., the adjacent points including the
+diagonals. It contains up to `3^n - 1` points for `n` sweep
+dimensions, as points outside of the parameter range are not gathered.
+The points are returned in no particular order.
+
+`moore_neighborhood_2d` returns the same set for two dimensions, but
+in clockwise order, which the 2D contour trace depends on. This
+function cannot replace it: there is no canonical cyclic ordering of
+the neighbors in three or more dimensions.
+
+Parameter ``sp``:
+    Step point to get the Moore neighborhood of.
+
+Returns:
+    The Moore neighborhood of `sp`.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_2d =
 R"doc(Returns the 2D Moore neighborhood of the step point at `sp = (x, y)`.
 The 2D Moore neighborhood is the set of all points that are adjacent
@@ -9453,20 +9612,6 @@ Parameter ``sp``:
 Returns:
     The 2D Moore neighborhood of the step point at `sp = (x, y)`.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_moore_neighborhood_3d =
-R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y,
-z)`. The 3D Moore neighborhood is the set of all points that are
-adjacent to `(x, y, z)` in the 3D space including the diagonals.
-Thereby, the 3D Moore neighborhood contains up to 26 points as points
-outside of the parameter range are not gathered. The points are
-returned in no particular order.
-
-Parameter ``sp``:
-    Step point to get the 3D Moore neighborhood of.
-
-Returns:
-    The 3D Moore neighborhood of the step point at `sp = (x, y, z)`.)doc";
-
 static const char *__doc_fiction_detail_operational_domain_impl_num_dimensions = R"doc(The number of dimensions.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_num_evaluated_parameter_combinations = R"doc(Number of evaluated parameter combinations.)doc";
@@ -9480,7 +9625,9 @@ provided parameters.
 Returns:
     The number of steps in the given dimension.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_number_of_threads = R"doc(Number of available hardware threads.)doc";
+static const char *__doc_fiction_detail_operational_domain_impl_number_of_threads =
+R"doc(Number of worker threads to distribute the parameter points over,
+taken from the parameters and floored at `1`.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
@@ -9596,24 +9743,53 @@ Parameter ``pp``:
 Returns:
     The step point corresponding to the parameter point `pp`.)doc";
 
+static const char *__doc_fiction_detail_operational_domain_impl_trace_boundary_surface =
+R"doc(Traces the boundary surface of the operational domain in three or more
+dimensions.
+
+This serves the same purpose as the two-dimensional Moore contour
+trace — sample only the boundary of an operational region and infer
+its interior — but collects the boundary instead of walking it. A
+closed curve can be walked because its neighbors admit a cyclic order;
+a closed surface cannot, so the boundary is gathered by a breadth-
+first search over the operational points that have at least one non-
+operational Moore neighbor. The resulting set is closed under the
+Moore neighborhood, which is what the interior inference requires.
+
+Parameter ``samples``:
+    Maximum number of random samples to be taken before tracing.
+
+Returns:
+    The (partial) operational domain of the layout.)doc";
+
+static const char *__doc_fiction_detail_operational_domain_impl_trace_contour_curve =
+R"doc(Traces the contour of the operational domain in two dimensions by
+Moore contour tracing.
+
+Parameter ``samples``:
+    Maximum number of random samples to be taken before contour
+    tracing.
+
+Returns:
+    The (partial) operational domain of the layout.)doc";
+
 static const char *__doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
 
 static const char *__doc_fiction_detail_operational_domain_impl_values = R"doc(All dimension values.)doc";
 
-static const char *__doc_fiction_detail_operational_domain_impl_von_neumann_neighborhood_2d =
-R"doc(Returns the 2D von Neumann neighborhood of the step point at `sp = (x,
-y)`. The 2D von Neumann neighborhood is the set of all points that are
-adjacent to `(x, y)` in the plane excluding the diagonals. Thereby,
-the 2D von Neumann neighborhood contains up to 4 points as points
-outside of the parameter range are not gathered. The points are
-returned in no particular order.
+static const char *__doc_fiction_detail_operational_domain_impl_von_neumann_neighborhood =
+R"doc(Returns the von Neumann neighborhood of the given step point. The von
+Neumann neighborhood is the set of all points that differ from `sp` by
+one step in exactly one dimension, i.e., the axis-aligned neighbors
+excluding the diagonals. It contains up to `2n` points for `n` sweep
+dimensions, as points outside of the parameter range are not gathered.
+The points are returned in no particular order.
 
 Parameter ``sp``:
-    Step point to get the 2D von Neumann neighborhood of.
+    Step point to get the von Neumann neighborhood of.
 
 Returns:
-    The 2D von Neumann neighborhood of the step point at `sp = (x,
-    y)`.)doc";
+    The von Neumann neighborhood of `sp`.)doc";
 
 static const char *__doc_fiction_detail_optimize_output_positions =
 R"doc(Utility function that moves outputs from the last row to the previous
@@ -10671,18 +10847,34 @@ Parameter ``to_delete``:
     Reference to the to-delete list to be updated with new
     coordinates.)doc";
 
-static const char *__doc_fiction_detail_validate_sweep_parameters =
-R"doc(This function validates the given sweep parameters for the operational
+static const char *__doc_fiction_detail_validate_operational_domain_params =
+R"doc(This function validates the given parameters for the operational
 domain computation. It checks if the minimum value of any sweep
-dimension is larger than the corresponding maximum value.
-Additionally, it checks if the step size of any sweep dimension is
-negative or zero.
+dimension is larger than the corresponding maximum value, and if the
+step size of any sweep dimension is negative or zero. Additionally, it
+checks the preconditions of the operational domain sketch.
+
+The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`,
+determines the operational status by filtering alone. It has two
+preconditions: the filtering steps are only defined when kinks are
+rejected, and they enumerate the charge configurations of the canvas,
+which the layout's `LOGIC` cells define. If either is unmet, the
+sketch evaluates nothing and silently falls back to a full simulation
+of the entire parameter space. Since that is the exhaustive cost the
+sketch exists to avoid, an unmet precondition is rejected instead of
+being absorbed.
+
+Template parameter ``Lyt``:
+    SiDB cell-level layout type.
+
+Parameter ``lyt``:
+    The layout the operational domain is computed for.
 
 Parameter ``params``:
     The operational domain parameters to validate.
 
 Throws:
-    std::invalid_argument if the sweep parameters are invalid.)doc";
+    std::invalid_argument if the parameters are invalid.)doc";
 
 static const char *__doc_fiction_detail_wire_east = R"doc()doc";
 
@@ -11577,6 +11769,15 @@ displacements of ±1 position in the x-direction are analyzed, with no
 displacement in the y-direction.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs in the given layout which shall not be affected by variations.)doc";
+
+static const char *__doc_fiction_displacement_robustness_domain_params_number_of_threads =
+R"doc(Number of worker threads to distribute the displaced layouts over.
+Defaults to the number of hardware threads, which is the behavior this
+setting replaces. Values below `1` are treated as `1`.
+
+Pinning it makes wall-clock comparisons reproducible across runs and
+machines, and allows a robustness domain computation to leave cores
+free for other work.)doc";
 
 static const char *__doc_fiction_displacement_robustness_domain_params_operational_params = R"doc(Parameters to check the operational status of the SiDB layout.)doc";
 
@@ -16460,19 +16661,25 @@ relies solely on physical simulation to make this determination. -
 determine if the layout is non-operational. If the layout passes all
 filtering strategies, it is considered operational. This is only an
 approximation. It may be possible that the layout is non-operational,
-but the filtering strategies do not detect it. -
-`FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
-the algorithm checks if filtering strategies have detected whether the
-layout is non-operational. This only provides any runtime benefits if
-kinks are rejected.)doc";
+but the filtering strategies do not detect it. Sweeping a parameter
+space this way is called the operational domain sketch. The filtering
+steps are only defined when kinks are rejected, and they enumerate the
+charge configurations of the canvas that the layout's `LOGIC` cells
+define, so this setting is only effective with `REJECT_KINKS` on a
+layout that has such cells. - `FILTER_THEN_SIMULATION`: Before a
+physical simulation is conducted, the algorithm checks if filtering
+strategies have detected whether the layout is non-operational. This
+only provides any runtime benefits if kinks are rejected.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
 R"doc(Apply filtering exclusively to determine whether the layout is non-
 operational. If the layout passes all filter steps, it is considered
-operational.
+operational. Sweeping a parameter space this way is called the
+operational domain sketch.
 
 @note This is an extremely fast approximation that may sometimes lead
-to false positives.)doc";
+to false positives. It requires `REJECT_KINKS` and a layout with
+`LOGIC` cells; without either, no filter step runs.)doc";
 
 static const char *__doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
@@ -17593,7 +17800,11 @@ Returns:
     The operational domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Flood fill and contour
+    tracing additionally require at least two sweep dimensions; grid
+    search and random sampling accept any number.)doc";
 
 static const char *__doc_fiction_operational_domain_dimensions =
 R"doc(The dimensions to sweep over. The first dimension is the x dimension,
@@ -17657,7 +17868,11 @@ Returns:
     The operational domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Flood fill and contour
+    tracing additionally require at least two sweep dimensions; grid
+    search and random sampling accept any number.)doc";
 
 static const char *__doc_fiction_operational_domain_get_dimension =
 R"doc(Returns a specific dimension by index.
@@ -17686,16 +17901,16 @@ BDL pairs of the layout are assumed to be in the same order as the
 inputs of the truth table.
 
 This algorithm uses a grid search to find the operational domain. The
-grid search is performed by exhaustively sweeping the parameter space
-in the x and y dimensions. Since grid search is exhaustive, the
-algorithm is guaranteed to find the operational domain, if it exists
-within the parameter range. However, the algorithm performs a
-quadratic number of operational checks on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+grid search is performed by exhaustively sweeping all sweep
+dimensions. Since grid search is exhaustive, the algorithm is
+guaranteed to find the operational domain, if it exists within the
+parameter range. However, the algorithm performs one operational check
+per parameter combination, i.e., the product of the step counts of all
+sweep dimensions, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
 
 Template parameter ``Lyt``:
     SiDB cell-level layout type.
@@ -17720,7 +17935,10 @@ Returns:
     The operational domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Any number of sweep
+    dimensions is accepted.)doc";
 
 static const char *__doc_fiction_operational_domain_operational_domain = R"doc(Default constructor.)doc";
 
@@ -17796,7 +18014,10 @@ Returns:
     The operational domain of the layout.
 
 Throws:
-    std::invalid_argument if the given sweep parameters are invalid.)doc";
+    std::invalid_argument if the given sweep parameters are invalid,
+    or if the operational domain sketch is requested without rejecting
+    kinks or on a layout without `LOGIC` cells. Any number of sweep
+    dimensions is accepted.)doc";
 
 static const char *__doc_fiction_operational_domain_ratio =
 R"doc(Calculates the ratio of operational parameter points surrounding a
@@ -18119,7 +18340,7 @@ Parameter ``e``:
 Parameter ``other``:
     Edge whose color is to be used to paint `e`.)doc";
 
-static const char *__doc_fiction_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
+static const char *__doc_fiction_parameter_point = R"doc(The parameter point holds one parameter value per sweep dimension.)doc";
 
 static const char *__doc_fiction_parameter_point_get =
 R"doc(Support for structured bindings.
@@ -23094,10 +23315,10 @@ Template parameter ``OpDomain``:
 
 Parameter ``opdom``:
     The operational domain to be written. It represents a mapping
-    between sets of simulation parameters (defined as a pair of sweep
-    parameters for the X, Y, and Z dimensions) and a tuple containing
-    detailed information about the SiDB layout associated with those
-    simulation parameters.
+    between sets of simulation parameters (one to three sweep
+    parameters, written as the X, Y, and Z columns) and a tuple
+    containing detailed information about the SiDB layout associated
+    with those simulation parameters.
 
 Parameter ``os``:
     The output stream where the CSV representation of the operational
