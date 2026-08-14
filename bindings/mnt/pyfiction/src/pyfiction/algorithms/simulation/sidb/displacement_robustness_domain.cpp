@@ -70,7 +70,9 @@ void determine_displacement_robustness_domain(nanobind::module_& m)
                 &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::operational_params)
         .def_rw("fixed_sidbs", &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::fixed_sidbs)
         .def_rw("dimer_policy",
-                &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_policy);
+                &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::dimer_policy)
+        .def_rw("number_of_threads",
+                &fiction::displacement_robustness_domain_params<fiction::offset::ucoord_t>::number_of_threads);
 
     py::class_<fiction::displacement_robustness_domain_stats>(m, "displacement_robustness_domain_stats")
         .def(py::init<>(), "Default constructor.")

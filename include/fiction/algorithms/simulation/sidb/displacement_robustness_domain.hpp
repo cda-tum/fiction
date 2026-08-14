@@ -114,6 +114,14 @@ struct displacement_robustness_domain_params
      * This flag controls whether the displacement in the y-direction can lead to changes in the Si dimer.
      */
     dimer_displacement_policy dimer_policy{dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER};
+    /**
+     * Number of worker threads to distribute the displaced layouts over. Defaults to the number of hardware threads,
+     * which is the behavior this setting replaces. Values below `1` are treated as `1`.
+     *
+     * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows a robustness domain
+     * computation to leave cores free for other work.
+     */
+    std::size_t number_of_threads{std::thread::hardware_concurrency()};
 };
 
 /**
@@ -208,8 +216,12 @@ class displacement_robustness_domain_impl
             }
         };
 
-        const std::size_t num_threads = std::min(static_cast<std::size_t>(std::thread::hardware_concurrency()),
-                                                 static_cast<std::size_t>(layouts.size()));
+        const std::size_t requested_threads = std::max(params.number_of_threads, std::size_t{1});
+
+        // floored at `1` so that the slice arithmetic below stays well-defined when there is nothing to distribute;
+        // the `start >= end` guard in the loop then keeps the worker from being launched
+        const std::size_t num_threads = std::max(std::min(requested_threads, layouts.size()), std::size_t{1});
+
         // calculate the size of each slice
         const auto slice_size = (layouts.size() + num_threads - 1) / num_threads;
 

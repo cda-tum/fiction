@@ -333,6 +333,14 @@ struct operational_domain_params
     std::vector<operational_domain_value_range> sweep_dimensions{
         operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.1},
         operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.1}};
+    /**
+     * Number of worker threads to distribute the parameter points over. Defaults to the number of hardware threads,
+     * which is the behavior this setting replaces. Values below `1` are treated as `1`.
+     *
+     * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows an operational domain
+     * computation to leave cores free for other work.
+     */
+    std::size_t number_of_threads{std::thread::hardware_concurrency()};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -715,7 +723,7 @@ class operational_domain_impl
                 }
             };
 
-            const auto num_workers = std::max(number_of_threads, std::size_t{1});
+            const auto num_workers = number_of_threads;
 
             std::vector<std::thread> workers{};
             workers.reserve(num_workers);
@@ -861,8 +869,9 @@ class operational_domain_impl
         // Cartesian product of all step point indices
         const auto all_index_combinations = cartesian_combinations(indices);
 
-        // number of threads
-        const auto num_threads = std::min(number_of_threads, all_index_combinations.size());
+        // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
+        // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
+        const auto num_threads = std::max(std::min(number_of_threads, all_index_combinations.size()), std::size_t{1});
 
         // calculate the size of each slice
         const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
@@ -1048,9 +1057,9 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
     /**
-     * Number of available hardware threads.
+     * Number of worker threads to distribute the parameter points over, taken from the parameters and floored at `1`.
      */
-    const std::size_t number_of_threads{std::thread::hardware_concurrency()};
+    const std::size_t number_of_threads{std::max(params.number_of_threads, std::size_t{1})};
     /**
      * Input BDL wires.
      */
@@ -1399,9 +1408,11 @@ class operational_domain_impl
      */
     void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points) noexcept
     {
-        // calculate the size of each slice
-        const std::size_t num_threads = std::min(number_of_threads, step_points.size());
+        // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
+        // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
+        const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
 
+        // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};

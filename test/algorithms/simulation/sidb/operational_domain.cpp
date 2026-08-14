@@ -326,6 +326,74 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
     check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 }
 
+TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]")
+{
+    // the parallel helpers slice their work across `min(number_of_threads, work_size)` threads and derive the slice
+    // size by dividing by that count, which is zero when there is no work at all. `samples = 0` reaches it through
+    // public API
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions                         = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+
+    operational_domain_stats op_domain_stats{};
+
+    const auto op_domain =
+        operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 0, op_domain_params, &op_domain_stats);
+
+    CHECK(op_domain.empty());
+    CHECK(op_domain_stats.num_evaluated_parameter_combinations == 0);
+}
+
+TEST_CASE("Pinning the thread count does not change the operational domain", "[operational-domain]")
+{
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions                         = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+
+    operational_domain_stats default_stats{};
+
+    const auto default_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &default_stats);
+
+    // one worker thread must produce exactly the same domain as the hardware-thread default
+    op_domain_params.number_of_threads = 1;
+
+    operational_domain_stats single_threaded_stats{};
+
+    const auto single_threaded_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &single_threaded_stats);
+
+    CHECK(single_threaded_domain.size() == default_domain.size());
+    CHECK(single_threaded_stats.num_simulator_invocations == default_stats.num_simulator_invocations);
+    CHECK(single_threaded_stats.num_evaluated_parameter_combinations ==
+          default_stats.num_evaluated_parameter_combinations);
+    CHECK(single_threaded_stats.num_operational_parameter_combinations ==
+          default_stats.num_operational_parameter_combinations);
+    CHECK(single_threaded_stats.num_non_operational_parameter_combinations ==
+          default_stats.num_non_operational_parameter_combinations);
+
+    // a thread count of zero is treated as one rather than dividing by zero
+    op_domain_params.number_of_threads = 0;
+
+    operational_domain_stats zero_stats{};
+
+    const auto zero_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &zero_stats);
+
+    CHECK(zero_domain.size() == default_domain.size());
+    CHECK(zero_stats.num_evaluated_parameter_combinations == default_stats.num_evaluated_parameter_combinations);
+}
+
 // NOLINTNEXTLINE(*-function-size)
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {

@@ -294,7 +294,9 @@ void operational_domain(nanobind::module_& m)
         .def_rw("operational_params", &fiction::operational_domain_params::operational_params,
                 DOC(fiction_operational_domain_params_operational_params))
         .def_rw("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
-                DOC(fiction_operational_domain_params_sweep_dimensions));
+                DOC(fiction_operational_domain_params_sweep_dimensions))
+        .def_rw("number_of_threads", &fiction::operational_domain_params::number_of_threads,
+                DOC(fiction_operational_domain_params_number_of_threads));
 
     py::class_<fiction::operational_domain_stats>(m, "operational_domain_stats", DOC(fiction_operational_domain_stats))
         .def(py::init<>(), "Default constructor.")

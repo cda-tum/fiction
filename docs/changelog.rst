@@ -13,8 +13,16 @@ Added
 - Algorithms:
     - Added an ``is_operational`` overload that takes one layout per input pattern, and
       ``generate_bdl_input_pattern_layouts`` to generate them
+    - Added a ``critical_temperature_gate_based`` overload that takes the pre-generated input pattern
+      layouts and BDL detection results instead of deriving them from the layout
+    - Added ``number_of_threads`` to ``operational_domain_params``, ``defect_influence_params``, and
+      ``displacement_robustness_domain_params``, defaulting to the number of hardware threads, which
+      leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
+      lets a computation leave cores free
 - Python bindings:
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
+    - Exposed ``number_of_threads`` on ``operational_domain_params`` and
+      ``displacement_robustness_domain_params``
 
 Changed
 #######
@@ -24,6 +32,14 @@ Changed
       gates are dominated by the physical simulation and gain little
     - Parallelized ``operational_domain_flood_fill`` over a pool of worker threads. The result is
       independent of exploration order and therefore unchanged
+    - ``critical_temperature_domain`` now reuses the operational domain's input pattern layouts and BDL
+      detection results instead of re-deriving them for every parameter point
+    - ``is_operational`` now builds the canvas charge distribution surface once per call instead of once
+      per canvas enumeration, which the ``FILTER_ONLY`` and ``FILTER_THEN_SIMULATION`` strategies repeat
+      for every combination of input kink state and output pattern
+    - ``bdl_input_iterator`` now determines the BDL dot distances that decide the input assignment once
+      in its constructor instead of on every increment; they cannot change over its lifetime
+    - ``is_operational_impl`` no longer detects the output BDL pairs twice under ``TOLERATE_KINKS``
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Code quality:
@@ -49,6 +65,14 @@ Removed
 Fixed
 #####
 - Algorithms:
+    - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
+      robustness helpers, which derive their slice size by dividing by a worker count that is zero when
+      there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
+    - Fixed the ``is_operational`` entry points building the canvas layout under different conditions, so
+      that the same layout and parameters took different code paths depending on the overload reached.
+      ``FILTER_ONLY`` combined with ``TOLERATE_KINKS`` reported every layout operational without checking
+      it, because the canvas was built but the filtering steps that need it require ``REJECT_KINKS``. The
+      condition is now decided in one place, in ``is_operational_impl::run()``
     - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
