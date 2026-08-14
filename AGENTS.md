@@ -42,8 +42,9 @@ code comments, and error messages.
 - Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
   `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
 - Write for the final design, not for the history of how you got there. Do not narrate
-  review rounds, prompts, or former names. Record a rejected alternative only where a
-  reader would otherwise retry it, and then say why it failed.
+  review rounds, prompts, former names, or the order in which you did the work. Where a
+  rejected alternative is worth recording because a reader would otherwise retry it, put
+  it in a code comment at the site or in the pull request — not in the changelog.
 - Break any of these rules rather than write something unclear or imprecise.
 
 ## Project Map

@@ -45,8 +45,11 @@ reviews:
         correctness problems and compilation breakage.
     - path: "docs/changelog.rst"
       instructions: >-
-        Entries are intentionally detailed and deliberately record approaches that were
-        tried and reverted, together with the reason. Do not suggest shortening them.
+        Entries are one or two sentences, target 90 characters and at most 350, grouped
+        under a category bullet with the entries as nested sub-bullets. Flag entries that
+        exceed this: per-file enumerations of a refactor, approaches that were tried and
+        reverted, lists of individual linter findings, and narration of the order in which
+        work happened all belong in the pull request or a code comment, not here.
     - path: "docs/**"
       instructions: >-
         reStructuredText built by Sphinx, with Doxygen directives for the C++ API. A new

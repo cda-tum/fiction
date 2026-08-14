@@ -33,12 +33,26 @@ The `Writing` rules in the root `AGENTS.md` apply here in full. In addition:
 Every user-facing change adds a bullet to the `Unreleased` section under `Added`,
 `Changed`, `Fixed`, or `Removed`, matching the existing category order and bullet style.
 
-This file is the **one exception** to the root rule "write for the final design, not the
-history of how you got there":
+### Length
 
-- Entries here are deliberately long and explain the reasoning, not just the outcome.
-- Record an approach that was tried and reverted, together with the reason it failed,
-  whenever a future reader would otherwise retry it. The `std::jthread` revert
-  (Apple's libc++ gates `<stop_token>`) is the model to follow.
-- Do not record the review process, prompts, or intermediate commits. The distinction is
-  whether the information saves the next person from a dead end.
+**One or two sentences per entry.** Aim for 90 characters and treat 350 as the ceiling —
+that is the profile of the `v0.6.12` and earlier releases, and it is the target.
+
+The changelog says _what changed and what a user must do about it_. It is not a commit
+message, a design document, or a work log. In particular, do not write:
+
+- per-file or per-symbol enumerations of a refactor — "modernized the module for C++20"
+  covers what a reader needs, and `git log` covers the rest;
+- approaches that were tried and reverted, or the reason CI rejected them;
+- lists of individual linter findings that were fixed along the way;
+- narration of the order in which work happened ("started with…", "then extended to…",
+  "continued into…").
+
+Rationale that a future maintainer genuinely needs belongs in a code comment at the site
+it applies to, or in the pull request. Both outlive the changelog entry and sit closer to
+the code they explain.
+
+Every entry is grouped under a category bullet — `Algorithms`, `Build system`, `CLI`,
+`Code quality`, `Continuous integration`, `Data structures`, `Dependencies`,
+`Documentation`, `Experiments`, `Python bindings`, `Tooling` — with the actual entries as
+nested sub-bullets. Do not add flat top-level bullets.
