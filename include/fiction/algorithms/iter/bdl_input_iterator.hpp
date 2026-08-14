@@ -495,6 +495,82 @@ class bdl_input_iterator
     }
 };
 
+namespace detail
+{
+/**
+ * Materializes the layout of every input pattern reachable by the given BDL input iterator.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param bii BDL input iterator to enumerate. It is left at input index \f$2^n\f$.
+ * @return Deep copies of the layout for each of the \f$2^n\f$ input patterns, indexed by input pattern.
+ */
+template <typename Lyt>
+[[nodiscard]] std::vector<Lyt> collect_bdl_input_pattern_layouts(bdl_input_iterator<Lyt>& bii) noexcept
+{
+    const auto num_input_patterns = uint64_t{1} << bii.num_input_pairs();
+
+    std::vector<Lyt> layouts{};
+    layouts.reserve(num_input_patterns);
+
+    for (bii = 0; bii < num_input_patterns; ++bii)
+    {
+        // `operator*` hands out a reference to the iterator's single internal layout, which the next increment
+        // overwrites. Cloning is what makes the entries independent; a plain copy would share cell storage
+        layouts.emplace_back((*bii).clone());
+    }
+
+    return layouts;
+}
+}  // namespace detail
+
+/**
+ * Generates the SiDB layout of every input pattern of a BDL layout. For an \f$n\f$-input BDL layout, this returns
+ * \f$2^n\f$ layouts, where the layout at index \f$i\f$ has the input pattern \f$i\f$ applied, using the same encoding
+ * as `bdl_input_iterator`.
+ *
+ * Since the input configuration of a layout does not depend on the physical simulation parameters, algorithms that
+ * evaluate the same layout under many parameter settings can generate these layouts once and reuse them, instead of
+ * re-deriving them for every evaluation. The returned layouts are independent deep copies and can be read
+ * concurrently.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The SiDB BDL layout to enumerate the input patterns of.
+ * @param ps Parameters for the BDL input iterator.
+ * @return One layout per input pattern, indexed by input pattern.
+ */
+template <typename Lyt>
+[[nodiscard]] std::vector<Lyt> generate_bdl_input_pattern_layouts(const Lyt&                       lyt,
+                                                                  const bdl_input_iterator_params& ps = {}) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    bdl_input_iterator<Lyt> bii{lyt, ps};
+
+    return detail::collect_bdl_input_pattern_layouts(bii);
+}
+/**
+ * Generates the SiDB layout of every input pattern of a BDL layout, reusing pre-detected input BDL wires.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The SiDB BDL layout to enumerate the input patterns of.
+ * @param ps Parameters for the BDL input iterator.
+ * @param input_wires Pre-detected input BDL wires.
+ * @return One layout per input pattern, indexed by input pattern.
+ */
+template <typename Lyt>
+[[nodiscard]] std::vector<Lyt>
+generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps,
+                                   const std::vector<bdl_wire<Lyt>>& input_wires) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    bdl_input_iterator<Lyt> bii{lyt, ps, input_wires};
+
+    return detail::collect_bdl_input_pattern_layouts(bii);
+}
+
 }  // namespace fiction
 
 // make `bdl_input_iterator` compatible with STL iterator categories

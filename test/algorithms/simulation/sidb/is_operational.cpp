@@ -658,3 +658,63 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
             .first == operational_status::NON_OPERATIONAL);
 }
 #endif
+
+TEST_CASE("Pre-generated input pattern layouts match the layout-based overload", "[is-operational]")
+{
+    const auto check_agreement = [](const auto& lat, const auto& spec, const is_operational_params& params)
+    {
+        const auto input_wires =
+            detect_bdl_wires(lat, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+        const auto output_wires =
+            detect_bdl_wires(lat, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
+
+        const auto [expected_status, expected_calls] = is_operational(lat, spec, params, input_wires, output_wires);
+
+        const auto input_pattern_layouts =
+            generate_bdl_input_pattern_layouts(lat, params.input_bdl_iterator_params, input_wires);
+
+        const auto [status, calls] = is_operational(input_pattern_layouts, spec, params, input_wires, output_wires);
+
+        CHECK(status == expected_status);
+        CHECK(calls == expected_calls);
+    };
+
+    SECTION("SiQAD AND gate")
+    {
+        const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+        for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
+                                     is_operational_params::operational_condition::REJECT_KINKS})
+        {
+            // an operational and a non-operational parameter setting, so both the early-return and the
+            // all-patterns-simulated paths are covered
+            for (const auto mu_minus : {-0.32, -0.15})
+            {
+                is_operational_params params{sidb_simulation_parameters{2, mu_minus},
+                                             sidb_simulation_engine::QUICKEXACT};
+                params.op_condition = condition;
+
+                check_agreement(lat, std::vector<tt>{create_and_tt()}, params);
+            }
+        }
+    }
+
+    SECTION("SiQAD OR gate")
+    {
+        const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>()};
+
+        is_operational_params params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT};
+        params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
+
+        check_agreement(lat, std::vector<tt>{create_or_tt()}, params);
+    }
+
+    SECTION("Bestagon AND gate")
+    {
+        const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+        const is_operational_params params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT};
+
+        check_agreement(lat, std::vector<tt>{create_and_tt()}, params);
+    }
+}

@@ -27,6 +27,8 @@ BDL Input Iterator
            :members:
         .. doxygenclass:: fiction::bdl_input_iterator
            :members:
+        .. doxygenfunction:: fiction::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps = {})
+        .. doxygenfunction:: fiction::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps, const std::vector<bdl_wire<Lyt>>& input_wires)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.input_bdl_configuration

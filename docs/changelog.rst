@@ -8,8 +8,30 @@ The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`
 Unreleased
 ----------
 
+Added
+#####
+- Algorithms:
+    - Added an ``is_operational`` overload that takes the layout of every input pattern as a list
+      instead of a single layout, and ``generate_bdl_input_pattern_layouts`` to produce that list.
+      A layout is operational only if it is operational for all of them. Since the input
+      configuration does not depend on the simulation parameters, callers that evaluate one layout
+      under many parameter settings can generate the layouts once and share them across calls
+      instead of re-deriving them per evaluation
+- Python bindings:
+    - Exposed the new ``is_operational`` overload and ``generate_bdl_input_pattern_layouts``
+
 Changed
 #######
+- ``operational_domain`` and ``critical_temperature_domain`` now generate the layout of each input
+  pattern once and pass it to every sample point, instead of copying the layout, re-detecting the
+  BDL pairs, and re-deriving the input configuration for each of them. The layouts are shared
+  read-only across the worker threads, which needs no lock: the only writer was the
+  ``bdl_input_iterator``, which the sample points no longer construct. Grid search over the five
+  SiQAD gates drops from 3.35 s to 2.99 s (-10.7%, over five alternating repetitions with a 3.6%
+  run-to-run spread). The Bestagon gates gain -1.2%, which is within their 3.8% spread and
+  therefore not a measurable improvement: the setup this removes is roughly constant per sample
+  point, so it only matters where the physical simulation is cheap. QuickExact costs about 58 µs
+  per sample point on an 11-SiDB SiQAD gate against about 2.9 ms on a 23-SiDB Bestagon gate
 - Completed the incremental C++20 modernization for the operational domain module
   (``operational_domain.hpp``, ``sidb_simulation_domain.hpp``, ``write_operational_domain.hpp``):
   collapsed ``step_point``'s hand-written ``operator==``/``operator!=``/``operator<`` into a single

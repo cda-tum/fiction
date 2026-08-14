@@ -423,7 +423,9 @@ class operational_domain_impl
             input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                              bdl_wire_selection::INPUT)},
             output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-                                              bdl_wire_selection::OUTPUT)}
+                                              bdl_wire_selection::OUTPUT)},
+            input_pattern_layouts{generate_bdl_input_pattern_layouts(
+                lyt, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
@@ -1051,6 +1053,12 @@ class operational_domain_impl
      */
     const std::vector<bdl_wire<Lyt>> output_bdl_wires;
     /**
+     * The layout with each input pattern applied, indexed by input pattern. The input configuration does not depend on
+     * the swept parameters, so these layouts are generated once and read by every sample point evaluation. Empty if
+     * the layout-only constructor was used, which never evaluates operational status.
+     */
+    const std::vector<Lyt> input_pattern_layouts;
+    /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
      *
@@ -1239,8 +1247,9 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values,
-                                                         input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
+        const auto& [status, sim_calls] =
+            is_operational(input_pattern_layouts, truth_table, op_params_set_dimension_values, input_bdl_wires,
+                           output_bdl_wires, std::optional{canvas_lyt});
 
         num_simulator_invocations += sim_calls;
 
