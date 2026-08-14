@@ -46,7 +46,7 @@ Core Guidelines
 ###############
 
 * `"Commit early and push often" <https://www.worklytics.co/blog/commit-early-push-often>`_.
-* Write meaningful commit messages (preferably using `gitmoji <https://gitmoji.dev>`_ to give additional context to your commits).
+* Write meaningful commit messages. Prefix each subject with a single `gitmoji <https://gitmoji.dev>`_ character matching the change's dominant nature; :code:`AGENTS.md` documents the convention in full.
 * Focus on a single feature/bug at a time and only touch relevant files. Split multiple features into multiple contributions.
 * If you added a new feature, you should add tests that ensure it works as intended. Furthermore, the new feature should be documented appropriately.
 * If you fixed a bug, you should add tests that demonstrate that the bug has been fixed.
@@ -71,6 +71,35 @@ Pull Request Workflow
 
 * Once your PR is ready, change it from a draft PR to a regular PR and request a review from one of the project maintainers.
 * If your PR gets a "Changes requested" review, you will need to address the feedback and update your PR by pushing to the same branch. You don't need to close the PR and open a new one. Respond to review comments on the PR (e.g., with "done 👍"). Be sure to re-request review once you have made changes after a code review so that maintainers know that the requests have been addressed.
+
+Code Review
+###########
+
+Two automated reviewers comment on every pull request, and they carry different weight.
+
+* The :code:`Clang-Tidy Review` workflow posts static-analysis findings. Treat these as **binding**: fix them, or suppress the specific check with a :code:`// NOLINT(check-name)` comment that states the reason.
+* `CodeRabbit <https://coderabbit.ai>`_ performs the first substantive review pass, covering design, contracts, tests, and documentation. Treat its findings as **suggestions**.
+
+When working with CodeRabbit:
+
+* **Review the review.** Language models skew conservative and will sometimes push toward overcomplicated code. Verify each finding against the current code, and disagree in writing when it is wrong — that is a normal outcome, not a problem.
+* **Respond to comments rather than silently resolving them.** CodeRabbit learns from replies, and a resolved-but-unanswered thread hides the reasoning from human reviewers. Leave resolution to the reviewer.
+* **Re-request a pass** with :code:`@coderabbitai review` after a substantial push, or :code:`@coderabbitai full review` after a rebase. When you tag a human in a thread, tag CodeRabbit too, or it will not participate.
+* **Do not enable a second AI reviewer** on the same pull request. CodeRabbit performs noticeably worse when another review bot is active on the same diff.
+* **Apply reviewer code suggestions through GitHub's batch flow** ("Add suggestion to batch" → "Commit suggestions") so authorship is attributed to the reviewer.
+* **Avoid force-pushing or squashing locally while a review is open.** It detaches existing comments from their lines. Maintainers squash on merge.
+
+:code:`.coderabbit.yaml` in the repository root configures which paths are reviewed and what CodeRabbit should not comment on. Update it rather than repeating the same correction by hand.
+
+AI-Assisted Contributions
+#########################
+
+Contributions written with the help of an AI agent are welcome, under two conditions.
+
+* Add an :code:`Assisted-by: <Model Name> via <Tool Name>` trailer to any commit whose content an agent authored, and note in the PR description that the change was AI-assisted.
+* Review and understand the change before opening the pull request. You are responsible for it either way.
+
+Agent instructions live in :code:`AGENTS.md` at the repository root, with additional files in the subdirectories they apply to. If your tool expects a different file name, create a local symlink — for example :code:`ln -s AGENTS.md CLAUDE.md`. Those names are gitignored, so the repository itself stays tool-neutral.
 
 .. raw:: html
 
