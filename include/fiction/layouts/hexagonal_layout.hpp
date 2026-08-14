@@ -184,6 +184,11 @@ class hexagonal_layout
      */
     explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
     {
+        // do not convert this `static_assert` disjunction, or its twin in the constructor below, into a `requires`
+        // clause: the pyfiction docstring generator parses this header as C++11 (see the note on
+        // `manhattan_distance` in `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that
+        // drops the Doxygen comments of the ~60 member functions declared after these constructors, breaking the
+        // fully bound `hexagonal_layout` bindings' ReadTheDocs build
         static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
