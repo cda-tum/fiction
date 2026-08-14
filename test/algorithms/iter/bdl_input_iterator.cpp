@@ -229,13 +229,15 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const detect_bdl_wires_params params{2.0};
+    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
     SECTION("SiQAD coordinates, encode input 0 with the absence of perturbers")
     {
         bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
-            lat, bdl_input_iterator_params{
-                     params, bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
+            lat,
+            bdl_input_iterator_params{
+                .bdl_wire_params  = params,
+                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -299,7 +301,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("SiQAD coordinates")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{params}};
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
