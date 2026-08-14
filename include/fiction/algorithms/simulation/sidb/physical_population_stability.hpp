@@ -144,13 +144,14 @@ class physical_population_stability_impl
         // Access the unique indices
         for (const auto& energy_and_index : energy_and_unique_charge_index)
         {
-            const auto it = std::find_if(
-                simulation_results.charge_distributions.begin(), simulation_results.charge_distributions.end(),
-                [&](const charge_distribution_surface<Lyt>& charge_lyt)
-                {
-                    // Compare with the first element of the pair returned by get_charge_index_and_base()
-                    return charge_lyt.get_charge_index_and_base().first == energy_and_index.charge_index;
-                });
+            const auto it = std::ranges::find_if(simulation_results.charge_distributions,
+                                                 [&](const charge_distribution_surface<Lyt>& charge_lyt)
+                                                 {
+                                                     // Compare with the first element of the pair returned by
+                                                     // get_charge_index_and_base()
+                                                     return charge_lyt.get_charge_index_and_base().first ==
+                                                            energy_and_index.charge_index;
+                                                 });
 
             if (it == simulation_results.charge_distributions.end())
             {
@@ -365,17 +366,16 @@ class physical_population_stability_impl
         std::vector<energy_and_charge_index> energy_charge_index{};
         energy_charge_index.reserve(sim_results.charge_distributions.size());
 
-        std::transform(sim_results.charge_distributions.cbegin(), sim_results.charge_distributions.cend(),
-                       std::back_inserter(energy_charge_index),
-                       [](const auto& ch_lyt)
-                       {
-                           return energy_and_charge_index{ch_lyt.get_electrostatic_potential_energy(),
-                                                          ch_lyt.get_charge_index_and_base().first};
-                       });
+        std::ranges::transform(sim_results.charge_distributions, std::back_inserter(energy_charge_index),
+                               [](const auto& ch_lyt)
+                               {
+                                   return energy_and_charge_index{ch_lyt.get_electrostatic_potential_energy(),
+                                                                  ch_lyt.get_charge_index_and_base().first};
+                               });
 
         // Sort the vector in ascending order of the energy value
-        std::sort(energy_charge_index.begin(), energy_charge_index.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.energy < rhs.energy; });
+        std::ranges::sort(energy_charge_index,
+                          [](const auto& lhs, const auto& rhs) { return lhs.energy < rhs.energy; });
 
         return energy_charge_index;
     }

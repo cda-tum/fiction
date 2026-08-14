@@ -2,10 +2,12 @@ import os
 import unittest
 
 from mnt.pyfiction import (
+    bdl_input_iterator_params,
     bdl_wire_selection,
     create_and_tt,
     detect_bdl_wires_100,
     detect_bdl_wires_params,
+    generate_bdl_input_pattern_layouts,
     is_kink_induced_non_operational,
     is_operational,
     is_operational_params,
@@ -82,6 +84,77 @@ class TestIsOperational(unittest.TestCase):
             output_bdl_wires,
         )
         self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+
+    def test_is_operational_with_input_pattern_layouts(self):
+        lyt = sidb_100_lattice()
+
+        lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
+        lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+
+        lyt.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
+        lyt.assign_cell_type((19, 3), sidb_technology.cell_type.INPUT)
+
+        lyt.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
+        lyt.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
+
+        lyt.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
+        lyt.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
+
+        lyt.assign_cell_type((10, 12, 0), sidb_technology.cell_type.OUTPUT)
+        lyt.assign_cell_type((10, 14, 0), sidb_technology.cell_type.OUTPUT)
+
+        lyt.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
+
+        params = is_operational_params()
+        params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
+
+        input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
+        output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
+
+        input_pattern_layouts = generate_bdl_input_pattern_layouts(
+            lyt,
+            bdl_input_iterator_params(),
+            input_bdl_wires,
+        )
+
+        # a 2-input gate has 4 input patterns
+        self.assertEqual(len(input_pattern_layouts), 4)
+
+        # the layout list yields the same verdict as the layout itself
+        for simulation_parameters, expected in [
+            (sidb_simulation_parameters(2, -0.28), operational_status.OPERATIONAL),
+            (sidb_simulation_parameters(2, -0.1), operational_status.NON_OPERATIONAL),
+        ]:
+            params.simulation_parameters = simulation_parameters
+
+            [reference_status, reference_calls] = is_operational(
+                lyt,
+                [create_and_tt()],
+                params,
+                input_bdl_wires,
+                output_bdl_wires,
+            )
+            [op_status, evaluated_input_combinations] = is_operational(
+                input_pattern_layouts,
+                [create_and_tt()],
+                params,
+                input_bdl_wires,
+                output_bdl_wires,
+            )
+
+            self.assertEqual(reference_status, expected)
+            self.assertEqual(op_status, reference_status)
+            self.assertEqual(evaluated_input_combinations, reference_calls)
+
+        # a layout list that does not match the specification is rejected
+        with self.assertRaises(ValueError):
+            is_operational(
+                input_pattern_layouts[:2],
+                [create_and_tt()],
+                params,
+                input_bdl_wires,
+                output_bdl_wires,
+            )
 
     def test_and_gate_kinks(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")

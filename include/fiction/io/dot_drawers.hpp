@@ -319,9 +319,15 @@ class technology_dot_drawer : public mockturtle::gate_dot_drawer<Ntk>
         return label;
     }
 
+    /**
+     * Checks whether a string represents a non-negative integer, i.e., consists exclusively of digits.
+     *
+     * @param s String to check.
+     * @return `true` iff `s` is non-empty and consists exclusively of digits.
+     */
     [[nodiscard]] bool is_node_number(const std::string_view& s) const noexcept
     {
-        return !s.empty() && std::all_of(s.begin(), s.end(), ::isdigit);
+        return !s.empty() && std::ranges::all_of(s, [](const unsigned char c) { return std::isdigit(c) != 0; });
     }
 };
 /**

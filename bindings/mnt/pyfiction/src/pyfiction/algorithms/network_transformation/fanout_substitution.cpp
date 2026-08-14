@@ -3,9 +3,10 @@
 
 #include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
 
-#include <pybind11/cast.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -14,9 +15,9 @@ namespace detail
 {
 
 template <typename Ntk>
-void fanout_substitution_impl(pybind11::module& m)
+void fanout_substitution_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("fanout_substitution", &fiction::fanout_substitution<py_logic_network, Ntk>, py::arg("network"),
           py::arg("params") = fiction::fanout_substitution_params{}, DOC(fiction_fanout_substitution));
@@ -27,9 +28,9 @@ void fanout_substitution_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void fanout_substitution(pybind11::module& m)
+void fanout_substitution(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
     py::enum_<fiction::fanout_substitution_params::substitution_strategy>(
         m, "substitution_strategy", DOC(fiction_fanout_substitution_params_substitution_strategy))
@@ -44,14 +45,13 @@ void fanout_substitution(pybind11::module& m)
 
     py::class_<fiction::fanout_substitution_params>(m, "fanout_substitution_params",
                                                     DOC(fiction_fanout_substitution_params))
-        .def(py::init<>())
-        .def_readwrite("strategy", &fiction::fanout_substitution_params::strategy,
-                       DOC(fiction_fanout_substitution_params_strategy))
-        .def_readwrite("degree", &fiction::fanout_substitution_params::degree,
-                       DOC(fiction_fanout_substitution_params_degree))
-        .def_readwrite("threshold", &fiction::fanout_substitution_params::threshold,
-                       DOC(fiction_fanout_substitution_params_threshold))
-        .def_readwrite("seed", &fiction::fanout_substitution_params::seed, DOC(fiction_fanout_substitution_params_seed))
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("strategy", &fiction::fanout_substitution_params::strategy,
+                DOC(fiction_fanout_substitution_params_strategy))
+        .def_rw("degree", &fiction::fanout_substitution_params::degree, DOC(fiction_fanout_substitution_params_degree))
+        .def_rw("threshold", &fiction::fanout_substitution_params::threshold,
+                DOC(fiction_fanout_substitution_params_threshold))
+        .def_rw("seed", &fiction::fanout_substitution_params::seed, DOC(fiction_fanout_substitution_params_seed))
 
         ;
 

@@ -161,21 +161,21 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                     return;
                 }
 
-                const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                                          params.non_operational_tag;
-                const auto pp  = sim_param.get_parameters();
+                const auto  tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
+                                                                                           params.non_operational_tag;
+                const auto& pp  = sim_param.get_parameters();
 
                 if (num_dimensions == 1)
                 {
-                    writer.write_line(pp[0], tag, std::get<1>(op_val));
+                    writer.write_line(pp.at(0), tag, std::get<1>(op_val));
                 }
                 else if (num_dimensions == 2)
                 {
-                    writer.write_line(pp[0], pp[1], tag, std::get<1>(op_val));
+                    writer.write_line(pp.at(0), pp.at(1), tag, std::get<1>(op_val));
                 }
                 else  // num_dimensions == 3
                 {
-                    writer.write_line(pp[0], pp[1], pp[2], tag, std::get<1>(op_val));
+                    writer.write_line(pp.at(0), pp.at(1), pp.at(2), tag, std::get<1>(op_val));
                 }
             });
     }
@@ -215,19 +215,19 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                 const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
                                                                                           params.non_operational_tag;
 
-                const auto pp = sim_param.get_parameters();
+                const auto& pp = sim_param.get_parameters();
 
                 if (num_dimensions == 1)
                 {
-                    writer.write_line(pp[0], tag);
+                    writer.write_line(pp.at(0), tag);
                 }
                 else if (num_dimensions == 2)
                 {
-                    writer.write_line(pp[0], pp[1], tag);
+                    writer.write_line(pp.at(0), pp.at(1), tag);
                 }
                 else  // num_dimensions == 3
                 {
-                    writer.write_line(pp[0], pp[1], pp[2], tag);
+                    writer.write_line(pp.at(0), pp.at(1), pp.at(2), tag);
                 }
             });
     }
@@ -262,7 +262,7 @@ template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
                               const write_operational_domain_params& params = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

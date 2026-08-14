@@ -7,20 +7,28 @@
 
 #include <fiction/io/read_fgl_layout.hpp>
 
-#include <pybind11/pybind11.h>
-
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
-void read_fgl_layout(pybind11::module& m)
+void read_fgl_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;
+    namespace py = nanobind;
 
-    py::register_exception<fiction::fgl_parsing_error>(
+    // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // translator with the module; it is not meant to be thrown here
+    py::exception<fiction::fgl_parsing_error>(
         m, "fgl_parsing_error",
-        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through pybind11.h
+        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
+    // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     // NOLINTNEXTLINE(misc-const-correctness)
     py_cartesian_gate_layout (*const read_cartesian_fgl_layout_function_pointer)(

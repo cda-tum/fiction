@@ -15,21 +15,16 @@ if(FICTION_TEST)
   FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG v3.11.0)
+    GIT_TAG v3.15.3)
   FetchContent_MakeAvailable(Catch2)
 endif()
 
-# pybind11
-FetchContent_Declare(
-  pybind11
-  GIT_REPOSITORY https://github.com/pybind/pybind11.git
-  GIT_TAG v3.0.1)
-# Suppress warnings about removed FindPython modules in newer CMake versions
-if(POLICY CMP0148)
-  set(CMAKE_POLICY_DEFAULT_CMP0148 OLD)
-endif()
-set(PYBIND11_FINDPYTHON ON)
-FetchContent_MakeAvailable(pybind11)
+# Note: nanobind (used for the Python bindings) is *not* declared here. Unlike
+# the other dependencies in this file, it is resolved as an installed Python
+# build dependency rather than via FetchContent, and is only needed when
+# FICTION_PYTHON_BINDINGS is enabled -- see
+# bindings/mnt/pyfiction/CMakeLists.txt, which is the first place in the
+# configure run where that option is guaranteed to be known.
 
 # parallel-hashmap
 FetchContent_Declare(
@@ -56,7 +51,7 @@ set(ALICE_TEST
 FetchContent_Declare(
   alice
   GIT_REPOSITORY https://github.com/marcelwa/alice.git
-  GIT_TAG master # Using master as per submodule
+  GIT_TAG 6b7f941ca44f38226f5e2545224fa1194940cd73 # Head of the master branch
 )
 FetchContent_MakeAvailable(alice)
 
@@ -73,7 +68,7 @@ set(MOCKTURTLE_TEST
 FetchContent_Declare(
   mockturtle
   GIT_REPOSITORY https://github.com/marcelwa/mockturtle.git
-  GIT_TAG mnt # Using mnt branch as per submodule
+  GIT_TAG c5807b7e2be424ec6cb2ea2152882ac3847af19c # Head of the mnt branch
 )
 FetchContent_MakeAvailable(mockturtle)
 

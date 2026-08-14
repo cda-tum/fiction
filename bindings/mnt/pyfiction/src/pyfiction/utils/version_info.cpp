@@ -4,12 +4,12 @@
 
 #include <fiction/utils/version_info.hpp>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void version_info(pybind11::module& m)
+void version_info(nanobind::module_& m)
 {
     m.attr("__version__")       = fiction::FICTION_VERSION;
     m.attr("__repo__")          = fiction::FICTION_REPO;

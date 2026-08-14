@@ -8,15 +8,17 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/constants.hpp"
 #include "fiction/utils/math_utils.hpp"
 #include "fmt/format.h"
 
 #include <algorithm>
 #include <cmath>
-#include <cstdint>
+#include <cstddef>
 #include <fstream>
-#include <limits>
 #include <ostream>
+#include <ranges>
+#include <string>
 #include <string_view>
 #include <vector>
 
@@ -56,7 +58,7 @@ class write_location_and_ground_state_impl
             // write the column headers
             os << "x [nm]; y [nm];";
 
-            for (uint64_t i = 0; i < ground_state_layouts.size(); i++)
+            for (const auto i : std::views::iota(std::size_t{0}, ground_state_layouts.size()))
             {
                 os << fmt::format("GS_{};", i);
             }
@@ -65,7 +67,7 @@ class write_location_and_ground_state_impl
             const auto ground_state = ground_state_layouts.front();
             auto       sidbs        = ground_state.get_sidb_order();
 
-            std::sort(sidbs.begin(), sidbs.end());
+            std::ranges::sort(sidbs);
 
             for (const auto& sidb : sidbs)
             {
@@ -130,7 +132,7 @@ void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_resu
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

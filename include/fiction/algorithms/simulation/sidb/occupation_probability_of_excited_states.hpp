@@ -55,8 +55,8 @@ namespace fiction
     }
 
     // Determine the minimal energy.
-    const auto [min_e_val, st_type] = *std::min_element(energy_and_state_type.cbegin(), energy_and_state_type.cend(),
-                                                        [](const auto& a, const auto& b) { return a.first < b.first; });
+    const auto [min_e_val, st_type] = *std::ranges::min_element(energy_and_state_type, [](const auto& a, const auto& b)
+                                                                { return a.first < b.first; });
 
     const auto min_energy = min_e_val;
 

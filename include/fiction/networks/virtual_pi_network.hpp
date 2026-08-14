@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
-#include <cstdlib>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -34,6 +33,8 @@ template <typename Ntk>
 class virtual_pi_network : public Ntk
 {
   public:
+    // name is part of a SFINAE detection idiom used across fiction::traits and cannot be renamed to satisfy
+    // NOLINTNEXTLINE(readability-identifier-naming)
     static constexpr bool is_virtual_network_type = true;
 
     using storage = typename Ntk::storage;
@@ -124,8 +125,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_pi(node const& n) const
     {
-        return std::find(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), n) !=
-               v_storage->virtual_inputs.cend();
+        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
     }
 
     /**
@@ -166,8 +166,7 @@ class virtual_pi_network : public Ntk
      */
     [[nodiscard]] bool is_virtual_ci(node const& n) const
     {
-        return std::find(v_storage->virtual_inputs.cbegin(), v_storage->virtual_inputs.cend(), n) !=
-               v_storage->virtual_inputs.cend();
+        return std::ranges::find(v_storage->virtual_inputs, n) != v_storage->virtual_inputs.cend();
     }
 
     /**

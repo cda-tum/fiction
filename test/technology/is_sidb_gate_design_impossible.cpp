@@ -4,11 +4,10 @@
 
 #include "fiction/technology/is_sidb_gate_design_impossible.hpp"
 
-#include "catch2/catch_template_test_macros.hpp"
+#include "catch2/catch_test_macros.hpp"
 
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defects.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
@@ -43,7 +42,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
     {
         CHECK(!is_sidb_gate_design_impossible(
             lyt, std::vector<tt>{create_and_tt()},
-            is_sidb_gate_design_impossible_params{sidb_simulation_parameters{2, -0.28}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.28}}));
     }
 
     SECTION("with defect")
@@ -52,7 +51,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
         lyt.assign_sidb_defect({11, 6, 0}, sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10, 5});
         CHECK(is_sidb_gate_design_impossible(
             lyt, std::vector<tt>{create_and_tt()},
-            is_sidb_gate_design_impossible_params{sidb_simulation_parameters{2, -0.28}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.28}}));
     }
 }
 
@@ -106,7 +105,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
     {
         CHECK(!is_sidb_gate_design_impossible(
             lyt, create_crossing_wire_tt(),
-            is_sidb_gate_design_impossible_params{sidb_simulation_parameters{2, -0.32}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.32}}));
     }
 
     SECTION("with defect")
@@ -115,6 +114,6 @@ TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
         lyt.assign_sidb_defect({34, 18, 1}, sidb_defect{sidb_defect_type::SI_VACANCY, -1, 5, 5});
         CHECK(is_sidb_gate_design_impossible(
             lyt, create_crossing_wire_tt(),
-            is_sidb_gate_design_impossible_params{sidb_simulation_parameters{2, -0.32}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.32}}));
     }
 }

@@ -1,23 +1,23 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void read_fgl_layout(pybind11::module& m);
-void read_fqca_layout(pybind11::module& m);
-void read_sqd_layout(pybind11::module& m);
-void write_dot_layout(pybind11::module& m);
-void write_fgl_layout(pybind11::module& m);
-void write_fqca_layout(pybind11::module& m);
-void write_operational_domain(pybind11::module& m);
-void write_qca_layout(pybind11::module& m);
-void write_qcc_layout(pybind11::module& m);
-void write_qll_layout(pybind11::module& m);
-void write_sqd_layout(pybind11::module& m);
-void write_sqd_sim_result(pybind11::module& m);
-void write_svg_layout(pybind11::module& m);
+void read_fgl_layout(nanobind::module_& m);
+void read_fqca_layout(nanobind::module_& m);
+void read_sqd_layout(nanobind::module_& m);
+void write_dot_layout(nanobind::module_& m);
+void write_fgl_layout(nanobind::module_& m);
+void write_fqca_layout(nanobind::module_& m);
+void write_operational_domain(nanobind::module_& m);
+void write_qca_layout(nanobind::module_& m);
+void write_qcc_layout(nanobind::module_& m);
+void write_qll_layout(nanobind::module_& m);
+void write_sqd_layout(nanobind::module_& m);
+void write_sqd_sim_result(nanobind::module_& m);
+void write_svg_layout(nanobind::module_& m);
 
-void register_inout(pybind11::module& m)
+void register_inout(nanobind::module_& m)
 {
     write_dot_layout(m);
     write_fgl_layout(m);

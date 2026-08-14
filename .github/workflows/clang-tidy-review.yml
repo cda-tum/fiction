@@ -14,9 +14,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-permissions:
-  contents: write
-  pull-requests: write
+permissions: {}
 
 env:
   Z3_VERSION: 4.13.4
@@ -25,15 +23,26 @@ jobs:
   clangtidy:
     runs-on: ubuntu-latest
     name: 🚨 Clang-Tidy
+    permissions:
+      contents: read
+      pull-requests: write # required to post/update the clang-tidy thread comment on the PR
 
     steps:
       - name: Clone Repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake libreadline-dev libtbb-dev python3-dev
+
+      - name: Install nanobind
+        # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
+        # config discoverable via `python -m nanobind --cmake_dir` (see
+        # bindings/mnt/pyfiction/CMakeLists.txt); unlike the previous pybind11-based bindings,
+        # this isn't fetched by CMake and must be pip-installed ahead of time
+        run: python3 -m pip install --break-system-packages --disable-pip-version-check "nanobind~=2.13.0"
 
       - name: Setup Z3 Solver
         id: z3

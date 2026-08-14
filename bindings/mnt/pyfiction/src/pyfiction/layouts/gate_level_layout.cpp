@@ -10,8 +10,6 @@
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <cstdint>
 #include <sstream>
@@ -20,6 +18,15 @@
 #include <utility>
 #include <vector>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+
 namespace pyfiction
 {
 
@@ -27,27 +34,29 @@ namespace detail
 {
 
 template <typename LytBase, typename GateLyt>
-void gate_level_layout(pybind11::module& m, const std::string& topology)
+void gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<GateLyt, LytBase>(m, fmt::format("{}_gate_layout", topology).c_str(), DOC(fiction_gate_level_layout))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_gate_level_layout_gate_level_layout))
         .def(py::init<const fiction::aspect_ratio<GateLyt>&>(), py::arg("dimension"),
              DOC(fiction_gate_level_layout_gate_level_layout))
-        .def(py::init(
-                 [](const fiction::aspect_ratio<GateLyt>& dimension, const std::string& scheme_name,
-                    const std::string& layout_name) -> GateLyt
-                 {
-                     if (const auto scheme = fiction::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())
-                     {
-                         return GateLyt{dimension, *scheme, layout_name};
-                     }
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<GateLyt> self, const fiction::aspect_ratio<GateLyt>& dimension,
+               const std::string& scheme_name, const std::string& layout_name)
+            {
+                if (const auto scheme = fiction::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())
+                {
+                    new (self.p) GateLyt{dimension, *scheme, layout_name};
+                    return;
+                }
 
-                     throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-                 }),
-             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
-             DOC(fiction_gate_level_layout_gate_level_layout_2))
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            },
+            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
+            DOC(fiction_gate_level_layout_gate_level_layout_2))
 
         .def("create_pi", &GateLyt::create_pi, py::arg("name") = std::string{}, py::arg("t") = fiction::tile<GateLyt>{},
              DOC(fiction_gate_level_layout_create_pi))
@@ -299,20 +308,22 @@ void gate_level_layout(pybind11::module& m, const std::string& topology)
             },
             DOC(fiction_bounding_box_2d_overridden))
         .def("is_dead", &GateLyt::is_dead, py::arg("n"), DOC(fiction_gate_level_layout_is_dead))
-        .def("__repr__",
-             [](const GateLyt& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 fiction::print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const GateLyt& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                fiction::print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }
 
 }  // namespace detail
 
-void gate_level_layouts(pybind11::module& m)
+void gate_level_layouts(nanobind::module_& m)
 {
     /**
      * Gate-level clocked Cartesian layout.

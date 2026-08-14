@@ -1,17 +1,17 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void area(pybind11::module& m);
-void charge_distribution_surfaces(pybind11::module& m);
-void sidb_charge_state(pybind11::module& m);
-void sidb_defects(pybind11::module& m);
-void sidb_lattices(pybind11::module& m);
-void sidb_nm_distance(pybind11::module& m);
-void sidb_nm_position(pybind11::module& m);
+void area(nanobind::module_& m);
+void charge_distribution_surfaces(nanobind::module_& m);
+void sidb_charge_state(nanobind::module_& m);
+void sidb_defects(nanobind::module_& m);
+void sidb_lattices(nanobind::module_& m);
+void sidb_nm_distance(nanobind::module_& m);
+void sidb_nm_position(nanobind::module_& m);
 
-void register_technology(pybind11::module& m)
+void register_technology(nanobind::module_& m)
 {
     area(m);
     sidb_defects(m);

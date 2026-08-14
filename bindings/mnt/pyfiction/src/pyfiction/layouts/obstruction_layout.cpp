@@ -6,9 +6,10 @@
 #include "pyfiction/types.hpp"
 
 #include <fmt/format.h>
-#include <pybind11/pybind11.h>
 
 #include <string>
+
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
@@ -17,13 +18,13 @@ namespace detail
 {
 
 template <typename LytBase, typename ObstrLyt>
-void obstruction_layout(pybind11::module& m, const std::string& topology)
+void obstruction_layout(nanobind::module_& m, const std::string& topology)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
                                   DOC(fiction_obstruction_layout))
-        .def(py::init<>())
+        .def(py::init<>(), "Default constructor.")
         .def(py::init<const LytBase&>(), py::arg("layout"), DOC(fiction_obstruction_layout_obstruction_layout))
 
         .def("obstruct_coordinate", &ObstrLyt::obstruct_coordinate, py::arg("c"))
@@ -40,7 +41,7 @@ void obstruction_layout(pybind11::module& m, const std::string& topology)
 
 }  // namespace detail
 
-void obstruction_layouts(pybind11::module& m)
+void obstruction_layouts(nanobind::module_& m)
 {
     /**
      * Cartesian obstruction layout.

@@ -1,13 +1,13 @@
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void sidb_simulation_engine(pybind11::module& m);
-void sidb_simulation_parameters(pybind11::module& m);
-void sidb_simulation_result(pybind11::module& m);
+void sidb_simulation_engine(nanobind::module_& m);
+void sidb_simulation_parameters(nanobind::module_& m);
+void sidb_simulation_result(nanobind::module_& m);
 
-void register_sidb_support(pybind11::module& m)
+void register_sidb_support(nanobind::module_& m)
 {
     sidb_simulation_engine(m);
     sidb_simulation_parameters(m);

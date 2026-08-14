@@ -15,6 +15,7 @@
 #include <exception>
 #include <fstream>
 #include <istream>
+#include <iterator>
 #include <regex>
 #include <stdexcept>
 #include <string>
@@ -65,8 +66,8 @@ namespace sidb_defects
 
 /* Regex */
 
-static const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
-static const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
+inline const std::regex RE_DEFECT_MATRIX{R"(\[(?:\s*\d+\s*)+\])"};  // each match is one row
+inline const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each match is one index
 
 /**
  * Maps indices in the data format to defect types.
@@ -205,7 +206,7 @@ sidb_defect_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::
 template <typename Lyt>
 sidb_defect_surface<Lyt> read_sidb_surface_defects(const std::string_view& filename, const std::string_view& name = "")
 {
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {

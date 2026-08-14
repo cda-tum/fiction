@@ -6,7 +6,6 @@
 #define FICTION_HEXAGONAL_LAYOUT_HPP
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/utils/range.hpp"
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
@@ -16,6 +15,7 @@
 #include <cstdint>
 #include <functional>
 #include <memory>
+#include <ranges>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -184,6 +184,11 @@ class hexagonal_layout
      */
     explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
     {
+        // do not convert this `static_assert` disjunction, or its twin in the constructor below, into a `requires`
+        // clause: the pyfiction docstring generator parses this header as C++11 (see the note on
+        // `manhattan_distance` in `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that
+        // drops the Doxygen comments of the ~60 member functions declared after these constructors, breaking the
+        // fully bound `hexagonal_layout` bindings' ReadTheDocs build
         static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
                           std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
@@ -827,9 +832,9 @@ class hexagonal_layout
      */
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
-        return range_t{
-            std::make_pair(coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop})};
+        return std::ranges::subrange{
+            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -846,7 +851,7 @@ class hexagonal_layout
     {
         mockturtle::detail::foreach_element(
             coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, fn);
+            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -864,9 +869,8 @@ class hexagonal_layout
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return range_t{
-            std::make_pair(coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                           coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop})};
+        return std::ranges::subrange{coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+                                     coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -887,7 +891,7 @@ class hexagonal_layout
 
         mockturtle::detail::foreach_element(
             coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, fn);
+            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
@@ -928,20 +932,22 @@ class hexagonal_layout
             {{+1, -1, 0}, {+1, 0, -1}, {0, +1, -1}, {-1, +1, 0}, {-1, 0, +1}, {0, -1, +1}}};
 
         // for each direction
-        std::for_each(cube_directions.cbegin(), cube_directions.cend(),
-                      [this, &c, &fn](const auto& dir)
-                      {
-                          // convert given coordinate to the cube system, add direction, and convert back to offset
-                          auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
-                          // since cube coordinates don't carry the layer information, it has to be manually added
-                          neighbor.z = c.z;
+        std::ranges::for_each(cube_directions,
+                              [this, &c, &fn](const auto& dir)
+                              {
+                                  // convert given coordinate to the cube system, add direction, and convert back to
+                                  // offset
+                                  auto neighbor = to_offset_coordinate(to_cube_coordinate(c) + dir);
+                                  // since cube coordinates don't carry the layer information, it has to be manually
+                                  // added
+                                  neighbor.z = c.z;
 
-                          // add neighboring coordinate if there was no over-/underflow
-                          if (is_within_bounds(neighbor))
-                          {
-                              std::invoke(std::forward<Fn>(fn), std::move(neighbor));
-                          }
-                      });
+                                  // add neighboring coordinate if there was no over-/underflow
+                                  if (is_within_bounds(neighbor))
+                                  {
+                                      std::invoke(std::forward<Fn>(fn), std::move(neighbor));
+                                  }
+                              });
     }
     /**
      * Returns a container that contains all coordinates pairs of opposing adjacent coordinates with
@@ -1039,7 +1045,7 @@ class hexagonal_layout
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             cube_coord.x = offset_coord.x -
-                           static_cast<decltype(cube_coord.x)>((offset_coord.y + offset * (offset_coord.y & 1)) / 2);
+                           static_cast<decltype(cube_coord.x)>((offset_coord.y + (offset * (offset_coord.y & 1))) / 2);
             cube_coord.z = offset_coord.y;
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
@@ -1047,7 +1053,7 @@ class hexagonal_layout
         {
             cube_coord.x = offset_coord.x;
             cube_coord.z = offset_coord.y -
-                           static_cast<decltype(cube_coord.z)>((offset_coord.x + offset * (offset_coord.x & 1)) / 2);
+                           static_cast<decltype(cube_coord.z)>((offset_coord.x + (offset * (offset_coord.x & 1))) / 2);
             cube_coord.y = -cube_coord.x - cube_coord.z;
         }
 
@@ -1074,14 +1080,14 @@ class hexagonal_layout
         if constexpr (std::is_same_v<typename hex_arrangement::orientation, pointy_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(
-                cube_coord.x + static_cast<int64_t>((cube_coord.z + offset * (cube_coord.z & 1)) / 2));
+                cube_coord.x + static_cast<int64_t>((cube_coord.z + (offset * (cube_coord.z & 1))) / 2));
             offset_coord.y = static_cast<decltype(offset_coord.y)>(cube_coord.z);
         }
         else if constexpr (std::is_same_v<typename hex_arrangement::orientation, flat_top_hex>)
         {
             offset_coord.x = static_cast<decltype(offset_coord.x)>(cube_coord.x);
             offset_coord.y = static_cast<decltype(offset_coord.y)>(
-                cube_coord.z + static_cast<int64_t>((cube_coord.x + offset * (cube_coord.x & 1)) / 2));
+                cube_coord.z + static_cast<int64_t>((cube_coord.x + (offset * (cube_coord.x & 1))) / 2));
         }
 
         return offset_coord;

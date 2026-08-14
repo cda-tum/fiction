@@ -9,10 +9,20 @@
 #include <fiction/traits.hpp>
 
 #include <mockturtle/io/write_dot.hpp>
-#include <pybind11/pybind11.h>
 
 #include <string>
 #include <string_view>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -21,9 +31,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_dot_layout(pybind11::module& m)
+void write_dot_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_dot_layout",
@@ -42,9 +52,9 @@ void write_dot_layout(pybind11::module& m)
 }
 
 template <typename Ntk>
-void write_dot_network(pybind11::module& m)
+void write_dot_network(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
@@ -54,7 +64,7 @@ void write_dot_network(pybind11::module& m)
 
 }  // namespace detail
 
-void write_dot_layout(pybind11::module& m)
+void write_dot_layout(nanobind::module_& m)
 {
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);

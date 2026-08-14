@@ -103,34 +103,3 @@ def _run_tests(
 def tests(session: nox.Session) -> None:
     """Run the test suite."""
     _run_tests(session)
-
-
-# @nox.session(reuse_venv=True)
-# def docs(session: nox.Session) -> None:
-#     """Build the docs. Use "--non-interactive" to avoid serving. Pass "-b linkcheck" to check links."""
-#     parser = argparse.ArgumentParser()
-#     parser.add_argument("-b", dest="builder", default="html", help="Build target (default: html)")
-#     args, posargs = parser.parse_known_args(session.posargs)
-#
-#     serve = args.builder == "html" and session.interactive
-#     extra_installs = ["sphinx-autobuild"] if serve else []
-#     session.install(*BUILD_REQUIREMENTS, *extra_installs)
-#     session.install("--no-build-isolation", "-ve.[docs]")
-#
-#     if args.builder == "linkcheck":
-#         session.run("sphinx-build", "-b", "linkcheck", "docs", "docs/_build/linkcheck", *posargs)
-#         return
-#
-#     shared_args = (
-#         "-n",  # nitpicky mode
-#         "-T",  # full tracebacks
-#         f"-b={args.builder}",
-#         "docs",
-#         f"docs/_build/{args.builder}",
-#         *posargs,
-#     )
-#
-#     if serve:
-#         session.run("sphinx-autobuild", *shared_args)
-#     else:
-#         session.run("sphinx-build", "--keep-going", *shared_args)

@@ -8,26 +8,32 @@
 #include <fiction/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
-
 #include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
 
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+
 namespace pyfiction
 {
 
-void hexagonal_layout(pybind11::module& m)
+void hexagonal_layout(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * Hexagonal layout.
      */
     py::class_<py_hexagonal_layout>(m, "hexagonal_layout", DOC(fiction_hexagonal_layout_overridden))
-        .def(py::init<>())
+        .def(py::init<>(), DOC(fiction_hexagonal_layout_hexagonal_layout))
         .def(py::init<const fiction::aspect_ratio<py_hexagonal_layout>&>(), py::arg("dimension"),
              DOC(fiction_hexagonal_layout_hexagonal_layout))
         .def(
@@ -129,13 +135,15 @@ void hexagonal_layout(pybind11::module& m)
         .def("adjacent_opposite_coordinates", &py_hexagonal_layout::adjacent_opposite_coordinates, py::arg("c"),
              DOC(fiction_hexagonal_layout_adjacent_opposite_coordinates))
 
-        .def("__repr__",
-             [](const py_hexagonal_layout& lyt) -> std::string
-             {
-                 std::stringstream stream{};
-                 print_layout(lyt, stream);
-                 return stream.str();
-             })
+        .def(
+            "__repr__",
+            [](const py_hexagonal_layout& lyt) -> std::string
+            {
+                std::stringstream stream{};
+                print_layout(lyt, stream);
+                return stream.str();
+            },
+            "Returns a string representation of the layout.")
 
         ;
 }

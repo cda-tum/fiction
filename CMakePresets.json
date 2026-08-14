@@ -46,8 +46,7 @@
       "cacheVariables": {
         "FICTION_EXPERIMENTS": "ON",
         "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_ENABLE_MUGEN": "ON"
+        "FICTION_ALGLIB": "ON"
       }
     },
     {
@@ -70,8 +69,7 @@
       "cacheVariables": {
         "FICTION_EXPERIMENTS": "ON",
         "FICTION_Z3": "ON",
-        "FICTION_ALGLIB": "ON",
-        "FICTION_ENABLE_MUGEN": "ON"
+        "FICTION_ALGLIB": "ON"
       }
     },
     {
@@ -105,7 +103,7 @@
     {
       "name": "deploy",
       "displayName": "Deploy",
-      "description": "Mirrors the Dockerfile: lean Release build of the CLI only, without tests, experiments, or Mugen",
+      "description": "Mirrors the Dockerfile: lean Release build of the CLI only, without tests or experiments",
       "binaryDir": "${sourceDir}/build",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
@@ -114,7 +112,6 @@
         "FICTION_EXPERIMENTS": "OFF",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
-        "FICTION_ENABLE_MUGEN": "OFF",
         "FICTION_PROGRESS_BARS": "ON",
         "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "MOCKTURTLE_EXAMPLES": "OFF"
@@ -131,7 +128,6 @@
         "FICTION_TEST": "ON",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
-        "FICTION_ENABLE_MUGEN": "ON",
         "FICTION_PROGRESS_BARS": "OFF",
         "FICTION_WARNINGS_AS_ERRORS": "OFF",
         "FICTION_ENABLE_COVERAGE": "ON"
@@ -140,7 +136,7 @@
     {
       "name": "ci-common",
       "hidden": true,
-      "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, Mugen, jemalloc) on top via -D overrides",
+      "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, jemalloc) on top via -D overrides",
       "inherits": "base",
       "cacheVariables": {
         "FICTION_CLI": "ON",
@@ -176,11 +172,10 @@
     {
       "name": "ci-codeql",
       "displayName": "CI (CodeQL)",
-      "description": "Mirrors the 📝 CodeQL CI workflow: no CLI, Mugen enabled",
+      "description": "Mirrors the 📝 CodeQL CI workflow: no CLI",
       "inherits": "ci-debug",
       "cacheVariables": {
-        "FICTION_CLI": "OFF",
-        "FICTION_ENABLE_MUGEN": "ON"
+        "FICTION_CLI": "OFF"
       }
     },
     {
@@ -196,7 +191,6 @@
         "FICTION_PROGRESS_BARS": "ON",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
-        "FICTION_ENABLE_MUGEN": "ON",
         "FICTION_PYTHON_BINDINGS": "ON",
         "MOCKTURTLE_EXAMPLES": "OFF"
       }

@@ -12,16 +12,15 @@
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/types.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
-#include <cstdint>
+#include <cstddef>
 #include <iostream>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -32,31 +31,31 @@ namespace detail
 {
 
 // Escape color sequence for input colors (green).
-static const auto INP_COLOR = fmt::fg(fmt::color::green);
+inline const auto INP_COLOR = fmt::fg(fmt::color::green);
 // Escape color sequence for output colors (red).
-static const auto OUT_COLOR = fmt::fg(fmt::color::red);
+inline const auto OUT_COLOR = fmt::fg(fmt::color::red);
 // Escape color sequence for latch colors (yellow on black).
-static const auto SE_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
+inline const auto SE_COLOR = fmt::fg(fmt::color::yellow) | fmt::bg(fmt::color::black);
 // Escape color sequences for clock background colors (white to dark grey).
-static const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
+inline const std::array<fmt::text_style, 4> CLOCK_COLOR{{fmt::fg(fmt::color::black) | fmt::bg(fmt::color::white),
                                                          fmt::fg(fmt::color::black) | fmt::bg(fmt::color::light_gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::gray),
                                                          fmt::fg(fmt::color::white) | fmt::bg(fmt::color::dark_gray)}};
 // Escape color sequence for negatively charged SiDB colors (cyan).
-static const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
+inline const auto SIDB_NEG_COLOR = fmt::fg(fmt::color::cyan);
 // Escape color sequence for positively charged SiDB colors (red).
-static const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
+inline const auto SIDB_POS_COLOR = fmt::fg(fmt::color::red);
 // Escape color sequence for charge-neutral SiDB colors (white).
-static const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
+inline const auto SIDB_NEUT_COLOR = fmt::fg(fmt::color::white);
 // Escape color sequence for lattice background colors (grey).
-static const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
+inline const auto SIDB_LAT_COLOR = fmt::fg(fmt::color::gray);
 
 // Escape color sequence for positively charged defect colors (red).
-static const auto SIDB_DEF_POS_COLOR = fmt::fg(fmt::color::red);
+inline const auto SIDB_DEF_POS_COLOR = fmt::fg(fmt::color::red);
 // Escape color sequence for negatively charged defect colors (blue).
-static const auto SIDB_DEF_NEG_COLOR = fmt::fg(fmt::color::blue);
+inline const auto SIDB_DEF_NEG_COLOR = fmt::fg(fmt::color::blue);
 // Escape color sequence for neutrally charged defect colors (yellow).
-static const auto SIDB_DEF_NEU_COLOR = fmt::fg(fmt::color::yellow);
+inline const auto SIDB_DEF_NEU_COLOR = fmt::fg(fmt::color::yellow);
 // Empty escape color sequence
 inline constexpr auto NO_COLOR = fmt::text_style{};
 
@@ -80,18 +79,18 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     // empty layout
     if (layout.num_gates() == 0ul && layout.num_wires() == 0ul)
     {
-        os << "[i] empty layout" << std::endl;
+        os << "[i] empty layout\n";
         return;
     }
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
     {
-        os << "[e] hexagonal layout printing is not supported" << std::endl;
+        os << "[e] hexagonal layout printing is not supported\n";
         return;
     }
     else if constexpr (is_shifted_cartesian_layout_v<Lyt>)
     {
-        os << "[e] shifted cartesian layout printing is not supported" << std::endl;
+        os << "[e] shifted cartesian layout printing is not supported\n";
         return;
     }
 
@@ -203,18 +202,20 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
     }
 
     // actual printing
-    auto r_ctr = 0u;
-    auto c_ctr = 0u;
-    for (const auto& row : reprs)
+    for (const auto r_ctr : std::views::iota(std::size_t{0}, reprs.size()))
     {
+        const auto& row{reprs[r_ctr]};
+
         for (const auto& d : y_dirs[r_ctr])
         {
             os << d << " ";
         }
         os << '\n';
 
-        for (const auto& gate : row)
+        for (const auto c_ctr : std::views::iota(std::size_t{0}, row.size()))
         {
+            const auto& gate{row[c_ctr]};
+
             const auto t = tile<Lyt>{c_ctr, r_ctr};
 
             fmt::text_style color{};
@@ -239,19 +240,15 @@ void print_gate_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                 color = color | detail::OUT_COLOR;
             }
 
-            os << fmt::format(color, gate);
+            os << fmt::format(color, fmt::runtime(gate));
 
             os << x_dirs[r_ctr][c_ctr];
-            ++c_ctr;
         }
-        c_ctr = 0u;
         os << '\n';
-
-        ++r_ctr;
     }
 
-    // flush stream
-    os << std::endl;
+    // terminate with a newline
+    os << "\n";
 }
 /**
  * Writes a simplified 2D representation of a cell-level layout to an output stream.
@@ -326,15 +323,16 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
                     color = color | detail::OUT_COLOR;
                 }
 
-                os << fmt::format(color,
-                                  (Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
+                os << fmt::format(
+                    color,
+                    fmt::runtime(Lyt::technology::is_normal_cell(ct) ? "▢" : std::string(1u, static_cast<char>(ct))));
             }
         }
         os << '\n';
     }
 
-    // flush stream
-    os << std::endl;
+    // terminate with a newline
+    os << "\n";
 }
 /**
  * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
@@ -520,8 +518,8 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
                 break;
             }
         }
-        // flush stream
-        os << std::endl;
+        // terminate with a newline
+        os << "\n";
     }
 }
 /**

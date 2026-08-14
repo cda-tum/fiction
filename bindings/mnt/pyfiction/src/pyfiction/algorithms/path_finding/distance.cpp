@@ -3,7 +3,9 @@
 
 #include <fiction/algorithms/path_finding/distance.hpp>
 
-#include <pybind11/pybind11.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>      // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -12,9 +14,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void distance_impl(pybind11::module& m)
+void distance_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("manhattan_distance", &fiction::manhattan_distance<Lyt>, py::arg("layout"), py::arg("source"),
           py::arg("target"), DOC(fiction_manhattan_distance));
@@ -30,7 +32,7 @@ void distance_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void distance(pybind11::module& m)
+void distance(nanobind::module_& m)
 {
     detail::distance_impl<py_cartesian_layout>(m);
     detail::distance_impl<py_shifted_cartesian_layout>(m);

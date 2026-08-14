@@ -34,31 +34,34 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions: {}
+
 jobs:
   build:
     name: 🐳 Build and publish Docker image
     runs-on: ubuntu-latest
     permissions:
-      packages: write
-      contents: read
-      attestations: write
-      id-token: write
+      packages: write # required to push the image to ghcr.io on release
+      contents: read # required to check out the repository
+      attestations: write # required to publish the build provenance attestation on release
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
 
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
+          persist-credentials: false
 
       - name: Log in to Docker Hub
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to GitHub Container Registry
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
@@ -97,7 +100,7 @@ jobs:
 
       - name: Generate artifact attestation
         if: github.event_name == 'release' && github.event.action == 'published'
-        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction
           subject-digest: ${{ steps.push.outputs.digest }}

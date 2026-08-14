@@ -438,7 +438,7 @@ class clustercomplete_impl
         charge_layout_copy.charge_distribution_to_index();
 
         {
-            const std::lock_guard lock{mutex_to_protect_the_simulation_results};
+            const std::scoped_lock lock{mutex_to_protect_the_simulation_results};
 
             result.charge_distributions.emplace_back(charge_layout_copy);
         }
@@ -710,7 +710,7 @@ class clustercomplete_impl
          */
         void initialize_queue_after_stealing(const sidb_clustering_state& clustering_state) noexcept
         {
-            const std::lock_guard lock(mutex_to_protect_this_queue);
+            const std::scoped_lock lock(mutex_to_protect_this_queue);
 
             clustering_state_for_thieves = clustering_state;
 
@@ -740,7 +740,7 @@ class clustercomplete_impl
          */
         void pop_last_layer() noexcept
         {
-            const std::lock_guard lock{mutex_to_protect_this_queue};
+            const std::scoped_lock lock{mutex_to_protect_this_queue};
 
             if (thief_informants.empty())
             {
@@ -762,7 +762,7 @@ class clustercomplete_impl
          */
         void add_to_queue(const std::vector<sidb_charge_space_composition>& compositions, mole&& informant) noexcept
         {
-            const std::lock_guard lock{mutex_to_protect_this_queue};
+            const std::scoped_lock lock{mutex_to_protect_this_queue};
 
             queue.emplace_front();
 
@@ -790,7 +790,7 @@ class clustercomplete_impl
          */
         [[nodiscard]] std::variant<work_t, bool> get_from_this_queue() noexcept
         {
-            const std::lock_guard lock{mutex_to_protect_this_queue};
+            const std::scoped_lock lock{mutex_to_protect_this_queue};
 
             if (work_in_queue_count == 0)
             {
@@ -967,8 +967,7 @@ class clustercomplete_impl
             }
         }
 
-        std::shuffle(work_from_top_cluster.begin(), work_from_top_cluster.end(),
-                     std::mt19937_64{std::random_device{}()});
+        std::ranges::shuffle(work_from_top_cluster, std::mt19937_64{std::random_device{}()});
 
         return work_from_top_cluster;
     }

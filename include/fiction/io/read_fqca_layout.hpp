@@ -5,7 +5,6 @@
 #ifndef FICTION_READ_FQCA_LAYOUT_HPP
 #define FICTION_READ_FQCA_LAYOUT_HPP
 
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
 #include <cctype>
@@ -14,7 +13,6 @@
 #include <fstream>
 #include <istream>
 #include <regex>
-#include <sstream>
 #include <string>
 #include <string_view>
 #include <unordered_map>
@@ -72,14 +70,14 @@ namespace qca_stack
 
 /* Regex */
 
-static const std::regex RE_WHITE_SPACE{R"(\s)"};
-static const std::regex RE_COMMENT{R"(\[.*\]$)"};
-static const std::regex RE_LAYER_SEPARATOR{R"(^=+$)"};
-static const std::regex RE_CELL_DEFINITION_ID{R"(^(\w)\:$)"};              // group 1 is the id
-static const std::regex RE_CELL_DEFINITION_LABEL{R"(^-label=\"(.*)\"$)"};  // group 1 is the label
-static const std::regex RE_CELL_DEFINITION_CLOCK{R"(^-clock=(\d)$)"};      // group 1 is the clock number
-static const std::regex RE_CELL_DEFINITION_NUMBER{R"(^-number=(\d+)$)"};   // group 1 is the number
-static const std::regex RE_CELL_DEFINITION_OFFSET{
+inline const std::regex RE_WHITE_SPACE{R"(\s)"};
+inline const std::regex RE_COMMENT{R"(\[.*\]$)"};
+inline const std::regex RE_LAYER_SEPARATOR{R"(^=+$)"};
+inline const std::regex RE_CELL_DEFINITION_ID{R"(^(\w)\:$)"};              // group 1 is the id
+inline const std::regex RE_CELL_DEFINITION_LABEL{R"(^-label=\"(.*)\"$)"};  // group 1 is the label
+inline const std::regex RE_CELL_DEFINITION_CLOCK{R"(^-clock=(\d)$)"};      // group 1 is the clock number
+inline const std::regex RE_CELL_DEFINITION_NUMBER{R"(^-number=(\d+)$)"};   // group 1 is the number
+inline const std::regex RE_CELL_DEFINITION_OFFSET{
     R"(^-offset=\((-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?),(-?\d*(?:\.\d+)?)\)$)"};  // group 1, 2, and 3 are the x, y, and z
                                                                                 // offset respectively
 
@@ -234,7 +232,7 @@ class read_fqca_layout_impl
 
     std::istream& is;
 
-    enum class fqca_section
+    enum class fqca_section : uint8_t
     {
         LAYOUT_DEFINITION,
         CELL_DEFINITION
@@ -364,7 +362,7 @@ Lyt read_fqca_layout(std::istream& is, const std::string_view& layout_name = "")
 template <typename Lyt>
 Lyt read_fqca_layout(const std::string_view& filename, const std::string_view& layout_name = "")
 {
-    std::ifstream is{filename.data(), std::ifstream::in};
+    std::ifstream is{std::string{filename}, std::ifstream::in};
 
     if (!is.is_open())
     {

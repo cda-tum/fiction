@@ -238,8 +238,8 @@ calculate_energy_distribution(const std::vector<charge_distribution_surface<Lyt>
 
     for (const auto& energy : unique_energies)
     {
-        const auto number_of_states_with_given_energy = static_cast<uint64_t>(std::count_if(
-            unique_cds.cbegin(), unique_cds.cend(), [&energy](const auto& lyt)
+        const auto number_of_states_with_given_energy = static_cast<uint64_t>(std::ranges::count_if(
+            unique_cds, [&energy](const auto& lyt)
             { return std::abs(lyt.get_electrostatic_potential_energy() - energy) < constants::ERROR_MARGIN; }));
 
         distribution.add_energy_state(energy_state(energy, number_of_states_with_given_energy));

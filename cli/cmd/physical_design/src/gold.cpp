@@ -25,7 +25,7 @@ gold_command::gold_command(const environment::ptr& e) :
         command(e, "Performs scalable placement and routing of the current logic network in store using the "
                    "Graph-Oriented Layout Design (GOLD) algorithm. GOLD generates close-to-optimal 2DDWave-clocked "
                    "FCN gate-level layouts in reasonable runtime. Its result quality is better than 'ortho' and "
-                   "its runtime behavior superior to 'exact' and 'onepass'. Additionally, different cost "
+                   "its runtime behavior superior to 'exact'. Additionally, different cost "
                    "objectives can be specified.")
 {
     add_option("--timeout,-t", ps.timeout, "Timeout in seconds");

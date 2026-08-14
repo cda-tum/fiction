@@ -11,12 +11,12 @@ class TestClockedLayout(unittest.TestCase):
             clocked_hexagonal_layout((2, 2, 0), "2DDWave"),
         ]:
             for t in layout.coordinates():
-                self.assertTrue(t <= (9, 9, 1))
+                self.assertLessEqual(t, (9, 9, 1))
                 self.assertTrue(layout.is_within_bounds(t))
 
             for t in layout.ground_coordinates():
-                self.assertTrue(t.z == 0)
-                self.assertTrue(t <= (9, 9, 0))
+                self.assertEqual(t.z, 0)
+                self.assertLessEqual(t, (9, 9, 0))
                 self.assertTrue(layout.is_within_bounds(t))
 
             for t in layout.adjacent_coordinates((2, 2)):

@@ -68,13 +68,11 @@ template <typename Lyt>
         return false;
     }
 
-    std::sort(result1.charge_distributions.begin(), result1.charge_distributions.end(),
-              [](const auto& lhs, const auto& rhs)
-              { return lhs.get_charge_index_and_base().first < rhs.get_charge_index_and_base().first; });
+    std::ranges::sort(result1.charge_distributions, [](const auto& lhs, const auto& rhs)
+                      { return lhs.get_charge_index_and_base().first < rhs.get_charge_index_and_base().first; });
 
-    std::sort(result2.charge_distributions.begin(), result2.charge_distributions.end(),
-              [](const auto& lhs, const auto& rhs)
-              { return lhs.get_charge_index_and_base().first < rhs.get_charge_index_and_base().first; });
+    std::ranges::sort(result2.charge_distributions, [](const auto& lhs, const auto& rhs)
+                      { return lhs.get_charge_index_and_base().first < rhs.get_charge_index_and_base().first; });
 
     for (auto i = 0u; i < result1.charge_distributions.size(); i++)
     {

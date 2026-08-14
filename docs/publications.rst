@@ -66,19 +66,6 @@ Furthermore, if you use any of the design automation algorithms, please consider
           publisher={ACM New York, NY, USA}
         }
 
-* :ref:`One-pass synthesis <onepass>` (``onepass``):
-
-    .. code-block:: tex
-
-        @inproceedings{walter2021onepass,
-          title={{One-pass Synthesis for Field-coupled Nanocomputing Technologies}},
-          author={Walter, Marcel and Haaswijk, W. and Wille, Robert and Sill Torres, Frank and Drechsler, Rolf},
-          booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
-          pages={574--580},
-          year={2021},
-          publisher={ACM New York, NY, USA}
-        }
-
 * :ref:`Equivalence checking <equiv>` (``equiv``):
 
     .. code-block:: tex

@@ -11,11 +11,14 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstddef>
 #include <cstdint>
 #include <functional>
 #include <iostream>
+#include <iterator>
 #include <limits>
+#include <string>
 #include <type_traits>
 
 // data types cannot properly be converted to bit field types
@@ -194,6 +197,10 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
+    // this is written out rather than defaulted. g++-11, the project's C++20 floor compiler and part of the Ubuntu CI
+    // matrix, miscompiles a defaulted comparison over this struct's bit-field members and produces wrong
+    // layout-printing output, consistent with a known class of GCC bugs in early C++20 support. The same applies to
+    // `siqad::coord_t` below. Revisit once g++-11 is dropped from the matrix
     constexpr bool operator==(const ucoord_t& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
@@ -790,19 +797,19 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
 {
     if (!coord.is_dead())
     {
-        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) >
+        if ((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z) >
             static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::max()))
         {
             return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::max()};
         }
 
-        if (2 * static_cast<double>(coord.y) + static_cast<double>(coord.z) <
+        if ((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z) <
             static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::min()))
         {
             return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::min()};
         }
 
-        return {coord.x, coord.y * 2 + coord.z};
+        return {coord.x, (coord.y * 2) + coord.z};
     }
 
     return CoordinateType{};
@@ -820,9 +827,9 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
 {
     if (coord.y >= 0)
     {
-        return {coord.x, (coord.y - coord.y % 2) / 2, coord.y % 2};
+        return {coord.x, (coord.y - (coord.y % 2)) / 2, coord.y % 2};
     }
-    return {coord.x, (coord.y + coord.y % 2) / 2, (-coord.y - 1) % 2 + 1};
+    return {coord.x, (coord.y + (coord.y % 2)) / 2, (coord.y % 2 == 0 ? 0 : 1)};
 }
 
 }  // namespace siqad
@@ -865,7 +872,7 @@ uint64_t area(const CoordinateType& coord) noexcept
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
         return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
-               (2 * static_cast<uint64_t>(integral_abs(coord.y)) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+               ((2 * static_cast<uint64_t>(integral_abs(coord.y))) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
     }
 
     return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
@@ -893,6 +900,10 @@ uint64_t volume(const CoordinateType& coord) noexcept
 /**
  * An iterator type that allows to enumerate coordinates in order within a boundary.
  *
+ * @note Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t` are supported. This is enforced on the
+ * boundary-and-start constructor via a `requires` clause rather than on the class itself, so that the
+ * default constructor (required for `std::semiregular`) remains usable for any `CoordinateType`.
+ *
  * @tparam CoordinateType Type of coordinate to enumerate.
  */
 template <typename CoordinateType>
@@ -900,6 +911,11 @@ class coord_iterator
 {
   public:
     using value_type = CoordinateType;
+    /**
+     * Default constructor. Required so that coord_iterator satisfies `std::semiregular`, which in turn is required
+     * for it to serve as its own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
+     */
+    constexpr coord_iterator() noexcept = default;
     /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
@@ -939,15 +955,11 @@ class coord_iterator
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
      */
-    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept :
-            aspect_ratio{dimension},
-            coord{start}
+    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
+        requires std::same_as<CoordinateType, offset::ucoord_t> || std::same_as<CoordinateType, cube::coord_t> ||
+                     std::same_as<CoordinateType, siqad::coord_t>
+            : aspect_ratio{dimension}, coord{start}
     {
-        static_assert(std::is_same_v<CoordinateType, offset::ucoord_t> ||
-                          std::is_same_v<CoordinateType, cube::coord_t> ||
-                          std::is_same_v<CoordinateType, siqad::coord_t>,
-                      "CoordinateType must be a supported coordinate");
-
         // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
         coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
         coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
@@ -1012,7 +1024,11 @@ class coord_iterator
     }
 
   private:
-    const CoordinateType aspect_ratio;
+    /**
+     * Boundary within to enumerate. Not `const`: `std::input_or_output_iterator` requires `coord_iterator` to be
+     * `std::movable`, which in turn requires it to be assignable.
+     */
+    CoordinateType aspect_ratio;
 
     CoordinateType coord;
 };
@@ -1054,12 +1070,19 @@ struct hash<fiction::siqad::coord_t>
     }
 };
 
-// make coord_iterator compatible with STL iterator categories
+/**
+ * Makes `coord_iterator` compatible with STL iterator categories. `reference` and `difference_type` are required
+ * for `coord_iterator` to satisfy `std::input_or_output_iterator` (e.g., for `std::ranges::subrange` CTAD).
+ *
+ * @tparam Coordinate Coordinate type enumerated by the `coord_iterator`.
+ */
 template <typename Coordinate>
 struct iterator_traits<fiction::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
+    using reference         = Coordinate;
+    using difference_type   = std::ptrdiff_t;
 };
 
 }  // namespace std

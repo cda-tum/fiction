@@ -3,8 +3,14 @@
 
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -13,9 +19,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void quicksim_impl(pybind11::module& m)
+void quicksim_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("quicksim", &fiction::quicksim<Lyt>, py::arg("lyt"), py::arg("params") = fiction::quicksim_params{},
           DOC(fiction_quicksim));
@@ -23,23 +29,23 @@ void quicksim_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void quicksim(pybind11::module& m)
+void quicksim(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * QuickSim parameters.
      */
     py::class_<fiction::quicksim_params>(m, "quicksim_params", DOC(fiction_quicksim_params))
-        .def(py::init<>())
-        .def_readwrite("simulation_parameters", &fiction::quicksim_params::simulation_parameters,
-                       DOC(fiction_quicksim_params_simulation_parameters))
-        .def_readwrite("iteration_steps", &fiction::quicksim_params::iteration_steps,
-                       DOC(fiction_quicksim_params_iteration_steps))
-        .def_readwrite("alpha", &fiction::quicksim_params::alpha, DOC(fiction_quicksim_params_alpha))
-        .def_readwrite("number_threads", &fiction::quicksim_params::number_threads,
-                       DOC(fiction_quicksim_params_number_threads))
-        .def_readwrite("timeout", &fiction::quicksim_params::timeout, DOC(fiction_quicksim_params_timeout))
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("simulation_parameters", &fiction::quicksim_params::simulation_parameters,
+                DOC(fiction_quicksim_params_simulation_parameters))
+        .def_rw("iteration_steps", &fiction::quicksim_params::iteration_steps,
+                DOC(fiction_quicksim_params_iteration_steps))
+        .def_rw("alpha", &fiction::quicksim_params::alpha, DOC(fiction_quicksim_params_alpha))
+        .def_rw("number_threads", &fiction::quicksim_params::number_threads,
+                DOC(fiction_quicksim_params_number_threads))
+        .def_rw("timeout", &fiction::quicksim_params::timeout, DOC(fiction_quicksim_params_timeout))
 
         ;
 

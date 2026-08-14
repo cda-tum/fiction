@@ -11,8 +11,87 @@ Unreleased
 Added
 #####
 - Algorithms:
-    - Added half-adder gate support (``ha`` parameter and ``--ha`` CLI flag) to ``technology_mapping`` and the ``map`` command, exposed through the new ``mockturtle::emap`` mapper
-    - Added the ``missing_required_gates_exception`` that is thrown by ``technology_mapping`` when the technology library is missing the gates required by the base network type (AIG requires INV and AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
+    - Added the ``missing_required_gates_exception`` that ``technology_mapping`` throws when the
+      technology library is missing the gates required by the base network type (AIG requires INV and
+      AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
+    - Added an ``is_operational`` overload that takes one layout per input pattern, and
+      ``generate_bdl_input_pattern_layouts`` to generate them
+- Python bindings:
+    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
+
+Changed
+#######
+- Algorithms:
+    - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
+      ``mockturtle::map``
+    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params``
+      (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a
+      ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports
+      mapping errors instead of storing a failed mapping
+    - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
+      layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
+      gates are dominated by the physical simulation and gain little
+    - Parallelized ``operational_domain_flood_fill`` over a pool of worker threads. The result is
+      independent of exploration order and therefore unchanged
+- Build system:
+    - Bumped the required C++ standard from C++17 to C++20
+- Code quality:
+    - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
+      defaulted comparison operators, and designated initializers throughout
+    - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
+- Continuous integration:
+    - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
+      ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
+
+Removed
+#######
+- Algorithms:
+    - Removed Mugen support: the vendored Glucose SAT solver (``vendors/mugen/``), the ``onepass`` CLI
+      command, and ``one_pass_synthesis()``. Use ``exact_physical_design()`` instead
+    - Removed ``jump_point_search()``. Use ``a_star()`` instead
+    - Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap`` does not support
+- Data structures:
+    - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
+      ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
+      change in usage
+
+Fixed
+#####
+- Algorithms:
+    - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
+      had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
+      the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
+- Code quality:
+    - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
+    - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``
+      does not guarantee
+    - Fixed plain ``char`` values being passed to ``::toupper``, ``::tolower``, ``::isdigit``, and
+      ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
+    - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
+- Continuous integration:
+    - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
+      instead of full GitHub URLs, which the datasource requires to resolve tags
+    - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
+    - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit carrying a C++20 fix,
+      instead of floating on ``master``
+- Python bindings:
+    - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
+      longer emitted now that the operator is compiler-synthesized
+
+v0.7.0 - 2026-07-31
+-------------------
+
+.. epigraph::
+
+   Cliché or not, "stranger than fiction" expresses exactly how I feel about the truth.
+
+   -- Richard Dawkins
+
+Added
+#####
 - Documentation:
     - Added ``AGENTS.md`` to guide AI agents in the repository
 - Build system:
@@ -29,6 +108,11 @@ Added
         - `cmake-format-precommit`
         - `uv-pre-commit`
     - Enabled auto-merging stable non-major dependency releases via Renovate
+- Continuous integration:
+    - Added a 🌈 Zizmor workflow that statically analyzes the GitHub Actions workflows for security
+      issues on every push, pull request, and merge group, and uploads findings to the code scanning
+      API; fork pull requests print findings to the log instead, since their read-only token can't
+      upload to it
 
 Changed
 #######
@@ -46,6 +130,14 @@ Changed
 - Continuous integration:
     - The 🐧/🍎/🪟 CI, ☂️ Coverage, and 📝 CodeQL workflows, the Clang-Tidy Review workflow, and the Docker
       build now configure via the new CMake presets instead of hand-rolled ``-D`` flag lists
+    - The 🔖 Release Drafter workflow now runs on the smaller ``ubuntu-slim`` runner instead of
+      ``ubuntu-latest``, since it only calls the GitHub API and needs no compiler toolchain
+    - Hardened every workflow against the findings from the new 🌈 Zizmor workflow: scoped
+      ``permissions`` blocks to the minimum each job needs (instead of relying on the broad default),
+      set ``persist-credentials: false`` on checkouts that don't push, routed matrix/workspace values
+      through ``env`` vars instead of interpolating them directly into shell commands, and disabled
+      the PyPI packaging workflow's build cache to close a cache-poisoning path into published
+      artifacts
 - Python bindings:
     - Restructured the ``pyfiction`` bindings to use multiple translation units (one ``.cpp`` file per
       binding) for better modularity and faster incremental compilation
@@ -59,9 +151,16 @@ Fixed
 #####
 - Code quality:
     - Addressed several ``clang-tidy`` warnings throughout the code base
+    - Addressed several CodeQL findings: a potential unsigned-subtraction underflow in a test assertion, an
+      unnecessarily nested ``switch`` over a single-valued enum, imprecise ``assertTrue(a == b)``-style
+      Python test assertions, a duplicate ``import``/``from ... import`` of the same module, an unused
+      local variable, and dead code
 - Continuous integration:
     - Fixed Renovate attempting to bump the ``sphinx`` pin used for Python <3.11, which is unsupported by
       Sphinx 8.2+
+    - Excluded vendored third-party dependencies (fetched via CMake ``FetchContent``) and the purely
+      stylistic ``cpp/poorly-documented-function`` query from CodeQL analysis, removing hundreds of
+      alerts this project cannot act on
 - Documentation:
     - Fixed several stale ``**Header:**`` references pointing at renamed header files
     - Fixed an inconsistent ``fiction::`` namespace omission in a ``doxygenfunction`` directive
@@ -69,6 +168,11 @@ Fixed
     - Fixed broken ``:ref:`` links in the publications list
     - Added missing Python binding exports (``charge_distribution_history``,
       ``sidb_charge_states_for_base_number``) that were referenced by the documentation but not importable
+- Python bindings:
+    - Added missing docstrings for numerous ``pyfiction`` constructors (e.g., ``cartesian_gate_layout``) that
+      were previously undocumented despite an equivalent, documented constructor overload existing
+    - Added missing docstrings for several dunder/operator methods (e.g., ``bdl_input_iterator_params``,
+      ``__repr__``, ``__hash__``, ``__getitem__``) across the layout, network, and SiDB simulation bindings
 
 Removed
 #######

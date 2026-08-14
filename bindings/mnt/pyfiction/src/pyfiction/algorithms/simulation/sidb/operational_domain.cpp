@@ -5,14 +5,24 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 
 #include <fmt/format.h>
-#include <pybind11/operators.h>
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 
 #include <cstddef>
 #include <tuple>
 #include <utility>
 #include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/operators.h>
+#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/map.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/tuple.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -21,9 +31,9 @@ namespace detail
 {
 
 template <typename Lyt>
-void operational_domain_impl(pybind11::module& m)
+void operational_domain_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("operational_domain_grid_search", &fiction::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::operational_domain_params{}, py::arg("stats") = nullptr,
@@ -43,9 +53,9 @@ void operational_domain_impl(pybind11::module& m)
 }
 
 template <typename Lyt>
-void critical_temperature_domain_impl(pybind11::module& m)
+void critical_temperature_domain_impl(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("critical_temperature_domain_grid_search", &fiction::critical_temperature_domain_grid_search<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::operational_domain_params{},
@@ -68,9 +78,9 @@ void critical_temperature_domain_impl(pybind11::module& m)
 
 }  // namespace detail
 
-void operational_domain(pybind11::module& m)
+void operational_domain(nanobind::module_& m)
 {
-    namespace py = pybind11;  // NOLINT(misc-unused-alias-decls)
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<fiction::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
         .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
@@ -79,14 +89,24 @@ void operational_domain(pybind11::module& m)
 
         // NOLINTBEGIN(misc-redundant-expression)
         .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_parameter_point_operator_ne))
+        // `parameter_point` no longer declares an `operator!=`; C++20 rewrites `a != b` as `!(a == b)`, so the
+        // binding still works, but there is no generated docstring to reference for it anymore
+        .def(py::self != py::self, py::arg("other"),
+             "Inequality operator. Checks if this parameter point is not equal to another point within the "
+             "tolerance defined by `constants::ERROR_MARGIN`.\n\n"
+             ":param other: Other parameter point to compare with.\n"
+             ":return: ``True`` iff the parameter points are not equal.")
         // NOLINTEND(misc-redundant-expression)
 
-        .def("__hash__",
-             [](const fiction::parameter_point& self) { return std::hash<fiction::parameter_point>{}(self); })
-        .def("__str__", [](const fiction::parameter_point& self) { return fmt::format("{}", self.get_parameters()); })
-        .def("__getitem__",
-             [](const fiction::parameter_point& self, const std::size_t index) { return self.get_parameters()[index]; })
+        .def(
+            "__hash__", [](const fiction::parameter_point& self)
+            { return std::hash<fiction::parameter_point>{}(self); }, "Returns a hash value of the parameter point.")
+        .def(
+            "__str__", [](const fiction::parameter_point& self) { return fmt::format("{}", self.get_parameters()); },
+            "Returns a string representation of the parameter point.")
+        .def(
+            "__getitem__", [](const fiction::parameter_point& self, const std::size_t index)
+            { return self.get_parameters()[index]; }, "Returns the value of the parameter at the given index.")
 
         ;
 
@@ -99,8 +119,9 @@ void operational_domain(pybind11::module& m)
 
     py::class_<fiction::critical_temperature_domain>(m, "critical_temperature_domain",
                                                      DOC(fiction_critical_temperature_domain))
-        .def(py::init<>())
-        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"))
+        .def(py::init<>(), "Default constructor.")
+        .def(py::init<const std::vector<fiction::sweep_parameter>>(), py::arg("dims"),
+             "Constructs a critical temperature domain with the given sweep dimensions.")
         .def("get_dimension", &fiction::critical_temperature_domain::get_dimension, py::arg("index"),
              DOC(fiction_critical_temperature_domain_get_dimension))
         .def("get_number_of_dimensions", &fiction::critical_temperature_domain::get_number_of_dimensions,
@@ -111,32 +132,42 @@ void operational_domain(pybind11::module& m)
              DOC(fiction_critical_temperature_domain_maximum_ct))
 
         // Pythonic interface functions
-        .def("__getitem__",
-             [](const fiction::critical_temperature_domain& self, const fiction::parameter_point& key)
-             {
-                 const auto val = self.contains(key);
-                 if (!val.has_value())
-                 {
-                     throw py::key_error("Key not found");
-                 }
-                 return val.value();
-             })
-        .def("__setitem__",
-             [](fiction::critical_temperature_domain& self, const fiction::parameter_point& key,
-                const std::tuple<fiction::operational_status, double>& value) { self.add_value(key, value); })
-        .def("__contains__", [](const fiction::critical_temperature_domain& self, const fiction::parameter_point& key)
-             { return self.contains(key).has_value(); })
-        .def("__len__", [](const fiction::critical_temperature_domain& self) { return self.size(); })
-        .def("__iter__",
-             [](const fiction::critical_temperature_domain& self)
-             {
-                 std::vector<fiction::parameter_point> keys{};
-                 keys.reserve(self.size());
-                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+        .def(
+            "__getitem__",
+            [](const fiction::critical_temperature_domain& self, const fiction::parameter_point& key)
+            {
+                const auto val = self.contains(key);
+                if (!val.has_value())
+                {
+                    throw py::key_error("Key not found");
+                }
+                return val.value();
+            },
+            "Returns the value stored for the given parameter point, raising a KeyError if it does not exist.")
+        .def(
+            "__setitem__",
+            [](fiction::critical_temperature_domain& self, const fiction::parameter_point& key,
+               const std::tuple<fiction::operational_status, double>& value) { self.add_value(key, value); },
+            "Sets the value stored for the given parameter point.")
+        .def(
+            "__contains__", [](const fiction::critical_temperature_domain& self, const fiction::parameter_point& key)
+            { return self.contains(key).has_value(); },
+            "Checks whether the given parameter point is contained in the domain.")
+        .def(
+            "__len__", [](const fiction::critical_temperature_domain& self) { return self.size(); },
+            "Returns the number of parameter points stored in the domain.")
+        .def(
+            "__iter__",
+            [](const fiction::critical_temperature_domain& self)
+            {
+                std::vector<fiction::parameter_point> keys{};
+                keys.reserve(self.size());
+                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
 
-                 const py::list py_keys = py::cast(keys);
-                 return py::iter(py_keys);
-             })
+                const py::object py_keys = py::cast(keys);
+                return py::iter(py_keys);
+            },
+            "Returns an iterator over the parameter points stored in the domain.")
         .def("keys",
              [](const fiction::critical_temperature_domain& self)
              {
@@ -177,32 +208,44 @@ void operational_domain(pybind11::module& m)
              DOC(fiction_operational_domain_get_number_of_dimensions))
 
         // Pythonic interface functions
-        .def("__getitem__",
-             [](const fiction::operational_domain& self, const fiction::parameter_point& key)
-             {
-                 const auto val = self.contains(key);
-                 if (!val.has_value())
-                 {
-                     throw py::key_error("Key not found");
-                 }
+        .def(
+            "__getitem__",
+            [](const fiction::operational_domain& self, const fiction::parameter_point& key)
+            {
+                const auto val = self.contains(key);
+                if (!val.has_value())
+                {
+                    throw py::key_error("Key not found");
+                }
 
-                 return std::get<0>(val.value());
-             })
-        .def("__setitem__", [](fiction::operational_domain& self, const fiction::parameter_point& key,
-                               const fiction::operational_status& value) { self.add_value(key, {value}); })
-        .def("__contains__", [](const fiction::operational_domain& self, const fiction::parameter_point& key)
-             { return self.contains(key).has_value(); })
-        .def("__len__", [](const fiction::operational_domain& self) { return self.size(); })
-        .def("__iter__",
-             [](const fiction::operational_domain& self)
-             {
-                 std::vector<fiction::parameter_point> keys{};
-                 keys.reserve(self.size());
-                 self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
+                return std::get<0>(val.value());
+            },
+            "Returns the operational status stored for the given parameter point, raising a KeyError if it does "
+            "not exist.")
+        .def(
+            "__setitem__",
+            [](fiction::operational_domain& self, const fiction::parameter_point& key,
+               const fiction::operational_status& value) { self.add_value(key, {value}); },
+            "Sets the operational status stored for the given parameter point.")
+        .def(
+            "__contains__", [](const fiction::operational_domain& self, const fiction::parameter_point& key)
+            { return self.contains(key).has_value(); },
+            "Checks whether the given parameter point is contained in the domain.")
+        .def(
+            "__len__", [](const fiction::operational_domain& self) { return self.size(); },
+            "Returns the number of parameter points stored in the domain.")
+        .def(
+            "__iter__",
+            [](const fiction::operational_domain& self)
+            {
+                std::vector<fiction::parameter_point> keys{};
+                keys.reserve(self.size());
+                self.for_each([&keys](const auto& key, const auto&) { keys.push_back(key); });
 
-                 const py::list py_keys = py::cast(keys);
-                 return py::iter(py_keys);
-             })
+                const py::object py_keys = py::cast(keys);
+                return py::iter(py_keys);
+            },
+            "Returns an iterator over the parameter points stored in the domain.")
         .def("keys",
              [](const fiction::operational_domain& self)
              {
@@ -236,42 +279,40 @@ void operational_domain(pybind11::module& m)
         .def(py::init<fiction::sweep_parameter>(), py::arg("dimension"))
         .def(py::init<fiction::sweep_parameter, double, double, double>(), py::arg("dimension"), py::arg("min"),
              py::arg("max"), py::arg("step"))
-        .def_readwrite("dimension", &fiction::operational_domain_value_range::dimension,
-                       DOC(fiction_operational_domain_value_range_dimension))
-        .def_readwrite("min", &fiction::operational_domain_value_range::min,
-                       DOC(fiction_operational_domain_value_range_min))
-        .def_readwrite("max", &fiction::operational_domain_value_range::max,
-                       DOC(fiction_operational_domain_value_range_max))
-        .def_readwrite("step", &fiction::operational_domain_value_range::step,
-                       DOC(fiction_operational_domain_value_range_step))
+        .def_rw("dimension", &fiction::operational_domain_value_range::dimension,
+                DOC(fiction_operational_domain_value_range_dimension))
+        .def_rw("min", &fiction::operational_domain_value_range::min, DOC(fiction_operational_domain_value_range_min))
+        .def_rw("max", &fiction::operational_domain_value_range::max, DOC(fiction_operational_domain_value_range_max))
+        .def_rw("step", &fiction::operational_domain_value_range::step,
+                DOC(fiction_operational_domain_value_range_step))
 
         ;
 
     py::class_<fiction::operational_domain_params>(m, "operational_domain_params",
                                                    DOC(fiction_operational_domain_params))
-        .def(py::init<>())
-        .def_readwrite("operational_params", &fiction::operational_domain_params::operational_params,
-                       DOC(fiction_operational_domain_params_operational_params))
-        .def_readwrite("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
-                       DOC(fiction_operational_domain_params_sweep_dimensions));
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("operational_params", &fiction::operational_domain_params::operational_params,
+                DOC(fiction_operational_domain_params_operational_params))
+        .def_rw("sweep_dimensions", &fiction::operational_domain_params::sweep_dimensions,
+                DOC(fiction_operational_domain_params_sweep_dimensions));
 
     py::class_<fiction::operational_domain_stats>(m, "operational_domain_stats", DOC(fiction_operational_domain_stats))
-        .def(py::init<>())
-        .def_readonly("time_total", &fiction::operational_domain_stats::time_total,
-                      DOC(fiction_operational_domain_stats_duration))
-        .def_readonly("num_simulator_invocations", &fiction::operational_domain_stats::num_simulator_invocations,
-                      DOC(fiction_operational_domain_stats_num_simulator_invocations))
-        .def_readonly("num_evaluated_parameter_combinations",
-                      &fiction::operational_domain_stats::num_evaluated_parameter_combinations,
-                      DOC(fiction_operational_domain_stats_num_evaluated_parameter_combinations))
-        .def_readonly("num_operational_parameter_combinations",
-                      &fiction::operational_domain_stats::num_operational_parameter_combinations,
-                      DOC(fiction_operational_domain_stats_num_operational_parameter_combinations))
-        .def_readonly("num_non_operational_parameter_combinations",
-                      &fiction::operational_domain_stats::num_non_operational_parameter_combinations,
-                      DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations))
-        .def_readonly("num_total_parameter_points", &fiction::operational_domain_stats::num_total_parameter_points,
-                      DOC(fiction_operational_domain_stats_num_total_parameter_points))
+        .def(py::init<>(), "Default constructor.")
+        .def_ro("time_total", &fiction::operational_domain_stats::time_total,
+                DOC(fiction_operational_domain_stats_duration))
+        .def_ro("num_simulator_invocations", &fiction::operational_domain_stats::num_simulator_invocations,
+                DOC(fiction_operational_domain_stats_num_simulator_invocations))
+        .def_ro("num_evaluated_parameter_combinations",
+                &fiction::operational_domain_stats::num_evaluated_parameter_combinations,
+                DOC(fiction_operational_domain_stats_num_evaluated_parameter_combinations))
+        .def_ro("num_operational_parameter_combinations",
+                &fiction::operational_domain_stats::num_operational_parameter_combinations,
+                DOC(fiction_operational_domain_stats_num_operational_parameter_combinations))
+        .def_ro("num_non_operational_parameter_combinations",
+                &fiction::operational_domain_stats::num_non_operational_parameter_combinations,
+                DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations))
+        .def_ro("num_total_parameter_points", &fiction::operational_domain_stats::num_total_parameter_points,
+                DOC(fiction_operational_domain_stats_num_total_parameter_points))
 
         ;
 
