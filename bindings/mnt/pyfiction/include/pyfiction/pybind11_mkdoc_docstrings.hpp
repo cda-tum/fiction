@@ -16386,7 +16386,12 @@ Parameter ``canvas_lyt``:
 Returns:
     A pair containing the operational status of the SiDB layout
     (either `OPERATIONAL` or `NON_OPERATIONAL`) and the number of
-    input combinations tested.)doc";
+    input combinations tested.
+
+Throws:
+    std::invalid_argument if `spec` is empty, or if the number of
+    input pattern layouts does not match the number of input
+    combinations of `spec`.)doc";
 
 static const char *__doc_fiction_is_operational_params = R"doc(Parameters for the `is_operational` algorithm.)doc";
 
