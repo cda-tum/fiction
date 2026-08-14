@@ -434,10 +434,12 @@ class operational_domain_impl
                 (logic_cells.size() > 0)) &&
                "No logic cells found in the layout");
 
-        // the canvas layout is created which is defined by the logic cells.
+        // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
+        // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
+        // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
         for (const auto& c : logic_cells)
         {
-            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
         }
 
         indices.reserve(num_dimensions);

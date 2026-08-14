@@ -391,22 +391,14 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
-        if (!canvas_lyt.is_empty())
+        if (canvas_filtering_applicable)
         {
-            if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
-                 parameters.strategy_to_analyze_operational_status ==
-                     is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
-                (parameters.strategy_to_analyze_operational_status ==
-                     is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-                 parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS))
+            // number of different input combinations
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
-                // number of different input combinations
-                for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
+                if (is_layout_invalid(i))
                 {
-                    if (is_layout_invalid(i))
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                    }
+                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
             }
         }
@@ -414,7 +406,7 @@ class is_operational_impl
         // This is only an approximation.
         if (parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-            !canvas_lyt.is_empty())
+            canvas_filtering_applicable)
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
@@ -423,7 +415,7 @@ class is_operational_impl
                 is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
             parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
-            canvas_lyt.is_empty())
+            !canvas_filtering_applicable)
         {
             // number of different input combinations
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
@@ -951,6 +943,19 @@ class is_operational_impl
      */
     Lyt canvas_lyt{};
     /**
+     * Whether the canvas-based filtering steps can be applied. They need a canvas to enumerate, they are skipped by
+     * `SIMULATION_ONLY`, and they are only defined for `REJECT_KINKS`.
+     *
+     * This is the single place the condition is decided. The entry points build a canvas whenever the layout has
+     * `LOGIC` cells and leave it to `run()` to determine whether the filtering applies, so that the same layout and the
+     * same parameters take the same path regardless of which overload the caller reached.
+     */
+    const bool canvas_filtering_applicable{!canvas_lyt.is_empty() &&
+                                           parameters.strategy_to_analyze_operational_status !=
+                                               is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
+                                           parameters.op_condition ==
+                                               is_operational_params::operational_condition::REJECT_KINKS};
+    /**
      * Pre-generated layouts, one per input pattern, or `nullptr` if the BDL input iterator is used instead. Not owned
      * by this object and only ever read.
      */
@@ -1177,11 +1182,9 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
-    // if there are logic cells, we can design the canvas layout consisting of all logic cells
-    if (!logic_cells.empty() &&
-        params.strategy_to_analyze_operational_status !=
-            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
-        params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+    // if there are logic cells, we can design the canvas layout consisting of all logic cells. Whether the canvas is
+    // actually used is decided by `is_operational_impl::run()`, so that every entry point takes the same path
+    if (!logic_cells.empty())
     {
         Lyt canvas_lyt{};
 
