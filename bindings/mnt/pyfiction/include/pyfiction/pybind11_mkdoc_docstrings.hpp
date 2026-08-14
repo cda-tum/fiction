@@ -23505,7 +23505,6 @@ static const char *__doc_fiction_yen_k_shortest_paths_params = R"doc(Parameters 
 
 static const char *__doc_fiction_yen_k_shortest_paths_params_astar_params = R"doc(Parameters for the internal A* algorithm.)doc";
 
-
 static const char *__doc_fmt_formatter = R"doc()doc";
 
 static const char *__doc_fmt_formatter_2 = R"doc()doc";
@@ -23523,6 +23522,7 @@ static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinat
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_layouts_coordinates_hpp_1125_8 = R"doc()doc";
 
 static const char *__doc_fmt_unnamed_struct_at_include_fiction_technology_cell_ports_hpp_295_8 = R"doc()doc";
+
 static const char *__doc_mockturtle_detail_foreach_element_if_transform = R"doc()doc";
 
 static const char *__doc_mockturtle_edge =
