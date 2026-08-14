@@ -96,8 +96,8 @@ AI-Assisted Contributions
 
 Contributions written with the help of an AI agent are welcome, under two conditions.
 
-* Add an :code:`Assisted-by: <Model Name> via <Tool Name>` trailer to any commit whose content an agent authored, and note in the PR description that the change was AI-assisted.
-* Review and understand the change before opening the pull request. You are responsible for it either way.
+* **Disclose it.** Add an :code:`Assisted-by: <Model Name> via <Tool Name>` trailer to any commit whose content an agent authored, and add a line disclosing AI assistance to every public text body an agent wrote or edited: pull request descriptions, issues, discussions, review comments, and replies. One line at the end is enough, and it should name what you actually checked. Titles are exempt, and having your PR reviewed by CodeRabbit does not make it an AI-assisted contribution.
+* **Take responsibility for it.** Review and understand the content before you post it. If you cannot explain it, do not submit it. A contribution should be worth more than the effort it costs to review.
 
 Agent instructions live in :code:`AGENTS.md` at the repository root, with additional files in the subdirectories they apply to. If your tool expects a different file name, create a local symlink — for example :code:`ln -s AGENTS.md CLAUDE.md`. Those names are gitignored, so the repository itself stays tool-neutral.
 

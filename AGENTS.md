@@ -115,12 +115,17 @@ docs, `✅` tests, `🚨` fix warnings, `🔥` remove code. Don't stack multiple
 imitate.
 
 - Add an `Assisted-by: <Model Name> via <Tool Name>` trailer to any commit whose content an
-  AI agent authored, for example `Assisted-by: Claude Opus 4.5 via Claude Code`.
-- State in the pull request description that the change was AI-assisted, and that you
-  reviewed and understood it before opening the request.
-- Never push, open or merge a pull request, post a comment, or otherwise change remote
-  state unless the maintainer authorized that specific action. Authorization for one task
-  does not carry over to the next.
+  AI agent authored, for example `Assisted-by: Claude Opus 5 via Claude Code`.
+- Disclose AI assistance in **every public text body** an agent wrote or edited: pull
+  request descriptions, issues, discussions, review comments, and replies. One line at the
+  end is enough, naming what a human actually checked — "Drafted with AI assistance;
+  measurements reproduced locally and against CI". Titles are exempt, and a review _by_
+  CodeRabbit does not make your pull request AI-assisted.
+- You are responsible for everything you post under your name. Review it and understand it
+  first; if you cannot explain it, do not submit it.
+- Never push, open or merge a pull request, post a comment, open an issue, or otherwise
+  change remote state unless the maintainer authorized that specific action. Authorization
+  for one task does not carry over to the next.
 
 ## Code Style
 
