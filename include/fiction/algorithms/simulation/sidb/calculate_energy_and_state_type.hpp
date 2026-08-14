@@ -126,7 +126,7 @@ template <typename Lyt, typename TT>
     const energy_distribution&                           energy_distribution,
     const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
     const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires,
-    std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept
+    const std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

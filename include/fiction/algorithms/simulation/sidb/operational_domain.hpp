@@ -1267,8 +1267,12 @@ class operational_domain_impl
 
         if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
         {
+            // the input pattern layouts and the BDL detection results do not depend on the swept parameters, so the
+            // ones generated once in the constructor are handed to every sample point instead of being re-derived here
             const auto ct = critical_temperature_gate_based(
-                layout, truth_table, critical_temperature_params{.operational_params = op_params_set_dimension_values});
+                input_pattern_layouts, truth_table,
+                critical_temperature_params{.operational_params = op_params_set_dimension_values}, output_bdl_pairs,
+                input_bdl_wires, output_bdl_wires);
 
             return operational(ct);
         }
