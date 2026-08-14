@@ -39,8 +39,8 @@ template <typename Lyt, typename Dist = uint64_t>
     // `-std` flag, so it parses these headers as C++11 with unresolved project includes. A `requires` clause is a
     // syntax error there, and it aborts the enclosing declaration list, dropping the Doxygen comments of everything
     // declared after it. Passing `-std=c++20` alone makes this worse, not better: it cut the generated docstrings
-    // from 3292 to 1769 on CI. Fixing the include path is the prerequisite for revisiting it. The same applies to
-    // `cost.hpp` and `a_star.hpp`
+    // from 3292 to 1769 on CI. Fixing the include path is the prerequisite for revisiting it; tracked in
+    // https://github.com/cda-tum/fiction/issues/1062. The same applies to `cost.hpp` and `a_star.hpp`
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
     static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
 
