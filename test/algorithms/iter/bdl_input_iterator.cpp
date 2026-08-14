@@ -10,6 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -497,7 +498,8 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const bdl_input_iterator_params params{detect_bdl_wires_params{2.0}};
+    const bdl_input_iterator_params params{.bdl_wire_params =
+                                               detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};
 
     SECTION("One layout per input pattern, matching the iterator")
     {

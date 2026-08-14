@@ -39,3 +39,4 @@ BDL Input Iterator
             :members:
         .. autoclass:: mnt.pyfiction.bdl_input_iterator_111
             :members:
+        .. autofunction:: mnt.pyfiction.generate_bdl_input_pattern_layouts

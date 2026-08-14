@@ -507,6 +507,8 @@ namespace detail
 template <typename Lyt>
 [[nodiscard]] std::vector<Lyt> collect_bdl_input_pattern_layouts(bdl_input_iterator<Lyt>& bii) noexcept
 {
+    assert(bii.num_input_pairs() < 64 && "too many input BDL pairs to enumerate");
+
     const auto num_input_patterns = uint64_t{1} << bii.num_input_pairs();
 
     std::vector<Lyt> layouts{};

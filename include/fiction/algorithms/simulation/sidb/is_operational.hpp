@@ -24,6 +24,7 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
+#include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
 
@@ -36,6 +37,7 @@
 #include <optional>
 #include <ranges>
 #include <set>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -1295,27 +1297,37 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
  * @param canvas_lyt Optional canvas layout.
  * @return A pair containing the operational status of the SiDB layout (either `OPERATIONAL` or `NON_OPERATIONAL`) and
  * the number of input combinations tested.
+ * @throws std::invalid_argument if `spec` is empty, or if the number of input pattern layouts does not match the
+ * number of input combinations of `spec`.
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] std::pair<operational_status, std::size_t>
 is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec,
                const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire,
-               const std::vector<bdl_wire<Lyt>>& output_bdl_wire,
-               const std::optional<Lyt>&         canvas_lyt = std::nullopt) noexcept
+               const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    assert(!input_pattern_layouts.empty() && "no input pattern layouts provided");
+    // unlike the other overloads, this one indexes a caller-supplied container, so a wrong size is an out-of-bounds
+    // read rather than a wrong answer. It is also reachable from `pyfiction` with an arbitrary list, so the checks
+    // have to survive `NDEBUG`
+    if (spec.empty())
+    {
+        throw std::invalid_argument("spec is empty");
+    }
 
-    assert(!spec.empty());
+    if (input_pattern_layouts.size() != spec.front().num_bits())
+    {
+        throw std::invalid_argument(
+            fmt::format("expected {} input pattern layouts for a {}-input specification, but got {}",
+                        spec.front().num_bits(), spec.front().num_vars(), input_pattern_layouts.size()));
+    }
+
     // all elements in spec must have the same number of variables
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
                                       { return a.num_vars() != b.num_vars(); }) == spec.cend());
-
-    assert(input_pattern_layouts.size() == spec.front().num_bits() &&
-           "number of input pattern layouts and input combinations don't match");
 
     if (canvas_lyt.has_value())
     {

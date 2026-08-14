@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <optional>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -690,8 +691,8 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
             // all-patterns-simulated paths are covered
             for (const auto mu_minus : {-0.32, -0.15})
             {
-                is_operational_params params{sidb_simulation_parameters{2, mu_minus},
-                                             sidb_simulation_engine::QUICKEXACT};
+                is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, mu_minus},
+                                             .sim_engine            = sidb_simulation_engine::QUICKEXACT};
                 params.op_condition = condition;
 
                 check_agreement(lat, std::vector<tt>{create_and_tt()}, params);
@@ -703,7 +704,8 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
     {
         const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>()};
 
-        is_operational_params params{sidb_simulation_parameters{2, -0.28}, sidb_simulation_engine::QUICKEXACT};
+        is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, -0.28},
+                                     .sim_engine            = sidb_simulation_engine::QUICKEXACT};
         params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
         check_agreement(lat, std::vector<tt>{create_or_tt()}, params);
@@ -713,8 +715,42 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
     {
         const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-        const is_operational_params params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT};
+        const is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, -0.32},
+                                           .sim_engine            = sidb_simulation_engine::QUICKEXACT};
 
         check_agreement(lat, std::vector<tt>{create_and_tt()}, params);
+    }
+}
+
+TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]")
+{
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    const is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, -0.32},
+                                       .sim_engine            = sidb_simulation_engine::QUICKEXACT};
+
+    const auto input_wires =
+        detect_bdl_wires(lat, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+    const auto output_wires =
+        detect_bdl_wires(lat, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
+
+    const auto input_pattern_layouts =
+        generate_bdl_input_pattern_layouts(lat, params.input_bdl_iterator_params, input_wires);
+
+    REQUIRE(input_pattern_layouts.size() == 4);
+
+    SECTION("Too few layouts for the specification")
+    {
+        const std::vector<sidb_100_cell_clk_lyt_siqad> too_few{input_pattern_layouts.cbegin(),
+                                                               input_pattern_layouts.cbegin() + 2};
+
+        CHECK_THROWS_AS(is_operational(too_few, std::vector<tt>{create_and_tt()}, params, input_wires, output_wires),
+                        std::invalid_argument);
+    }
+
+    SECTION("Empty specification")
+    {
+        CHECK_THROWS_AS(is_operational(input_pattern_layouts, std::vector<tt>{}, params, input_wires, output_wires),
+                        std::invalid_argument);
     }
 }
