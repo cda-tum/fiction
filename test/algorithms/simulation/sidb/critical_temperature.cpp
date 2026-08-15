@@ -869,7 +869,8 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
         const auto ct = critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()}, params,
                                                         output_pairs, input_wires, output_wires, &stats);
 
-        CHECK(ct == expected_ct);
+        // the two overloads run the same computation, so the results must be bit-identical
+        CHECK_THAT(ct, Catch::Matchers::WithinULP(expected_ct, 0));
         CHECK(stats.num_valid_lyt == expected_stats.num_valid_lyt);
         CHECK(stats.energy_between_ground_state_and_first_erroneous ==
               expected_stats.energy_between_ground_state_and_first_erroneous);
