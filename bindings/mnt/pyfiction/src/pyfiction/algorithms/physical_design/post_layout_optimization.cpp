@@ -72,7 +72,7 @@ void post_layout_optimization(nanobind::module_& m)
         .def("report", &fiction::post_layout_optimization_stats::report,
              DOC(fiction_post_layout_optimization_stats_report))
         .def_ro("time_total", &fiction::post_layout_optimization_stats::time_total,
-                DOC(fiction_post_layout_optimization_stats_duration))
+                DOC(fiction_post_layout_optimization_stats_time_total))
         .def_ro("x_size_before", &fiction::post_layout_optimization_stats::x_size_before,
                 DOC(fiction_post_layout_optimization_stats_x_size_before))
         .def_ro("y_size_before", &fiction::post_layout_optimization_stats::y_size_before,

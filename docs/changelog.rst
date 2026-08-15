@@ -21,6 +21,14 @@ Added
 
 Changed
 #######
+- Continuous integration:
+    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
+      paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
+      ``requires`` clause no longer silences the Doxygen comments that follow it
+- Python bindings:
+    - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
+      ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
+      directly must be renamed
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
@@ -80,6 +88,8 @@ Fixed
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
+    - Fixed nine ``DOC(...)`` references that named symbols the broken parse had invented; the
+      ``*_stats`` runtime members are now documented under their real names
 
 v0.7.0 - 2026-07-31
 -------------------
@@ -116,10 +126,6 @@ Added
 
 Changed
 #######
-- Algorithms:
-    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
-    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params`` (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
-    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports mapping errors instead of silently storing a failed mapping
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
     - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
@@ -173,12 +179,6 @@ Fixed
       were previously undocumented despite an equivalent, documented constructor overload existing
     - Added missing docstrings for several dunder/operator methods (e.g., ``bdl_input_iterator_params``,
       ``__repr__``, ``__hash__``, ``__getitem__``) across the layout, network, and SiDB simulation bindings
-
-Removed
-#######
-- CLI:
-    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
-
 
 v0.6.12 - 2025-10-29
 --------------------
