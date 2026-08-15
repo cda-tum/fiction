@@ -81,7 +81,7 @@ repos:
 
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.3.0
+    rev: v2.3.1
     hooks:
       - id: mypy
         files: ^(bindings/mnt/pyfiction|noxfile.py)
@@ -108,7 +108,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.08.14
+    rev: 2026.08.15
     hooks:
       - id: validate-pyproject
 
