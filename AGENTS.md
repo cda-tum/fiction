@@ -6,8 +6,8 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 
 ## Working Principles
 
-- Prefer the smallest change that fully solves the task. Keep unrelated cleanup,
-  reformatting, and dependency bumps out of the same pull request; open a separate one.
+- Prefer the smallest change that fully solves the task. Cleanup, reformatting, and dependency
+  bumps in code the task does not otherwise touch belong in their own pull request.
 - Do not add an abstraction, a template parameter, or a configuration option until a
   second concrete caller needs it. _fiction_ is header-only and template-heavy, so every
   added template parameter costs compile time and instantiation surface in every
@@ -21,14 +21,25 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
   `git worktree add .ai/worktrees/<task> -b <branch>` and work there, never directly in the
   primary checkout. Two agents that share a working directory overwrite each other's
   uncommitted edits and switch the branch under each other, and neither notices. `.ai/` is
-  gitignored, so the worktree stays out of `git status`. Remove it with
-  `git worktree remove` when the task is done.
+  gitignored, so the worktree stays out of `git status`.
+- **Configure one build preset per worktree, and tear the worktree down when you are done.**
+  A configured build tree costs 1 to 4 GB, so a worktree left behind is not free the way the
+  source checkout is — that is only ~45 MB against a shared `.git`. Use a preset from
+  `CMakePresets.json` rather than a hand-rolled `-B` directory, so the build tree carries a
+  recognizable `build-<preset>` name that the next reader can place. When the task is done,
+  run `git worktree remove <path>` — which deletes the build trees with it — followed by
+  `git worktree prune`.
 - Inspect the working tree before editing, and never revert or overwrite a change you did
   not make. If you find edits you did not write, stop and ask instead of reverting them.
 - Remove scaffolding before handoff: debug output, commented-out code, and `NOLINT`
   suppressions. A suppression that has to stay names the technical reason in a comment.
-- Warn when you spot a sub-par design decision, including in existing code, and say what
-  you would do instead. Do not act on it in the same change without asking.
+- **Report every streamlining, restructuring, simplification, and optimization you notice
+  while working, including in existing code.** Say what you would do and why. This is part
+  of the task, not a distraction from it: a feature request or a bug fix is the moment
+  someone reads the surrounding code closely, and staying quiet wastes that reading.
+- Implement such a change in the same pull request when it falls inside the code the task
+  already modifies. Beyond that radius, name it in the pull request description and open a
+  separate pull request; do not expand the diff to reach it.
 - Prioritize the architecture and maintainability of the project as a whole.
 
 ## Writing
@@ -42,9 +53,16 @@ code comments, and error messages.
   "empty layouts are now rejected".
 - No metaphors, no figures of speech, no filler openers ("Note that", "It is worth
   mentioning that", "Basically").
+- Keep sentences short and direct, and give each sentence one idea. Prefer an explicit noun
+  to a pronoun whose referent the reader has to reconstruct — "the layout", not "it".
 - Use the established domain term, and use one term per concept. Do not paraphrase `SiDB`,
   `defect`, `gate library`, or `operational domain` into everyday words, and do not switch
-  between synonyms for variety.
+  between synonyms for variety. Take terminology from the repository's own usage and from
+  established precedent in field-coupled nanocomputing, logic synthesis, and design
+  automation. Where those communities use different words for one concept, explain the
+  mapping once and then pick one.
+- Prefer everyday English to a jargon term where it costs no precision. Where it does cost
+  precision, keep the precise term.
 - Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
   `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
 - Write for the final design, not for the history of how you got there. Do not narrate
@@ -52,6 +70,39 @@ code comments, and error messages.
   rejected alternative is worth recording because a reader would otherwise retry it, put
   it in a code comment at the site or in the pull request — not in the changelog.
 - Break any of these rules rather than write something unclear or imprecise.
+
+### Documentation describes the status quo
+
+Documentation, Doxygen comments, and docstrings state what the code does now and why. They
+never describe what it used to do. A reader has no access to the earlier state, so a
+sentence that compares against it carries no information and goes stale the moment someone
+reads it cold.
+
+Do not write "this fixes the way it was before", "unlike the previous implementation",
+"now correctly handles", "changed to return", or "no longer crashes". Describe the behavior
+that exists: "returns `std::nullopt` when the layout is empty".
+
+The same holds for the reason a thing is the way it is. Record it as a present-tense
+constraint at the site, not as a story about a past attempt — "`std::unordered_map`
+is not usable here because the iteration order feeds the gate ordering", not "switched away
+from `std::unordered_map` because it broke the gate ordering".
+
+`docs/changelog.rst` is the one exception, because naming the delta between two releases is
+its whole purpose. The word "now" marks the boundary: "`hexagonalization` now rejects empty
+layouts" is a good changelog entry, and a bad Doxygen comment on `hexagonalization`, which
+should say that the function rejects empty layouts.
+
+### Descriptions match the implementation
+
+For any user-facing surface — an algorithm entry point, a CLI command, a `pyfiction`
+binding, a page under `docs/` — keep the summary aligned with what the code actually does:
+its scope, its defaults, its limitations, its failure modes, and what it deliberately does
+not handle. A description that claims more than the implementation delivers produces bug
+reports against behavior that was never promised in code.
+
+When a change adds or alters such a surface, say what a user can do that they could not do
+before, and how they can see it working. Over-explain the user-visible effect; leave the
+incidental implementation detail to the code.
 
 ## Project Map
 
@@ -147,6 +198,9 @@ imitate.
     classes, etc.).
   - Use modern Doxygen commands (`@brief`, `@param`, `@return`, `@tparam`, `@file`,
     `@author`, `@ref`, `@see`, `@throws` etc.).
+  - Describe the status quo, never the previous behavior, and keep the description true to
+    what the code does — see "Documentation describes the status quo" and "Descriptions
+    match the implementation" under `Writing`.
   - The current codebase uses `// Created by ...` comments. A migration to using `@file`
     and `@author` tags per file (with full name and GitHub handle) is planned. After
     migration, the new convention will be enforced and `// Created by ...` comments should
@@ -173,7 +227,10 @@ enforces the following:
   - Satisfy every box in `.github/pull_request_template.md` before calling a PR done.
   - Use `const` correctness and braced initialization.
   - Keep plans, notes, analyses, and worktrees in `.ai/` (gitignored). Never write them to
-    the repository root and never commit them.
+    the repository root and never commit them. `.claude/worktrees/` is a superseded
+    location; do not add to it.
+  - Remove your worktree and its build trees when the task is done (`git worktree remove`,
+    then `git worktree prune`).
 - ⚠️ **Ask First**:
   - Before adding a new third-party dependency, whether vendored under `vendors/` or
     fetched from `CMakeLists.txt`.

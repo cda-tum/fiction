@@ -22,20 +22,23 @@
   customManagers: [
     {
       // Renovate has no native manager for CMake FetchContent, so the pinned
-      // GIT_TAG versions in cmake/Dependencies.cmake are tracked via regex
-      // managers instead, one per dependency, matching the GIT_REPOSITORY on
-      // the preceding line to disambiguate between blocks.
+      // versions in cmake/Dependencies.cmake are tracked via regex managers
+      // instead, one per dependency, matching the `set(<DEP>_VERSION ...)`
+      // block that feeds the download URL. The version variables hold a bare
+      // version, so extractVersionTemplate strips the leading "v" from tags
+      // that carry one.
       customType: "regex",
       description: "Update the nlohmann_json revision pinned for CMake FetchContent",
       managerFilePatterns: [
         "cmake/Dependencies.cmake"
       ],
       matchStrings: [
-        "GIT_REPOSITORY https://github\\.com/nlohmann/json\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+        "set\\(JSON_VERSION\\s+(?<currentValue>[0-9.]+)"
       ],
       depNameTemplate: "nlohmann/json",
       packageNameTemplate: "nlohmann/json",
       datasourceTemplate: "github-tags",
+      extractVersionTemplate: "^v(?<version>.+)$",
     },
     {
       customType: "regex",
@@ -44,11 +47,12 @@
         "cmake/Dependencies.cmake"
       ],
       matchStrings: [
-        "GIT_REPOSITORY https://github\\.com/catchorg/Catch2\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+        "set\\(CATCH2_VERSION\\s+(?<currentValue>[0-9.]+)"
       ],
       depNameTemplate: "catchorg/Catch2",
       packageNameTemplate: "catchorg/Catch2",
       datasourceTemplate: "github-tags",
+      extractVersionTemplate: "^v(?<version>.+)$",
     },
     {
       customType: "regex",
@@ -57,11 +61,12 @@
         "cmake/Dependencies.cmake"
       ],
       matchStrings: [
-        "GIT_REPOSITORY https://github\\.com/greg7mdp/parallel-hashmap\\.git\\s+GIT_TAG (?<currentValue>v[0-9.]+)"
+        "set\\(PARALLEL_HASHMAP_VERSION\\s+(?<currentValue>[0-9.]+)"
       ],
       depNameTemplate: "greg7mdp/parallel-hashmap",
       packageNameTemplate: "greg7mdp/parallel-hashmap",
       datasourceTemplate: "github-tags",
+      extractVersionTemplate: "^v(?<version>.+)$",
     },
     {
       customType: "regex",
@@ -70,7 +75,7 @@
         "cmake/Dependencies.cmake"
       ],
       matchStrings: [
-        "GIT_REPOSITORY https://github\\.com/leethomason/tinyxml2\\.git\\s+GIT_TAG (?<currentValue>[0-9.]+)"
+        "set\\(TINYXML2_VERSION\\s+(?<currentValue>[0-9.]+)"
       ],
       depNameTemplate: "leethomason/tinyxml2",
       packageNameTemplate: "leethomason/tinyxml2",
@@ -79,14 +84,15 @@
     {
       // alice and mockturtle are pinned to a commit SHA that tracks the head
       // of a branch (rather than a release tag), so these use the git-refs
-      // datasource against that branch instead of github-tags.
+      // datasource against that branch instead of github-tags. mockturtle is
+      // still fetched as a clone, so its manager matches GIT_TAG.
       customType: "regex",
       description: "Update the alice revision pinned for CMake FetchContent",
       managerFilePatterns: [
         "cmake/Dependencies.cmake"
       ],
       matchStrings: [
-        "GIT_REPOSITORY https://github\\.com/marcelwa/alice\\.git\\s+GIT_TAG (?<currentDigest>[0-9a-f]{40})"
+        "set\\(ALICE_REV\\s+(?<currentDigest>[0-9a-f]{40})"
       ],
       depNameTemplate: "marcelwa/alice",
       packageNameTemplate: "https://github.com/marcelwa/alice",

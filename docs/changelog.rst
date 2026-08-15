@@ -36,6 +36,8 @@ Changed
       independent of exploration order and therefore unchanged
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
+    - Fetch dependencies as release tarballs instead of git clones, which shrinks a configured
+      build directory by roughly 240 MB. ``mockturtle`` stays a clone because it uses a submodule
 - Code quality:
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
