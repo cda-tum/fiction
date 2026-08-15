@@ -20,7 +20,8 @@ Added
       leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
       lets a computation leave cores free
 - Python bindings:
-    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
+    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
+      ``critical_temperature_gate_based`` overloads
     - Exposed ``number_of_threads`` on ``operational_domain_params`` and
       ``displacement_robustness_domain_params``
 
@@ -68,11 +69,8 @@ Fixed
     - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
       robustness helpers, which derive their slice size by dividing by a worker count that is zero when
       there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
-    - Fixed the ``is_operational`` entry points building the canvas layout under different conditions, so
-      that the same layout and parameters took different code paths depending on the overload reached.
-      ``FILTER_ONLY`` combined with ``TOLERATE_KINKS`` reported every layout operational without checking
-      it, because the canvas was built but the filtering steps that need it require ``REJECT_KINKS``. The
-      condition is now decided in one place, in ``is_operational_impl::run()``
+    - Fixed ``is_operational`` reporting every layout operational without checking it when ``FILTER_ONLY``
+      was combined with ``TOLERATE_KINKS``. All entry points now decide canvas filtering in one place
     - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
