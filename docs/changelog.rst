@@ -11,6 +11,9 @@ Unreleased
 Added
 #####
 - Algorithms:
+    - Added the ``missing_required_gates_exception`` that ``technology_mapping`` throws when the
+      technology library is missing the gates required by the base network type (AIG requires INV and
+      AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
     - Added an ``is_operational`` overload that takes one layout per input pattern, and
       ``generate_bdl_input_pattern_layouts`` to generate them
 - Python bindings:
@@ -19,6 +22,13 @@ Added
 Changed
 #######
 - Algorithms:
+    - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
+      ``mockturtle::map``
+    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params``
+      (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a
+      ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports
+      mapping errors instead of storing a failed mapping
     - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
       layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
       gates are dominated by the physical simulation and gain little
@@ -41,6 +51,8 @@ Removed
       command, and ``one_pass_synthesis()``. Use ``exact_physical_design()`` instead
     - Removed ``jump_point_search()``. Use ``a_star()`` instead
     - Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap`` does not support
 - Data structures:
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
@@ -104,6 +116,10 @@ Added
 
 Changed
 #######
+- Algorithms:
+    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
+    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params`` (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports mapping errors instead of silently storing a failed mapping
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
     - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
@@ -158,6 +174,12 @@ Fixed
     - Added missing docstrings for several dunder/operator methods (e.g., ``bdl_input_iterator_params``,
       ``__repr__``, ``__hash__``, ``__getitem__``) across the layout, network, and SiDB simulation bindings
 
+Removed
+#######
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
+
+
 v0.6.12 - 2025-10-29
 --------------------
 
@@ -194,11 +216,6 @@ Changed
 - Dependencies:
     - Updated all dependencies to their latest versions
 
-Removed
-#######
-- Continuous integration:
-    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
-
 Fixed
 #####
 - Data structures:
@@ -219,6 +236,7 @@ Fixed
 Removed
 #######
 - Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
 

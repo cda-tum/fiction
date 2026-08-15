@@ -27,7 +27,7 @@ class map_command final : public command
 
   protected:
     /**
-     * Function to perform the map call. Generates a logic network from another one.
+     * Function to perform the mockturtle::emap call. Generates a logic network from another one.
      */
     void execute() override;
 
