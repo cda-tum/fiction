@@ -780,10 +780,10 @@ class graph_oriented_layout_design_impl
      * @param p The parameters for the graph-enhanced layout search algorithm.
      * @param st The statistics object to record execution details.
      */
-    graph_oriented_layout_design_impl(tec_nt src, const graph_oriented_layout_design_params& p,
+    graph_oriented_layout_design_impl(const tec_nt& src, const graph_oriented_layout_design_params& p,
                                       graph_oriented_layout_design_stats&       st,
                                       const std::function<uint64_t(const Lyt&)> custom) :
-            ntk{std::move(src)},
+            ntk{src},
             ps{p},
             pst{st},
             custom_cost_objective{custom},

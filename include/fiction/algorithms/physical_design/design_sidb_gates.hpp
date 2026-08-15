@@ -17,7 +17,6 @@
 #include "fiction/traits.hpp"
 #include "fiction/utils/combination_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
-#include "fiction/utils/math_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/traits.hpp>

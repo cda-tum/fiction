@@ -13,12 +13,12 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/combination_utils.hpp>
 #include <fiction/utils/layout_utils.hpp>
-#include <fiction/utils/math_utils.hpp>
 
 #include <fmt/format.h>
 
 #include <algorithm>
 #include <cstdint>
+#include <cstdlib>
 #include <iostream>
 #include <iterator>
 #include <mutex>
@@ -83,23 +83,24 @@ int main()  // NOLINT
                     }
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
-                    auto result_quickexact = quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{params});
+                    auto result_quickexact = quickexact(
+                        lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{.simulation_parameters = params});
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
-                        const std::lock_guard lock{mutex_qe};
+                        const std::scoped_lock lock{mutex_qe};
                         quickexact_non_equivalence_counter++;
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{params};
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{.simulation_parameters = params};
                     cc_params.available_threads = 1;
 
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))
                     {
-                        const std::lock_guard lock{mutex_cc};
+                        const std::scoped_lock lock{mutex_cc};
                         clustercomplete_non_equivalence_counter++;
                     }
 #endif  // FICTION_ALGLIB_ENABLED

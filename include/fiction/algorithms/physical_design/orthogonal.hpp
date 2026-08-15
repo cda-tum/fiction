@@ -28,7 +28,6 @@
 #include <iostream>
 #include <optional>
 #include <ostream>
-#include <utility>
 #include <vector>
 
 #if (PROGRESS_BARS)
@@ -440,9 +439,9 @@ template <typename Lyt>
 class orthogonal_impl
 {
   public:
-    orthogonal_impl(mockturtle::names_view<technology_network> src, const orthogonal_physical_design_params& p,
+    orthogonal_impl(const mockturtle::names_view<technology_network>& src, const orthogonal_physical_design_params& p,
                     orthogonal_physical_design_stats& st) :
-            ntk{mockturtle::fanout_view{std::move(src)}},
+            ntk{mockturtle::fanout_view{src}},
             ps{p},
             pst{st}
     {}
