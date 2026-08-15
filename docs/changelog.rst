@@ -18,6 +18,14 @@ Added
 
 Changed
 #######
+- Continuous integration:
+    - The docstring generator now parses the code base the way the compiler does. It runs
+      ``pybind11_mkdoc`` 3.0 against a pinned libclang, passes ``-std=c++20``, and takes its include
+      paths and defines from a configured build's compile database. Parse errors drop from about 180
+      to zero, and a ``requires`` clause no longer silences the Doxygen comments that follow it
+- Python bindings:
+    - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of ``__doc_*``,
+      which is reserved. The ``DOC(...)`` macro is unchanged, so binding code needs no edit
 - Algorithms:
     - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
       layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
@@ -68,6 +76,10 @@ Fixed
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
+    - Fixed nine docstring references that pointed at symbol names the broken parse had invented.
+      ``mockturtle::stopwatch<>::duration time_total`` was read as a declaration of ``duration``
+      whenever ``mockturtle`` was unresolvable, so eight ``*_stats`` runtime members were documented
+      under ``_duration`` rather than their real names
 
 v0.7.0 - 2026-07-31
 -------------------
