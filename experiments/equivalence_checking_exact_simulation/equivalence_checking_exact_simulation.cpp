@@ -11,6 +11,7 @@
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/combination_utils.hpp>
 #include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/math_utils.hpp>
 
