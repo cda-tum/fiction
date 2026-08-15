@@ -259,6 +259,7 @@ known-first-party = ["mnt.pyfiction"]
 "bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D"]
 "docs/**" = ["T20", "A"]
 "noxfile.py" = ["T20", "TID251"]
+"scripts/**" = ["T20"]  # maintenance scripts report progress on stdout
 "*.pyi" = ["D418", "PYI021"]  # pydocstyle
 "*.ipynb" = [
     "D", # pydocstyle

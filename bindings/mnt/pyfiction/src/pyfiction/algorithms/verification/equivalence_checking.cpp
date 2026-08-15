@@ -66,7 +66,7 @@ void equivalence_checking(nanobind::module_& m)
         .def_ro("counter_example", &fiction::equivalence_checking_stats::counter_example,
                 DOC(fiction_equivalence_checking_stats_counter_example))
         .def_ro("runtime", &fiction::equivalence_checking_stats::runtime,
-                DOC(fiction_equivalence_checking_stats_duration))
+                DOC(fiction_equivalence_checking_stats_runtime))
         .def_ro("spec_drv_stats", &fiction::equivalence_checking_stats::spec_drv_stats,
                 DOC(fiction_equivalence_checking_stats_spec_drv_stats))
         .def_ro("impl_drv_stats", &fiction::equivalence_checking_stats::impl_drv_stats,

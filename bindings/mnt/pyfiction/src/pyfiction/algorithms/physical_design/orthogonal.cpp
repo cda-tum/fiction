@@ -41,7 +41,7 @@ void orthogonal(nanobind::module_& m)
         .def("report", &fiction::orthogonal_physical_design_stats::report,
              DOC(fiction_orthogonal_physical_design_stats_report))
         .def_ro("time_total", &fiction::orthogonal_physical_design_stats::time_total,
-                DOC(fiction_orthogonal_physical_design_stats_duration))
+                DOC(fiction_orthogonal_physical_design_stats_time_total))
         .def_ro("x_size", &fiction::orthogonal_physical_design_stats::x_size,
                 DOC(fiction_orthogonal_physical_design_stats_x_size))
         .def_ro("y_size", &fiction::orthogonal_physical_design_stats::y_size,
