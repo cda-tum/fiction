@@ -28,6 +28,7 @@
 #include <iostream>
 #include <optional>
 #include <ostream>
+#include <utility>
 #include <vector>
 
 #if (PROGRESS_BARS)
@@ -429,12 +430,19 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
         });
 }
 
-template <typename Lyt, typename Ntk>
+/**
+ * The specification network is converted to a `technology_network` before anything else happens, so this class is
+ * templated on the layout type only. Carrying the caller's network type through the whole implementation would
+ * duplicate every member for each network type the caller happens to use, without a single line of the body depending
+ * on it. The conversion lives in the `orthogonal` entry point below.
+ */
+template <typename Lyt>
 class orthogonal_impl
 {
   public:
-    orthogonal_impl(const Ntk& src, const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
-            ntk{mockturtle::fanout_view{fanout_substitution<mockturtle::names_view<technology_network>>(src)}},
+    orthogonal_impl(mockturtle::names_view<technology_network> src, const orthogonal_physical_design_params& p,
+                    orthogonal_physical_design_stats& st) :
+            ntk{mockturtle::fanout_view{std::move(src)}},
             ps{p},
             pst{st}
     {}
@@ -692,8 +700,8 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
         throw high_degree_fanin_exception();
     }
 
-    orthogonal_physical_design_stats  st{};
-    detail::orthogonal_impl<Lyt, Ntk> p{ntk, ps, st};
+    orthogonal_physical_design_stats st{};
+    detail::orthogonal_impl<Lyt>     p{fanout_substitution<mockturtle::names_view<technology_network>>(ntk), ps, st};
 
     auto result = p.run();
 

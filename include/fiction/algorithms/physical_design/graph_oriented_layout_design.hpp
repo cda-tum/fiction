@@ -762,24 +762,28 @@ struct placement_info
  * Implementation of the graph-oriented layout design algorithm.
  * This class handles the initialization and execution of the algorithm.
  *
+ * The specification network is converted to a `technology_network` before anything else happens, so this class is
+ * templated on the layout type only. Carrying the caller's network type through the whole implementation would
+ * duplicate every member for each network type the caller happens to use, without a single line of the body depending
+ * on it. The conversion lives in the `graph_oriented_layout_design` entry point below.
+ *
  * @tparam Lyt Cartesian gate-level layout type.
- * @tparam Ntk Network type.
  */
-template <typename Lyt, typename Ntk>
+template <typename Lyt>
 class graph_oriented_layout_design_impl
 {
   public:
     /**
      * Constructor for the graph-oriented layout design algorithm.
      *
-     * @param src The source network to be placed.
+     * @param src The source network to be placed, already converted to a `technology_network`.
      * @param p The parameters for the graph-enhanced layout search algorithm.
      * @param st The statistics object to record execution details.
      */
-    graph_oriented_layout_design_impl(const Ntk& src, const graph_oriented_layout_design_params& p,
+    graph_oriented_layout_design_impl(tec_nt src, const graph_oriented_layout_design_params& p,
                                       graph_oriented_layout_design_stats&       st,
                                       const std::function<uint64_t(const Lyt&)> custom) :
-            ntk{convert_network<tec_nt>(src)},
+            ntk{std::move(src)},
             ps{p},
             pst{st},
             custom_cost_objective{custom},
@@ -2491,8 +2495,8 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
         throw std::invalid_argument("No custom cost objective provided.");
     }
 
-    graph_oriented_layout_design_stats                  st{};
-    detail::graph_oriented_layout_design_impl<Lyt, Ntk> p{ntk, ps, st, custom_cost_objective};
+    graph_oriented_layout_design_stats             st{};
+    detail::graph_oriented_layout_design_impl<Lyt> p{convert_network<tec_nt>(ntk), ps, st, custom_cost_objective};
 
     const auto result = p.run();
 
