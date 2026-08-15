@@ -126,10 +126,6 @@ Added
 
 Changed
 #######
-- Algorithms:
-    - Switched the default technology mapper in the ``map`` command and the ``technology_mapping`` function from ``mockturtle::map`` to ``mockturtle::emap``
-    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params`` (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
-    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports mapping errors instead of silently storing a failed mapping
 - Build system:
     - Restructured the CLI command implementation to improve code organization, modularity, and compilation speed
     - Refactored the entire CMake build system to use ``FetchContent`` for dependency management instead of git submodules
@@ -183,12 +179,6 @@ Fixed
       were previously undocumented despite an equivalent, documented constructor overload existing
     - Added missing docstrings for several dunder/operator methods (e.g., ``bdl_input_iterator_params``,
       ``__repr__``, ``__hash__``, ``__getitem__``) across the layout, network, and SiDB simulation bindings
-
-Removed
-#######
-- CLI:
-    - Removed the ``--logic_sharing`` flag from ``map`` as ``mockturtle::emap`` does not support it
-
 
 v0.6.12 - 2025-10-29
 --------------------
