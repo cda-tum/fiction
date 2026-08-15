@@ -44,6 +44,8 @@ Changed
       independent of exploration order and therefore unchanged
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
+    - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s
+      ``_deps`` from 504 MB to 262 MB. ``mockturtle`` stays a clone because it uses a submodule
 - Code quality:
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
