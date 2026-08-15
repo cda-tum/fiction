@@ -28,7 +28,6 @@ macro(fiction_setup_options)
   option(FICTION_ENABLE_SANITIZER_UNDEFINED "Enable undefined sanitizer" OFF)
   option(FICTION_ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
   option(FICTION_ENABLE_SANITIZER_MEMORY "Enable memory sanitizer" OFF)
-  option(FICTION_ENABLE_UNITY_BUILD "Enable unity builds" OFF)
   option(FICTION_ENABLE_PCH "Enable precompiled headers" OFF)
   option(FICTION_ENABLE_CACHE "Enable ccache" ON)
   option(FICTION_LIGHTWEIGHT_DEBUG_BUILDS
@@ -45,7 +44,6 @@ macro(fiction_setup_options)
       FICTION_ENABLE_SANITIZER_UNDEFINED
       FICTION_ENABLE_SANITIZER_THREAD
       FICTION_ENABLE_SANITIZER_MEMORY
-      FICTION_ENABLE_UNITY_BUILD
       FICTION_ENABLE_COVERAGE
       FICTION_ENABLE_PCH
       FICTION_ENABLE_CACHE
@@ -89,9 +87,6 @@ macro(fiction_local_options)
     fiction_options ${FICTION_ENABLE_SANITIZER_ADDRESS}
     ${FICTION_ENABLE_SANITIZER_LEAK} ${FICTION_ENABLE_SANITIZER_UNDEFINED}
     ${FICTION_ENABLE_SANITIZER_THREAD} ${FICTION_ENABLE_SANITIZER_MEMORY})
-
-  set_target_properties(fiction_options
-                        PROPERTIES UNITY_BUILD ${FICTION_ENABLE_UNITY_BUILD})
 
   if(FICTION_ENABLE_CACHE)
     include(cmake/Cache.cmake)

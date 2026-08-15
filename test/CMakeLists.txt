@@ -17,6 +17,20 @@ target_compile_definitions(
 
 include_directories(.)
 
+# Pre-Compiled Header (PCH) carrier for the test suite. Every test executable
+# compiles the same expensive header stack; building the PCH once here and
+# reusing it keeps that work from being repeated in all of them.
+if(FICTION_ENABLE_PCH)
+  add_library(libfiction_test_pch STATIC
+              ${CMAKE_CURRENT_SOURCE_DIR}/pch_test.cpp)
+  target_link_libraries(
+    libfiction_test_pch PRIVATE libfiction_test fiction::libfiction
+                                Catch2::Catch2WithMain)
+  target_compile_definitions(libfiction_test_pch
+                             PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
+  target_precompile_headers(libfiction_test_pch PRIVATE pch_test.hpp)
+endif()
+
 file(GLOB_RECURSE FILENAMES */*.cpp)
 list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
 
@@ -32,6 +46,10 @@ foreach(FILE IN LISTS FILENAMES)
 
   # Make Catch2 ignore SIGTERMs sent to applications when timeouts are reached
   target_compile_definitions(${TEST_NAME} PRIVATE CATCH_CONFIG_NO_POSIX_SIGNALS)
+
+  if(FICTION_ENABLE_PCH)
+    target_precompile_headers(${TEST_NAME} REUSE_FROM libfiction_test_pch)
+  endif()
 
   add_test(NAME ${NAME} COMMAND ${TEST_NAME}) # group tests by file
 endforeach()

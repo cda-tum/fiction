@@ -24,7 +24,9 @@
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
         "FICTION_TEST": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
+        "FICTION_ENABLE_PCH": "ON",
+        "FICTION_LIGHTWEIGHT_DEBUG_BUILDS": "ON"
       }
     },
     {
@@ -58,7 +60,9 @@
         "CMAKE_BUILD_TYPE": "Debug",
         "FICTION_CLI": "OFF",
         "FICTION_TEST": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF"
+        "FICTION_WARNINGS_AS_ERRORS": "OFF",
+        "FICTION_ENABLE_PCH": "ON",
+        "FICTION_LIGHTWEIGHT_DEBUG_BUILDS": "ON"
       }
     },
     {

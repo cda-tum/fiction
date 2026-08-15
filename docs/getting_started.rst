@@ -411,8 +411,11 @@ The following CMake options are available which have a potential positive impact
 attempts, or performance of the resulting binaries:
 
 * ``-DFICTION_ENABLE_IPO=ON``: Enable IPO/LTO to improve performance of resulting binaries on some systems.
-* ``-DFICTION_ENABLE_PCH=ON``: Enable precompiled headers (PCH) to speed up compilation.
-* ``-DFICTION_ENABLE_UNITY_BUILD=ON``: Enable unity builds to speed up compilation.
+* ``-DFICTION_ENABLE_PCH=ON``: Enable precompiled headers (PCH) for the CLI and the test suite to speed up compilation.
+  The ``dev`` and ``tests-slim`` presets turn this on. On Windows, add ``sloppiness = pch_defines,time_macros`` to your
+  ccache configuration, or ccache will stop caching the compilations that use the PCH.
+* ``-DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON``: Cut debug information down to ``-g1`` and disable inlining. This is by far
+  the largest single lever on Debug build cost; the CI Debug preset and the ``dev``/``tests-slim`` presets enable it.
 * ``-DFICTION_ENABLE_SANITIZER_ADDRESS=ON``: Enable the address sanitizer to detect memory issues.
 * ``-DFICTION_ENABLE_SANITIZER_LEAK=ON``: Enable the leak sanitizer to detect memory leaks.
 * ``-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON``: Enable the undefined behavior sanitizer to detect undefined behavior.
