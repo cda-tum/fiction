@@ -10471,16 +10471,30 @@ Template Args:
 )doc";
 
 static const char *mkd_doc_fiction_detail_orthogonal_impl =
-R"doc(The specification network is converted to a `technology_network`
+R"doc(Implementation of the orthogonal physical design algorithm.
+
+The specification network is converted to a `technology_network`
 before anything else happens, so this class is templated on the layout
 type only. Carrying the caller's network type through the whole
 implementation would duplicate every member for each network type the
 caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `orthogonal` entry point below.)doc";
+it. The conversion lives in the `orthogonal` entry point below.
+
+Template Args:
+    Lyt: Gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_detail_orthogonal_impl_ntk = R"doc()doc";
 
-static const char *mkd_doc_fiction_detail_orthogonal_impl_orthogonal_impl = R"doc()doc";
+static const char *mkd_doc_fiction_detail_orthogonal_impl_orthogonal_impl =
+R"doc(Constructor for the orthogonal physical design algorithm.
+
+Args:
+    src: The source network to be placed, already fanout-substituted
+         into a `technology_network`.
+    p: The parameters for the orthogonal physical design algorithm.
+    st: The statistics object to record execution details.
+
+)doc";
 
 static const char *mkd_doc_fiction_detail_orthogonal_impl_po_counter = R"doc()doc";
 
