@@ -72,13 +72,19 @@ jobs:
       - name: Run pybind11_mkdoc
         env:
           LIBCLANG_PATH: /usr/lib/llvm-${{env.LLVM_VERSION}}/lib/libclang.so.1
-        run: >
-          python3 -m pybind11_mkdoc
-          -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
-          -std=c++20
-          "-resource-dir=/usr/lib/llvm-${LLVM_VERSION}/lib/clang/${LLVM_VERSION}"
-          $(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)
-          $(find include/fiction -name "*.hpp" -print)
+        # Resolve the flags and the header list into variables first. Inline command
+        # substitution would swallow a failure of either: the generator would still run, just
+        # without include paths or without inputs, and commit a truncated header.
+        run: |
+          set -euo pipefail
+          mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
+          mkdoc_headers="$(find include/fiction -name "*.hpp" -print)"
+          python3 -m pybind11_mkdoc \
+            -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
+            -std=c++20 \
+            "-resource-dir=/usr/lib/llvm-${LLVM_VERSION}/lib/clang/${LLVM_VERSION}" \
+            ${mkdoc_flags} \
+            ${mkdoc_headers}
 
       - name: Upload docstrings as an artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
