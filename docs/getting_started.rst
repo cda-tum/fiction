@@ -415,6 +415,25 @@ attempts, or performance of the resulting binaries:
 * ``-DFICTION_ENABLE_SANITIZER_THREAD=ON``: Enable the thread sanitizer to detect multithreading-related problems.
 * ``-DFICTION_ENABLE_SANITIZER_MEMORY=ON``: Enable the memory sanitizer to detect uninitialized reads.
 * ``-DFICTION_ENABLE_JEMALLOC=ON``: Enable the usage of jemalloc by Jason Evans to speed up ``malloc`` in parallelized processes.
+* ``-DFICTION_ENABLE_TIME_TRACE=ON``: Emit Clang ``-ftime-trace`` compilation profiles to find out where build time goes.
+
+Profiling compilation time
+##########################
+
+*fiction* is header-only and template-heavy, so a translation unit's build time is dominated by the headers it pulls in
+and the templates it instantiates. ``-DFICTION_ENABLE_TIME_TRACE=ON`` makes Clang write a ``.json`` profile next to
+every object file. `ClangBuildAnalyzer <https://github.com/aras-p/ClangBuildAnalyzer>`_ aggregates those into a ranking
+of the most expensive headers, template instantiations, and functions:
+
+.. code-block:: console
+
+  $ cmake -S . --preset tests-slim -DCMAKE_CXX_COMPILER=clang++ -DFICTION_ENABLE_TIME_TRACE=ON
+  $ cmake --build --preset tests-slim
+  $ ClangBuildAnalyzer --all build-tests-slim trace.bin
+  $ ClangBuildAnalyzer --analyze trace.bin
+
+The option is Clang-only; it warns and does nothing on GCC and MSVC. Combine it with ``-DFICTION_ENABLE_CACHE=OFF``, as
+a ccache hit produces no profile.
 
 Usage of jemalloc
 #################
