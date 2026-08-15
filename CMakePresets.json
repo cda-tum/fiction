@@ -136,13 +136,13 @@
     {
       "name": "ci-common",
       "hidden": true,
-      "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, jemalloc) on top via -D overrides",
+      "description": "Baseline shared by all 🐧/🍎/🪟 CI workflows; each job layers its own compiler and platform-specific flags (e.g. Z3 on ARM, jemalloc) on top via -D overrides. Experiments are off here and covered by one dedicated 🐧 job instead of all 22 of them",
       "inherits": "base",
       "cacheVariables": {
         "FICTION_CLI": "ON",
         "FICTION_TEST": "ON",
         "FICTION_BENCHMARK": "OFF",
-        "FICTION_EXPERIMENTS": "ON",
+        "FICTION_EXPERIMENTS": "OFF",
         "FICTION_ALGLIB": "ON",
         "FICTION_PROGRESS_BARS": "OFF",
         "FICTION_WARNINGS_AS_ERRORS": "OFF",
@@ -156,7 +156,8 @@
       "inherits": "ci-common",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "FICTION_Z3": "ON"
+        "FICTION_Z3": "ON",
+        "FICTION_LIGHTWEIGHT_DEBUG_BUILDS": "ON"
       }
     },
     {

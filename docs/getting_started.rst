@@ -8,6 +8,10 @@ prototype new ideas or script evaluations.
 We are continuously testing on Ubuntu, macOS, and Windows with multiple compilers and various Python versions.
 See the badges in the README file for more information.
 
+CI builds every commit in Debug and Release with GCC 11, 13, and 14 and with Clang 18, 19, and 20 on Ubuntu (x86-64 and
+ARM64), with Apple Clang on macOS 15, and with the MSVC ``v143`` and ``ClangCL`` toolsets on Windows Server 2025. Any
+C++20 compiler should work; those are the ones we verify.
+
 Quick Start
 -----------
 

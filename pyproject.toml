@@ -159,9 +159,15 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 build = "cp3*"
 archs = "auto64"
 skip = ["*-musllinux*"]
-test-command = "python -c \"from mnt import pyfiction\""
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
+# The wheel does not ship its own tests, so the suite is copied in next to the installed
+# wheel. `test-sources` keeps the relative path, and since `pyproject.toml` is not copied
+# along, pytest finds no configuration file and the `[tool.pytest]` `addopts` do not apply --
+# hence the explicit flags here.
+test-groups = ["test"]
+test-sources = ["bindings/mnt/pyfiction/test"]
+test-command = "pytest bindings/mnt/pyfiction/test -ra --numprocesses=auto"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
