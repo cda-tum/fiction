@@ -814,7 +814,7 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
                                     is_operational_params::operational_analysis_strategy::FILTER_ONLY,
                                     is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION})
         {
-            is_operational_params params{sidb_simulation_parameters{2}};
+            is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2}};
             params.op_condition                           = condition;
             params.strategy_to_analyze_operational_status = strategy;
 

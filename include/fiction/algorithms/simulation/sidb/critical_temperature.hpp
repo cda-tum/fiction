@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"

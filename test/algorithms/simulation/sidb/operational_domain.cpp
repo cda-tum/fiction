@@ -11,6 +11,7 @@
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
