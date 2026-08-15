@@ -73,12 +73,13 @@ struct defect_influence_params
     influence_definition influence_def{influence_definition::OPERATIONALITY_CHANGE};
     /**
      * Number of worker threads to distribute the defect positions over. Defaults to the number of hardware threads,
-     * which is the behavior this setting replaces. Values below `1` are treated as `1`.
+     * which is the behavior this setting replaces, and to `1` where that count is not detectable. Values below `1`
+     * are treated as `1`.
      *
      * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows a defect influence
      * computation to leave cores free for other work.
      */
-    std::size_t number_of_threads{std::thread::hardware_concurrency()};
+    std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
 };
 
 /**
