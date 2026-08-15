@@ -103,7 +103,7 @@ void map_command::execute()
                                 is_set("or_and"), is_set("onehot"), is_set("gamble"), is_set("mux"),  is_set("and_xor"),
                                 is_set("all2"),   is_set("all3"),   is_set("all")};
 
-    if (std::none_of(gate_flags.cbegin(), gate_flags.cend(), [](const auto f) { return f; }))
+    if (std::ranges::none_of(gate_flags, [](const auto f) { return f; }))
     {
         env->out() << "[e] no gates specified; cannot perform technology mapping\n";
         ps = {};
