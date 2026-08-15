@@ -7,6 +7,11 @@ include(FetchContent)
 # that cost once per directory. mockturtle is the exception; see the note below
 # it.
 #
+# Every `URL` carries a `URL_HASH`. A `GIT_TAG` commit SHA verifies its own
+# content; a URL does not, and a tag can be repointed at different bytes, so the
+# hash is what keeps the switch from weakening the supply chain. When bumping a
+# version, recompute the hash with `sha256sum` over the downloaded archive.
+#
 # None of these declarations uses `FIND_PACKAGE_ARGS`. vendors/CMakeLists.txt
 # reads `<dep>_SOURCE_DIR` and the target names that FetchContent creates, so a
 # dependency satisfied by an installed package instead would break the configure
@@ -19,10 +24,15 @@ set(JSON_VERSION
 set(JSON_URL
     https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz
 )
+set(JSON_SHA256
+    42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa)
 set(JSON_BuildTests
     OFF
     CACHE INTERNAL "")
-FetchContent_Declare(nlohmann_json URL ${JSON_URL})
+FetchContent_Declare(
+  nlohmann_json
+  URL ${JSON_URL}
+  URL_HASH SHA256=${JSON_SHA256})
 FetchContent_MakeAvailable(nlohmann_json)
 
 # Catch2
@@ -33,7 +43,12 @@ if(FICTION_TEST)
   set(CATCH2_URL
       https://github.com/catchorg/Catch2/archive/refs/tags/v${CATCH2_VERSION}.tar.gz
   )
-  FetchContent_Declare(Catch2 URL ${CATCH2_URL})
+  set(CATCH2_SHA256
+      b0299ae552918220a7a6e21e7de5b714777f4e8c883fb70c4bb23fe01df8c6e3)
+  FetchContent_Declare(
+    Catch2
+    URL ${CATCH2_URL}
+    URL_HASH SHA256=${CATCH2_SHA256})
   FetchContent_MakeAvailable(Catch2)
 endif()
 
@@ -51,7 +66,12 @@ set(PARALLEL_HASHMAP_VERSION
 set(PARALLEL_HASHMAP_URL
     https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v${PARALLEL_HASHMAP_VERSION}.tar.gz
 )
-FetchContent_Declare(parallel-hashmap URL ${PARALLEL_HASHMAP_URL})
+set(PARALLEL_HASHMAP_SHA256
+    4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b)
+FetchContent_Declare(
+  parallel-hashmap
+  URL ${PARALLEL_HASHMAP_URL}
+  URL_HASH SHA256=${PARALLEL_HASHMAP_SHA256})
 FetchContent_MakeAvailable(parallel-hashmap)
 
 # tinyxml2
@@ -61,8 +81,13 @@ set(TINYXML2_VERSION
 set(TINYXML2_URL
     https://github.com/leethomason/tinyxml2/archive/refs/tags/${TINYXML2_VERSION}.tar.gz
 )
+set(TINYXML2_SHA256
+    5556deb5081fb246ee92afae73efd943c889cef0cafea92b0b82422d6a18f289)
 set(tinyxml2_BUILD_TESTING OFF)
-FetchContent_Declare(tinyxml2 URL ${TINYXML2_URL})
+FetchContent_Declare(
+  tinyxml2
+  URL ${TINYXML2_URL}
+  URL_HASH SHA256=${TINYXML2_SHA256})
 FetchContent_MakeAvailable(tinyxml2)
 
 # alice
@@ -70,13 +95,18 @@ set(ALICE_REV
     6b7f941ca44f38226f5e2545224fa1194940cd73
     CACHE STRING "alice revision -- head of the master branch")
 set(ALICE_URL https://github.com/marcelwa/alice/archive/${ALICE_REV}.tar.gz)
+set(ALICE_SHA256
+    38709e50db916639c4baf7b2a7e56449baa65d6b17e6616d62439853e65163d2)
 set(ALICE_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
 set(ALICE_TEST
     OFF
     CACHE BOOL "" FORCE)
-FetchContent_Declare(alice URL ${ALICE_URL})
+FetchContent_Declare(
+  alice
+  URL ${ALICE_URL}
+  URL_HASH SHA256=${ALICE_SHA256})
 FetchContent_MakeAvailable(alice)
 
 # mockturtle

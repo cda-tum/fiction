@@ -23,11 +23,11 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
   uncommitted edits and switch the branch under each other, and neither notices. `.ai/` is
   gitignored, so the worktree stays out of `git status`.
 - **Configure one build preset per worktree, and tear the worktree down when you are done.**
-  A configured build tree costs 1 to 4 GB, so a worktree left behind is not free the way the
-  source checkout is — that is only ~45 MB against a shared `.git`. Use a preset from
-  `CMakePresets.json` rather than a hand-rolled `-B` directory, so the build tree carries a
-  recognizable `build-<preset>` name that the next reader can place. When the task is done,
-  run `git worktree remove <path>` — which deletes the build trees with it — followed by
+  A new worktree adds about 45 MB of source files and shares the existing `.git`. Each
+  configured build tree adds another 1 to 4 GB. The build trees are what make an abandoned
+  worktree expensive. Use a preset from `CMakePresets.json` rather than a hand-rolled `-B`
+  directory, so each build tree has a recognizable `build-<preset>` name. When the task is
+  done, run `git worktree remove <path>`, which deletes the build trees with it, then run
   `git worktree prune`.
 - Inspect the working tree before editing, and never revert or overwrite a change you did
   not make. If you find edits you did not write, stop and ask instead of reverting them.
@@ -100,9 +100,10 @@ its scope, its defaults, its limitations, its failure modes, and what it deliber
 not handle. A description that claims more than the implementation delivers produces bug
 reports against behavior that was never promised in code.
 
-When a change adds or alters such a surface, say what a user can do that they could not do
-before, and how they can see it working. Over-explain the user-visible effect; leave the
-incidental implementation detail to the code.
+When a change adds or alters such a surface, describe the capability the surface provides
+and how a user can verify it. Over-explain the user-visible effect; leave the incidental
+implementation detail to the code. The changelog entry for the same change is where the
+delta against the previous release belongs.
 
 ## Project Map
 
