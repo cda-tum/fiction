@@ -18,6 +18,9 @@ Added
       ``generate_bdl_input_pattern_layouts`` to generate them
 - Python bindings:
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
+- Build system:
+    - Added ``-DFICTION_ENABLE_TIME_TRACE=ON``, which emits Clang ``-ftime-trace`` profiles for
+      ClangBuildAnalyzer to attribute build time to headers and template instantiations
 
 Changed
 #######
@@ -36,13 +39,34 @@ Changed
       independent of exploration order and therefore unchanged
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
+    - The ``ci-debug`` preset now enables ``FICTION_LIGHTWEIGHT_DEBUG_BUILDS``, which the 🐧 workflow
+      used to pass by hand, so macOS, Windows, and CodeQL Debug builds get it too
+    - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
+    - ``FICTION_ENABLE_PCH`` now also covers the test suite, which shares one pre-compiled header
+      across all 118 test executables
 - Code quality:
+    - ``gate_level_layout`` forward-declares ``detail::gate_level_drvs_impl`` instead of including
+      ``design_rule_violations.hpp`` for its friend declaration, which kept ``nlohmann/json.hpp`` and
+      three ``fmt`` headers out of every translation unit that touches a gate-level layout
+    - Moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions`` into the new
+      ``fiction/utils/combination_utils.hpp``, so the vendored ``combinations.h`` no longer reaches
+      every header that includes ``traits.hpp``
+    - ``orthogonal`` and ``graph_oriented_layout_design`` convert their specification network to a
+      ``technology_network`` before any work happens, but their implementation classes were still
+      templated on the caller's network type, duplicating 210 and 1690 lines of body per network type
+      used. Both now follow ``exact``'s existing shape and are templated on the layout type alone. The
+      public entry points are unchanged
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
     - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
+    - Halved the OS matrices: the 🐧 workflow keeps 8 of its 16 compiler combinations, macOS drops
+      ``macos-14``, and Windows drops ``windows-2022``. ``docs/getting_started.rst`` records the set
+      we verify
+    - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of only
+      smoke-testing the import, and every build job carries a ``timeout-minutes``
 
 Removed
 #######
@@ -57,6 +81,13 @@ Removed
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
+- Build system:
+    - Removed ``FICTION_ENABLE_UNITY_BUILD``. It set the ``UNITY_BUILD`` property on an ``INTERFACE``
+      target, where the property does not propagate, so the option never did anything
+- Continuous integration:
+    - Removed the 🐍 CI workflow. It built the extension 20 times per run (four runners × five
+      CPythons via ``nox``) to test what the wheel builds already build. ``nox -s tests`` remains the
+      local entry point
 
 Fixed
 #####
@@ -77,9 +108,15 @@ Fixed
     - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
     - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit carrying a C++20 fix,
       instead of floating on ``master``
+    - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, which left the slowest runners
+      permanently cold
+    - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``, and the 🐍 Packaging path
+      filter still pointing at the pre-restructuring ``bindings/pyfiction/**``
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
+    - Fixed ``bdl_input_iterator.py`` never being collected: pytest's default ``python_files`` pattern
+      did not match its name, so its five tests had never run
 
 v0.7.0 - 2026-07-31
 -------------------
