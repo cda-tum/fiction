@@ -11469,6 +11469,15 @@ static const char *mkd_doc_fiction_detail_technology_mapping_impl_stats = R"doc(
 
 static const char *mkd_doc_fiction_detail_technology_mapping_impl_technology_mapping_impl = R"doc()doc";
 
+static const char *mkd_doc_fiction_detail_technology_mapping_impl_validate_required_gates =
+R"doc(Validate that the technology library contains the required gates for
+the base network type.
+
+Raises:
+    missing_required_gates_exception: if required gates are missing.
+
+)doc";
+
 static const char *mkd_doc_fiction_detail_to_hex =
 R"doc(Utility function to transform a Cartesian tile into a hexagonal one.
 
@@ -15274,6 +15283,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
+
 static const char *mkd_doc_fiction_get_projector_state_compositions =
 R"doc(This function is used to obtain the cluster charge state compositions
 of the multiset charge configuration in a projector state. The
@@ -15289,6 +15300,8 @@ Returns:
     of the projecting cluster.
 
 )doc";
+
+static const char *mkd_doc_fiction_get_sidb_lattice_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_get_sidb_simulation_engine =
 R"doc(Returns a simulation engine by name.
@@ -15313,6 +15326,10 @@ R"doc(Forward declaration. Required for compilation due to the mutually
 recursive structure in this file.
 
 )doc";
+
+static const char *mkd_doc_fiction_get_tech_cell_name = R"doc()doc";
+
+static const char *mkd_doc_fiction_get_tech_impl_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_get_unique_cluster_id =
 R"doc(Forward declaration. Required for compilation due to the mutually
@@ -18168,6 +18185,12 @@ Returns:
     input range, or `last` if the range is empty.
 
 )doc";
+
+static const char *mkd_doc_fiction_missing_required_gates_exception =
+R"doc(Exception thrown when a technology mapping library does not contain
+the required gates for the base network type.)doc";
+
+static const char *mkd_doc_fiction_missing_required_gates_exception_missing_required_gates_exception = R"doc()doc";
 
 static const char *mkd_doc_fiction_missing_sidb_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
@@ -23265,7 +23288,7 @@ static const char *mkd_doc_fiction_technology_dot_drawer_node_label_callback = R
 static const char *mkd_doc_fiction_technology_mapping =
 R"doc(Performs technology mapping on the given network. Technology mapping
 is the process of replacing the gates in a network with gates from a
-given technology library. This function utilizes `mockturtle::map` to
+given technology library. This function utilizes `mockturtle::emap` to
 perform the technology mapping. This function is a wrapper around that
 interface to provide a more convenient usage.
 
@@ -23279,6 +23302,14 @@ Template Args:
 
 Returns:
     Mapped network exclusively using gates from the provided library.
+
+Raises:
+    missing_required_gates_exception: if the technology library does
+                                      not contain required gates for
+                                      the base network type (e.g., AIG
+                                      requires INV and AND; XAG
+                                      requires INV, AND, and XOR; MIG
+                                      requires INV and MAJ).
 
 )doc";
 
@@ -23302,7 +23333,7 @@ static const char *mkd_doc_fiction_technology_mapping_params_ge2 = R"doc(2-input
 
 static const char *mkd_doc_fiction_technology_mapping_params_gt2 = R"doc(2-input greater-than gate.)doc";
 
-static const char *mkd_doc_fiction_technology_mapping_params_inv = R"doc()doc";
+static const char *mkd_doc_fiction_technology_mapping_params_inv = R"doc(1-input NOT gate (inverter).)doc";
 
 static const char *mkd_doc_fiction_technology_mapping_params_le2 = R"doc(2-input less-or-equal gate.)doc";
 
@@ -23312,7 +23343,7 @@ static const char *mkd_doc_fiction_technology_mapping_params_maj3 = R"doc(3-inpu
 
 static const char *mkd_doc_fiction_technology_mapping_params_mapper_params = R"doc(mockturtle's mapper parameters.)doc";
 
-static const char *mkd_doc_fiction_technology_mapping_params_mux = R"doc(3-input MUX gate.)doc";
+static const char *mkd_doc_fiction_technology_mapping_params_mux = R"doc(3-input MUX gate (ITE).)doc";
 
 static const char *mkd_doc_fiction_technology_mapping_params_nand2 = R"doc(2-input NAND gate.)doc";
 
