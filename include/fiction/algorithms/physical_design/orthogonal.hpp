@@ -430,15 +430,26 @@ void place_outputs(Lyt& layout, const coloring_container<Ntk>& ctn, uint32_t po_
 }
 
 /**
+ * Implementation of the orthogonal physical design algorithm.
+ *
  * The specification network is converted to a `technology_network` before anything else happens, so this class is
  * templated on the layout type only. Carrying the caller's network type through the whole implementation would
  * duplicate every member for each network type the caller happens to use, without a single line of the body depending
  * on it. The conversion lives in the `orthogonal` entry point below.
+ *
+ * @tparam Lyt Gate-level layout type.
  */
 template <typename Lyt>
 class orthogonal_impl
 {
   public:
+    /**
+     * Constructor for the orthogonal physical design algorithm.
+     *
+     * @param src The source network to be placed, already fanout-substituted into a `technology_network`.
+     * @param p The parameters for the orthogonal physical design algorithm.
+     * @param st The statistics object to record execution details.
+     */
     orthogonal_impl(const mockturtle::names_view<technology_network>& src, const orthogonal_physical_design_params& p,
                     orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},

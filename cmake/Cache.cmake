@@ -38,12 +38,16 @@ function(fiction_enable_cache)
       endif()
     endif()
 
+    # FORCE, because without it a build tree configured before
+    # FICTION_ENABLE_PCH was turned on keeps its bare `ccache` launcher and
+    # never picks up the sloppiness wrapper, silently losing every PCH
+    # compilation's cache entry.
     set(CMAKE_CXX_COMPILER_LAUNCHER
         ${CACHE_LAUNCHER}
-        CACHE STRING "CXX compiler cache used")
+        CACHE STRING "CXX compiler cache used" FORCE)
     set(CMAKE_C_COMPILER_LAUNCHER
         ${CACHE_LAUNCHER}
-        CACHE STRING "C compiler cache used")
+        CACHE STRING "C compiler cache used" FORCE)
   else()
     message(
       WARNING "${CACHE_OPTION} is enabled but was not found. Not using it")
