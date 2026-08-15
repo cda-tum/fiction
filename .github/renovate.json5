@@ -195,6 +195,12 @@
       ],
       commitMessagePrefix: "⬆️📦",
       automerge: false,
+      // The archive-based dependencies pin a SHA-256 in cmake/Dependencies.cmake
+      // that Renovate cannot compute, so a version bump lands with a stale hash
+      // and fails the configure step until someone regenerates it.
+      prBodyNotes: [
+        "⚠️ If this bump touches a `*_VERSION` or `ALICE_REV` variable in `cmake/Dependencies.cmake`, the matching `*_SHA256` is now stale and CMake will fail with `Hash mismatch`. Run `python3 scripts/update_dependency_hashes.py` and commit the result."
+      ],
     }
   ]
 }

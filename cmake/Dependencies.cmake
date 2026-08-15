@@ -9,8 +9,18 @@ include(FetchContent)
 #
 # Every `URL` carries a `URL_HASH`. A `GIT_TAG` commit SHA verifies its own
 # content; a URL does not, and a tag can be repointed at different bytes, so the
-# hash is what keeps the switch from weakening the supply chain. When bumping a
-# version, recompute the hash with `sha256sum` over the downloaded archive.
+# hash is what keeps the switch from weakening the supply chain.
+#
+# A version and its hash have to move together. Renovate bumps the `*_VERSION`
+# and `ALICE_REV` variables but cannot compute a hash, so a bump arrives with a
+# stale `*_SHA256` and fails the configure step with `Hash mismatch`. Run
+# `python3 scripts/update_dependency_hashes.py` to bring the hashes back in
+# line, and `--check` to verify them without writing.
+#
+# Each `*_URL` and `*_SHA256` default is guarded by `if(NOT DEFINED ...)` so a
+# caller can point the build at an internal mirror with `-D<DEP>_URL=...`. A
+# plain `set()` would shadow the `-D` value; a `CACHE` entry would go stale when
+# the version changes.
 #
 # None of these declarations uses `FIND_PACKAGE_ARGS`. vendors/CMakeLists.txt
 # reads `<dep>_SOURCE_DIR` and the target names that FetchContent creates, so a
@@ -21,11 +31,15 @@ include(FetchContent)
 set(JSON_VERSION
     3.12.0
     CACHE STRING "nlohmann_json version")
-set(JSON_URL
-    https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz
-)
-set(JSON_SHA256
-    42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa)
+if(NOT DEFINED JSON_URL)
+  set(JSON_URL
+      https://github.com/nlohmann/json/releases/download/v${JSON_VERSION}/json.tar.xz
+  )
+endif()
+if(NOT DEFINED JSON_SHA256)
+  set(JSON_SHA256
+      42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa)
+endif()
 set(JSON_BuildTests
     OFF
     CACHE INTERNAL "")
@@ -40,11 +54,15 @@ if(FICTION_TEST)
   set(CATCH2_VERSION
       3.15.3
       CACHE STRING "Catch2 version")
-  set(CATCH2_URL
-      https://github.com/catchorg/Catch2/archive/refs/tags/v${CATCH2_VERSION}.tar.gz
-  )
-  set(CATCH2_SHA256
-      b0299ae552918220a7a6e21e7de5b714777f4e8c883fb70c4bb23fe01df8c6e3)
+  if(NOT DEFINED CATCH2_URL)
+    set(CATCH2_URL
+        https://github.com/catchorg/Catch2/archive/refs/tags/v${CATCH2_VERSION}.tar.gz
+    )
+  endif()
+  if(NOT DEFINED CATCH2_SHA256)
+    set(CATCH2_SHA256
+        b0299ae552918220a7a6e21e7de5b714777f4e8c883fb70c4bb23fe01df8c6e3)
+  endif()
   FetchContent_Declare(
     Catch2
     URL ${CATCH2_URL}
@@ -63,11 +81,15 @@ endif()
 set(PARALLEL_HASHMAP_VERSION
     2.0.0
     CACHE STRING "parallel-hashmap version")
-set(PARALLEL_HASHMAP_URL
-    https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v${PARALLEL_HASHMAP_VERSION}.tar.gz
-)
-set(PARALLEL_HASHMAP_SHA256
-    4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b)
+if(NOT DEFINED PARALLEL_HASHMAP_URL)
+  set(PARALLEL_HASHMAP_URL
+      https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v${PARALLEL_HASHMAP_VERSION}.tar.gz
+  )
+endif()
+if(NOT DEFINED PARALLEL_HASHMAP_SHA256)
+  set(PARALLEL_HASHMAP_SHA256
+      4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b)
+endif()
 FetchContent_Declare(
   parallel-hashmap
   URL ${PARALLEL_HASHMAP_URL}
@@ -78,11 +100,15 @@ FetchContent_MakeAvailable(parallel-hashmap)
 set(TINYXML2_VERSION
     11.0.0
     CACHE STRING "tinyxml2 version")
-set(TINYXML2_URL
-    https://github.com/leethomason/tinyxml2/archive/refs/tags/${TINYXML2_VERSION}.tar.gz
-)
-set(TINYXML2_SHA256
-    5556deb5081fb246ee92afae73efd943c889cef0cafea92b0b82422d6a18f289)
+if(NOT DEFINED TINYXML2_URL)
+  set(TINYXML2_URL
+      https://github.com/leethomason/tinyxml2/archive/refs/tags/${TINYXML2_VERSION}.tar.gz
+  )
+endif()
+if(NOT DEFINED TINYXML2_SHA256)
+  set(TINYXML2_SHA256
+      5556deb5081fb246ee92afae73efd943c889cef0cafea92b0b82422d6a18f289)
+endif()
 set(tinyxml2_BUILD_TESTING OFF)
 FetchContent_Declare(
   tinyxml2
@@ -94,9 +120,13 @@ FetchContent_MakeAvailable(tinyxml2)
 set(ALICE_REV
     6b7f941ca44f38226f5e2545224fa1194940cd73
     CACHE STRING "alice revision -- head of the master branch")
-set(ALICE_URL https://github.com/marcelwa/alice/archive/${ALICE_REV}.tar.gz)
-set(ALICE_SHA256
-    38709e50db916639c4baf7b2a7e56449baa65d6b17e6616d62439853e65163d2)
+if(NOT DEFINED ALICE_URL)
+  set(ALICE_URL https://github.com/marcelwa/alice/archive/${ALICE_REV}.tar.gz)
+endif()
+if(NOT DEFINED ALICE_SHA256)
+  set(ALICE_SHA256
+      38709e50db916639c4baf7b2a7e56449baa65d6b17e6616d62439853e65163d2)
+endif()
 set(ALICE_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
