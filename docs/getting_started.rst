@@ -8,6 +8,26 @@ prototype new ideas or script evaluations.
 We are continuously testing on Ubuntu, macOS, and Windows with multiple compilers and various Python versions.
 See the badges in the README file for more information.
 
+CI builds every commit in Debug and Release with the following combinations. Any C++20 compiler should work; these are
+the ones we verify.
+
+.. list-table::
+   :widths: 40 60
+   :header-rows: 1
+
+   * - Platform
+     - Compilers
+   * - Ubuntu 22.04 (x86-64)
+     - GCC 11
+   * - Ubuntu 24.04 (x86-64)
+     - GCC 13, GCC 14, Clang 18, Clang 19, Clang 20
+   * - Ubuntu 24.04 (ARM64)
+     - Clang 19, Clang 20
+   * - macOS 15 (ARM64)
+     - Apple Clang
+   * - Windows Server 2025 (x86-64)
+     - MSVC ``v143``, ``ClangCL``
+
 Quick Start
 -----------
 
@@ -407,14 +427,36 @@ The following CMake options are available which have a potential positive impact
 attempts, or performance of the resulting binaries:
 
 * ``-DFICTION_ENABLE_IPO=ON``: Enable IPO/LTO to improve performance of resulting binaries on some systems.
-* ``-DFICTION_ENABLE_PCH=ON``: Enable precompiled headers (PCH) to speed up compilation.
-* ``-DFICTION_ENABLE_UNITY_BUILD=ON``: Enable unity builds to speed up compilation.
+* ``-DFICTION_ENABLE_PCH=ON``: Enable precompiled headers (PCH) for the CLI and the test suite to speed up compilation.
+  The ``dev`` and ``tests-slim`` presets turn this on. On Windows, add ``sloppiness = pch_defines,time_macros`` to your
+  ccache configuration, or ccache will stop caching the compilations that use the PCH.
+* ``-DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON``: Cut debug information down to ``-g1`` and disable inlining. This is by far
+  the largest single lever on Debug build cost; the CI Debug preset and the ``dev``/``tests-slim`` presets enable it.
 * ``-DFICTION_ENABLE_SANITIZER_ADDRESS=ON``: Enable the address sanitizer to detect memory issues.
 * ``-DFICTION_ENABLE_SANITIZER_LEAK=ON``: Enable the leak sanitizer to detect memory leaks.
 * ``-DFICTION_ENABLE_SANITIZER_UNDEFINED=ON``: Enable the undefined behavior sanitizer to detect undefined behavior.
 * ``-DFICTION_ENABLE_SANITIZER_THREAD=ON``: Enable the thread sanitizer to detect multithreading-related problems.
 * ``-DFICTION_ENABLE_SANITIZER_MEMORY=ON``: Enable the memory sanitizer to detect uninitialized reads.
 * ``-DFICTION_ENABLE_JEMALLOC=ON``: Enable the usage of jemalloc by Jason Evans to speed up ``malloc`` in parallelized processes.
+* ``-DFICTION_ENABLE_TIME_TRACE=ON``: Emit Clang ``-ftime-trace`` compilation profiles to find out where build time goes.
+
+Profiling compilation time
+##########################
+
+*fiction* is header-only and template-heavy, so a translation unit's build time is dominated by the headers it pulls in
+and the templates it instantiates. ``-DFICTION_ENABLE_TIME_TRACE=ON`` makes Clang write a ``.json`` profile next to
+every object file. `ClangBuildAnalyzer <https://github.com/aras-p/ClangBuildAnalyzer>`_ aggregates those into a ranking
+of the most expensive headers, template instantiations, and functions:
+
+.. code-block:: console
+
+  $ cmake -S . --preset tests-slim -DCMAKE_CXX_COMPILER=clang++ -DFICTION_ENABLE_TIME_TRACE=ON
+  $ cmake --build --preset tests-slim
+  $ ClangBuildAnalyzer --all build-tests-slim trace.bin
+  $ ClangBuildAnalyzer --analyze trace.bin
+
+The option is Clang-only; it warns and does nothing on GCC and MSVC. Combine it with ``-DFICTION_ENABLE_CACHE=OFF``, as
+a ccache hit produces no profile.
 
 Usage of jemalloc
 #################

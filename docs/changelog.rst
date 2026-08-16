@@ -16,6 +16,8 @@ Added
       AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
     - Added an ``is_operational`` overload that takes one layout per input pattern, and
       ``generate_bdl_input_pattern_layouts`` to generate them
+- Build system:
+    - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
 - Python bindings:
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
 
@@ -46,13 +48,29 @@ Changed
     - Bumped the required C++ standard from C++17 to C++20
     - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s
       ``_deps`` from 504 MB to 262 MB. ``mockturtle`` stays a clone because it uses a submodule
+    - The ``ci-debug``, ``dev``, and ``tests-slim`` presets now enable
+      ``FICTION_LIGHTWEIGHT_DEBUG_BUILDS``, which cuts Debug compile time and memory substantially
+    - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
+      and ``tests-slim`` presets
+    - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
 - Code quality:
+    - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
+      ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
+    - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
+      from ``fiction/utils/math_utils.hpp`` to the new ``fiction/utils/combination_utils.hpp``.
+      Include the latter to keep using it
+    - ``orthogonal`` and ``graph_oriented_layout_design`` no longer template their implementation on
+      the specification network type, which they convert away before doing any work. Their public
+      entry points are unchanged
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
     - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
+    - Halved the OS matrices; ``docs/getting_started.rst`` records the combinations we verify
+    - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
+      only smoke-testing the import
 
 Removed
 #######
@@ -67,6 +85,12 @@ Removed
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
+- Build system:
+    - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
+      ``INTERFACE`` target and therefore never did anything
+- Continuous integration:
+    - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
+      remains the local entry point
 
 Fixed
 #####
@@ -87,11 +111,16 @@ Fixed
     - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
     - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit carrying a C++20 fix,
       instead of floating on ``master``
+    - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, leaving the slowest runners cold
+    - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``
+    - Fixed the 🐍 Packaging path filter still pointing at the removed ``bindings/pyfiction/**``
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
     - Fixed nine ``DOC(...)`` references that named symbols the broken parse had invented; the
       ``*_stats`` runtime members are now documented under their real names
+    - Fixed ``bdl_input_iterator.py`` never being collected, as its name did not match pytest's
+      ``python_files`` pattern, so its five tests had never run
 
 v0.7.0 - 2026-07-31
 -------------------

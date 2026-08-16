@@ -41,7 +41,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [windows-2022, windows-2025]
+        os: [windows-2025]
         toolset: [v143, ClangCL]
         include:
           - toolset: v143
@@ -53,6 +53,7 @@ jobs:
 
     name: 🪟 ${{matrix.os}} with ${{matrix.toolset}} toolset
     runs-on: ${{matrix.os}}
+    timeout-minutes: 120
 
     steps:
       - name: Clone Repository

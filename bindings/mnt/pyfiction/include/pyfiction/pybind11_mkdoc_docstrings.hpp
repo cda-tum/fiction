@@ -8018,6 +8018,12 @@ static const char *mkd_doc_fiction_detail_fanout_substitution_impl_run = R"doc()
 
 static const char *mkd_doc_fiction_detail_gate_level_drvs_impl = R"doc()doc";
 
+static const char *mkd_doc_fiction_detail_gate_level_drvs_impl_2 =
+R"doc(Forward declaration for the friend declaration in `gate_level_layout`.
+Including `algorithms/verification/design_rule_violations.hpp` here
+instead would pull `nlohmann/json.hpp` and three `fmt` headers into
+every translation unit that touches a gate-level layout.)doc";
+
 static const char *mkd_doc_fiction_detail_gate_level_drvs_impl_border_io_check =
 R"doc(Checks if all PI/POs are located at the layout's borders.
 
@@ -8439,9 +8445,16 @@ static const char *mkd_doc_fiction_detail_graph_oriented_layout_design_impl =
 R"doc(Implementation of the graph-oriented layout design algorithm. This
 class handles the initialization and execution of the algorithm.
 
+The specification network is converted to a `technology_network`
+before anything else happens, so this class is templated on the layout
+type only. Carrying the caller's network type through the whole
+implementation would duplicate every member for each network type the
+caller happens to use, without a single line of the body depending on
+it. The conversion lives in the `graph_oriented_layout_design` entry
+point below.
+
 Template Args:
-    Lyt: Cartesian gate-level layout type.
-    Ntk: Network type.)doc";
+    Lyt: Cartesian gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_detail_graph_oriented_layout_design_impl_adjust_layout_size =
 R"doc(Adjusts the layout size based on the last position.
@@ -8671,7 +8684,8 @@ static const char *mkd_doc_fiction_detail_graph_oriented_layout_design_impl_grap
 R"doc(Constructor for the graph-oriented layout design algorithm.
 
 Args:
-    src: The source network to be placed.
+    src: The source network to be placed, already converted to a
+         `technology_network`.
     p: The parameters for the graph-enhanced layout search algorithm.
     st: The statistics object to record execution details.
 
@@ -10456,11 +10470,31 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_detail_orthogonal_impl = R"doc()doc";
+static const char *mkd_doc_fiction_detail_orthogonal_impl =
+R"doc(Implementation of the orthogonal physical design algorithm.
+
+The specification network is converted to a `technology_network`
+before anything else happens, so this class is templated on the layout
+type only. Carrying the caller's network type through the whole
+implementation would duplicate every member for each network type the
+caller happens to use, without a single line of the body depending on
+it. The conversion lives in the `orthogonal` entry point below.
+
+Template Args:
+    Lyt: Gate-level layout type.)doc";
 
 static const char *mkd_doc_fiction_detail_orthogonal_impl_ntk = R"doc()doc";
 
-static const char *mkd_doc_fiction_detail_orthogonal_impl_orthogonal_impl = R"doc()doc";
+static const char *mkd_doc_fiction_detail_orthogonal_impl_orthogonal_impl =
+R"doc(Constructor for the orthogonal physical design algorithm.
+
+Args:
+    src: The source network to be placed, already fanout-substituted
+         into a `technology_network`.
+    p: The parameters for the orthogonal physical design algorithm.
+    st: The statistics object to record execution details.
+
+)doc";
 
 static const char *mkd_doc_fiction_detail_orthogonal_impl_po_counter = R"doc()doc";
 
