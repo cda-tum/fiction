@@ -2996,26 +2996,20 @@ class exact_impl
                 fut[i] = std::async(std::launch::async, &exact_impl::explore_asynchronously, this, i, ti_list);
             }
 
-            // wait for all tasks to finish running (can be made much prettier in C++20...)
-            for (auto still_running = true; still_running;)
+            // wait for every task to finish running. This is the join that makes the unguarded `result_aspect_ratio`
+            // read below safe: a running task may still write it under `rar_mutex`
+            for (auto& f : fut)
             {
-                still_running = false;
-                for (auto i = 0u; i < ps.num_threads; ++i)
-                {
-                    using namespace std::chrono_literals;
-                    if (fut[i].wait_for(10ms) == std::future_status::timeout)
-                    {
-                        still_running = true;
-                    }
+                f.wait();
+
 #if (PROGRESS_BARS)
-                    else if (!post_toggle)
-                    {
-                        thread_bar.done();
-                        post_bar(true);
-                        post_toggle = true;
-                    }
-#endif
+                if (!post_toggle)
+                {
+                    thread_bar.done();
+                    post_bar(true);
+                    post_toggle = true;
                 }
+#endif
             }
 
             if (result_aspect_ratio)
