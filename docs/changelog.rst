@@ -82,6 +82,12 @@ Changed
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
     - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
+    - The type checks on the path-finding, operational domain, and ``hexagonal_layout`` entry points
+      are now ``requires`` clauses. An unsatisfied one is reported as a failed constraint at the call
+      site instead of a ``static_assert`` message from inside the body
+    - ``hexagonal_layout`` now rejects an invalid ``HexagonalCoordinateSystem`` where the type is
+      named rather than where it is constructed
+    - ``exact`` no longer polls its worker futures every 10 ms while solving asynchronously
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
