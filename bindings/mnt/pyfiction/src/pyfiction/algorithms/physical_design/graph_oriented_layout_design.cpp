@@ -90,7 +90,7 @@ void graph_oriented_layout_design(nanobind::module_& m)
             },
             "Returns a string representation of the statistics.")
         .def_ro("time_total", &fiction::graph_oriented_layout_design_stats::time_total,
-                DOC(fiction_graph_oriented_layout_design_stats_duration))
+                DOC(fiction_graph_oriented_layout_design_stats_time_total))
         .def_ro("x_size", &fiction::graph_oriented_layout_design_stats::x_size,
                 DOC(fiction_graph_oriented_layout_design_stats_x_size))
         .def_ro("y_size", &fiction::graph_oriented_layout_design_stats::y_size,

@@ -29,6 +29,13 @@ void technology_mapping(nanobind::module_& m)
 {
     namespace py = nanobind;
 
+    // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
+    // translator with the module; it is not meant to be thrown here
+    py::exception<fiction::missing_required_gates_exception>(
+        m, "missing_required_gates_exception",
+        PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): included through nanobind.h
+    // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
+
     py::class_<fiction::technology_mapping_params>(m, "technology_mapping_params",
                                                    DOC(fiction_technology_mapping_params))
         .def(py::init<>(), "Default constructor.")

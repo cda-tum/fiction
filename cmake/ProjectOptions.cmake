@@ -28,11 +28,12 @@ macro(fiction_setup_options)
   option(FICTION_ENABLE_SANITIZER_UNDEFINED "Enable undefined sanitizer" OFF)
   option(FICTION_ENABLE_SANITIZER_THREAD "Enable thread sanitizer" OFF)
   option(FICTION_ENABLE_SANITIZER_MEMORY "Enable memory sanitizer" OFF)
-  option(FICTION_ENABLE_UNITY_BUILD "Enable unity builds" OFF)
   option(FICTION_ENABLE_PCH "Enable precompiled headers" OFF)
   option(FICTION_ENABLE_CACHE "Enable ccache" ON)
   option(FICTION_LIGHTWEIGHT_DEBUG_BUILDS
          "Reduce memory consumption of Debug builds" OFF)
+  option(FICTION_ENABLE_TIME_TRACE
+         "Emit Clang -ftime-trace compilation profiles" OFF)
 
   if(NOT PROJECT_IS_TOP_LEVEL)
     mark_as_advanced(
@@ -43,11 +44,11 @@ macro(fiction_setup_options)
       FICTION_ENABLE_SANITIZER_UNDEFINED
       FICTION_ENABLE_SANITIZER_THREAD
       FICTION_ENABLE_SANITIZER_MEMORY
-      FICTION_ENABLE_UNITY_BUILD
       FICTION_ENABLE_COVERAGE
       FICTION_ENABLE_PCH
       FICTION_ENABLE_CACHE
-      FICTION_LIGHTWEIGHT_DEBUG_BUILDS)
+      FICTION_LIGHTWEIGHT_DEBUG_BUILDS
+      FICTION_ENABLE_TIME_TRACE)
   endif()
 
 endmacro()
@@ -87,9 +88,6 @@ macro(fiction_local_options)
     ${FICTION_ENABLE_SANITIZER_LEAK} ${FICTION_ENABLE_SANITIZER_UNDEFINED}
     ${FICTION_ENABLE_SANITIZER_THREAD} ${FICTION_ENABLE_SANITIZER_MEMORY})
 
-  set_target_properties(fiction_options
-                        PROPERTIES UNITY_BUILD ${FICTION_ENABLE_UNITY_BUILD})
-
   if(FICTION_ENABLE_CACHE)
     include(cmake/Cache.cmake)
     fiction_enable_cache()
@@ -105,6 +103,20 @@ macro(fiction_local_options)
     if(LINKER_FATAL_WARNINGS)
       # This is not working consistently, so disabling for now
       # target_link_options(fiction_options INTERFACE -Wl,--fatal-warnings)
+    endif()
+  endif()
+
+  # Emit one JSON profile next to every object file, recording where the
+  # compiler spent its time. Aggregate them with ClangBuildAnalyzer; see
+  # docs/getting_started.rst.
+  if(FICTION_ENABLE_TIME_TRACE)
+    if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
+      target_compile_options(fiction_options INTERFACE -ftime-trace)
+    else()
+      message(
+        WARNING
+          "-ftime-trace is a Clang feature; FICTION_ENABLE_TIME_TRACE has no effect for ${CMAKE_CXX_COMPILER_ID}."
+      )
     endif()
   endif()
 
