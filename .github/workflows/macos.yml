@@ -41,11 +41,12 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-14, macos-15]
+        os: [macos-15]
         compiler: [clang++]
 
     name: 🍎 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
+    timeout-minutes: 120
 
     steps:
       - name: Clone Repository

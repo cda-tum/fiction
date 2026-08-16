@@ -40,7 +40,7 @@ void wiring_reduction(nanobind::module_& m)
             "Returns a string representation of the statistics.")
         .def("report", &fiction::wiring_reduction_stats::report, DOC(fiction_wiring_reduction_stats_report))
         .def_ro("time_total", &fiction::wiring_reduction_stats::time_total,
-                DOC(fiction_wiring_reduction_stats_duration))
+                DOC(fiction_wiring_reduction_stats_time_total))
         .def_ro("x_size_before", &fiction::wiring_reduction_stats::x_size_before,
                 DOC(fiction_wiring_reduction_stats_x_size_before))
         .def_ro("y_size_before", &fiction::wiring_reduction_stats::y_size_before,

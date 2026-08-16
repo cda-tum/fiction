@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/clustercomplete.hpp"
+#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
@@ -31,6 +32,7 @@
 #include <cstdint>
 #include <iostream>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -643,6 +645,8 @@ double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& sp
  * @param output_bdl_wires BDL output wires of the layout.
  * @param pst Statistics.
  * @return The critical temperature (unit: K).
+ * @throws std::invalid_argument if `spec` is empty, if the number of input pattern layouts does not match the number
+ * of input combinations of `spec`, or if the number of output BDL pairs does not match the number of truth tables.
  */
 template <typename Lyt, typename TT>
 double critical_temperature_gate_based(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec,
@@ -655,15 +659,30 @@ double critical_temperature_gate_based(const std::vector<Lyt>& input_pattern_lay
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    assert(!input_pattern_layouts.empty() && "no input pattern layouts provided");
+    // unlike the other overload, this one indexes caller-supplied containers, so a wrong size is an out-of-bounds
+    // read rather than a wrong answer. It is also reachable from `pyfiction` with arbitrary lists, so the checks
+    // have to survive `NDEBUG`
+    if (spec.empty())
+    {
+        throw std::invalid_argument("spec is empty");
+    }
 
-    assert(!spec.empty());
+    if (input_pattern_layouts.size() != spec.front().num_bits())
+    {
+        throw std::invalid_argument(
+            fmt::format("expected {} input pattern layouts for a {}-input specification, but got {}",
+                        spec.front().num_bits(), spec.front().num_vars(), input_pattern_layouts.size()));
+    }
+
+    if (output_bdl_pairs.size() != spec.size())
+    {
+        throw std::invalid_argument(fmt::format("expected {} output BDL pairs, one per truth table, but got {}",
+                                                spec.size(), output_bdl_pairs.size()));
+    }
+
     // all elements in tts must have the same number of variables
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
                                       { return a.num_vars() != b.num_vars(); }) == spec.end());
-
-    assert(input_pattern_layouts.size() == spec.front().num_bits() &&
-           "number of input pattern layouts and input combinations don't match");
 
     critical_temperature_stats st{};
 

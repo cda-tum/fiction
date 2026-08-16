@@ -40,6 +40,7 @@ jobs:
   build:
     name: 🐳 Build and publish Docker image
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     permissions:
       packages: write # required to push the image to ghcr.io on release
       contents: read # required to check out the repository

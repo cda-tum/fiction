@@ -8,6 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/combination_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math_utils.hpp"
 
@@ -116,12 +117,13 @@ struct displacement_robustness_domain_params
     dimer_displacement_policy dimer_policy{dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER};
     /**
      * Number of worker threads to distribute the displaced layouts over. Defaults to the number of hardware threads,
-     * which is the behavior this setting replaces. Values below `1` are treated as `1`.
+     * which is the behavior this setting replaces, and to `1` where that count is not detectable. Values below `1`
+     * are treated as `1`.
      *
      * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows a robustness domain
      * computation to leave cores free for other work.
      */
-    std::size_t number_of_threads{std::thread::hardware_concurrency()};
+    std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
 };
 
 /**

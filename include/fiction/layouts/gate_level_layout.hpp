@@ -5,9 +5,6 @@
 #ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
-#include "fiction/algorithms/verification/design_rule_violations.hpp"  // NOLINT(misc-include-cleaner): provides
-                                                                       // detail::gate_level_drvs_impl for the friend
-                                                                       // declaration below
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/mockturtle_utils.hpp"
@@ -33,6 +30,18 @@
 
 namespace fiction
 {
+
+namespace detail
+{
+/**
+ * Forward declaration for the friend declaration in `gate_level_layout`. Including
+ * `algorithms/verification/design_rule_violations.hpp` here instead would pull `nlohmann/json.hpp` and three `fmt`
+ * headers into every translation unit that touches a gate-level layout.
+ */
+template <typename Lyt>
+class gate_level_drvs_impl;
+
+}  // namespace detail
 
 /**
  * A layout type to layer on top of a clocked layout that allows the assignment of gates to clock zones (aka tiles in

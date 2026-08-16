@@ -301,7 +301,7 @@ void operational_domain(nanobind::module_& m)
     py::class_<fiction::operational_domain_stats>(m, "operational_domain_stats", DOC(fiction_operational_domain_stats))
         .def(py::init<>(), "Default constructor.")
         .def_ro("time_total", &fiction::operational_domain_stats::time_total,
-                DOC(fiction_operational_domain_stats_duration))
+                DOC(fiction_operational_domain_stats_time_total))
         .def_ro("num_simulator_invocations", &fiction::operational_domain_stats::num_simulator_invocations,
                 DOC(fiction_operational_domain_stats_num_simulator_invocations))
         .def_ro("num_evaluated_parameter_combinations",

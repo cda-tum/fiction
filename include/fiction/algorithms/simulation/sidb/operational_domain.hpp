@@ -351,12 +351,13 @@ struct operational_domain_params
         operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.1}};
     /**
      * Number of worker threads to distribute the parameter points over. Defaults to the number of hardware threads,
-     * which is the behavior this setting replaces. Values below `1` are treated as `1`.
+     * which is the behavior this setting replaces, and to `1` where that count is not detectable. Values below `1`
+     * are treated as `1`.
      *
      * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows an operational domain
      * computation to leave cores free for other work.
      */
-    std::size_t number_of_threads{std::thread::hardware_concurrency()};
+    std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -478,6 +479,11 @@ class operational_domain_impl
         // the public entry points reject a `FILTER_ONLY` request on a layout without `LOGIC` cells, so this may only
         // be empty for the strategies that do not need a canvas
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
+
+        assert(((params.operational_params.strategy_to_analyze_operational_status !=
+                 is_operational_params::operational_analysis_strategy::FILTER_ONLY) ||
+                (logic_cells.size() > 0)) &&
+               "No logic cells found in the layout");
 
         // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
         // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to

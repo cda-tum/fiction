@@ -4,6 +4,7 @@
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/traits.hpp>
 
 #include <sstream>
 #include <vector>

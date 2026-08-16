@@ -11,6 +11,9 @@ Unreleased
 Added
 #####
 - Algorithms:
+    - Added the ``missing_required_gates_exception`` that ``technology_mapping`` throws when the
+      technology library is missing the gates required by the base network type (AIG requires INV and
+      AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
     - Added an ``is_operational`` overload that takes one layout per input pattern, and
       ``generate_bdl_input_pattern_layouts`` to generate them
     - Added a ``critical_temperature_gate_based`` overload that takes the pre-generated input pattern
@@ -22,17 +25,35 @@ Added
     - ``operational_domain_contour_tracing`` now supports three or more sweep dimensions, where it
       collects the boundary surface instead of walking a closed curve. ``operational_domain_flood_fill``
       no longer caps at three dimensions
+- Build system:
+    - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
 - Experiments:
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space
 - Python bindings:
-    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` overload
+    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
+      ``critical_temperature_gate_based`` overloads
     - Exposed ``number_of_threads`` on ``operational_domain_params`` and
       ``displacement_robustness_domain_params``
 
 Changed
 #######
+- Continuous integration:
+    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
+      paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
+      ``requires`` clause no longer silences the Doxygen comments that follow it
+- Python bindings:
+    - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
+      ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
+      directly must be renamed
 - Algorithms:
+    - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
+      ``mockturtle::map``
+    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params``
+      (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a
+      ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports
+      mapping errors instead of storing a failed mapping
     - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
       layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
       gates are dominated by the physical simulation and gain little
@@ -48,13 +69,31 @@ Changed
     - ``is_operational_impl`` no longer detects the output BDL pairs twice under ``TOLERATE_KINKS``
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
+    - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s
+      ``_deps`` from 504 MB to 262 MB. ``mockturtle`` stays a clone because it uses a submodule
+    - The ``ci-debug``, ``dev``, and ``tests-slim`` presets now enable
+      ``FICTION_LIGHTWEIGHT_DEBUG_BUILDS``, which cuts Debug compile time and memory substantially
+    - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
+      and ``tests-slim`` presets
+    - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
 - Code quality:
+    - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
+      ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
+    - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
+      from ``fiction/utils/math_utils.hpp`` to the new ``fiction/utils/combination_utils.hpp``.
+      Include the latter to keep using it
+    - ``orthogonal`` and ``graph_oriented_layout_design`` no longer template their implementation on
+      the specification network type, which they convert away before doing any work. Their public
+      entry points are unchanged
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
     - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
+    - Halved the OS matrices; ``docs/getting_started.rst`` records the combinations we verify
+    - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
+      only smoke-testing the import
 
 Removed
 #######
@@ -63,10 +102,18 @@ Removed
       command, and ``one_pass_synthesis()``. Use ``exact_physical_design()`` instead
     - Removed ``jump_point_search()``. Use ``a_star()`` instead
     - Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap`` does not support
 - Data structures:
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
+- Build system:
+    - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
+      ``INTERFACE`` target and therefore never did anything
+- Continuous integration:
+    - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
+      remains the local entry point
 
 Fixed
 #####
@@ -77,11 +124,8 @@ Fixed
     - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
       robustness helpers, which derive their slice size by dividing by a worker count that is zero when
       there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
-    - Fixed the ``is_operational`` entry points building the canvas layout under different conditions, so
-      that the same layout and parameters took different code paths depending on the overload reached.
-      ``FILTER_ONLY`` combined with ``TOLERATE_KINKS`` reported every layout operational without checking
-      it, because the canvas was built but the filtering steps that need it require ``REJECT_KINKS``. The
-      condition is now decided in one place, in ``is_operational_impl::run()``
+    - Fixed ``is_operational`` reporting every layout operational without checking it when ``FILTER_ONLY``
+      was combined with ``TOLERATE_KINKS``. All entry points now decide canvas filtering in one place
     - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
@@ -98,9 +142,16 @@ Fixed
     - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
     - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit carrying a C++20 fix,
       instead of floating on ``master``
+    - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, leaving the slowest runners cold
+    - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``
+    - Fixed the 🐍 Packaging path filter still pointing at the removed ``bindings/pyfiction/**``
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
+    - Fixed nine ``DOC(...)`` references that named symbols the broken parse had invented; the
+      ``*_stats`` runtime members are now documented under their real names
+    - Fixed ``bdl_input_iterator.py`` never being collected, as its name did not match pytest's
+      ``python_files`` pattern, so its five tests had never run
 
 v0.7.0 - 2026-07-31
 -------------------
@@ -227,11 +278,6 @@ Changed
 - Dependencies:
     - Updated all dependencies to their latest versions
 
-Removed
-#######
-- Continuous integration:
-    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
-
 Fixed
 #####
 - Data structures:
@@ -252,6 +298,7 @@ Fixed
 Removed
 #######
 - Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
 

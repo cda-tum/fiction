@@ -17,12 +17,37 @@ function(fiction_enable_cache)
   find_program(CACHE_BINARY NAMES ${CACHE_OPTION_VALUES})
   if(CACHE_BINARY)
     message(STATUS "${CACHE_BINARY} found and enabled")
+
+    set(CACHE_LAUNCHER ${CACHE_BINARY})
+
+    # ccache refuses to cache a compilation that uses a pre-compiled header
+    # unless it is told that the PCH's macro definitions and __DATE__/__TIME__
+    # expansions can be ignored. Without this, turning PCH on turns caching off,
+    # which is a net loss. `env` is not available on Windows, where the two
+    # options have to be combined through a ccache.conf instead.
+    if(FICTION_ENABLE_PCH AND CACHE_BINARY MATCHES "ccache")
+      if(WIN32)
+        message(
+          STATUS
+            "Set `sloppiness = pch_defines,time_macros` in your ccache configuration, or ccache will not cache PCH-using compilations"
+        )
+      else()
+        set(CACHE_LAUNCHER
+            ${CMAKE_COMMAND} -E env CCACHE_SLOPPINESS=pch_defines,time_macros
+            ${CACHE_BINARY})
+      endif()
+    endif()
+
+    # FORCE, because without it a build tree configured before
+    # FICTION_ENABLE_PCH was turned on keeps its bare `ccache` launcher and
+    # never picks up the sloppiness wrapper, silently losing every PCH
+    # compilation's cache entry.
     set(CMAKE_CXX_COMPILER_LAUNCHER
-        ${CACHE_BINARY}
-        CACHE FILEPATH "CXX compiler cache used")
+        ${CACHE_LAUNCHER}
+        CACHE STRING "CXX compiler cache used" FORCE)
     set(CMAKE_C_COMPILER_LAUNCHER
-        ${CACHE_BINARY}
-        CACHE FILEPATH "C compiler cache used")
+        ${CACHE_LAUNCHER}
+        CACHE STRING "C compiler cache used" FORCE)
   else()
     message(
       WARNING "${CACHE_OPTION} is enabled but was not found. Not using it")
