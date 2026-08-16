@@ -129,6 +129,10 @@ Fixed
     - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
+    - Fixed an off-by-one in the boundary search of ``operational_domain_contour_tracing``, which skipped
+      the first sweep dimension's lowest step index. Where the operational region reached that edge, the
+      search returned an interior point, which is not a boundary point, so the trace produced an empty
+      contour and the enclosure inference then marked every reachable point operational without simulating it
 - Code quality:
     - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
     - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``

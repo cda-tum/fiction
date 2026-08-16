@@ -35,6 +35,36 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
+def wire_with_canvas() -> sidb_100_lattice:
+    """A BDL wire with two LOGIC cells, so that the sketch has a canvas to enumerate.
+
+    Returns:
+        The wire layout.
+    """
+    lyt = sidb_100_lattice()
+
+    lyt.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type((2, 1, 0), sidb_technology.cell_type.INPUT)
+
+    lyt.assign_cell_type((6, 2, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type((8, 3, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type((12, 4, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type((14, 5, 0), sidb_technology.cell_type.NORMAL)
+
+    lyt.assign_cell_type((11, 7, 0), sidb_technology.cell_type.LOGIC)
+    lyt.assign_cell_type((13, 13, 0), sidb_technology.cell_type.LOGIC)
+
+    lyt.assign_cell_type((14, 15, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type((12, 16, 0), sidb_technology.cell_type.NORMAL)
+
+    lyt.assign_cell_type((8, 17, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type((6, 18, 0), sidb_technology.cell_type.OUTPUT)
+
+    lyt.assign_cell_type((2, 19, 0), sidb_technology.cell_type.NORMAL)
+
+    return lyt
+
+
 class TestOperationalDomain(unittest.TestCase):
     def test_operational_domain_SiQAD_OR_100_lattice(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
@@ -95,27 +125,7 @@ class TestOperationalDomain(unittest.TestCase):
 
     def test_three_dimensional_operational_domain_sketch(self) -> None:
         """The sketch and the boundary-following strategies work over three sweep dimensions."""
-        # a wire with two canvas cells, so that the sketch has a canvas to enumerate
-        lyt = sidb_100_lattice()
-
-        lyt.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
-        lyt.assign_cell_type((2, 1, 0), sidb_technology.cell_type.INPUT)
-
-        lyt.assign_cell_type((6, 2, 0), sidb_technology.cell_type.NORMAL)
-        lyt.assign_cell_type((8, 3, 0), sidb_technology.cell_type.NORMAL)
-        lyt.assign_cell_type((12, 4, 0), sidb_technology.cell_type.NORMAL)
-        lyt.assign_cell_type((14, 5, 0), sidb_technology.cell_type.NORMAL)
-
-        lyt.assign_cell_type((11, 7, 0), sidb_technology.cell_type.LOGIC)
-        lyt.assign_cell_type((13, 13, 0), sidb_technology.cell_type.LOGIC)
-
-        lyt.assign_cell_type((14, 15, 0), sidb_technology.cell_type.NORMAL)
-        lyt.assign_cell_type((12, 16, 0), sidb_technology.cell_type.NORMAL)
-
-        lyt.assign_cell_type((8, 17, 0), sidb_technology.cell_type.OUTPUT)
-        lyt.assign_cell_type((6, 18, 0), sidb_technology.cell_type.OUTPUT)
-
-        lyt.assign_cell_type((2, 19, 0), sidb_technology.cell_type.NORMAL)
+        lyt = wire_with_canvas()
 
         params = operational_domain_params()
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -155,10 +165,17 @@ class TestOperationalDomain(unittest.TestCase):
         with self.assertRaises(ValueError):
             operational_domain_grid_search(lyt, [create_or_tt()], params)
 
-        # tolerating kinks leaves the filtering steps undefined
+        # tolerating kinks leaves the filtering steps undefined. This uses a layout that does have a canvas, so that
+        # the rejection can only come from the kink condition
+        canvas_lyt = wire_with_canvas()
+
         params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
         with self.assertRaises(ValueError):
-            operational_domain_grid_search(lyt, [create_or_tt()], params)
+            operational_domain_grid_search(canvas_lyt, [create_id_tt()], params)
+
+        # the same layout is accepted once kinks are rejected again
+        params.operational_params.op_condition = operational_condition.REJECT_KINKS
+        operational_domain_grid_search(canvas_lyt, [create_id_tt()], params)
 
     def test_operational_domain_XOR_gate_100_lattice(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")

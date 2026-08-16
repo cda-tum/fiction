@@ -32,6 +32,7 @@
 #include <cassert>
 #include <cmath>
 #include <condition_variable>
+#include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <deque>
@@ -45,6 +46,7 @@
 #include <random>
 #include <ranges>
 #include <stdexcept>
+#include <string_view>
 #include <thread>
 #include <tuple>
 #include <type_traits>
@@ -408,11 +410,22 @@ namespace detail
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout the operational domain is computed for.
  * @param params The operational domain parameters to validate.
+ * @param min_sweep_dimensions The number of sweep dimensions the calling algorithm requires at least. Grid search and
+ * random sampling accept any number; flood fill and contour tracing need at least two.
+ * @param algorithm_name The name of the calling algorithm, used to phrase the sweep dimension count error.
  * @throws std::invalid_argument if the parameters are invalid.
  */
 template <typename Lyt>
-void validate_operational_domain_params(const Lyt& lyt, const operational_domain_params& params)
+void validate_operational_domain_params(const Lyt& lyt, const operational_domain_params& params,
+                                        const std::size_t      min_sweep_dimensions = 1,
+                                        const std::string_view algorithm_name       = "The operational domain")
 {
+    if (params.sweep_dimensions.size() < min_sweep_dimensions)
+    {
+        throw std::invalid_argument(
+            fmt::format("{} is only applicable to {} or more dimensions", algorithm_name, min_sweep_dimensions));
+    }
+
     if (params.operational_params.strategy_to_analyze_operational_status ==
         is_operational_params::operational_analysis_strategy::FILTER_ONLY)
     {
@@ -935,18 +948,24 @@ class operational_domain_impl
 
         // a step point is on the boundary if it is operational and borders a non-operational point or the edge of the
         // parameter range. The latter is implied: `moore_neighborhood` does not gather points outside the range, so a
-        // point at the edge has fewer than `3^n - 1` neighbors
-        const auto is_boundary_point = [this](const step_point& sp) noexcept
+        // point at the edge has fewer than `3^n - 1` neighbors.
+        //
+        // the neighborhood is returned alongside the verdict so that the expansion below does not have to rebuild it.
+        // It grows as `3^n - 1`, so recomputing it once per popped point gets expensive in higher dimensions
+        const auto neighborhood_and_boundary_status = [this](const step_point& sp) noexcept
         {
-            const auto neighborhood = moore_neighborhood(sp);
+            auto neighborhood = moore_neighborhood(sp);
 
             if (neighborhood.size() < static_cast<std::size_t>(std::pow(3, num_dimensions)) - 1)
             {
-                return true;
+                return std::pair{std::move(neighborhood), true};
             }
 
-            return std::ranges::any_of(neighborhood, [this](const auto& m) noexcept
-                                       { return is_step_point_operational(m) == operational_status::NON_OPERATIONAL; });
+            const auto on_boundary =
+                std::ranges::any_of(neighborhood, [this](const auto& m) noexcept
+                                    { return is_step_point_operational(m) == operational_status::NON_OPERATIONAL; });
+
+            return std::pair{std::move(neighborhood), on_boundary};
         };
 
         for (const auto& starting_point : step_point_samples)
@@ -984,14 +1003,16 @@ class operational_domain_impl
                 const auto sp = queue.front();
                 queue.pop();
 
-                if (!is_boundary_point(sp))
+                const auto [neighborhood, on_boundary] = neighborhood_and_boundary_status(sp);
+
+                if (!on_boundary)
                 {
                     continue;
                 }
 
                 contour.insert(sp);
 
-                for (const auto& m : moore_neighborhood(sp))
+                for (const auto& m : neighborhood)
                 {
                     if (!visited.insert(m).second)
                     {
@@ -1650,8 +1671,11 @@ class operational_domain_impl
 
         auto latest_operational_point = starting_point;
 
-        // move towards the lower border of the first dimension, holding all other dimensions fixed
-        for (std::size_t x = starting_point.step_values.at(0); x > 0; --x)
+        // move towards the lower border of the first dimension, holding all other dimensions fixed. The walk starts
+        // one step below `starting_point`, which is already known to be operational, and includes index `0`: stopping
+        // at index `1` would return an interior point whose Moore neighborhood is complete and operational, which
+        // `is_boundary_point` rejects, leaving the traced contour empty
+        for (std::size_t x = starting_point.step_values.at(0); x-- > 0;)
         {
             auto left_step_values  = starting_point.step_values;
             left_step_values.at(0) = x;
@@ -2104,13 +2128,8 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() < 2)
-    {
-        throw std::invalid_argument("Flood fill is only applicable to 2 or more dimensions");
-    }
-
     // this may throw an `std::invalid_argument` exception
-    detail::validate_operational_domain_params(lyt, params);
+    detail::validate_operational_domain_params(lyt, params, 2, "Flood fill");
 
     operational_domain_stats                                     st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
@@ -2168,13 +2187,8 @@ template <typename Lyt, typename TT>
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() < 2)
-    {
-        throw std::invalid_argument("Contour tracing is only applicable to 2 or more dimensions");
-    }
-
     // this may throw an `std::invalid_argument` exception
-    detail::validate_operational_domain_params(lyt, params);
+    detail::validate_operational_domain_params(lyt, params, 2, "Contour tracing");
 
     operational_domain_stats                                     st{};
     detail::operational_domain_impl<Lyt, TT, operational_domain> p{lyt, spec, params, st};
@@ -2325,13 +2339,8 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() < 2)
-    {
-        throw std::invalid_argument("Flood fill is only applicable to 2 or more dimensions");
-    }
-
     // this may throw an `std::invalid_argument` exception
-    detail::validate_operational_domain_params(lyt, params);
+    detail::validate_operational_domain_params(lyt, params, 2, "Flood fill");
 
     operational_domain_stats                                              st{};
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};
@@ -2388,13 +2397,8 @@ critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
-    if (params.sweep_dimensions.size() < 2)
-    {
-        throw std::invalid_argument("Contour tracing is only applicable to 2 or more dimensions");
-    }
-
     // this may throw an `std::invalid_argument` exception
-    detail::validate_operational_domain_params(lyt, params);
+    detail::validate_operational_domain_params(lyt, params, 2, "Contour tracing");
 
     operational_domain_stats                                              st{};
     detail::operational_domain_impl<Lyt, TT, critical_temperature_domain> p{lyt, spec, params, st};

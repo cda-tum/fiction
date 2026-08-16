@@ -138,9 +138,17 @@ int main()  // NOLINT
         write_operational_domain(op_domain_sketch_flood_fill,
                                  fmt::format("{}/3d_sketch_flood_fill_{}.csv", folder, gate));
 
-        mean_ratio_num_op_sketch_to_num_op_grid_search +=
-            static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
-            static_cast<double>(op_domain_stats_grid_search.num_operational_parameter_combinations);
+        // a gate without a single operational point in the swept range would turn the ratio into a NaN, which would
+        // then propagate into the mean and corrupt the "Total" row for every other gate
+        const auto num_op_grid_search = op_domain_stats_grid_search.num_operational_parameter_combinations;
+
+        const auto ratio_num_op_sketch_to_num_op_grid_search =
+            num_op_grid_search == 0 ?
+                0.0 :
+                static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
+                    static_cast<double>(num_op_grid_search);
+
+        mean_ratio_num_op_sketch_to_num_op_grid_search += ratio_num_op_sketch_to_num_op_grid_search;
 
         opdomain_exp(
             // Benchmark
@@ -158,8 +166,7 @@ int main()  // NOLINT
             op_domain_stats_sketch_flood_fill.num_operational_parameter_combinations,
             mockturtle::to_seconds(op_domain_stats_sketch_flood_fill.time_total),
 
-            static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
-                static_cast<double>(op_domain_stats_grid_search.num_operational_parameter_combinations),
+            ratio_num_op_sketch_to_num_op_grid_search,
             mockturtle::to_seconds(op_domain_stats_grid_search.time_total) /
                 mockturtle::to_seconds(op_domain_stats_sketch.time_total));
 

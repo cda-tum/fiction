@@ -23,6 +23,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <cstddef>
 #include <functional>
 #include <optional>
 #include <stdexcept>
@@ -252,6 +253,9 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
                 std::invalid_argument);
             CHECK_THROWS_AS(operational_domain_flood_fill(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
                             std::invalid_argument);
+            CHECK_THROWS_AS(
+                operational_domain_contour_tracing(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
+                std::invalid_argument);
         }
 
         SECTION("the layout must have canvas cells")

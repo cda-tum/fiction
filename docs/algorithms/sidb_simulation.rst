@@ -353,6 +353,17 @@ Operational Domain Computation
         .. autoclass:: mnt.pyfiction.operational_domain_stats
             :members:
 
+        The same four strategies are available here. Grid search and random sampling accept any number of
+        sweep dimensions; flood fill and contour tracing follow the shape of the operational region and
+        therefore need at least two. In two dimensions, contour tracing walks the boundary as a closed
+        curve; in three or more, where the boundary is a surface, it collects the boundary instead.
+
+        Setting ``strategy_to_analyze_operational_status`` to ``FILTER_ONLY`` computes the *operational
+        domain sketch*, which classifies each parameter point by filtering alone instead of by physical
+        simulation. It requires ``REJECT_KINKS`` and a layout with ``LOGIC`` cells; without either, the
+        call raises ``ValueError``. The sketch pairs best with grid search and random sampling — see the
+        C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
+
         .. autofunction:: mnt.pyfiction.operational_domain_grid_search
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
         .. autofunction:: mnt.pyfiction.operational_domain_flood_fill
