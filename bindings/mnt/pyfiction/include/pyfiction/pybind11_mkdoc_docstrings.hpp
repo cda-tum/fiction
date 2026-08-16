@@ -11832,6 +11832,12 @@ being absorbed.
 Args:
     lyt: The layout the operational domain is computed for.
     params: The operational domain parameters to validate.
+    min_sweep_dimensions: The number of sweep dimensions the calling
+                          algorithm requires at least. Grid search and
+                          random sampling accept any number; flood
+                          fill and contour tracing need at least two.
+    algorithm_name: The name of the calling algorithm, used to phrase
+                    the sweep dimension count error.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
@@ -25006,10 +25012,10 @@ epsilon_r, lambda_tf, operational status
 
 Args:
     opdom: The operational domain to be written. It represents a
-           mapping between sets of simulation parameters (defined as a
-           pair of sweep parameters for the X, Y, and Z dimensions)
-           and a tuple containing detailed information about the SiDB
-           layout associated with those simulation parameters.
+           mapping between sets of simulation parameters (one to three
+           sweep parameters, written as the X, Y, and Z columns) and a
+           tuple containing detailed information about the SiDB layout
+           associated with those simulation parameters.
     filename: The filename where the CSV representation of the
               operational domain is written to.
     params: The parameters used for writing, including the operational
