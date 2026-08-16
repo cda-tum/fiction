@@ -643,9 +643,10 @@ class operational_domain_impl
 
         // this termination logic is hand-rolled rather than built on `std::jthread` with
         // `std::stop_source`/`std::stop_token` and the C++20 `std::condition_variable_any::wait` stop-token overload.
-        // Apple's libc++ still gates `<stop_token>` and `std::jthread` behind `-fexperimental-library`, so both macOS
-        // CI jobs fail to compile them. A single portable implementation was preferred over a feature-detected second
-        // copy. Revisit once the macOS runners ship a libc++ that enables them by default
+        // Apple's libc++ does not ship `<stop_token>`: P0660R10 is absent from
+        // https://developer.apple.com/xcode/cpp/, so the macOS CI job cannot compile it. Upstream libc++ un-gated it
+        // from `-fexperimental-library` in LLVM 20. A single portable implementation was preferred over a
+        // feature-detected second copy. Revisit once Apple Clang ships the feature
         std::mutex              queue_mutex{};
         std::condition_variable queue_cv{};
 
@@ -1855,19 +1856,11 @@ class operational_domain_impl
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] operational_domain operational_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
                                                                 const operational_domain_params& params = {},
                                                                 operational_domain_stats*        stats  = nullptr)
 {
-    // do not convert the `static_assert` type checks in this file's public entry points into `requires` clauses: the
-    // pyfiction docstring generator parses this header as C++11 (see the note on `manhattan_distance` in
-    // `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that drops the Doxygen comments of
-    // the declarations that follow. `kitty` also provides no `is_truth_table_v` alias that would simplify the third
-    // check
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     // this may throw an `std::invalid_argument` exception
     detail::validate_sweep_parameters(params);
 
@@ -1906,15 +1899,12 @@ template <typename Lyt, typename TT>
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] operational_domain operational_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec,
                                                                     const std::size_t                samples,
                                                                     const operational_domain_params& params = {},
                                                                     operational_domain_stats*        stats  = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     // this may throw an `std::invalid_argument` exception
     detail::validate_sweep_parameters(params);
 
@@ -1963,14 +1953,11 @@ template <typename Lyt, typename TT>
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] operational_domain
 operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
                               const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
     {
         throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
@@ -2023,15 +2010,12 @@ operational_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] operational_domain operational_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec,
                                                                     const std::size_t                samples,
                                                                     const operational_domain_params& params = {},
                                                                     operational_domain_stats*        stats  = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (params.sweep_dimensions.size() != 2)
     {
         throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
@@ -2074,15 +2058,12 @@ template <typename Lyt, typename TT>
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
 critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& spec,
                                         const operational_domain_params& params = {},
                                         operational_domain_stats*        stats  = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     // this may throw an `std::invalid_argument` exception
     detail::validate_sweep_parameters(params);
 
@@ -2120,15 +2101,12 @@ critical_temperature_domain_grid_search(const Lyt& lyt, const std::vector<TT>& s
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
 critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                             const operational_domain_params& params = {},
                                             operational_domain_stats*        stats  = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     // this may throw an `std::invalid_argument` exception
     detail::validate_sweep_parameters(params);
 
@@ -2172,15 +2150,12 @@ critical_temperature_domain_random_sampling(const Lyt& lyt, const std::vector<TT
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
 critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                        const operational_domain_params& params = {},
                                        operational_domain_stats*        stats  = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (params.sweep_dimensions.size() != 2 && params.sweep_dimensions.size() != 3)
     {
         throw std::invalid_argument("Flood fill is only applicable to 2 or 3 dimensions");
@@ -2232,15 +2207,12 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
  * @throws std::invalid_argument if the given sweep parameters are invalid.
  */
 template <typename Lyt, typename TT>
+    requires is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt> && kitty::is_truth_table<TT>::value
 [[nodiscard]] critical_temperature_domain
 critical_temperature_domain_contour_tracing(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples,
                                             const operational_domain_params& params = {},
                                             operational_domain_stats*        stats  = nullptr)
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
-
     if (params.sweep_dimensions.size() != 2)
     {
         throw std::invalid_argument("Contour tracing is only applicable to exactly 2 dimensions");
