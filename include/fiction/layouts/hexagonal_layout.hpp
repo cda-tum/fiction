@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <memory>
@@ -149,6 +150,10 @@ struct even_column_hex : flat_top_hex
  */
 template <typename OffsetCoordinateType = offset::ucoord_t, typename HexagonalCoordinateSystem = even_row_hex,
           typename CubeCoordinateType = cube::coord_t>
+    requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
+             std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
+             std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
+             std::same_as<HexagonalCoordinateSystem, even_column_hex>
 class hexagonal_layout
 {
   public:
@@ -182,30 +187,14 @@ class hexagonal_layout
      *
      * @param ar Highest possible position in the layout.
      */
-    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)}
-    {
-        // do not convert this `static_assert` disjunction, or its twin in the constructor below, into a `requires`
-        // clause: the pyfiction docstring generator parses this header as C++11 (see the note on
-        // `manhattan_distance` in `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that
-        // drops the Doxygen comments of the ~60 member functions declared after these constructors, breaking the
-        // fully bound `hexagonal_layout` bindings' ReadTheDocs build
-        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
-                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
-                      "odd_column_hex, even_column_hex");
-    }
-
-    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)}
-    {
-        static_assert(std::is_same_v<HexagonalCoordinateSystem, odd_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_row_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, odd_column_hex> ||
-                          std::is_same_v<HexagonalCoordinateSystem, even_column_hex>,
-                      "HexagonalCoordinateSystem has to be one of the following: odd_row_hex, even_row_hex, "
-                      "odd_column_hex, even_column_hex");
-    }
+    explicit hexagonal_layout(const aspect_ratio& ar = {}) : strg{std::make_shared<hexagonal_layout_storage>(ar)} {}
+    /**
+     * Constructor that takes ownership of an existing storage, so that the new layout shares the coordinates of the
+     * one the storage came from.
+     *
+     * @param s Storage to adopt.
+     */
+    explicit hexagonal_layout(std::shared_ptr<hexagonal_layout_storage> s) : strg{std::move(s)} {}
     /**
      * Clones the layout returning a deep copy.
      *
