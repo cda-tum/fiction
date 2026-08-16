@@ -141,12 +141,22 @@ class TestOperationalDomain(unittest.TestCase):
 
         # 3 x 3 x 2 parameter points
         stats_grid = operational_domain_stats()
-        operational_domain_grid_search(lyt, [create_id_tt()], params, stats_grid)
+        grid_domain = operational_domain_grid_search(lyt, [create_id_tt()], params, stats_grid)
         self.assertEqual(stats_grid.num_evaluated_parameter_combinations, 18)
+        self.assertEqual(len(grid_domain), 18)
 
-        # flood fill and contour tracing both accept three dimensions
-        operational_domain_flood_fill(lyt, [create_id_tt()], 4, params)
-        operational_domain_contour_tracing(lyt, [create_id_tt()], 4, params)
+        # flood fill and contour tracing both accept three dimensions. They sample the same grid, so every point they
+        # report must carry the status the exhaustive search determined for it
+        flood_domain = operational_domain_flood_fill(lyt, [create_id_tt()], 4, params)
+        contour_domain = operational_domain_contour_tracing(lyt, [create_id_tt()], 4, params)
+
+        for domain in (flood_domain, contour_domain):
+            self.assertGreater(len(domain), 0)
+            self.assertLessEqual(len(domain), 18)
+
+            for point in domain:
+                self.assertIn(point, grid_domain)
+                self.assertEqual(domain[point], grid_domain[point])
 
     def test_operational_domain_sketch_preconditions(self) -> None:
         """The sketch is rejected when it cannot filter anything."""
