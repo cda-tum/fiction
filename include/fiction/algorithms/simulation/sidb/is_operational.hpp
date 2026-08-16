@@ -269,13 +269,7 @@ class is_operational_impl
             number_of_output_wires{output_bdl_wires.size()},
             number_of_input_wires{input_bdl_wires.size()},
             canvas_lyt{c_lyt}
-    {
-        if (params.op_condition == is_operational_params::operational_condition::TOLERATE_KINKS)
-        {
-            output_bdl_pairs = detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
-                                                params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
-        }
-    }
+    {}
 
     /**
      * Constructor to initialize the algorithm with a layout and parameters.
@@ -391,22 +385,14 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
-        if (!canvas_lyt.is_empty())
+        if (canvas_filtering_applicable)
         {
-            if ((parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS &&
-                 parameters.strategy_to_analyze_operational_status ==
-                     is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION) ||
-                (parameters.strategy_to_analyze_operational_status ==
-                     is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-                 parameters.op_condition == is_operational_params::operational_condition::REJECT_KINKS))
+            // number of different input combinations
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
-                // number of different input combinations
-                for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
+                if (is_layout_invalid(i))
                 {
-                    if (is_layout_invalid(i))
-                    {
-                        return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
-                    }
+                    return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
                 }
             }
         }
@@ -414,7 +400,7 @@ class is_operational_impl
         // This is only an approximation.
         if (parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
-            !canvas_lyt.is_empty())
+            canvas_filtering_applicable)
         {
             return {operational_status::OPERATIONAL, non_operationality_reason::NONE};
         }
@@ -423,7 +409,7 @@ class is_operational_impl
                 is_operational_params::operational_analysis_strategy::SIMULATION_ONLY ||
             parameters.strategy_to_analyze_operational_status ==
                 is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION ||
-            canvas_lyt.is_empty())
+            !canvas_filtering_applicable)
         {
             // number of different input combinations
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
@@ -630,7 +616,7 @@ class is_operational_impl
      * otherwise.
      */
     [[nodiscard]] std::optional<double>
-    is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) const noexcept
+    is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) noexcept
     {
         assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
@@ -638,23 +624,21 @@ class is_operational_impl
 
         uint64_t canvas_charge_index = 0;
 
-        charge_distribution_surface<Lyt> cds_canvas_copy{canvas_lyt};
-        cds_canvas_copy.assign_base_number(2);
-        cds_canvas_copy.assign_charge_index(canvas_charge_index);
-        cds_canvas_copy.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
-        cds_layout.assign_dependent_cell(cds_canvas_copy.get_sidb_order().front());
+        auto& cds_canvas = canvas_charge_distribution();
+        cds_canvas.assign_charge_index(canvas_charge_index);
+        cds_layout.assign_dependent_cell(cds_canvas.get_sidb_order().front());
 
-        const auto max_index = cds_canvas_copy.get_max_charge_index();
+        const auto max_index = cds_canvas.get_max_charge_index();
 
-        assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas_copy.num_cells() - 1) - 1) &&
+        assert(max_index == static_cast<uint64_t>(std::pow(2, cds_canvas.num_cells() - 1) - 1) &&
                "The maximum charge index is incorrect. Probably, the dependent cell is not set.");
 
         while (canvas_charge_index <= max_index)
         {
-            cds_canvas_copy.foreach_cell(
-                [&cds_layout, &cds_canvas_copy](const auto& c)
+            cds_canvas.foreach_cell(
+                [&cds_layout, &cds_canvas](const auto& c)
                 {
-                    cds_layout.assign_charge_state(c, cds_canvas_copy.get_charge_state(c),
+                    cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
                 });
             cds_layout.update_after_charge_change(dependent_cell_mode::VARIABLE,
@@ -675,8 +659,7 @@ class is_operational_impl
             }
 
             canvas_charge_index++;
-            cds_canvas_copy.assign_charge_index(canvas_charge_index,
-                                                charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
+            cds_canvas.assign_charge_index(canvas_charge_index, charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
         }
 
         if (std::isinf(min_energy))
@@ -874,12 +857,15 @@ class is_operational_impl
     [[nodiscard]] bool is_io_signal_unstable(charge_distribution_surface<Lyt>& cds_layout,
                                              const uint64_t max_input_pattern_index, const uint64_t input_pattern,
                                              const uint64_t logical_correct_output_pattern,
-                                             const double   minimal_energy_of_physically_valid_layout) const noexcept
+                                             const double   minimal_energy_of_physically_valid_layout) noexcept
     {
-        for (auto kink_states_input = 0u; kink_states_input < max_input_pattern_index; ++kink_states_input)
+        // the number of output patterns is fixed for this layout, so it is determined once instead of on every
+        // iteration of the inner loop
+        const uint64_t max_output_pattern_index{uint64_t{1} << output_bdl_wires.size()};
+
+        for (uint64_t kink_states_input = 0; kink_states_input < max_input_pattern_index; ++kink_states_input)
         {
-            for (auto output_wire_index = 0u; output_wire_index < std::pow(2, output_bdl_wires.size());
-                 output_wire_index++)
+            for (uint64_t output_wire_index = 0; output_wire_index < max_output_pattern_index; ++output_wire_index)
             {
                 if (output_wire_index == logical_correct_output_pattern && kink_states_input == input_pattern)
                 {
@@ -951,10 +937,51 @@ class is_operational_impl
      */
     Lyt canvas_lyt{};
     /**
+     * Whether the canvas-based filtering steps can be applied. They need a canvas to enumerate, they are skipped by
+     * `SIMULATION_ONLY`, and they are only defined for `REJECT_KINKS`.
+     *
+     * This is the single place the condition is decided. The entry points build a canvas whenever the layout has
+     * `LOGIC` cells and leave it to `run()` to determine whether the filtering applies, so that the same layout and the
+     * same parameters take the same path regardless of which overload the caller reached.
+     */
+    const bool canvas_filtering_applicable{!canvas_lyt.is_empty() &&
+                                           parameters.strategy_to_analyze_operational_status !=
+                                               is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
+                                           parameters.op_condition ==
+                                               is_operational_params::operational_condition::REJECT_KINKS};
+    /**
      * Pre-generated layouts, one per input pattern, or `nullptr` if the BDL input iterator is used instead. Not owned
      * by this object and only ever read.
      */
     const std::vector<Lyt>* input_pattern_layouts{nullptr};
+    /**
+     * The charge distribution surface of the canvas layout, enumerated by `is_physical_validity_feasible`. It is built
+     * on first use and reused afterwards, since the canvas does not change over this object's lifetime. Empty until
+     * then, so that the strategies that never inspect the canvas do not pay for it.
+     */
+    std::optional<charge_distribution_surface<Lyt>> canvas_cds{};
+
+    /**
+     * Returns the charge distribution surface of the canvas layout, constructing it on first use.
+     *
+     * Constructing it means computing the potential matrix over the canvas SiDBs, which
+     * `is_physical_validity_feasible` would otherwise repeat on each of its calls even though the canvas is fixed. The
+     * caller is responsible for resetting the charge index; the base number and the dependent cell are set here and
+     * stay valid.
+     *
+     * @return The canvas charge distribution surface.
+     */
+    [[nodiscard]] charge_distribution_surface<Lyt>& canvas_charge_distribution() noexcept
+    {
+        if (!canvas_cds.has_value())
+        {
+            canvas_cds.emplace(canvas_lyt);
+            canvas_cds->assign_base_number(2);
+            canvas_cds->assign_dependent_cell(canvas_cds->get_sidb_order().front());
+        }
+
+        return *canvas_cds;
+    }
 
     /**
      * Returns the layout with the given input pattern applied.
@@ -1177,11 +1204,9 @@ is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational
 
     const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
-    // if there are logic cells, we can design the canvas layout consisting of all logic cells
-    if (!logic_cells.empty() &&
-        params.strategy_to_analyze_operational_status !=
-            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY &&
-        params.op_condition == is_operational_params::operational_condition::REJECT_KINKS)
+    // if there are logic cells, we can design the canvas layout consisting of all logic cells. Whether the canvas is
+    // actually used is decided by `is_operational_impl::run()`, so that every entry point takes the same path
+    if (!logic_cells.empty())
     {
         Lyt canvas_lyt{};
 

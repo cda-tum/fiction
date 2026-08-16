@@ -776,3 +776,76 @@ TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]
                         std::invalid_argument);
     }
 }
+
+TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-operational]")
+{
+    // a layout with canvas SiDBs, so that both entry points can build a canvas layout from its `LOGIC` cells
+    sidb_cell_clk_lyt_siqad lyt{};
+
+    // input wires
+    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+
+    lyt.assign_cell_type({6, 2, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({14, 5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    // canvas SiDBs
+    lyt.assign_cell_type({11, 7, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
+    lyt.assign_cell_type({13, 13, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
+
+    // output wires
+    lyt.assign_cell_type({14, 15, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 17, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+
+    lyt.assign_cell_type({2, 19, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+
+    const auto spec = std::vector<tt>{create_id_tt()};
+
+    for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
+                                 is_operational_params::operational_condition::REJECT_KINKS})
+    {
+        for (const auto strategy : {is_operational_params::operational_analysis_strategy::SIMULATION_ONLY,
+                                    is_operational_params::operational_analysis_strategy::FILTER_ONLY,
+                                    is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION})
+        {
+            is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2}};
+            params.op_condition                           = condition;
+            params.strategy_to_analyze_operational_status = strategy;
+
+            const auto input_wires =
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+            const auto output_wires =
+                detect_bdl_wires(lyt, params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
+
+            const auto [status_without_wires, calls_without_wires] = is_operational(lyt, spec, params);
+            const auto [status_with_wires, calls_with_wires] =
+                is_operational(lyt, spec, params, input_wires, output_wires);
+
+            // both entry points must take the same path, so both the verdict and the number of simulator
+            // invocations must agree; the invocation count is what distinguishes the filtering path from the
+            // simulation path
+            CHECK(status_with_wires == status_without_wires);
+            CHECK(calls_with_wires == calls_without_wires);
+
+            // this wire cannot be pruned, so `FILTER_ONLY` combined with `REJECT_KINKS` reports it operational by
+            // approximation. Every other combination reaches the simulation and finds it non-operational. Before the
+            // canvas rule was unified, `FILTER_ONLY` combined with `TOLERATE_KINKS` also reported it operational
+            // through the overload taking pre-detected wires: the canvas was built, so the `FILTER_ONLY` early return
+            // fired, but the filtering steps that would have populated it never ran, because they require
+            // `REJECT_KINKS`
+            const auto expected_status =
+                (strategy == is_operational_params::operational_analysis_strategy::FILTER_ONLY &&
+                 condition == is_operational_params::operational_condition::REJECT_KINKS) ?
+                    operational_status::OPERATIONAL :
+                    operational_status::NON_OPERATIONAL;
+
+            CHECK(status_with_wires == expected_status);
+        }
+    }
+}

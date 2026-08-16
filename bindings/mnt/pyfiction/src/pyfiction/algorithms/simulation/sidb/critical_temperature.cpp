@@ -2,8 +2,12 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
+#include <fiction/traits.hpp>
 
 #include <sstream>
+#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -26,9 +30,22 @@ void critical_temperature_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("critical_temperature_gate_based", &fiction::critical_temperature_gate_based<Lyt, py_tt>, py::arg("lyt"),
-          py::arg("spec"), py::arg("params") = fiction::critical_temperature_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_critical_temperature_gate_based));
+    m.def(
+        "critical_temperature_gate_based",
+        py::overload_cast<const Lyt&, const std::vector<py_tt>&, const fiction::critical_temperature_params&,
+                          fiction::critical_temperature_stats*>(&fiction::critical_temperature_gate_based<Lyt, py_tt>),
+        py::arg("lyt"), py::arg("spec"), py::arg("params") = fiction::critical_temperature_params{},
+        py::arg("stats") = nullptr, DOC(fiction_critical_temperature_gate_based));
+
+    m.def("critical_temperature_gate_based",
+          py::overload_cast<
+              const std::vector<Lyt>&, const std::vector<py_tt>&, const fiction::critical_temperature_params&,
+              const std::vector<fiction::bdl_pair<fiction::cell<Lyt>>>&, const std::vector<fiction::bdl_wire<Lyt>>&,
+              const std::vector<fiction::bdl_wire<Lyt>>&, fiction::critical_temperature_stats*>(
+              &fiction::critical_temperature_gate_based<Lyt, py_tt>),
+          py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("output_bdl_pairs"),
+          py::arg("input_bdl_wires"), py::arg("output_bdl_wires"), py::arg("stats") = nullptr,
+          DOC(fiction_critical_temperature_gate_based_2));
 
     m.def("critical_temperature_non_gate_based", &fiction::critical_temperature_non_gate_based<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::critical_temperature_params{}, py::arg("stats") = nullptr,

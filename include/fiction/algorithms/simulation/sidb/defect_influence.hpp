@@ -71,6 +71,15 @@ struct defect_influence_params
      * Definition of defect influence.
      */
     influence_definition influence_def{influence_definition::OPERATIONALITY_CHANGE};
+    /**
+     * Number of worker threads to distribute the defect positions over. Defaults to the number of hardware threads,
+     * which is the behavior this setting replaces, and to `1` where that count is not detectable. Values below `1`
+     * are treated as `1`.
+     *
+     * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows a defect influence
+     * computation to leave cores free for other work.
+     */
+    std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
 };
 
 /**
@@ -159,7 +168,9 @@ class defect_influence_impl
         const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
         const std::size_t     num_positions                 = all_possible_defect_positions.size();
 
-        const auto number_of_threads = std::min(num_threads, num_positions);
+        // floored at `1` so that the slice arithmetic below stays well-defined when there is nothing to distribute;
+        // the `start >= end` guard in the loop then keeps the worker from being launched
+        const auto number_of_threads = std::max(std::min(num_threads, num_positions), std::size_t{1});
 
         // calculate the size of each slice
         const auto slice_size = (num_positions + number_of_threads - 1) / number_of_threads;
@@ -230,7 +241,9 @@ class defect_influence_impl
         // Determine how many positions to sample (use the smaller of samples or the total number of positions)
         const auto min_iterations = std::min(all_possible_defect_positions.size(), samples);
 
-        const auto number_of_threads = std::min(num_threads, min_iterations);
+        // floored at `1` so that the slice arithmetic below stays well-defined when there is nothing to distribute;
+        // the `start >= end` guard in the loop then keeps the worker from being launched
+        const auto number_of_threads = std::max(std::min(num_threads, min_iterations), std::size_t{1});
 
         // calculate the size of each slice
         const auto slice_size = (min_iterations + number_of_threads - 1) / number_of_threads;
@@ -463,9 +476,9 @@ class defect_influence_impl
      */
     std::atomic<std::size_t> num_evaluated_defect_positions{0};
     /**
-     * Number of available hardware threads.
+     * Number of worker threads to distribute the defect positions over, taken from the parameters and floored at `1`.
      */
-    const std::size_t num_threads{std::thread::hardware_concurrency()};
+    const std::size_t num_threads{std::max(params.number_of_threads, std::size_t{1})};
     /**
      * This function determines the northwest and southeast cells based on the layout and the additional scan
      * area specified.

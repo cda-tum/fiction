@@ -89,6 +89,7 @@ class bdl_input_iterator
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{detect_bdl_wires<Lyt>(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT)},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
+            upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
             params{ps}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -112,6 +113,7 @@ class bdl_input_iterator
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{input_wires},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
+            upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
             params{ps}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -375,6 +377,13 @@ class bdl_input_iterator
      */
     const std::vector<bdl_pair<cell<Lyt>>> last_bdl_for_each_wire;
     /**
+     * For each input BDL pair, whether its upper dot is closer to the end of its wire than its lower dot.
+     *
+     * This only depends on `input_pairs` and `last_bdl_for_each_wire`, both of which are fixed for this object's
+     * lifetime, so it is determined once here instead of on every increment in `set_all_inputs`.
+     */
+    const std::vector<bool> upper_input_closer_to_wire_end;
+    /**
      * The current input index. There are \f$2^n\f$ possible input states for an \f$n\f$-input BDL layout.
      */
     uint64_t current_input_index{0ull};
@@ -430,6 +439,38 @@ class bdl_input_iterator
         return end_bdls;
     }
     /**
+     * Determines, for each input BDL pair, whether its upper dot is closer to the end of its wire than its lower dot.
+     *
+     * `set_all_inputs` needs only this comparison, not the distances themselves, and both operands are fixed for this
+     * object's lifetime. Evaluating it once here keeps the two `sidb_nm_distance` calls per input pair out of every
+     * increment.
+     *
+     * @note Assumes that `input_pairs` and `last_bdl_for_each_wire` are already initialized.
+     *
+     * @return One flag per input BDL pair, indexed like `input_pairs`.
+     */
+    [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const noexcept
+    {
+        std::vector<bool> upper_is_closer{};
+        upper_is_closer.reserve(num_inputs);
+
+        for (auto i = 0u; i < num_inputs; ++i)
+        {
+            const auto& input_i = input_pairs[i];
+
+            // both distances are measured against the upper dot of the wire's last BDL pair
+            const auto distance_between_end_bdl_and_upper_input =
+                sidb_nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
+            const auto distance_between_end_bdl_and_lower_input =
+                sidb_nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
+
+            upper_is_closer.push_back(distance_between_end_bdl_and_upper_input <
+                                      distance_between_end_bdl_and_lower_input);
+        }
+
+        return upper_is_closer;
+    }
+    /**
      * Sets all input cells of the layout according to the current input index. The input index is interpreted as a
      * binary number, where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit
      * is `1`, the lower BDL dot is set and the upper BDL dot removed. If the bit is `0`, the upper BDL dot is removed
@@ -445,12 +486,7 @@ class bdl_input_iterator
 
             if ((current_input_index & (uint64_t{1ull} << (num_inputs - 1 - i))) != 0ull)
             {
-                const auto distance_between_end_bdl_and_upper_input =
-                    sidb_nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
-                const auto distance_between_end_bdl_and_lower_input =
-                    sidb_nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
-
-                if (distance_between_end_bdl_and_upper_input < distance_between_end_bdl_and_lower_input)
+                if (upper_input_closer_to_wire_end[i])
                 {
                     layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::EMPTY);
                     layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::INPUT);
@@ -467,12 +503,7 @@ class bdl_input_iterator
                 if (params.input_bdl_config ==
                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
                 {
-                    const auto distance_between_end_bdl_and_upper_input =
-                        sidb_nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
-                    const auto distance_between_end_bdl_and_lower_input =
-                        sidb_nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
-
-                    if (distance_between_end_bdl_and_upper_input < distance_between_end_bdl_and_lower_input)
+                    if (upper_input_closer_to_wire_end[i])
                     {
                         layout.assign_cell_type(input_i.lower, technology<Lyt>::cell_type::INPUT);
                         layout.assign_cell_type(input_i.upper, technology<Lyt>::cell_type::EMPTY);

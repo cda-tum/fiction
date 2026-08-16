@@ -56,6 +56,42 @@ class TestOperationalDomain(unittest.TestCase):
         operational_domain_grid_search(lyt, [create_or_tt()], params, stats_grid)
         self.assertEqual(stats_grid.num_operational_parameter_combinations, 10201)
 
+    def test_number_of_threads(self) -> None:
+        """The thread count is configurable and does not change the resulting operational domain."""
+        lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
+
+        params = operational_domain_params()
+        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+        params.operational_params.simulation_parameters.base = 2
+        params.operational_params.simulation_parameters.mu_minus = -0.28
+        params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5
+        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+
+        params.sweep_dimensions = [
+            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.70, 5.80, 0.01),
+            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 3.00, 3.10, 0.01),
+        ]
+
+        # defaults to the number of hardware threads
+        self.assertGreaterEqual(params.number_of_threads, 1)
+
+        stats_default = operational_domain_stats()
+        operational_domain_grid_search(lyt, [create_or_tt()], params, stats_default)
+
+        params.number_of_threads = 1
+
+        stats_single = operational_domain_stats()
+        operational_domain_grid_search(lyt, [create_or_tt()], params, stats_single)
+
+        self.assertEqual(
+            stats_single.num_operational_parameter_combinations,
+            stats_default.num_operational_parameter_combinations,
+        )
+        self.assertEqual(
+            stats_single.num_evaluated_parameter_combinations,
+            stats_default.num_evaluated_parameter_combinations,
+        )
+
     def test_operational_domain_XOR_gate_100_lattice(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")
 

@@ -223,6 +223,49 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     CHECK(lyt_0_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
 }
 
+TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
+{
+    // the same wire as in "BDL wire iteration", but with the input pair at the right end and the wire running to the
+    // left, so that the dot closer to the end of the wire is the opposite one of the two. Under
+    // `PERTURBER_DISTANCE_ENCODED`, an input of `1` places the perturber closer to the wire, so both orientations
+    // together cover both outcomes of the distance comparison
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{20, 0}, "mirrored BDL wire"};
+
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+
+    REQUIRE(bii.num_input_pairs() == 1);
+
+    // input state 0 keeps the perturber that is farther away from the wire, which is the right-hand dot here
+    const auto& lyt_0 = *bii;
+
+    CHECK(lyt_0.get_cell_type({20, 0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(lyt_0.get_cell_type({18, 0, 0}) == sidb_technology::cell_type::EMPTY);
+
+    ++bii;
+
+    // input state 1 keeps the perturber that is closer to the wire, which is the left-hand dot here
+    const auto& lyt_1 = *bii;
+
+    CHECK(lyt_1.get_cell_type({20, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_1.get_cell_type({18, 0, 0}) == sidb_technology::cell_type::INPUT);
+}
+
 TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 {
     const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
