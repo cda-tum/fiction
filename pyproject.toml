@@ -75,37 +75,24 @@ install.components = ["fiction_Python"]
 
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 
+# The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
+# `cmake/`. Every pattern is anchored to the repository root: `**/include` also matches
+# `bindings/mnt/pyfiction/include/`, and `**.hpp` matches the library itself, which is how the
+# published sdist came to ship no C++ sources at all. `[tool.check-sdist]` below mirrors this
+# list and fails when the two drift apart.
 sdist.exclude = [
-    "**/.git",
-    "**/.github",
-    "**/app",
-    "**/apps",
-    "**/bib",
-    "**/css",
-    "**/cli",
-    "**/html",
-    "**/doc",
-    "**/docs",
-    "**/benchmark",
-    "**/benchmarks",
-    "**/experiment",
-    "**/experiments",
-    "**/examples",
-    "**/include",
-    "**/cmake-build-**",
-    "**/plots",
-    "**/test",
-    "**/tests",
-    "**/nauty",
-    "**.cpp",
-    "**.hpp",
-    "**.pdf",
-    "**.ans",
-    "**.out",
-    "**.log",
-    "**.xml",
-    "**CMakeList.txt",
-    "**__pycache__"
+    "/.github",
+    "/benchmarks",
+    "/bib",
+    "/cli",
+    "/docs",
+    "/experiments",
+    "/test",
+    # the wheel does not ship the Python suite either; `[tool.cibuildwheel] test-sources` copies
+    # it in from the source tree
+    "/bindings/mnt/pyfiction/test",
+    "**/cmake-build-*",
+    "**/__pycache__"
 ]
 
 [tool.scikit-build.cmake.define]
