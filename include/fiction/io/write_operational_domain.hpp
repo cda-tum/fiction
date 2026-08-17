@@ -110,7 +110,8 @@ namespace detail
  * @param os The output stream where the CSV representation of the operational domain is written to.
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
- * @throws std::invalid_argument if the number of dimensions in the operational domain is 0 or greater than 3.
+ * @throws std::invalid_argument if the number of dimensions in the operational domain is 0 or greater than 3. Three is
+ * the number of enumerators of `sweep_parameter`, so a fourth dimension could only repeat one of them.
  */
 template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, std::ostream& os,
@@ -120,6 +121,11 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
 
     const auto num_dimensions = opdom.get_number_of_dimensions();
 
+    // the CSV format writes one sweep column per dimension, and `sweep_parameter` has exactly three enumerators, each
+    // mapping to a distinct field of `sidb_simulation_parameters`. A fourth dimension could therefore only repeat a
+    // parameter, which `set_dimension_value` would overwrite, leaving that axis without an effect on the simulation.
+    // The cap is that enum, not this writer: should `sweep_parameter` ever gain a fourth sweepable parameter, the
+    // branches below are what needs extending
     if (num_dimensions == 0 || num_dimensions > 3)
     {
         throw std::invalid_argument("unsupported number of dimensions in the given operational domain");
@@ -138,17 +144,12 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                               detail::sweep_parameter_to_string(opdom.get_dimension(1)), "operational status",
                               "critical temperature");
         }
-        else if (num_dimensions == 3)  // num_dimensions == 3
+        else  // num_dimensions == 3
         {
             writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
                               detail::sweep_parameter_to_string(opdom.get_dimension(1)),
                               detail::sweep_parameter_to_string(opdom.get_dimension(2)), "operational status",
                               "critical temperature");
-        }
-
-        else
-        {
-            throw std::invalid_argument(fmt::format("Unsupported number of dimensions: {}", num_dimensions));
         }
 
         opdom.for_each(
@@ -190,16 +191,11 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
             writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
                               detail::sweep_parameter_to_string(opdom.get_dimension(1)), "operational status");
         }
-        else if (num_dimensions == 3)  // num_dimensions == 3
+        else  // num_dimensions == 3
         {
             writer.write_line(detail::sweep_parameter_to_string(opdom.get_dimension(0)),
                               detail::sweep_parameter_to_string(opdom.get_dimension(1)),
                               detail::sweep_parameter_to_string(opdom.get_dimension(2)), "operational status");
-        }
-
-        else
-        {
-            throw std::invalid_argument(fmt::format("Unsupported number of dimensions: {}", num_dimensions));
         }
 
         opdom.for_each(
@@ -257,6 +253,8 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
  * @param params The parameters used for writing, including the operational and non-operational tags. Defaults to an
  * empty `write_operational_domain_params` object, which provides standard tags.
  * @throws std::ofstream::failure if the file could not be opened.
+ * @throws std::invalid_argument if the number of dimensions in the operational domain is 0 or greater than 3. Three is
+ * the number of enumerators of `sweep_parameter`, so a fourth dimension could only repeat one of them.
  */
 template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, const std::string_view& filename,
