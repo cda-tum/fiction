@@ -77,3 +77,10 @@ venv/
 
 # AI agent scratch files (plans, tech-debt notes, review write-ups) - never tracked
 .ai/
+
+# Tool-specific agent state and instruction-file aliases. The tracked instructions are
+# AGENTS.md; symlink these to it locally if your tool expects a different name.
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.local.md

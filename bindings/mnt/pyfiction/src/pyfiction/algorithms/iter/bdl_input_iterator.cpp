@@ -2,11 +2,13 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/iter/bdl_input_iterator.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 
 #include <fmt/format.h>
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
@@ -98,6 +100,18 @@ void bdl_input_iterator_impl(nanobind::module_& m, const std::string& lattice)
             "iterator.")
 
         ;
+
+    m.def("generate_bdl_input_pattern_layouts",
+          py::overload_cast<const Lyt&, const fiction::bdl_input_iterator_params&>(
+              &fiction::generate_bdl_input_pattern_layouts<Lyt>),
+          py::arg("lyt"), py::arg("params") = fiction::bdl_input_iterator_params{},
+          DOC(fiction_generate_bdl_input_pattern_layouts));
+
+    m.def("generate_bdl_input_pattern_layouts",
+          py::overload_cast<const Lyt&, const fiction::bdl_input_iterator_params&,
+                            const std::vector<fiction::bdl_wire<Lyt>>&>(
+              &fiction::generate_bdl_input_pattern_layouts<Lyt>),
+          py::arg("lyt"), py::arg("params"), py::arg("input_wires"), DOC(fiction_generate_bdl_input_pattern_layouts_2));
 }
 
 }  // namespace detail

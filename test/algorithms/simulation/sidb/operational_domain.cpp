@@ -11,6 +11,7 @@
 
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
+#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/cell_technologies.hpp>
@@ -24,6 +25,7 @@
 #include <functional>
 #include <optional>
 #include <stdexcept>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -128,6 +130,35 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     SECTION("Structured bindings - invalid index")
     {
         REQUIRE_THROWS_AS(p1.get<3>(), std::out_of_range);
+    }
+
+    SECTION("Equal parameter points hash equally")
+    {
+        // every hash-based container relies on this invariant. Comparing with a tolerance does not establish it on
+        // its own, since two values within the tolerance can still fall either side of a cell boundary
+        const std::hash<parameter_point> hash{};
+
+        REQUIRE(p1 == p3);
+        CHECK(hash(p1) == hash(p3));
+        CHECK(hash(p1) == hash(p2));
+    }
+
+    SECTION("Negative parameter values are hashable")
+    {
+        // a `MU_MINUS` sweep produces negative values throughout. Casting them straight to an unsigned type is
+        // undefined behavior
+        const parameter_point negative({-0.32, -0.5, -1.0});
+
+        const std::hash<parameter_point> hash{};
+
+        CHECK(hash(negative) == hash(parameter_point{{-0.32, -0.5, -1.0}}));
+        CHECK(hash(negative) != hash(parameter_point{{0.32, 0.5, 1.0}}));
+
+        // and they must survive a round trip through a hash-based container
+        const std::unordered_set<parameter_point> points{negative, parameter_point{{-0.28, -0.5, -1.0}}};
+
+        CHECK(points.size() == 2);
+        CHECK(points.count(negative) == 1);
     }
 }
 
@@ -324,6 +355,74 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
         operational_domain_grid_search(lyt, std::vector{create_or_tt()}, op_domain_params, &op_domain_stats);
 
     check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
+}
+
+TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]")
+{
+    // the parallel helpers slice their work across `min(number_of_threads, work_size)` threads and derive the slice
+    // size by dividing by that count, which is zero when there is no work at all. `samples = 0` reaches it through
+    // public API
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions                         = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+
+    operational_domain_stats op_domain_stats{};
+
+    const auto op_domain =
+        operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 0, op_domain_params, &op_domain_stats);
+
+    CHECK(op_domain.empty());
+    CHECK(op_domain_stats.num_evaluated_parameter_combinations == 0);
+}
+
+TEST_CASE("Pinning the thread count does not change the operational domain", "[operational-domain]")
+{
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions                         = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+
+    operational_domain_stats default_stats{};
+
+    const auto default_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &default_stats);
+
+    // one worker thread must produce exactly the same domain as the hardware-thread default
+    op_domain_params.number_of_threads = 1;
+
+    operational_domain_stats single_threaded_stats{};
+
+    const auto single_threaded_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &single_threaded_stats);
+
+    CHECK(single_threaded_domain.size() == default_domain.size());
+    CHECK(single_threaded_stats.num_simulator_invocations == default_stats.num_simulator_invocations);
+    CHECK(single_threaded_stats.num_evaluated_parameter_combinations ==
+          default_stats.num_evaluated_parameter_combinations);
+    CHECK(single_threaded_stats.num_operational_parameter_combinations ==
+          default_stats.num_operational_parameter_combinations);
+    CHECK(single_threaded_stats.num_non_operational_parameter_combinations ==
+          default_stats.num_non_operational_parameter_combinations);
+
+    // a thread count of zero is treated as one rather than dividing by zero
+    op_domain_params.number_of_threads = 0;
+
+    operational_domain_stats zero_stats{};
+
+    const auto zero_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &zero_stats);
+
+    CHECK(zero_domain.size() == default_domain.size());
+    CHECK(zero_stats.num_evaluated_parameter_combinations == default_stats.num_evaluated_parameter_combinations);
 }
 
 // NOLINTNEXTLINE(*-function-size)

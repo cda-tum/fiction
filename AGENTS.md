@@ -1,62 +1,127 @@
 # AGENTS.md
 
-You are an expert software architect and engineer specializing in **C++20**, **Python**, and **Field-coupled Nanocomputing (FCN)** design automation. You are working on the `fiction` project.
+_fiction_ is a C++20 header-only library with Python bindings for Field-coupled
+Nanocomputing (FCN) design automation. This file holds the rules that apply everywhere.
+Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 
-## Persona
+## Working Principles
 
-- **Role**: Core developer and maintainer.
-- **Expertise**:
-  - Modern C++ (C++20 standard).
-  - Python bindings using `pybind11`.
-  - CMake build systems.
-  - FCN technologies (QCA, iNML, SiDB).
-  - Testing via `Catch2`.
-  - CI/CD via GitHub Actions.
-  - Documentation via Doxygen.
-- **Goal**: Write high-performance, safe, readable, and maintainable code that adheres to strict project standards.
-- **Architectural Oversight**:
-  - Always prioritize the architecture and maintainability of the project as a whole.
-  - **Warn** when you spot sub-par design decisions, even in existing code.
-  - Adhere to modern best practices across the entire tech stack (C++, Python, CMake).
-  - Proactively suggest new libraries, corrections to library usage, or performance/maintainability improvements.
+- Prefer the smallest change that fully solves the task. Cleanup, reformatting, and dependency
+  bumps in code the task does not otherwise touch belong in their own pull request.
+- Do not add an abstraction, a template parameter, or a configuration option until a
+  second concrete caller needs it. _fiction_ is header-only and template-heavy, so every
+  added template parameter costs compile time and instantiation surface in every
+  translation unit that includes the header.
+- Prefer an existing facility from the STL, `mockturtle`, or `kitty` over a new
+  implementation. If you add a helper that duplicates one of them, say in the pull request
+  description why the existing one does not fit.
+- Test the documented contract, not provisional implementation choices. A test that pins
+  down an internal detail blocks the next refactor without protecting a user.
+- **Work in your own git worktree, always.** Create it with
+  `git worktree add .ai/worktrees/<task> -b <branch>` and work there, never directly in the
+  primary checkout. Two agents that share a working directory overwrite each other's
+  uncommitted edits and switch the branch under each other, and neither notices. `.ai/` is
+  gitignored, so the worktree stays out of `git status`.
+- **Configure one build preset per worktree, and tear the worktree down when you are done.**
+  A new worktree adds about 45 MB of source files and shares the existing `.git`. Each
+  configured build tree adds another 1 to 4 GB. The build trees are what make an abandoned
+  worktree expensive. Use a preset from `CMakePresets.json` rather than a hand-rolled `-B`
+  directory, so each build tree has a recognizable `build-<preset>` name. When the task is
+  done, run `git worktree remove <path>`, which deletes the build trees with it, then run
+  `git worktree prune`.
+- Inspect the working tree before editing, and never revert or overwrite a change you did
+  not make. If you find edits you did not write, stop and ask instead of reverting them.
+- Remove scaffolding before handoff: debug output, commented-out code, and `NOLINT`
+  suppressions. A suppression that has to stay names the technical reason in a comment.
+- **Report every streamlining, restructuring, simplification, and optimization you notice
+  while working, including in existing code.** Say what you would do and why. This is part
+  of the task, not a distraction from it: a feature request or a bug fix is the moment
+  someone reads the surrounding code closely, and staying quiet wastes that reading.
+- Implement such a change in the same pull request when it falls inside the code the task
+  already modifies. Beyond that radius, name it in the pull request description and open a
+  separate pull request; do not expand the diff to reach it.
+- Prioritize the architecture and maintainability of the project as a whole.
 
-## Project Knowledge
+## Writing
 
-- **Tech Stack**:
-  - **C++**: C++20 (Strict), `clang-format`, `clang-tidy`.
-  - **Python**: Python 3.10+, `pybind11`, `scikit-build-core`, `nox`, `pytest`.
-  - **Build System**: CMake 3.23+.
-  - **Documentation**: Doxygen.
-  - **Testing**: Catch2, `pytest`.
-  - **CI/CD**: GitHub Actions.
-  - **Libraries**:
-    - `kitty` (truth tables)
-    - `mockturtle` (logic networks)
-    - `alice` (CLI)
-    - `pybind11` (bindings)
-    - `Catch2` (C++ testing)
-    - `nlohmann_json` (JSON)
-    - `fmt` (formatting)
-    - `Z3` (SMT solver, optional)
-    - `ALGLIB` (optimization, optional)
-- **File Structure**:
-  - `include/fiction/`: **Read/Write**. Main library headers.
-  - `test/`: **Read/Write**. C++ unit tests (Catch2).
-  - `bindings/mnt/pyfiction/`: **Read/Write**. Python bindings and tests.
-    Bindings are source-based, one translation unit per binding: each new Python-exposed feature gets its own
-    `.cpp` file under `src/pyfiction/<module>/<submodule>/` that defines a single `void xxx(pybind11::module& m)`
-    binding function; that function is forward-declared and called from the enclosing `register_<name>.cpp`, whose
-    own `register_<name>(m)` is in turn called either by a parent `register_<name>.cpp` or, for top-level modules,
-    directly from `pyfiction.cpp`'s `PYBIND11_MODULE` block. Sources are picked up automatically via
-    `file(GLOB_RECURSE ... src/*.cpp)` in `CMakeLists.txt` — do not add files to a manual list, just wire the new
-    function into its `register_<name>.cpp`. Do **not** add bindings via a monolithic header included into
-    `pyfiction.cpp` (the old pattern); do not introduce new Python-level submodules — the
-    `mnt.pyfiction` namespace shape must stay unchanged. See `docs/getting_started.rst` ("Bindings Architecture")
-    for details.
-  - `cli/`: **Read/Write**. Command-line interface.
-  - `docs/`: **Read/Write**. Documentation (Sphinx/Doxygen).
-  - `vendors/`: **ReadOnly**. Third-party libraries (NEVER modify).
-  - `experiments/`: **Read/Write**. Scientific experiments for reproducibility of papers.
+These rules apply to every piece of prose you produce: commit messages, pull request
+descriptions, review replies, changelog entries, Doxygen comments and Python docstrings,
+code comments, and error messages.
+
+- Cut every word that does not change the meaning. Prefer the short word.
+- Use active voice and name the actor: "`hexagonalization` now rejects empty layouts", not
+  "empty layouts are now rejected".
+- No metaphors, no figures of speech, no filler openers ("Note that", "It is worth
+  mentioning that", "Basically").
+- Keep sentences short and direct, and give each sentence one idea. Prefer an explicit noun
+  to a pronoun whose referent the reader has to reconstruct — "the layout", not "it".
+- Use the established domain term, and use one term per concept. Do not paraphrase `SiDB`,
+  `defect`, `gate library`, or `operational domain` into everyday words, and do not switch
+  between synonyms for variety. Take terminology from the repository's own usage and from
+  established precedent in field-coupled nanocomputing, logic synthesis, and design
+  automation. Where those communities use different words for one concept, explain the
+  mapping once and then pick one.
+- Prefer everyday English to a jargon term where it costs no precision. Where it does cost
+  precision, keep the precise term.
+- Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
+  `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
+- Write for the final design, not for the history of how you got there. Do not narrate
+  review rounds, prompts, former names, or the order in which you did the work. Where a
+  rejected alternative is worth recording because a reader would otherwise retry it, put
+  it in a code comment at the site or in the pull request — not in the changelog.
+- Break any of these rules rather than write something unclear or imprecise.
+
+### Documentation describes the status quo
+
+Documentation, Doxygen comments, and docstrings state what the code does now and why. They
+never describe what it used to do. A reader has no access to the earlier state, so a
+sentence that compares against it carries no information and goes stale the moment someone
+reads it cold.
+
+Do not write "this fixes the way it was before", "unlike the previous implementation",
+"now correctly handles", "changed to return", or "no longer crashes". Describe the behavior
+that exists: "returns `std::nullopt` when the layout is empty".
+
+The same holds for the reason a thing is the way it is. Record it as a present-tense
+constraint at the site, not as a story about a past attempt — "`std::unordered_map`
+is not usable here because the iteration order feeds the gate ordering", not "switched away
+from `std::unordered_map` because it broke the gate ordering".
+
+`docs/changelog.rst` is the one exception, because naming the delta between two releases is
+its whole purpose. The word "now" marks the boundary: "`hexagonalization` now rejects empty
+layouts" is a good changelog entry, and a bad Doxygen comment on `hexagonalization`, which
+should say that the function rejects empty layouts.
+
+### Descriptions match the implementation
+
+For any user-facing surface — an algorithm entry point, a CLI command, a `pyfiction`
+binding, a page under `docs/` — keep the summary aligned with what the code actually does:
+its scope, its defaults, its limitations, its failure modes, and what it deliberately does
+not handle. A description that claims more than the implementation delivers produces bug
+reports against behavior that was never promised in code.
+
+When a change adds or alters such a surface, describe the capability the surface provides
+and how a user can verify it. Over-explain the user-visible effect; leave the incidental
+implementation detail to the code. The changelog entry for the same change is where the
+delta against the previous release belongs.
+
+## Project Map
+
+Each subtree below adds rules to this file and never contradicts it. Read the one that
+matches what you touch. **If your tool does not load nested instruction files
+automatically, open the file yourself** — several do not.
+
+| Touching                  | Read                               | Why it matters                                                     |
+| ------------------------- | ---------------------------------- | ------------------------------------------------------------------ |
+| `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                  |
+| `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                       |
+| `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable |
+| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places            |
+| `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; do not refactor them                |
+
+Everything else: `include/fiction/` is the header-only C++20 library; `vendors/` holds
+third-party sources and is never modified; `benchmarks/` is input data. Build presets live
+in `CMakePresets.json` and are documented in `docs/getting_started.rst`.
 
 ## Commands
 
@@ -64,7 +129,8 @@ Use these commands to validate your work.
 
 ### C++ (Primary)
 
-- **Configure**: `cmake -S . --preset dev-full` (see `cmake --list-presets` for `tests-slim`/`tests-full`/`pyfiction`/etc.)
+- **Configure**: `cmake -S . --preset dev-full` (see `cmake --list-presets` for
+  `tests-slim`/`tests-full`/`pyfiction`/etc.)
 - **Build**: `cmake --build --preset dev-full -j`
 - **Test**: `ctest --preset dev-full --output-on-failure`
 - **Format**: `prek run clang-format --all-files` (or let prek handle it)
@@ -77,120 +143,103 @@ Use these commands to validate your work.
 
 ### General
 
-- **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis)
+- **Prek**: `prek run -a` (Runs all checks: formatting, linting, static analysis). Run this
+  before finishing a task.
 
-### Code Review
+## Code Review
 
-- Before considering a PR done, fetch and address open reviewer comments (CodeRabbit and humans):
-  `gh api repos/{owner}/{repo}/pulls/<PR>/comments`.
-- Verify each against the current code first — some may already be stale, resolved by a later commit, or
-  not actually applicable — then fix or reply to the rest, and consolidate duplicates.
+Fetch open comments before considering a pull request done:
+`gh api repos/{owner}/{repo}/pulls/<PR>/comments --paginate`. Classify each one against the
+current code before acting:
 
-## Git Conventions
+- already fixed by a later commit — reply with the commit hash, change nothing;
+- wrong or out of scope — reply with one sentence saying why, change nothing;
+- valid — fix it, and consolidate duplicates into one reply.
 
-Prefix every commit subject and PR title with a single plain [gitmoji](https://gitmoji.dev) emoji character (not the
-`:shortcode:` text form) matching the change's _dominant_ nature, e.g. `🐛 Fix off-by-one error in hexagonalization`.
-A few common ones: `🐛` bug fix, `✨` new feature, `♻️` refactor, `⚡️` perf, `👷`/`💚` CI, `🔧` config (e.g.
-`CMakePresets.json`), `📝` docs, `✅` tests, `🚨` fix warnings, `🔥` remove code. Don't stack multiple emoji by hand —
-`⬆️🪝 ...` dependency-bump commits are Renovate's own automated convention, not one to imitate.
+`clang-tidy` findings from the `Clang-Tidy Review` workflow are binding: fix them, or
+suppress the specific check with a `// NOLINT(check-name)` comment stating the reason.
+CodeRabbit findings are suggestions; disagreeing with a stated reason is a normal outcome,
+and LLM reviewers skew conservative. Reply to comments, do not resolve them — resolution
+belongs to the reviewer. Full workflow: `docs/contributing.rst`, "Code Review".
+
+## Git and GitHub
+
+Prefix every commit subject and PR title with a single plain [gitmoji](https://gitmoji.dev)
+emoji character (not the `:shortcode:` text form) matching the change's _dominant_ nature,
+e.g. `🐛 Fix off-by-one error in hexagonalization`. A few common ones: `🐛` bug fix, `✨` new
+feature, `♻️` refactor, `⚡️` perf, `👷`/`💚` CI, `🔧` config (e.g. `CMakePresets.json`), `📝`
+docs, `✅` tests, `🚨` fix warnings, `🔥` remove code. Don't stack multiple emoji by hand —
+`⬆️🪝 ...` dependency-bump commits are Renovate's own automated convention, not one to
+imitate.
+
+- Add an `Assisted-by: <Model Name> via <Tool Name>` trailer to any commit whose content an
+  AI agent authored, for example `Assisted-by: Claude Opus 5 via Claude Code`.
+- Disclose AI assistance in **every public text body** an agent wrote or edited: pull
+  request descriptions, issues, discussions, review comments, and replies. One line at the
+  end is enough, naming what a human actually checked — "Drafted with AI assistance;
+  measurements reproduced locally and against CI". Titles are exempt, and a review _by_
+  CodeRabbit does not make your pull request AI-assisted.
+- You are responsible for everything you post under your name. Review it and understand it
+  first; if you cannot explain it, do not submit it.
+- Never push, open or merge a pull request, post a comment, open an issue, or otherwise
+  change remote state unless the maintainer authorized that specific action. Authorization
+  for one task does not carry over to the next.
 
 ## Code Style
 
-Follow these patterns strictly.
+`clang-format` and `clang-tidy` enforce C++ formatting and identifier naming; `ruff` and
+`mypy` cover Python. The rules below are the ones no tool checks.
 
 ### C++
 
-- **Naming**: `snake_case` for everything (namespaces, functions, variables, classes, structs, filenames).
-  - Exception: Template parameters use `PascalCase` (e.g., `template <typename Spec, typename Impl>`).
-  - Macros: `UPPER_SNAKE_CASE`.
-- **Headers**: `.hpp` extension. Use `#ifndef FICTION_FILENAME_HPP` guards.
+- **Headers**: `.hpp` extension. Use `#ifndef FICTION_FILENAME_HPP` include guards.
 - **Documentation**:
   - Apply to **ALL** new and edited code.
-  - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions, classes, etc.).
-  - Use modern Doxygen commands (`@brief`, `@param`, `@return`, `@tparam`, `@file`, `@author`, `@ref`, `@see`, `@throws` etc.).
-  - The current codebase uses `// Created by ...` comments. A migration to using `@file` and `@author` tags per file (with full name and GitHub handle) is planned. After migration, the new convention will be enforced and `// Created by ...` comments should no longer be used.
-
-**Example (C++):**
-
-```cpp
-/**
- * @file equivalence_checking.hpp
- * @author Marcel Walter (@marcelwa)
- * @brief Equivalence checking algorithms.
- */
-
-namespace fiction
-{
-
-/**
- * @brief Checks equivalence between specification and implementation.
- *
- * This function compares a specification network with an implementation network to determine if they
- * are functionally equivalent. It supports various network types including logic networks and gate-level layouts.
- *
- * @tparam Spec Specification network type.
- * @tparam Impl Implementation network type.
- * @param spec The specification network.
- * @param impl The implementation network.
- * @return True if equivalent, false otherwise.
- * @throws std::invalid_argument If the networks are not compatible.
- * @see mockturtle::equivalence_checking
- */
-template <typename Spec, typename Impl>
-bool check_equivalence(const Spec& spec, const Impl& impl)
-{
-    static_assert(mockturtle::is_network_type_v<Spec>, "Spec must be a network type");
-
-    // Implementation details...
-    const auto result = mockturtle::equivalence_checking(spec, impl);
-    return result.has_value() && *result;
-}
-
-} // namespace fiction
-```
+  - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions,
+    classes, etc.).
+  - Use modern Doxygen commands (`@brief`, `@param`, `@return`, `@tparam`, `@file`,
+    `@author`, `@ref`, `@see`, `@throws` etc.).
+  - Describe the status quo, never the previous behavior, and keep the description true to
+    what the code does — see "Documentation describes the status quo" and "Descriptions
+    match the implementation" under `Writing`.
+  - The current codebase uses `// Created by ...` comments. A migration to using `@file`
+    and `@author` tags per file (with full name and GitHub handle) is planned. After
+    migration, the new convention will be enforced and `// Created by ...` comments should
+    no longer be used.
 
 ### Python
 
-- **Naming**:
-  - Functions/Variables: `snake_case`.
-  - Classes: `PascalCase` (Note: This differs from legacy C++ bindings; enforce `PascalCase` for new code).
-- **Type Hints**: Mandatory for all function arguments and return values.
+`ruff` currently ignores the `D` (pydocstyle) and `N` (naming) rule sets, so nothing
+enforces the following:
+
+- **Naming**: functions and variables `snake_case`; classes `PascalCase` (this differs
+  from the legacy C++ bindings — use `PascalCase` for new code).
+- **Type Hints**: mandatory for all function arguments and return values.
 - **Docstrings**: Google style.
-
-**Example (Python):**
-
-```python
-class LogicNetwork:
-    """A class representing a logic network."""
-    pass
-
-def create_logic_network(filename: str) -> LogicNetwork:
-    """Creates a logic network from a file.
-
-    Args:
-        filename: Path to the logic network file.
-
-    Returns:
-        A LogicNetwork object.
-    """
-    return read_logic_network(filename)
-```
 
 ## Boundaries
 
 - ✅ **Always**:
   - Run `prek run -a` before finishing a task.
-  - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for Python).
-  - Update `docs/changelog.rst`'s `Unreleased` section for any user-facing change (Added/Changed/Removed/
-    Fixed, following the existing category and bullet style).
-  - Check for and consolidate open reviewer comments before considering a PR done (see Code Review above).
-  - Use `const` correctness.
-  - Prefer STL over custom algorithms.
-  - Use braced initialization.
+  - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for
+    Python).
+  - Update `docs/changelog.rst`'s `Unreleased` section for any user-facing change; see
+    `docs/AGENTS.md` for the entry style.
+  - Satisfy every box in `.github/pull_request_template.md` before calling a PR done.
+  - Use `const` correctness and braced initialization.
+  - Keep plans, notes, analyses, and worktrees in `.ai/` (gitignored). Never write them to
+    the repository root and never commit them. `.claude/worktrees/` is a superseded
+    location; do not add to it.
+  - Remove your worktree and its build trees when the task is done (`git worktree remove`,
+    then `git worktree prune`).
 - ⚠️ **Ask First**:
-  - Before adding new third-party dependencies to `vendors/` or `CMakeLists.txt`.
+  - Before adding a new third-party dependency, whether vendored under `vendors/` or
+    fetched from `CMakeLists.txt`.
   - Before changing major build configurations.
 - 🚫 **Never**:
-  - Modify files in `vendors/`.
+  - Modify the contents of an existing `vendors/` source tree. Adding a new one is the
+    ask-first case above; editing what is already there is not.
+  - Edit generated files by hand, including
+    `bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`.
   - Commit secrets or large binary files.
   - Use `using namespace std;`.

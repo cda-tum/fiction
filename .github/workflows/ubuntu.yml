@@ -39,36 +39,24 @@ jobs:
     permissions:
       contents: read # required to check out the repository
 
+    # Each entry costs a full Debug *and* Release build of a header-only, template-heavy
+    # library, so the matrix carries the ends of each compiler family and one point in
+    # between, not every version. g++-11 on 22.04 is the oldest combination we support.
     strategy:
       matrix:
-        os: [ubuntu-22.04, ubuntu-24.04, ubuntu-24.04-arm]
-        compiler: [g++-11, g++-12, g++-13, clang++-16]
-        exclude:
-          - os: ubuntu-22.04
-            compiler: g++-13
-          - os: ubuntu-22.04
-            compiler: clang++-16
-          - os: ubuntu-24.04-arm
-            compiler: g++-11
-          - os: ubuntu-24.04-arm
-            compiler: g++-12
-          - os: ubuntu-24.04-arm
-            compiler: g++-13
         include:
+          - os: ubuntu-22.04
+            compiler: g++-11
+          - os: ubuntu-24.04
+            compiler: g++-13
           - os: ubuntu-24.04
             compiler: g++-14
-          - os: ubuntu-24.04
-            compiler: clang++-17
           - os: ubuntu-24.04
             compiler: clang++-18
           - os: ubuntu-24.04
             compiler: clang++-19
           - os: ubuntu-24.04
             compiler: clang++-20
-          - os: ubuntu-24.04-arm
-            compiler: clang++-17
-          - os: ubuntu-24.04-arm
-            compiler: clang++-18
           - os: ubuntu-24.04-arm
             compiler: clang++-19
           - os: ubuntu-24.04-arm
@@ -76,6 +64,7 @@ jobs:
 
     name: 🐧 ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
+    timeout-minutes: 120
 
     steps:
       - name: Install libraries and the respective compiler
@@ -89,8 +78,6 @@ jobs:
           persist-credentials: false
 
       - name: Setup ccache
-        # ccache is not supported on ARM yet
-        if: matrix.os != 'ubuntu-24.04-arm'
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{matrix.os}}-${{matrix.compiler}}"
@@ -121,7 +108,6 @@ jobs:
         run: >
           cmake -S . --preset ci-debug
           -DCMAKE_CXX_COMPILER="$COMPILER"
-          -DFICTION_LIGHTWEIGHT_DEBUG_BUILDS=ON
           $EXTRA_CMAKE_ARGS
 
       - name: Build (Debug)
@@ -147,3 +133,54 @@ jobs:
 
       - name: Test (Release)
         run: ctest --preset ci-release --verbose --repeat until-pass:3 --parallel 4
+
+  # The experiments are 34 stand-alone binaries that reproduce published papers. CI never
+  # runs them, so building them in every matrix entry bought nothing but build time. One
+  # job keeps them from rotting.
+  build_experiments:
+    name: 🐧 experiments
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read # required to check out the repository
+
+    steps:
+      - name: Install libraries and the respective compiler
+        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev g++-14
+
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          key: "ubuntu-24.04-experiments"
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        with:
+          version: ${{env.Z3_VERSION}}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+      - name: Configure CMake
+        run: >
+          cmake -S . --preset ci-debug
+          -DCMAKE_CXX_COMPILER=g++-14
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_TEST=OFF
+          -DFICTION_CLI=OFF
+
+      - name: Build
+        run: cmake --build --preset ci-debug --parallel 4

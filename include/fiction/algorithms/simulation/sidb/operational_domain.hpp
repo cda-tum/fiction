@@ -79,7 +79,23 @@ struct parameter_point
     [[nodiscard]] bool operator==(const parameter_point& other) const noexcept
     {
         return std::ranges::equal(parameters, other.parameters, [](const auto lhs, const auto rhs) noexcept
-                                  { return std::fabs(lhs - rhs) < constants::ERROR_MARGIN; });
+                                  { return quantize(lhs) == quantize(rhs); });
+    }
+    /**
+     * Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide cells that both this type's equality and
+     * its `std::hash` specialization are defined on.
+     *
+     * Comparing parameter values with a tolerance, as in `std::fabs(lhs - rhs) < constants::ERROR_MARGIN`, does not
+     * yield an equivalence relation: it is not transitive, and two values that compare equal can still fall on
+     * opposite sides of a cell boundary and therefore hash differently. That breaks the invariant every hash-based
+     * container relies on, namely that equal keys hash equally. Deciding both on the same quantized value restores it.
+     *
+     * @param value Parameter value to quantize.
+     * @return The index of the cell `value` falls into.
+     */
+    [[nodiscard]] static int64_t quantize(const double value) noexcept
+    {
+        return static_cast<int64_t>(std::llround(value / constants::ERROR_MARGIN));
     }
     /**
      * Support for structured bindings.
@@ -333,6 +349,15 @@ struct operational_domain_params
     std::vector<operational_domain_value_range> sweep_dimensions{
         operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 1.0, .max = 10.0, .step = 0.1},
         operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 1.0, .max = 10.0, .step = 0.1}};
+    /**
+     * Number of worker threads to distribute the parameter points over. Defaults to the number of hardware threads,
+     * which is the behavior this setting replaces, and to `1` where that count is not detectable. Values below `1`
+     * are treated as `1`.
+     *
+     * Pinning it makes wall-clock comparisons reproducible across runs and machines, and allows an operational domain
+     * computation to leave cores free for other work.
+     */
+    std::size_t number_of_threads{std::max(std::size_t{std::thread::hardware_concurrency()}, std::size_t{1})};
 };
 /**
  * Statistics for the operational domain computation. The statistics are used across the different operational domain
@@ -423,7 +448,9 @@ class operational_domain_impl
             input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                                              bdl_wire_selection::INPUT)},
             output_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-                                              bdl_wire_selection::OUTPUT)}
+                                              bdl_wire_selection::OUTPUT)},
+            input_pattern_layouts{generate_bdl_input_pattern_layouts(
+                lyt, params.operational_params.input_bdl_iterator_params, input_bdl_wires)}
     {
         const auto logic_cells = lyt.get_cells_by_type(technology<Lyt>::cell_type::LOGIC);
 
@@ -432,10 +459,12 @@ class operational_domain_impl
                 (logic_cells.size() > 0)) &&
                "No logic cells found in the layout");
 
-        // the canvas layout is created which is defined by the logic cells.
+        // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
+        // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
+        // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
         for (const auto& c : logic_cells)
         {
-            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::NORMAL);
+            canvas_lyt.assign_cell_type(c, technology<Lyt>::cell_type::LOGIC);
         }
 
         indices.reserve(num_dimensions);
@@ -612,6 +641,11 @@ class operational_domain_impl
         std::deque<step_point>       queue{};
         phmap::btree_set<step_point> scheduled{};
 
+        // this termination logic is hand-rolled rather than built on `std::jthread` with
+        // `std::stop_source`/`std::stop_token` and the C++20 `std::condition_variable_any::wait` stop-token overload.
+        // Apple's libc++ still gates `<stop_token>` and `std::jthread` behind `-fexperimental-library`, so both macOS
+        // CI jobs fail to compile them. A single portable implementation was preferred over a feature-detected second
+        // copy. Revisit once the macOS runners ship a libc++ that enables them by default
         std::mutex              queue_mutex{};
         std::condition_variable queue_cv{};
 
@@ -706,7 +740,7 @@ class operational_domain_impl
                 }
             };
 
-            const auto num_workers = std::max(number_of_threads, std::size_t{1});
+            const auto num_workers = number_of_threads;
 
             std::vector<std::thread> workers{};
             workers.reserve(num_workers);
@@ -852,8 +886,9 @@ class operational_domain_impl
         // Cartesian product of all step point indices
         const auto all_index_combinations = cartesian_combinations(indices);
 
-        // number of threads
-        const auto num_threads = std::min(number_of_threads, all_index_combinations.size());
+        // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
+        // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
+        const auto num_threads = std::max(std::min(number_of_threads, all_index_combinations.size()), std::size_t{1});
 
         // calculate the size of each slice
         const auto slice_size = (all_index_combinations.size() + num_threads - 1) / num_threads;
@@ -1039,9 +1074,9 @@ class operational_domain_impl
      */
     std::atomic<std::size_t> num_evaluated_parameter_combinations{0};
     /**
-     * Number of available hardware threads.
+     * Number of worker threads to distribute the parameter points over, taken from the parameters and floored at `1`.
      */
-    const std::size_t number_of_threads{std::thread::hardware_concurrency()};
+    const std::size_t number_of_threads{std::max(params.number_of_threads, std::size_t{1})};
     /**
      * Input BDL wires.
      */
@@ -1050,6 +1085,12 @@ class operational_domain_impl
      * Output BDL wires.
      */
     const std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    /**
+     * The layout with each input pattern applied, indexed by input pattern. The input configuration does not depend on
+     * the swept parameters, so these layouts are generated once and read by every sample point evaluation. Empty if
+     * the layout-only constructor was used, which never evaluates operational status.
+     */
+    const std::vector<Lyt> input_pattern_layouts;
     /**
      * A step point represents a point in the x and y dimension from 0 to the maximum number of steps. A step point does
      * not hold the actual parameter values, but the step values in the x and y dimension, respectively.
@@ -1239,8 +1280,9 @@ class operational_domain_impl
         auto op_params_set_dimension_values                  = params.operational_params;
         op_params_set_dimension_values.simulation_parameters = sim_params;
 
-        const auto& [status, sim_calls] = is_operational(layout, truth_table, op_params_set_dimension_values,
-                                                         input_bdl_wires, output_bdl_wires, std::optional{canvas_lyt});
+        const auto& [status, sim_calls] =
+            is_operational(input_pattern_layouts, truth_table, op_params_set_dimension_values, input_bdl_wires,
+                           output_bdl_wires, std::optional{canvas_lyt});
 
         num_simulator_invocations += sim_calls;
 
@@ -1251,8 +1293,12 @@ class operational_domain_impl
 
         if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
         {
+            // the input pattern layouts and the BDL detection results do not depend on the swept parameters, so the
+            // ones generated once in the constructor are handed to every sample point instead of being re-derived here
             const auto ct = critical_temperature_gate_based(
-                layout, truth_table, critical_temperature_params{.operational_params = op_params_set_dimension_values});
+                input_pattern_layouts, truth_table,
+                critical_temperature_params{.operational_params = op_params_set_dimension_values}, output_bdl_pairs,
+                input_bdl_wires, output_bdl_wires);
 
             return operational(ct);
         }
@@ -1379,9 +1425,11 @@ class operational_domain_impl
      */
     void simulate_operational_status_in_parallel(const std::vector<step_point>& step_points) noexcept
     {
-        // calculate the size of each slice
-        const std::size_t num_threads = std::min(number_of_threads, step_points.size());
+        // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
+        // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
+        const std::size_t num_threads = std::max(std::min(number_of_threads, step_points.size()), std::size_t{1});
 
+        // calculate the size of each slice
         const auto slice_size = (step_points.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
@@ -1811,6 +1859,11 @@ template <typename Lyt, typename TT>
                                                                 const operational_domain_params& params = {},
                                                                 operational_domain_stats*        stats  = nullptr)
 {
+    // do not convert the `static_assert` type checks in this file's public entry points into `requires` clauses: the
+    // pyfiction docstring generator parses this header as C++11 (see the note on `manhattan_distance` in
+    // `algorithms/path_finding/distance.hpp`), where the clause is a syntax error that drops the Doxygen comments of
+    // the declarations that follow. `kitty` also provides no `is_truth_table_v` alias that would simplify the third
+    // check
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
@@ -2234,8 +2287,10 @@ struct hash<fiction::parameter_point>
         size_t hash_value = 0;
         for (const auto& parameter : pp.get_parameters())
         {
-            // hash the double values with tolerance
-            fiction::hash_combine(hash_value, static_cast<size_t>(parameter / fiction::constants::ERROR_MARGIN));
+            // hash the cell the parameter value falls into, which is what `parameter_point::operator==` compares.
+            // Casting the quotient straight to `size_t` would be undefined for the negative values that a `MU_MINUS`
+            // sweep produces
+            fiction::hash_combine(hash_value, fiction::parameter_point::quantize(parameter));
         }
 
         return hash_value;

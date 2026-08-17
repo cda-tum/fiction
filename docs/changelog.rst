@@ -13,315 +13,122 @@ Added
 - Added the ``molecular_qca_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK molecular QCA
   standard-cell library to gate-level layouts, including QLL/SVG export support, Python bindings, and tests.
 
+Added
+#####
+- Algorithms:
+    - Added the ``missing_required_gates_exception`` that ``technology_mapping`` throws when the
+      technology library is missing the gates required by the base network type (AIG requires INV and
+      AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
+    - Added an ``is_operational`` overload that takes one layout per input pattern, and
+      ``generate_bdl_input_pattern_layouts`` to generate them
+    - Added a ``critical_temperature_gate_based`` overload that takes the pre-generated input pattern
+      layouts and BDL detection results instead of deriving them from the layout
+    - Added ``number_of_threads`` to ``operational_domain_params``, ``defect_influence_params``, and
+      ``displacement_robustness_domain_params``, defaulting to the number of hardware threads, which
+      leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
+      lets a computation leave cores free
+- Build system:
+    - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- Python bindings:
+    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
+      ``critical_temperature_gate_based`` overloads
+    - Exposed ``number_of_threads`` on ``operational_domain_params`` and
+      ``displacement_robustness_domain_params``
+
 Changed
 #######
-- Completed the incremental C++20 modernization for the operational domain module
-  (``operational_domain.hpp``, ``sidb_simulation_domain.hpp``, ``write_operational_domain.hpp``):
-  collapsed ``step_point``'s hand-written ``operator==``/``operator!=``/``operator<`` into a single
-  defaulted ``operator<=>`` (which also yields ``==`` and the relational operators via C++20's rewritten
-  candidates) and dropped ``parameter_point::operator!=`` for the same reason, keeping its tolerance-based
-  ``operator==`` and expressing it with ``std::ranges::equal``; ``std::ranges`` algorithms
-  (``std::ranges::transform``, ``std::ranges::shuffle``, ``std::ranges::find``, ``std::ranges::rotate``,
-  ``std::ranges::lower_bound``, ``std::ranges::for_each``) in place of iterator-pair calls; designated
-  initializers for ``operational_domain_value_range``, ``quicksim_params``, and
-  ``critical_temperature_params``; and ``std::cmp_less`` in place of a signed/unsigned cast comparison in
-  the 3D Moore neighborhood. The ``static_assert(is_cell_level_layout_v<Lyt>)`` /
-  ``has_sidb_technology_v<Lyt>`` triples on the public entry points are deliberately left as they are:
-  converting them to ``requires`` clauses is what broke the pyfiction docstring bot's pinned
-  ``clang==15.0.7`` parser during the ``layouts/`` pass, and ``kitty`` provides no ``is_truth_table_v``
-  alias to simplify the third check. ``std::iota`` is likewise kept, as ``std::ranges::iota`` is C++23.
-  Additionally replaced every unchecked ``operator[]`` in these headers with bounds-checked ``at()``,
-  reserved the result vector in ``to_parameter_point``, made the ``mockturtle::stopwatch`` guards and the
-  writer's parameter references ``const``, and stopped passing a possibly non-null-terminated
-  ``std::string_view::data()`` to ``std::ofstream``. Together these take the module's clang-tidy report
-  from 92 warnings to zero
-- Parallelized ``operational_domain_flood_fill``. Previously, only the initial random sampling ran in
-  parallel while the flood fill itself explored the parameter space on a single thread, which could make
-  it slower in wall-clock time than a grid search on machines with many cores despite needing far fewer
-  simulations. The exploration now runs on a pool of worker threads that share a single work queue. One
-  mutex guards the queue, the
-  set of already-scheduled points, and the active-worker count, while the physical simulation itself runs
-  without any lock held. Tracking scheduled points also removes a pre-existing inefficiency of the serial
-  version, in which the same parameter point could be enqueued repeatedly. The result is independent of
-  the order of exploration and therefore unchanged by the parallelization. Also added the
-  ``std::shuffle`` that flood fill was missing for load balancing across its sampling threads.
-  ``std::jthread`` with ``std::stop_source``/``std::stop_token`` and the C++20
-  ``std::condition_variable_any::wait`` stop-token overload were used at first and then reverted:
-  Apple's ``libc++`` still gates ``<stop_token>`` and ``std::jthread`` behind ``-fexperimental-library``,
-  so both macOS CI jobs failed to compile them. A single portable implementation was preferred over a
-  feature-detected second copy of the termination logic
-- Code quality:
-    - Adopted C++20 idioms across ``include/fiction/utils/`` as the first step of an incremental,
-      module-by-module modernization: ``std::ranges`` algorithms (``std::ranges::for_each``,
-      ``std::ranges::find``, ``std::ranges::find_if``, ``std::ranges::all_of``,
-      ``std::ranges::max_element``) in place of hand-rolled loops; ``std::integral``/``std::floating_point``/
-      ``std::random_access_iterator`` concepts in place of ``static_assert`` type checks; and a defaulted
-      ``operator==`` on ``mockturtle::edge`` (relying on C++20 rewritten candidates instead of a
-      hand-written ``operator!=``). Extended the same modernization to ``test/utils/routing_utils.cpp``
-      (``std::ranges`` and designated initializers)
-    - Continued the incremental C++20 modernization in ``include/fiction/networks/``: ``std::ranges``
-      algorithms (``std::ranges::find``, ``std::ranges::find_if``, ``std::ranges::copy``,
-      ``std::ranges::for_each``, ``std::ranges::sort``, ``std::ranges::distance``) in place of hand-rolled
-      loops and iterator-pair algorithm calls in ``technology_network.hpp``, ``virtual_pi_network.hpp``,
-      ``views/bfs_topo_view.hpp``, and ``views/mutable_rank_view.hpp``. This module has no
-      ``static_assert(std::is_*)`` type checks or hand-written ``operator==``/``operator!=`` to modernize
-      into concepts/defaulted comparisons; extended a designated initializer to
-      ``test/networks/views/static_depth_view.cpp``, the only aggregate-initialization opportunity found in
-      this module's tests
-    - Completed the incremental C++20 modernization of ``include/fiction/technology/`` and its tests.
-      Started with a low-connectivity subset (``sidb_charge_state.hpp``, ``sidb_lattice_orientations.hpp``,
-      ``constants.hpp``, ``technology_mapping_library.hpp``, ``cell_technologies.hpp``,
-      ``sidb_defects.hpp``): collapsed ``sidb_defect``'s hand-written ``operator==``/``operator!=`` into a
-      defaulted ``operator==``. Then extended to the rest of the directory: ``std::ranges`` algorithms in
-      place of iterator-pair ``std::algorithm`` calls (``charge_distribution_surface.hpp``,
-      ``sidb_cluster_hierarchy.hpp``, ``fcn_gate_library.hpp``, ``sidb_on_the_fly_gate_library.hpp``),
-      ``std::erase_if`` in place of an erase-remove idiom (``qca_one_library.hpp``), a ``requires`` clause
-      with ``std::same_as`` in place of two ``static_assert(std::is_same_v<...>)`` checks
-      (``sidb_surface_analysis.hpp``), and a designated initializer for a nested aggregate construction
-      (``sidb_cluster_hierarchy.hpp``) as well as in ``test/technology/is_sidb_gate_design_impossible.cpp``.
-      The unscoped ``cell_type`` enums (``cell_technologies.hpp``) and ``port_direction::cardinal``
-      (``cell_ports.hpp``) are deliberately left untouched, as converting them to ``enum class`` is a
-      separate, much larger refactor
-    - Started the incremental C++20 modernization of ``include/fiction/layouts/`` with its smallest,
-      lowest-connectivity slice (``coordinates.hpp``, ``tile_based_layout.hpp``,
-      ``synchronization_element_layout.hpp``): replaced ``coord_iterator``'s
-      ``static_assert(std::is_same_v<...>)`` disjunction with an equivalent ``requires`` clause using
-      ``std::same_as``. Collapsing ``offset::ucoord_t``, ``cube::coord_t``, and ``siqad::coord_t``'s
-      hand-written ``operator==``/``operator!=`` pairs into a defaulted ``operator==`` was attempted but
-      reverted: CI's g++-11 job (the project's explicit C++20 floor compiler) miscompiled a defaulted
-      comparison on ``offset::ucoord_t``/``siqad::coord_t``'s bit-field data members, producing wrong
-      layout-printing output, consistent with a known class of GCC bugs around defaulted comparison
-      operators on bit-field-containing structs in early C++20 support. ``tile_based_layout.hpp``
-      and ``synchronization_element_layout.hpp`` have no ``std::algorithm``-with-iterator-pairs patterns,
-      no ``static_assert(std::is_*)`` over standard-library traits, and no aggregate-initialization
-      opportunities to modernize. Completed the rest of ``include/fiction/layouts/``: ``std::ranges``
-      algorithms in place of iterator-pair ``std::algorithm`` calls (``cell_level_layout.hpp``,
-      ``clocking_scheme.hpp``, ``hexagonal_layout.hpp``, ``gate_level_layout.hpp``). A ``requires``
-      clause with ``std::same_as`` was attempted for a duplicated
-      ``static_assert(std::is_same_v<...>)`` disjunction in both ``hexagonal_layout`` constructors but
-      reverted: the pyfiction docstring auto-gen bot's pinned ``clang==15.0.7`` Python parser failed to
-      associate Doxygen comments with the ~60 member functions declared after those constructors once
-      converted, breaking the fully Python-bound ``hexagonal_layout`` bindings' ReadTheDocs build.
-      ``obstruction_layout.hpp``, ``shifted_cartesian_layout.hpp``, ``bounding_box.hpp``,
-      ``clocked_layout.hpp``, and ``cartesian_layout.hpp`` had nothing applicable in any of the four
-      modernization categories
-    - Completed a full C++20 modernization of ``include/fiction/io/`` and its tests, first with the four
-      categories established for the other modules: ``std::ranges`` algorithms in place of iterator-pair
-      ``std::algorithm`` calls across ``network_reader.hpp``, ``write_location_and_ground_state.hpp``,
-      ``write_sqd_sim_result.hpp``, ``write_qll_layout.hpp``, ``write_qcc_layout.hpp``,
-      ``read_sqd_layout.hpp``, ``read_fgl_layout.hpp``, ``dot_drawers.hpp``, and ``write_svg_layout.hpp``;
-      ``std::erase_if`` in place of the erase-remove idiom in
-      ``test/io/write_location_and_ground_state.cpp`` and ``test/io/write_svg_layout.cpp``; and
-      designated initializers in ``test/io/write_operational_domain.cpp`` and
-      ``test/io/write_svg_layout.cpp``. This module has no hand-written ``operator==``/``operator!=``
-      pairs or bit-field-bearing structs to modernize. ``write_svg_layout.hpp``'s one
-      ``static_assert(std::is_same_v<...>)`` was deliberately left as-is, since it sits alongside
-      custom-trait ``static_assert``\ s in the same function and converting only one of three checks to a
-      ``requires`` clause isn't a clear readability win.
-      Then extended beyond those four categories to the remaining candidates surfaced by a full-module
-      survey: C++17 ``if``-init statements collapsing the ``tinyxml2`` "look up an XML element, then check
-      it and its text for null" two-statement pattern into one throughout ``read_fgl_layout.hpp``
-      (bringing it in line with ``read_sqd_layout.hpp``'s existing convention); ``std::views::iota`` in
-      place of manually incremented loop counters in ``print_layout.hpp`` and
-      ``write_location_and_ground_state.hpp``; plain range-based ``for`` loops in place of vector index
-      loops in ``read_fgl_layout.hpp`` and ``write_fgl_layout.hpp``; ``std::erase_if`` on associative
-      containers (a case the erase-remove-idiom pass had missed, since it isn't shaped like
-      ``remove_if``/``.erase()``) in ``write_svg_layout.hpp``; ``static``\ →\ ``inline`` on namespace-scope
-      ``fmt::text_style``, ``std::regex``, and ``std::unordered_map`` constants in ``print_layout.hpp``,
-      ``read_fqca_layout.hpp``, ``read_sidb_surface_defects.hpp``, ``write_qcc_layout.hpp``,
-      ``write_qll_layout.hpp``, and ``write_sqd_layout.hpp`` to avoid per-translation-unit duplication;
-      structured bindings in place of ``.first``/``.second`` access in ``test/io/read_sqd_layout.cpp`` and
-      ``test/io/write_sqd_layout.cpp``; and const-correctness fixes for never-reassigned locals in
-      ``write_fgl_layout.hpp`` and ``write_svg_layout.hpp``. A hand-rolled nested-loop corner-offset
-      generator in ``write_qca_layout.hpp`` and an index-as-iterator refactor flagged by existing
-      ``// TODO`` comments in ``tt_reader.hpp`` were surveyed but deliberately left alone as
-      out-of-proportion, purely stylistic risk for no real C++20 gain
-    - Started the incremental C++20 modernization of ``include/fiction/algorithms/`` with a pilot slice
-      across its five smallest subdirectories (``graph/``, ``iter/``, ``optimization/``, ``properties/``,
-      ``verification/``): ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
-      (``generate_edge_intersection_graph.hpp``, ``graph_coloring.hpp``, ``mincross.hpp``,
-      ``bdl_input_iterator.hpp``, ``critical_path_length_and_throughput.hpp``, ``virtual_miter.hpp``), and
-      a ``requires`` clause with ``std::same_as`` in place of an ``std::enable_if_t``/``std::is_same_v``
-      SFINAE constraint (``graph_coloring.hpp``). ``aspect_ratio_iterator.hpp`` and
-      ``gray_code_iterator.hpp``'s hand-written comparison operators were deliberately left as-is: they
-      compare derived/partial state (dereferenced iterators, a single cached field) rather than performing
-      plain memberwise equality, so defaulting them would silently change behavior.
-      ``simulated_annealing.hpp``, ``count_gate_types.hpp``, ``design_rule_violations.hpp``, and
-      ``equivalence_checking.hpp`` had nothing applicable in any of the four modernization categories.
-      Fixed 16 Clang-Tidy whole-file findings surfaced once these files were touched: missing
-      ``<cstddef>``/``<cstdint>``/``<map>`` includes, an explicit ``std::uint8_t`` base type for two
-      ``graph_coloring.hpp`` enums, a nested ternary in a member-initializer list, missing parentheses
-      around ``h / 2 + 1``, an ``#ifndef`` in place of ``#if !defined(...)``, an unused
-      ``<mockturtle/traits.hpp>`` include, and a ``<bill/sat/interface/types.hpp>`` include for symbols
-      that were only pulled in transitively before.
-
-      Continued into ``network_transformation/`` and ``path_finding/`` (11 more files): designated
-      initializers for the ``technology_mapping_params`` builder functions in ``technology_mapping.hpp``;
-      and ``std::ranges`` algorithms in place of iterator-pair ``std::algorithm`` calls
-      (``network_balancing.hpp``, ``a_star.hpp``, ``k_shortest_paths.hpp``). A ``requires`` clause with
-      ``std::integral``/``std::floating_point`` in place of
-      ``static_assert(std::is_integral_v<...>)``/``static_assert(std::is_floating_point_v<...>)`` checks
-      was attempted for ``cost.hpp``, ``distance.hpp``, and ``a_star.hpp``'s free functions, but reverted:
-      these functions (``manhattan_distance``, ``euclidean_distance``, ``squared_euclidean_distance``,
-      ``twoddwave_distance``, ``chebyshev_distance``, ``a_star_distance``) are bound in pyfiction, and the
-      ``requires`` clause broke the pyfiction docstring auto-gen bot's ability to match the generated
-      docstring symbols to their binding call sites, failing the compiled-extension build — the same
-      failure mode already documented for ``hexagonalization.hpp`` in the ``layouts/`` pass.
-      ``delete_virtual_pis.hpp``, ``fanout_substitution.hpp``, ``network_conversion.hpp``,
-      ``enumerate_all_paths.hpp``, and ``distance_map.hpp`` had nothing applicable in any of the four
-      modernization categories. Fixed the whole-file Clang-Tidy findings this surfaced: missing
-      ``<cassert>``/``<cstddef>``/``<cstdint>``/``<vector>`` includes and several unused includes
-      (``<cstdlib>`` in ``delete_virtual_pis.hpp``; ``<mockturtle/algorithms/cleanup.hpp>``,
-      ``fiction/traits.hpp``, and ``<utility>`` in ``network_balancing.hpp``; ``fiction/types.hpp`` in
-      ``network_conversion.hpp``; ``<iterator>`` in ``a_star.hpp``); a missing ``<lorina/common.hpp>``
-      include for ``lorina::return_code`` in ``technology_mapping.hpp`` (later reverted — see below); and
-      two missing-parentheses precedence findings in ``distance.hpp`` and ``distance_map.hpp``. Removing the
-      unused ``fiction/types.hpp`` include from ``network_conversion.hpp`` broke
-      ``test/algorithms/network_transformation/fanout_substitution.cpp``, which relied on it transitively
-      for ``mockturtle::mig_network``; fixed by including ``<mockturtle/networks/mig.hpp>`` directly in
-      the test instead of restoring the unused library include.
-
-      Continued into 7 of the 11 files of ``physical_design/`` (the remaining four —
-      ``apply_gate_library.hpp``, ``on_the_fly_sidb_circuit_design.hpp``, ``wiring_reduction.hpp``, and
-      ``exact.hpp`` — had nothing applicable in any of the four modernization categories, or were deferred;
-      ``apply_gate_library.hpp``'s four ``static_assert(std::is_same_v<...>)`` checks were deliberately
-      left as-is since each sits alongside several custom-trait ``static_assert``\ s in the same function,
-      matching the judgment call already made for ``write_svg_layout.hpp`` in the ``io/`` pass;
-      ``exact.hpp``'s three ``std::ranges`` conversions were reverted after CI's Clang-Tidy run surfaced
-      ~20 unrelated pre-existing findings in this 3300-line file — bounds/exception-safety/threading
-      checks disproportionate to a mechanical modernization pass — deferring it to a dedicated future PR):
-      designated initializers for nested-aggregate parameter construction (``color_routing.hpp``,
-      ``graph_oriented_layout_design.hpp``); ``std::ranges`` algorithms in place of iterator-pair
-      ``std::algorithm`` calls (``color_routing.hpp``, ``determine_clocking.hpp``, ``orthogonal.hpp``,
-      ``design_sidb_gates.hpp``, ``hexagonalization.hpp``, ``post_layout_optimization.hpp``,
-      ``graph_oriented_layout_design.hpp``); and pass-by-value plus ``std::move`` in place of a
-      const-reference constructor parameter that was unconditionally copied into a same-type member
-      (``network_conversion.hpp``, discovered as a Clang-Tidy finding once the file was re-touched here).
-      Fixed the whole-file Clang-Tidy findings this surfaced: missing
-      ``<cstddef>``/``<cstdint>``/``<optional>``/``<cassert>``/``<iterator>``/``<utility>`` includes;
-      several unused includes (``fiction/traits.hpp`` mistakenly removed and then restored, ``<map>``, and
-      ``<utility>`` in ``color_routing.hpp``; ``fiction/io/print_layout.hpp`` and ``<set>`` in
-      ``orthogonal.hpp``); missing direct includes for symbols only pulled in transitively before
-      (``<bill/sat/interface/common.hpp>`` for ``bill::solvers`` in ``color_routing.hpp``;
-      ``fiction/networks/technology_network.hpp`` and ``<mockturtle/views/names_view.hpp>`` in
-      ``orthogonal.hpp``); redundant ``typename`` on non-dependent-in-context member-type accesses
-      (``determine_clocking.hpp``, ``graph_oriented_layout_design.hpp``); a ``bill/sat/solver.hpp``
-      umbrella-header false positive suppressed with the same ``NOLINT`` pattern already used in
-      ``graph_coloring.hpp`` (``determine_clocking.hpp``); and a
-      ``misc-const-correctness``/``mockturtle::progress_bar`` false positive (the check misses that
-      ``bar``'s non-const ``operator()`` is invoked from inside a nested lambda) suppressed with
-      ``NOLINTNEXTLINE`` (``orthogonal.hpp``). Reverted the ``<lorina/common.hpp>`` include added for
-      ``technology_mapping.hpp`` in the previous batch: CI's Clang-Tidy build flagged it as unused,
-      unlike this branch's own local Debug builds, most likely because ``lorina::return_code``'s only use
-      site is inside an ``assert()`` and the two build configurations differ in whether ``NDEBUG`` (and
-      thus the macro's expansion) is defined.
-
-      Touching ``network_conversion.hpp`` a second time also caused CI's cumulative whole-PR-diff Clang-Tidy
-      pass to re-surface findings in ``test/algorithms/network_transformation/fanout_substitution.cpp``
-      (touched for the ``mockturtle::mig_network`` include fix, above): positional aggregate construction
-      of ``fanout_substitution_params`` converted to designated initializers across the file's test cases,
-      plus the same category of missing/unused-include fixes as elsewhere in this pass.
-
-      Completed the module with the last remaining subdirectory, ``simulation/sidb/`` (``operational_domain.hpp``
-      and ``sidb_simulation_domain.hpp`` were already modernized separately): ``std::ranges`` algorithms in place
-      of iterator-pair ``std::algorithm`` calls across ``band_bending_resilience.hpp``,
-      ``calculate_energy_and_state_type.hpp``, ``clustercomplete.hpp``, ``critical_temperature.hpp``,
-      ``defect_influence.hpp``, ``detect_bdl_pairs.hpp``, ``detect_bdl_wires.hpp``,
-      ``displacement_robustness_domain.hpp``, ``energy_distribution.hpp``,
-      ``equivalence_check_for_simulation_results.hpp``, ``ground_state_space.hpp``, ``is_operational.hpp``,
-      ``occupation_probability_of_excited_states.hpp``, ``physical_population_stability.hpp``,
-      ``sidb_simulation_result.hpp``, and ``verify_logic_match.hpp``; ``std::erase``/``std::erase_if`` in place
-      of the erase-remove idiom
-      (``detect_bdl_wires.hpp``, ``quickexact.hpp``); and a defaulted ``operator==`` on ``bdl_pair`` in place of
-      its hand-written memberwise ``operator==``/``operator!=`` pair (``detect_bdl_pairs.hpp``). ``bdl_pair``'s
-      ordering operators were left as hand-written, since they order only by ``upper``/``lower`` and ignore
-      ``type``, making them partial- rather than memberwise comparisons, the same judgment call already applied
-      to ``aspect_ratio_iterator.hpp``/``gray_code_iterator.hpp`` in the pilot slice. ``quicksim.hpp`` and
-      ``random_sidb_layout_generator.hpp`` each have one ``std::find``/``std::any_of`` call using an execution
-      policy, which C++20 ``std::ranges`` algorithms do not support, so both were left as-is; ``minimum_energy.hpp``'s
-      ``std::min_element`` was left as well, since its public API takes a generic iterator pair rather than a
-      container. ``can_positive_charges_occur.hpp``, ``defect_clearance.hpp``, ``exhaustive_ground_state_simulation.hpp``,
-      ``is_ground_state.hpp``, ``operational_domain_ratio.hpp``, ``physically_valid_parameters.hpp``, and
-      ``potential_to_distance_conversion.hpp`` had nothing applicable in any of the four modernization categories.
-      This completes the incremental C++20 modernization of ``include/fiction/algorithms/`` and, with it, the whole
-      codebase.
+- Continuous integration:
+    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
+      paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
+      ``requires`` clause no longer silences the Doxygen comments that follow it
+- Python bindings:
+    - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
+      ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
+      directly must be renamed
+- Algorithms:
+    - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
+      ``mockturtle::map``
+    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params``
+      (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a
+      ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports
+      mapping errors instead of storing a failed mapping
+    - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
+      layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
+      gates are dominated by the physical simulation and gain little
+    - Parallelized ``operational_domain_flood_fill`` over a pool of worker threads. The result is
+      independent of exploration order and therefore unchanged
+    - ``critical_temperature_domain`` now reuses the operational domain's input pattern layouts and BDL
+      detection results instead of re-deriving them for every parameter point
+    - ``is_operational`` now builds the canvas charge distribution surface once per call instead of once
+      per canvas enumeration, which the ``FILTER_ONLY`` and ``FILTER_THEN_SIMULATION`` strategies repeat
+      for every combination of input kink state and output pattern
+    - ``bdl_input_iterator`` now determines the BDL dot distances that decide the input assignment once
+      in its constructor instead of on every increment; they cannot change over its lifetime
+    - ``is_operational_impl`` no longer detects the output BDL pairs twice under ``TOLERATE_KINKS``
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
 - Continuous integration:
-    - Updated the Ubuntu CI compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
-      ``clang++-15`` (Clang <16 has a known constraint-instantiation bug that breaks libstdc++'s
-      ``<ranges>`` implementation for non-trivial cases), and added ``clang++-19`` and ``clang++-20``
+    - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
+      ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
+    - Halved the OS matrices; ``docs/getting_started.rst`` records the combinations we verify
+    - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
+      only smoke-testing the import
 
 Removed
 #######
-- Removed Mugen support: the vendored Glucose SAT solver (``vendors/mugen/``), the ``onepass`` CLI
-  command, and ``one_pass_synthesis()``. It was never enabled by default (opt-in via
-  ``FICTION_ENABLE_MUGEN``), depended on an unmaintained vendored solver plus Python 2-era
-  dependencies, and had no CI coverage beyond a single conditionally-compiled test. Use
-  ``exact_physical_design()`` instead
-- Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
-- Removed ``jump_point_search()``. Use ``a_star()`` instead
-- Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
-  ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
-  change in usage
+- Algorithms:
+    - Removed Mugen support: the vendored Glucose SAT solver (``vendors/mugen/``), the ``onepass`` CLI
+      command, and ``one_pass_synthesis()``. Use ``exact_physical_design()`` instead
+    - Removed ``jump_point_search()``. Use ``a_star()`` instead
+    - Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+- CLI:
+    - Removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap`` does not support
+- Data structures:
+    - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
+      ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
+      change in usage
+- Build system:
+    - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
+      ``INTERFACE`` target and therefore never did anything
+- Continuous integration:
+    - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
+      remains the local entry point
 
 Fixed
 #####
-- Fixed the enclosure inference of ``operational_domain_contour_tracing``, which had never been active: an
-  inverted guard in ``infer_operational_status_in_enclosing_contour`` left the set of points assumed to be
-  operational by enclosure permanently empty, so every random sample landing in an already traced operational
-  island triggered another trace of the very same contour. Additionally, the inference's flood fill is now
-  bounded by the traced contour and expands over the von Neumann (4-connected) neighborhood instead of the
-  Moore (8-connected) one. Since a 4-connected path cannot cross an 8-connected closed curve, the inference is
-  now guaranteed to stay inside the traced contour and can no longer suppress the tracing of other operational
-  islands
+- Algorithms:
+    - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
+      robustness helpers, which derive their slice size by dividing by a worker count that is zero when
+      there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
+    - Fixed ``is_operational`` reporting every layout operational without checking it when ``FILTER_ONLY``
+      was combined with ``TOLERATE_KINKS``. All entry points now decide canvas filtering in one place
+    - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
+      had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
+      the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
 - Code quality:
-    - Fixed several pre-existing ``fmt`` compile-time format-string misuses (passing a runtime string
-      as the format-string argument with no substitution args) that were surfaced by the C++20 bump
-      enabling ``fmt``'s ``consteval`` format-string checks
-    - Fixed two ``std::string_view::data()`` calls in ``network_reader.hpp`` and
-      ``write_location_and_ground_state.hpp`` that relied on null-termination they aren't guaranteed to
-      have, surfaced by Clang-Tidy's whole-file linting once these files were touched for the ``io/``
-      modernization pass
-    - Fixed a ``std::string_view::data()`` call in ``clocking_scheme.hpp``'s ``get_clocking_scheme`` that
-      relied on null-termination it isn't guaranteed to have, surfaced by Clang-Tidy's whole-file linting
-      once the file was touched for the ``layouts/`` modernization pass
-    - Fixed ``get_clocking_scheme`` passing plain ``char`` values (potentially negative on signed-``char``
-      platforms) directly to ``::toupper``, which is undefined behavior for arguments that aren't
-      representable as ``unsigned char`` or equal to ``EOF``, by casting through ``unsigned char`` in the
-      ``std::ranges::transform`` call
-    - Fixed a signed-integer overflow in ``coordinates.hpp``'s ``to_siqad_coord`` for the minimum
-      representable ``CoordinateType::y`` value, where negating it before taking the modulo was undefined
-      behavior; the SiQAD ``z`` value is now derived from ``coord.y % 2`` directly, without negation
-    - Fixed CodeRabbit and Clang-Tidy findings surfaced on the ``io/`` modernization PR: plain ``char``
-      values (potentially negative on signed-``char`` platforms) passed directly to ``::isdigit``,
-      ``::isxdigit``, and ``::tolower`` in ``dot_drawers.hpp``, ``read_fgl_layout.hpp``, and
-      ``read_sqd_layout.hpp``, which is undefined behavior for non-``unsigned char``/non-``EOF``
-      arguments; two more ``std::string_view::data()`` calls relying on unguaranteed null-termination in
-      ``read_fqca_layout.hpp`` and ``read_sidb_surface_defects.hpp``; a non-null-terminated
-      ``std::string_view::data()`` passed to ``paths.emplace_back()`` in ``network_reader.hpp``; unused
-      ``cell_technologies.hpp``, ``sstream``, and ``cstdint`` includes in ``read_fqca_layout.hpp`` and
-      ``write_location_and_ground_state.hpp``; a missing ``<iterator>`` include for
-      ``std::istreambuf_iterator`` in ``read_sidb_surface_defects.hpp``; an oversized ``int`` base type
-      for the two-value ``fqca_section`` enum in ``read_fqca_layout.hpp``; and brace-init/Doxygen
-      documentation gaps on declarations touched by the modernization in ``dot_drawers.hpp``,
-      ``read_sqd_layout.hpp``, ``print_layout.hpp``, and ``write_fgl_layout.hpp``
-- Python bindings:
-    - Fixed the ``pyfiction`` binding for ``sidb_defect``'s ``operator!=``, which referenced a docstring
-      symbol that the auto-gen bot stopped emitting once ``operator!=`` became compiler-synthesized from
-      the newly defaulted ``operator==`` (see above), by inlining the docstring text directly at the
-      binding site
+    - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
+    - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``
+      does not guarantee
+    - Fixed plain ``char`` values being passed to ``::toupper``, ``::tolower``, ``::isdigit``, and
+      ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
+    - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
 - Continuous integration:
-    - Fixed the Renovate ``github-tags`` custom managers for ``nlohmann/json``, ``catchorg/Catch2``,
-      ``greg7mdp/parallel-hashmap``, and ``leethomason/tinyxml2`` to reference ``owner/repository``
-      package names instead of full GitHub URLs, which the datasource requires to resolve tags
-    - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge by moving the
-      ``custom.regex`` package rule after the ``patch versions`` rule, so its ``automerge: false``
-      takes precedence
-    - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit that includes a
-      ``std::result_of``/``std::invoke_result_t`` fix required for C++20, instead of floating on
-      ``master``, which could resolve to a stale commit via GitHub's ``info/refs`` caching for
-      anonymous clones
+    - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
+      instead of full GitHub URLs, which the datasource requires to resolve tags
+    - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
+    - Pinned the vendored ``alice`` dependency's ``GIT_TAG`` to a fixed commit carrying a C++20 fix,
+      instead of floating on ``master``
+    - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, leaving the slowest runners cold
+    - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``
+    - Fixed the 🐍 Packaging path filter still pointing at the removed ``bindings/pyfiction/**``
+- Python bindings:
+    - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
+      longer emitted now that the operator is compiler-synthesized
+    - Fixed nine ``DOC(...)`` references that named symbols the broken parse had invented; the
+      ``*_stats`` runtime members are now documented under their real names
+    - Fixed ``bdl_input_iterator.py`` never being collected, as its name did not match pytest's
+      ``python_files`` pattern, so its five tests had never run
 
 v0.7.0 - 2026-07-31
 -------------------

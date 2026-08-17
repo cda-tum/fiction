@@ -9,7 +9,10 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
+#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
+#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
@@ -18,6 +21,7 @@
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cmath>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -830,6 +834,89 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         CHECK(ct_cc == 350);
 
 #endif  // FICTION_ALGLIB_ENABLED
+    }
+}
+
+TEST_CASE("Pre-generated input pattern layouts match the layout-based overload", "[critical-temperature]")
+{
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
+                                 is_operational_params::operational_condition::REJECT_KINKS})
+    {
+        critical_temperature_params params{};
+        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+        params.operational_params.op_condition          = condition;
+
+        critical_temperature_stats expected_stats{};
+
+        const auto expected_ct =
+            critical_temperature_gate_based(lat, std::vector<tt>{create_and_tt()}, params, &expected_stats);
+
+        const auto input_wires = detect_bdl_wires(
+            lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+        const auto output_wires = detect_bdl_wires(
+            lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::OUTPUT);
+        const auto output_pairs =
+            detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT,
+                             params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+
+        const auto input_pattern_layouts =
+            generate_bdl_input_pattern_layouts(lat, params.operational_params.input_bdl_iterator_params, input_wires);
+
+        critical_temperature_stats stats{};
+
+        const auto ct = critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()}, params,
+                                                        output_pairs, input_wires, output_wires, &stats);
+
+        // the two overloads run the same computation, so the results must be bit-identical
+        CHECK_THAT(ct, Catch::Matchers::WithinULP(expected_ct, 0));
+        CHECK(stats.num_valid_lyt == expected_stats.num_valid_lyt);
+        CHECK(stats.energy_between_ground_state_and_first_erroneous ==
+              expected_stats.energy_between_ground_state_and_first_erroneous);
+    }
+}
+
+TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[critical-temperature]")
+{
+    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+
+    const critical_temperature_params params{};
+
+    const auto input_wires  = detect_bdl_wires(lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                               bdl_wire_selection::INPUT);
+    const auto output_wires = detect_bdl_wires(lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                                               bdl_wire_selection::OUTPUT);
+    const auto output_pairs =
+        detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT,
+                         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+
+    const auto input_pattern_layouts =
+        generate_bdl_input_pattern_layouts(lat, params.operational_params.input_bdl_iterator_params, input_wires);
+
+    SECTION("empty specification")
+    {
+        CHECK_THROWS_AS(critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{}, params, output_pairs,
+                                                        input_wires, output_wires),
+                        std::invalid_argument);
+    }
+    SECTION("too few input pattern layouts")
+    {
+        const std::vector<sidb_100_cell_clk_lyt_siqad> too_few{input_pattern_layouts.front()};
+
+        CHECK_THROWS_AS(critical_temperature_gate_based(too_few, std::vector<tt>{create_and_tt()}, params, output_pairs,
+                                                        input_wires, output_wires),
+                        std::invalid_argument);
+    }
+    SECTION("more output BDL pairs than truth tables")
+    {
+        auto too_many = output_pairs;
+        too_many.push_back(output_pairs.front());
+
+        CHECK_THROWS_AS(critical_temperature_gate_based(input_pattern_layouts, std::vector<tt>{create_and_tt()}, params,
+                                                        too_many, input_wires, output_wires),
+                        std::invalid_argument);
     }
 }
 

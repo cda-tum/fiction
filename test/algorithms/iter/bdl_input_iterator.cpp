@@ -10,6 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
@@ -222,19 +223,64 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     CHECK(lyt_0_1.get_cell_type({2, 0, 0}) == sidb_technology::cell_type::EMPTY);
 }
 
+TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
+{
+    // the same wire as in "BDL wire iteration", but with the input pair at the right end and the wire running to the
+    // left, so that the dot closer to the end of the wire is the opposite one of the two. Under
+    // `PERTURBER_DISTANCE_ENCODED`, an input of `1` places the perturber closer to the wire, so both orientations
+    // together cover both outcomes of the distance comparison
+    using layout = sidb_cell_clk_lyt_siqad;
+
+    layout lyt{{20, 0}, "mirrored BDL wire"};
+
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::INPUT);
+
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::OUTPUT);
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+
+    REQUIRE(bii.num_input_pairs() == 1);
+
+    // input state 0 keeps the perturber that is farther away from the wire, which is the right-hand dot here
+    const auto& lyt_0 = *bii;
+
+    CHECK(lyt_0.get_cell_type({20, 0, 0}) == sidb_technology::cell_type::INPUT);
+    CHECK(lyt_0.get_cell_type({18, 0, 0}) == sidb_technology::cell_type::EMPTY);
+
+    ++bii;
+
+    // input state 1 keeps the perturber that is closer to the wire, which is the left-hand dot here
+    const auto& lyt_1 = *bii;
+
+    CHECK(lyt_1.get_cell_type({20, 0, 0}) == sidb_technology::cell_type::EMPTY);
+    CHECK(lyt_1.get_cell_type({18, 0, 0}) == sidb_technology::cell_type::INPUT);
+}
+
 TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 {
     const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const detect_bdl_wires_params params{2.0};
+    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
     SECTION("SiQAD coordinates, encode input 0 with the absence of perturbers")
     {
         bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
-            lat, bdl_input_iterator_params{
-                     params, bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
+            lat,
+            bdl_input_iterator_params{
+                .bdl_wire_params  = params,
+                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -298,7 +344,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("SiQAD coordinates")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{params}};
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -487,6 +533,73 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
                     CHECK(false);
                 }
             }
+        }
+    }
+}
+
+TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
+{
+    const auto lyt = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
+
+    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+
+    const bdl_input_iterator_params params{.bdl_wire_params =
+                                               detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};
+
+    SECTION("One layout per input pattern, matching the iterator")
+    {
+        const auto layouts = generate_bdl_input_pattern_layouts(lat, params);
+
+        REQUIRE(layouts.size() == 4);
+
+        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
+
+        for (uint64_t i = 0; i < layouts.size(); ++i, ++bii)
+        {
+            const auto& expected = *bii;
+
+            CHECK(layouts[i].num_cells() == expected.num_cells());
+
+            expected.foreach_cell([&layouts, &expected, i](const auto& c)
+                                  { CHECK(layouts[i].get_cell_type(c) == expected.get_cell_type(c)); });
+        }
+    }
+
+    SECTION("Pre-detected input wires yield the same layouts")
+    {
+        const auto input_wires = detect_bdl_wires(lat, params.bdl_wire_params, bdl_wire_selection::INPUT);
+
+        const auto layouts            = generate_bdl_input_pattern_layouts(lat, params);
+        const auto layouts_with_wires = generate_bdl_input_pattern_layouts(lat, params, input_wires);
+
+        REQUIRE(layouts.size() == layouts_with_wires.size());
+
+        for (uint64_t i = 0; i < layouts.size(); ++i)
+        {
+            layouts[i].foreach_cell([&layouts, &layouts_with_wires, i](const auto& c)
+                                    { CHECK(layouts_with_wires[i].get_cell_type(c) == layouts[i].get_cell_type(c)); });
+        }
+    }
+
+    SECTION("The layouts are independent deep copies")
+    {
+        // a shallow copy would make all entries share cell storage, which passes every other check here but
+        // corrupts the layouts as soon as they are read concurrently
+        auto layouts = generate_bdl_input_pattern_layouts(lat, params);
+
+        REQUIRE(layouts.size() == 4);
+
+        const cell<sidb_100_cell_clk_lyt_siqad> probe{100, 100, 0};
+
+        REQUIRE(layouts[0].get_cell_type(probe) == sidb_technology::cell_type::EMPTY);
+
+        layouts[0].assign_cell_type(probe, sidb_technology::cell_type::NORMAL);
+
+        CHECK(layouts[0].get_cell_type(probe) == sidb_technology::cell_type::NORMAL);
+
+        for (uint64_t i = 1; i < layouts.size(); ++i)
+        {
+            CHECK(layouts[i].get_cell_type(probe) == sidb_technology::cell_type::EMPTY);
         }
     }
 }

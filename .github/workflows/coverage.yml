@@ -46,6 +46,7 @@ jobs:
 
     name: Coverage on ${{matrix.os}} with ${{matrix.compiler}}
     runs-on: ${{matrix.os}}
+    timeout-minutes: 120
 
     steps:
       - name: Install Dependencies

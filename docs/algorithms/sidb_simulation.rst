@@ -157,7 +157,8 @@ Temperature Behavior
 
         .. doxygenstruct:: fiction::critical_temperature_params
            :members:
-        .. doxygenfunction:: fiction::critical_temperature_gate_based
+        .. doxygenfunction:: fiction::critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::critical_temperature_gate_based(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const critical_temperature_params& params, const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<bdl_wire<Lyt>>& input_bdl_wires, const std::vector<bdl_wire<Lyt>>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
         .. doxygenfunction:: fiction::critical_temperature_non_gate_based
 
         **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp``
@@ -256,6 +257,7 @@ Operational Domain Computation
            :members:
         .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
         .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
         .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
         .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
         .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
