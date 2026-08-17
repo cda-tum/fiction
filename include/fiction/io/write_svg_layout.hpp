@@ -862,7 +862,7 @@ class write_qca_layout_svg_impl
     }
 
   private:
-    Lyt lyt;
+    const Lyt& lyt;
 
     std::ostream& os;
 
@@ -1198,7 +1198,7 @@ class write_mol_qca_layout_svg_impl
     }
 
   private:
-    Lyt lyt;
+    const Lyt& lyt;
 
     std::ostream& os;
 
