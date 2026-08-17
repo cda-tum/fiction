@@ -56,6 +56,9 @@ SVG Images
         .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
         .. doxygenfunction:: fiction::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
 
+        .. doxygenfunction:: fiction::write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.write_qca_layout_svg_params
@@ -66,3 +69,4 @@ SVG Images
             :members:
         .. autofunction:: mnt.pyfiction.write_sidb_layout_svg
         .. autofunction:: mnt.pyfiction.write_sidb_layout_svg_to_string
+        .. autofunction:: mnt.pyfiction.write_mol_qca_layout_svg
