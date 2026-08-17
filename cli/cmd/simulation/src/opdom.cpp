@@ -127,7 +127,7 @@ void opdom_command::execute()
     // make sure that at most one algorithm is selected
     const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
                                              is_set("contour_tracing")};
-    if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
+    if (std::ranges::count(algorithm_selections, true) > 1)
     {
         env->out() << "[e] only one algorithm can be selected at a time\n";
         reset_params();
@@ -145,7 +145,8 @@ void opdom_command::execute()
     // make sure that z is not set if y is not, and that y is not set if x is not
     if (is_set("z_sweep") && !is_set("y_sweep"))
     {
-        env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set\n";
+        env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set. Pass the first two "
+                      "dimensions explicitly, e.g. '-x epsilon_r -y lambda_tf -z mu_minus'\n";
         reset_params();
         return;
     }
@@ -156,15 +157,22 @@ void opdom_command::execute()
         return;
     }
 
-    // overwrite the sweeps with their respective lower-case string representations
-    std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
-    std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
-    std::transform(z_sweep.begin(), z_sweep.end(), z_sweep.begin(), ::tolower);
+    // overwrite the sweeps with their respective lower-case string representations. `std::tolower` is undefined for
+    // negative values, which a plain `char` can hold, so each character is widened through `unsigned char` first
+    const auto lowercase = [](std::string& str) noexcept
+    {
+        std::ranges::transform(str, str.begin(),
+                               [](const unsigned char c) noexcept { return static_cast<char>(std::tolower(c)); });
+    };
+
+    lowercase(x_sweep);
+    lowercase(y_sweep);
+    lowercase(z_sweep);
 
     static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
 
     // check if x sweep parameter is valid
-    if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+    if (std::ranges::find(valid_sweep_params, x_sweep) == valid_sweep_params.cend())
     {
         env->out() << "[e] invalid x sweep parameter \"" << x_sweep
                    << "\". Has to be one of [epsilon_r, lambda_tf, "
@@ -174,7 +182,7 @@ void opdom_command::execute()
     }
 
     // check if y sweep parameter is valid
-    if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
+    if (std::ranges::find(valid_sweep_params, y_sweep) == valid_sweep_params.cend())
     {
         env->out() << "[e] invalid y sweep parameter \"" << y_sweep
                    << "\". Has to be one of [epsilon_r, lambda_tf, "
@@ -186,7 +194,7 @@ void opdom_command::execute()
     // check if z sweep parameter is valid if set
     if (is_set("z_sweep"))
     {
-        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), z_sweep) == valid_sweep_params.cend())
+        if (std::ranges::find(valid_sweep_params, z_sweep) == valid_sweep_params.cend())
         {
             env->out() << "[e] invalid z sweep parameter \"" << z_sweep
                        << "\". Has to be one of [epsilon_r, lambda_tf, "
