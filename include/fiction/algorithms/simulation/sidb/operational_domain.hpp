@@ -643,10 +643,12 @@ class operational_domain_impl
 
         // this termination logic is hand-rolled rather than built on `std::jthread` with
         // `std::stop_source`/`std::stop_token` and the C++20 `std::condition_variable_any::wait` stop-token overload.
-        // Apple's libc++ does not ship `<stop_token>`: P0660R10 is absent from
-        // https://developer.apple.com/xcode/cpp/, so the macOS CI job cannot compile it. Upstream libc++ un-gated it
-        // from `-fexperimental-library` in LLVM 20. A single portable implementation was preferred over a
-        // feature-detected second copy. Revisit once Apple Clang ships the feature
+        // Apple's libc++ ships the `<stop_token>` and `<__thread/jthread.h>` headers but keeps their contents behind
+        // `-fexperimental-library`, so including them defines no `__cpp_lib_jthread` and declares neither
+        // `std::jthread` nor `std::stop_token`. Verified on the macOS CI runner on 2026-08-17: Apple clang 17.0.0
+        // (Xcode 16.4, macos-15) fails the probe with "use of undeclared identifier '__cpp_lib_jthread'". Upstream
+        // libc++ un-gated the feature in LLVM 20, which Apple Clang has not picked up yet. A single portable
+        // implementation was preferred over a feature-detected second copy. Revisit once Apple Clang un-gates it
         std::mutex              queue_mutex{};
         std::condition_variable queue_cv{};
 
