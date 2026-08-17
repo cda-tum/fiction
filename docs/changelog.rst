@@ -138,6 +138,8 @@ Fixed
     - Fixed an off-by-one in the boundary search of ``operational_domain_contour_tracing``, which skipped
       the first sweep dimension's lowest step index. Where the operational region reached that edge, the
       traced contour came out empty and every reachable point was marked operational without simulation
+    - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
+      ``bool``. It is now ``std::atomic_bool``
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL

@@ -15,6 +15,7 @@
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <limits>
@@ -94,7 +95,8 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         return std::nullopt;
     }
 
-    bool timeout_limit_reached = false;
+    // written by every worker thread, read after they have all joined
+    std::atomic_bool timeout_limit_reached{false};
 
     mockturtle::stopwatch<>::duration time_counter{};
 
@@ -200,7 +202,8 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
                             if (std::cmp_greater_equal(elapsed_time, ps.timeout))
                             {
-                                timeout_limit_reached = true;
+                                // relaxed: join establishes the happens-before edge to the read below
+                                timeout_limit_reached.store(true, std::memory_order_relaxed);
                                 return;  // Exit the thread if the timeout has been reached
                             }
 
@@ -255,7 +258,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
     st.simulation_runtime = time_counter;
 
-    if (timeout_limit_reached || st.charge_distributions.empty())
+    if (timeout_limit_reached.load(std::memory_order_relaxed) || st.charge_distributions.empty())
     {
         return std::nullopt;
     }

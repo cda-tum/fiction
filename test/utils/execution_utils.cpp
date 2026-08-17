@@ -34,9 +34,9 @@ constexpr int policy_arity(const Policy&, int) noexcept
 // feature-test macros
 #if (defined(__cpp_lib_parallel_algorithm) || defined(__cpp_lib_execution)) && \
     (!defined(__GNUC__) || defined(__clang__) || __GNUC__ > 9)
-constexpr int EXPECTED_POLICY_ARITY = 2;
+constexpr int EXPECTED_POLICY_ARITY{2};
 #else
-constexpr int EXPECTED_POLICY_ARITY = 1;
+constexpr int EXPECTED_POLICY_ARITY{1};
 #endif
 
 static_assert(policy_arity(FICTION_EXECUTION_POLICY_SEQ 0) == EXPECTED_POLICY_ARITY,
@@ -61,8 +61,8 @@ TEST_CASE("Execution policy macros are usable as algorithm arguments", "[executi
 
     const std::vector<std::pair<uint64_t, double>> costs{{0, 2.5}, {1, 0.5}, {2, 1.5}};
 
-    const auto cheapest = std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ costs.cbegin(), costs.cend(),
-                                           [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
+    const auto cheapest{std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ costs.cbegin(), costs.cend(),
+                                         [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; })};
 
     CHECK(cheapest->first == 1);
 }
