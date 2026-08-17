@@ -209,7 +209,7 @@ def test_and_gate_111_lattice_11_input_pattern():
 
     params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-    assert params.simulation_parameters.mu_minus == pytest.approx(-0.1)
+    assert params.simulation_parameters.mu_minus == -0.1
 
     [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 

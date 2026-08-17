@@ -1,5 +1,3 @@
-import pytest
-
 from mnt.pyfiction import (
     charge_distribution_surface,
     charge_distribution_surface_111,
@@ -24,14 +22,14 @@ def test_perturber_and_sidb_pair():
     params.iteration_steps = 80
     params.alpha = 0.7
     assert params.iteration_steps == 80
-    assert params.alpha == pytest.approx(0.7)
+    assert params.alpha == 0.7
 
     params_one = quicksim_params()
     params_one.iteration_steps = 50
     params_one.alpha = 0.4
     params_one.number_threads = 1
     assert params_one.iteration_steps == 50
-    assert params_one.alpha == pytest.approx(0.4)
+    assert params_one.alpha == 0.4
     assert params_one.number_threads == 1
 
     charge_distribution_surface(layout)
@@ -61,8 +59,8 @@ def test_perturber_and_sidb_pair_111():
     params.iteration_steps = 80
     params.alpha = 0.7
     assert params.iteration_steps == 80
-    assert params.alpha == pytest.approx(0.7)
-    assert params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+    assert params.alpha == 0.7
+    assert params.simulation_parameters.mu_minus == -0.32
 
     charge_distribution_surface_111(layout)
 

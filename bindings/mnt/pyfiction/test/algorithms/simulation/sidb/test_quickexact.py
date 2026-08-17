@@ -1,7 +1,5 @@
 import os
 
-import pytest
-
 from mnt.pyfiction import (
     automatic_base_number_detection,
     charge_distribution_surface_100,
@@ -29,7 +27,7 @@ def test_three_sidbs():
     params.simulation_parameters.base = 2
     params.simulation_parameters.mu_minus = -0.25
     params.base_number_detection = automatic_base_number_detection.OFF
-    assert params.simulation_parameters.mu_minus == pytest.approx(-0.25)
+    assert params.simulation_parameters.mu_minus == -0.25
     assert params.base_number_detection == automatic_base_number_detection.OFF
 
     cds = charge_distribution_surface_100(layout)
@@ -62,7 +60,7 @@ def test_perturber_and_sidb_pair_111():
     params.simulation_parameters.base = 2
     params.simulation_parameters.mu_minus = -0.32
     params.base_number_detection = automatic_base_number_detection.OFF
-    assert params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+    assert params.simulation_parameters.mu_minus == -0.32
     assert params.base_number_detection == automatic_base_number_detection.OFF
 
     cds = charge_distribution_surface_111(layout)

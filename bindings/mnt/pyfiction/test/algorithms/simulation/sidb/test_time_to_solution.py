@@ -86,7 +86,7 @@ def test_time_to_solution_with_simulation_results():
     quickexact_params_inst = quickexact_params()
     quickexact_params_inst.simulation_parameters = params
     quickexact_params_inst.base_number_detection = automatic_base_number_detection.OFF
-    assert quickexact_params_inst.simulation_parameters.mu_minus == pytest.approx(-0.32)
+    assert quickexact_params_inst.simulation_parameters.mu_minus == -0.32
     assert quickexact_params_inst.base_number_detection == automatic_base_number_detection.OFF
 
     # Run the QuickExact simulation

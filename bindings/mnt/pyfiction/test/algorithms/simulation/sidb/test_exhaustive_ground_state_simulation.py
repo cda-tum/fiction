@@ -1,5 +1,3 @@
-import pytest
-
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
@@ -45,7 +43,7 @@ def test_perturber_and_sidb_pair_111():
     params.mu_minus = -0.32
     params.base = 2
 
-    assert params.mu_minus == pytest.approx(-0.32)
+    assert params.mu_minus == -0.32
 
     cds = charge_distribution_surface_111(layout)
 

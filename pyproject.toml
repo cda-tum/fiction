@@ -255,7 +255,9 @@ future-annotations = true
 known-first-party = ["mnt.pyfiction"]
 
 [tool.ruff.lint.per-file-ignores]
-"bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D"]
+# RUF069: a test that stores a float through a binding and reads it back asserts that it
+# comes back unchanged, which is exact; pytest.approx there would hide a broken setter
+"bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D", "RUF069"]
 "docs/**" = ["T20", "A"]
 "noxfile.py" = ["T20", "TID251"]
 "scripts/**" = ["T20"]  # maintenance scripts report progress on stdout

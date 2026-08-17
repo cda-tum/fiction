@@ -1,5 +1,3 @@
-import pytest
-
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
@@ -27,7 +25,7 @@ def test_three_sidbs():
     params.available_threads = 4
     params.report_gss_stats = ground_state_space_reporting.ON
     assert params.simulation_parameters.base == 2
-    assert params.simulation_parameters.mu_minus == pytest.approx(-0.25)
+    assert params.simulation_parameters.mu_minus == -0.25
     assert params.validity_witness_partitioning_max_cluster_size_gss == 15
     assert params.num_overlapping_witnesses_limit_gss == 8
     assert params.available_threads == 4
@@ -62,7 +60,7 @@ def test_perturber_and_sidb_pair_111():
     params = clustercomplete_params()
     params.simulation_parameters.base = 2
     params.simulation_parameters.mu_minus = -0.32
-    assert params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+    assert params.simulation_parameters.mu_minus == -0.32
 
     cds = charge_distribution_surface_111(layout)
 

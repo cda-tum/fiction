@@ -14,8 +14,8 @@ def test_sidb_nm_distance_100_lattice():
     assert sidb_nm_distance_100(layout_one, (1, 1), (1, 1)) == 0
 
     # Replace the placeholders with actual values or function calls
-    assert sidb_nm_distance_100(layout_one, (0, 0), (2, 0)) == pytest.approx(2 * 0.384)
-    assert sidb_nm_distance_100(layout_one, (0, 0), (0, 1)) == pytest.approx(0.225)
+    assert sidb_nm_distance_100(layout_one, (0, 0), (2, 0)) == pytest.approx(2 * 0.384, abs=1e-7)
+    assert sidb_nm_distance_100(layout_one, (0, 0), (0, 1)) == pytest.approx(0.225, abs=1e-7)
 
 
 def test_sidb_nm_distance_111_lattice():
@@ -29,5 +29,5 @@ def test_sidb_nm_distance_111_lattice():
     assert sidb_nm_distance_111(layout_one, (1, 1), (1, 1)) == 0
 
     # Replace the placeholders with actual values or function calls
-    assert sidb_nm_distance_111(layout_one, (0, 0), (2, 0)) == pytest.approx(1.33)
-    assert sidb_nm_distance_111(layout_one, (0, 0), (0, 1)) == pytest.approx(0.3839967)
+    assert sidb_nm_distance_111(layout_one, (0, 0), (2, 0)) == pytest.approx(1.33, abs=1e-7)
+    assert sidb_nm_distance_111(layout_one, (0, 0), (0, 1)) == pytest.approx(0.3839967, abs=1e-7)

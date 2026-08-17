@@ -81,7 +81,7 @@ def test_siqad_and_gate_skeleton_100():
     params.number_of_canvas_sidbs = 1
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-    assert params.operational_params.simulation_parameters.mu_minus == pytest.approx(-0.28)
+    assert params.operational_params.simulation_parameters.mu_minus == -0.28
     assert params.number_of_canvas_sidbs == 1
     assert params.canvas[0] == (4, 8, 0)
     assert params.canvas[1] == (14, 11)
@@ -103,7 +103,7 @@ def test_nor_gate_111(nor_gate_skeleton):
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
     params.operational_params.op_condition = operational_condition.REJECT_KINKS
 
-    assert params.operational_params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+    assert params.operational_params.simulation_parameters.mu_minus == -0.32
     assert params.number_of_canvas_sidbs == 3
     assert params.canvas[0] == (10, 22, 0)
     assert params.canvas[1] == (14, 34)
@@ -134,7 +134,7 @@ def test_nor_gate_111_quickcell(nor_gate_skeleton):
     params.number_of_canvas_sidbs = 3
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-    assert params.operational_params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+    assert params.operational_params.simulation_parameters.mu_minus == -0.32
     assert params.number_of_canvas_sidbs == 3
     assert params.canvas[0] == (10, 26, 0)
     assert params.canvas[1] == (14, 34)

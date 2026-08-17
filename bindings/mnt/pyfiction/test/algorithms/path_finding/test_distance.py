@@ -51,10 +51,16 @@ def test_euclidean(make_lyt):
     assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == 0
     assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == 1
     assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == 1
-    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)) == pytest.approx(2**0.5)
-    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)) == pytest.approx(2 * 2**0.5)
-    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)) == pytest.approx(3 * 2**0.5)
-    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)) == pytest.approx(4 * 2**0.5)
+    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)) == pytest.approx(2**0.5, abs=1e-7)
+    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)) == pytest.approx(
+        2 * 2**0.5, abs=1e-7
+    )
+    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)) == pytest.approx(
+        3 * 2**0.5, abs=1e-7
+    )
+    assert euclidean_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)) == pytest.approx(
+        4 * 2**0.5, abs=1e-7
+    )
 
 
 @pytest.mark.parametrize("make_lyt", ALL_LAYOUTS)

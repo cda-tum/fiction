@@ -35,15 +35,15 @@ def test_three_DBs_100_lattice():
 
     charge_layouts = [cds1, cds2, cds3, cds4]
 
-    assert cds1.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997)
-    assert cds2.get_electrostatic_potential_energy() == pytest.approx(0.0, abs=1e-9)
-    assert cds3.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997)
-    assert cds4.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997)
+    assert cds1.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997, abs=1e-7)
+    assert cds2.get_electrostatic_potential_energy() == pytest.approx(0.0, abs=1e-7)
+    assert cds3.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997, abs=1e-7)
+    assert cds4.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997, abs=1e-7)
 
     distribution = calculate_energy_distribution(charge_layouts)
 
-    assert distribution.get_nth_state(0).electrostatic_potential_energy == pytest.approx(0.0, abs=1e-9)
-    assert distribution.get_nth_state(1).electrostatic_potential_energy == pytest.approx(0.48066663155586997)
+    assert distribution.get_nth_state(0).electrostatic_potential_energy == pytest.approx(0.0, abs=1e-7)
+    assert distribution.get_nth_state(1).electrostatic_potential_energy == pytest.approx(0.48066663155586997, abs=1e-7)
     assert distribution.get_nth_state(0).degeneracy <= 1
     assert distribution.get_nth_state(1).degeneracy <= 3
 
@@ -71,10 +71,10 @@ def test_three_DBs_111_lattice():
 
     charge_layouts = [cds1, cds2, cds3, cds4]
 
-    assert cds1.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219)
-    assert cds2.get_electrostatic_potential_energy() == pytest.approx(0.0, abs=1e-9)
-    assert cds3.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219)
-    assert cds4.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219)
+    assert cds1.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219, abs=1e-7)
+    assert cds2.get_electrostatic_potential_energy() == pytest.approx(0.0, abs=1e-7)
+    assert cds3.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219, abs=1e-7)
+    assert cds4.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219, abs=1e-7)
 
     distribution = calculate_energy_distribution(charge_layouts)
 
