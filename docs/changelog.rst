@@ -27,6 +27,10 @@ Added
       no longer caps at three dimensions
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- Continuous integration:
+    - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which diffs the built source
+      distribution against the files git tracks and fails if a planted editor, cache, or virtual
+      environment file reaches it. ``nox -s check_sdist`` runs the same check locally
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
@@ -105,6 +109,12 @@ Changed
     - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
     - Migrated the ``pyfiction`` test suite from ``unittest`` to pytest and enabled ruff's ``PT``,
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
+    - Every Python file now carries ``from __future__ import annotations``, which ruff's
+      ``future-annotations`` setting had assumed of all of them and only six of them had
+    - Retired ruff's TODO ignore list. What remains ignored states a decision: ``experiments/`` is
+      exempt from the style rules that ``experiments/AGENTS.md`` puts out of reach, the three
+      ``__init__.py`` files that register the Windows DLL search path are exempt from ``RUF067``,
+      and ``CPY001`` stays off pending a decision on copyright headers
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
@@ -151,6 +161,14 @@ Fixed
       traced contour came out empty and every reachable point was marked operational without simulation
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
+- Build system:
+    - ``.gitignore`` now covers ``dist/``, ``.venv/``, ``.tox/``, ``.coverage``, and the usual editor
+      and OS droppings. The source distribution is built from the working tree and skips only what
+      git ignores, so a local ``uv build --sdist`` could ship them
+    - Fixed the source distribution shipping none of the C++ sources it needs to build.
+      ``sdist.exclude`` matched at any depth, so ``**/include`` removed ``include/fiction/`` and
+      ``**.cpp``/``**.hpp`` removed the extension and vendored sources. Installing ``mnt.pyfiction``
+      from source failed at CMake configure on every platform without a matching wheel
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
