@@ -898,7 +898,8 @@ class write_qca_layout_svg_impl
      */
     std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
     {
-        std::string cell_description, cell_color{};
+        std::string cell_description{};
+        std::string cell_color{};
 
         static constexpr const std::array<const char*, 4> cell_colors{
             {svg::CLOCK_ZONE_1_CELL, svg::CLOCK_ZONE_2_CELL, svg::CLOCK_ZONE_3_CELL, svg::CLOCK_ZONE_4_CELL}};
