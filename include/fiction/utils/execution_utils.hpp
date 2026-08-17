@@ -14,7 +14,9 @@
 #if (defined(__cpp_lib_parallel_algorithm) || defined(__cpp_lib_execution)) && \
     (!defined(__GNUC__) || defined(__clang__) || __GNUC__ > 9)  // GCC version >= 10
 
-#include <execution>  // include execution policies only if the C++ library supports them
+// include execution policies only if the C++ library supports them. Pinned, because only the macro
+// replacement lists below name std::execution and include-cleaner cannot see through them.
+#include <execution>  // IWYU pragma: keep
 
 // define the execution policies as macros
 

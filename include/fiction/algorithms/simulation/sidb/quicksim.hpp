@@ -21,6 +21,7 @@
 #include <mutex>
 #include <optional>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -197,7 +198,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                 std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
                                     .count();
 
-                            if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
+                            if (std::cmp_greater_equal(elapsed_time, ps.timeout))
                             {
                                 timeout_limit_reached = true;
                                 return;  // Exit the thread if the timeout has been reached
@@ -222,7 +223,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                             {
                                 charge_lyt_copy.charge_distribution_to_index();
 
-                                const std::lock_guard lock{mutex};
+                                const std::scoped_lock lock{mutex};
                                 st.charge_distributions.emplace_back(charge_lyt_copy);
                             }
 
@@ -237,7 +238,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                 {
                                     charge_lyt_copy.charge_distribution_to_index();
 
-                                    const std::lock_guard lock{mutex};
+                                    const std::scoped_lock lock{mutex};
                                     st.charge_distributions.emplace_back(charge_lyt_copy);
                                 }
                             }

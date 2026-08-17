@@ -16,12 +16,19 @@
 #include <vector>
 #include <version>
 
-// FICTION_EXECUTION_POLICY_* expands either to a policy followed by a comma, or to nothing.
-// Counting the arguments it contributes tells which of the two happened.
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage): only the preprocessor can observe an empty expansion
-#define FICTION_TEST_POLICY_ARITY(...) FICTION_TEST_ARGUMENT_COUNT(__VA_ARGS__, 2, 1)
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage): only the preprocessor can observe an empty expansion
-#define FICTION_TEST_ARGUMENT_COUNT(a, b, n, ...) n
+// FICTION_EXECUTION_POLICY_* expands either to a policy followed by a comma, or to nothing. Feeding
+// the expansion to these overloads reports which of the two happened: the two-argument overload only
+// wins when the macro contributed a policy. Overload resolution rather than a variadic argument
+// count, because MSVC's traditional preprocessor passes __VA_ARGS__ on as a single argument.
+constexpr int policy_arity(int) noexcept
+{
+    return 1;
+}
+template <typename Policy>
+constexpr int policy_arity(const Policy&, int) noexcept
+{
+    return 2;
+}
 
 // the condition the guard is supposed to encode, evaluated here after <version> has defined the
 // feature-test macros
@@ -32,11 +39,11 @@ constexpr int EXPECTED_POLICY_ARITY = 2;
 constexpr int EXPECTED_POLICY_ARITY = 1;
 #endif
 
-static_assert(FICTION_TEST_POLICY_ARITY(FICTION_EXECUTION_POLICY_SEQ 0) == EXPECTED_POLICY_ARITY,
+static_assert(policy_arity(FICTION_EXECUTION_POLICY_SEQ 0) == EXPECTED_POLICY_ARITY,
               "FICTION_EXECUTION_POLICY_SEQ disagrees with the standard library's own feature-test macros");
-static_assert(FICTION_TEST_POLICY_ARITY(FICTION_EXECUTION_POLICY_PAR 0) == EXPECTED_POLICY_ARITY,
+static_assert(policy_arity(FICTION_EXECUTION_POLICY_PAR 0) == EXPECTED_POLICY_ARITY,
               "FICTION_EXECUTION_POLICY_PAR disagrees with the standard library's own feature-test macros");
-static_assert(FICTION_TEST_POLICY_ARITY(FICTION_EXECUTION_POLICY_PAR_UNSEQ 0) == EXPECTED_POLICY_ARITY,
+static_assert(policy_arity(FICTION_EXECUTION_POLICY_PAR_UNSEQ 0) == EXPECTED_POLICY_ARITY,
               "FICTION_EXECUTION_POLICY_PAR_UNSEQ disagrees with the standard library's own feature-test macros");
 
 TEST_CASE("Execution policy macros are usable as algorithm arguments", "[execution_utils]")
