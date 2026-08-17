@@ -1,3 +1,5 @@
+import pytest
+
 from mnt.pyfiction import (
     cartesian_gate_layout,
     cartesian_obstruction_layout,
@@ -11,83 +13,102 @@ from mnt.pyfiction import (
     shifted_cartesian_obstruction_layout,
 )
 
-
-def test_obstruction_layout_clocking_inheritance():
-    for layout in [
-        cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-        shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-        hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-    ]:
-        assert layout.incoming_clocked_zones((0, 0)) == []
-        assert layout.outgoing_clocked_zones((2, 2)) == []
-
-        for icz in layout.incoming_clocked_zones((1, 1)):
-            assert icz in [offset_coordinate(1, 0), offset_coordinate(0, 1)]
-
-        for icz in layout.outgoing_clocked_zones((1, 1)):
-            assert icz in [offset_coordinate(1, 2), offset_coordinate(2, 1)]
-
-
-def test_obstructed_coordinates():
-    for layout in [
-        cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-    ]:
-        for c in layout.coordinates():
-            assert not layout.is_obstructed_coordinate(c)
-
-        layout.obstruct_coordinate((0, 0))
-        layout.obstruct_coordinate((1, 1))
-        layout.obstruct_coordinate((2, 2))
-
-        assert layout.is_obstructed_coordinate((0, 0))
-        assert layout.is_obstructed_coordinate((1, 1))
-        assert layout.is_obstructed_coordinate((2, 2))
+OBSTRUCTION_LAYOUTS = [
+    pytest.param(
+        lambda: cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+        id="cartesian_obstruction_layout",
+    ),
+    pytest.param(
+        lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+        id="shifted_cartesian_obstruction_layout",
+    ),
+    pytest.param(
+        lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
+        id="hexagonal_obstruction_layout",
+    ),
+]
 
 
-def test_obstructed_connections():
-    for layout in [
-        cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-    ]:
-        for c1 in layout.coordinates():
-            for c2 in layout.coordinates():
-                assert not layout.is_obstructed_connection(c1, c2)
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(
+            lambda: cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            id="cartesian_obstruction_layout",
+        ),
+        pytest.param(
+            lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            id="shifted_cartesian_obstruction_layout",
+        ),
+        pytest.param(
+            lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            id="hexagonal_obstruction_layout",
+        ),
+    ],
+)
+def test_obstruction_layout_clocking_inheritance(make_layout):
+    layout = make_layout()
+    assert layout.incoming_clocked_zones((0, 0)) == []
+    assert layout.outgoing_clocked_zones((2, 2)) == []
 
-        layout.obstruct_connection((0, 0), (1, 1))
-        layout.obstruct_connection((1, 1), (2, 2))
+    for icz in layout.incoming_clocked_zones((1, 1)):
+        assert icz in [offset_coordinate(1, 0), offset_coordinate(0, 1)]
 
-        assert layout.is_obstructed_connection((0, 0), (1, 1))
-        assert layout.is_obstructed_connection((1, 1), (2, 2))
+    for icz in layout.outgoing_clocked_zones((1, 1)):
+        assert icz in [offset_coordinate(1, 2), offset_coordinate(2, 1)]
 
 
-def test_obstruction_via_gates():
-    for layout in [
-        cartesian_obstruction_layout(cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-        hexagonal_obstruction_layout(hexagonal_gate_layout((3, 3, 1), "2DDWave", "Layout")),
-    ]:
-        x1 = layout.create_pi("x1", (0, 1))
-        x2 = layout.create_pi("x2", (3, 2))
-        x3 = layout.create_pi("x3", (2, 0))
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_obstructed_coordinates(make_layout):
+    layout = make_layout()
+    for c in layout.coordinates():
+        assert not layout.is_obstructed_coordinate(c)
 
-        buf1 = layout.create_buf(x3, (2, 1))
-        layout.create_buf(buf1, (2, 2))
+    layout.obstruct_coordinate((0, 0))
+    layout.obstruct_coordinate((1, 1))
+    layout.obstruct_coordinate((2, 2))
 
-        layout.create_and(x1, x2, (4, 2))
+    assert layout.is_obstructed_coordinate((0, 0))
+    assert layout.is_obstructed_coordinate((1, 1))
+    assert layout.is_obstructed_coordinate((2, 2))
 
-        assert layout.is_obstructed_coordinate((0, 1))
-        assert layout.is_obstructed_coordinate((3, 2))
-        assert layout.is_obstructed_coordinate((2, 0))
-        assert layout.is_obstructed_coordinate((2, 1))
-        assert layout.is_obstructed_coordinate((2, 2))
-        assert layout.is_obstructed_coordinate((4, 2))
 
-        assert layout.is_obstructed_connection((2, 0), (2, 1))
-        assert layout.is_obstructed_connection((2, 1), (2, 2))
-        assert layout.is_obstructed_connection((3, 2), (4, 2))
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_obstructed_connections(make_layout):
+    layout = make_layout()
+    for c1 in layout.coordinates():
+        for c2 in layout.coordinates():
+            assert not layout.is_obstructed_connection(c1, c2)
+
+    layout.obstruct_connection((0, 0), (1, 1))
+    layout.obstruct_connection((1, 1), (2, 2))
+
+    assert layout.is_obstructed_connection((0, 0), (1, 1))
+    assert layout.is_obstructed_connection((1, 1), (2, 2))
+
+
+@pytest.mark.parametrize("make_layout", OBSTRUCTION_LAYOUTS)
+def test_obstruction_via_gates(make_layout):
+    layout = make_layout()
+    x1 = layout.create_pi("x1", (0, 1))
+    x2 = layout.create_pi("x2", (3, 2))
+    x3 = layout.create_pi("x3", (2, 0))
+
+    buf1 = layout.create_buf(x3, (2, 1))
+    layout.create_buf(buf1, (2, 2))
+
+    layout.create_and(x1, x2, (4, 2))
+
+    assert layout.is_obstructed_coordinate((0, 1))
+    assert layout.is_obstructed_coordinate((3, 2))
+    assert layout.is_obstructed_coordinate((2, 0))
+    assert layout.is_obstructed_coordinate((2, 1))
+    assert layout.is_obstructed_coordinate((2, 2))
+    assert layout.is_obstructed_coordinate((4, 2))
+
+    assert layout.is_obstructed_connection((2, 0), (2, 1))
+    assert layout.is_obstructed_connection((2, 1), (2, 2))
+    assert layout.is_obstructed_connection((3, 2), (4, 2))
 
 
 def test_cartesian_obstruction_layout_gate_level_inheritance():

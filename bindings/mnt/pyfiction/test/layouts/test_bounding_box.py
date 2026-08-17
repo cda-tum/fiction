@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from mnt.pyfiction import (
     cartesian_gate_layout,
     cartesian_obstruction_layout,
@@ -18,20 +20,35 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def test_bounding_box_around_an_empty_gate_level_layout():
-    for layout in [
-        cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
-        shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"),
-        hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"),
-        cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-        shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-        hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
-    ]:
-        min_coord, max_coord = layout.bounding_box_2d()
-        assert min_coord == layout.coord(0, 0)
-        assert max_coord == layout.coord(0, 0)
-        assert max_coord.x - min_coord.x == 0
-        assert max_coord.y - min_coord.y == 0
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+        pytest.param(
+            lambda: shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="shifted_cartesian_gate_layout"
+        ),
+        pytest.param(lambda: hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+        pytest.param(
+            lambda: cartesian_obstruction_layout(cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            id="cartesian_obstruction_layout",
+        ),
+        pytest.param(
+            lambda: shifted_cartesian_obstruction_layout(shifted_cartesian_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            id="shifted_cartesian_obstruction_layout",
+        ),
+        pytest.param(
+            lambda: hexagonal_obstruction_layout(hexagonal_gate_layout((2, 2, 0), "2DDWave", "Layout")),
+            id="hexagonal_obstruction_layout",
+        ),
+    ],
+)
+def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
+    layout = make_layout()
+    min_coord, max_coord = layout.bounding_box_2d()
+    assert min_coord == layout.coord(0, 0)
+    assert max_coord == layout.coord(0, 0)
+    assert max_coord.x - min_coord.x == 0
+    assert max_coord.y - min_coord.y == 0
 
 
 def test_initialize_gate_level_with_ortho_bounding_box():
@@ -102,14 +119,18 @@ def test_update_gate_level_bounding_box():
     assert max_coord.y - min_coord.y == 7
 
 
-def test_bounding_box_around_cell_level_layout():
-    for layout in [
-        qca_layout((2, 2, 0), "2DDWave", "Layout"),
-        inml_layout((2, 2, 0), "2DDWave", "Layout"),
-        sidb_layout((2, 2, 0), "2DDWave", "Layout"),
-    ]:
-        min_coord, max_coord = layout.bounding_box_2d()
-        assert min_coord == layout.coord(0, 0)
-        assert max_coord == layout.coord(0, 0)
-        assert max_coord.x - min_coord.x == 0
-        assert max_coord.y - min_coord.y == 0
+@pytest.mark.parametrize(
+    "make_layout",
+    [
+        pytest.param(lambda: qca_layout((2, 2, 0), "2DDWave", "Layout"), id="qca_layout"),
+        pytest.param(lambda: inml_layout((2, 2, 0), "2DDWave", "Layout"), id="inml_layout"),
+        pytest.param(lambda: sidb_layout((2, 2, 0), "2DDWave", "Layout"), id="sidb_layout"),
+    ],
+)
+def test_bounding_box_around_cell_level_layout(make_layout):
+    layout = make_layout()
+    min_coord, max_coord = layout.bounding_box_2d()
+    assert min_coord == layout.coord(0, 0)
+    assert max_coord == layout.coord(0, 0)
+    assert max_coord.x - min_coord.x == 0
+    assert max_coord.y - min_coord.y == 0

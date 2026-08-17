@@ -1,3 +1,5 @@
+import pytest
+
 from mnt.pyfiction import (
     cartesian_gate_layout,
     color_routing,
@@ -7,21 +9,25 @@ from mnt.pyfiction import (
 )
 
 
-def test_routing():
-    for lyt in [
-        cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-        hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
-    ]:
-        x1 = lyt.create_pi("x1", offset_coordinate(0, 0))
-        x2 = lyt.create_pi("x2", offset_coordinate(0, 1))
+@pytest.mark.parametrize(
+    "make_lyt",
+    [
+        pytest.param(lambda: cartesian_gate_layout((4, 4), "2DDWave", "Layout"), id="cartesian_gate_layout"),
+        pytest.param(lambda: hexagonal_gate_layout((4, 4), "2DDWave", "Layout"), id="hexagonal_gate_layout"),
+    ],
+)
+def test_routing(make_lyt):
+    lyt = make_lyt()
+    x1 = lyt.create_pi("x1", offset_coordinate(0, 0))
+    x2 = lyt.create_pi("x2", offset_coordinate(0, 1))
 
-        a = lyt.create_and(x1, x2, offset_coordinate(2, 2))
+    a = lyt.create_and(x1, x2, offset_coordinate(2, 2))
 
-        lyt.create_po(a, "f1", offset_coordinate(4, 4))
+    lyt.create_po(a, "f1", offset_coordinate(4, 4))
 
-        success = color_routing(lyt, [((0, 0), (2, 2)), ((0, 1), (2, 2)), ((2, 2), (4, 4))])
+    success = color_routing(lyt, [((0, 0), (2, 2)), ((0, 1), (2, 2)), ((2, 2), (4, 4))])
 
-        assert success
+    assert success
 
 
 def test_crossings():
