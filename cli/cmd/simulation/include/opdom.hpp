@@ -28,9 +28,14 @@ namespace alice
  * - Grid search: Evaluates all possible parameter combinations within the specified ranges.
  * - Random sampling: Evaluates a specified number of random parameter combinations.
  * - Flood fill: Evaluates a specified number of random parameter combinations and then performs a flood fill to find
- *  the operational domain.
+ *  the operational domain. Requires at least two sweep dimensions.
  *  - Contour tracing: Evaluates a specified number of random parameter combinations and then performs contour tracing
- *  to find the edges of the operational domain.
+ *  to find the edges of the operational domain. Requires at least two sweep dimensions; in three, it collects the
+ *  boundary surface instead of walking a closed curve.
+ *
+ * Each flavor can determine the operational status either by physical simulation or, with `--sketch`, by filtering
+ * alone. The latter is the *operational domain sketch*: dramatically faster, never rejecting a point that is
+ * operational, but reporting some non-operational points as operational.
  *
  * The operational domain is written to a CSV file, which can be used for further analysis or visualization.
  *
@@ -97,6 +102,10 @@ class opdom_command final : public command
      */
     std::string last_engine_name{};
     /**
+     * Cached sketch flag for logging (preserves the setting after params reset).
+     */
+    bool last_sketch = false;
+    /**
      * CSV filename to write the operational domain to.
      */
     std::string filename{};
@@ -104,6 +113,10 @@ class opdom_command final : public command
      * Flag to omit non-operational samples.
      */
     bool omit_non_operational_samples = false;
+    /**
+     * Flag to compute the operational domain sketch instead of simulating each parameter point.
+     */
+    bool sketch = false;
     /**
      * The operational domain.
      */

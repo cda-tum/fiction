@@ -6,6 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>
@@ -42,13 +43,19 @@ opdom_command::opdom_command(const environment::ptr& e) :
     add_option("--random_sampling,-r", num_random_samples,
                "Use random sampling instead of grid search with this many random samples");
     add_option("--flood_fill,-f", num_random_samples,
-               "Use flood fill instead of grid search with this many initial random samples");
+               "Use flood fill instead of grid search with this many initial random samples (needs 2 or more sweep "
+               "dimensions)");
     add_option("--contour_tracing,-c", num_random_samples,
-               "Use contour tracing instead of grid search with this many random samples");
+               "Use contour tracing instead of grid search with this many random samples (needs 2 or more sweep "
+               "dimensions; collects the boundary surface in 3 dimensions)");
 
     add_option("filename", filename, "CSV filename to write the operational domain to")->required();
     add_flag("--omit_non_op_samples,-o", omit_non_operational_samples,
              "Omit non-operational samples in the CSV file to reduce file size and increase visibility in 3D plots");
+    add_flag("--sketch,-s", sketch,
+             "Compute the operational domain sketch: determine the operational status by filtering alone instead of by "
+             "physical simulation. Much faster, but reports some non-operational points as operational. Implies kink "
+             "rejection and requires a layout with 'LOGIC' cells");
 
     add_option("--epsilon_r,-e", params.operational_params.simulation_parameters.epsilon_r,
                "Electric permittivity of the substrate (unit-less)", true);
@@ -274,8 +281,20 @@ void opdom_command::execute()
         params.sweep_dimensions                              = sweep_dimensions;
         params.operational_params.sim_engine                 = engine.value();
 
-        // Cache the engine name for logging before any potential reset
+        if (sketch)
+        {
+            params.operational_params.strategy_to_analyze_operational_status =
+                fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+            // the filtering steps are only defined when kinks are rejected, so the sketch implies the condition rather
+            // than rejecting the request for not having set it by hand
+            params.operational_params.op_condition =
+                fiction::is_operational_params::operational_condition::REJECT_KINKS;
+        }
+
+        // Cache the engine name and the sketch setting for logging before any potential reset
         last_engine_name = fiction::sidb_simulation_engine_name(params.operational_params.sim_engine);
+        last_sketch      = sketch;
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt>)
@@ -361,7 +380,8 @@ nlohmann::json opdom_command::log() const
         {"Number of simulator invocations", stats.num_simulator_invocations},
         {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},
         {"Number of operational parameter combinations", stats.num_operational_parameter_combinations},
-        {"Number of non-operational parameter combinations", stats.num_non_operational_parameter_combinations}};
+        {"Number of non-operational parameter combinations", stats.num_non_operational_parameter_combinations},
+        {"Operational domain sketch", last_sketch}};
 }
 
 void opdom_command::reset_params()
@@ -379,6 +399,7 @@ void opdom_command::reset_params()
     filename = "";
 
     omit_non_operational_samples = false;
+    sketch                       = false;
 }
 
 }  // namespace alice

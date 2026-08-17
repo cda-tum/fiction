@@ -27,6 +27,9 @@ Added
       no longer caps at three dimensions
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- CLI:
+    - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
+      physical simulation. It implies kink rejection, since the filtering steps are only defined there
 - Experiments:
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space
