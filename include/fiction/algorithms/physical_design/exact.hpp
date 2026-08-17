@@ -3048,20 +3048,23 @@ class exact_impl
 #endif
             }
 
-            if (result_aspect_ratio)
+            // extract the layout from the futures. Every future is consumed, even when no result was found:
+            // `wait` above does not propagate a stored exception, so skipping `get` would discard a genuine worker
+            // failure and misreport it as "no layout found". `explore_asynchronously` handles `z3::exception`
+            // itself, so anything surfacing here is a real error and belongs to the caller
+            for (auto& f : fut)
             {
-                const auto result_ar_val = *result_aspect_ratio;
-                // extract the layout from the futures
-                for (auto& f : fut)
+                const auto l = f.get();
+
+                if (!result_aspect_ratio || !l.has_value())
                 {
-                    if (auto l = f.get(); l.has_value())
-                    {
-                        // in case multiple returned, get the actual winner
-                        if ((*l).x() == result_ar_val.x && (*l).y() == result_ar_val.y)
-                        {
-                            layout = *l;
-                        }
-                    }
+                    continue;
+                }
+
+                // in case multiple returned, get the actual winner
+                if (l->x() == result_aspect_ratio->x && l->y() == result_aspect_ratio->y)
+                {
+                    layout = *l;
                 }
             }
         }

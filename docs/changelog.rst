@@ -88,10 +88,9 @@ Changed
     - ``hexagonal_layout`` now rejects an invalid ``HexagonalCoordinateSystem`` where the type is
       named rather than where it is constructed
     - ``exact`` no longer polls its worker futures every 10 ms while solving asynchronously
-    - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp`` that touching the file surfaced:
-      pruned and completed its includes, replaced ``std::lock_guard`` with ``std::scoped_lock``,
-      unfolded four nested conditional operators into ``if``/``else``, and dropped an incorrect
-      ``noexcept`` from a lambda that can throw ``z3::exception``
+    - ``exact`` now surfaces a failure in one of its asynchronous workers instead of reporting it
+      as "no layout found"
+    - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
