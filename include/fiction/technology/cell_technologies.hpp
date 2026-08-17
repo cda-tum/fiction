@@ -315,19 +315,19 @@ struct mol_qca_technology
     /**
      * Default width of a molQCA cell.
      */
-    static constexpr uint64_t CELL_WIDTH = 18ul;
+    static constexpr uint64_t CELL_WIDTH = 2ul;
     /**
      * Default height of a molQCA cell.
      */
-    static constexpr uint64_t CELL_HEIGHT = 18ul;
+    static constexpr uint64_t CELL_HEIGHT = 2ul;
     /**
      * Default horizontal spacing between two molQCA cells.
      */
-    static constexpr uint64_t CELL_HSPACE = 2ul;
+    static constexpr uint64_t CELL_HSPACE = 0ul;
     /**
      * Default vertical spacing between two molQCA cells.
      */
-    static constexpr uint64_t CELL_VSPACE = 2ul;
+    static constexpr uint64_t CELL_VSPACE = 0ul;
 
     // Deleted constructors to prevent instantiation
     mol_qca_technology() = delete;

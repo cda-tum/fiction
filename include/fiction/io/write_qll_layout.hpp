@@ -142,7 +142,7 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name = []()
+    static constexpr auto tech_name = []
     {
         if constexpr (has_inml_technology_v<Lyt>)
         {
