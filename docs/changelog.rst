@@ -103,6 +103,7 @@ Changed
     - ``exact`` now surfaces a failure in one of its asynchronous workers instead of reporting it
       as "no layout found"
     - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
+    - Migrated the ``pyfiction`` test suite from ``unittest`` to pytest and enabled ruff's ``PT`` rule set
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
