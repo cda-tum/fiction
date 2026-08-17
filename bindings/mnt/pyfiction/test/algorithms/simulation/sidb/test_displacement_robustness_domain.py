@@ -64,7 +64,7 @@ class TestDisplacementRobustnessDomain(unittest.TestCase):
 
         _ = determine_displacement_robustness_domain_100(layout, [create_and_tt()], params, stats)
 
-        self.assertEqual(stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements, 8)
+        assert stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements == 8
 
 
 if __name__ == "__main__":

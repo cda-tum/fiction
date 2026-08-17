@@ -34,9 +34,9 @@ class TestDetectBDLPairs(unittest.TestCase):
         output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.OUTPUT, params)
         normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.NORMAL, params)
 
-        self.assertEqual(len(input_bdl_pairs), 0)
-        self.assertEqual(len(output_bdl_pairs), 0)
-        self.assertEqual(len(normal_bdl_pairs), 2)
+        assert len(input_bdl_pairs) == 0
+        assert len(output_bdl_pairs) == 0
+        assert len(normal_bdl_pairs) == 2
 
     def test_detect_bdl_pairs_111_lattice(self):
         lyt = sidb_111_lattice((7, 0))
@@ -60,9 +60,9 @@ class TestDetectBDLPairs(unittest.TestCase):
         output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.OUTPUT, params)
         normal_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.NORMAL, params)
 
-        self.assertEqual(len(input_bdl_pairs), 0)
-        self.assertEqual(len(output_bdl_pairs), 0)
-        self.assertEqual(len(normal_bdl_pairs), 2)
+        assert len(input_bdl_pairs) == 0
+        assert len(output_bdl_pairs) == 0
+        assert len(normal_bdl_pairs) == 2
 
 
 if __name__ == "__main__":

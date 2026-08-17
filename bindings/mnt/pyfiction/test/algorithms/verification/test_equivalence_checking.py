@@ -12,11 +12,11 @@ class TestEquivalenceChecking(unittest.TestCase):
         xnor2_net = read_technology_network(dir_path + "/../../resources/xnor2.v")
 
         stats = equivalence_checking_stats()
-        self.assertEqual(stats.counter_example, [])
+        assert stats.counter_example == []
 
         eq = equivalence_checking(xor2_net, xnor2_net, stats)
-        self.assertEqual(eq, eq_type.NO)
-        self.assertEqual(stats.counter_example, [True, False])
+        assert eq == eq_type.NO
+        assert stats.counter_example == [True, False]
 
 
 if __name__ == "__main__":

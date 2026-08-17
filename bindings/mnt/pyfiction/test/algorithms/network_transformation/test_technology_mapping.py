@@ -20,11 +20,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 class TestTechnologyMapping(unittest.TestCase):
     def test_mapping_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
-        self.assertEqual(network.num_gates(), 5)
+        assert network.num_gates() == 5
 
         mapped_network = technology_mapping(network)
 
-        self.assertEqual(equivalence_checking(network, mapped_network), eq_type.NO)
+        assert equivalence_checking(network, mapped_network) == eq_type.NO
 
     def test_mapping_with_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -38,7 +38,7 @@ class TestTechnologyMapping(unittest.TestCase):
         ]:
             mapped_network = technology_mapping(network, params)
 
-            self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
+            assert equivalence_checking(network, mapped_network) == eq_type.STRONG
 
     def test_mapping_with_stats(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -53,7 +53,7 @@ class TestTechnologyMapping(unittest.TestCase):
             stats = technology_mapping_stats()
             mapped_network = technology_mapping(network, params=params, stats=stats)
 
-            self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
+            assert equivalence_checking(network, mapped_network) == eq_type.STRONG
 
 
 if __name__ == "__main__":

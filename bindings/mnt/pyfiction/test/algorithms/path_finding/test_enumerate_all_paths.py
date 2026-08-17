@@ -18,7 +18,7 @@ from mnt.pyfiction import (
 class TestEnumerateAllPaths(unittest.TestCase):
     def test_non_clocked_paths(self):
         for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
-            self.assertListEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [[(0, 0)]])
+            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
 
     def test_clocking_paths(self):
         for lyt in [
@@ -29,20 +29,14 @@ class TestEnumerateAllPaths(unittest.TestCase):
             clocked_hexagonal_layout((4, 4), "2DDWave"),
             hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
         ]:
-            self.assertEqual(enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [[(0, 0)]])
-            self.assertEqual(
-                enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)),
-                [[(0, 0), (1, 0)]],
-            )
-            self.assertEqual(
-                enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)),
-                [[(0, 0), (0, 1)]],
-            )
+            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
+            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == [[(0, 0), (1, 0)]]
+            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == [[(0, 0), (0, 1)]]
 
             paths = enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))
 
-            self.assertIn([(0, 0), (0, 1), (1, 1)], paths)
-            self.assertIn([(0, 0), (1, 0), (1, 1)], paths)
+            assert [(0, 0), (0, 1), (1, 1)] in paths
+            assert [(0, 0), (1, 0), (1, 1)] in paths
 
 
 if __name__ == "__main__":

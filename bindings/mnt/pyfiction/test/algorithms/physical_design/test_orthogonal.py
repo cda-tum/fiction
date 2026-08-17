@@ -17,7 +17,7 @@ class TestOrthogonalPhysicalDesign(unittest.TestCase):
     def test_orthogonal_default(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = orthogonal(network)
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+        assert equivalence_checking(network, layout) == eq_type.STRONG
 
     def test_orthogonal_with_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -26,7 +26,7 @@ class TestOrthogonalPhysicalDesign(unittest.TestCase):
 
         layout = orthogonal(network, params)
 
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+        assert equivalence_checking(network, layout) == eq_type.STRONG
 
     def test_orthogonal_with_stats(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -35,7 +35,7 @@ class TestOrthogonalPhysicalDesign(unittest.TestCase):
 
         layout = orthogonal(network, statistics=stats)
 
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+        assert equivalence_checking(network, layout) == eq_type.STRONG
 
 
 if __name__ == "__main__":

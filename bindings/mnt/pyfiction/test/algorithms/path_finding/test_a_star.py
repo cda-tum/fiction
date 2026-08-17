@@ -23,7 +23,7 @@ from mnt.pyfiction import (
 class TestAStar(unittest.TestCase):
     def test_non_clocked_path_finding(self):
         for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
-            self.assertListEqual(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [(0, 0)])
+            assert a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [(0, 0)]
 
     def test_clocked_path_finding(self):
         for lyt in [
@@ -34,13 +34,13 @@ class TestAStar(unittest.TestCase):
             clocked_hexagonal_layout((4, 4), "2DDWave"),
             hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
         ]:
-            self.assertListEqual(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [(0, 0)])
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))), 3)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2))), 5)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3))), 7)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4))), 9)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0))), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1))), 0)
+            assert a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [(0, 0)]
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))) == 3
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2))) == 5
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3))) == 7
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4))) == 9
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0))) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1))) == 0
 
     def test_path_finding_with_obstructions(self):
         for lyt in [
@@ -55,19 +55,19 @@ class TestAStar(unittest.TestCase):
             lyt.obstruct_coordinate(offset_coordinate(1, 3))
             lyt.obstruct_coordinate(offset_coordinate(1, 4))
 
-            self.assertTrue(lyt.is_obstructed_coordinate(offset_coordinate(1, 0)))
-            self.assertTrue(lyt.is_obstructed_coordinate(offset_coordinate(1, 1)))
-            self.assertTrue(lyt.is_obstructed_coordinate(offset_coordinate(1, 2)))
-            self.assertTrue(lyt.is_obstructed_coordinate(offset_coordinate(1, 3)))
-            self.assertTrue(lyt.is_obstructed_coordinate(offset_coordinate(1, 4)))
+            assert lyt.is_obstructed_coordinate(offset_coordinate(1, 0))
+            assert lyt.is_obstructed_coordinate(offset_coordinate(1, 1))
+            assert lyt.is_obstructed_coordinate(offset_coordinate(1, 2))
+            assert lyt.is_obstructed_coordinate(offset_coordinate(1, 3))
+            assert lyt.is_obstructed_coordinate(offset_coordinate(1, 4))
 
-            self.assertListEqual(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), [(0, 0)])
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))), 3)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2))), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3))), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4))), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0))), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1))), 0)
+            assert a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [(0, 0)]
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))) == 3
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2))) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3))) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4))) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0))) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1))) == 0
 
     def test_path_finding_with_obstructions_and_crossings(self):
         for lyt in [
@@ -93,47 +93,47 @@ class TestAStar(unittest.TestCase):
             params = a_star_params()
             params.crossings = True
 
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0), params)), 1)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1), params)), 2)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 1), params)), 0)
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0), params)) == 1
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1), params)) == 2
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 0), offset_coordinate(2, 1), params)) == 0
 
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(0, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(1, 0), params)), 1)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(0, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(1, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(2, 0), params)), 2)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(2, 1), params)), 3)
+            assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(0, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(1, 0), params)) == 1
+            assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(0, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(1, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(2, 0), params)) == 2
+            assert len(a_star(lyt, offset_coordinate(1, 0), offset_coordinate(2, 1), params)) == 3
 
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(0, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(1, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(0, 1), params)), 1)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(1, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(2, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(2, 1), params)), 0)
+            assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(0, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(1, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(0, 1), params)) == 1
+            assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(1, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(2, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(0, 1), offset_coordinate(2, 1), params)) == 0
 
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(1, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(1, 1), params)), 1)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(2, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(2, 1), params)), 2)
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(1, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(0, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(1, 1), params)) == 1
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(2, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(1, 1), offset_coordinate(2, 1), params)) == 2
 
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(0, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(1, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(0, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(1, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(2, 0), params)), 1)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(2, 1), params)), 2)
+            assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(0, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(1, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(0, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(1, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(2, 0), params)) == 1
+            assert len(a_star(lyt, offset_coordinate(2, 0), offset_coordinate(2, 1), params)) == 2
 
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(0, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(1, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(0, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(1, 1), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(2, 0), params)), 0)
-            self.assertEqual(len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(2, 1), params)), 1)
+            assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(0, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(1, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(0, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(1, 1), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(2, 0), params)) == 0
+            assert len(a_star(lyt, offset_coordinate(2, 1), offset_coordinate(2, 1), params)) == 1
 
     def test_distance(self):
         for lyt in [
@@ -144,15 +144,15 @@ class TestAStar(unittest.TestCase):
             clocked_hexagonal_layout((4, 4), "2DDWave"),
             hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
         ]:
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)), 0)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)), 1)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)), 1)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)), 2)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)), 4)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)), 6)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)), 8)
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0)), float("inf"))
-            self.assertEqual(a_star_distance(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1)), float("inf"))
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == 0
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == 1
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == 1
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1)) == 2
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(2, 2)) == 4
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(3, 3)) == 6
+            assert a_star_distance(lyt, offset_coordinate(0, 0), offset_coordinate(4, 4)) == 8
+            assert a_star_distance(lyt, offset_coordinate(1, 1), offset_coordinate(0, 0)) == float("inf")
+            assert a_star_distance(lyt, offset_coordinate(2, 2), offset_coordinate(1, 1)) == float("inf")
 
 
 if __name__ == "__main__":

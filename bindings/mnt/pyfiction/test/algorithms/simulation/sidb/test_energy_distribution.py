@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     calculate_energy_distribution,
     charge_distribution_surface_100,
@@ -36,17 +38,17 @@ class TestEnergyDistribution(unittest.TestCase):
 
         charge_layouts = [cds1, cds2, cds3, cds4]
 
-        self.assertAlmostEqual(cds1.get_electrostatic_potential_energy(), 0.48066663155586997)
-        self.assertAlmostEqual(cds2.get_electrostatic_potential_energy(), 0.0)
-        self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.48066663155586997)
-        self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.48066663155586997)
+        assert cds1.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997)
+        assert cds2.get_electrostatic_potential_energy() == pytest.approx(0.0, abs=1e-9)
+        assert cds3.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997)
+        assert cds4.get_electrostatic_potential_energy() == pytest.approx(0.48066663155586997)
 
         distribution = calculate_energy_distribution(charge_layouts)
 
-        self.assertAlmostEqual(distribution.get_nth_state(0).electrostatic_potential_energy, 0.0)
-        self.assertAlmostEqual(distribution.get_nth_state(1).electrostatic_potential_energy, 0.48066663155586997)
-        self.assertLessEqual(distribution.get_nth_state(0).degeneracy, 1)
-        self.assertLessEqual(distribution.get_nth_state(1).degeneracy, 3)
+        assert distribution.get_nth_state(0).electrostatic_potential_energy == pytest.approx(0.0, abs=1e-9)
+        assert distribution.get_nth_state(1).electrostatic_potential_energy == pytest.approx(0.48066663155586997)
+        assert distribution.get_nth_state(0).degeneracy <= 1
+        assert distribution.get_nth_state(1).degeneracy <= 3
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -71,15 +73,15 @@ class TestEnergyDistribution(unittest.TestCase):
 
         charge_layouts = [cds1, cds2, cds3, cds4]
 
-        self.assertAlmostEqual(cds1.get_electrostatic_potential_energy(), 0.233980661373219)
-        self.assertAlmostEqual(cds2.get_electrostatic_potential_energy(), 0.0)
-        self.assertAlmostEqual(cds3.get_electrostatic_potential_energy(), 0.233980661373219)
-        self.assertAlmostEqual(cds4.get_electrostatic_potential_energy(), 0.233980661373219)
+        assert cds1.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219)
+        assert cds2.get_electrostatic_potential_energy() == pytest.approx(0.0, abs=1e-9)
+        assert cds3.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219)
+        assert cds4.get_electrostatic_potential_energy() == pytest.approx(0.233980661373219)
 
         distribution = calculate_energy_distribution(charge_layouts)
 
-        self.assertLessEqual(distribution.get_nth_state(0).degeneracy, 1)
-        self.assertLessEqual(distribution.get_nth_state(1).degeneracy, 3)
+        assert distribution.get_nth_state(0).degeneracy <= 1
+        assert distribution.get_nth_state(1).degeneracy <= 3
 
 
 if __name__ == "__main__":

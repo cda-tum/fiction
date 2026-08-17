@@ -19,13 +19,13 @@ class TestAssessPhysicalPopulationStability(unittest.TestCase):
         params = physical_population_stability_params()
         params.simulation_parameters.mu_minus = -0.25
         result = physical_population_stability_100(layout, params)
-        self.assertEqual(len(result), 5)
-        self.assertLessEqual(result[0].system_energy, result[1].system_energy)
-        self.assertLessEqual(result[1].system_energy, result[2].system_energy)
+        assert len(result) == 5
+        assert result[0].system_energy <= result[1].system_energy
+        assert result[1].system_energy <= result[2].system_energy
 
         params.simulation_parameters.mu_minus = -0.32
         result = physical_population_stability_100(layout, params)
-        self.assertEqual(len(result), 1)
+        assert len(result) == 1
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((2, 3))
@@ -35,13 +35,13 @@ class TestAssessPhysicalPopulationStability(unittest.TestCase):
         params = physical_population_stability_params()
         params.simulation_parameters.mu_minus = -0.25
         result = physical_population_stability_111(layout, params)
-        self.assertEqual(len(result), 5)
-        self.assertLessEqual(result[0].system_energy, result[1].system_energy)
-        self.assertLessEqual(result[1].system_energy, result[2].system_energy)
+        assert len(result) == 5
+        assert result[0].system_energy <= result[1].system_energy
+        assert result[1].system_energy <= result[2].system_energy
 
         params.simulation_parameters.mu_minus = -0.32
         result = physical_population_stability_111(layout, params)
-        self.assertEqual(len(result), 2)
+        assert len(result) == 2
 
 
 if __name__ == "__main__":

@@ -34,12 +34,12 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results.charge_distributions = [cds1, cds2, cds3]
 
         ground_state = results.groundstates()
-        self.assertEqual(len(ground_state), 1)
+        assert len(ground_state) == 1
 
         groundstate = ground_state[0]
-        self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
+        assert groundstate.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
+        assert groundstate.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
+        assert groundstate.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
 
     def test_three_DBs_111_lattice(self):
         layout = sidb_111_lattice((10, 10))
@@ -61,13 +61,13 @@ class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
         results.charge_distributions = [cds1, cds2, cds3]
 
         result = results.groundstates()
-        self.assertEqual(len(result), 1)
+        assert len(result) == 1
 
         ground_state = result[0]
 
-        self.assertEqual(ground_state.get_charge_state((0, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(ground_state.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(ground_state.get_charge_state((6, 1)), sidb_charge_state.NEUTRAL)
+        assert ground_state.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
+        assert ground_state.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
+        assert ground_state.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
 
 
 if __name__ == "__main__":

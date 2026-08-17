@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     create_and_tt,
     create_nor_tt,
@@ -45,14 +47,14 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.number_of_canvas_sidbs = 1
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.28)
-        self.assertEqual(params.number_of_canvas_sidbs, 1)
-        self.assertEqual(params.canvas[0], (4, 8, 0))
-        self.assertEqual(params.canvas[1], (14, 11))
+        assert params.operational_params.simulation_parameters.mu_minus == pytest.approx(-0.28)
+        assert params.number_of_canvas_sidbs == 1
+        assert params.canvas[0] == (4, 8, 0)
+        assert params.canvas[1] == (14, 11)
 
         designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
 
-        self.assertEqual(len(designed_gates), 23)
+        assert len(designed_gates) == 23
 
     def test_nor_gate_111(self):
         layout = sidb_111_lattice((30, 30))
@@ -93,23 +95,23 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
         params.operational_params.op_condition = operational_condition.REJECT_KINKS
 
-        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.number_of_canvas_sidbs, 3)
-        self.assertEqual(params.canvas[0], (10, 22, 0))
-        self.assertEqual(params.canvas[1], (14, 34))
+        assert params.operational_params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+        assert params.number_of_canvas_sidbs == 3
+        assert params.canvas[0] == (10, 22, 0)
+        assert params.canvas[1] == (14, 34)
 
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 44)
+        assert len(designed_gates) == 44
 
         params.design_mode = design_sidb_gates_mode.PRUNING_ONLY
         designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gate_candidates), 44)
+        assert len(designed_gate_candidates) == 44
 
         # tolerate kink states
         params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
         params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 175)
+        assert len(designed_gates) == 175
 
     def test_nor_gate_111_quickcell(self):
         layout = sidb_111_lattice((30, 30))
@@ -150,13 +152,13 @@ class TestDesignSiDBGates(unittest.TestCase):
         params.number_of_canvas_sidbs = 3
         params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.number_of_canvas_sidbs, 3)
-        self.assertEqual(params.canvas[0], (10, 26, 0))
-        self.assertEqual(params.canvas[1], (14, 34))
+        assert params.operational_params.simulation_parameters.mu_minus == pytest.approx(-0.32)
+        assert params.number_of_canvas_sidbs == 3
+        assert params.canvas[0] == (10, 26, 0)
+        assert params.canvas[1] == (14, 34)
 
         designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 14)
+        assert len(designed_gates) == 14
 
 
 if __name__ == "__main__":

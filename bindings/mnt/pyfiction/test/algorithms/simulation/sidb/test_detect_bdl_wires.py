@@ -46,9 +46,9 @@ class TestDetectBDLWires(unittest.TestCase):
         output_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.OUTPUT)
         input_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.INPUT)
 
-        self.assertEqual(len(all_bdl_wires), 3)
-        self.assertEqual(len(output_bdl_wires), 2)
-        self.assertEqual(len(input_bdl_wires), 1)
+        assert len(all_bdl_wires) == 3
+        assert len(output_bdl_wires) == 2
+        assert len(input_bdl_wires) == 1
 
 
 if __name__ == "__main__":

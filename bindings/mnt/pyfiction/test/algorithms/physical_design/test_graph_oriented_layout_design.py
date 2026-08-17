@@ -21,7 +21,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
     def test_graph_oriented_layout_design_with_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -31,7 +31,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network, params)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
     def test_graph_oriented_layout_design_with_stats(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -40,7 +40,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network, statistics=stats)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
     def test_graph_oriented_layout_design_with_stats_and_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -52,7 +52,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network, params, statistics=stats)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
     def test_graph_oriented_layout_design_with_different_parameters(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -72,19 +72,19 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network, params)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
         params.mode = gold_effort_mode.MAXIMUM_EFFORT
 
         layout = graph_oriented_layout_design(network, params)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
         params.seed = 42
 
         layout = graph_oriented_layout_design(network, params)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
     def test_graph_oriented_layout_design_with_custom_cost_function(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -99,7 +99,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network, params, custom_cost_objective=custom_cost_objective)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
     def test_graph_oriented_layout_design_with_multithreading(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
@@ -111,7 +111,7 @@ class TestGraphOrientedLayoutDesign(unittest.TestCase):
 
         layout = graph_oriented_layout_design(network, params)
 
-        self.assertNotEqual(equivalence_checking(network, layout), eq_type.NO)
+        assert equivalence_checking(network, layout) != eq_type.NO
 
 
 if __name__ == "__main__":

@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
@@ -19,12 +21,12 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = physically_valid_parameters(cds)
 
-        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])), 0)
+        assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])) == 0
 
-        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point([5.1, 5.1])), 0)
+        assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5.1, 5.1])) == 0
 
         # Testing for an invalid parameter point that raises an exception
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="no excited state number available"):
             valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
     def test_one_DB_111_lattice(self):
@@ -34,12 +36,12 @@ class TestDeterminePhysicallyValidParameters(unittest.TestCase):
 
         valid_parameters = physically_valid_parameters(cds)
 
-        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])), 0)
+        assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])) == 0
 
-        self.assertEqual(valid_parameters.get_excited_state_number_for_parameter(parameter_point([5.1, 5.1])), 0)
+        assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5.1, 5.1])) == 0
 
         # Testing for an invalid parameter point that raises an exception
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="no excited state number available"):
             valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
 

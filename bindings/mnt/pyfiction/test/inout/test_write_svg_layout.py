@@ -214,12 +214,12 @@ class TestWriteSvgLayout(unittest.TestCase):
         params.color_background = color_mode.DARK
         generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
         # print(generated_svg_cell_level_dark_mode)
-        self.assertEqual(normalize_svg(generated_svg_cell_level_dark_mode), normalize_svg(cell_level_dark_mode))
+        assert normalize_svg(generated_svg_cell_level_dark_mode) == normalize_svg(cell_level_dark_mode)
 
         params.color_background = color_mode.LIGHT
         generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
         print(cell_level_light_mode)
-        self.assertEqual(normalize_svg(generated_svg_cell_level_light_mode), normalize_svg(cell_level_light_mode))
+        assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
     def test_write_sidb_charge_distribution_to_svg(self):
         # Create and configure the SIDB layout
@@ -239,11 +239,11 @@ class TestWriteSvgLayout(unittest.TestCase):
 
         params.color_background = color_mode.DARK
         generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(cds, params)
-        self.assertEqual(normalize_svg(generated_svg_cds_dark_mode), normalize_svg(cds_dark_mode))
+        assert normalize_svg(generated_svg_cds_dark_mode) == normalize_svg(cds_dark_mode)
 
         params.color_background = color_mode.LIGHT
         generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(cds, params)
-        self.assertEqual(normalize_svg(generated_svg_cds_light_mode), normalize_svg(cds_light_mode))
+        assert normalize_svg(generated_svg_cds_light_mode) == normalize_svg(cds_light_mode)
 
 
 if __name__ == "__main__":

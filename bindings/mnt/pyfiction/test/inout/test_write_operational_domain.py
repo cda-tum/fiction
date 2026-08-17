@@ -26,7 +26,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
         operational_domain_as_string = write_operational_domain_to_string(opdom, write_operational_domain_params())
 
         # Sort both expected and result to handle order variations
-        self.assertEqual(sorted(operational_domain_as_string.strip().split("\n")), sorted(expected.strip().split("\n")))
+        assert sorted(operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
 
         # Custom operational tags
         expected_custom = "epsilon_r,lambda_tf,operational status\n0,0,True\n0,1,False"
@@ -36,7 +36,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
         result_custom = write_operational_domain_to_string(opdom, params)
 
-        self.assertEqual(sorted(result_custom.strip().split("\n")), sorted(expected_custom.strip().split("\n")))
+        assert sorted(result_custom.strip().split("\n")) == sorted(expected_custom.strip().split("\n"))
 
     def test_write_operational_domain_with_floating_point_values(self):
         opdom = operational_domain([sweep_parameter.EPSILON_R, sweep_parameter.LAMBDA_TF])
@@ -50,7 +50,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
         # Get the result from the function that returns a string
         operational_domain_as_string = write_operational_domain_to_string(opdom)
 
-        self.assertEqual(sorted(operational_domain_as_string.strip().split("\n")), sorted(expected.strip().split("\n")))
+        assert sorted(operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
 
         # Custom operational tags
         expected_custom = "epsilon_r,lambda_tf,operational status\n0.1,0.2,operational\n0.3,0.4,non-operational"
@@ -60,9 +60,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
         operational_domain_custom_as_string = write_operational_domain_to_string(opdom, params)
 
-        self.assertEqual(
-            sorted(operational_domain_custom_as_string.strip().split("\n")),
-            sorted(expected_custom.strip().split("\n")),
+        assert sorted(operational_domain_custom_as_string.strip().split("\n")) == sorted(
+            expected_custom.strip().split("\n")
         )
 
     def test_write_operational_domain_with_metric_values(self):
@@ -77,9 +76,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
         # Get the result from the function that returns a string
         temperature_operational_domain_as_string = write_critical_temperature_domain_to_string(opdom)
 
-        self.assertEqual(
-            sorted(temperature_operational_domain_as_string.strip().split("\n")),
-            sorted(expected.strip().split("\n")),
+        assert sorted(temperature_operational_domain_as_string.strip().split("\n")) == sorted(
+            expected.strip().split("\n")
         )
 
         # Custom operational tags
@@ -90,9 +88,8 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
         temperature_operational_domain_custom_as_string = write_critical_temperature_domain_to_string(opdom, params)
 
-        self.assertEqual(
-            sorted(temperature_operational_domain_custom_as_string.strip().split("\n")),
-            sorted(expected_custom.strip().split("\n")),
+        assert sorted(temperature_operational_domain_custom_as_string.strip().split("\n")) == sorted(
+            expected_custom.strip().split("\n")
         )
 
     def test_skip_non_operational_samples(self):
@@ -109,7 +106,7 @@ class TestWriteOperationalDomain(unittest.TestCase):
 
         operational_domain_as_string = write_operational_domain_to_string(opdom, params)
 
-        self.assertEqual(sorted(operational_domain_as_string.strip().split("\n")), sorted(expected.strip().split("\n")))
+        assert sorted(operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
 
 
 if __name__ == "__main__":

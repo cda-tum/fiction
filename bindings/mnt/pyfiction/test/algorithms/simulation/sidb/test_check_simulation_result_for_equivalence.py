@@ -27,7 +27,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
 
         equivalent = check_simulation_results_for_equivalence(first_result_100, second_result_100)
 
-        self.assertTrue(equivalent)
+        assert equivalent
 
     def test_cds_with_two_sidbs_111_lattice(self):
         # Use standard constructor.
@@ -43,7 +43,7 @@ class TestCheckSimulationResultsForEquivalence(unittest.TestCase):
 
         equivalent = check_simulation_results_for_equivalence(first_result_111, second_result_111)
 
-        self.assertTrue(equivalent)
+        assert equivalent
 
 
 if __name__ == "__main__":

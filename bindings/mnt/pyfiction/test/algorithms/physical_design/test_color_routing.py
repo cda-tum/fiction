@@ -24,7 +24,7 @@ class TestColorRouting(unittest.TestCase):
 
             success = color_routing(lyt, [((0, 0), (2, 2)), ((0, 1), (2, 2)), ((2, 2), (4, 4))])
 
-            self.assertTrue(success)
+            assert success
 
     def test_crossings(self):
         lyt = cartesian_gate_layout((4, 2, 1), "2DDWave", "Layout")
@@ -45,7 +45,7 @@ class TestColorRouting(unittest.TestCase):
 
         success = color_routing(lyt, [((0, 1), (4, 2)), ((3, 2), (4, 2))], params=params)
 
-        self.assertTrue(success)
+        assert success
 
 
 if __name__ == "__main__":

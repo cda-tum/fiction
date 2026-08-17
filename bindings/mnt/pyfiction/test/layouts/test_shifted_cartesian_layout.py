@@ -8,16 +8,16 @@ class TestShiftedCartesianLayout(unittest.TestCase):
         layout = shifted_cartesian_layout((9, 9, 1))
 
         for t in layout.coordinates():
-            self.assertLessEqual(t, (9, 9, 1))
-            self.assertTrue(layout.is_within_bounds(t))
+            assert t <= (9, 9, 1)
+            assert layout.is_within_bounds(t)
 
         for t in layout.ground_coordinates():
-            self.assertEqual(t.z, 0)
-            self.assertLessEqual(t, (9, 9, 0))
-            self.assertTrue(layout.is_within_bounds(t))
+            assert t.z == 0
+            assert t <= (9, 9, 0)
+            assert layout.is_within_bounds(t)
 
         for t in layout.adjacent_coordinates((2, 2)):
-            self.assertIn(t, [(1, 1), (1, 2), (2, 1), (3, 1), (3, 2), (2, 3)])
+            assert t in [(1, 1), (1, 2), (2, 1), (3, 1), (3, 2), (2, 3)]
 
 
 if __name__ == "__main__":

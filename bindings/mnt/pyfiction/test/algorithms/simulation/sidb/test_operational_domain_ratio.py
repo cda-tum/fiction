@@ -1,6 +1,8 @@
 import os
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     create_and_tt,
     operational_domain_params,
@@ -32,7 +34,7 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
         ratio_params = operational_domain_ratio_params()
         ratio_params.op_domain_params = params
 
-        self.assertEqual(ratio_params.op_domain_params.operational_params.simulation_parameters.base, 2)
+        assert ratio_params.op_domain_params.operational_params.simulation_parameters.base == 2
 
         operational_domain_ratio_result = operational_domain_ratio(
             lyt,
@@ -41,7 +43,7 @@ class TestComputeOperationalRatioAtPoint(unittest.TestCase):
             ratio_params,
         )
 
-        self.assertAlmostEqual(operational_domain_ratio_result, 23 / 121, delta=10e-6)
+        assert operational_domain_ratio_result == pytest.approx(23 / 121, abs=1e-5)
 
 
 if __name__ == "__main__":

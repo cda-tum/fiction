@@ -57,8 +57,8 @@ class TestDesignRuleViolations(unittest.TestCase):
 
         warnings, drvs = gate_level_drvs(layout)
 
-        self.assertEqual(0, warnings)
-        self.assertEqual(0, drvs)
+        assert warnings == 0
+        assert drvs == 0
 
 
 if __name__ == "__main__":

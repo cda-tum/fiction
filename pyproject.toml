@@ -235,7 +235,6 @@ ignore = [
     "D", # pydocstyle
     "N", # flake8-naming
     "PL", # pylint
-    "PT", # flake8-pytest-style
     "PTH", # flake8-use-pathlib
     "S", # flake8-bandit
     "ERA001", # Found commented-out code

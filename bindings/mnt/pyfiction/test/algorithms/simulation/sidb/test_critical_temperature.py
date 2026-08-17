@@ -1,6 +1,8 @@
 import os
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     bdl_input_iterator_params,
     bdl_wire_selection,
@@ -44,10 +46,10 @@ class TestCriticalTemperature(unittest.TestCase):
 
         cds = charge_distribution_surface_100(layout)
 
-        self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
+        assert critical_temperature_non_gate_based(cds, params, stats) == 400
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
-        self.assertEqual(stats.num_valid_lyt, 1)
+        assert stats.algorithm_name == "QuickExact"
+        assert stats.num_valid_lyt == 1
 
     def test_perturber_and_DB_pair_111(self):
         layout = sidb_111_lattice((10, 10))
@@ -63,10 +65,10 @@ class TestCriticalTemperature(unittest.TestCase):
 
         cds = charge_distribution_surface_111(layout)
 
-        self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
+        assert critical_temperature_non_gate_based(cds, params, stats) == 400
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
-        self.assertEqual(stats.num_valid_lyt, 1)
+        assert stats.algorithm_name == "QuickExact"
+        assert stats.num_valid_lyt == 1
 
     def test_gate_based_simulation(self):
         layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
@@ -81,9 +83,9 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_xor_tt()]
 
-        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 200)
+        assert critical_temperature_gate_based(cds, spec, params, stats) <= 200
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
+        assert stats.algorithm_name == "QuickExact"
 
     def test_bestagon_inv(self):
         layout = read_sqd_layout_100(
@@ -100,10 +102,10 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_not_tt()]
 
-        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 400)
+        assert critical_temperature_gate_based(cds, spec, params, stats) <= 400
 
-        self.assertEqual(stats.algorithm_name, "QuickSim")
-        self.assertGreater(stats.num_valid_lyt, 1)
+        assert stats.algorithm_name == "QuickSim"
+        assert stats.num_valid_lyt > 1
 
     def test_bestagon_inv_with_different_mu(self):
         layout = read_sqd_layout_100(
@@ -122,9 +124,9 @@ class TestCriticalTemperature(unittest.TestCase):
         cds = charge_distribution_surface_100(layout)
         spec = [create_not_tt()]
 
-        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 5)
+        assert critical_temperature_gate_based(cds, spec, params, stats) <= 5
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
+        assert stats.algorithm_name == "QuickExact"
 
     def test_critical_temperature_with_input_pattern_layouts(self):
         lyt = sidb_100_lattice()
@@ -161,7 +163,7 @@ class TestCriticalTemperature(unittest.TestCase):
         )
 
         # a 2-input gate has 4 input patterns
-        self.assertEqual(len(input_pattern_layouts), 4)
+        assert len(input_pattern_layouts) == 4
 
         reference_stats = critical_temperature_stats()
         reference_ct = critical_temperature_gate_based(lyt, [create_and_tt()], params, reference_stats)
@@ -178,12 +180,12 @@ class TestCriticalTemperature(unittest.TestCase):
         )
 
         # the two overloads run the same computation, so the results must be identical
-        self.assertEqual(ct, reference_ct)
-        self.assertEqual(stats.num_valid_lyt, reference_stats.num_valid_lyt)
-        self.assertEqual(stats.algorithm_name, reference_stats.algorithm_name)
+        assert ct == reference_ct
+        assert stats.num_valid_lyt == reference_stats.num_valid_lyt
+        assert stats.algorithm_name == reference_stats.algorithm_name
 
         # a layout list that does not match the specification is rejected
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="expected 4 input pattern layouts"):
             critical_temperature_gate_based(
                 input_pattern_layouts[:1],
                 [create_and_tt()],
@@ -194,7 +196,7 @@ class TestCriticalTemperature(unittest.TestCase):
             )
 
         # more output BDL pairs than truth tables is rejected
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="expected 1 output BDL pairs"):
             critical_temperature_gate_based(
                 input_pattern_layouts,
                 [create_and_tt()],

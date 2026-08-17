@@ -18,10 +18,10 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         params.number_of_sidbs = 1
         params.coordinate_pair = ((10, 10), (10, 10))
         result_lyt = generate_random_sidb_layout(params, sidb_100_lattice())
-        self.assertEqual(result_lyt.num_cells(), 1)
+        assert result_lyt.num_cells() == 1
         cell = (result_lyt.cells())[0]
-        self.assertEqual(cell.x, 10)
-        self.assertEqual(cell.y, 10)
+        assert cell.x == 10
+        assert cell.y == 10
 
     def test_area_with_five_sidb_layout(self):
         params = generate_random_sidb_layout_params()
@@ -29,7 +29,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
         result_lyt = generate_random_sidb_layout(params, sidb_layout())
-        self.assertEqual(result_lyt.num_cells(), 5)
+        assert result_lyt.num_cells() == 5
 
     def test_area_with_five_sidb_100_lattice(self):
         params = generate_random_sidb_layout_params()
@@ -37,7 +37,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
         result_lyt = generate_random_sidb_layout(params, sidb_100_lattice())
-        self.assertEqual(result_lyt.num_cells(), 5)
+        assert result_lyt.num_cells() == 5
 
     def test_area_with_five_sidbs_cds_100(self):
         params = generate_random_sidb_layout_params()
@@ -45,7 +45,7 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
         result_lyt = generate_random_sidb_layout(params, charge_distribution_surface_100())
-        self.assertEqual(result_lyt.num_cells(), 5)
+        assert result_lyt.num_cells() == 5
 
     def test_area_with_five_sidbs_cds_111(self):
         params = generate_random_sidb_layout_params()
@@ -53,30 +53,30 @@ class TestRandomSiDBLayoutGenerator(unittest.TestCase):
         print(params.number_of_sidbs)
         params.coordinate_pair = ((0, 0), (10, 10))
         result_lyt = generate_random_sidb_layout(params, charge_distribution_surface_111())
-        self.assertEqual(result_lyt.num_cells(), 5)
+        assert result_lyt.num_cells() == 5
 
     def test_area_with_one_coordinate_111_lattice(self):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 1
         params.coordinate_pair = ((10, 10), (10, 10))
         result_lyt = generate_random_sidb_layout(params, sidb_111_lattice())
-        self.assertEqual(result_lyt.num_cells(), 1)
+        assert result_lyt.num_cells() == 1
         cell = (result_lyt.cells())[0]
-        self.assertEqual(cell.x, 10)
-        self.assertEqual(cell.y, 10)
+        assert cell.x == 10
+        assert cell.y == 10
 
     def test_impossible_design_of_single_layout(self):
         params = generate_random_sidb_layout_params()
         params.number_of_sidbs = 2
         result_lyt = generate_random_sidb_layout(params, sidb_layout())
-        self.assertIsNone(result_lyt)
+        assert result_lyt is None
 
     def test_impossible_design_of_multiple_layouts(self):
         params = generate_random_sidb_layout_params()
         params.maximal_attempts_for_multiple_layouts = 5
         params.number_of_sidbs = 2
         result_lyt = generate_multiple_random_sidb_layouts(params, sidb_layout())
-        self.assertIsNone(result_lyt)
+        assert result_lyt is None
 
 
 if __name__ == "__main__":

@@ -1,6 +1,8 @@
 import math
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     automatic_base_number_detection,
     charge_distribution_surface_100,
@@ -37,9 +39,9 @@ class TestTimeToSolution(unittest.TestCase):
 
         time_to_solution(cds, quicksim_parameter, tts_params, stats)
 
-        self.assertEqual(stats.acc, 100)
-        self.assertGreater(stats.time_to_solution, 0.0)
-        self.assertGreater(stats.mean_single_runtime, 0.0)
+        assert stats.acc == 100
+        assert stats.time_to_solution > 0.0
+        assert stats.mean_single_runtime > 0.0
 
     def test_one_sidb_111_lattice(self):
         layout = sidb_111_lattice((0, 0))
@@ -56,9 +58,9 @@ class TestTimeToSolution(unittest.TestCase):
 
         time_to_solution(cds, quicksim_parameter, tts_params, stats)
 
-        self.assertEqual(stats.acc, 100)
-        self.assertGreater(stats.time_to_solution, 0.0)
-        self.assertGreater(stats.mean_single_runtime, 0.0)
+        assert stats.acc == 100
+        assert stats.time_to_solution > 0.0
+        assert stats.mean_single_runtime > 0.0
 
     def test_time_to_solution_with_simulation_results(self):
         layout = sidb_100_lattice((0, 0))
@@ -84,8 +86,8 @@ class TestTimeToSolution(unittest.TestCase):
         quickexact_params_inst = quickexact_params()
         quickexact_params_inst.simulation_parameters = params
         quickexact_params_inst.base_number_detection = automatic_base_number_detection.OFF
-        self.assertEqual(quickexact_params_inst.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(quickexact_params_inst.base_number_detection, automatic_base_number_detection.OFF)
+        assert quickexact_params_inst.simulation_parameters.mu_minus == pytest.approx(-0.32)
+        assert quickexact_params_inst.base_number_detection == automatic_base_number_detection.OFF
 
         # Run the QuickExact simulation
         simulation_results_quickexact = quickexact(layout, quickexact_params_inst)
@@ -99,16 +101,16 @@ class TestTimeToSolution(unittest.TestCase):
             st,
         )
 
-        self.assertGreater(st.time_to_solution, 0.0)
-        self.assertGreater(st.mean_single_runtime, 0.0)
+        assert st.time_to_solution > 0.0
+        assert st.mean_single_runtime > 0.0
 
         if st.acc == 100:
             tts_calculated = st.mean_single_runtime
-            self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
+            assert st.time_to_solution == pytest.approx(tts_calculated, abs=1e-6)
         elif not math.isclose(st.acc, 0.0):
             # To avoid division by zero, ensure st.acc is not 1.0
             tts_calculated = st.mean_single_runtime * math.log(1.0 - 0.997) / math.log(1.0 - st.acc / 100)
-            self.assertAlmostEqual(st.time_to_solution - tts_calculated, 0.0, delta=1e-6)
+            assert st.time_to_solution == pytest.approx(tts_calculated, abs=1e-6)
 
 
 if __name__ == "__main__":

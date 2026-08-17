@@ -1,6 +1,8 @@
 import os
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     bdl_input_iterator_params,
     bdl_wire_selection,
@@ -52,13 +54,13 @@ class TestIsOperational(unittest.TestCase):
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        assert op_status == operational_status.OPERATIONAL
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
         # pre-determined I/O pins
         output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
@@ -70,7 +72,7 @@ class TestIsOperational(unittest.TestCase):
             input_bdl_wires,
             output_bdl_wires,
         )
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
         # pre-determined I/O pins and canvas layout
         canvas_lyt = sidb_100_lattice()
@@ -83,7 +85,7 @@ class TestIsOperational(unittest.TestCase):
             input_bdl_wires,
             output_bdl_wires,
         )
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
     def test_is_operational_with_input_pattern_layouts(self):
         lyt = sidb_100_lattice()
@@ -118,7 +120,7 @@ class TestIsOperational(unittest.TestCase):
         )
 
         # a 2-input gate has 4 input patterns
-        self.assertEqual(len(input_pattern_layouts), 4)
+        assert len(input_pattern_layouts) == 4
 
         # the layout list yields the same verdict as the layout itself
         for simulation_parameters, expected in [
@@ -142,12 +144,12 @@ class TestIsOperational(unittest.TestCase):
                 output_bdl_wires,
             )
 
-            self.assertEqual(reference_status, expected)
-            self.assertEqual(op_status, reference_status)
-            self.assertEqual(evaluated_input_combinations, reference_calls)
+            assert reference_status == expected
+            assert op_status == reference_status
+            assert evaluated_input_combinations == reference_calls
 
         # a layout list that does not match the specification is rejected
-        with self.assertRaises(ValueError):
+        with pytest.raises(ValueError, match="expected 4 input pattern layouts"):
             is_operational(
                 input_pattern_layouts[:2],
                 [create_and_tt()],
@@ -164,13 +166,13 @@ class TestIsOperational(unittest.TestCase):
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        assert op_status == operational_status.OPERATIONAL
 
         params.op_condition = operational_condition.REJECT_KINKS
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
     def test_and_gate_non_operational_due_to_kinks(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
@@ -180,7 +182,7 @@ class TestIsOperational(unittest.TestCase):
 
         result = is_kink_induced_non_operational(lyt, [create_and_tt()], params)
 
-        self.assertTrue(result)
+        assert result
 
     def test_and_gate_non_operational_input_patterns_due_to_kinks(self):
         lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
@@ -190,7 +192,7 @@ class TestIsOperational(unittest.TestCase):
 
         non_operational_pattern_kinks = kink_induced_non_operational_input_patterns(lyt, [create_and_tt()], params)
 
-        self.assertEqual(non_operational_pattern_kinks, {1, 2})
+        assert non_operational_pattern_kinks == {1, 2}
 
     def test_and_gate_111_lattice_11_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
@@ -200,30 +202,27 @@ class TestIsOperational(unittest.TestCase):
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.OPERATIONAL)
+        assert op_status == operational_status.OPERATIONAL
 
         params.simulation_parameters = sidb_simulation_parameters(2, -0.1)
 
-        self.assertEqual(params.simulation_parameters.mu_minus, -0.1)
+        assert params.simulation_parameters.mu_minus == pytest.approx(-0.1)
 
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
 
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
         # filer only
         params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_ONLY
-        self.assertEqual(params.strategy_to_analyze_operational_status, operational_analysis_strategy.FILTER_ONLY)
+        assert params.strategy_to_analyze_operational_status == operational_analysis_strategy.FILTER_ONLY
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
         # filer then simulation
         params.strategy_to_analyze_operational_status = operational_analysis_strategy.FILTER_THEN_SIMULATION
-        self.assertEqual(
-            params.strategy_to_analyze_operational_status,
-            operational_analysis_strategy.FILTER_THEN_SIMULATION,
-        )
+        assert params.strategy_to_analyze_operational_status == operational_analysis_strategy.FILTER_THEN_SIMULATION
         [op_status, _evaluated_input_combinations] = is_operational(lyt, [create_and_tt()], params)
-        self.assertEqual(op_status, operational_status.NON_OPERATIONAL)
+        assert op_status == operational_status.NON_OPERATIONAL
 
     def test_and_gate_111_lattice_operational_input_pattern(self):
         lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
@@ -234,9 +233,9 @@ class TestIsOperational(unittest.TestCase):
         operational_patterns = operational_input_patterns(lyt, [create_and_tt()], params)
 
         print(operational_patterns)
-        self.assertEqual(len(operational_patterns), 2)
+        assert len(operational_patterns) == 2
 
-        self.assertEqual(operational_patterns, {0, 3})
+        assert operational_patterns == {0, 3}
 
 
 if __name__ == "__main__":

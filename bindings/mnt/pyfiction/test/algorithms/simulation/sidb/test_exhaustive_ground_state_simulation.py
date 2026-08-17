@@ -1,5 +1,7 @@
 import unittest
 
+import pytest
+
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
@@ -25,14 +27,14 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
 
         result = exhaustive_ground_state_simulation(layout, params)
 
-        self.assertEqual(result.algorithm_name, "ExGS")
-        self.assertEqual(len(result.charge_distributions), 1)
+        assert result.algorithm_name == "ExGS"
+        assert len(result.charge_distributions) == 1
 
         groundstate = result.charge_distributions[0]
 
-        self.assertEqual(groundstate.get_charge_state((0, 1)), sidb_charge_state.NEGATIVE)
-        self.assertEqual(groundstate.get_charge_state((4, 1)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate.get_charge_state((6, 1)), sidb_charge_state.NEGATIVE)
+        assert groundstate.get_charge_state((0, 1)) == sidb_charge_state.NEGATIVE
+        assert groundstate.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
+        assert groundstate.get_charge_state((6, 1)) == sidb_charge_state.NEGATIVE
 
     def test_perturber_and_sidb_pair_111(self):
         layout = sidb_111_lattice((4, 1))
@@ -45,22 +47,22 @@ class TestExhaustiveGroundStateSimulation(unittest.TestCase):
         params.mu_minus = -0.32
         params.base = 2
 
-        self.assertEqual(params.mu_minus, -0.32)
+        assert params.mu_minus == pytest.approx(-0.32)
 
         cds = charge_distribution_surface_111(layout)
 
         result = exhaustive_ground_state_simulation(cds, params)
 
-        self.assertEqual(result.algorithm_name, "ExGS")
+        assert result.algorithm_name == "ExGS"
 
         groundstate = result.groundstates()
 
-        self.assertEqual(len(groundstate), 1)
+        assert len(groundstate) == 1
 
-        self.assertEqual(groundstate[0].get_charge_state((0, 0)), sidb_charge_state.NEGATIVE)
-        self.assertEqual(groundstate[0].get_charge_state((1, 0)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate[0].get_charge_state((2, 0)), sidb_charge_state.NEUTRAL)
-        self.assertEqual(groundstate[0].get_charge_state((3, 0)), sidb_charge_state.NEGATIVE)
+        assert groundstate[0].get_charge_state((0, 0)) == sidb_charge_state.NEGATIVE
+        assert groundstate[0].get_charge_state((1, 0)) == sidb_charge_state.NEUTRAL
+        assert groundstate[0].get_charge_state((2, 0)) == sidb_charge_state.NEUTRAL
+        assert groundstate[0].get_charge_state((3, 0)) == sidb_charge_state.NEGATIVE
 
 
 if __name__ == "__main__":
