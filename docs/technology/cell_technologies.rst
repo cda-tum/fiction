@@ -46,3 +46,17 @@ Silicon Dangling Bonds (SiDB)
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_technology
             :members:
+
+Molecular Quantum-dot Cellular Automata (MolQCA)
+------------------------------------------------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/technology/cell_technologies.hpp``
+
+        .. doxygenstruct:: fiction::mol_qca_technology
+           :members:
+
+    .. tab:: Python
+        .. autoclass:: mnt.pyfiction.mol_qca_technology
+            :members:
