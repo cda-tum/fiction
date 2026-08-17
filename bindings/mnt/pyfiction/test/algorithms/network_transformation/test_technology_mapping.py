@@ -1,5 +1,4 @@
 import os
-import unittest
 
 from mnt.pyfiction import (
     all_standard_2_input_functions,
@@ -17,44 +16,41 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestTechnologyMapping(unittest.TestCase):
-    def test_mapping_default(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-        assert network.num_gates() == 5
+def test_mapping_default():
+    network = read_technology_network(dir_path + "/../../resources/mux21.v")
+    assert network.num_gates() == 5
 
-        mapped_network = technology_mapping(network)
+    mapped_network = technology_mapping(network)
 
-        assert equivalence_checking(network, mapped_network) == eq_type.NO
-
-    def test_mapping_with_parameters(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        for params in [
-            and_or_not(),
-            and_or_not_maj(),
-            all_standard_2_input_functions(),
-            all_standard_3_input_functions(),
-            all_supported_standard_functions(),
-        ]:
-            mapped_network = technology_mapping(network, params)
-
-            assert equivalence_checking(network, mapped_network) == eq_type.STRONG
-
-    def test_mapping_with_stats(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        for params in [
-            and_or_not(),
-            and_or_not_maj(),
-            all_standard_2_input_functions(),
-            all_standard_3_input_functions(),
-            all_supported_standard_functions(),
-        ]:
-            stats = technology_mapping_stats()
-            mapped_network = technology_mapping(network, params=params, stats=stats)
-
-            assert equivalence_checking(network, mapped_network) == eq_type.STRONG
+    assert equivalence_checking(network, mapped_network) == eq_type.NO
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_mapping_with_parameters():
+    network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+    for params in [
+        and_or_not(),
+        and_or_not_maj(),
+        all_standard_2_input_functions(),
+        all_standard_3_input_functions(),
+        all_supported_standard_functions(),
+    ]:
+        mapped_network = technology_mapping(network, params)
+
+        assert equivalence_checking(network, mapped_network) == eq_type.STRONG
+
+
+def test_mapping_with_stats():
+    network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+    for params in [
+        and_or_not(),
+        and_or_not_maj(),
+        all_standard_2_input_functions(),
+        all_standard_3_input_functions(),
+        all_supported_standard_functions(),
+    ]:
+        stats = technology_mapping_stats()
+        mapped_network = technology_mapping(network, params=params, stats=stats)
+
+        assert equivalence_checking(network, mapped_network) == eq_type.STRONG

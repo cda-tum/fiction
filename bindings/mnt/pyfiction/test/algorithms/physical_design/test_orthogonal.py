@@ -1,5 +1,4 @@
 import os
-import unittest
 
 from mnt.pyfiction import (
     eq_type,
@@ -13,30 +12,27 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestOrthogonalPhysicalDesign(unittest.TestCase):
-    def test_orthogonal_default(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-        layout = orthogonal(network)
-        assert equivalence_checking(network, layout) == eq_type.STRONG
-
-    def test_orthogonal_with_parameters(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        params = orthogonal_params()
-
-        layout = orthogonal(network, params)
-
-        assert equivalence_checking(network, layout) == eq_type.STRONG
-
-    def test_orthogonal_with_stats(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        stats = orthogonal_stats()
-
-        layout = orthogonal(network, statistics=stats)
-
-        assert equivalence_checking(network, layout) == eq_type.STRONG
+def test_orthogonal_default():
+    network = read_technology_network(dir_path + "/../../resources/mux21.v")
+    layout = orthogonal(network)
+    assert equivalence_checking(network, layout) == eq_type.STRONG
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_orthogonal_with_parameters():
+    network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+    params = orthogonal_params()
+
+    layout = orthogonal(network, params)
+
+    assert equivalence_checking(network, layout) == eq_type.STRONG
+
+
+def test_orthogonal_with_stats():
+    network = read_technology_network(dir_path + "/../../resources/mux21.v")
+
+    stats = orthogonal_stats()
+
+    layout = orthogonal(network, statistics=stats)
+
+    assert equivalence_checking(network, layout) == eq_type.STRONG

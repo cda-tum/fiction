@@ -1,5 +1,3 @@
-import unittest
-
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,
@@ -13,62 +11,58 @@ from mnt.pyfiction import (
 )
 
 
-class TestDetermineGroundstateFromSimulationResults(unittest.TestCase):
-    def test_three_DBs_100_lattice(self):
-        layout = sidb_100_lattice((10, 10))
+def test_three_DBs_100_lattice():
+    layout = sidb_100_lattice((10, 10))
 
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
-        cds1 = charge_distribution_surface_100(layout)  # all negative
-        cds2 = charge_distribution_surface_100(
-            layout,
-            sidb_simulation_parameters(),
-            sidb_charge_state.NEUTRAL,
-        )  # all neutral
-        cds3 = charge_distribution_surface_100(layout)
-        cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
+    cds1 = charge_distribution_surface_100(layout)  # all negative
+    cds2 = charge_distribution_surface_100(
+        layout,
+        sidb_simulation_parameters(),
+        sidb_charge_state.NEUTRAL,
+    )  # all neutral
+    cds3 = charge_distribution_surface_100(layout)
+    cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
 
-        results = sidb_simulation_result_100()
-        results.charge_distributions = [cds1, cds2, cds3]
+    results = sidb_simulation_result_100()
+    results.charge_distributions = [cds1, cds2, cds3]
 
-        ground_state = results.groundstates()
-        assert len(ground_state) == 1
+    ground_state = results.groundstates()
+    assert len(ground_state) == 1
 
-        groundstate = ground_state[0]
-        assert groundstate.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
-        assert groundstate.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
-        assert groundstate.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
-
-    def test_three_DBs_111_lattice(self):
-        layout = sidb_111_lattice((10, 10))
-
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
-
-        cds1 = charge_distribution_surface_111(layout)  # all negative
-        cds2 = charge_distribution_surface_111(
-            layout,
-            sidb_simulation_parameters(),
-            sidb_charge_state.NEUTRAL,
-        )  # all neutral
-        cds3 = charge_distribution_surface_111(layout)
-        cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
-
-        results = sidb_simulation_result_111()
-        results.charge_distributions = [cds1, cds2, cds3]
-
-        result = results.groundstates()
-        assert len(result) == 1
-
-        ground_state = result[0]
-
-        assert ground_state.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
-        assert ground_state.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
-        assert ground_state.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
+    groundstate = ground_state[0]
+    assert groundstate.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
+    assert groundstate.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
+    assert groundstate.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_three_DBs_111_lattice():
+    layout = sidb_111_lattice((10, 10))
+
+    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+
+    cds1 = charge_distribution_surface_111(layout)  # all negative
+    cds2 = charge_distribution_surface_111(
+        layout,
+        sidb_simulation_parameters(),
+        sidb_charge_state.NEUTRAL,
+    )  # all neutral
+    cds3 = charge_distribution_surface_111(layout)
+    cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
+
+    results = sidb_simulation_result_111()
+    results.charge_distributions = [cds1, cds2, cds3]
+
+    result = results.groundstates()
+    assert len(result) == 1
+
+    ground_state = result[0]
+
+    assert ground_state.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
+    assert ground_state.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
+    assert ground_state.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL

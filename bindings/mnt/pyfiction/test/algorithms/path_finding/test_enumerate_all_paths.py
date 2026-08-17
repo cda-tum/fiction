@@ -1,5 +1,3 @@
-import unittest
-
 from mnt.pyfiction import (
     cartesian_gate_layout,
     cartesian_layout,
@@ -15,29 +13,25 @@ from mnt.pyfiction import (
 )
 
 
-class TestEnumerateAllPaths(unittest.TestCase):
-    def test_non_clocked_paths(self):
-        for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
-            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
-
-    def test_clocking_paths(self):
-        for lyt in [
-            clocked_cartesian_layout((4, 4), "2DDWave"),
-            cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-            clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
-            shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
-            clocked_hexagonal_layout((4, 4), "2DDWave"),
-            hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
-        ]:
-            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
-            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == [[(0, 0), (1, 0)]]
-            assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == [[(0, 0), (0, 1)]]
-
-            paths = enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))
-
-            assert [(0, 0), (0, 1), (1, 1)] in paths
-            assert [(0, 0), (1, 0), (1, 1)] in paths
+def test_non_clocked_paths():
+    for lyt in [cartesian_layout((4, 4)), shifted_cartesian_layout((4, 4)), hexagonal_layout((4, 4))]:
+        assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_clocking_paths():
+    for lyt in [
+        clocked_cartesian_layout((4, 4), "2DDWave"),
+        cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+        clocked_shifted_cartesian_layout((4, 4), "2DDWave"),
+        shifted_cartesian_gate_layout((4, 4), "2DDWave", "Layout"),
+        clocked_hexagonal_layout((4, 4), "2DDWave"),
+        hexagonal_gate_layout((4, 4), "2DDWave", "Layout"),
+    ]:
+        assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 0)) == [[(0, 0)]]
+        assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 0)) == [[(0, 0), (1, 0)]]
+        assert enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(0, 1)) == [[(0, 0), (0, 1)]]
+
+        paths = enumerate_all_paths(lyt, offset_coordinate(0, 0), offset_coordinate(1, 1))
+
+        assert [(0, 0), (0, 1), (1, 1)] in paths
+        assert [(0, 0), (1, 0), (1, 1)] in paths

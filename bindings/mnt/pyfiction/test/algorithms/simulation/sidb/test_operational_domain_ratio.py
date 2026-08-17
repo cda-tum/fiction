@@ -1,5 +1,4 @@
 import os
-import unittest
 
 import pytest
 
@@ -18,33 +17,28 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-class TestComputeOperationalRatioAtPoint(unittest.TestCase):
-    def test_and_gate_100_lattice(self):
-        lyt = read_sqd_layout_100(dir_path + "/../../../resources/21_hex_inputsdbp_and_v19.sqd")
+def test_and_gate_100_lattice():
+    lyt = read_sqd_layout_100(dir_path + "/../../../resources/21_hex_inputsdbp_and_v19.sqd")
 
-        params = operational_domain_params()
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.operational_params.simulation_parameters.base = 2
+    params = operational_domain_params()
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.simulation_parameters.base = 2
 
-        params.sweep_dimensions = [
-            operational_domain_value_range(sweep_parameter.EPSILON_R, 5.00, 6.00, 0.1),
-            operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1),
-        ]
+    params.sweep_dimensions = [
+        operational_domain_value_range(sweep_parameter.EPSILON_R, 5.00, 6.00, 0.1),
+        operational_domain_value_range(sweep_parameter.LAMBDA_TF, 5.00, 6.00, 0.1),
+    ]
 
-        ratio_params = operational_domain_ratio_params()
-        ratio_params.op_domain_params = params
+    ratio_params = operational_domain_ratio_params()
+    ratio_params.op_domain_params = params
 
-        assert ratio_params.op_domain_params.operational_params.simulation_parameters.base == 2
+    assert ratio_params.op_domain_params.operational_params.simulation_parameters.base == 2
 
-        operational_domain_ratio_result = operational_domain_ratio(
-            lyt,
-            [create_and_tt()],
-            parameter_point([5.6, 5.0]),
-            ratio_params,
-        )
+    operational_domain_ratio_result = operational_domain_ratio(
+        lyt,
+        [create_and_tt()],
+        parameter_point([5.6, 5.0]),
+        ratio_params,
+    )
 
-        assert operational_domain_ratio_result == pytest.approx(23 / 121, abs=1e-5)
-
-
-if __name__ == "__main__":
-    unittest.main()
+    assert operational_domain_ratio_result == pytest.approx(23 / 121, abs=1e-5)
