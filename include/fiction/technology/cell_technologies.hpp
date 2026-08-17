@@ -197,8 +197,10 @@ struct mol_qca_technology
     {
         NORMAL = 0u,
         ROTATED,
-        VERTICAL,
-        CROSSOVER
+        VERTICAL,  // reserved for a future crossing gate; writer branches are kept so they won't silently break on
+                   // addition
+        CROSSOVER  // reserved for a future crossing gate; writer branches are kept so they won't silently break on
+                   // addition
     };
     /**
      * Possible marks to be applied to a cell to change its type.
