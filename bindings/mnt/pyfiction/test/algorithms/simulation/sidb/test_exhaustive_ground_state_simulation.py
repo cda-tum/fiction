@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     charge_distribution_surface_100,
     charge_distribution_surface_111,

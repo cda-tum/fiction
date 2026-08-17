@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     fanout_substitution,
     fanout_substitution_params,

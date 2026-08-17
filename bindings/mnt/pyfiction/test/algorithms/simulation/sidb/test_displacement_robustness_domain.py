@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     create_and_tt,
     determine_displacement_robustness_domain_100,

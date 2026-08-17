@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import sidb_simulation_parameters
 
 

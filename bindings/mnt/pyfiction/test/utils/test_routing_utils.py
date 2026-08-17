@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import a_star, cartesian_gate_layout, route_path
 
 

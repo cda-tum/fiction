@@ -252,6 +252,9 @@ future-annotations = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["mnt.pyfiction"]
+# `future-annotations = true` above lets ruff assume PEP 563 semantics when it rewrites an
+# annotation, which only holds in files that carry the import. Requiring it closes the gap.
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 # E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped

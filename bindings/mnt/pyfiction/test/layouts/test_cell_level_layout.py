@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_technology
 
 

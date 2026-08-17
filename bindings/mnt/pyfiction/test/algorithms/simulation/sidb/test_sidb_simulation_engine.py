@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     exact_sidb_simulation_engine,
     heuristic_sidb_simulation_engine,

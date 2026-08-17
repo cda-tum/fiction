@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mnt.pyfiction import bdl_input_iterator_100, sidb_100_lattice, sidb_technology

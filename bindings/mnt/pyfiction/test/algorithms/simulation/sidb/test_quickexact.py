@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     automatic_base_number_detection,
     charge_distribution_surface_100,
