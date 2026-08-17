@@ -18542,9 +18542,9 @@ static const char *mkd_doc_fiction_molecular_qca_library =
 R"doc(SIM(7)-MolPDK molecular QCA gate library.
 
 This MolQCA gate library corresponds to the physically simulated
-standard-cell library SIM(7)-MolPDK, introduced in \"Bridging the Gap
+standard-cell library SIM(7)-MolPDK, introduced in "Bridging the Gap
 Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
-Physically Simulated Standard-Cell Library\" by B. Hien, D. Quinci, Y.
+Physically Simulated Standard-Cell Library" by B. Hien, D. Quinci, Y.
 Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
 IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
 simulations using the SCERPA tool, and tiles represent uniform
