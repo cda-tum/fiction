@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from mnt.pyfiction import (
@@ -33,8 +31,6 @@ from mnt.pyfiction import (
     sweep_parameter,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
-
 
 @pytest.fixture
 def wire_with_canvas() -> sidb_100_lattice:
@@ -67,8 +63,8 @@ def wire_with_canvas() -> sidb_100_lattice:
     return lyt
 
 
-def test_operational_domain_SiQAD_OR_100_lattice():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
+def test_operational_domain_siqad_or_100_lattice(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -89,9 +85,9 @@ def test_operational_domain_SiQAD_OR_100_lattice():
     assert stats_grid.num_operational_parameter_combinations == 10201
 
 
-def test_number_of_threads() -> None:
+def test_number_of_threads(resources_dir):
     """The thread count is configurable and does not change the resulting operational domain."""
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
+    lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -156,9 +152,9 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas) -> None:
             assert domain[point] == grid_domain[point]
 
 
-def test_operational_domain_sketch_preconditions(wire_with_canvas) -> None:
+def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir) -> None:
     """The sketch is rejected when it cannot filter anything."""
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
+    lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -186,8 +182,8 @@ def test_operational_domain_sketch_preconditions(wire_with_canvas) -> None:
     operational_domain_grid_search(canvas_lyt, [create_id_tt()], params)
 
 
-def test_operational_domain_XOR_gate_100_lattice():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")
+def test_operational_domain_xor_gate_100_lattice(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -215,8 +211,8 @@ def test_operational_domain_XOR_gate_100_lattice():
     assert stats_contour_tracing.num_operational_parameter_combinations > 0
 
 
-def test_critical_temperature_domain_XOR_gate_100_lattice():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd")
+def test_critical_temperature_domain_xor_gate_100_lattice(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -271,8 +267,8 @@ def test_critical_temperature_domain_XOR_gate_100_lattice():
     assert stats_random_sampling.num_operational_parameter_combinations > 0
 
 
-def test_operational_domain_AND_gate_111_lattice():
-    lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
+def test_operational_domain_and_gate_111_lattice(resources_dir):
+    lyt = read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT

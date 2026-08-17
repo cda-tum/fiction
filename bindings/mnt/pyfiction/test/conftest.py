@@ -2,17 +2,17 @@
 
 from __future__ import annotations
 
-import os
+from pathlib import Path
 
 import pytest
 
 from mnt.pyfiction import read_technology_network, technology_network
 
-RESOURCES_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "resources")
+RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 
 
 @pytest.fixture
-def resources_dir() -> str:
+def resources_dir() -> Path:
     """Directory holding the Verilog and SQD input files the tests read.
 
     Returns:
@@ -31,4 +31,4 @@ def mux21() -> technology_network:
     Returns:
         The ``mux21.v`` network as a ``technology_network``.
     """
-    return read_technology_network(os.path.join(RESOURCES_DIR, "mux21.v"))
+    return read_technology_network(str(RESOURCES_DIR / "mux21.v"))

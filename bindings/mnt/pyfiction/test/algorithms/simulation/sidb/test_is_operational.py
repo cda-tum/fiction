@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from mnt.pyfiction import (
@@ -23,8 +21,6 @@ from mnt.pyfiction import (
     sidb_simulation_parameters,
     sidb_technology,
 )
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def test_is_operational():
@@ -158,8 +154,8 @@ def test_is_operational_with_input_pattern_layouts():
         )
 
 
-def test_and_gate_kinks():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
+def test_and_gate_kinks(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -175,8 +171,8 @@ def test_and_gate_kinks():
     assert op_status == operational_status.NON_OPERATIONAL
 
 
-def test_and_gate_non_operational_due_to_kinks():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
+def test_and_gate_non_operational_due_to_kinks(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -186,8 +182,8 @@ def test_and_gate_non_operational_due_to_kinks():
     assert result
 
 
-def test_and_gate_non_operational_input_patterns_due_to_kinks():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/AND_mu_032_kinks.sqd")
+def test_and_gate_non_operational_input_patterns_due_to_kinks(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -197,8 +193,8 @@ def test_and_gate_non_operational_input_patterns_due_to_kinks():
     assert non_operational_pattern_kinks == {1, 2}
 
 
-def test_and_gate_111_lattice_11_input_pattern():
-    lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
+def test_and_gate_111_lattice_11_input_pattern(resources_dir):
+    lyt = read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -228,8 +224,8 @@ def test_and_gate_111_lattice_11_input_pattern():
     assert op_status == operational_status.NON_OPERATIONAL
 
 
-def test_and_gate_111_lattice_operational_input_pattern():
-    lyt = read_sqd_layout_111(dir_path + "/../../../resources/AND_mu_032_111_surface.sqd")
+def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
+    lyt = read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.30)

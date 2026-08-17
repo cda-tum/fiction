@@ -78,7 +78,11 @@ def test_write_operational_domain_with_metric_values():
     assert sorted(temperature_operational_domain_as_string.strip().split("\n")) == sorted(expected.strip().split("\n"))
 
     # Custom operational tags
-    expected_custom = "epsilon_r,lambda_tf,operational status,critical temperature\n0.1,0.2,operational,50.3\n0.3,0.4,non-operational,0"
+    expected_custom = (
+        "epsilon_r,lambda_tf,operational status,critical temperature\n"
+        "0.1,0.2,operational,50.3\n"
+        "0.3,0.4,non-operational,0"
+    )
     params = write_operational_domain_params()
     params.operational_tag = "operational"
     params.non_operational_tag = "non-operational"

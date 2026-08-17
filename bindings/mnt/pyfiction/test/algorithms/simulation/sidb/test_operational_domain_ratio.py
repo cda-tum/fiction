@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from mnt.pyfiction import (
@@ -14,11 +12,9 @@ from mnt.pyfiction import (
     sweep_parameter,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
-def test_and_gate_100_lattice():
-    lyt = read_sqd_layout_100(dir_path + "/../../../resources/21_hex_inputsdbp_and_v19.sqd")
+def test_and_gate_100_lattice(resources_dir):
+    lyt = read_sqd_layout_100(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT

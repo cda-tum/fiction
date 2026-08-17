@@ -236,13 +236,11 @@ ignore = [
     "D", # pydocstyle
     "N", # flake8-naming
     "PL", # pylint
-    "PTH", # flake8-use-pathlib
     "S", # flake8-bandit
     "ERA001", # Found commented-out code
     "CPY001", # Missing copyright notice at top of file
     "FBT003", # Boolean positional value in function call
     "INP001", # File is part of an implicit namespace package
-    "E501", # Line too long
     "TD002", # Missing author in TODO
     "TD003", # Missing issue link in TODO
     "TD004", # Missing colon in TODO
@@ -256,6 +254,8 @@ future-annotations = true
 known-first-party = ["mnt.pyfiction"]
 
 [tool.ruff.lint.per-file-ignores]
+# E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
+"bindings/mnt/pyfiction/test/inout/test_write_svg_layout.py" = ["E501"]
 # RUF069: a test that stores a float through a binding and reads it back asserts that it
 # comes back unchanged, which is exact; pytest.approx there would hide a broken setter
 "bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D", "RUF069"]

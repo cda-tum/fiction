@@ -7,7 +7,7 @@ from mnt.pyfiction import (
 )
 
 
-def test_three_DBs_100_lattice():
+def test_three_sidbs_100_lattice():
     layout = sidb_100_lattice((2, 3))
     layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
@@ -20,7 +20,7 @@ def test_three_DBs_100_lattice():
     assert not can_positive_charges_occur(layout, params)
 
 
-def test_three_DBs_111_lattice():
+def test_three_sidbs_111_lattice():
     layout = sidb_111_lattice((2, 3))
     layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)

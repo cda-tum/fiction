@@ -1,13 +1,9 @@
-import os
-
 from mnt.pyfiction import exact_cartesian, exact_params, read_technology_network, simulate
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
-def test_logic_simulation():
-    xor2_net = read_technology_network(dir_path + "/../../resources/xor2.v")
-    xnor2_net = read_technology_network(dir_path + "/../../resources/xnor2.v")
+def test_logic_simulation(resources_dir):
+    xor2_net = read_technology_network(str(resources_dir / "xor2.v"))
+    xnor2_net = read_technology_network(str(resources_dir / "xnor2.v"))
 
     xor_sim = simulate(xor2_net)
     assert xor_sim["out"] == [False, True, True, False]

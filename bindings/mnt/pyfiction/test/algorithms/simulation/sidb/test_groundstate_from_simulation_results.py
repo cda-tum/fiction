@@ -11,7 +11,7 @@ from mnt.pyfiction import (
 )
 
 
-def test_three_DBs_100_lattice():
+def test_three_sidbs_100_lattice():
     layout = sidb_100_lattice((10, 10))
 
     layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
@@ -39,7 +39,7 @@ def test_three_DBs_100_lattice():
     assert groundstate.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
 
 
-def test_three_DBs_111_lattice():
+def test_three_sidbs_111_lattice():
     layout = sidb_111_lattice((10, 10))
 
     layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)

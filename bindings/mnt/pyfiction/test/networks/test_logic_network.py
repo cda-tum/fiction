@@ -1,14 +1,14 @@
-import os
+from pathlib import Path
 
 import pytest
 
 from mnt.pyfiction import read_technology_network
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+DIR_PATH = Path(__file__).resolve().parent
 
 
-def test_read_technology_network():
-    network = read_technology_network(dir_path + "/../resources/mux21.v")
+def test_read_technology_network(resources_dir):
+    network = read_technology_network(str(resources_dir / "mux21.v"))
 
     assert network.size() == 10
     assert network.nodes() == list(range(10))
@@ -54,11 +54,11 @@ def test_read_technology_network():
     assert network.fanins(9) == [8]
 
     with pytest.raises(RuntimeError):
-        read_technology_network(dir_path + "/mux41.v")
+        read_technology_network(str(DIR_PATH / "mux41.v"))
 
 
 def test_is_gate_functions(resources_dir):
-    network = read_technology_network(os.path.join(resources_dir, "mux21.v"))
+    network = read_technology_network(str(resources_dir / "mux21.v"))
 
     for i in network.nodes():
         assert not network.is_maj(i)
@@ -67,7 +67,7 @@ def test_is_gate_functions(resources_dir):
         assert not network.is_nand(i)
         assert not network.is_nor(i)
 
-    network = read_technology_network(os.path.join(resources_dir, "FA.v"))
+    network = read_technology_network(str(resources_dir / "FA.v"))
 
     assert network.is_xor(6)
 

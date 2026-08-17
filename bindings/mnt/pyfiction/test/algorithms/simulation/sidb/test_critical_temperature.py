@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from mnt.pyfiction import (
@@ -26,8 +24,6 @@ from mnt.pyfiction import (
     sidb_simulation_parameters,
     sidb_technology,
 )
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 @pytest.mark.parametrize(
@@ -57,8 +53,8 @@ def test_perturber_and_sidb_pair(sidb_lattice, charge_distribution_surface):
     assert stats.num_valid_lyt == 1
 
 
-def test_gate_based_simulation():
-    layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
+def test_gate_based_simulation(resources_dir):
+    layout = read_sqd_layout_100(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), "xor_gate")
     params = critical_temperature_params()
 
     params.operational_params.simulation_parameters.base = 2
@@ -75,9 +71,9 @@ def test_gate_based_simulation():
     assert stats.algorithm_name == "QuickExact"
 
 
-def test_bestagon_inv():
+def test_bestagon_inv(resources_dir):
     layout = read_sqd_layout_100(
-        dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
+        str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
         "inverter_input_0",
     )
 
@@ -96,9 +92,9 @@ def test_bestagon_inv():
     assert stats.num_valid_lyt > 1
 
 
-def test_bestagon_inv_with_different_mu():
+def test_bestagon_inv_with_different_mu(resources_dir):
     layout = read_sqd_layout_100(
-        dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
+        str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
         "inverter_input_0",
     )
 

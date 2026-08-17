@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from mnt.pyfiction import (
@@ -16,8 +14,6 @@ from mnt.pyfiction import (
     shifted_cartesian_obstruction_layout,
     sidb_layout,
 )
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 @pytest.mark.parametrize(
@@ -61,7 +57,7 @@ def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
     ],
 )
 def test_initialize_gate_level_with_ortho_bounding_box(resources_dir, verilog, width, height):
-    network = read_technology_network(os.path.join(resources_dir, verilog))
+    network = read_technology_network(str(resources_dir / verilog))
     layout = orthogonal(network, orthogonal_params())
     min_coord, max_coord = layout.bounding_box_2d()
 

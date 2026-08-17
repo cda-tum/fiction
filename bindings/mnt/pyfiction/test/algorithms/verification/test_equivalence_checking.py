@@ -1,13 +1,9 @@
-import os
-
 from mnt.pyfiction import eq_type, equivalence_checking, equivalence_checking_stats, read_technology_network
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
-
-def test_non_eq():
-    xor2_net = read_technology_network(dir_path + "/../../resources/xor2.v")
-    xnor2_net = read_technology_network(dir_path + "/../../resources/xnor2.v")
+def test_non_eq(resources_dir):
+    xor2_net = read_technology_network(str(resources_dir / "xor2.v"))
+    xnor2_net = read_technology_network(str(resources_dir / "xnor2.v"))
 
     stats = equivalence_checking_stats()
     assert stats.counter_example == []

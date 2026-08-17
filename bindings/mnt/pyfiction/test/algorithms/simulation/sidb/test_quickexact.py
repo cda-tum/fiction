@@ -1,5 +1,3 @@
-import os
-
 from mnt.pyfiction import (
     automatic_base_number_detection,
     charge_distribution_surface_100,
@@ -13,8 +11,6 @@ from mnt.pyfiction import (
     sidb_simulation_parameters,
     sidb_technology,
 )
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def test_three_sidbs():
@@ -79,8 +75,8 @@ def test_perturber_and_sidb_pair_111():
     assert groundstate[0].get_charge_state((3, 0)) == sidb_charge_state.NEGATIVE
 
 
-def test_simulate_all_inputs_of_AND_gate():
-    and_gate = read_sqd_layout_100(dir_path + "/../../../resources/Bestagon_AND_mu_025_v0.sqd")
+def test_simulate_all_inputs_of_and_gate(resources_dir):
+    and_gate = read_sqd_layout_100(str(resources_dir / "Bestagon_AND_mu_025_v0.sqd"))
     physical_parameters = sidb_simulation_parameters()
     physical_parameters.base = 2
     physical_parameters.epsilon_r = 5.6

@@ -11,7 +11,7 @@ from mnt.pyfiction import (
 )
 
 
-def test_one_DB_100_lattice():
+def test_one_sidb_100_lattice():
     layout = sidb_100_lattice((10, 10))
     layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
     cds = charge_distribution_surface_100(layout)
@@ -27,7 +27,7 @@ def test_one_DB_100_lattice():
         valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
 
-def test_one_DB_111_lattice():
+def test_one_sidb_111_lattice():
     layout = sidb_111_lattice((10, 10))
     layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
     cds = charge_distribution_surface_111(layout)
