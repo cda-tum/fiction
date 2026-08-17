@@ -34,4 +34,6 @@ def test_calculate_energy_and_state_type():
 
     [charge_distribution_surface(), charge_distribution_surface()]
 
-    # TODO Tests has to be added
+    # TODO(marcelwa): assert what `calculate_energy_and_state_type` returns for these two charge
+    # distributions; the test asserts nothing today
+    # https://github.com/cda-tum/fiction/issues/1092

@@ -224,7 +224,6 @@ def test_write_sidb_cell_level_layout_to_svg(sidb_layout):
 
     params.color_background = color_mode.DARK
     generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
-    # print(generated_svg_cell_level_dark_mode)
     assert normalize_svg(generated_svg_cell_level_dark_mode) == normalize_svg(cell_level_dark_mode)
 
     params.color_background = color_mode.LIGHT

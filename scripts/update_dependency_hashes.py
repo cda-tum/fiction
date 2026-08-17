@@ -16,8 +16,14 @@ import argparse
 import hashlib
 import re
 import sys
+import urllib.error
 import urllib.request
 from pathlib import Path
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from email.message import Message
+    from typing import IO
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
 DEPENDENCIES_CMAKE = REPOSITORY_ROOT / "cmake" / "Dependencies.cmake"
@@ -73,6 +79,48 @@ def expand(value: str, text: str) -> str:
     return value
 
 
+class HTTPSOnlyRedirectHandler(urllib.request.HTTPRedirectHandler):
+    """Redirect handler that refuses to leave ``https``.
+
+    ``urllib`` follows a redirect from ``https`` to ``http`` without complaint. The hash this
+    script writes into ``Dependencies.cmake`` is what later builds verify their download against,
+    so letting an unauthenticated response decide it would defeat the point of recording it.
+    """
+
+    def redirect_request(
+        self,
+        req: urllib.request.Request,
+        fp: IO[bytes],
+        code: int,
+        msg: str,
+        headers: Message,
+        newurl: str,
+    ) -> urllib.request.Request | None:
+        """Reject a redirect that leaves ``https``, and otherwise defer to the default.
+
+        Args:
+            req: The request that was redirected.
+            fp: The response body of the redirect.
+            code: The HTTP status code of the redirect.
+            msg: The HTTP status message of the redirect.
+            headers: The headers of the redirect response.
+            newurl: The URL the redirect points at.
+
+        Returns:
+            The request to follow, or ``None`` where the default declines to redirect.
+
+        Raises:
+            urllib.error.HTTPError: If ``newurl`` is not ``https``.
+        """
+        if not newurl.startswith("https://"):
+            reason = f"refusing to follow a redirect to a non-https URL: {newurl}"
+            raise urllib.error.HTTPError(newurl, code, reason, headers, fp)
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+HTTPS_ONLY_OPENER = urllib.request.build_opener(HTTPSOnlyRedirectHandler)
+
+
 def sha256_of(url: str) -> str:
     """Stream an archive and digest it without holding it in memory.
 
@@ -81,9 +129,17 @@ def sha256_of(url: str) -> str:
 
     Returns:
         The archive's SHA-256 digest as a hexadecimal string.
+
+    Raises:
+        ValueError: If the URL is not ``https``.
     """
+    if not url.startswith("https://"):
+        msg = f"refusing to download over a non-https URL: {url}"
+        raise ValueError(msg)
+
     digest = hashlib.sha256()
-    with urllib.request.urlopen(url) as response:
+    # the opener rejects a redirect that would leave https, which `urlopen` would follow
+    with HTTPS_ONLY_OPENER.open(url) as response:
         while chunk := response.read(DOWNLOAD_CHUNK_SIZE):
             digest.update(chunk)
     return digest.hexdigest()

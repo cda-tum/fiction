@@ -78,6 +78,11 @@ repos:
       - id: ruff-format
       - id: ruff-check
         require_serial: true
+        # ruff lints `pyproject.toml`, where the rule selectors live, and skips every other TOML
+        # file. `uv.lock` is the exception: it carries no extension, so `identify` labels it TOML
+        # while ruff falls back to parsing it as Python
+        types_or: [python, pyi, jupyter, toml]
+        exclude: ^uv\.lock$
 
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
