@@ -457,7 +457,7 @@ the following options:
 - ``--random_sampling``/``-r``
 - ``--flood_fill``/``-f``
 - ``--contour_tracing``/``-c``
-each of which start from a set of random samples, whose number has to be passed as an argument to the flag. Grid search
+each of which starts from a set of random samples, whose number has to be passed as an argument to the flag. Grid search
 and random sampling accept any number of sweep dimensions. Flood fill and contour tracing follow the shape of the
 operational region and therefore need at least two; in three dimensions, contour tracing collects the boundary surface
 instead of walking a closed curve.

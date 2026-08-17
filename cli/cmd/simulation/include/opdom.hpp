@@ -104,7 +104,7 @@ class opdom_command final : public command
     /**
      * Cached sketch flag for logging (preserves the setting after params reset).
      */
-    bool last_sketch = false;
+    bool last_sketch{};
     /**
      * CSV filename to write the operational domain to.
      */
@@ -112,11 +112,11 @@ class opdom_command final : public command
     /**
      * Flag to omit non-operational samples.
      */
-    bool omit_non_operational_samples = false;
+    bool omit_non_operational_samples{};
     /**
      * Flag to compute the operational domain sketch instead of simulating each parameter point.
      */
-    bool sketch = false;
+    bool sketch{};
     /**
      * The operational domain.
      */
