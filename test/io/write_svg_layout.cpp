@@ -685,6 +685,10 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
         CHECK(contains(svg, "C0"));
         CHECK(contains(svg, "C1"));
         CHECK(contains(svg, "left molecule"));
+        CHECK(contains(svg, "y=\"-102.93404\""));
+        CHECK(contains(svg, "x=\"56.46016\""));
+        CHECK(contains(svg, "cx=\"61.46016\""));
+        CHECK(contains(svg, "cy=\"-97.93404\""));
         CHECK(contains(svg, "r=\"5.31886\""));
     }
 
