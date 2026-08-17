@@ -16742,7 +16742,14 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_hexagonal_layout_hexagonal_layout_2 = R"doc()doc";
+static const char *mkd_doc_fiction_hexagonal_layout_hexagonal_layout_2 =
+R"doc(Constructor that takes ownership of an existing storage, so that the
+new layout shares the coordinates of the one the storage came from.
+
+Args:
+    s: Storage to adopt.
+
+)doc";
 
 static const char *mkd_doc_fiction_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
 
