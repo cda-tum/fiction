@@ -24984,6 +24984,9 @@ Template Args:
 Raises:
     std::invalid_argument: if the number of dimensions in the
                            operational domain is 0 or greater than 3.
+                           Three is the number of enumerators of
+                           `sweep_parameter`, so a fourth dimension
+                           could only repeat one of them.
 
 )doc";
 
@@ -25028,6 +25031,11 @@ Template Args:
 
 Raises:
     std::ofstream::failure: if the file could not be opened.
+    std::invalid_argument: if the number of dimensions in the
+                           operational domain is 0 or greater than 3.
+                           Three is the number of enumerators of
+                           `sweep_parameter`, so a fourth dimension
+                           could only repeat one of them.
 
 )doc";
 
