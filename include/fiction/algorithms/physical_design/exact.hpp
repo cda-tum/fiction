@@ -10,6 +10,7 @@
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/networks/technology_network.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -20,23 +21,22 @@
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <fmt/format.h>
-#include <kitty/dynamic_truth_table.hpp>
 #include <kitty/operations.hpp>
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
-#include <mockturtle/views/color_view.hpp>
 #include <mockturtle/views/depth_view.hpp>
 #include <mockturtle/views/fanout_view.hpp>
+#include <mockturtle/views/names_view.hpp>
 #include <mockturtle/views/topo_view.hpp>
 #if (PROGRESS_BARS)
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
 #include <z3++.h>
+#include <z3_api.h>
 
 #include <algorithm>
-#include <atomic>
 #include <cassert>
 #include <chrono>
 #include <cstdint>
@@ -49,9 +49,9 @@
 #include <mutex>
 #include <optional>
 #include <string>
-#include <thread>
 #include <unordered_map>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -178,9 +178,9 @@ template <typename Lyt>
 class exact_impl
 {
   public:
-    exact_impl(mockturtle::names_view<technology_network>& src, const exact_physical_design_params& p,
+    exact_impl(mockturtle::names_view<technology_network>& src, exact_physical_design_params p,
                exact_physical_design_stats& st, const surface_black_list<Lyt, port_direction>& sbl = {}) :
-            ps{p},
+            ps{std::move(p)},
             pst{st},
             scheme{*get_clocking_scheme<Lyt>(ps.scheme)},
             black_list{sbl}
@@ -271,12 +271,12 @@ class exact_impl
          * @param lyt The empty gate-level layout that is going to contain the created layout.
          * @param ps The parameters to respect in the SMT instance generation process.
          */
-        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, const exact_physical_design_params& ps,
+        smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
                     const surface_black_list<Lyt, port_direction>& sbl) noexcept :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
-                params{ps},
+                params{std::move(ps)},
                 black_list{sbl},
                 node2pos{ntk},
                 depth_ntk{ntk},
@@ -694,7 +694,7 @@ class exact_impl
         template <typename Fn>
         void apply_to_added_tiles(Fn&& fn)
         {
-            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), fn);
+            std::for_each(check_point->added_tiles.cbegin(), check_point->added_tiles.cend(), std::forward<Fn>(fn));
         }
         /**
          * Applies a given function to all updated tiles in the current solver check point.
@@ -705,7 +705,7 @@ class exact_impl
         template <typename Fn>
         void apply_to_updated_tiles(Fn&& fn)
         {
-            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), fn);
+            std::for_each(check_point->updated_tiles.cbegin(), check_point->updated_tiles.cend(), std::forward<Fn>(fn));
         }
         /**
          * Applies a given function to all added and updated tiles in the current solver check point.
@@ -717,7 +717,7 @@ class exact_impl
         void apply_to_added_and_updated_tiles(Fn&& fn)
         {
             apply_to_added_tiles(fn);
-            apply_to_updated_tiles(fn);
+            apply_to_updated_tiles(std::forward<Fn>(fn));
         }
         /**
          * Determines the number of child nodes to some given node n in the stored logic network, not counting constants
@@ -959,7 +959,7 @@ class exact_impl
                     // an artificial latch variable counts as an extra 1 clock cycle (n clock phases)
                     if (has_synchronization_elements_v<Lyt> && params.synchronization_elements && !params.desynchronize)
                     {
-                        ve.push_back(z3::ite(get_te(t, e), get_tse(t) * num_phases + one, zero));
+                        ve.push_back(z3::ite(get_te(t, e), (get_tse(t) * num_phases) + one, zero));
                     }
                     else
                     {
@@ -2077,16 +2077,34 @@ class exact_impl
                 network.foreach_pi(
                     [this, &assign_north, &assign_west, &assign_border](const auto& pi)
                     {
-                        layout.is_clocking_scheme(clock_name::COLUMNAR) ? assign_west(pi) :
-                        layout.is_clocking_scheme(clock_name::ROW)      ? assign_north(pi) :
-                                                                          assign_border(pi);
+                        if (layout.is_clocking_scheme(clock_name::COLUMNAR))
+                        {
+                            assign_west(pi);
+                        }
+                        else if (layout.is_clocking_scheme(clock_name::ROW))
+                        {
+                            assign_north(pi);
+                        }
+                        else
+                        {
+                            assign_border(pi);
+                        }
                     });
                 network.foreach_po(
                     [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
-                        layout.is_clocking_scheme(clock_name::COLUMNAR) ? assign_east(network.get_node(po)) :
-                        layout.is_clocking_scheme(clock_name::ROW)      ? assign_south(network.get_node(po)) :
-                                                                          assign_border(network.get_node(po));
+                        if (layout.is_clocking_scheme(clock_name::COLUMNAR))
+                        {
+                            assign_east(network.get_node(po));
+                        }
+                        else if (layout.is_clocking_scheme(clock_name::ROW))
+                        {
+                            assign_south(network.get_node(po));
+                        }
+                        else
+                        {
+                            assign_border(network.get_node(po));
+                        }
                     });
             }
             else
@@ -2099,10 +2117,18 @@ class exact_impl
                                                {
                                                    if (!skip_const_or_io_node(fon))
                                                    {
-                                                       layout.is_clocking_scheme(clock_name::COLUMNAR) ?
-                                                           assign_west(fon) :
-                                                       layout.is_clocking_scheme(clock_name::ROW) ? assign_north(fon) :
-                                                                                                    assign_border(fon);
+                                                       if (layout.is_clocking_scheme(clock_name::COLUMNAR))
+                                                       {
+                                                           assign_west(fon);
+                                                       }
+                                                       else if (layout.is_clocking_scheme(clock_name::ROW))
+                                                       {
+                                                           assign_north(fon);
+                                                       }
+                                                       else
+                                                       {
+                                                           assign_border(fon);
+                                                       }
                                                    }
                                                });
                     });
@@ -2110,17 +2136,26 @@ class exact_impl
                 network.foreach_po(
                     [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
-                        network.foreach_fanin(
-                            po,
-                            [this, &assign_east, &assign_south, &assign_border](const auto& fi)
-                            {
-                                if (const auto fin = network.get_node(fi); !skip_const_or_io_node(fin))
-                                {
-                                    layout.is_clocking_scheme(clock_name::COLUMNAR) ? assign_east(fin) :
-                                    layout.is_clocking_scheme(clock_name::ROW)      ? assign_south(fin) :
-                                                                                      assign_border(fin);
-                                }
-                            });
+                        network.foreach_fanin(po,
+                                              [this, &assign_east, &assign_south, &assign_border](const auto& fi)
+                                              {
+                                                  if (const auto fin = network.get_node(fi);
+                                                      !skip_const_or_io_node(fin))
+                                                  {
+                                                      if (layout.is_clocking_scheme(clock_name::COLUMNAR))
+                                                      {
+                                                          assign_east(fin);
+                                                      }
+                                                      else if (layout.is_clocking_scheme(clock_name::ROW))
+                                                      {
+                                                          assign_south(fin);
+                                                      }
+                                                      else
+                                                      {
+                                                          assign_border(fin);
+                                                      }
+                                                  }
+                                              });
                     });
             }
         }
@@ -2367,7 +2402,8 @@ class exact_impl
          */
         void black_list_gates()  // TODO take advantage of incremental solving
         {
-            const auto gather_black_list_expr = [this](const auto& port, const auto& t) noexcept
+            // not `noexcept`: building the `z3::expr_vector` and every `z3` call below can throw `z3::exception`
+            const auto gather_black_list_expr = [this](const auto& port, const auto& t)
             {
                 z3::expr_vector iop{*ctx};
 
@@ -2816,7 +2852,7 @@ class exact_impl
         const auto time_elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(time).count();
         const auto time_left = (ps.timeout - time_elapsed > 0 ? static_cast<unsigned>(ps.timeout - time_elapsed) : 0u);
 
-        if (!time_left)
+        if (time_left == 0u)
         {
             throw z3::exception("timeout");
         }
@@ -2866,7 +2902,7 @@ class exact_impl
 
             // mutually exclusive access to the aspect ratio iterator
             {
-                std::lock_guard<std::mutex> guard(ari_mutex);
+                const std::scoped_lock guard{ari_mutex};
 
                 ++ari;
                 ar = *ari;  // operations ++ and * are split to prevent a vector copy construction
@@ -2887,7 +2923,7 @@ class exact_impl
 
             // mutually exclusive access to the result aspect ratio
             {
-                std::lock_guard<std::mutex> guard(rar_mutex);
+                const std::scoped_lock guard{rar_mutex};
 
                 // a result is available already
                 if (result_aspect_ratio)
@@ -2912,7 +2948,7 @@ class exact_impl
                 {
                     // mutually exclusive access to the result_aspect_ratio
                     {
-                        std::lock_guard<std::mutex> guard(rar_mutex);
+                        const std::scoped_lock guard{rar_mutex};
 
                         // update the result_aspect_ratio if there is none
                         if (!result_aspect_ratio)
@@ -3062,6 +3098,9 @@ class exact_impl
         {
 
 #if (PROGRESS_BARS)
+            // `progress_bar::operator()` is non-const, so `bar` cannot be declared `const`; clang-tidy does not
+            // recognize the variadic call below as a mutating use
+            // NOLINTNEXTLINE(misc-const-correctness)
             mockturtle::progress_bar bar("[i] examining layout aspect ratios: {:>2} × {:<2}");
 #endif
 
@@ -3178,7 +3217,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
         throw unsupported_clocking_scheme_exception();
     }
     // check for input degree
-    else if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
         throw high_degree_fanin_exception();
     }
@@ -3189,7 +3228,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
         {
             std::cout << "[w] Lyt does not implement the foreach_adjacent_opposite_tiles function; straight inverters "
                          "cannot be guaranteed"
-                      << std::endl;
+                      << '\n';
         }
     }
     if constexpr (!fiction::has_synchronization_elements_v<Lyt>)
