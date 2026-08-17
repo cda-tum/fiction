@@ -2334,7 +2334,7 @@ critical_temperature_domain_flood_fill(const Lyt& lyt, const std::vector<TT>& sp
 /**
  * Computes the critical temperature domain of the given SiDB cell-level layout. The critical temperature domain
  * consists of all parameter combinations for which the layout is logically operational, along with the critical
- * temperature for each specific parameter point.nt.
+ * temperature for each specific parameter point.
  *
  * This algorithm first uses random sampling to find a set of operational point within the parameter range. From there,
  * it traverses outwards to find the edge of the operational area and performs Moore neighborhood contour tracing to
