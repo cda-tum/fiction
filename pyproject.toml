@@ -76,10 +76,10 @@ install.components = ["fiction_Python"]
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 
 # The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
-# `cmake/`. Every pattern is anchored to the repository root: `**/include` also matches
-# `bindings/mnt/pyfiction/include/`, and `**.hpp` matches the library itself, which is how the
-# published sdist came to ship no C++ sources at all. `[tool.check-sdist]` below mirrors this
-# list and fails when the two drift apart.
+# `cmake/`. Two rules keep it that way, because `[tool.check-sdist]` below takes this list on
+# trust: name directories, never a source glob, and anchor every pattern to the repository root.
+# The published sdist shipped no C++ sources at all because `**/include` also matched
+# `bindings/mnt/pyfiction/include/` and `**.hpp` matched the library itself.
 sdist.exclude = [
     "/.github",
     "/benchmarks",
@@ -128,6 +128,24 @@ cmake.define.DISABLE_GIL = "1"
 
 
 [tool.setuptools_scm]
+
+
+[tool.check-sdist]
+# `build-backend` is left at its default `"auto"`, which resolves the scikit-build-core adapter.
+# That adapter subtracts `sdist.exclude` from what it expects the sdist to hold, so it takes that
+# list on trust rather than checking it -- which is why `sdist.exclude` names directories and never
+# a source glob. What this does catch is the other direction: anything in the sdist that git does
+# not track, which is what `--inject-junk` exercises.
+git-only = [
+    "/.github",
+    "/benchmarks",
+    "/bib",
+    "/cli",
+    "/docs",
+    "/experiments",
+    "/test",
+    "/bindings/mnt/pyfiction/test",
+]
 
 
 [tool.pytest]

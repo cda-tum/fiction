@@ -103,3 +103,14 @@ def _run_tests(
 def tests(session: nox.Session) -> None:
     """Run the test suite."""
     _run_tests(session)
+
+
+@nox.session(reuse_venv=True)
+def check_sdist(session: nox.Session) -> None:
+    """Diff the built source distribution against the files git tracks.
+
+    Not a prek hook: it builds an sdist, which needs a build environment that the pre-commit
+    sandbox does not have. CI runs it in the packaging workflow's sdist job.
+    """
+    session.install("check-sdist")
+    session.run("check-sdist", "--inject-junk", *session.posargs)
