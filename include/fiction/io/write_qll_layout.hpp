@@ -385,6 +385,9 @@ class write_qll_layout_impl
                         // write normal cell
                         if (mol_qca_technology::is_normal_cell(type))
                         {
+                            // Phase is encoded in the cell symbol, not in the gate-layout clock number, because each
+                            // 10×10 tile spans a full a→d phase cycle; correctness relies on the clocking scheme
+                            // keeping path lengths tile-synchronized.
                             const auto phase = mol_qca_technology::cell_clock_number(type);
 
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);

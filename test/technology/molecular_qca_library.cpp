@@ -19,8 +19,6 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
-#include <exception>
-
 using namespace fiction;
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
@@ -145,41 +143,52 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
     auto layout = blueprints::three_wire_paths_gate_layout<gate_layout>();
 
+    // clang-format off
+
     static constexpr const molecular_qca_library::fcn_gate primary_input_port{
-        molecular_qca_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}}})};
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
     static constexpr const molecular_qca_library::fcn_gate primary_output_port{
-        molecular_qca_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}}})};
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
+    }})};
 
     static constexpr const molecular_qca_library::fcn_gate wire{
-        molecular_qca_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}}})};
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'b', 'b', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
 
     // clang-format on
 
@@ -304,17 +313,24 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     static constexpr auto fanout_clock = static_cast<clock_number_t>(1);
     static constexpr auto output_clock = static_cast<clock_number_t>(2);
 
+    // clang-format off
+
     static constexpr const molecular_qca_library::fcn_gate fanout_1_3{
-        molecular_qca_library::cell_list_to_gate<char>({{{' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-                                                         {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
-                                                         {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
-                                                         {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
-                                                         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}}})};
+    molecular_qca_library::cell_list_to_gate<char>(
+    {{
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {'d', 'd', 'c', 'b', 'b', 'b', 'b', 'c', 'd', 'd'},
+        {' ', ' ', ' ', 'b', 'b', 'b', 'b', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'c', 'c', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
+        {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
+    }})};
+
+    // clang-format on
 
     auto northern_input_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}};
     northern_input_layout.assign_clock_number({1, 0}, input_clock);
@@ -516,7 +532,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate bent_inverter{
+    static constexpr const molecular_qca_library::fcn_gate bent_inverter_r{
     molecular_qca_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
@@ -619,7 +635,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_270(straight_inverter));
     CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == bent_wire);
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == fanout);
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 0}) == molecular_qca_library::rotate_180(bent_inverter));
+    CHECK(molecular_qca_library::set_up_gate(layout, {3, 0}) == molecular_qca_library::rotate_180(bent_inverter_r));
     CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_180(disjunction));
     CHECK(molecular_qca_library::set_up_gate(layout, {3, 1}) == molecular_qca_library::rotate_90(conjunction_r));
     CHECK(molecular_qca_library::set_up_gate(layout, {3, 2}) == molecular_qca_library::rotate_180(conjunction));
@@ -632,5 +648,6 @@ TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 
     auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
 
-    REQUIRE_THROWS_AS(molecular_qca_library::set_up_gate(layout, {1, 2}), std::exception);
+    REQUIRE_THROWS_AS(molecular_qca_library::set_up_gate(layout, {1, 2}),
+                      unsupported_gate_type_exception<offset::ucoord_t>);
 }

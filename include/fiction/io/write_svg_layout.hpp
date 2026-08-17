@@ -1212,17 +1212,12 @@ class write_mol_qca_layout_svg_impl
      */
     std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
     {
-        std::string cell_description, cell_color{};
+        std::string cell_description{};
+        std::string cell_color{};
 
         static constexpr const std::array<const char*, 4> cell_colors{
             {svg::MOL_QCA_CLOCK_ZONE_1_CELL, svg::MOL_QCA_CLOCK_ZONE_2_CELL, svg::MOL_QCA_CLOCK_ZONE_3_CELL,
              svg::MOL_QCA_CLOCK_ZONE_4_CELL}};
-
-        if (lyt.is_empty_cell(c))
-        {
-            // skip empty cells
-            return std::make_pair(cell_description, cell_color);
-        }
 
         const auto ct = lyt.get_cell_type(c);
 

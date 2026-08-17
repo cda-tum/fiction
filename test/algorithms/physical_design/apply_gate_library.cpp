@@ -12,6 +12,7 @@
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/technology/molecular_qca_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -593,4 +594,15 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
         CHECK(layout.y() == 14);
         CHECK(layout.z() == 1);
     }
+}
+
+TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
+
+    const auto cell_layout = apply_gate_library<mol_qca_cell_clk_lyt, molecular_qca_library>(layout);
+
+    CHECK(cell_layout.num_cells() > 0u);
 }

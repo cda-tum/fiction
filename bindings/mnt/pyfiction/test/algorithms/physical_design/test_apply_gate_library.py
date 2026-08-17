@@ -28,7 +28,9 @@ class TestApplyGateLibrary(unittest.TestCase):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
         layout = orthogonal(network)
 
-        apply_mol_qca_library(layout)
+        cell_layout = apply_mol_qca_library(layout)
+        self.assertIsNotNone(cell_layout)
+        self.assertGreater(cell_layout.num_cells(), 0)
 
     def test_apply_bestagon_library(self):
         network = read_technology_network(dir_path + "/../../resources/mux21.v")
