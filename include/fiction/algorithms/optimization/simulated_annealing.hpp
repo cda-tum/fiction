@@ -6,7 +6,6 @@
 #define FICTION_SIMULATED_ANNEALING_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -199,7 +198,9 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     }
 
     // Find the minimum result
-    return *std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ results.cbegin(), results.cend(),
+    // no execution policy: results holds one entry per annealing instance, where the dispatch costs an order of
+    // magnitude more than the scan itself
+    return *std::min_element(results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 

@@ -61,6 +61,9 @@ Changed
     - ``bdl_input_iterator`` now determines the BDL dot distances that decide the input assignment once
       in its constructor instead of on every increment; they cannot change over its lifetime
     - ``is_operational_impl`` no longer detects the output BDL pairs twice under ``TOLERATE_KINKS``
+    - ``quicksim`` and ``multi_simulated_annealing`` no longer pass a parallel execution policy to
+      their ``std::find`` and ``std::min_element``, which scan a handful of elements where the
+      dispatch costs an order of magnitude more than the scan
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
     - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s
@@ -121,6 +124,9 @@ Fixed
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
 - Code quality:
+    - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
+      before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
+      algorithms were disabled on every Clang build
     - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
     - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``
       does not guarantee

@@ -11,7 +11,6 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -140,8 +139,9 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
         for (const auto& cell : charge_lyt.get_sidb_order())
         {
-            if (std::find(FICTION_EXECUTION_POLICY_PAR_UNSEQ predefined_negative_sidb_indices.cbegin(),
-                          predefined_negative_sidb_indices.cend(),
+            // no execution policy: predefined_negative_sidb_indices holds a handful of entries, where the dispatch
+            // costs an order of magnitude more than the search itself
+            if (std::find(predefined_negative_sidb_indices.cbegin(), predefined_negative_sidb_indices.cend(),
                           charge_lyt.cell_to_index(cell)) == predefined_negative_sidb_indices.cend())
             {
                 all_sidb_indices_with_unknown_charge_state.push_back(
