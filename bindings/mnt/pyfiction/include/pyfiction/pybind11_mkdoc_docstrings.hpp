@@ -25326,7 +25326,7 @@ R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
 used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
 tool and a physical simulator for the iNML technology platform as well
 as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
-simulator for the mQCA technology platform.
+simulator for the molQCA (mQCA) technology platform.
 
 This overload uses an output stream to write into.
 
@@ -25344,7 +25344,7 @@ R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
 used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
 tool and a physical simulator for the iNML technology platform as well
 as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
-simulator for the mQCA technology platform.
+simulator for the molQCA (mQCA) technology platform.
 
 This overload uses a file name to create and write into.
 
