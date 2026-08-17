@@ -15,6 +15,43 @@ from mnt.pyfiction import (
 )
 
 
+@pytest.fixture
+def nor_gate_skeleton():
+    """The 111-lattice NOR gate skeleton that the canvas SiDBs are designed into.
+
+    Returns:
+        The skeleton as a 111-lattice SiDB layout, with an empty canvas.
+    """
+    layout = sidb_111_lattice((30, 30))
+
+    layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
+
+    layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
+
+    layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((8, 16), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((17, 16), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((9, 19), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((15, 19), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((15, 43), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((17, 46), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((19, 51), sidb_technology.cell_type.OUTPUT)
+    layout.assign_cell_type((21, 54), sidb_technology.cell_type.OUTPUT)
+
+    layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
+    return layout
+
+
 def test_siqad_and_gate_skeleton_100():
     layout = sidb_100_lattice((20, 20))
 
@@ -54,35 +91,8 @@ def test_siqad_and_gate_skeleton_100():
     assert len(designed_gates) == 23
 
 
-def test_nor_gate_111():
-    layout = sidb_111_lattice((30, 30))
-
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
-
-    layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
-
-    layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((8, 16), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((17, 16), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((9, 19), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((15, 19), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((15, 43), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((17, 46), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((19, 51), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type((21, 54), sidb_technology.cell_type.OUTPUT)
-
-    layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
-
+def test_nor_gate_111(nor_gate_skeleton):
+    layout = nor_gate_skeleton
     params = design_sidb_gates_params()
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.32
@@ -112,35 +122,8 @@ def test_nor_gate_111():
     assert len(designed_gates) == 175
 
 
-def test_nor_gate_111_quickcell():
-    layout = sidb_111_lattice((30, 30))
-
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
-
-    layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
-
-    layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((8, 16), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((17, 16), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((9, 19), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((15, 19), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((15, 43), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((17, 46), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((19, 51), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type((21, 54), sidb_technology.cell_type.OUTPUT)
-
-    layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
-
+def test_nor_gate_111_quickcell(nor_gate_skeleton):
+    layout = nor_gate_skeleton
     params = design_sidb_gates_params()
     params.operational_params.simulation_parameters.base = 2
     params.operational_params.simulation_parameters.mu_minus = -0.32

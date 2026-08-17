@@ -57,8 +57,8 @@ def test_read_technology_network():
         read_technology_network(dir_path + "/mux41.v")
 
 
-def test_is_gate_functions():
-    network = read_technology_network(dir_path + "/../resources/mux21.v")
+def test_is_gate_functions(resources_dir):
+    network = read_technology_network(os.path.join(resources_dir, "mux21.v"))
 
     for i in network.nodes():
         assert not network.is_maj(i)
@@ -67,7 +67,7 @@ def test_is_gate_functions():
         assert not network.is_nand(i)
         assert not network.is_nor(i)
 
-    network = read_technology_network(dir_path + "/../resources/FA.v")
+    network = read_technology_network(os.path.join(resources_dir, "FA.v"))
 
     assert network.is_xor(6)
 

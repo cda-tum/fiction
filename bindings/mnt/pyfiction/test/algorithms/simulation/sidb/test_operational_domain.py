@@ -36,6 +36,7 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
+@pytest.fixture
 def wire_with_canvas() -> sidb_100_lattice:
     """A BDL wire with two LOGIC cells, so that the sketch has a canvas to enumerate.
 
@@ -119,10 +120,9 @@ def test_number_of_threads() -> None:
     assert stats_single.num_evaluated_parameter_combinations == stats_default.num_evaluated_parameter_combinations
 
 
-
-def test_three_dimensional_operational_domain_sketch() -> None:
+def test_three_dimensional_operational_domain_sketch(wire_with_canvas) -> None:
     """The sketch and the boundary-following strategies work over three sweep dimensions."""
-    lyt = wire_with_canvas()
+    lyt = wire_with_canvas
 
     params = operational_domain_params()
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
@@ -156,7 +156,7 @@ def test_three_dimensional_operational_domain_sketch() -> None:
             assert domain[point] == grid_domain[point]
 
 
-def test_operational_domain_sketch_preconditions() -> None:
+def test_operational_domain_sketch_preconditions(wire_with_canvas) -> None:
     """The sketch is rejected when it cannot filter anything."""
     lyt = read_sqd_layout_100(dir_path + "/../../../resources/siqad_or_gate.sqd")
 
@@ -175,7 +175,7 @@ def test_operational_domain_sketch_preconditions() -> None:
 
     # tolerating kinks leaves the filtering steps undefined. This uses a layout that does have a canvas, so that
     # the rejection can only come from the kink condition
-    canvas_lyt = wire_with_canvas()
+    canvas_lyt = wire_with_canvas
 
     params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
     with pytest.raises(ValueError, match="requires that kinks are rejected"):

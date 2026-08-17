@@ -51,49 +51,29 @@ def test_bounding_box_around_an_empty_gate_level_layout(make_layout):
     assert max_coord.y - min_coord.y == 0
 
 
-def test_initialize_gate_level_with_ortho_bounding_box():
-    network = read_technology_network(os.path.join(dir_path + "/../resources/mux21.v"))
+@pytest.mark.parametrize(
+    ("verilog", "width", "height"),
+    [
+        ("mux21.v", 5, 7),
+        ("xnor2.v", 5, 8),
+        ("xor2.v", 4, 7),
+        ("FA.v", 7, 11),
+    ],
+)
+def test_initialize_gate_level_with_ortho_bounding_box(resources_dir, verilog, width, height):
+    network = read_technology_network(os.path.join(resources_dir, verilog))
+    layout = orthogonal(network, orthogonal_params())
+    min_coord, max_coord = layout.bounding_box_2d()
+
+    assert min_coord == layout.coord(0, 0)
+    assert max_coord == layout.coord(width, height)
+    assert max_coord.x - min_coord.x == width
+    assert max_coord.y - min_coord.y == height
+
+
+def test_update_gate_level_bounding_box(mux21):
     params = orthogonal_params()
-    layout = orthogonal(network, params)
-    min_coord, max_coord = layout.bounding_box_2d()
-
-    assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(5, 7)
-    assert max_coord.x - min_coord.x == 5
-    assert max_coord.y - min_coord.y == 7
-
-    network = read_technology_network(os.path.join(dir_path + "/../resources/xnor2.v"))
-    layout = orthogonal(network, params)
-    min_coord, max_coord = layout.bounding_box_2d()
-
-    assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(5, 8)
-    assert max_coord.x - min_coord.x == 5
-    assert max_coord.y - min_coord.y == 8
-
-    network = read_technology_network(os.path.join(dir_path + "/../resources/xor2.v"))
-    layout = orthogonal(network, params)
-    min_coord, max_coord = layout.bounding_box_2d()
-
-    assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(4, 7)
-    assert max_coord.x - min_coord.x == 4
-    assert max_coord.y - min_coord.y == 7
-
-    network = read_technology_network(os.path.join(dir_path + "/../resources/FA.v"))
-    layout = orthogonal(network, params)
-    min_coord, max_coord = layout.bounding_box_2d()
-
-    assert min_coord == layout.coord(0, 0)
-    assert max_coord == layout.coord(7, 11)
-    assert max_coord.x - min_coord.x == 7
-    assert max_coord.y - min_coord.y == 11
-
-
-def test_update_gate_level_bounding_box():
-    network = read_technology_network(os.path.join(dir_path + "/../resources/mux21.v"))
-    params = orthogonal_params()
-    layout = orthogonal(network, params)
+    layout = orthogonal(mux21, params)
     min_coord, max_coord = layout.bounding_box_2d()
 
     assert min_coord == layout.coord(0, 0)

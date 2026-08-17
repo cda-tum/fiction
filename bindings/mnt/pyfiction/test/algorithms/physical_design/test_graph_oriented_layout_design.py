@@ -1,5 +1,3 @@
-import os
-
 from mnt.pyfiction import (
     eq_type,
     equivalence_checking,
@@ -8,57 +6,44 @@ from mnt.pyfiction import (
     graph_oriented_layout_design,
     graph_oriented_layout_design_params,
     graph_oriented_layout_design_stats,
-    read_technology_network,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+
+def test_graph_oriented_layout_design(mux21):
+    layout = graph_oriented_layout_design(mux21)
+
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-    layout = graph_oriented_layout_design(network)
-
-    assert equivalence_checking(network, layout) != eq_type.NO
-
-
-def test_graph_oriented_layout_design_with_parameters():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
+def test_graph_oriented_layout_design_with_parameters(mux21):
     params = graph_oriented_layout_design_params()
     params.return_first = True
 
-    layout = graph_oriented_layout_design(network, params)
+    layout = graph_oriented_layout_design(mux21, params)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_stats():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
+def test_graph_oriented_layout_design_with_stats(mux21):
     stats = graph_oriented_layout_design_stats()
 
-    layout = graph_oriented_layout_design(network, statistics=stats)
+    layout = graph_oriented_layout_design(mux21, statistics=stats)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_stats_and_parameters():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
+def test_graph_oriented_layout_design_with_stats_and_parameters(mux21):
     params = graph_oriented_layout_design_params()
     params.return_first = True
 
     stats = graph_oriented_layout_design_stats()
 
-    layout = graph_oriented_layout_design(network, params, statistics=stats)
+    layout = graph_oriented_layout_design(mux21, params, statistics=stats)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_different_parameters():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
+def test_graph_oriented_layout_design_with_different_parameters(mux21):
     params = graph_oriented_layout_design_params()
     params.return_first = True
     params.mode = gold_effort_mode.HIGH_EFFORT
@@ -72,26 +57,24 @@ def test_graph_oriented_layout_design_with_different_parameters():
     params.tiles_to_skip_between_pis = 1
     params.randomize_tiles_to_skip_between_pis = True
 
-    layout = graph_oriented_layout_design(network, params)
+    layout = graph_oriented_layout_design(mux21, params)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
     params.mode = gold_effort_mode.MAXIMUM_EFFORT
 
-    layout = graph_oriented_layout_design(network, params)
+    layout = graph_oriented_layout_design(mux21, params)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
     params.seed = 42
 
-    layout = graph_oriented_layout_design(network, params)
+    layout = graph_oriented_layout_design(mux21, params)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_custom_cost_function():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
+def test_graph_oriented_layout_design_with_custom_cost_function(mux21):
     params = graph_oriented_layout_design_params()
     params.return_first = True
     params.mode = gold_effort_mode.HIGH_EFFORT
@@ -100,19 +83,17 @@ def test_graph_oriented_layout_design_with_custom_cost_function():
     def custom_cost_objective(layout):
         return layout.num_wires() * 2 + layout.num_crossings()
 
-    layout = graph_oriented_layout_design(network, params, custom_cost_objective=custom_cost_objective)
+    layout = graph_oriented_layout_design(mux21, params, custom_cost_objective=custom_cost_objective)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO
 
 
-def test_graph_oriented_layout_design_with_multithreading():
-    network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
+def test_graph_oriented_layout_design_with_multithreading(mux21):
     params = graph_oriented_layout_design_params()
     params.return_first = True
     params.mode = gold_effort_mode.HIGH_EFFORT
     params.enable_multithreading = True
 
-    layout = graph_oriented_layout_design(network, params)
+    layout = graph_oriented_layout_design(mux21, params)
 
-    assert equivalence_checking(network, layout) != eq_type.NO
+    assert equivalence_checking(mux21, layout) != eq_type.NO

@@ -30,8 +30,15 @@ from mnt.pyfiction import (
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-def test_perturber_and_DB_pair_100():
-    layout = sidb_100_lattice((10, 10))
+@pytest.mark.parametrize(
+    ("sidb_lattice", "charge_distribution_surface"),
+    [
+        pytest.param(sidb_100_lattice, charge_distribution_surface_100, id="100"),
+        pytest.param(sidb_111_lattice, charge_distribution_surface_111, id="111"),
+    ],
+)
+def test_perturber_and_sidb_pair(sidb_lattice, charge_distribution_surface):
+    layout = sidb_lattice((10, 10))
     layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
@@ -42,27 +49,7 @@ def test_perturber_and_DB_pair_100():
 
     stats = critical_temperature_stats()
 
-    cds = charge_distribution_surface_100(layout)
-
-    assert critical_temperature_non_gate_based(cds, params, stats) == 400
-
-    assert stats.algorithm_name == "QuickExact"
-    assert stats.num_valid_lyt == 1
-
-
-def test_perturber_and_DB_pair_111():
-    layout = sidb_111_lattice((10, 10))
-    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
-
-    params = critical_temperature_params()
-
-    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-
-    stats = critical_temperature_stats()
-
-    cds = charge_distribution_surface_111(layout)
+    cds = charge_distribution_surface(layout)
 
     assert critical_temperature_non_gate_based(cds, params, stats) == 400
 

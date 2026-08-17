@@ -1,5 +1,3 @@
-import os
-
 import pytest
 
 from mnt.pyfiction import (
@@ -13,8 +11,6 @@ from mnt.pyfiction import (
     sidb_charge_state,
     sidb_technology,
 )
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
 def test_three_sidbs():

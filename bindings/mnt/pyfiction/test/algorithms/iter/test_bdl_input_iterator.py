@@ -1,4 +1,29 @@
+import pytest
+
 from mnt.pyfiction import bdl_input_iterator_100, sidb_100_lattice, sidb_technology
+
+
+@pytest.fixture
+def bdl_wire():
+    """A BDL wire of one input pair, two normal pairs, and one output pair.
+
+    Returns:
+        The wire as a 100-lattice SiDB layout.
+    """
+    layout = sidb_100_lattice((20, 0))
+
+    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.INPUT)
+
+    layout.assign_cell_type((6, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((8, 0, 0), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((12, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((14, 0, 0), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((18, 0, 0), sidb_technology.cell_type.OUTPUT)
+    layout.assign_cell_type((20, 0, 0), sidb_technology.cell_type.OUTPUT)
+    return layout
 
 
 def test_empty_layout():
@@ -36,21 +61,8 @@ def test_iteration_empty_layout():
     assert bii.get_layout().num_cells() == 0
 
 
-def test_manual_bdl_wire_iteration():
-    layout = sidb_100_lattice((20, 0))
-
-    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.INPUT)
-
-    layout.assign_cell_type((6, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((8, 0, 0), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((12, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((14, 0, 0), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((18, 0, 0), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type((20, 0, 0), sidb_technology.cell_type.OUTPUT)
-
+def test_manual_bdl_wire_iteration(bdl_wire):
+    layout = bdl_wire
     bii = bdl_input_iterator_100(layout)
 
     assert bii.get_layout().num_cells() == 7  # 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
@@ -91,21 +103,8 @@ def test_manual_bdl_wire_iteration():
     assert lyt0.get_cell_type((2, 0, 0)) == sidb_technology.cell_type.EMPTY
 
 
-def test_automatic_bdl_wire_iteration():
-    layout = sidb_100_lattice((20, 0))
-
-    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.INPUT)
-    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.INPUT)
-
-    layout.assign_cell_type((6, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((8, 0, 0), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((12, 0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((14, 0, 0), sidb_technology.cell_type.NORMAL)
-
-    layout.assign_cell_type((18, 0, 0), sidb_technology.cell_type.OUTPUT)
-    layout.assign_cell_type((20, 0, 0), sidb_technology.cell_type.OUTPUT)
-
+def test_automatic_bdl_wire_iteration(bdl_wire):
+    layout = bdl_wire
     bii = bdl_input_iterator_100(layout)
 
     for index, bii_iterator in enumerate(bii):

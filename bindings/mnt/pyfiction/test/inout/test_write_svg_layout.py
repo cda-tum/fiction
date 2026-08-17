@@ -1,3 +1,5 @@
+import pytest
+
 from mnt.pyfiction import (
     __repo__,
     __version__,
@@ -9,6 +11,21 @@ from mnt.pyfiction import (
     write_sidb_layout_svg_params,
     write_sidb_layout_svg_to_string,
 )
+
+
+@pytest.fixture
+def sidb_layout():
+    """A four-cell SiDB layout covering the cell types the SVG writer draws.
+
+    Returns:
+        The layout as a 100-lattice SiDB layout.
+    """
+    sidb_layout = sidb_100_lattice((4, 4))
+    sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+    sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
+    sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+    return sidb_layout
 
 
 def normalize_svg(svg: str) -> str:
@@ -198,12 +215,7 @@ cds_light_mode = (
 )
 
 
-def test_write_sidb_cell_level_layout_to_svg():
-    # Create and configure the SIDB layout
-    sidb_layout = sidb_100_lattice((4, 4))
-    sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+def test_write_sidb_cell_level_layout_to_svg(sidb_layout):
     sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
     params = write_sidb_layout_svg_params()
@@ -219,12 +231,7 @@ def test_write_sidb_cell_level_layout_to_svg():
     assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
 
-def test_write_sidb_charge_distribution_to_svg():
-    # Create and configure the SIDB layout
-    sidb_layout = sidb_100_lattice((4, 4))
-    sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+def test_write_sidb_charge_distribution_to_svg(sidb_layout):
     sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
     cds = charge_distribution_surface_100(sidb_layout)
