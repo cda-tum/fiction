@@ -4151,7 +4151,13 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Flood fill
+                           and contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
 
 )doc";
 
@@ -4210,7 +4216,13 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Flood fill
+                           and contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
 
 )doc";
 
@@ -4243,16 +4255,16 @@ combinations for which the layout is logically operational, along with
 the critical temperature for each specific parameter point.
 
 This algorithm uses a grid search to find the operational domain. The
-grid search is performed by exhaustively sweeping the parameter space
-in the x and y dimensions. Since grid search is exhaustive, the
-algorithm is guaranteed to find the operational domain, if it exists
-within the parameter range. However, the algorithm performs a
-quadratic number of operational checks on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+grid search is performed by exhaustively sweeping all sweep
+dimensions. Since grid search is exhaustive, the algorithm is
+guaranteed to find the operational domain, if it exists within the
+parameter range. However, the algorithm performs one operational check
+per parameter combination, i.e., the product of the step counts of all
+sweep dimensions, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -4269,7 +4281,11 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Any number of
+                           sweep dimensions is accepted.
 
 )doc";
 
@@ -4321,7 +4337,11 @@ Returns:
     The critical temperature domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Any number of
+                           sweep dimensions is accepted.
 
 )doc";
 
@@ -10277,8 +10297,9 @@ Returns:
 
 static const char *mkd_doc_fiction_detail_operational_domain_impl_grid_search =
 R"doc(Performs a grid search over the specified parameter ranges with the
-specified step sizes. The grid search always has quadratic complexity.
-The operational status is computed for each parameter combination.
+specified step sizes. The grid search evaluates the product of the
+step counts of all sweep dimensions. The operational status is
+computed for each parameter combination.
 
 Returns:
     The operational domain of the layout.
@@ -10317,12 +10338,14 @@ The function starts at the given starting point and performs flood
 fill to mark all points that are reachable from the starting point
 until it encounters the traced contour.
 
-The flood fill expands over the von Neumann (4-connected)
-neighborhood, while the given contour is a closed 8-connected curve.
-Since a 4-connected path cannot cross an 8-connected closed curve, the
-inference is guaranteed to stay within the area enclosed by the
-contour. Points on the contour itself are marked, but not expanded
-from.
+The flood fill expands over the von Neumann neighborhood, which
+connects `2n` points for `n` sweep dimensions, while the given contour
+is closed under the Moore neighborhood, which connects `3^n - 1`. A
+`2n`-connected path cannot cross a `(3^n - 1)`-connected closed
+boundary, so the inference is guaranteed to stay within the region the
+contour encloses. In two dimensions this is the familiar pairing of a
+4-connected path against an 8-connected closed curve. Points on the
+contour itself are marked, but not expanded from.
 
 Note that no physical simulation is conducted by this function!
 
@@ -10426,6 +10449,27 @@ computation has finished.
 
 )doc";
 
+static const char *mkd_doc_fiction_detail_operational_domain_impl_moore_neighborhood =
+R"doc(Returns the Moore neighborhood of the given step point. The Moore
+neighborhood is the set of all points that differ from `sp` by at most
+one step in every dimension, i.e., the adjacent points including the
+diagonals. It contains up to `3^n - 1` points for `n` sweep
+dimensions, as points outside of the parameter range are not gathered.
+The points are returned in no particular order.
+
+`moore_neighborhood_2d` returns the same set for two dimensions, but
+in clockwise order, which the 2D contour trace depends on. This
+function cannot replace it: there is no canonical cyclic ordering of
+the neighbors in three or more dimensions.
+
+Args:
+    sp: Step point to get the Moore neighborhood of.
+
+Returns:
+    The Moore neighborhood of `sp`.
+
+)doc";
+
 static const char *mkd_doc_fiction_detail_operational_domain_impl_moore_neighborhood_2d =
 R"doc(Returns the 2D Moore neighborhood of the step point at `sp = (x, y)`.
 The 2D Moore neighborhood is the set of all points that are adjacent
@@ -10439,22 +10483,6 @@ Args:
 
 Returns:
     The 2D Moore neighborhood of the step point at `sp = (x, y)`.
-
-)doc";
-
-static const char *mkd_doc_fiction_detail_operational_domain_impl_moore_neighborhood_3d =
-R"doc(Returns the 3D Moore neighborhood of the step point at `sp = (x, y,
-z)`. The 3D Moore neighborhood is the set of all points that are
-adjacent to `(x, y, z)` in the 3D space including the diagonals.
-Thereby, the 3D Moore neighborhood contains up to 26 points as points
-outside of the parameter range are not gathered. The points are
-returned in no particular order.
-
-Args:
-    sp: Step point to get the 3D Moore neighborhood of.
-
-Returns:
-    The 3D Moore neighborhood of the step point at `sp = (x, y, z)`.
 
 )doc";
 
@@ -10607,24 +10635,58 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_detail_operational_domain_impl_trace_boundary_surface =
+R"doc(Traces the boundary surface of the operational domain in three or more
+dimensions.
+
+This serves the same purpose as the two-dimensional Moore contour
+trace — sample only the boundary of an operational region and infer
+its interior — but collects the boundary instead of walking it. A
+closed curve can be walked because its neighbors admit a cyclic order;
+a closed surface cannot, so the boundary is gathered by a breadth-
+first search over the operational points that have at least one non-
+operational Moore neighbor. The resulting set is closed under the
+Moore neighborhood, which is what the interior inference requires.
+
+Args:
+    samples: Maximum number of random samples to be taken before
+             tracing.
+
+Returns:
+    The (partial) operational domain of the layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_detail_operational_domain_impl_trace_contour_curve =
+R"doc(Traces the contour of the operational domain in two dimensions by
+Moore contour tracing.
+
+Args:
+    samples: Maximum number of random samples to be taken before
+             contour tracing.
+
+Returns:
+    The (partial) operational domain of the layout.
+
+)doc";
+
 static const char *mkd_doc_fiction_detail_operational_domain_impl_truth_table = R"doc(The logical specification of the layout.)doc";
 
 static const char *mkd_doc_fiction_detail_operational_domain_impl_values = R"doc(All dimension values.)doc";
 
-static const char *mkd_doc_fiction_detail_operational_domain_impl_von_neumann_neighborhood_2d =
-R"doc(Returns the 2D von Neumann neighborhood of the step point at `sp = (x,
-y)`. The 2D von Neumann neighborhood is the set of all points that are
-adjacent to `(x, y)` in the plane excluding the diagonals. Thereby,
-the 2D von Neumann neighborhood contains up to 4 points as points
-outside of the parameter range are not gathered. The points are
-returned in no particular order.
+static const char *mkd_doc_fiction_detail_operational_domain_impl_von_neumann_neighborhood =
+R"doc(Returns the von Neumann neighborhood of the given step point. The von
+Neumann neighborhood is the set of all points that differ from `sp` by
+one step in exactly one dimension, i.e., the axis-aligned neighbors
+excluding the diagonals. It contains up to `2n` points for `n` sweep
+dimensions, as points outside of the parameter range are not gathered.
+The points are returned in no particular order.
 
 Args:
-    sp: Step point to get the 2D von Neumann neighborhood of.
+    sp: Step point to get the von Neumann neighborhood of.
 
 Returns:
-    The 2D von Neumann neighborhood of the step point at `sp = (x,
-    y)`.
+    The von Neumann neighborhood of `sp`.
 
 )doc";
 
@@ -11750,18 +11812,38 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_detail_validate_sweep_parameters =
-R"doc(This function validates the given sweep parameters for the operational
+static const char *mkd_doc_fiction_detail_validate_operational_domain_params =
+R"doc(This function validates the given parameters for the operational
 domain computation. It checks if the minimum value of any sweep
-dimension is larger than the corresponding maximum value.
-Additionally, it checks if the step size of any sweep dimension is
-negative or zero.
+dimension is larger than the corresponding maximum value, and if the
+step size of any sweep dimension is negative or zero. Additionally, it
+checks the preconditions of the operational domain sketch.
+
+The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`,
+determines the operational status by filtering alone. It has two
+preconditions: the filtering steps are only defined when kinks are
+rejected, and they enumerate the charge configurations of the canvas,
+which the layout's `LOGIC` cells define. If either is unmet, the
+sketch evaluates nothing and silently falls back to a full simulation
+of the entire parameter space. Since that is the exhaustive cost the
+sketch exists to avoid, an unmet precondition is rejected instead of
+being absorbed.
 
 Args:
+    lyt: The layout the operational domain is computed for.
     params: The operational domain parameters to validate.
+    min_sweep_dimensions: The number of sweep dimensions the calling
+                          algorithm requires at least. Grid search and
+                          random sampling accept any number; flood
+                          fill and contour tracing need at least two.
+    algorithm_name: The name of the calling algorithm, used to phrase
+                    the sweep dimension count error.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
 
 Raises:
-    std::invalid_argument: if the sweep parameters are invalid.
+    std::invalid_argument: if the parameters are invalid.
 
 )doc";
 
@@ -17918,7 +18000,12 @@ this determination.
 non-operational. If the layout passes all filtering strategies, it is
 considered operational. This is only an approximation. It may be
 possible that the layout is non-operational, but the filtering
-strategies do not detect it.
+strategies do not detect it. Sweeping a parameter space this way is
+called the operational domain sketch. The filtering steps are only
+defined when kinks are rejected, and they enumerate the charge
+configurations of the canvas that the layout's `LOGIC` cells define,
+so this setting is only effective with `REJECT_KINKS` on a layout that
+has such cells.
 - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted,
   the algorithm checks if filtering
 strategies have detected whether the layout is non-operational. This
@@ -17927,11 +18014,13 @@ only provides any runtime benefits if kinks are rejected.)doc";
 static const char *mkd_doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_ONLY =
 R"doc(Apply filtering exclusively to determine whether the layout is non-
 operational. If the layout passes all filter steps, it is considered
-operational.
+operational. Sweeping a parameter space this way is called the
+operational domain sketch.
 
 Note:
     This is an extremely fast approximation that may sometimes lead to
-    false positives.)doc";
+    false positives. It requires `REJECT_KINKS` and a layout with
+    `LOGIC` cells; without either, no filter step runs.)doc";
 
 static const char *mkd_doc_fiction_is_operational_params_operational_analysis_strategy_FILTER_THEN_SIMULATION =
 R"doc(Before a physical simulation is conducted, the algorithm checks if
@@ -19148,7 +19237,13 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Flood fill
+                           and contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
 
 )doc";
 
@@ -19204,7 +19299,13 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Flood fill
+                           and contour tracing additionally require at
+                           least two sweep dimensions; grid search and
+                           random sampling accept any number.
 
 )doc";
 
@@ -19239,16 +19340,16 @@ BDL pairs of the layout are assumed to be in the same order as the
 inputs of the truth table.
 
 This algorithm uses a grid search to find the operational domain. The
-grid search is performed by exhaustively sweeping the parameter space
-in the x and y dimensions. Since grid search is exhaustive, the
-algorithm is guaranteed to find the operational domain, if it exists
-within the parameter range. However, the algorithm performs a
-quadratic number of operational checks on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
-simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
-itself. Therefore, the algorithm is only feasible for small layouts
-with few inputs.
+grid search is performed by exhaustively sweeping all sweep
+dimensions. Since grid search is exhaustive, the algorithm is
+guaranteed to find the operational domain, if it exists within the
+parameter range. However, the algorithm performs one operational check
+per parameter combination, i.e., the product of the step counts of all
+sweep dimensions, where each operational check consists of up to
+:math:`2^n` exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each exact ground state simulation has
+exponential complexity in of itself. Therefore, the algorithm is only
+feasible for small layouts with few inputs.
 
 Args:
     lyt: Layout to compute the operational domain for.
@@ -19265,7 +19366,11 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Any number of
+                           sweep dimensions is accepted.
 
 )doc";
 
@@ -19336,7 +19441,11 @@ Returns:
     The operational domain of the layout.
 
 Raises:
-    std::invalid_argument: if the given sweep parameters are invalid.
+    std::invalid_argument: if the given sweep parameters are invalid,
+                           or if the operational domain sketch is
+                           requested without rejecting kinks or on a
+                           layout without `LOGIC` cells. Any number of
+                           sweep dimensions is accepted.
 
 )doc";
 
@@ -19643,7 +19752,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_parameter_point = R"doc(The parameter point holds parameter values in the x and y dimension.)doc";
+static const char *mkd_doc_fiction_parameter_point = R"doc(The parameter point holds one parameter value per sweep dimension.)doc";
 
 static const char *mkd_doc_fiction_parameter_point_get =
 R"doc(Support for structured bindings.
@@ -24865,10 +24974,10 @@ epsilon_r, lambda_tf, operational status
 
 Args:
     opdom: The operational domain to be written. It represents a
-           mapping between sets of simulation parameters (defined as a
-           pair of sweep parameters for the X, Y, and Z dimensions)
-           and a tuple containing detailed  information about the SiDB
-           layout associated with those simulation parameters.
+           mapping between sets of simulation parameters (one to three
+           sweep parameters, written as the X, Y, and Z columns) and a
+           tuple containing detailed information about the SiDB layout
+           associated with those simulation parameters.
     os: The output stream where the CSV representation of the
         operational domain is written to.
     params: The parameters used for writing, including the operational
@@ -24882,6 +24991,9 @@ Template Args:
 Raises:
     std::invalid_argument: if the number of dimensions in the
                            operational domain is 0 or greater than 3.
+                           Three is the number of enumerators of
+                           `sweep_parameter`, so a fourth dimension
+                           could only repeat one of them.
 
 )doc";
 
@@ -24910,10 +25022,10 @@ epsilon_r, lambda_tf, operational status
 
 Args:
     opdom: The operational domain to be written. It represents a
-           mapping between sets of simulation parameters (defined as a
-           pair of sweep parameters for the X, Y, and Z dimensions)
-           and a tuple containing detailed information about the SiDB
-           layout associated with those simulation parameters.
+           mapping between sets of simulation parameters (one to three
+           sweep parameters, written as the X, Y, and Z columns) and a
+           tuple containing detailed information about the SiDB layout
+           associated with those simulation parameters.
     filename: The filename where the CSV representation of the
               operational domain is written to.
     params: The parameters used for writing, including the operational
@@ -24926,6 +25038,11 @@ Template Args:
 
 Raises:
     std::ofstream::failure: if the file could not be opened.
+    std::invalid_argument: if the number of dimensions in the
+                           operational domain is 0 or greater than 3.
+                           Three is the number of enumerators of
+                           `sweep_parameter`, so a fourth dimension
+                           could only repeat one of them.
 
 )doc";
 
