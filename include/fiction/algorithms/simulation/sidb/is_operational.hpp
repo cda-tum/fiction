@@ -88,7 +88,9 @@ struct is_operational_params
      * - `FILTER_ONLY`: This setting does only apply filtering strategies to determine if the layout is
      * non-operational. If the layout passes all filtering strategies, it is considered operational. This is only an
      * approximation. It may be possible that the layout is non-operational, but the filtering strategies do not detect
-     * it.
+     * it. Sweeping a parameter space this way is called the operational domain sketch. The filtering steps are only
+     * defined when kinks are rejected, and they enumerate the charge configurations of the canvas that the layout's
+     * `LOGIC` cells define, so this setting is only effective with `REJECT_KINKS` on a layout that has such cells.
      * - `FILTER_THEN_SIMULATION`: Before a physical simulation is conducted, the algorithm checks if filtering
      * strategies have detected whether the layout is non-operational. This only provides any runtime benefits if kinks
      * are rejected.
@@ -102,9 +104,11 @@ struct is_operational_params
         SIMULATION_ONLY,
         /**
          * Apply filtering exclusively to determine whether the layout is non-operational. If the layout
-         * passes all filter steps, it is considered operational.
+         * passes all filter steps, it is considered operational. Sweeping a parameter space this way is called the
+         * operational domain sketch.
          *
-         * @note This is an extremely fast approximation that may sometimes lead to false positives.
+         * @note This is an extremely fast approximation that may sometimes lead to false positives. It requires
+         * `REJECT_KINKS` and a layout with `LOGIC` cells; without either, no filter step runs.
          */
         FILTER_ONLY,
         /**

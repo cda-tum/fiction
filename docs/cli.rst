@@ -457,7 +457,18 @@ the following options:
 - ``--random_sampling``/``-r``
 - ``--flood_fill``/``-f``
 - ``--contour_tracing``/``-c``
-each of which start from a set of random samples, whose number has to be passed as an argument to the flag.
+each of which starts from a set of random samples, whose number has to be passed as an argument to the flag. Grid search
+and random sampling accept any number of sweep dimensions. Flood fill and contour tracing follow the shape of the
+operational region and therefore need at least two; in three dimensions, contour tracing collects the boundary surface
+instead of walking a closed curve.
+
+The flag ``--sketch``/``-s`` computes the *operational domain sketch*, which determines the operational status of each
+parameter point by filtering alone instead of by physical simulation. This is dramatically faster and never rejects a
+point that is operational, but it does report some non-operational points as operational. Since the filtering steps are
+only defined when kinks are rejected, the flag implies kink rejection, and it requires a layout with ``LOGIC`` cells for
+the filtering steps to enumerate; without such cells, the command reports an error. The sketch combines with any of the
+four algorithms, but pairs best with grid search and random sampling — see :ref:`opdom` for why combining it with flood
+fill or contour tracing needs a much higher sample count.
 
 Operational domain calculation may be powered by *QuickExact*, *ClusterComplete*, *ExGS* or *QuickSim*. The simulation
 engine to use can be set with ``--engine``.

@@ -281,6 +281,30 @@ Operational Domain Computation
         .. doxygenstruct:: fiction::operational_domain_stats
            :members:
 
+        Four strategies sample the parameter space. Grid search and random sampling place their samples
+        independently and accept any number of sweep dimensions. Flood fill and contour tracing follow the
+        shape of the operational region and therefore need a neighborhood to expand over, which requires at
+        least two dimensions. In two dimensions, contour tracing walks the boundary as a closed curve; in
+        three or more, where the boundary is a surface, it collects the boundary instead.
+
+        Setting ``strategy_to_analyze_operational_status`` to ``FILTER_ONLY`` computes the *operational
+        domain sketch*: each parameter point is classified by filtering alone, without physical simulation.
+        This is dramatically faster and never rejects a point that is operational, but it does report some
+        non-operational points as operational. The sketch requires ``REJECT_KINKS`` and a layout with
+        ``LOGIC`` cells, since the filtering steps enumerate the charge configurations of the canvas those
+        cells define; without either, it is rejected with ``std::invalid_argument``.
+
+        The sketch combines with any of the four strategies, but pairs best with the exhaustive ones. Grid
+        search and random sampling place their samples independently of the result, so the sketch simply makes
+        each of them cheaper. Flood fill and contour tracing instead follow the boundary of the *sketch*
+        region rather than of the operational region. That is sound, since the former contains the latter, but
+        it is only useful when the initial random sampling lands inside the region: over a three-dimensional
+        range, a sample count that suffices in two dimensions frequently misses the region altogether and
+        returns almost nothing. Where the sketch region does fill the swept range, the frontier never stops
+        and the flood fill visits every point anyway, at a higher per-point cost than a grid search. Prefer
+        grid search with the sketch, and raise the sample count substantially before combining the sketch with
+        flood fill or contour tracing in three dimensions.
+
         .. doxygenfunction:: fiction::operational_domain_grid_search
         .. doxygenfunction:: fiction::operational_domain_random_sampling
         .. doxygenfunction:: fiction::operational_domain_flood_fill
@@ -328,6 +352,17 @@ Operational Domain Computation
             :members:
         .. autoclass:: mnt.pyfiction.operational_domain_stats
             :members:
+
+        The same four strategies are available here. Grid search and random sampling accept any number of
+        sweep dimensions; flood fill and contour tracing follow the shape of the operational region and
+        therefore need at least two. In two dimensions, contour tracing walks the boundary as a closed
+        curve; in three or more, where the boundary is a surface, it collects the boundary instead.
+
+        Setting ``strategy_to_analyze_operational_status`` to ``FILTER_ONLY`` computes the *operational
+        domain sketch*, which classifies each parameter point by filtering alone instead of by physical
+        simulation. It requires ``REJECT_KINKS`` and a layout with ``LOGIC`` cells; without either, the
+        call raises ``ValueError``. The sketch pairs best with grid search and random sampling — see the
+        C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
 
         .. autofunction:: mnt.pyfiction.operational_domain_grid_search
         .. autofunction:: mnt.pyfiction.operational_domain_random_sampling
