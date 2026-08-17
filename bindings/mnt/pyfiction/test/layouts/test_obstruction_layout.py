@@ -97,18 +97,18 @@ def test_obstruction_via_gates(make_layout):
     buf1 = layout.create_buf(x3, (2, 1))
     layout.create_buf(buf1, (2, 2))
 
-    layout.create_and(x1, x2, (4, 2))
+    layout.create_and(x1, x2, (3, 3))
 
     assert layout.is_obstructed_coordinate((0, 1))
     assert layout.is_obstructed_coordinate((3, 2))
     assert layout.is_obstructed_coordinate((2, 0))
     assert layout.is_obstructed_coordinate((2, 1))
     assert layout.is_obstructed_coordinate((2, 2))
-    assert layout.is_obstructed_coordinate((4, 2))
+    assert layout.is_obstructed_coordinate((3, 3))
 
     assert layout.is_obstructed_connection((2, 0), (2, 1))
     assert layout.is_obstructed_connection((2, 1), (2, 2))
-    assert layout.is_obstructed_connection((3, 2), (4, 2))
+    assert layout.is_obstructed_connection((3, 2), (3, 3))
 
 
 def test_cartesian_obstruction_layout_gate_level_inheritance():

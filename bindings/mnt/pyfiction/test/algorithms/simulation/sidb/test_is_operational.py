@@ -82,7 +82,13 @@ def test_is_operational():
     assert op_status == operational_status.NON_OPERATIONAL
 
 
-def test_is_operational_with_input_pattern_layouts():
+@pytest.fixture
+def and_gate_with_bdl_wires():
+    """A 100-lattice AND gate together with its detected input and output BDL wires.
+
+    Returns:
+        The layout, its input BDL wires, and its output BDL wires.
+    """
     lyt = sidb_100_lattice()
 
     lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
@@ -102,53 +108,67 @@ def test_is_operational_with_input_pattern_layouts():
 
     lyt.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
 
-    params = is_operational_params()
-    params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
-
-    input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
-    output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
-
-    input_pattern_layouts = generate_bdl_input_pattern_layouts(
+    return (
         lyt,
-        bdl_input_iterator_params(),
-        input_bdl_wires,
+        detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT),
+        detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT),
     )
+
+
+def test_generate_bdl_input_pattern_layouts(and_gate_with_bdl_wires):
+    lyt, input_bdl_wires, _output_bdl_wires = and_gate_with_bdl_wires
+
+    input_pattern_layouts = generate_bdl_input_pattern_layouts(lyt, bdl_input_iterator_params(), input_bdl_wires)
 
     # a 2-input gate has 4 input patterns
     assert len(input_pattern_layouts) == 4
 
-    # the layout list yields the same verdict as the layout itself
-    for simulation_parameters, expected in [
-        (sidb_simulation_parameters(2, -0.28), operational_status.OPERATIONAL),
-        (sidb_simulation_parameters(2, -0.1), operational_status.NON_OPERATIONAL),
-    ]:
-        params.simulation_parameters = simulation_parameters
 
-        [reference_status, reference_calls] = is_operational(
-            lyt,
-            [create_and_tt()],
-            params,
-            input_bdl_wires,
-            output_bdl_wires,
-        )
-        [op_status, evaluated_input_combinations] = is_operational(
-            input_pattern_layouts,
-            [create_and_tt()],
-            params,
-            input_bdl_wires,
-            output_bdl_wires,
-        )
+@pytest.mark.parametrize(
+    ("mu_minus", "expected"),
+    [
+        pytest.param(-0.28, operational_status.OPERATIONAL, id="operational"),
+        pytest.param(-0.1, operational_status.NON_OPERATIONAL, id="non_operational"),
+    ],
+)
+def test_input_pattern_layouts_yield_the_same_verdict(and_gate_with_bdl_wires, mu_minus, expected):
+    lyt, input_bdl_wires, output_bdl_wires = and_gate_with_bdl_wires
 
-        assert reference_status == expected
-        assert op_status == reference_status
-        assert evaluated_input_combinations == reference_calls
+    input_pattern_layouts = generate_bdl_input_pattern_layouts(lyt, bdl_input_iterator_params(), input_bdl_wires)
 
-    # a layout list that does not match the specification is rejected
+    params = is_operational_params()
+    params.simulation_parameters = sidb_simulation_parameters(2, mu_minus)
+
+    [reference_status, reference_calls] = is_operational(
+        lyt,
+        [create_and_tt()],
+        params,
+        input_bdl_wires,
+        output_bdl_wires,
+    )
+    [op_status, evaluated_input_combinations] = is_operational(
+        input_pattern_layouts,
+        [create_and_tt()],
+        params,
+        input_bdl_wires,
+        output_bdl_wires,
+    )
+
+    assert reference_status == expected
+    assert op_status == reference_status
+    assert evaluated_input_combinations == reference_calls
+
+
+def test_a_layout_list_that_does_not_match_the_specification_is_rejected(and_gate_with_bdl_wires):
+    lyt, input_bdl_wires, output_bdl_wires = and_gate_with_bdl_wires
+
+    input_pattern_layouts = generate_bdl_input_pattern_layouts(lyt, bdl_input_iterator_params(), input_bdl_wires)
+
     with pytest.raises(ValueError, match="expected 4 input pattern layouts"):
         is_operational(
             input_pattern_layouts[:2],
             [create_and_tt()],
-            params,
+            is_operational_params(),
             input_bdl_wires,
             output_bdl_wires,
         )

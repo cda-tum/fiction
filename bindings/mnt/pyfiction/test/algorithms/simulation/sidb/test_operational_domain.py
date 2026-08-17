@@ -116,7 +116,7 @@ def test_number_of_threads(resources_dir):
     assert stats_single.num_evaluated_parameter_combinations == stats_default.num_evaluated_parameter_combinations
 
 
-def test_three_dimensional_operational_domain_sketch(wire_with_canvas) -> None:
+def test_three_dimensional_operational_domain_sketch(wire_with_canvas):
     """The sketch and the boundary-following strategies work over three sweep dimensions."""
     lyt = wire_with_canvas
 
@@ -152,7 +152,7 @@ def test_three_dimensional_operational_domain_sketch(wire_with_canvas) -> None:
             assert domain[point] == grid_domain[point]
 
 
-def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir) -> None:
+def test_operational_domain_sketch_preconditions(wire_with_canvas, resources_dir):
     """The sketch is rejected when it cannot filter anything."""
     lyt = read_sqd_layout_100(str(resources_dir / "siqad_or_gate.sqd"))
 

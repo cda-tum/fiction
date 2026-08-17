@@ -14,7 +14,7 @@ from mnt.pyfiction import (
 
 
 @pytest.fixture
-def sidb_layout():
+def sidb_layout() -> sidb_100_lattice:
     """A four-cell SiDB layout covering the cell types the SVG writer draws.
 
     Returns:

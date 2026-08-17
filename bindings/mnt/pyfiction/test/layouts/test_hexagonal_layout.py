@@ -13,5 +13,6 @@ def test_coordinate_iteration():
         assert t <= (9, 9, 0)
         assert layout.is_within_bounds(t)
 
-    for t in layout.adjacent_coordinates((2, 2)):
-        assert t in [(2, 1), (3, 1), (3, 2), (3, 3), (2, 3), (1, 2), (2, 1)]
+    # comparing the whole set rather than each element also catches a missing neighbor
+    neighbors = {(t.x, t.y, t.z) for t in layout.adjacent_coordinates((2, 2))}
+    assert neighbors == {(2, 1, 0), (3, 1, 0), (3, 2, 0), (3, 3, 0), (2, 3, 0), (1, 2, 0)}

@@ -4,7 +4,7 @@ from mnt.pyfiction import bdl_input_iterator_100, sidb_100_lattice, sidb_technol
 
 
 @pytest.fixture
-def bdl_wire():
+def bdl_wire() -> sidb_100_lattice:
     """A BDL wire of one input pair, two normal pairs, and one output pair.
 
     Returns:

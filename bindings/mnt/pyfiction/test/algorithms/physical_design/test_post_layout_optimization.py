@@ -45,7 +45,7 @@ def test_post_layout_optimization_with_stats(mux21):
     assert stats.y_size_before == 8
     assert stats.x_size_after == 6
     assert stats.y_size_after == 4
-    assert stats.area_improvement == pytest.approx(50.0)
+    assert stats.area_improvement == pytest.approx(50.0, abs=1e-9)
 
 
 def test_post_layout_optimization_with_stats_and_parameters(mux21):
@@ -66,4 +66,4 @@ def test_post_layout_optimization_with_stats_and_parameters(mux21):
     assert stats.y_size_before == 8
     assert stats.x_size_after == 6
     assert stats.y_size_after == 4
-    assert stats.area_improvement == pytest.approx(50.0)
+    assert stats.area_improvement == pytest.approx(50.0, abs=1e-9)

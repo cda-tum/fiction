@@ -47,8 +47,8 @@ def test_wiring_reduction_with_stats(mux21):
     assert stats.y_size_after == 5
     assert stats.num_wires_before == 21
     assert stats.num_wires_after == 15
-    assert stats.wiring_improvement == pytest.approx(28.57)
-    assert stats.area_improvement == pytest.approx(37.5)
+    assert stats.wiring_improvement == pytest.approx(28.57, abs=1e-9)
+    assert stats.area_improvement == pytest.approx(37.5, abs=1e-9)
 
 
 def test_wiring_reduction_with_stats_and_parameters(mux21):
@@ -70,5 +70,5 @@ def test_wiring_reduction_with_stats_and_parameters(mux21):
     assert stats.y_size_after == 5
     assert stats.num_wires_before == 21
     assert stats.num_wires_after == 15
-    assert stats.wiring_improvement == pytest.approx(28.57)
-    assert stats.area_improvement == pytest.approx(37.5)
+    assert stats.wiring_improvement == pytest.approx(28.57, abs=1e-9)
+    assert stats.area_improvement == pytest.approx(37.5, abs=1e-9)

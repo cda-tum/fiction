@@ -16,7 +16,7 @@ from mnt.pyfiction import (
 
 
 @pytest.fixture
-def nor_gate_skeleton():
+def nor_gate_skeleton() -> sidb_111_lattice:
     """The 111-lattice NOR gate skeleton that the canvas SiDBs are designed into.
 
     Returns:
