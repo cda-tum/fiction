@@ -22,8 +22,17 @@ Added
       ``displacement_robustness_domain_params``, defaulting to the number of hardware threads, which
       leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
       lets a computation leave cores free
+    - ``operational_domain_contour_tracing`` now supports three or more sweep dimensions, where it
+      collects the boundary surface instead of walking a closed curve. ``operational_domain_flood_fill``
+      no longer caps at three dimensions
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- CLI:
+    - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
+      physical simulation. It implies kink rejection, since the filtering steps are only defined there
+- Experiments:
+    - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
+      operational domain sketch over a three-dimensional parameter space
 - Python bindings:
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
       ``critical_temperature_gate_based`` overloads
@@ -115,6 +124,9 @@ Removed
 Fixed
 #####
 - Algorithms:
+    - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a layout
+      without ``LOGIC`` cells now throws instead of silently falling back to a full simulation of the
+      entire parameter space
     - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
       robustness helpers, which derive their slice size by dividing by a worker count that is zero when
       there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
@@ -123,6 +135,9 @@ Fixed
     - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
+    - Fixed an off-by-one in the boundary search of ``operational_domain_contour_tracing``, which skipped
+      the first sweep dimension's lowest step index. Where the operational region reached that edge, the
+      traced contour came out empty and every reachable point was marked operational without simulation
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
