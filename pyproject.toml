@@ -213,10 +213,8 @@ cache-keys = [
 
 [tool.mypy]
 # Every Python file the repository owns, so a new one is checked without anyone remembering to
-# add it here. `experiments/` is the exception: it reports 12 errors that all trace to one class
-# initializing four attributes to `None`, and clearing them is a design change plus `numpy` and
-# `matplotlib` in the hook environment. Worth doing, not here
-files = ["bindings/mnt/pyfiction", "docs/conf.py", "noxfile.py", "scripts"]
+# add it here
+files = ["bindings/mnt/pyfiction", "docs/conf.py", "experiments", "noxfile.py", "scripts"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]

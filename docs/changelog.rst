@@ -92,8 +92,9 @@ Changed
     - Refactored ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
       directory to modernization: docstrings, a ``PascalCase`` class name, the public
       ``matplotlib`` logger instead of a private import, and the dead ``rand_int`` helper removed.
-      The surface it generates is unchanged, verified by running the old and the new placement loop
-      against each other on the same seed
+      Its three constant tables move to typed module-level constants, which is what lets ``mypy``
+      cover the file. Apart from the out-of-bounds fix below, the surface it generates is unchanged,
+      verified by running the old and the new placement loop against each other on the same seed
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
@@ -119,12 +120,12 @@ Changed
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
       ``future-annotations`` setting had assumed of all of them and only six of them had
-    - Retired ruff's TODO ignore list. What remains ignored states a decision: ``experiments/`` is
-      exempt from the style rules that ``experiments/AGENTS.md`` puts out of reach, the three
+    - Retired ruff's TODO ignore list. What remains ignored states a decision: the three
       ``__init__.py`` files that register the Windows DLL search path are exempt from ``RUF067``,
-      and ``CPY001`` stays off pending a decision on copyright headers
-    - ``mypy`` now checks ``docs/conf.py`` and ``scripts/`` as well, so a new Python file outside the
-      bindings is no longer unchecked until someone adds it to the list
+      ``experiments/`` is exempt from the two rules that a script run by path and a published
+      sampler cannot satisfy, and ``CPY001`` stays off pending a decision on copyright headers
+    - ``mypy`` now checks ``docs/conf.py``, ``experiments/``, and ``scripts/`` as well, so a new
+      Python file outside the bindings is no longer unchecked until someone adds it to the list
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``

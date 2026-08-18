@@ -89,7 +89,7 @@ repos:
     rev: v2.3.1
     hooks:
       - id: mypy
-        files: ^(bindings/mnt/pyfiction|docs/conf\.py|noxfile\.py|scripts)
+        files: ^(bindings/mnt/pyfiction|docs/conf\.py|experiments|noxfile\.py|scripts)
         args: []
         additional_dependencies:
           - nox
@@ -97,6 +97,9 @@ repos:
           # `docs/conf.py` subclasses `docutils`' `Directive` and annotates a Sphinx `app`
           - sphinx
           - types-docutils
+          # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
+          - matplotlib
+          - numpy
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
