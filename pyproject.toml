@@ -76,10 +76,11 @@ install.components = ["fiction_Python"]
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 
 # The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
-# `cmake/`. Two rules keep it that way, because `[tool.check-sdist]` below takes this list on
-# trust: name directories, never a source glob, and anchor every pattern to the repository root.
-# The published sdist shipped no C++ sources at all because `**/include` also matched
-# `bindings/mnt/pyfiction/include/` and `**.hpp` matched the library itself.
+# `cmake/`. Two rules keep it readable: name directories, never a source glob, and anchor every
+# pattern to the repository root. The published sdist shipped no C++ sources at all because
+# `**/include` also matched `bindings/mnt/pyfiction/include/` and `**.hpp` matched the library
+# itself. `[tool.check-sdist]` below now fails on a pattern that drops a tracked source, so the
+# two rules are style rather than the only defense.
 sdist.exclude = [
     "/.github",
     "/benchmarks",
@@ -131,11 +132,13 @@ cmake.define.DISABLE_GIL = "1"
 
 
 [tool.check-sdist]
-# `build-backend` is left at its default `"auto"`, which resolves the scikit-build-core adapter.
-# That adapter subtracts `sdist.exclude` from what it expects the sdist to hold, so it takes that
-# list on trust rather than checking it -- which is why `sdist.exclude` names directories and never
-# a source glob. What this does catch is the other direction: anything in the sdist that git does
-# not track, which is what `--inject-junk` exercises.
+# `build-backend = "none"` is what makes this check load-bearing. The default `"auto"` resolves the
+# scikit-build-core adapter, whose `git_only_excludes` subtracts `sdist.exclude` from the set of
+# files it expects to find -- so it takes that list on trust and forgives exactly the bug that
+# emptied the published sdist. `"none"` subtracts nothing, so `git-only` below becomes the list
+# that has to account for every tracked file the sdist drops, and an over-broad exclude fails here.
+# The two lists overlap by design: that duplication is the check.
+build-backend = "none"
 git-only = [
     "/.github",
     "/benchmarks",

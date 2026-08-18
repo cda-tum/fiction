@@ -29,8 +29,10 @@ Added
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
 - Continuous integration:
     - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which diffs the built source
-      distribution against the files git tracks and fails if a planted editor, cache, or virtual
-      environment file reaches it. ``nox -s check_sdist`` runs the same check locally
+      distribution against the files git tracks. It runs with ``build-backend = "none"``, so an
+      ``sdist.exclude`` pattern that drops a tracked source fails the check instead of being
+      forgiven, and ``--inject-junk`` fails it if a planted editor, cache, or virtual environment
+      file reaches the tarball. ``nox -s check_sdist`` runs the same check locally
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
