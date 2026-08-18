@@ -4110,7 +4110,7 @@ static const char *mkd_doc_fiction_critical_temperature_domain_contour_tracing =
 R"doc(Computes the critical temperature domain of the given SiDB cell-level
 layout. The critical temperature domain consists of all parameter
 combinations for which the layout is logically operational, along with
-the critical temperature for each specific parameter point.nt.
+the critical temperature for each specific parameter point.
 
 This algorithm first uses random sampling to find a set of operational
 point within the parameter range. From there, it traverses outwards to
@@ -16824,7 +16824,14 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_hexagonal_layout_hexagonal_layout_2 = R"doc()doc";
+static const char *mkd_doc_fiction_hexagonal_layout_hexagonal_layout_2 =
+R"doc(Constructor that takes ownership of an existing storage, so that the
+new layout shares the coordinates of the one the storage came from.
+
+Args:
+    s: Storage to adopt.
+
+)doc";
 
 static const char *mkd_doc_fiction_hexagonal_layout_hexagonal_layout_storage = R"doc()doc";
 
