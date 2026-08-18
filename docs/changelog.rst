@@ -28,14 +28,11 @@ Added
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
 - Continuous integration:
-    - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which diffs the built source
-      distribution against the files git tracks. It runs with ``build-backend = "none"``, so an
-      ``sdist.exclude`` pattern that drops a tracked source fails the check instead of being
-      forgiven, and ``--inject-junk`` fails it if a planted editor, cache, or virtual environment
-      file reaches the tarball. ``nox -s check_sdist`` runs the same check locally
-    - Added a 🐍 Lint workflow that runs the ``mypy`` hook. ``mypy`` is listed under ``ci: skip`` in
-      ``.pre-commit-config.yaml``, because the dependencies it needs to resolve the imports of the
-      files it checks put its environment over the size pre-commit.ci allows a hook
+    - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which fails if the source
+      distribution drops a tracked source or ships an untracked one. ``nox -s check_sdist`` runs it
+      locally
+    - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which is now listed under ``ci: skip``
+      because its environment exceeds the size pre-commit.ci allows a hook
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
@@ -92,21 +89,12 @@ Changed
       and ``tests-slim`` presets
     - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
 - Experiments:
-    - Refactored ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
-      directory to modernization: docstrings, a ``PascalCase`` class name, the public
-      ``matplotlib`` logger instead of a private import, and the dead ``rand_int`` helper removed.
-      Its three constant tables move to typed module-level constants, which is what lets ``mypy``
-      cover the file. Apart from the out-of-bounds fix below, the surface it generates is unchanged,
-      verified by running the old and the new placement loop against each other on the same seed
-    - ``generate_defective_surface.py`` now declares its dependencies in a PEP 723 block and is
-      executable, so ``./generate_defective_surface.py`` runs it with ``matplotlib`` and ``numpy``
-      resolved on the spot and nothing to install first
-    - ``generate_defective_surface.py`` now writes the surface it generates. Both of its outputs
-      were commented out, so a run computed a lattice and discarded it. It takes ``--width``,
-      ``--height``, ``--coverage``, ``--output``, and ``--plot``, each defaulting to the value the
-      script previously hard-coded, and writes comma-separated array values to
-      ``defective_surface.csv``. Its body moved behind an ``if __name__ == "__main__":`` guard, so
-      importing the module no longer runs the experiment
+    - Modernized ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
+      directory to it. Apart from the out-of-bounds fix below, the surface it generates is unchanged
+    - ``generate_defective_surface.py`` is executable and declares its dependencies in a PEP 723
+      block, so running it needs nothing installed first
+    - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
+      discarded, and takes the parameters it used to hard-code as command-line arguments
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
@@ -132,10 +120,8 @@ Changed
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
       ``future-annotations`` setting had assumed of all of them and only six of them had
-    - Retired ruff's TODO ignore list. What remains ignored states a decision: the three
-      ``__init__.py`` files that register the Windows DLL search path are exempt from ``RUF067``,
-      ``experiments/`` is exempt from the two rules that a script run by path and a published
-      sampler cannot satisfy, and ``CPY001`` stays off pending a decision on copyright headers
+    - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
+      including ``CPY001``, which stays off pending #1091
     - ``mypy`` now checks ``docs/conf.py``, ``experiments/``, and ``scripts/`` as well, so a new
       Python file outside the bindings is no longer unchecked until someone adds it to the list
 - Continuous integration:
@@ -185,19 +171,13 @@ Fixed
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
 - Experiments:
-    - **Breaking:** fixed the out-of-bounds guard in ``generate_defective_surface.py``, which read
-      ``random_width > random_width + defect[1]`` and was therefore always false. A defect whose
-      footprint ran off the right or bottom edge was placed clipped, because numpy truncates such a
-      slice instead of raising; it is now rejected. The generated surface changes: at the script's
-      own parameters this affects about one placement per run
+    - **Breaking:** fixed the always-false out-of-bounds guard in ``generate_defective_surface.py``
+      that let a defect be placed clipped at the surface edge. The generated surface changes
 - Build system:
-    - ``.gitignore`` now covers ``dist/``, ``.venv/``, ``.tox/``, ``.coverage``, and the usual editor
-      and OS droppings. The source distribution is built from the working tree and skips only what
-      git ignores, so a local ``uv build --sdist`` could ship them
-    - Fixed the source distribution shipping none of the C++ sources it needs to build.
-      ``sdist.exclude`` matched at any depth, so ``**/include`` removed ``include/fiction/`` and
-      ``**.cpp``/``**.hpp`` removed the extension and vendored sources. Installing ``mnt.pyfiction``
-      from source failed at CMake configure on every platform without a matching wheel
+    - ``.gitignore`` now covers ``dist/``, ``.venv/``, ``.coverage``, and the usual editor and OS
+      droppings, which a local ``uv build --sdist`` would otherwise ship
+    - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
+      ``pip install mnt.pyfiction`` fail wherever no matching wheel exists
 - Documentation:
     - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a
       function without a Doxygen brief description
