@@ -10,8 +10,12 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/molecular_qca_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
