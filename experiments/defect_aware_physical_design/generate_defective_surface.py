@@ -84,7 +84,14 @@ class DefectSurface:
         Args:
             surface_width: The number of dimers within a row.
             surface_height: The number of dimer rows. One dimer is made of two H-Si atoms.
+
+        Raises:
+            ValueError: If either dimension is not positive.
         """
+        if surface_width <= 0 or surface_height <= 0:
+            msg = f"surface dimensions must be positive, got {surface_width}x{surface_height}"
+            raise ValueError(msg)
+
         self.total_defect_lattice_points = 0
 
         self.surface_width = surface_width
@@ -103,7 +110,14 @@ class DefectSurface:
 
         Args:
             coverage: The total coverage of defects. A fully defected surface is ``1.0``.
+
+        Raises:
+            ValueError: If ``coverage`` lies outside ``[0.0, 1.0]``.
         """
+        if not 0.0 <= coverage <= 1.0:
+            msg = f"coverage must be between 0.0 and 1.0, got {coverage}"
+            raise ValueError(msg)
+
         self.total_defect_lattice_points = int(self.surface_width * self.surface_height * coverage)
         for defect in DEFECT_PARAMS:
             num_of_defects = int(defect[3] * self.total_defect_lattice_points)
@@ -188,14 +202,52 @@ class DefectSurface:
         np.savetxt(filename, self.surface_lattice, fmt="%d", delimiter=",")
 
 
+def _positive_int(value: str) -> int:
+    """Parse a command-line argument that has to be a positive integer.
+
+    Args:
+        value: The raw argument.
+
+    Returns:
+        The parsed integer.
+
+    Raises:
+        argparse.ArgumentTypeError: If the argument is not a positive integer.
+    """
+    number = int(value)
+    if number <= 0:
+        msg = f"expected a positive integer, got {number}"
+        raise argparse.ArgumentTypeError(msg)
+    return number
+
+
+def _coverage(value: str) -> float:
+    """Parse a command-line argument that has to be a coverage fraction.
+
+    Args:
+        value: The raw argument.
+
+    Returns:
+        The parsed coverage.
+
+    Raises:
+        argparse.ArgumentTypeError: If the argument lies outside ``[0.0, 1.0]``.
+    """
+    coverage = float(value)
+    if not 0.0 <= coverage <= 1.0:
+        msg = f"expected a coverage between 0.0 and 1.0, got {coverage}"
+        raise argparse.ArgumentTypeError(msg)
+    return coverage
+
+
 def main() -> None:
     """Generate a defective surface and write it out."""
     parser = argparse.ArgumentParser(description="Generate a randomly defective H-Si surface.")
-    parser.add_argument("--width", type=int, default=740, help="number of dimers within a row")
-    parser.add_argument("--height", type=int, default=1090, help="number of dimer rows")
+    parser.add_argument("--width", type=_positive_int, default=740, help="number of dimers within a row")
+    parser.add_argument("--height", type=_positive_int, default=1090, help="number of dimer rows")
     parser.add_argument(
         "--coverage",
-        type=float,
+        type=_coverage,
         default=0.005,
         help="total coverage of defects, where a fully defected surface is 1.0",
     )

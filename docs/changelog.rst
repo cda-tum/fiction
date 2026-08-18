@@ -173,6 +173,8 @@ Fixed
 - Experiments:
     - **Breaking:** fixed the always-false out-of-bounds guard in ``generate_defective_surface.py``
       that let a defect be placed clipped at the surface edge. The generated surface changes
+    - ``generate_defective_surface.py`` now rejects a coverage outside ``[0.0, 1.0]`` and a
+      non-positive surface dimension, where it used to write an empty surface and report success
 - Build system:
     - ``.gitignore`` now covers ``dist/``, ``.venv/``, ``.coverage``, and the usual editor and OS
       droppings, which a local ``uv build --sdist`` would otherwise ship
