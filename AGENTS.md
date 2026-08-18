@@ -115,13 +115,13 @@ Each subtree below adds rules to this file and never contradicts it. Read the on
 matches what you touch. **If your tool does not load nested instruction files
 automatically, open the file yourself** — several do not.
 
-| Touching                  | Read                               | Why it matters                                                     |
-| ------------------------- | ---------------------------------- | ------------------------------------------------------------------ |
-| `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                  |
-| `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                       |
-| `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable |
-| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places            |
-| `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; do not refactor them                |
+| Touching                  | Read                               | Why it matters                                                      |
+| ------------------------- | ---------------------------------- | ------------------------------------------------------------------- |
+| `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                   |
+| `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                        |
+| `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable  |
+| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places             |
+| `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; the code may change, the results not |
 
 Everything else: `include/fiction/` is the header-only C++20 library; `vendors/` holds
 third-party sources and is never modified; `benchmarks/` is input data. Build presets live
