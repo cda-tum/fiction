@@ -309,11 +309,6 @@ Changed
 - Dependencies:
     - Updated all dependencies to their latest versions
 
-Removed
-#######
-- Continuous integration:
-    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
-
 Fixed
 #####
 - Data structures:
@@ -334,6 +329,7 @@ Fixed
 Removed
 #######
 - Continuous integration:
+    - macOS 13 has been removed, along with support for the x86_64 (Intel) architecture
     - Dropped Windows 2019 and v142 support
     - Dropped Python 3.9 support due to its end-of-life status
 
