@@ -171,6 +171,12 @@ Fixed
       traced contour came out empty and every reachable point was marked operational without simulation
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
+- Experiments:
+    - **Breaking:** fixed the out-of-bounds guard in ``generate_defective_surface.py``, which read
+      ``random_width > random_width + defect[1]`` and was therefore always false. A defect whose
+      footprint ran off the right or bottom edge was placed clipped, because numpy truncates such a
+      slice instead of raising; it is now rejected. The generated surface changes: at the script's
+      own parameters this affects about one placement per run
 - Build system:
     - ``.gitignore`` now covers ``dist/``, ``.venv/``, ``.tox/``, ``.coverage``, and the usual editor
       and OS droppings. The source distribution is built from the working tree and skips only what

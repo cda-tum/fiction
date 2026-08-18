@@ -105,8 +105,13 @@ class DefectSurface:
                 random_width = random.randint(0, self.surface_width - 1)
                 random_height = random.randint(0, self.surface_height - 1)
 
-                if (random_width > random_width + defect[1] and random_height > random_height + defect[2]) or (
-                    random_height % 2 == 1 and defect[2] % 2 == 0
+                # a defect whose footprint runs off the right or bottom edge is rejected. numpy
+                # truncates such a slice instead of raising, so before this check the experiment
+                # placed a clipped defect there
+                if (
+                    random_width + defect[1] > self.surface_width
+                    or random_height + defect[2] > self.surface_height
+                    or (random_height % 2 == 1 and defect[2] % 2 == 0)
                 ):
                     continue
 
