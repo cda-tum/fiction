@@ -9,15 +9,16 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 - Prefer the smallest change that fully solves the task, then improve what you found on
   the way there. Dependency bumps are the one thing that still belongs in its own pull
   request; Renovate opens those itself.
-- Do not add an abstraction, a template parameter, or a configuration option until a
+- Never add an abstraction, a template parameter, or a configuration option until a
   second concrete caller needs it. _fiction_ is header-only and template-heavy, so every
   added template parameter costs compile time and instantiation surface in every
   translation unit that includes the header.
 - Prefer an existing facility from the STL, `mockturtle`, or `kitty` over a new
   implementation. If you add a helper that duplicates one of them, say in the pull request
   description why the existing one does not fit.
-- Test the documented contract, not provisional implementation choices. A test that pins
-  down an internal detail blocks the next refactor without protecting a user.
+- Test the documented contract. Never pin down a provisional implementation choice: a
+  test that asserts on an internal detail blocks the next refactor without protecting a
+  user.
 - **Work in your own git worktree, always.** Create it with
   `git worktree add .ai/worktrees/<task> -b <branch>` and work there, never directly in the
   primary checkout. Two agents that share a working directory overwrite each other's
@@ -54,12 +55,12 @@ code comments, and error messages.
 - Cut every word that does not change the meaning. Prefer the short word.
 - Use active voice and name the actor: "`hexagonalization` now rejects empty layouts", not
   "empty layouts are now rejected".
-- No metaphors, no figures of speech, no filler openers ("Note that", "It is worth
+- Never use a metaphor, a figure of speech, or a filler opener ("Note that", "It is worth
   mentioning that", "Basically").
 - Keep sentences short and direct, and give each sentence one idea. Prefer an explicit noun
   to a pronoun whose referent the reader has to reconstruct — "the layout", not "it".
-- Use the established domain term, and use one term per concept. Do not paraphrase `SiDB`,
-  `defect`, `gate library`, or `operational domain` into everyday words, and do not switch
+- Use the established domain term, and use one term per concept. Never paraphrase `SiDB`,
+  `defect`, `gate library`, or `operational domain` into everyday words, and never switch
   between synonyms for variety. Take terminology from the repository's own usage and from
   established precedent in field-coupled nanocomputing, logic synthesis, and design
   automation. Where those communities use different words for one concept, explain the
@@ -68,7 +69,7 @@ code comments, and error messages.
   precision, keep the precise term.
 - Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
   `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
-- Write for the final design, not for the history of how you got there. Do not narrate
+- Write for the final design, not for the history of how you got there. Never narrate
   review rounds, prompts, former names, or the order in which you did the work. Where a
   rejected alternative is worth recording because a reader would otherwise retry it, put
   it in a code comment at the site or in the pull request — not in the changelog.
@@ -81,12 +82,12 @@ never describe what it used to do. A reader has no access to the earlier state, 
 sentence that compares against it carries no information and goes stale the moment someone
 reads it cold.
 
-Do not write "this fixes the way it was before", "unlike the previous implementation",
+Never write "this fixes the way it was before", "unlike the previous implementation",
 "now correctly handles", "changed to return", or "no longer crashes". Describe the behavior
 that exists: "returns `std::nullopt` when the layout is empty".
 
 The same holds for the reason a thing is the way it is. Record it as a present-tense
-constraint at the site, not as a story about a past attempt — "`std::unordered_map`
+constraint at the site, not as an account of a past attempt — "`std::unordered_map`
 is not usable here because the iteration order feeds the gate ordering", not "switched away
 from `std::unordered_map` because it broke the gate ordering".
 
@@ -162,7 +163,7 @@ current code before acting:
 `clang-tidy` findings from the `Clang-Tidy Review` workflow are binding: fix them, or
 suppress the specific check with a `// NOLINT(check-name)` comment stating the reason.
 CodeRabbit findings are suggestions; disagreeing with a stated reason is a normal outcome,
-and LLM reviewers skew conservative. Reply to comments, do not resolve them — resolution
+and LLM reviewers skew conservative. Reply to comments; never resolve them — resolution
 belongs to the reviewer. Full workflow: `docs/contributing.rst`, "Code Review".
 
 ## Git and GitHub
@@ -205,10 +206,9 @@ imitate.
   - Describe the status quo, never the previous behavior, and keep the description true to
     what the code does — see "Documentation describes the status quo" and "Descriptions
     match the implementation" under `Writing`.
-  - The current codebase uses `// Created by ...` comments. A migration to using `@file`
-    and `@author` tags per file (with full name and GitHub handle) is planned. After
-    migration, the new convention will be enforced and `// Created by ...` comments should
-    no longer be used.
+  - The codebase still carries `// Created by ...` comments. A migration to per-file
+    `@file` and `@author` tags, with full name and GitHub handle, is planned; once it
+    lands, that convention is enforced and `// Created by ...` is gone.
 
 ### Python
 
