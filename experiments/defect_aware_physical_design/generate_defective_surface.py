@@ -1,3 +1,9 @@
+#!/usr/bin/env -S uv run --script --quiet
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["matplotlib", "numpy"]
+# ///
+
 """Generate a randomly defective H-Si surface and write it out as a lattice of array values.
 
 Each H-Si atom is one array value. The surface is a 2D array of dimer rows, where one dimer

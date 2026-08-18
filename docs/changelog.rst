@@ -98,6 +98,9 @@ Changed
       Its three constant tables move to typed module-level constants, which is what lets ``mypy``
       cover the file. Apart from the out-of-bounds fix below, the surface it generates is unchanged,
       verified by running the old and the new placement loop against each other on the same seed
+    - ``generate_defective_surface.py`` now declares its dependencies in a PEP 723 block and is
+      executable, so ``./generate_defective_surface.py`` runs it with ``matplotlib`` and ``numpy``
+      resolved on the spot and nothing to install first
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
