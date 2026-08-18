@@ -11,17 +11,18 @@
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <cstdint>
 #include <limits>
 #include <mutex>
 #include <optional>
 #include <thread>
+#include <utility>
 #include <vector>
 
 namespace fiction
@@ -94,7 +95,8 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         return std::nullopt;
     }
 
-    bool timeout_limit_reached = false;
+    // written by every worker thread, read after they have all joined
+    std::atomic_bool timeout_limit_reached{false};
 
     mockturtle::stopwatch<>::duration time_counter{};
 
@@ -140,8 +142,9 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
         for (const auto& cell : charge_lyt.get_sidb_order())
         {
-            if (std::find(FICTION_EXECUTION_POLICY_PAR_UNSEQ predefined_negative_sidb_indices.cbegin(),
-                          predefined_negative_sidb_indices.cend(),
+            // no execution policy: predefined_negative_sidb_indices holds a handful of entries, where the dispatch
+            // costs an order of magnitude more than the search itself
+            if (std::find(predefined_negative_sidb_indices.cbegin(), predefined_negative_sidb_indices.cend(),
                           charge_lyt.cell_to_index(cell)) == predefined_negative_sidb_indices.cend())
             {
                 all_sidb_indices_with_unknown_charge_state.push_back(
@@ -197,9 +200,10 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                 std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time)
                                     .count();
 
-                            if (static_cast<uint64_t>(elapsed_time) >= ps.timeout)
+                            if (std::cmp_greater_equal(elapsed_time, ps.timeout))
                             {
-                                timeout_limit_reached = true;
+                                // relaxed: join establishes the happens-before edge to the read below
+                                timeout_limit_reached.store(true, std::memory_order_relaxed);
                                 return;  // Exit the thread if the timeout has been reached
                             }
 
@@ -222,7 +226,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                             {
                                 charge_lyt_copy.charge_distribution_to_index();
 
-                                const std::lock_guard lock{mutex};
+                                const std::scoped_lock lock{mutex};
                                 st.charge_distributions.emplace_back(charge_lyt_copy);
                             }
 
@@ -237,7 +241,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                 {
                                     charge_lyt_copy.charge_distribution_to_index();
 
-                                    const std::lock_guard lock{mutex};
+                                    const std::scoped_lock lock{mutex};
                                     st.charge_distributions.emplace_back(charge_lyt_copy);
                                 }
                             }
@@ -254,7 +258,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
     st.simulation_runtime = time_counter;
 
-    if (timeout_limit_reached || st.charge_distributions.empty())
+    if (timeout_limit_reached.load(std::memory_order_relaxed) || st.charge_distributions.empty())
     {
         return std::nullopt;
     }

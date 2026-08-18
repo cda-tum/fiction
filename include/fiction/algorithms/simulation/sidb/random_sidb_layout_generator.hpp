@@ -206,7 +206,8 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     {
         if (auto random_lyt = generate_random_sidb_layout(params, skeleton); random_lyt.has_value())
         {
-            // check if the layout is unique
+            // check if the layout is unique; the execution policy pays off from roughly a thousand collected
+            // layouts onwards, and costs well under a millisecond below that
             const auto is_identical = std::any_of(FICTION_EXECUTION_POLICY_PAR_UNSEQ unique_lyts.cbegin(),
                                                   unique_lyts.cend(), [&](const auto& old_lyt)
                                                   { return are_cell_layouts_identical(random_lyt.value(), old_lyt); });
