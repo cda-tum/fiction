@@ -6,17 +6,19 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 
 ## Working Principles
 
-- Prefer the smallest change that fully solves the task. Cleanup, reformatting, and dependency
-  bumps in code the task does not otherwise touch belong in their own pull request.
-- Do not add an abstraction, a template parameter, or a configuration option until a
+- Prefer the smallest change that fully solves the task, then improve what you found on
+  the way there. Dependency bumps are the one thing that still belongs in its own pull
+  request; Renovate opens those itself.
+- Never add an abstraction, a template parameter, or a configuration option until a
   second concrete caller needs it. _fiction_ is header-only and template-heavy, so every
   added template parameter costs compile time and instantiation surface in every
   translation unit that includes the header.
 - Prefer an existing facility from the STL, `mockturtle`, or `kitty` over a new
   implementation. If you add a helper that duplicates one of them, say in the pull request
   description why the existing one does not fit.
-- Test the documented contract, not provisional implementation choices. A test that pins
-  down an internal detail blocks the next refactor without protecting a user.
+- Test the documented contract. Never pin down a provisional implementation choice: a
+  test that asserts on an internal detail blocks the next refactor without protecting a
+  user.
 - **Work in your own git worktree, always.** Create it with
   `git worktree add .ai/worktrees/<task> -b <branch>` and work there, never directly in the
   primary checkout. Two agents that share a working directory overwrite each other's
@@ -37,9 +39,11 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
   while working, including in existing code.** Say what you would do and why. This is part
   of the task, not a distraction from it: a feature request or a bug fix is the moment
   someone reads the surrounding code closely, and staying quiet wastes that reading.
-- Implement such a change in the same pull request when it falls inside the code the task
-  already modifies. Beyond that radius, name it in the pull request description and open a
-  separate pull request; do not expand the diff to reach it.
+- Implement it in the same pull request, as its own commit, so a reviewer reads it apart
+  from the feature. There is no radius: a fix or a cleanup you found while working ships
+  with the work that found it, not in a follow-up pull request that nobody opens.
+- A redesign is the exception, because it costs more to review than to write. Say what you
+  would change and why, and act once the maintainer agrees.
 - Prioritize the architecture and maintainability of the project as a whole.
 
 ## Writing
@@ -51,12 +55,12 @@ code comments, and error messages.
 - Cut every word that does not change the meaning. Prefer the short word.
 - Use active voice and name the actor: "`hexagonalization` now rejects empty layouts", not
   "empty layouts are now rejected".
-- No metaphors, no figures of speech, no filler openers ("Note that", "It is worth
+- Never use a metaphor, a figure of speech, or a filler opener ("Note that", "It is worth
   mentioning that", "Basically").
 - Keep sentences short and direct, and give each sentence one idea. Prefer an explicit noun
   to a pronoun whose referent the reader has to reconstruct — "the layout", not "it".
-- Use the established domain term, and use one term per concept. Do not paraphrase `SiDB`,
-  `defect`, `gate library`, or `operational domain` into everyday words, and do not switch
+- Use the established domain term, and use one term per concept. Never paraphrase `SiDB`,
+  `defect`, `gate library`, or `operational domain` into everyday words, and never switch
   between synonyms for variety. Take terminology from the repository's own usage and from
   established precedent in field-coupled nanocomputing, logic synthesis, and design
   automation. Where those communities use different words for one concept, explain the
@@ -65,7 +69,7 @@ code comments, and error messages.
   precision, keep the precise term.
 - Preserve the capitalization of project names: _fiction_, `pyfiction`, `nanobind`,
   `mockturtle`, `kitty`, `alice`, `Catch2`, `CMake`, `GitHub`, `SiDB`, `QCA`, `iNML`.
-- Write for the final design, not for the history of how you got there. Do not narrate
+- Write for the final design, not for the history of how you got there. Never narrate
   review rounds, prompts, former names, or the order in which you did the work. Where a
   rejected alternative is worth recording because a reader would otherwise retry it, put
   it in a code comment at the site or in the pull request — not in the changelog.
@@ -78,12 +82,12 @@ never describe what it used to do. A reader has no access to the earlier state, 
 sentence that compares against it carries no information and goes stale the moment someone
 reads it cold.
 
-Do not write "this fixes the way it was before", "unlike the previous implementation",
+Never write "this fixes the way it was before", "unlike the previous implementation",
 "now correctly handles", "changed to return", or "no longer crashes". Describe the behavior
 that exists: "returns `std::nullopt` when the layout is empty".
 
 The same holds for the reason a thing is the way it is. Record it as a present-tense
-constraint at the site, not as a story about a past attempt — "`std::unordered_map`
+constraint at the site, not as an account of a past attempt — "`std::unordered_map`
 is not usable here because the iteration order feeds the gate ordering", not "switched away
 from `std::unordered_map` because it broke the gate ordering".
 
@@ -111,13 +115,13 @@ Each subtree below adds rules to this file and never contradicts it. Read the on
 matches what you touch. **If your tool does not load nested instruction files
 automatically, open the file yourself** — several do not.
 
-| Touching                  | Read                               | Why it matters                                                     |
-| ------------------------- | ---------------------------------- | ------------------------------------------------------------------ |
-| `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                  |
-| `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                       |
-| `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable |
-| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places            |
-| `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; do not refactor them                |
+| Touching                  | Read                               | Why it matters                                                      |
+| ------------------------- | ---------------------------------- | ------------------------------------------------------------------- |
+| `bindings/mnt/pyfiction/` | `bindings/mnt/pyfiction/AGENTS.md` | nanobind wiring; five steps, no compiler reminder                   |
+| `test/`                   | `test/AGENTS.md`                   | test file base names must be globally unique                        |
+| `docs/`                   | `docs/AGENTS.md`                   | a page missing from a `toctree` builds silently and is unreachable  |
+| `cli/`                    | `cli/AGENTS.md`                    | the one subtree with manual source lists, in two places             |
+| `experiments/`            | `experiments/AGENTS.md`            | published-paper reproductions; the code may change, the results not |
 
 Everything else: `include/fiction/` is the header-only C++20 library; `vendors/` holds
 third-party sources and is never modified; `benchmarks/` is input data. Build presets live
@@ -159,8 +163,10 @@ current code before acting:
 `clang-tidy` findings from the `Clang-Tidy Review` workflow are binding: fix them, or
 suppress the specific check with a `// NOLINT(check-name)` comment stating the reason.
 CodeRabbit findings are suggestions; disagreeing with a stated reason is a normal outcome,
-and LLM reviewers skew conservative. Reply to comments, do not resolve them — resolution
-belongs to the reviewer. Full workflow: `docs/contributing.rst`, "Code Review".
+and LLM reviewers skew conservative. CodeRabbit skips drafts, and marking a draft ready
+does not trigger a pass — ask for one with a `@coderabbitai review` comment. Reply to
+comments; never resolve them — resolution belongs to the reviewer. Full workflow:
+`docs/contributing.rst`, "Code Review".
 
 ## Git and GitHub
 
@@ -183,7 +189,17 @@ imitate.
   first; if you cannot explain it, do not submit it.
 - Never push, open or merge a pull request, post a comment, open an issue, or otherwise
   change remote state unless the maintainer authorized that specific action. Authorization
-  for one task does not carry over to the next.
+  for one task does not carry over to the next. It does carry within one pull request:
+  permission to open it covers pushing fixes to it until it is green and replying to its
+  review comments.
+- Opening a pull request does not finish the task. Watch it: poll `gh pr checks <PR>`, fix
+  what fails, push, and poll again. The matrix spans Linux, macOS, and Windows in Debug
+  and Release, plus the Python bindings, and takes hours — check back periodically rather
+  than blocking on `--watch`. Reviews arrive on their own schedule; answer them as they
+  land, as described under "Code Review".
+- Report success only once every required check is green and every review comment has an
+  answer. Report a check you cannot make pass just as promptly, naming the job and quoting
+  the failing lines. Never leave a red pull request unmentioned.
 
 ## Code Style
 
@@ -202,10 +218,9 @@ imitate.
   - Describe the status quo, never the previous behavior, and keep the description true to
     what the code does — see "Documentation describes the status quo" and "Descriptions
     match the implementation" under `Writing`.
-  - The current codebase uses `// Created by ...` comments. A migration to using `@file`
-    and `@author` tags per file (with full name and GitHub handle) is planned. After
-    migration, the new convention will be enforced and `// Created by ...` comments should
-    no longer be used.
+  - The codebase still carries `// Created by ...` comments. A migration to per-file
+    `@file` and `@author` tags, with full name and GitHub handle, is planned; once it
+    lands, that convention is enforced and `// Created by ...` is gone.
 
 ### Python
 
