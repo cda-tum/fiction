@@ -97,8 +97,9 @@ repos:
           # `docs/conf.py` subclasses `docutils`' `Directive` and annotates a Sphinx `app`
           - sphinx
           - types-docutils
-          # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
-          - matplotlib
+          # `experiments/` holds its surfaces in `numpy` arrays. `matplotlib` is deliberately
+          # absent: it costs ~73 MiB here and pre-commit.ci caps a hook environment at 250 MiB,
+          # so `[tool.mypy]` ignores its missing stubs instead
           - numpy
 
   # Format configuration files with prettier
