@@ -228,19 +228,19 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
         const auto south = port_position(5u, 9u);
         const auto west  = port_position(0u, 5u);
 
-        if (p.inp.contains(north) && !p.out.contains(north))
+        if (p.inp.contains(north))
         {
             return FAN_OUT_1_3;
         }
-        if (p.inp.contains(east) && !p.out.contains(east))
+        if (p.inp.contains(east))
         {
             return rotate_90(FAN_OUT_1_3);
         }
-        if (p.inp.contains(south) && !p.out.contains(south))
+        if (p.inp.contains(south))
         {
             return rotate_180(FAN_OUT_1_3);
         }
-        if (p.inp.contains(west) && !p.out.contains(west))
+        if (p.inp.contains(west))
         {
             return rotate_270(FAN_OUT_1_3);
         }
