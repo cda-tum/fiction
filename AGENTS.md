@@ -163,8 +163,10 @@ current code before acting:
 `clang-tidy` findings from the `Clang-Tidy Review` workflow are binding: fix them, or
 suppress the specific check with a `// NOLINT(check-name)` comment stating the reason.
 CodeRabbit findings are suggestions; disagreeing with a stated reason is a normal outcome,
-and LLM reviewers skew conservative. Reply to comments; never resolve them — resolution
-belongs to the reviewer. Full workflow: `docs/contributing.rst`, "Code Review".
+and LLM reviewers skew conservative. CodeRabbit skips drafts, and marking a draft ready
+does not trigger a pass — ask for one with a `@coderabbitai review` comment. Reply to
+comments; never resolve them — resolution belongs to the reviewer. Full workflow:
+`docs/contributing.rst`, "Code Review".
 
 ## Git and GitHub
 
@@ -187,7 +189,17 @@ imitate.
   first; if you cannot explain it, do not submit it.
 - Never push, open or merge a pull request, post a comment, open an issue, or otherwise
   change remote state unless the maintainer authorized that specific action. Authorization
-  for one task does not carry over to the next.
+  for one task does not carry over to the next. It does carry within one pull request:
+  permission to open it covers pushing fixes to it until it is green and replying to its
+  review comments.
+- Opening a pull request does not finish the task. Watch it: poll `gh pr checks <PR>`, fix
+  what fails, push, and poll again. The matrix spans Linux, macOS, and Windows in Debug
+  and Release, plus the Python bindings, and takes hours — check back periodically rather
+  than blocking on `--watch`. Reviews arrive on their own schedule; answer them as they
+  land, as described under "Code Review".
+- Report success only once every required check is green and every review comment has an
+  answer. Report a check you cannot make pass just as promptly, naming the job and quoting
+  the failing lines. Never leave a red pull request unmentioned.
 
 ## Code Style
 
