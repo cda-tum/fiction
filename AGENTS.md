@@ -6,8 +6,9 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 
 ## Working Principles
 
-- Prefer the smallest change that fully solves the task. Cleanup, reformatting, and dependency
-  bumps in code the task does not otherwise touch belong in their own pull request.
+- Prefer the smallest change that fully solves the task, then improve what you found on
+  the way there. Dependency bumps are the one thing that still belongs in its own pull
+  request; Renovate opens those itself.
 - Do not add an abstraction, a template parameter, or a configuration option until a
   second concrete caller needs it. _fiction_ is header-only and template-heavy, so every
   added template parameter costs compile time and instantiation surface in every
@@ -37,9 +38,11 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
   while working, including in existing code.** Say what you would do and why. This is part
   of the task, not a distraction from it: a feature request or a bug fix is the moment
   someone reads the surrounding code closely, and staying quiet wastes that reading.
-- Implement such a change in the same pull request when it falls inside the code the task
-  already modifies. Beyond that radius, name it in the pull request description and open a
-  separate pull request; do not expand the diff to reach it.
+- Implement it in the same pull request, as its own commit, so a reviewer reads it apart
+  from the feature. There is no radius: a fix or a cleanup you found while working ships
+  with the work that found it, not in a follow-up pull request that nobody opens.
+- A redesign is the exception, because it costs more to review than to write. Say what you
+  would change and why, and act once the maintainer agrees.
 - Prioritize the architecture and maintainability of the project as a whole.
 
 ## Writing
