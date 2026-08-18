@@ -29,10 +29,8 @@ Added
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
 - Continuous integration:
     - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which fails if the source
-      distribution drops a tracked source or ships an untracked one. ``nox -s check_sdist`` runs it
-      locally
-    - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which is now listed under ``ci: skip``
-      because its environment exceeds the size pre-commit.ci allows a hook
+      distribution drops a tracked source or ships an untracked one
+    - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which pre-commit.ci no longer runs
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
@@ -122,8 +120,8 @@ Changed
       ``future-annotations`` setting had assumed of all of them and only six of them had
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
       including ``CPY001``, which stays off pending #1091
-    - ``mypy`` now checks ``docs/conf.py``, ``experiments/``, and ``scripts/`` as well, so a new
-      Python file outside the bindings is no longer unchecked until someone adds it to the list
+    - ``mypy`` now checks every Python file the repository owns, where it previously checked only
+      the bindings and ``noxfile.py``
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
@@ -176,8 +174,8 @@ Fixed
     - ``generate_defective_surface.py`` now rejects a coverage outside ``[0.0, 1.0]`` and a
       non-positive surface dimension, where it used to write an empty surface and report success
 - Build system:
-    - ``.gitignore`` now covers ``dist/``, ``.venv/``, ``.coverage``, and the usual editor and OS
-      droppings, which a local ``uv build --sdist`` would otherwise ship
+    - ``.gitignore`` now covers the build, virtual environment, and editor droppings that a local
+      ``uv build --sdist`` would otherwise ship into the source distribution
     - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
       ``pip install mnt.pyfiction`` fail wherever no matching wheel exists
 - Documentation:
