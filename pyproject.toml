@@ -228,6 +228,9 @@ warn_unreachable = true
 [tool.ruff]
 line-length = 120
 namespace-packages = ["mnt"]
+# Load-bearing, not just extra rules: the `# ruff: ignore[<name>]` suppressions in `docs/conf.py`
+# and the `rule-codes-in-selectors` rule that puts rule names in the selectors below are both
+# preview features. Turning this off makes those suppressions inert
 preview = true
 fix = true
 unsafe-fixes = true
@@ -241,8 +244,6 @@ ignore = [
     "single-line-implicit-string-concatenation", # conflicts with the formatter
     "missing-trailing-comma", # conflicts with the formatter
     "PLR09", # too many <...>
-    "magic-value-comparison", # a test suite compares against the numbers it expects
-    "assert", # a test suite asserts
     "missing-copyright-notice", # the project uses no per-file copyright headers; see #1091
     # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
     # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
@@ -264,8 +265,17 @@ required-imports = ["from __future__ import annotations"]
 # PLR6201: a set literal tests membership by hash, a list literal by `__eq__`. The coordinate
 # bindings compare equal to the tuples these tests write but do not hash equal to them, so the
 # rule's rewrite turns a passing assertion into a failing one
-"bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D", "float-equality-comparison", "literal-membership"]
-"docs/**" = ["T20", "A"]
+"bindings/mnt/pyfiction/test/**" = [
+    "T20",
+    "ANN",
+    "D",
+    "assert", # a test suite asserts
+    "magic-value-comparison", # a test suite compares against the numbers it expects
+    "float-equality-comparison",
+    "literal-membership",
+]
+# `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
+"docs/**" = ["T20", "A", "implicit-namespace-package"]
 "noxfile.py" = ["T20", "banned-api"]
 "scripts/**" = ["T20"]  # maintenance scripts report progress on stdout
 "*.pyi" = ["overload-with-docstring", "docstring-in-stub"]  # pydocstyle
@@ -277,20 +287,18 @@ required-imports = ["from __future__ import annotations"]
 "bindings/mnt/pyfiction/test/__init__.py" = ["non-empty-init-module"]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = ["implicit-namespace-package"]
-"docs/conf.py" = ["implicit-namespace-package"]
 # `experiments/AGENTS.md`: these reproduce the results of published papers and are not to be
-# modernized, refactored, or reformatted, so the style rules cannot be applied to them
+# modernized, refactored, or reformatted, so the style rules cannot be applied to them. The
+# entries are prefixes on purpose. `select = ["ALL"]` means every ruff release can raise a new
+# finding here, and nobody is allowed to fix one, so a list of leaf rules would only ever grow
 "experiments/**" = [
     "N", # pep8-naming
     "D", # pydocstyle
-    "boolean-positional-value-in-call",
-    "collapsible-else-if",
-    "commented-out-code",
-    "implicit-namespace-package",
-    "import-private-name",
-    "non-augmented-assignment",
-    "redefined-loop-name",
-    "suspicious-non-cryptographic-random-usage",
+    "ERA", # eradicate: commented-out code
+    "FBT", # flake8-boolean-trap
+    "INP", # flake8-no-pep420: run by path, not imported
+    "PL", # pylint
+    "S", # flake8-bandit
 ]
 "*.ipynb" = [
     "D", # pydocstyle

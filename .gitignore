@@ -69,7 +69,6 @@ coverage.xml
 # Python
 __pycache__
 venv/
-.venv/
 .venv*/
 dist/
 .tox/
@@ -83,6 +82,7 @@ dist/
 # OS and editor droppings. These are untracked but not otherwise ignored, and the source
 # distribution is built from the working tree, so without these it can ship them
 .DS_Store
+# a literal `?`, not a wildcard: `check-sdist --inject-junk` plants a file by that name
 .DS_Store?
 ._*
 .Spotlight-V100
