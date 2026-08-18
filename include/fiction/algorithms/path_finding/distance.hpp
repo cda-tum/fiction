@@ -9,10 +9,10 @@
 
 #include <algorithm>
 #include <cmath>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <limits>
-#include <type_traits>
 
 namespace fiction
 {
@@ -30,20 +30,10 @@ namespace fiction
  * @return Manhattan distance between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
+    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
 [[nodiscard]] constexpr Dist manhattan_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
-    // do not convert the `static_assert` type checks of this file's free functions into `requires` clauses with
-    // `std::integral`/`std::floating_point`. The pyfiction docstring generator
-    // (.github/workflows/pyfiction-docstring-generator.yml) runs pybind11_mkdoc with neither `-I include` nor an
-    // `-std` flag, so it parses these headers as C++11 with unresolved project includes. A `requires` clause is a
-    // syntax error there, and it aborts the enclosing declaration list, dropping the Doxygen comments of everything
-    // declared after it. Passing `-std=c++20` alone makes this worse, not better: it cut the generated docstrings
-    // from 3292 to 1769 on CI. Fixing the include path is the prerequisite for revisiting it; tracked in
-    // https://github.com/cda-tum/fiction/issues/1062. The same applies to `cost.hpp` and `a_star.hpp`
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
-
     return static_cast<Dist>(std::abs(static_cast<int64_t>(source.x) - static_cast<int64_t>(target.x)) +
                              std::abs(static_cast<int64_t>(source.y) - static_cast<int64_t>(target.y)));
 }
@@ -60,12 +50,10 @@ template <typename Lyt, typename Dist = uint64_t>
  * @return Euclidean distance between `source` and `target`.
  */
 template <typename Lyt, typename Dist = double>
+    requires is_coordinate_layout_v<Lyt> && std::floating_point<Dist>
 [[nodiscard]] constexpr Dist euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_floating_point_v<Dist>, "Dist is not a floating-point type");
-
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
@@ -87,12 +75,10 @@ template <typename Lyt, typename Dist = double>
  * @return Squared euclidean distance between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
+    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
 [[nodiscard]] constexpr Dist squared_euclidean_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                         const coordinate<Lyt>& target) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
-
     const auto x = static_cast<double>(source.x) - static_cast<double>(target.x);
     const auto y = static_cast<double>(source.y) - static_cast<double>(target.y);
 
@@ -117,12 +103,10 @@ template <typename Lyt, typename Dist = uint64_t>
  * @return 2DDWave distance between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
+    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
 [[nodiscard]] constexpr Dist twoddwave_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
-
     return source.x <= target.x && source.y <= target.y ? manhattan_distance<Lyt, Dist>(lyt, source, target) :
                                                           static_cast<Dist>(std::numeric_limits<uint32_t>::max());
 }
@@ -142,12 +126,10 @@ template <typename Lyt, typename Dist = uint64_t>
  * @return Chebyshev distance between `source` and `target`.
  */
 template <typename Lyt, typename Dist = uint64_t>
+    requires is_coordinate_layout_v<Lyt> && std::integral<Dist>
 [[nodiscard]] constexpr Dist chebyshev_distance([[maybe_unused]] const Lyt& lyt, const coordinate<Lyt>& source,
                                                 const coordinate<Lyt>& target) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_integral_v<Dist>, "Dist is not an integral type");
-
     return static_cast<Dist>(std::max(std::abs(static_cast<int64_t>(source.x) - static_cast<int64_t>(target.x)),
                                       std::abs(static_cast<int64_t>(source.y) - static_cast<int64_t>(target.y))));
 }

@@ -5,13 +5,9 @@
 #ifndef FICTION_SIMULATED_ANNEALING_HPP
 #define FICTION_SIMULATED_ANNEALING_HPP
 
-#include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
-
 #include <algorithm>
 #include <cassert>
 #include <cmath>
-#include <cstdint>
 #include <cstdlib>
 #include <random>
 #include <thread>
@@ -70,10 +66,13 @@ constexpr auto geometric_temperature_schedule(const double t) noexcept
  * @param next The next state function that determines an adjacent state given a current one.
  * @return A pair of the optimized state and its cost value.
  */
+// NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are invoked once per annealing
+// cycle, so forwarding them would move from them on the first call
 template <typename State, typename CostFunc, typename TempFunc, typename NextFunc>
 std::pair<State, std::invoke_result_t<CostFunc, State>>
 simulated_annealing(const State& init_state, const double init_temp, const double final_temp, const std::size_t cycles,
                     CostFunc&& cost, TempFunc&& schedule, NextFunc&& next) noexcept
+// NOLINTEND(cppcoreguidelines-missing-std-forward)
 {
     static_assert(std::is_invocable_v<CostFunc, State>, "CostFunc must be invocable with objects of type State");
     static_assert(std::is_invocable_v<TempFunc, double>, "TempFunc must be invocable with double");
@@ -161,11 +160,14 @@ simulated_annealing(const State& init_state, const double init_temp, const doubl
  * @param next The next state function that determines an adjacent state given a current one.
  * @return A pair of the overall best optimized state and its cost value.
  */
+// NOLINTBEGIN(cppcoreguidelines-missing-std-forward): the callables are shared by every annealing
+// instance, so forwarding them would move from them on the first one
 template <typename RandStateFunc, typename CostFunc, typename TempFunc, typename NextFunc>
 std::pair<std::invoke_result_t<RandStateFunc>, std::invoke_result_t<CostFunc, std::invoke_result_t<RandStateFunc>>>
 multi_simulated_annealing(const double init_temp, const double final_temp, const std::size_t cycles,
                           const std::size_t instances, RandStateFunc&& rand_state, CostFunc&& cost, TempFunc&& schedule,
                           NextFunc&& next) noexcept
+// NOLINTEND(cppcoreguidelines-missing-std-forward)
 {
     using state_t = std::invoke_result_t<RandStateFunc>;
     using cost_t  = std::invoke_result_t<CostFunc, state_t>;
@@ -199,7 +201,9 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
     }
 
     // Find the minimum result
-    return *std::min_element(FICTION_EXECUTION_POLICY_PAR_UNSEQ results.cbegin(), results.cend(),
+    // no execution policy: results holds one entry per annealing instance, where the dispatch costs an order of
+    // magnitude more than the scan itself
+    return *std::min_element(results.cbegin(), results.cend(),
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 

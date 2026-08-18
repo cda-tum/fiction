@@ -154,16 +154,27 @@ Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/action
 which regenerates `pybind11_mkdoc_docstrings.hpp` and overrides the existing one every time changes to
 any `*.hpp` file are pushed to a branch.
 
-Alternatively, you can also run `pybind11_mkdoc` locally using the `pybind11_mkdoc` tool (not recommended):
+Alternatively, you can run `pybind11_mkdoc` locally (not recommended). It parses with libclang, so it needs the same
+include paths, defines, and language standard as the real build. Without them it parses this C++20 code base as C++11
+and silently drops the docstrings that follow anything it cannot parse, such as a `requires` clause.
+
+Install the tool and the libclang bindings, which must match the `libclang-18` shared library that does the parsing:
 
 ```bash
-pip install pybind11_mkdoc clang==14
+pip install "pybind11_mkdoc==3.0.0" "clang==18.1.8" nanobind
 ```
 
-To generate the docstrings call
+Configure a build to produce the compile database the flags are read from, then generate the docstrings from
+_fiction_'s base directory:
 
 ```bash
-python3 -m pybind11_mkdoc -o pybind11_mkdoc_docstrings.hpp -D FICTION_Z3_SOLVER `find ./include/fiction -name "*.hpp" -print`
+cmake --preset pyfiction
+python3 -m pybind11_mkdoc \
+  -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
+  -std=c++20 \
+  "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
+  $(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction) \
+  $(find include/fiction -name "*.hpp" -print)
 ```
 
-in _fiction_'s base directory.
+Expect zero parse errors. A drop in the number of generated symbols means the flags did not take effect.

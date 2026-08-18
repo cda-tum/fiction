@@ -6,6 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>
@@ -42,13 +43,19 @@ opdom_command::opdom_command(const environment::ptr& e) :
     add_option("--random_sampling,-r", num_random_samples,
                "Use random sampling instead of grid search with this many random samples");
     add_option("--flood_fill,-f", num_random_samples,
-               "Use flood fill instead of grid search with this many initial random samples");
+               "Use flood fill instead of grid search with this many initial random samples (needs 2 or more sweep "
+               "dimensions)");
     add_option("--contour_tracing,-c", num_random_samples,
-               "Use contour tracing instead of grid search with this many random samples");
+               "Use contour tracing instead of grid search with this many random samples (needs 2 or more sweep "
+               "dimensions; collects the boundary surface in 3 dimensions)");
 
     add_option("filename", filename, "CSV filename to write the operational domain to")->required();
     add_flag("--omit_non_op_samples,-o", omit_non_operational_samples,
              "Omit non-operational samples in the CSV file to reduce file size and increase visibility in 3D plots");
+    add_flag("--sketch,-s", sketch,
+             "Compute the operational domain sketch: determine the operational status by filtering alone instead of by "
+             "physical simulation. Much faster, but reports some non-operational points as operational. Implies kink "
+             "rejection and requires a layout with 'LOGIC' cells");
 
     add_option("--epsilon_r,-e", params.operational_params.simulation_parameters.epsilon_r,
                "Electric permittivity of the substrate (unit-less)", true);
@@ -120,7 +127,7 @@ void opdom_command::execute()
     // make sure that at most one algorithm is selected
     const std::array algorithm_selections = {is_set("random_sampling"), is_set("flood_fill"),
                                              is_set("contour_tracing")};
-    if (std::count(algorithm_selections.cbegin(), algorithm_selections.cend(), true) > 1)
+    if (std::ranges::count(algorithm_selections, true) > 1)
     {
         env->out() << "[e] only one algorithm can be selected at a time\n";
         reset_params();
@@ -138,7 +145,8 @@ void opdom_command::execute()
     // make sure that z is not set if y is not, and that y is not set if x is not
     if (is_set("z_sweep") && !is_set("y_sweep"))
     {
-        env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set\n";
+        env->out() << "[e] z sweep parameter cannot be set if y sweep parameter is not set. Pass the first two "
+                      "dimensions explicitly, e.g. '-x epsilon_r -y lambda_tf -z mu_minus'\n";
         reset_params();
         return;
     }
@@ -149,15 +157,22 @@ void opdom_command::execute()
         return;
     }
 
-    // overwrite the sweeps with their respective lower-case string representations
-    std::transform(x_sweep.begin(), x_sweep.end(), x_sweep.begin(), ::tolower);
-    std::transform(y_sweep.begin(), y_sweep.end(), y_sweep.begin(), ::tolower);
-    std::transform(z_sweep.begin(), z_sweep.end(), z_sweep.begin(), ::tolower);
+    // overwrite the sweeps with their respective lower-case string representations. `std::tolower` is undefined for
+    // negative values, which a plain `char` can hold, so each character is widened through `unsigned char` first
+    const auto lowercase = [](std::string& str) noexcept
+    {
+        std::ranges::transform(str, str.begin(),
+                               [](const unsigned char c) noexcept { return static_cast<char>(std::tolower(c)); });
+    };
+
+    lowercase(x_sweep);
+    lowercase(y_sweep);
+    lowercase(z_sweep);
 
     static constexpr const std::array valid_sweep_params = {"epsilon_r", "lambda_tf", "mu_minus"};
 
     // check if x sweep parameter is valid
-    if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), x_sweep) == valid_sweep_params.cend())
+    if (std::ranges::find(valid_sweep_params, x_sweep) == valid_sweep_params.cend())
     {
         env->out() << "[e] invalid x sweep parameter \"" << x_sweep
                    << "\". Has to be one of [epsilon_r, lambda_tf, "
@@ -167,7 +182,7 @@ void opdom_command::execute()
     }
 
     // check if y sweep parameter is valid
-    if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), y_sweep) == valid_sweep_params.cend())
+    if (std::ranges::find(valid_sweep_params, y_sweep) == valid_sweep_params.cend())
     {
         env->out() << "[e] invalid y sweep parameter \"" << y_sweep
                    << "\". Has to be one of [epsilon_r, lambda_tf, "
@@ -179,7 +194,7 @@ void opdom_command::execute()
     // check if z sweep parameter is valid if set
     if (is_set("z_sweep"))
     {
-        if (std::find(valid_sweep_params.cbegin(), valid_sweep_params.cend(), z_sweep) == valid_sweep_params.cend())
+        if (std::ranges::find(valid_sweep_params, z_sweep) == valid_sweep_params.cend())
         {
             env->out() << "[e] invalid z sweep parameter \"" << z_sweep
                        << "\". Has to be one of [epsilon_r, lambda_tf, "
@@ -274,8 +289,20 @@ void opdom_command::execute()
         params.sweep_dimensions                              = sweep_dimensions;
         params.operational_params.sim_engine                 = engine.value();
 
-        // Cache the engine name for logging before any potential reset
+        if (sketch)
+        {
+            params.operational_params.strategy_to_analyze_operational_status =
+                fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+
+            // the filtering steps are only defined when kinks are rejected, so the sketch implies the condition rather
+            // than rejecting the request for not having set it by hand
+            params.operational_params.op_condition =
+                fiction::is_operational_params::operational_condition::REJECT_KINKS;
+        }
+
+        // Cache the engine name and the sketch setting for logging before any potential reset
         last_engine_name = fiction::sidb_simulation_engine_name(params.operational_params.sim_engine);
+        last_sketch      = sketch;
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt>)
@@ -361,7 +388,8 @@ nlohmann::json opdom_command::log() const
         {"Number of simulator invocations", stats.num_simulator_invocations},
         {"Number of evaluated parameter combinations", stats.num_evaluated_parameter_combinations},
         {"Number of operational parameter combinations", stats.num_operational_parameter_combinations},
-        {"Number of non-operational parameter combinations", stats.num_non_operational_parameter_combinations}};
+        {"Number of non-operational parameter combinations", stats.num_non_operational_parameter_combinations},
+        {"Operational domain sketch", last_sketch}};
 }
 
 void opdom_command::reset_params()
@@ -379,6 +407,7 @@ void opdom_command::reset_params()
     filename = "";
 
     omit_non_operational_samples = false;
+    sketch                       = false;
 }
 
 }  // namespace alice

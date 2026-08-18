@@ -10,11 +10,6 @@ Unreleased
 
 Added
 #####
-- Added the ``molecular_qca_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK molecular QCA
-  standard-cell library to gate-level layouts, including QLL/SVG export support, Python bindings, and tests.
-
-Added
-#####
 - Algorithms:
     - Added the ``missing_required_gates_exception`` that ``technology_mapping`` throws when the
       technology library is missing the gates required by the base network type (AIG requires INV and
@@ -27,13 +22,28 @@ Added
       ``displacement_robustness_domain_params``, defaulting to the number of hardware threads, which
       leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
       lets a computation leave cores free
+    - ``operational_domain_contour_tracing`` now supports three or more sweep dimensions, where it
+      collects the boundary surface instead of walking a closed curve. ``operational_domain_flood_fill``
+      no longer caps at three dimensions
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- CLI:
+    - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
+      physical simulation. It implies kink rejection, since the filtering steps are only defined there
+- Experiments:
+    - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
+      operational domain sketch over a three-dimensional parameter space
+- Gate libraries:
+    - Added ``molecular_qca_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK
+      molecular QCA standard-cell library to gate-level layouts, including QLL/SVG export support,
+      Python bindings, and tests
 - Python bindings:
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
       ``critical_temperature_gate_based`` overloads
     - Exposed ``number_of_threads`` on ``operational_domain_params`` and
       ``displacement_robustness_domain_params``
+    - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
+      ``apply_mol_qca_library``
 
 Changed
 #######
@@ -66,8 +76,39 @@ Changed
     - ``bdl_input_iterator`` now determines the BDL dot distances that decide the input assignment once
       in its constructor instead of on every increment; they cannot change over its lifetime
     - ``is_operational_impl`` no longer detects the output BDL pairs twice under ``TOLERATE_KINKS``
+    - ``quicksim`` and ``multi_simulated_annealing`` no longer pass a parallel execution policy to
+      their ``std::find`` and ``std::min_element``, which scan a handful of elements where the
+      dispatch costs an order of magnitude more than the scan
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
+    - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s
+      ``_deps`` from 504 MB to 262 MB. ``mockturtle`` stays a clone because it uses a submodule
+    - The ``ci-debug``, ``dev``, and ``tests-slim`` presets now enable
+      ``FICTION_LIGHTWEIGHT_DEBUG_BUILDS``, which cuts Debug compile time and memory substantially
+    - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
+      and ``tests-slim`` presets
+    - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
+- Code quality:
+    - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
+      ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
+    - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
+      from ``fiction/utils/math_utils.hpp`` to the new ``fiction/utils/combination_utils.hpp``.
+      Include the latter to keep using it
+    - ``orthogonal`` and ``graph_oriented_layout_design`` no longer template their implementation on
+      the specification network type, which they convert away before doing any work. Their public
+      entry points are unchanged
+    - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
+      defaulted comparison operators, and designated initializers throughout
+    - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
+    - The type checks on the path-finding, operational domain, and ``hexagonal_layout`` entry points
+      are now ``requires`` clauses. An unsatisfied one is reported as a failed constraint at the call
+      site instead of a ``static_assert`` message from inside the body
+    - ``hexagonal_layout`` now rejects an invalid ``HexagonalCoordinateSystem`` where the type is
+      named rather than where it is constructed
+    - ``exact`` no longer polls its worker futures every 10 ms while solving asynchronously
+    - ``exact`` now surfaces a failure in one of its asynchronous workers instead of reporting it
+      as "no layout found"
+    - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
@@ -98,6 +139,9 @@ Removed
 Fixed
 #####
 - Algorithms:
+    - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a layout
+      without ``LOGIC`` cells now throws instead of silently falling back to a full simulation of the
+      entire parameter space
     - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
       robustness helpers, which derive their slice size by dividing by a worker count that is zero when
       there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
@@ -106,7 +150,15 @@ Fixed
     - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
       had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
       the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
+    - Fixed an off-by-one in the boundary search of ``operational_domain_contour_tracing``, which skipped
+      the first sweep dimension's lowest step index. Where the operational region reached that edge, the
+      traced contour came out empty and every reachable point was marked operational without simulation
+    - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
+      ``bool``. It is now ``std::atomic_bool``
 - Code quality:
+    - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
+      before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
+      algorithms were disabled on every Clang build
     - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
     - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``
       does not guarantee

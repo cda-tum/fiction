@@ -15,6 +15,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <cstdint>
 #include <functional>
 #include <limits>
@@ -395,13 +396,12 @@ class a_star_impl
  * @return The shortest loop-less path in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
+    requires is_coordinate_layout_v<Lyt>
 [[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
                           const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
                           const a_star_params&               params  = {}) noexcept
 {
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-
     return detail::a_star_impl<Path, Lyt, Dist, Cost>{layout, objective, dist_fn, cost_fn, params}.run();
 }
 /**
@@ -421,14 +421,10 @@ template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost =
  * @return Minimum path length between `source` and `target` in `layout`.
  */
 template <typename Lyt, typename Dist = uint64_t>
+    requires is_coordinate_layout_v<Lyt> && (std::integral<Dist> || std::floating_point<Dist>)
 [[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
                                    const coordinate<Lyt>& target) noexcept
 {
-    // do not convert these `static_assert` type checks into a `requires` clause; see the note on `manhattan_distance`
-    // in `distance.hpp` for why the pyfiction docstring generator forbids it
-    static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
-    static_assert(std::is_arithmetic_v<Dist>, "Dist is not an arithmetic type");
-
     const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
 
     if (path_length == 0ul)
