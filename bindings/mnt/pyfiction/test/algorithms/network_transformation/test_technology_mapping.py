@@ -1,5 +1,4 @@
-import os
-import unittest
+import pytest
 
 from mnt.pyfiction import (
     all_standard_2_input_functions,
@@ -9,52 +8,37 @@ from mnt.pyfiction import (
     and_or_not_maj,
     eq_type,
     equivalence_checking,
-    read_technology_network,
     technology_mapping,
     technology_mapping_stats,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+GATE_LIBRARIES = [
+    pytest.param(and_or_not, id="and_or_not"),
+    pytest.param(and_or_not_maj, id="and_or_not_maj"),
+    pytest.param(all_standard_2_input_functions, id="all_standard_2_input_functions"),
+    pytest.param(all_standard_3_input_functions, id="all_standard_3_input_functions"),
+    pytest.param(all_supported_standard_functions, id="all_supported_standard_functions"),
+]
 
 
-class TestTechnologyMapping(unittest.TestCase):
-    def test_mapping_default(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-        self.assertEqual(network.num_gates(), 5)
+def test_mapping_default(mux21):
+    assert mux21.num_gates() == 5
 
-        mapped_network = technology_mapping(network)
+    mapped_network = technology_mapping(mux21)
 
-        self.assertEqual(equivalence_checking(network, mapped_network), eq_type.NO)
-
-    def test_mapping_with_parameters(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        for params in [
-            and_or_not(),
-            and_or_not_maj(),
-            all_standard_2_input_functions(),
-            all_standard_3_input_functions(),
-            all_supported_standard_functions(),
-        ]:
-            mapped_network = technology_mapping(network, params)
-
-            self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
-
-    def test_mapping_with_stats(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        for params in [
-            and_or_not(),
-            and_or_not_maj(),
-            all_standard_2_input_functions(),
-            all_standard_3_input_functions(),
-            all_supported_standard_functions(),
-        ]:
-            stats = technology_mapping_stats()
-            mapped_network = technology_mapping(network, params=params, stats=stats)
-
-            self.assertEqual(equivalence_checking(network, mapped_network), eq_type.STRONG)
+    assert equivalence_checking(mux21, mapped_network) == eq_type.NO
 
 
-if __name__ == "__main__":
-    unittest.main()
+@pytest.mark.parametrize("make_params", GATE_LIBRARIES)
+def test_mapping_with_parameters(mux21, make_params):
+    mapped_network = technology_mapping(mux21, make_params())
+
+    assert equivalence_checking(mux21, mapped_network) == eq_type.STRONG
+
+
+@pytest.mark.parametrize("make_params", GATE_LIBRARIES)
+def test_mapping_with_stats(mux21, make_params):
+    stats = technology_mapping_stats()
+    mapped_network = technology_mapping(mux21, params=make_params(), stats=stats)
+
+    assert equivalence_checking(mux21, mapped_network) == eq_type.STRONG

@@ -1,5 +1,4 @@
-import os
-import unittest
+import pytest
 
 from mnt.pyfiction import (
     bdl_input_iterator_params,
@@ -26,184 +25,169 @@ from mnt.pyfiction import (
     sidb_technology,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+
+@pytest.mark.parametrize(
+    ("sidb_lattice", "charge_distribution_surface"),
+    [
+        pytest.param(sidb_100_lattice, charge_distribution_surface_100, id="100"),
+        pytest.param(sidb_111_lattice, charge_distribution_surface_111, id="111"),
+    ],
+)
+def test_perturber_and_sidb_pair(sidb_lattice, charge_distribution_surface):
+    layout = sidb_lattice((10, 10))
+    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+
+    params = critical_temperature_params()
+
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+
+    stats = critical_temperature_stats()
+
+    cds = charge_distribution_surface(layout)
+
+    assert critical_temperature_non_gate_based(cds, params, stats) == 400
+
+    assert stats.algorithm_name == "QuickExact"
+    assert stats.num_valid_lyt == 1
 
 
-class TestCriticalTemperature(unittest.TestCase):
-    def test_perturber_and_DB_pair_100(self):
-        layout = sidb_100_lattice((10, 10))
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+def test_gate_based_simulation(resources_dir):
+    layout = read_sqd_layout_100(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), "xor_gate")
+    params = critical_temperature_params()
 
-        params = critical_temperature_params()
+    params.operational_params.simulation_parameters.base = 2
 
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-        stats = critical_temperature_stats()
+    stats = critical_temperature_stats()
 
-        cds = charge_distribution_surface_100(layout)
+    cds = charge_distribution_surface_100(layout)
+    spec = [create_xor_tt()]
 
-        self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
+    assert critical_temperature_gate_based(cds, spec, params, stats) <= 200
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
-        self.assertEqual(stats.num_valid_lyt, 1)
+    assert stats.algorithm_name == "QuickExact"
 
-    def test_perturber_and_DB_pair_111(self):
-        layout = sidb_111_lattice((10, 10))
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
 
-        params = critical_temperature_params()
+def test_bestagon_inv(resources_dir):
+    layout = read_sqd_layout_100(
+        str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
+        "inverter_input_0",
+    )
 
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params = critical_temperature_params()
 
-        stats = critical_temperature_stats()
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKSIM
 
-        cds = charge_distribution_surface_111(layout)
+    stats = critical_temperature_stats()
 
-        self.assertEqual(critical_temperature_non_gate_based(cds, params, stats), 400)
+    cds = charge_distribution_surface_100(layout)
+    spec = [create_not_tt()]
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
-        self.assertEqual(stats.num_valid_lyt, 1)
+    assert critical_temperature_gate_based(cds, spec, params, stats) <= 400
 
-    def test_gate_based_simulation(self):
-        layout = read_sqd_layout_100(dir_path + "/../../../resources/hex_21_inputsdbp_xor_v1.sqd", "xor_gate")
-        params = critical_temperature_params()
+    assert stats.algorithm_name == "QuickSim"
+    assert stats.num_valid_lyt > 1
 
-        params.operational_params.simulation_parameters.base = 2
 
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+def test_bestagon_inv_with_different_mu(resources_dir):
+    layout = read_sqd_layout_100(
+        str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
+        "inverter_input_0",
+    )
 
-        stats = critical_temperature_stats()
+    params = critical_temperature_params()
+    params.operational_params.simulation_parameters.base = 2
+    params.operational_params.simulation_parameters.mu_minus = -0.2
 
-        cds = charge_distribution_surface_100(layout)
-        spec = [create_xor_tt()]
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
 
-        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 200)
+    stats = critical_temperature_stats()
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
+    cds = charge_distribution_surface_100(layout)
+    spec = [create_not_tt()]
 
-    def test_bestagon_inv(self):
-        layout = read_sqd_layout_100(
-            dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-            "inverter_input_0",
-        )
+    assert critical_temperature_gate_based(cds, spec, params, stats) <= 5
 
-        params = critical_temperature_params()
+    assert stats.algorithm_name == "QuickExact"
 
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKSIM
 
-        stats = critical_temperature_stats()
+def test_critical_temperature_with_input_pattern_layouts():
+    lyt = sidb_100_lattice()
 
-        cds = charge_distribution_surface_100(layout)
-        spec = [create_not_tt()]
+    lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
 
-        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 400)
+    lyt.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type((19, 3), sidb_technology.cell_type.INPUT)
 
-        self.assertEqual(stats.algorithm_name, "QuickSim")
-        self.assertGreater(stats.num_valid_lyt, 1)
+    lyt.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
 
-    def test_bestagon_inv_with_different_mu(self):
-        layout = read_sqd_layout_100(
-            dir_path + "/../../../resources/hex_11_inputsdbp_inv_straight_v0_manual.sqd",
-            "inverter_input_0",
-        )
+    lyt.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
 
-        params = critical_temperature_params()
-        params.operational_params.simulation_parameters.base = 2
-        params.operational_params.simulation_parameters.mu_minus = -0.2
+    lyt.assign_cell_type((10, 12, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type((10, 14, 0), sidb_technology.cell_type.OUTPUT)
 
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    lyt.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
 
-        stats = critical_temperature_stats()
+    params = critical_temperature_params()
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
 
-        cds = charge_distribution_surface_100(layout)
-        spec = [create_not_tt()]
+    input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
+    output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
+    output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.OUTPUT, detect_bdl_pairs_params())
 
-        self.assertLessEqual(critical_temperature_gate_based(cds, spec, params, stats), 5)
+    input_pattern_layouts = generate_bdl_input_pattern_layouts(
+        lyt,
+        bdl_input_iterator_params(),
+        input_bdl_wires,
+    )
 
-        self.assertEqual(stats.algorithm_name, "QuickExact")
+    # a 2-input gate has 4 input patterns
+    assert len(input_pattern_layouts) == 4
 
-    def test_critical_temperature_with_input_pattern_layouts(self):
-        lyt = sidb_100_lattice()
+    reference_stats = critical_temperature_stats()
+    reference_ct = critical_temperature_gate_based(lyt, [create_and_tt()], params, reference_stats)
 
-        lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
-        lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+    stats = critical_temperature_stats()
+    ct = critical_temperature_gate_based(
+        input_pattern_layouts,
+        [create_and_tt()],
+        params,
+        output_bdl_pairs,
+        input_bdl_wires,
+        output_bdl_wires,
+        stats,
+    )
 
-        lyt.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
-        lyt.assign_cell_type((19, 3), sidb_technology.cell_type.INPUT)
+    # the two overloads run the same computation, so the results must be identical
+    assert ct == reference_ct
+    assert stats.num_valid_lyt == reference_stats.num_valid_lyt
+    assert stats.algorithm_name == reference_stats.algorithm_name
 
-        lyt.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
-        lyt.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
-
-        lyt.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
-        lyt.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
-
-        lyt.assign_cell_type((10, 12, 0), sidb_technology.cell_type.OUTPUT)
-        lyt.assign_cell_type((10, 14, 0), sidb_technology.cell_type.OUTPUT)
-
-        lyt.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
-
-        params = critical_temperature_params()
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.operational_params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
-
-        input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
-        output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
-        output_bdl_pairs = detect_bdl_pairs(lyt, sidb_technology.cell_type.OUTPUT, detect_bdl_pairs_params())
-
-        input_pattern_layouts = generate_bdl_input_pattern_layouts(
-            lyt,
-            bdl_input_iterator_params(),
-            input_bdl_wires,
-        )
-
-        # a 2-input gate has 4 input patterns
-        self.assertEqual(len(input_pattern_layouts), 4)
-
-        reference_stats = critical_temperature_stats()
-        reference_ct = critical_temperature_gate_based(lyt, [create_and_tt()], params, reference_stats)
-
-        stats = critical_temperature_stats()
-        ct = critical_temperature_gate_based(
-            input_pattern_layouts,
+    # a layout list that does not match the specification is rejected
+    with pytest.raises(ValueError, match="expected 4 input pattern layouts"):
+        critical_temperature_gate_based(
+            input_pattern_layouts[:1],
             [create_and_tt()],
             params,
             output_bdl_pairs,
             input_bdl_wires,
             output_bdl_wires,
-            stats,
         )
 
-        # the two overloads run the same computation, so the results must be identical
-        self.assertEqual(ct, reference_ct)
-        self.assertEqual(stats.num_valid_lyt, reference_stats.num_valid_lyt)
-        self.assertEqual(stats.algorithm_name, reference_stats.algorithm_name)
-
-        # a layout list that does not match the specification is rejected
-        with self.assertRaises(ValueError):
-            critical_temperature_gate_based(
-                input_pattern_layouts[:1],
-                [create_and_tt()],
-                params,
-                output_bdl_pairs,
-                input_bdl_wires,
-                output_bdl_wires,
-            )
-
-        # more output BDL pairs than truth tables is rejected
-        with self.assertRaises(ValueError):
-            critical_temperature_gate_based(
-                input_pattern_layouts,
-                [create_and_tt()],
-                params,
-                [*output_bdl_pairs, output_bdl_pairs[0]],
-                input_bdl_wires,
-                output_bdl_wires,
-            )
-
-
-if __name__ == "__main__":
-    unittest.main()
+    # more output BDL pairs than truth tables is rejected
+    with pytest.raises(ValueError, match="expected 1 output BDL pairs"):
+        critical_temperature_gate_based(
+            input_pattern_layouts,
+            [create_and_tt()],
+            params,
+            [*output_bdl_pairs, output_bdl_pairs[0]],
+            input_bdl_wires,
+            output_bdl_wires,
+        )

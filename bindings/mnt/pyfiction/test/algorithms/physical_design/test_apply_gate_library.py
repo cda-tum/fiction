@@ -1,6 +1,3 @@
-import os
-import unittest
-
 from mnt.pyfiction import (
     apply_bestagon_library,
     apply_qca_one_library,
@@ -9,45 +6,34 @@ from mnt.pyfiction import (
     exact_params,
     exact_shifted_cartesian,
     orthogonal,
-    read_technology_network,
     technology_constraints,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+
+def test_apply_qca_one_library(mux21):
+    layout = orthogonal(mux21)
+
+    apply_qca_one_library(layout)
 
 
-class TestApplyGateLibrary(unittest.TestCase):
-    def test_apply_qca_one_library(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-        layout = orthogonal(network)
+def test_apply_bestagon_library(mux21):
+    params = exact_params()
+    params.scheme = "ROW"
+    params.crossings = True
+    params.border_io = True
 
-        apply_qca_one_library(layout)
+    layout = exact_hexagonal(mux21, params)
 
-    def test_apply_bestagon_library(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        params = exact_params()
-        params.scheme = "ROW"
-        params.crossings = True
-        params.border_io = True
-
-        layout = exact_hexagonal(network, params)
-
-        apply_bestagon_library(layout)
-
-    def test_apply_topolinano_library(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        params = exact_params()
-        params.scheme = "COLUMNAR3"
-        params.crossings = True
-        params.border_io = True
-        params.technology_specifics = technology_constraints.TOPOLINANO
-
-        layout = exact_shifted_cartesian(network, params)
-
-        apply_topolinano_library(layout)
+    apply_bestagon_library(layout)
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_apply_topolinano_library(mux21):
+    params = exact_params()
+    params.scheme = "COLUMNAR3"
+    params.crossings = True
+    params.border_io = True
+    params.technology_specifics = technology_constraints.TOPOLINANO
+
+    layout = exact_shifted_cartesian(mux21, params)
+
+    apply_topolinano_library(layout)

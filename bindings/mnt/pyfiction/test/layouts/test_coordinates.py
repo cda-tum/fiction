@@ -1,93 +1,63 @@
-import unittest
+import operator
+
+import pytest
 
 from mnt.pyfiction import cube_coordinate, offset_coordinate, siqad_coordinate
 
-
-class TestCoordinates(unittest.TestCase):
-    def test_unsigned_offset_coordinates(self):
-        offset_coordinate((1, 0))
-        offset_coordinate((1, 0, 0))
-
-        with self.assertRaises(RuntimeError):
-            offset_coordinate((0, 0, 1, 1))
-        with self.assertRaises(RuntimeError):
-            offset_coordinate((0, 0, 1, 1, 3))
-        with self.assertRaises(RuntimeError):
-            offset_coordinate((0,))
-
-        t0 = offset_coordinate(0, 0, 0)
-        t1 = offset_coordinate(1, 2, 0)
-        t2 = offset_coordinate(1, 2)
-
-        self.assertEqual(t1.x, 1)
-        self.assertEqual(t1.y, 2)
-        self.assertEqual(t1.z, 0)
-
-        self.assertLess(t0, t1)
-        self.assertGreater(t1, t0)
-        self.assertGreaterEqual(t1, t0)
-        self.assertLessEqual(t0, t1)
-        self.assertEqual(t1, t2)
-        self.assertEqual(t2, t1)
-
-        self.assertEqual(offset_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
-
-    def test_signed_cube_coordinates(self):
-        cube_coordinate((1, 0))
-        cube_coordinate((1, 0, 0))
-
-        with self.assertRaises(RuntimeError):
-            cube_coordinate((0, 0, 1, 1))
-        with self.assertRaises(RuntimeError):
-            cube_coordinate((0, 0, 1, 1, 3))
-        with self.assertRaises(RuntimeError):
-            cube_coordinate((0,))
-
-        t0 = cube_coordinate(0, 0, 0)
-        t1 = cube_coordinate(1, 2, 0)
-        t2 = cube_coordinate(1, 2)
-
-        self.assertEqual(t1.x, 1)
-        self.assertEqual(t1.y, 2)
-        self.assertEqual(t1.z, 0)
-
-        self.assertLess(t0, t1)
-        self.assertGreater(t1, t0)
-        self.assertGreaterEqual(t1, t0)
-        self.assertLessEqual(t0, t1)
-        self.assertEqual(t1, t2)
-        self.assertEqual(t2, t1)
-
-        self.assertEqual(cube_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
-
-    def test_signed_siqad_coordinates(self):
-        siqad_coordinate((1, 0))
-        siqad_coordinate((1, 0, 0))
-
-        with self.assertRaises(RuntimeError):
-            siqad_coordinate((0, 0, 1, 1))
-        with self.assertRaises(RuntimeError):
-            siqad_coordinate((0, 0, 1, 1, 3))
-        with self.assertRaises(RuntimeError):
-            siqad_coordinate((0,))
-
-        t0 = siqad_coordinate(0, 0, 0)
-        t1 = siqad_coordinate(1, 2, 0)
-        t2 = siqad_coordinate(1, 2)
-
-        self.assertEqual(t1.x, 1)
-        self.assertEqual(t1.y, 2)
-        self.assertEqual(t1.z, 0)
-
-        self.assertLess(t0, t1)
-        self.assertGreater(t1, t0)
-        self.assertGreaterEqual(t1, t0)
-        self.assertLessEqual(t0, t1)
-        self.assertEqual(t1, t2)
-        self.assertEqual(t2, t1)
-
-        self.assertEqual(siqad_coordinate(3, 2, 1).__repr__(), "(3,2,1)")
+COORDINATE_TYPES = [
+    pytest.param(offset_coordinate, id="offset"),
+    pytest.param(cube_coordinate, id="cube"),
+    pytest.param(siqad_coordinate, id="siqad"),
+]
 
 
-if __name__ == "__main__":
-    unittest.main()
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+def test_construction_from_a_tuple(coordinate):
+    coordinate((1, 0))
+    coordinate((1, 0, 0))
+
+
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+@pytest.mark.parametrize("dimensions", [(0,), (0, 0, 1, 1), (0, 0, 1, 1, 3)])
+def test_construction_from_a_tuple_of_the_wrong_length(coordinate, dimensions):
+    with pytest.raises(RuntimeError):
+        coordinate(dimensions)
+
+
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+def test_dimension_access(coordinate):
+    t = coordinate(1, 2, 0)
+
+    assert t.x == 1
+    assert t.y == 2
+    assert t.z == 0
+
+
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+@pytest.mark.parametrize(
+    ("compare", "ascending"),
+    [
+        pytest.param(operator.lt, True, id="lt"),
+        pytest.param(operator.le, True, id="le"),
+        pytest.param(operator.gt, False, id="gt"),
+        pytest.param(operator.ge, False, id="ge"),
+    ],
+)
+def test_ordering(coordinate, compare, ascending):
+    smaller, larger = coordinate(0, 0, 0), coordinate(1, 2, 0)
+    operands = (smaller, larger) if ascending else (larger, smaller)
+
+    assert compare(*operands)
+
+
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+def test_equality_disregards_an_omitted_z(coordinate):
+    with_z, without_z = coordinate(1, 2, 0), coordinate(1, 2)
+
+    assert with_z == without_z
+    assert without_z == with_z
+
+
+@pytest.mark.parametrize("coordinate", COORDINATE_TYPES)
+def test_repr(coordinate):
+    assert repr(coordinate(3, 2, 1)) == "(3,2,1)"
