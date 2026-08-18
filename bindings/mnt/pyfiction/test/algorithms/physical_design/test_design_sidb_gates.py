@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from mnt.pyfiction import (
     create_and_tt,
@@ -15,149 +15,129 @@ from mnt.pyfiction import (
 )
 
 
-class TestDesignSiDBGates(unittest.TestCase):
-    def test_siqad_and_gate_skeleton_100(self):
-        layout = sidb_100_lattice((20, 20))
+@pytest.fixture
+def nor_gate_skeleton() -> sidb_111_lattice:
+    """The 111-lattice NOR gate skeleton that the canvas SiDBs are designed into.
 
-        layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+    Returns:
+        The skeleton as a 111-lattice SiDB layout, with an empty canvas.
+    """
+    layout = sidb_111_lattice((30, 30))
 
-        layout.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((18, 3), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
 
-        layout.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
 
-        layout.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
 
-        layout.assign_cell_type((10, 12), sidb_technology.cell_type.OUTPUT)
-        layout.assign_cell_type((10, 14), sidb_technology.cell_type.OUTPUT)
+    layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
 
-        layout.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((8, 16), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((17, 16), sidb_technology.cell_type.NORMAL)
 
-        params = design_sidb_gates_params()
-        params.operational_params.simulation_parameters.base = 2
-        params.operational_params.simulation_parameters.mu_minus = -0.28
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-        params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-        params.canvas = [(4, 8), (14, 11)]
-        params.number_of_canvas_sidbs = 1
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    layout.assign_cell_type((9, 19), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((15, 19), sidb_technology.cell_type.NORMAL)
 
-        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.28)
-        self.assertEqual(params.number_of_canvas_sidbs, 1)
-        self.assertEqual(params.canvas[0], (4, 8, 0))
-        self.assertEqual(params.canvas[1], (14, 11))
+    layout.assign_cell_type((15, 43), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((17, 46), sidb_technology.cell_type.NORMAL)
 
-        designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
+    layout.assign_cell_type((19, 51), sidb_technology.cell_type.OUTPUT)
+    layout.assign_cell_type((21, 54), sidb_technology.cell_type.OUTPUT)
 
-        self.assertEqual(len(designed_gates), 23)
-
-    def test_nor_gate_111(self):
-        layout = sidb_111_lattice((30, 30))
-
-        layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
-
-        layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
-
-        layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((8, 16), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((17, 16), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((9, 19), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((15, 19), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((15, 43), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((17, 46), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((19, 51), sidb_technology.cell_type.OUTPUT)
-        layout.assign_cell_type((21, 54), sidb_technology.cell_type.OUTPUT)
-
-        layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
-
-        params = design_sidb_gates_params()
-        params.operational_params.simulation_parameters.base = 2
-        params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-        params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-        params.canvas = [(10, 22), (14, 34)]
-        params.number_of_canvas_sidbs = 3
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-        params.operational_params.op_condition = operational_condition.REJECT_KINKS
-
-        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.number_of_canvas_sidbs, 3)
-        self.assertEqual(params.canvas[0], (10, 22, 0))
-        self.assertEqual(params.canvas[1], (14, 34))
-
-        designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 44)
-
-        params.design_mode = design_sidb_gates_mode.PRUNING_ONLY
-        designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gate_candidates), 44)
-
-        # tolerate kink states
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-        params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
-        designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 175)
-
-    def test_nor_gate_111_quickcell(self):
-        layout = sidb_111_lattice((30, 30))
-
-        layout.assign_cell_type((0, 0), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((1, 3), sidb_technology.cell_type.INPUT)
-
-        layout.assign_cell_type((25, 0), sidb_technology.cell_type.INPUT)
-        layout.assign_cell_type((23, 3), sidb_technology.cell_type.INPUT)
-
-        layout.assign_cell_type((4, 8), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((21, 8), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((5, 11), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((19, 11), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((8, 16), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((17, 16), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((9, 19), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((15, 19), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((15, 43), sidb_technology.cell_type.NORMAL)
-        layout.assign_cell_type((17, 46), sidb_technology.cell_type.NORMAL)
-
-        layout.assign_cell_type((19, 51), sidb_technology.cell_type.OUTPUT)
-        layout.assign_cell_type((21, 54), sidb_technology.cell_type.OUTPUT)
-
-        layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
-
-        params = design_sidb_gates_params()
-        params.operational_params.simulation_parameters.base = 2
-        params.operational_params.simulation_parameters.mu_minus = -0.32
-        params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
-        params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
-
-        params.canvas = [(10, 26), (14, 34)]
-        params.number_of_canvas_sidbs = 3
-        params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
-
-        self.assertEqual(params.operational_params.simulation_parameters.mu_minus, -0.32)
-        self.assertEqual(params.number_of_canvas_sidbs, 3)
-        self.assertEqual(params.canvas[0], (10, 26, 0))
-        self.assertEqual(params.canvas[1], (14, 34))
-
-        designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
-        self.assertEqual(len(designed_gates), 14)
+    layout.assign_cell_type((23, 59), sidb_technology.cell_type.NORMAL)
+    return layout
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_siqad_and_gate_skeleton_100():
+    layout = sidb_100_lattice((20, 20))
+
+    layout.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+
+    layout.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
+    layout.assign_cell_type((18, 3), sidb_technology.cell_type.INPUT)
+
+    layout.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
+
+    layout.assign_cell_type((10, 12), sidb_technology.cell_type.OUTPUT)
+    layout.assign_cell_type((10, 14), sidb_technology.cell_type.OUTPUT)
+
+    layout.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
+
+    params = design_sidb_gates_params()
+    params.operational_params.simulation_parameters.base = 2
+    params.operational_params.simulation_parameters.mu_minus = -0.28
+    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
+    params.canvas = [(4, 8), (14, 11)]
+    params.number_of_canvas_sidbs = 1
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+
+    assert params.operational_params.simulation_parameters.mu_minus == -0.28
+    assert params.number_of_canvas_sidbs == 1
+    assert params.canvas[0] == (4, 8, 0)
+    assert params.canvas[1] == (14, 11)
+
+    designed_gates = design_sidb_gates(layout, [create_and_tt()], params)
+
+    assert len(designed_gates) == 23
+
+
+def test_nor_gate_111(nor_gate_skeleton):
+    layout = nor_gate_skeleton
+    params = design_sidb_gates_params()
+    params.operational_params.simulation_parameters.base = 2
+    params.operational_params.simulation_parameters.mu_minus = -0.32
+    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
+    params.canvas = [(10, 22), (14, 34)]
+    params.number_of_canvas_sidbs = 3
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+    params.operational_params.op_condition = operational_condition.REJECT_KINKS
+
+    assert params.operational_params.simulation_parameters.mu_minus == -0.32
+    assert params.number_of_canvas_sidbs == 3
+    assert params.canvas[0] == (10, 22, 0)
+    assert params.canvas[1] == (14, 34)
+
+    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    assert len(designed_gates) == 44
+
+    params.design_mode = design_sidb_gates_mode.PRUNING_ONLY
+    designed_gate_candidates = design_sidb_gates(layout, [create_nor_tt()], params)
+    assert len(designed_gate_candidates) == 44
+
+    # tolerate kink states
+    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+    params.operational_params.op_condition = operational_condition.TOLERATE_KINKS
+    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    assert len(designed_gates) == 175
+
+
+def test_nor_gate_111_quickcell(nor_gate_skeleton):
+    layout = nor_gate_skeleton
+    params = design_sidb_gates_params()
+    params.operational_params.simulation_parameters.base = 2
+    params.operational_params.simulation_parameters.mu_minus = -0.32
+    params.design_mode = design_sidb_gates_mode.AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER
+    params.termination_cond = termination_condition.ALL_COMBINATIONS_ENUMERATED
+
+    params.canvas = [(10, 26), (14, 34)]
+    params.number_of_canvas_sidbs = 3
+    params.operational_params.sim_engine = sidb_simulation_engine.QUICKEXACT
+
+    assert params.operational_params.simulation_parameters.mu_minus == -0.32
+    assert params.number_of_canvas_sidbs == 3
+    assert params.canvas[0] == (10, 26, 0)
+    assert params.canvas[1] == (14, 34)
+
+    designed_gates = design_sidb_gates(layout, [create_nor_tt()], params)
+    assert len(designed_gates) == 14

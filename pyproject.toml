@@ -146,6 +146,7 @@ cmake.define.DISABLE_GIL = "1"
 [tool.pytest]
 minversion = "9.0"
 strict = true
+filterwarnings = ["error"]
 addopts = [
     "-ra",
     "--numprocesses=auto", # Automatically use all available CPU cores for parallel testing
@@ -161,12 +162,12 @@ skip = ["*-musllinux*"]
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
-# wheel. `test-sources` keeps the relative path, and since `pyproject.toml` is not copied
-# along, pytest finds no configuration file and the `[tool.pytest]` `addopts` do not apply --
-# hence the explicit flags here.
+# wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
+# gives pytest its configuration file, so the wheel runs the same suite under the same
+# settings as `nox -s tests` without repeating any of them here.
 test-groups = ["test"]
-test-sources = ["bindings/mnt/pyfiction/test"]
-test-command = "pytest bindings/mnt/pyfiction/test -ra --numprocesses=auto"
+test-sources = ["bindings/mnt/pyfiction/test", "pyproject.toml"]
+test-command = "pytest"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
@@ -235,14 +236,11 @@ ignore = [
     "D", # pydocstyle
     "N", # flake8-naming
     "PL", # pylint
-    "PT", # flake8-pytest-style
-    "PTH", # flake8-use-pathlib
     "S", # flake8-bandit
     "ERA001", # Found commented-out code
     "CPY001", # Missing copyright notice at top of file
     "FBT003", # Boolean positional value in function call
     "INP001", # File is part of an implicit namespace package
-    "E501", # Line too long
     "TD002", # Missing author in TODO
     "TD003", # Missing issue link in TODO
     "TD004", # Missing colon in TODO
@@ -256,7 +254,11 @@ future-annotations = true
 known-first-party = ["mnt.pyfiction"]
 
 [tool.ruff.lint.per-file-ignores]
-"bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D"]
+# E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
+"bindings/mnt/pyfiction/test/inout/test_write_svg_layout.py" = ["E501"]
+# RUF069: a test that stores a float through a binding and reads it back asserts that it
+# comes back unchanged, which is exact; pytest.approx there would hide a broken setter
+"bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D", "RUF069"]
 "docs/**" = ["T20", "A"]
 "noxfile.py" = ["T20", "TID251"]
 "scripts/**" = ["T20"]  # maintenance scripts report progress on stdout

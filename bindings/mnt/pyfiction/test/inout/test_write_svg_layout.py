@@ -1,4 +1,4 @@
-import unittest
+import pytest
 
 from mnt.pyfiction import (
     __repo__,
@@ -11,6 +11,21 @@ from mnt.pyfiction import (
     write_sidb_layout_svg_params,
     write_sidb_layout_svg_to_string,
 )
+
+
+@pytest.fixture
+def sidb_layout() -> sidb_100_lattice:
+    """A four-cell SiDB layout covering the cell types the SVG writer draws.
+
+    Returns:
+        The layout as a 100-lattice SiDB layout.
+    """
+    sidb_layout = sidb_100_lattice((4, 4))
+    sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+    sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
+    sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+    return sidb_layout
 
 
 def normalize_svg(svg: str) -> str:
@@ -200,51 +215,37 @@ cds_light_mode = (
 )
 
 
-class TestWriteSvgLayout(unittest.TestCase):
-    def test_write_sidb_cell_level_layout_to_svg(self):
-        # Create and configure the SIDB layout
-        sidb_layout = sidb_100_lattice((4, 4))
-        sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-        sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
-        sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
-        sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+def test_write_sidb_cell_level_layout_to_svg(sidb_layout):
+    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
-        params = write_sidb_layout_svg_params()
+    params = write_sidb_layout_svg_params()
 
-        params.color_background = color_mode.DARK
-        generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
-        # print(generated_svg_cell_level_dark_mode)
-        self.assertEqual(normalize_svg(generated_svg_cell_level_dark_mode), normalize_svg(cell_level_dark_mode))
+    params.color_background = color_mode.DARK
+    generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
+    # print(generated_svg_cell_level_dark_mode)
+    assert normalize_svg(generated_svg_cell_level_dark_mode) == normalize_svg(cell_level_dark_mode)
 
-        params.color_background = color_mode.LIGHT
-        generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
-        print(cell_level_light_mode)
-        self.assertEqual(normalize_svg(generated_svg_cell_level_light_mode), normalize_svg(cell_level_light_mode))
-
-    def test_write_sidb_charge_distribution_to_svg(self):
-        # Create and configure the SIDB layout
-        sidb_layout = sidb_100_lattice((4, 4))
-        sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-        sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
-        sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
-        sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
-
-        cds = charge_distribution_surface_100(sidb_layout)
-        cds.assign_charge_state((0, 0), sidb_charge_state.NEGATIVE)
-        cds.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE)
-        cds.assign_charge_state((1, 0), sidb_charge_state.NEUTRAL)
-        cds.assign_charge_state((3, 3), sidb_charge_state.POSITIVE)
-
-        params = write_sidb_layout_svg_params()
-
-        params.color_background = color_mode.DARK
-        generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(cds, params)
-        self.assertEqual(normalize_svg(generated_svg_cds_dark_mode), normalize_svg(cds_dark_mode))
-
-        params.color_background = color_mode.LIGHT
-        generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(cds, params)
-        self.assertEqual(normalize_svg(generated_svg_cds_light_mode), normalize_svg(cds_light_mode))
+    params.color_background = color_mode.LIGHT
+    generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
+    print(cell_level_light_mode)
+    assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_write_sidb_charge_distribution_to_svg(sidb_layout):
+    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+
+    cds = charge_distribution_surface_100(sidb_layout)
+    cds.assign_charge_state((0, 0), sidb_charge_state.NEGATIVE)
+    cds.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE)
+    cds.assign_charge_state((1, 0), sidb_charge_state.NEUTRAL)
+    cds.assign_charge_state((3, 3), sidb_charge_state.POSITIVE)
+
+    params = write_sidb_layout_svg_params()
+
+    params.color_background = color_mode.DARK
+    generated_svg_cds_dark_mode = write_sidb_layout_svg_to_string(cds, params)
+    assert normalize_svg(generated_svg_cds_dark_mode) == normalize_svg(cds_dark_mode)
+
+    params.color_background = color_mode.LIGHT
+    generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(cds, params)
+    assert normalize_svg(generated_svg_cds_light_mode) == normalize_svg(cds_light_mode)

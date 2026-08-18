@@ -1,5 +1,4 @@
-import os
-import unittest
+import pytest
 
 from mnt.pyfiction import (
     eq_type,
@@ -8,76 +7,63 @@ from mnt.pyfiction import (
     post_layout_optimization,
     post_layout_optimization_params,
     post_layout_optimization_stats,
-    read_technology_network,
 )
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+
+def test_post_layout_optimization_default(mux21):
+    layout = orthogonal(mux21)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+
+    post_layout_optimization(layout)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-class TestPostLayoutOptimization(unittest.TestCase):
-    def test_post_layout_optimization_default(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
+def test_post_layout_optimization_with_parameters(mux21):
+    layout = orthogonal(mux21)
 
-        layout = orthogonal(network)
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
+    params = post_layout_optimization_params()
+    post_layout_optimization(layout, params)
 
-        post_layout_optimization(layout)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-
-    def test_post_layout_optimization_with_parameters(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        layout = orthogonal(network)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-
-        params = post_layout_optimization_params()
-        post_layout_optimization(layout, params)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-
-    def test_post_layout_optimization_with_stats(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        layout = orthogonal(network)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-
-        stats = post_layout_optimization_stats()
-        post_layout_optimization(layout, statistics=stats)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-        self.assertGreater(stats.time_total.total_seconds(), 0)
-        self.assertEqual(stats.x_size_before, 6)
-        self.assertEqual(stats.y_size_before, 8)
-        self.assertEqual(stats.x_size_after, 6)
-        self.assertEqual(stats.y_size_after, 4)
-        self.assertEqual(stats.area_improvement, 50.0)
-
-    def test_post_layout_optimization_with_stats_and_parameters(self):
-        network = read_technology_network(dir_path + "/../../resources/mux21.v")
-
-        layout = orthogonal(network)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-
-        params = post_layout_optimization_params()
-        params.max_gate_relocations = 1
-        params.timeout = 1000000
-
-        stats = post_layout_optimization_stats()
-        post_layout_optimization(layout, params, statistics=stats)
-
-        self.assertEqual(equivalence_checking(network, layout), eq_type.STRONG)
-        self.assertGreater(stats.time_total.total_seconds(), 0)
-        self.assertEqual(stats.x_size_before, 6)
-        self.assertEqual(stats.y_size_before, 8)
-        self.assertEqual(stats.x_size_after, 6)
-        self.assertEqual(stats.y_size_after, 4)
-        self.assertEqual(stats.area_improvement, 50.0)
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_post_layout_optimization_with_stats(mux21):
+    layout = orthogonal(mux21)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+
+    stats = post_layout_optimization_stats()
+    post_layout_optimization(layout, statistics=stats)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert stats.time_total.total_seconds() > 0
+    assert stats.x_size_before == 6
+    assert stats.y_size_before == 8
+    assert stats.x_size_after == 6
+    assert stats.y_size_after == 4
+    assert stats.area_improvement == pytest.approx(50.0, abs=1e-9)
+
+
+def test_post_layout_optimization_with_stats_and_parameters(mux21):
+    layout = orthogonal(mux21)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+
+    params = post_layout_optimization_params()
+    params.max_gate_relocations = 1
+    params.timeout = 1000000
+
+    stats = post_layout_optimization_stats()
+    post_layout_optimization(layout, params, statistics=stats)
+
+    assert equivalence_checking(mux21, layout) == eq_type.STRONG
+    assert stats.time_total.total_seconds() > 0
+    assert stats.x_size_before == 6
+    assert stats.y_size_before == 8
+    assert stats.x_size_after == 6
+    assert stats.y_size_after == 4
+    assert stats.area_improvement == pytest.approx(50.0, abs=1e-9)
