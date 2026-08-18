@@ -9,13 +9,18 @@
 Each H-Si atom is one array value. The surface is a 2D array of dimer rows, where one dimer
 is made of two H-Si atoms, and every lattice point carries the array value of the defect
 occupying it.
+
+Run it with no arguments to reproduce the published surface, or pass ``--help`` for the
+parameters it accepts.
 """
 
 from __future__ import annotations
 
+import argparse
 import logging
 import random
 import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -174,18 +179,44 @@ class DefectSurface:
         plt.legend()
         plt.show()
 
-    def save_to_file(self, filename: str = "test.txt") -> None:
-        """Write the surface lattice out as text.
+    def save_to_file(self, filename: str | Path = "defective_surface.csv") -> None:
+        """Write the surface lattice out as comma-separated array values, one row per line.
 
         Args:
             filename: The path to write the lattice to.
         """
-        np.savetxt(filename, self.surface_lattice)
+        np.savetxt(filename, self.surface_lattice, fmt="%d", delimiter=",")
 
 
-surface_width = 740
-surface_height = 1090
-coverage = 0.005
-surface = DefectSurface(surface_width=surface_width, surface_height=surface_height)
-surface.add_defects(coverage=coverage)
-# `surface.draw_panels()` plots the result and `surface.save_to_file(...)` writes it to disk
+def main() -> None:
+    """Generate a defective surface and write it out."""
+    parser = argparse.ArgumentParser(description="Generate a randomly defective H-Si surface.")
+    parser.add_argument("--width", type=int, default=740, help="number of dimers within a row")
+    parser.add_argument("--height", type=int, default=1090, help="number of dimer rows")
+    parser.add_argument(
+        "--coverage",
+        type=float,
+        default=0.005,
+        help="total coverage of defects, where a fully defected surface is 1.0",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("defective_surface.csv"),
+        help="path to write the lattice to",
+    )
+    parser.add_argument("--plot", action="store_true", help="also plot the surface")
+    args = parser.parse_args()
+
+    surface = DefectSurface(surface_width=args.width, surface_height=args.height)
+    surface.add_defects(coverage=args.coverage)
+    surface.save_to_file(args.output)
+    print(f"wrote {args.output}")
+
+    if args.plot:
+        surface.draw_panels()
+
+
+if __name__ == "__main__":
+    main()

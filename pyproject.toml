@@ -287,6 +287,7 @@ required-imports = ["from __future__ import annotations"]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = ["implicit-namespace-package"]
 "experiments/**" = [
+    "T20", # an experiment reports on stdout, as the C++ experiments do
     "implicit-namespace-package",
     # an experiment samples with `random`; a cryptographic source would draw a different
     # surface, and an experiment keeps producing the result it reproduces

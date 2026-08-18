@@ -101,6 +101,12 @@ Changed
     - ``generate_defective_surface.py`` now declares its dependencies in a PEP 723 block and is
       executable, so ``./generate_defective_surface.py`` runs it with ``matplotlib`` and ``numpy``
       resolved on the spot and nothing to install first
+    - ``generate_defective_surface.py`` now writes the surface it generates. Both of its outputs
+      were commented out, so a run computed a lattice and discarded it. It takes ``--width``,
+      ``--height``, ``--coverage``, ``--output``, and ``--plot``, each defaulting to the value the
+      script previously hard-coded, and writes comma-separated array values to
+      ``defective_surface.csv``. Its body moved behind an ``if __name__ == "__main__":`` guard, so
+      importing the module no longer runs the experiment
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
