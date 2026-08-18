@@ -213,8 +213,9 @@ cache-keys = [
 
 [tool.mypy]
 # Every Python file the repository owns, so a new one is checked without anyone remembering to
-# add it here. `experiments/` is the exception: `experiments/AGENTS.md` puts those files out of
-# reach, so annotating them is not an option
+# add it here. `experiments/` is the exception: it reports 12 errors that all trace to one class
+# initializing four attributes to `None`, and clearing them is a design change plus `numpy` and
+# `matplotlib` in the hook environment. Worth doing, not here
 files = ["bindings/mnt/pyfiction", "docs/conf.py", "noxfile.py", "scripts"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
 warn_unused_configs = true
@@ -287,18 +288,11 @@ required-imports = ["from __future__ import annotations"]
 "bindings/mnt/pyfiction/test/__init__.py" = ["non-empty-init-module"]
 # standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
 ".github/scripts/**" = ["implicit-namespace-package"]
-# `experiments/AGENTS.md`: these reproduce the results of published papers and are not to be
-# modernized, refactored, or reformatted, so the style rules cannot be applied to them. The
-# entries are prefixes on purpose. `select = ["ALL"]` means every ruff release can raise a new
-# finding here, and nobody is allowed to fix one, so a list of leaf rules would only ever grow
 "experiments/**" = [
-    "N", # pep8-naming
-    "D", # pydocstyle
-    "ERA", # eradicate: commented-out code
-    "FBT", # flake8-boolean-trap
-    "INP", # flake8-no-pep420: run by path, not imported
-    "PL", # pylint
-    "S", # flake8-bandit
+    "implicit-namespace-package",
+    # an experiment samples with `random`; a cryptographic source would draw a different
+    # surface, and an experiment keeps producing the result it reproduces
+    "suspicious-non-cryptographic-random-usage",
 ]
 "*.ipynb" = [
     "D", # pydocstyle

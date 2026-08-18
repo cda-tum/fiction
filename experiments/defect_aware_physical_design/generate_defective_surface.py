@@ -1,30 +1,33 @@
-# this one treats each H-Si as an array value
+"""Generate a randomly defective H-Si surface and write it out as a lattice of array values.
 
+Each H-Si atom is one array value. The surface is a 2D array of dimer rows, where one dimer
+is made of two H-Si atoms, and every lattice point carries the array value of the defect
+occupying it.
+"""
 
 from __future__ import annotations
 
+import logging
 import random
 import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.axes._axes import _log as matplotlib_axes_logger
 
 np.set_printoptions(threshold=sys.maxsize)
-matplotlib_axes_logger.setLevel("ERROR")
+logging.getLogger("matplotlib.axes._axes").setLevel(logging.ERROR)
 
 
-def rand_int(minimum: int, maximum: int) -> int:
-    return random.randit(minimum, maximum)
+class DefectSurface:
+    """A 2D lattice of H-Si atoms, each holding the array value of the defect that occupies it."""
 
-
-class defect_surface:
-    # creates a 2d array of the surface
-    # the surface is initialized with each surface dimer with a value of -1
-    # surface_width is the number of dimers within a row
-    # surface_height is the number of dimer rows (1 dimer is made of 2 HSi atoms)
-    # self.surface_lattice is the array of the surface
     def __init__(self, surface_width: int = 100, surface_height: int = 100) -> None:
+        """Initialize every lattice point of the surface to the H-Si array value.
+
+        Args:
+            surface_width: The number of dimers within a row.
+            surface_height: The number of dimer rows. One dimer is made of two H-Si atoms.
+        """
         self.defects_name = None
         self.defect_params = None
         self.defect_plotting = None
@@ -39,14 +42,17 @@ class defect_surface:
 
         self.surface_lattice = np.full((self.surface_height, self.surface_width), 0)
 
-    # add_defects function allows you to choose total coverage of defects (fully defected surface is coverage = 1.)
-    # self.defect_params is array used for configuration of ratio and size of defects on the surface
-    # each entry is formatted as [array_value,width,height,ratio]
-    # array_value is number assigned to each lattice point in the self.surface_lattice
-    # width and height are how many HSi atoms are used (note this different than surface_height in init)
-    # ratio is given as fractional percent (0.05 = 5%)
-    # Following
     def add_defects(self, coverage: float = 0.05) -> None:
+        """Scatter defects across the surface until the requested coverage is accounted for.
+
+        ``self.defect_params`` configures the ratio and size of each defect. One entry reads
+        ``[array_value, width, height, ratio]``, where ``array_value`` is the number assigned to
+        each lattice point in ``self.surface_lattice``, ``width`` and ``height`` count H-Si atoms
+        rather than dimer rows, and ``ratio`` is a fractional percent, so ``0.05`` is 5%.
+
+        Args:
+            coverage: The total coverage of defects. A fully defected surface is ``1.0``.
+        """
         self.defects_name = [
             "H-Si",
             "DB",
@@ -91,45 +97,41 @@ class defect_surface:
         self.total_defect_lattice_points = int(self.surface_width * self.surface_height * coverage)
         for defect in self.defect_params:
             num_of_defects = int(defect[3] * self.total_defect_lattice_points)
-            for i in range(1, num_of_defects):
+            # a placement that lands out of bounds or on an already occupied region is skipped, not
+            # retried: the original `i = i - 1` reassigned the loop variable, which `range` discards
+            # on the next iteration, so it never retried either. Retrying would change the surface
+            # this experiment produces
+            for _ in range(1, num_of_defects):
                 random_width = random.randint(0, self.surface_width - 1)
                 random_height = random.randint(0, self.surface_height - 1)
 
                 if (random_width > random_width + defect[1] and random_height > random_height + defect[2]) or (
                     random_height % 2 == 1 and defect[2] % 2 == 0
                 ):
-                    i = i - 1
-                else:
-                    if np.all(
-                        self.surface_lattice[
-                            random_height : random_height + defect[2],
-                            random_width : random_width + defect[1],
-                        ]
-                        == 0,
-                    ):
-                        self.surface_lattice[
-                            random_height : random_height + defect[2],
-                            random_width : random_width + defect[1],
-                        ] = defect[0]
+                    continue
 
-                    else:
-                        i = i - 1
+                if np.all(
+                    self.surface_lattice[
+                        random_height : random_height + defect[2],
+                        random_width : random_width + defect[1],
+                    ]
+                    == 0,
+                ):
+                    self.surface_lattice[
+                        random_height : random_height + defect[2],
+                        random_width : random_width + defect[1],
+                    ] = defect[0]
 
-    def draw_panels(self) -> None:  # DB_panels,DB_pattern_extended, pattern):
-        # draws the DB_pattern_extended with rectangles to show each panel
-
+    def draw_panels(self) -> None:
+        """Plot the surface, one marker per lattice point, coloured and shaped by defect."""
         width_nm = self.a1 * self.surface_width
         height_nm = self.a2 * self.surface_height
-        # print(height_nm,width_nm)
-        # lattice_points = np.where(self.surface_lattice>=-1)
-        # DB_top_points = np.where(self.surface_lattice==0)
-        # DB_bottom_points = np.where(self.surface_lattice==1)
-        # print(lattice_points)
+
         fig = plt.figure(figsize=((width_nm + 1) / 10, (height_nm + 1) / 10), dpi=100)
         fig.add_subplot(1, 1, 1)
         plt.gca().invert_yaxis()
 
-        label_list = np.full((np.shape(self.defect_params)[0]), False)
+        label_list = np.zeros(np.shape(self.defect_params)[0], dtype=bool)
 
         for y in range(self.surface_height):
             for x in range(self.surface_width):
@@ -160,17 +162,20 @@ class defect_surface:
         plt.xticks([])
         plt.yticks([])
         plt.legend()
-        # print(self.DB_pattern_extended.shape)
         plt.show()
 
     def save_to_file(self, filename: str = "test.txt") -> None:
+        """Write the surface lattice out as text.
+
+        Args:
+            filename: The path to write the lattice to.
+        """
         np.savetxt(filename, self.surface_lattice)
 
 
 surface_width = 740
 surface_height = 1090
 coverage = 0.005
-surface = defect_surface(surface_width=surface_width, surface_height=surface_height)
+surface = DefectSurface(surface_width=surface_width, surface_height=surface_height)
 surface.add_defects(coverage=coverage)
-# surface.draw_panels()
-# surface.save_to_file('test.txt')
+# `surface.draw_panels()` plots the result and `surface.save_to_file(...)` writes it to disk

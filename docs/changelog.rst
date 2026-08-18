@@ -88,6 +88,12 @@ Changed
     - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
       and ``tests-slim`` presets
     - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
+- Experiments:
+    - Refactored ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
+      directory to modernization: docstrings, a ``PascalCase`` class name, the public
+      ``matplotlib`` logger instead of a private import, and the dead ``rand_int`` helper removed.
+      The surface it generates is unchanged, verified by running the old and the new placement loop
+      against each other on the same seed
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
