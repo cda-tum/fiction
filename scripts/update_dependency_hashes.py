@@ -22,7 +22,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from email.message import Message
+    from http.client import HTTPMessage
     from typing import IO
 
 REPOSITORY_ROOT = Path(__file__).resolve().parent.parent
@@ -93,7 +93,7 @@ class HTTPSOnlyRedirectHandler(urllib.request.HTTPRedirectHandler):
         fp: IO[bytes],
         code: int,
         msg: str,
-        headers: Message,
+        headers: HTTPMessage,
         newurl: str,
     ) -> urllib.request.Request | None:
         """Reject a redirect that leaves ``https``, and otherwise defer to the default.

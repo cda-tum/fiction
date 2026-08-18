@@ -115,6 +115,8 @@ Changed
       exempt from the style rules that ``experiments/AGENTS.md`` puts out of reach, the three
       ``__init__.py`` files that register the Windows DLL search path are exempt from ``RUF067``,
       and ``CPY001`` stays off pending a decision on copyright headers
+    - ``mypy`` now checks ``docs/conf.py`` and ``scripts/`` as well, so a new Python file outside the
+      bindings is no longer unchecked until someone adds it to the list
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
@@ -169,6 +171,9 @@ Fixed
       ``sdist.exclude`` matched at any depth, so ``**/include`` removed ``include/fiction/`` and
       ``**.cpp``/``**.hpp`` removed the extension and vendored sources. Installing ``mnt.pyfiction``
       from source failed at CMake configure on every platform without a matching wheel
+- Documentation:
+    - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a
+      function without a Doxygen brief description
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL

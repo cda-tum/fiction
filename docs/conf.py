@@ -165,7 +165,7 @@ class DocOverviewTableDirective(Directive):
     required_arguments = 1
     option_spec: ClassVar = {"column": str}
 
-    def run(self) -> list:
+    def run(self) -> list[nodes.Node]:
         """Build the table from the Doxygen XML the docs build produced.
 
         Returns:
@@ -198,7 +198,7 @@ class DocOverviewTableDirective(Directive):
                 reft.extend([ref])
 
                 func = nodes.entry("", reft)
-                desc = nodes.entry("", nodes.line(text=elem.findtext("./briefdescription/para")))
+                desc = nodes.entry("", nodes.line(text=elem.findtext("./briefdescription/para", default="")))
 
                 tbody += nodes.row("", func, desc)
 

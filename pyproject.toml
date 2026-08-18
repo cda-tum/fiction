@@ -209,7 +209,10 @@ cache-keys = [
 ]
 
 [tool.mypy]
-files = ["bindings/mnt/pyfiction", "noxfile.py"]
+# Every Python file the repository owns, so a new one is checked without anyone remembering to
+# add it here. `experiments/` is the exception: `experiments/AGENTS.md` puts those files out of
+# reach, so annotating them is not an option
+files = ["bindings/mnt/pyfiction", "docs/conf.py", "noxfile.py", "scripts"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
