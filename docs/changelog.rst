@@ -33,6 +33,9 @@ Added
       ``sdist.exclude`` pattern that drops a tracked source fails the check instead of being
       forgiven, and ``--inject-junk`` fails it if a planted editor, cache, or virtual environment
       file reaches the tarball. ``nox -s check_sdist`` runs the same check locally
+    - Added a 🐍 Lint workflow that runs the ``mypy`` hook. ``mypy`` is listed under ``ci: skip`` in
+      ``.pre-commit-config.yaml``, because the dependencies it needs to resolve the imports of the
+      files it checks put its environment over the size pre-commit.ci allows a hook
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there

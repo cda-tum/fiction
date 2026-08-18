@@ -223,13 +223,6 @@ disallow_untyped_defs = false
 explicit_package_bases = true
 warn_unreachable = true
 
-[[tool.mypy.overrides]]
-# `matplotlib` ships its own types, but installing it into the `mypy` hook environment costs
-# ~73 MiB and pre-commit.ci caps that environment at 250 MiB. Only `experiments/` imports it, and
-# only to plot, so the array logic that matters stays checked while the plotting calls do not
-module = ["matplotlib.*"]
-ignore_missing_imports = true
-
 
 [tool.ruff]
 line-length = 120
