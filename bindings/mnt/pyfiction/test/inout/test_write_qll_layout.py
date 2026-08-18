@@ -18,10 +18,10 @@ class TestWriteQllLayout(unittest.TestCase):
 
             qll = filename.read_text(encoding="utf-8")
 
-            self.assertIn('<settings tech="MolFCN">', qll)
-            self.assertIn('<item tech="MolFCN" name="Bisferrocene"/>', qll)
-            self.assertIn('<property name="phase" value="0"/>', qll)
-            self.assertIn('<property name="phase" value="1"/>', qll)
+            assert '<settings tech="MolFCN">' in qll
+            assert '<item tech="MolFCN" name="Bisferrocene"/>' in qll
+            assert '<property name="phase" value="0"/>' in qll
+            assert '<property name="phase" value="1"/>' in qll
 
 
 if __name__ == "__main__":
