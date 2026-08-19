@@ -1,0 +1,119 @@
+name: 🔍 • CI
+
+# The thin caller. Every real job lives in a `reusable-*.yml` beside this file; the only
+# work done here is deciding what runs and aggregating the outcome into `🚦 Check`.
+#
+# Deliberately no `on: paths:` filters. A workflow that `paths:` skips never reports a
+# status context, so it can never be required by branch protection — which is why
+# `docs/readthedocs.org:fiction` used to be the only required check in this repository.
+# Filtering moved into `reusable-change-detection.yml`, whose flags skip *jobs* while
+# `🚦 Check` still concludes.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  merge_group:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  change-detection:
+    name: 🔍 Change
+    uses: ./.github/workflows/reusable-change-detection.yml
+
+  cpp-tests-ubuntu:
+    name: 🐧 Test
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [ci-debug, ci-release]
+        # Each entry costs a full build of a header-only, template-heavy library, so the
+        # matrix carries the ends of each compiler family and one point in between, not
+        # every version. g++-11 on 22.04 is the oldest combination we support.
+        config:
+          - { os: ubuntu-22.04, compiler: g++-11 }
+          - { os: ubuntu-24.04, compiler: g++-13 }
+          - { os: ubuntu-24.04, compiler: g++-14 }
+          - { os: ubuntu-24.04, compiler: clang++-18 }
+          - { os: ubuntu-24.04, compiler: clang++-19 }
+          - { os: ubuntu-24.04, compiler: clang++-20 }
+          - { os: ubuntu-24.04-arm, compiler: clang++-19 }
+          - { os: ubuntu-24.04-arm, compiler: clang++-20 }
+    uses: ./.github/workflows/reusable-cpp-tests-ubuntu.yml
+    with:
+      runs-on: ${{ matrix.config.os }}
+      compiler: ${{ matrix.config.compiler }}
+      preset: ${{ matrix.preset }}
+
+  cpp-tests-macos:
+    name: 🍎 Test
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [ci-debug, ci-release]
+        config:
+          - { os: macos-15, compiler: clang++ }
+    uses: ./.github/workflows/reusable-cpp-tests-macos.yml
+    with:
+      runs-on: ${{ matrix.config.os }}
+      compiler: ${{ matrix.config.compiler }}
+      preset: ${{ matrix.preset }}
+
+  cpp-tests-windows:
+    name: 🪟 Test
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [ci-debug, ci-release]
+        config:
+          - { os: windows-2025, toolset: v143 }
+          - { os: windows-2025, toolset: ClangCL }
+    uses: ./.github/workflows/reusable-cpp-tests-windows.yml
+    with:
+      runs-on: ${{ matrix.config.os }}
+      toolset: ${{ matrix.config.toolset }}
+      preset: ${{ matrix.preset }}
+
+  cpp-experiments:
+    name: 🧪 Build
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
+    uses: ./.github/workflows/reusable-cpp-experiments.yml
+
+  # This job does nothing and is only used for branch protection. `if: always()` is what
+  # makes it usable as a required check: without it a failed dependency would *skip* the
+  # guard, and a skipped required context leaves a pull request waiting forever.
+  required-checks-pass:
+    name: 🚦 Check
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-ubuntu
+      - cpp-tests-macos
+      - cpp-tests-windows
+      - cpp-experiments
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the needed jobs succeeded or failed
+        # `alls-green` fails on any skip that `allowed-skips` did not predict — a job
+        # skipped because an upstream job died still fails the guard. A hand-rolled
+        # `contains(needs.*.result, 'failure')` would silently pass on lost coverage.
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-ubuntu,cpp-tests-macos,cpp-tests-windows,cpp-experiments' || '' }}
+          jobs: ${{ toJSON(needs) }}

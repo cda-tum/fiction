@@ -1,0 +1,103 @@
+name: 🐧 • C++ Tests
+
+# One matrix leg: one compiler in one build type. `ubuntu.yml` used to build and test
+# Debug *and* Release inside a single job, which is what pushed the g++-13 and g++-14
+# legs into the 120-minute ceiling. Splitting them halves the wall clock per job on the
+# same total compute and with the same coverage.
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: The runner to execute on
+        required: true
+        type: string
+      compiler:
+        description: The C++ compiler package and binary name, e.g. `g++-13`
+        required: true
+        type: string
+      preset:
+        description: The CMake configure and build preset, `ci-debug` or `ci-release`
+        required: true
+        type: string
+
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-cpp-tests-${{
+    inputs.runs-on }}-${{ inputs.compiler }}-${{ inputs.preset }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_VERSION: 4.13.4
+
+jobs:
+  build_and_test:
+    name: 🐧 ${{ inputs.runs-on }} with ${{ inputs.compiler }} (${{ inputs.preset }})
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 120
+    permissions:
+      contents: read # required to check out the repository
+
+    steps:
+      - name: Install libraries and the respective compiler
+        env:
+          COMPILER: ${{ inputs.compiler }}
+        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev "$COMPILER"
+
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          # Debug and Release are separate jobs now, so they need separate caches; sharing
+          # one key would have them overwrite each other's objects on every run
+          key: "${{ inputs.runs-on }}-${{ inputs.compiler }}-${{ inputs.preset }}"
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Setup Z3 Solver
+        if: inputs.runs-on != 'ubuntu-24.04-arm'
+        id: z3
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        with:
+          version: ${{ env.Z3_VERSION }}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure CMake
+        env:
+          COMPILER: ${{ inputs.compiler }}
+          PRESET: ${{ inputs.preset }}
+          # jemalloc is a Release-only measure; Z3 has no ARM build in `cda-tum/setup-z3`
+          EXTRA_CMAKE_ARGS: >-
+            ${{ inputs.preset == 'ci-release' && '-DFICTION_ENABLE_JEMALLOC=ON' || '' }}
+            ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
+        run: >
+          cmake -S . --preset "$PRESET"
+          -DCMAKE_CXX_COMPILER="$COMPILER"
+          $EXTRA_CMAKE_ARGS
+
+      - name: Build
+        env:
+          PRESET: ${{ inputs.preset }}
+        run: cmake --build --preset "$PRESET" --parallel 4
+
+      - name: Test
+        env:
+          PRESET: ${{ inputs.preset }}
+        run: ctest --preset "$PRESET" --output-on-failure --repeat until-pass:3 --parallel 4

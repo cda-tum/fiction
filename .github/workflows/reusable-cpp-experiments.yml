@@ -1,0 +1,70 @@
+name: 🧪 • Experiments
+
+# The experiments are 34 stand-alone binaries that reproduce published papers. CI never
+# runs them, so building them in every matrix entry bought nothing but build time. One
+# job keeps them from rotting.
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-cpp-experiments
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_VERSION: 4.13.4
+
+jobs:
+  build_experiments:
+    name: 🧪 experiments
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    permissions:
+      contents: read # required to check out the repository
+
+    steps:
+      - name: Install libraries and the respective compiler
+        run: sudo apt-get update && sudo apt-get install -yq libtbb-dev g++-14
+
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          key: "ubuntu-24.04-experiments"
+          variant: ccache
+          save: true
+          max-size: 10G
+
+      - name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Setup Z3 Solver
+        id: z3
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        with:
+          version: ${{ env.Z3_VERSION }}
+          platform: linux
+          architecture: x64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure CMake
+        run: >
+          cmake -S . --preset ci-debug
+          -DCMAKE_CXX_COMPILER=g++-14
+          -DFICTION_EXPERIMENTS=ON
+          -DFICTION_TEST=OFF
+          -DFICTION_CLI=OFF
+
+      - name: Build
+        run: cmake --build --preset ci-debug --parallel 4
