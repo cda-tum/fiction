@@ -446,6 +446,131 @@ inline constexpr const char* SIMPLE_CELL = "<g\n"
                                            "style=\"fill:#{0};stroke:#000000;\" />\n"
                                            "</g>";
 
+/**
+ * @brief MolQCA-specific SVG color codes, geometry constants, and cell templates.
+ *
+ * This group defines the clock-zone colors, intra-cell spacing, offsets, and SVG glyphs used by the MolQCA layout
+ * writer.
+ */
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_1_CELL = "ffe700";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_2_CELL = "65ff00";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_3_CELL = "0071ff";
+inline constexpr const char* MOL_QCA_CLOCK_ZONE_4_CELL = "f800ff";
+inline constexpr const char* PI_CELL_MOL_QCA           = "cccccc";
+inline constexpr const char* PO_CELL_MOL_QCA           = "4a4a4a";
+
+inline constexpr const double MOL_QCA_CELL_DISTANCE = 11.5;
+
+/**
+ * MolQCA glyph templates draw the visible 10x10 cell body at these SVG-local coordinates. The layout translation
+ * offsets below are derived from those anchors to keep their origin visible instead of using unexplained magic numbers.
+ */
+inline constexpr const double MOL_QCA_GLYPH_ANCHOR_X         = 92.93404;
+inline constexpr const double MOL_QCA_GLYPH_ANCHOR_Y         = 56.46016;
+inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_X = STARTING_OFFSET_CELL_X + MOL_QCA_GLYPH_ANCHOR_X;
+inline constexpr const double MOL_QCA_STARTING_OFFSET_CELL_Y = STARTING_OFFSET_CELL_Y + MOL_QCA_GLYPH_ANCHOR_Y;
+
+inline constexpr const char* MOL_QCA_VIA = "<g\n"
+                                           "    style=\"fill:#{0};\"\n"
+                                           "    transform=\"translate({1},{2})\">\n"
+                                           "  <g>\n"
+                                           "    <rect\n"
+                                           "      transform=\"rotate(90)\"\n"
+                                           "      ry=\"1.07143\"\n"
+                                           "      y=\"-102.93404\"\n"
+                                           "      x=\"56.46016\"\n"
+                                           "      width=\"10\"\n"
+                                           "      height=\"10\"\n"
+                                           "      style=\"fill:#{0};stroke:#000000;\" />\n"
+                                           "    <circle\n"
+                                           "      r=\"5.31886\"\n"
+                                           "      transform=\"rotate(90)\"\n"
+                                           "      cx=\"61.46016\"\n"
+                                           "      cy=\"-97.93404\"\n"
+                                           "      style=\"fill:none;stroke:#000000;\" />\n"
+                                           "  </g>\n"
+                                           "</g>";
+
+inline constexpr const char* MOL_QCA_CONST0 =
+    "<g\n"
+    "    transform=\"translate({1},{2})\">\n"
+    "\n"
+    "  <rect\n"
+    "    style=\"fill:#000000;stroke:#000000;\"\n"
+    "    width=\"10\"\n"
+    "    height=\"10\"\n"
+    "    x=\"92.93404\"\n"
+    "    y=\"56.46016\" />\n"
+    "\n"
+    "  <text\n"
+    "    x=\"97.93404\"\n"
+    "    y=\"63.46016\"\n"
+    "    style=\"font-family:Arial, sans-serif;font-size:6px;fill:#ffffff;\"\n"
+    "    text-anchor=\"middle\"\n"
+    "    alignment-baseline=\"central\">\n"
+    "    C0\n"
+    "  </text>\n"
+    "</g>";
+
+inline constexpr const char* MOL_QCA_CONST1 =
+    "<g\n"
+    "    transform=\"translate({1},{2})\">\n"
+    "\n"
+    "  <rect\n"
+    "    style=\"fill:#000000;stroke:#000000;\"\n"
+    "    width=\"10\"\n"
+    "    height=\"10\"\n"
+    "    x=\"92.93404\"\n"
+    "    y=\"56.46016\" />\n"
+    "\n"
+    "  <text\n"
+    "    x=\"97.93404\"\n"
+    "    y=\"63.46016\"\n"
+    "    style=\"font-family:Arial, sans-serif;font-size:6px;fill:#ffffff;\"\n"
+    "    text-anchor=\"middle\"\n"
+    "    alignment-baseline=\"central\">\n"
+    "    C1\n"
+    "  </text>\n"
+    "</g>";
+
+inline constexpr const char* MOL_QCA_CELL =
+    "<g\n"
+    "    style=\"fill:#{0};\"\n"
+    "    transform=\"translate({1},{2})\">\n"
+    "\n"
+    "  <rect\n"
+    "    style=\"fill:#{0};stroke:#{0};\"\n"
+    "    width=\"10\"\n"
+    "    height=\"10\"\n"
+    "    x=\"92.93404\"\n"
+    "    y=\"56.46016\" />\n"
+    "\n"
+    "  <g style=\"stroke:#000000;stroke-width:0.5;fill:#{0};\">\n"
+    "    <!-- left molecule -->\n"
+    "    <line x1=\"95.43404\" y1=\"58.96016\" x2=\"95.43404\" y2=\"63.96016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"95.43404\" cy=\"58.96016\" />\n"
+    "    <circle r=\"0.50000\" cx=\"95.43404\" cy=\"61.46016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"95.43404\" cy=\"63.96016\" />\n"
+    "\n"
+    "    <!-- right molecule -->\n"
+    "    <line x1=\"100.43404\" y1=\"58.96016\" x2=\"100.43404\" y2=\"63.96016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"100.43404\" cy=\"58.96016\" />\n"
+    "    <circle r=\"0.50000\" cx=\"100.43404\" cy=\"61.46016\" />\n"
+    "    <circle r=\"0.97553\" cx=\"100.43404\" cy=\"63.96016\" />\n"
+    "  </g>\n"
+    "</g>";
+
+inline constexpr const char* MOL_QCA_SIMPLE_CELL = "<g\n"
+                                                   "transform=\"translate({1},{2})\">\n"
+                                                   "<rect\n"
+                                                   "ry=\"0.75\"\n"
+                                                   "y=\"56.46016\"\n"
+                                                   "x=\"92.93404\"\n"
+                                                   "height=\"10\"\n"
+                                                   "width=\"10\"\n"
+                                                   "style=\"fill:#{0};stroke:#000000;\" />\n"
+                                                   "</g>";
+
 }  // namespace svg
 
 template <typename Lyt>
@@ -737,7 +862,7 @@ class write_qca_layout_svg_impl
     }
 
   private:
-    Lyt lyt;
+    const Lyt& lyt;
 
     std::ostream& os;
 
@@ -773,7 +898,8 @@ class write_qca_layout_svg_impl
      */
     std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
     {
-        std::string cell_description, cell_color{};
+        std::string cell_description{};
+        std::string cell_color{};
 
         static constexpr const std::array<const char*, 4> cell_colors{
             {svg::CLOCK_ZONE_1_CELL, svg::CLOCK_ZONE_2_CELL, svg::CLOCK_ZONE_3_CELL, svg::CLOCK_ZONE_4_CELL}};
@@ -1054,6 +1180,136 @@ class write_qca_layout_svg_impl
     }
 };
 
+template <typename Lyt>
+class write_mol_qca_layout_svg_impl
+{
+  public:
+    /**
+     * Default constructor.
+     */
+    write_mol_qca_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_qca_layout_svg_params& p = {}) :
+            lyt{layout},
+            os{stream},
+            ps{p}
+    {}
+
+    void run()
+    {
+        generate_cell_based_svg();
+    }
+
+  private:
+    const Lyt& lyt;
+
+    std::ostream& os;
+
+    write_qca_layout_svg_params ps;
+
+    /**
+     * Generates and returns a pair of strings representing the description and color of the given cell.
+     *
+     * @param c The cell for which to generate the description and color.
+     * @return A pair of strings representing the description and color of the given cell `c`.
+     */
+    std::pair<std::string, std::string> generate_description_color(const cell<Lyt>& c)
+    {
+        std::string cell_description{};
+        std::string cell_color{};
+
+        static constexpr const std::array<const char*, 4> cell_colors{
+            {svg::MOL_QCA_CLOCK_ZONE_1_CELL, svg::MOL_QCA_CLOCK_ZONE_2_CELL, svg::MOL_QCA_CLOCK_ZONE_3_CELL,
+             svg::MOL_QCA_CLOCK_ZONE_4_CELL}};
+
+        const auto ct = lyt.get_cell_type(c);
+
+        if (Lyt::technology::is_normal_cell(ct))
+        {
+            cell_color = cell_colors.at(Lyt::technology::cell_clock_number(ct));
+
+            if (c.z != 0 && Lyt::technology::is_vertical_cell_mode(lyt.get_cell_mode(c)))
+            {
+                cell_description = svg::MOL_QCA_VIA;
+            }
+            // crossings are not yet implemented in this technology
+            else if (const auto ac = lyt.above(c), bc = lyt.below(c);
+                     ((c != ac) && !lyt.is_empty_cell(ac)) || ((c != bc) && !lyt.is_empty_cell(bc)))
+            {
+                throw unsupported_cell_type_exception(c);
+            }
+            else if (c.z != 0)
+            {
+                // skip non-ground layer cells
+            }
+            else if (ps.simple)
+            {
+                cell_description = svg::MOL_QCA_SIMPLE_CELL;
+            }
+            else
+            {
+                cell_description = svg::MOL_QCA_CELL;
+            }
+        }
+        else if (Lyt::technology::is_input_cell(ct))
+        {
+            cell_color       = svg::PI_CELL_MOL_QCA;
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CELL;
+        }
+        else if (Lyt::technology::is_output_cell(ct))
+        {
+            cell_color       = svg::PO_CELL_MOL_QCA;
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CELL;
+        }
+        else if (Lyt::technology::is_const_0_cell(ct))
+        {
+            cell_color       = "000000";
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST0;
+        }
+        else if (Lyt::technology::is_const_1_cell(ct))
+        {
+            cell_color       = "000000";
+            cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST1;
+        }
+        else
+        {
+            throw unsupported_cell_type_exception(c);
+        }
+
+        return std::make_pair(cell_description, cell_color);
+    }
+
+    /**
+     * Generates an SVG string representing the cell-based clocked cell layout and appends it to the output stream.
+     */
+    void generate_cell_based_svg()
+    {
+        std::stringstream cell_descriptions{};
+
+        lyt.foreach_cell_position(
+            [this, &cell_descriptions](const auto& c)
+            {
+                if (!lyt.is_empty_cell(c))
+                {
+                    // Determines cell type and color
+                    const auto desc_col = generate_description_color(c);
+
+                    // Current cell-description can now be appended to the description of all cells
+                    cell_descriptions << fmt::format(fmt::runtime(desc_col.first), desc_col.second,
+                                                     svg::STARTING_OFFSET_TILE_X + svg::MOL_QCA_STARTING_OFFSET_CELL_X +
+                                                         (c.x * svg::MOL_QCA_CELL_DISTANCE),
+                                                     svg::STARTING_OFFSET_TILE_Y + svg::MOL_QCA_STARTING_OFFSET_CELL_Y +
+                                                         (c.y * svg::MOL_QCA_CELL_DISTANCE));
+                }
+            });
+
+        const double viewbox_x =
+            (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.x() + 1) * svg::MOL_QCA_CELL_DISTANCE);
+        const double viewbox_y =
+            (2 * svg::VIEWBOX_DISTANCE) + (static_cast<double>(lyt.y() + 1) * svg::MOL_QCA_CELL_DISTANCE);
+
+        os << fmt::format(svg::HEADER, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, cell_descriptions.str());
+    }
+};
+
 }  // namespace detail
 
 /**
@@ -1107,6 +1363,58 @@ void write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, cons
     }
 
     write_qca_layout_svg(lyt, os, ps);
+    os.close();
+}
+
+/**
+ * Writes an SVG representation of a cell-level MolQCA layout to an output stream.
+ * Only cell-based layouts are supported, since the clocking scheme is not uniform at the gate level.
+ * Currently, only a uniform gate size of \f$10 \times 10\f$ is supported.
+ *
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout.
+ *
+ * @tparam Lyt Cell-level molQCA layout type.
+ * @param lyt The layout to be written.
+ * @param os The output stream to write into.
+ * @param ps Parameters.
+ */
+template <typename Lyt>
+void write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_mol_qca_technology_v<Lyt>, "Lyt must be a molQCA layout");
+    static_assert(std::is_same_v<coordinate<Lyt>, offset::ucoord_t>, "Lyt must use unsigned Cartesian coordinates");
+
+    detail::write_mol_qca_layout_svg_impl<Lyt> p{lyt, os, ps};
+
+    p.run();
+}
+
+/**
+ * Writes an SVG representation of a cell-level MolQCA layout to a file.
+ * Only cell-based layouts are supported, since the clocking scheme is not uniform at the gate level.
+ * Currently, only a uniform gate size of \f$10 \times 10\f$ is supported.
+ *
+ * May throw an `unsupported_cell_type_exception` if it encounters unsupported cell types in the layout. May throw an
+ * `std::ofstream::failure` if it cannot open the file.
+ *
+ * @tparam Lyt Cell-level molQCA layout type.
+ * @param lyt The layout to be written.
+ * @param filename The file name to create and write into. Should preferably use the `.svg` extension.
+ * @param ps Parameters.
+ */
+template <typename Lyt>
+void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename,
+                              const write_qca_layout_svg_params& ps = {})
+{
+    std::ofstream os{std::string(filename), std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_mol_qca_layout_svg(lyt, os, ps);
     os.close();
 }
 

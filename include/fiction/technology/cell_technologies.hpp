@@ -18,7 +18,7 @@ struct qca_technology
     /**
      * Possible types of QCA cells.
      */
-    enum cell_type : uint8_t
+    enum cell_type : uint8_t  // NOLINT(cppcoreguidelines-use-enum-class)
     {
         /**
          * Symbol used for empty QCA cells.
@@ -141,6 +141,201 @@ struct qca_technology
 };
 
 /**
+ * Molecular Quantum-dot Cellular Automata (molQCA) technology implementation of the FCN concept.
+ *
+ * MolQCA normal cell symbols encode their SCERPA clock phase directly. The helper predicates below keep phase handling
+ * centralized for writers and gate libraries that need to translate cell symbols into simulator-specific metadata.
+ */
+struct mol_qca_technology
+{
+    /**
+     * Possible types of molQCA cells.
+     */
+    enum class cell_type : uint8_t
+    {
+        /**
+         * Symbol used for empty molQCA cells.
+         */
+        EMPTY = ' ',
+        /**
+         * Symbol used for normal molQCA cells with clocking 0.
+         */
+        NORMAL1 = 'a',
+        /**
+         * Symbol used for normal molQCA cells with clocking 1.
+         */
+        NORMAL2 = 'b',
+        /**
+         * Symbol used for normal molQCA cells with clocking 2.
+         */
+        NORMAL3 = 'c',
+        /**
+         * Symbol used for normal molQCA cells with clocking 3.
+         */
+        NORMAL4 = 'd',
+        /**
+         * Symbol used for input molQCA cells.
+         */
+        INPUT = 'i',
+        /**
+         * Symbol used for output molQCA cells.
+         */
+        OUTPUT = 'o',
+        /**
+         * Symbol used for constant 0 input molQCA cells.
+         */
+        CONST_0 = '0',
+        /**
+         * Symbol used for constant 1 input molQCA cells.
+         */
+        CONST_1 = '1'
+    };
+    /**
+     * Possible cell modes for molQCA cells.
+     */
+    enum class cell_mode : uint8_t
+    {
+        NORMAL = 0u,
+        ROTATED,
+        VERTICAL,  // reserved for a future crossing gate; writer branches are kept so they won't silently break on
+                   // addition
+        CROSSOVER  // reserved for a future crossing gate; writer branches are kept so they won't silently break on
+                   // addition
+    };
+    /**
+     * Possible marks to be applied to a cell to change its type.
+     */
+    enum class cell_mark : uint8_t
+    {
+        EMPTY  = static_cast<uint8_t>(cell_type::EMPTY),
+        INPUT  = static_cast<uint8_t>(cell_type::INPUT),
+        OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
+    };
+
+    [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
+    {
+        return c == cell_type::EMPTY;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
+    {
+        return is_normal_cell1(c) || is_normal_cell2(c) || is_normal_cell3(c) || is_normal_cell4(c);
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell1(const cell_type& c) noexcept
+    {
+        return c == cell_type::NORMAL1;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell2(const cell_type& c) noexcept
+    {
+        return c == cell_type::NORMAL2;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell3(const cell_type& c) noexcept
+    {
+        return c == cell_type::NORMAL3;
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell4(const cell_type& c) noexcept
+    {
+        return c == cell_type::NORMAL4;
+    }
+
+    /**
+     * Returns the SCERPA clock number encoded by a molQCA normal cell type.
+     *
+     * Non-normal cell types do not encode a clock phase and are mapped to phase 0 for callers that need a deterministic
+     * fallback.
+     *
+     * @param c Cell type to inspect.
+     * @return Clock number in the range 0 to 3.
+     */
+    [[nodiscard]] static constexpr uint64_t cell_clock_number(const cell_type& c) noexcept
+    {
+        if (is_normal_cell2(c))
+        {
+            return 1u;
+        }
+        if (is_normal_cell3(c))
+        {
+            return 2u;
+        }
+        if (is_normal_cell4(c))
+        {
+            return 3u;
+        }
+
+        return 0u;
+    }
+
+    [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
+    {
+        return c == cell_type::INPUT;
+    }
+
+    [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
+    {
+        return c == cell_type::OUTPUT;
+    }
+
+    [[nodiscard]] static constexpr bool is_const_0_cell(const cell_type& c) noexcept
+    {
+        return c == cell_type::CONST_0;
+    }
+
+    [[nodiscard]] static constexpr bool is_const_1_cell(const cell_type& c) noexcept
+    {
+        return c == cell_type::CONST_1;
+    }
+
+    [[nodiscard]] static constexpr bool is_constant_cell(const cell_type& c) noexcept
+    {
+        return is_const_0_cell(c) || is_const_1_cell(c);
+    }
+
+    [[nodiscard]] static constexpr bool is_normal_cell_mode(const cell_mode& m) noexcept
+    {
+        return m == cell_mode::NORMAL;
+    }
+
+    [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
+    {
+        return m == cell_mode::ROTATED;
+    }
+
+    [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
+    {
+        return m == cell_mode::VERTICAL;
+    }
+
+    [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
+    {
+        return m == cell_mode::CROSSOVER;
+    }
+
+    /**
+     * Default width of a molQCA cell.
+     */
+    static constexpr uint64_t CELL_WIDTH = 2ul;
+    /**
+     * Default height of a molQCA cell.
+     */
+    static constexpr uint64_t CELL_HEIGHT = 2ul;
+    /**
+     * Default horizontal spacing between two molQCA cells.
+     */
+    static constexpr uint64_t CELL_HSPACE = 0ul;
+    /**
+     * Default vertical spacing between two molQCA cells.
+     */
+    static constexpr uint64_t CELL_VSPACE = 0ul;
+
+    // Deleted constructors to prevent instantiation
+    mol_qca_technology() = delete;
+};
+
+/**
  * in-plane Nanomagnet Logic (iNML) technology implementation of the FCN concept.
  */
 struct inml_technology
@@ -148,7 +343,7 @@ struct inml_technology
     /**
      * Possible types of iNML cells.
      */
-    enum cell_type : uint8_t
+    enum cell_type : uint8_t  // NOLINT(cppcoreguidelines-use-enum-class)
     {
         /**
          * Symbol used for empty iNML cells.
@@ -287,7 +482,7 @@ struct sidb_technology
     /**
      * Possible types of SiDB cells.
      */
-    enum cell_type : uint8_t
+    enum cell_type : uint8_t  // NOLINT(cppcoreguidelines-use-enum-class)
     {
         /**
          * Symbol used for empty SiDB cells.

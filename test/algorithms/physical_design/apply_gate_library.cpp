@@ -10,13 +10,18 @@
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_on_the_fly_gate_library.hpp>
+#include <fiction/technology/sim7_mol_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
@@ -593,4 +598,15 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
         CHECK(layout.y() == 14);
         CHECK(layout.z() == 1);
     }
+}
+
+TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
+{
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+
+    const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
+
+    const auto cell_layout = apply_gate_library<mol_qca_cell_clk_lyt, sim7_mol_library>(layout);
+
+    CHECK(cell_layout.num_cells() > 0u);
 }

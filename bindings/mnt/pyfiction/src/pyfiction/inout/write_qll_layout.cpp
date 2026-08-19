@@ -42,6 +42,7 @@ void write_qll_layout(nanobind::module_& m)
 {
     detail::write_qll_layout<py_qca_layout>(m);
     detail::write_qll_layout<py_inml_layout>(m);
+    detail::write_qll_layout<py_mol_qca_layout>(m);
 }
 
 }  // namespace pyfiction

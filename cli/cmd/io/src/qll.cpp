@@ -49,14 +49,15 @@ void qll_command::execute()
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (fiction::has_inml_technology_v<Lyt> || fiction::has_qca_technology_v<Lyt>)
+        if constexpr (fiction::has_inml_technology_v<Lyt> || fiction::has_qca_technology_v<Lyt> ||
+                      fiction::has_mol_qca_technology_v<Lyt>)
         {
             fiction::write_qll_layout(*lyt_ptr, filename);
         }
         else
         {
-            env->out() << fmt::format("[e] {}'s cell technology is neither iNML nor QCA but {}\n", get_name(lyt_ptr),
-                                      fiction::tech_impl_name<fiction::technology<Lyt>>);
+            env->out() << fmt::format("[e] {}'s cell technology is neither iNML, QCA, nor molQCA but {}\n",
+                                      get_name(lyt_ptr), fiction::tech_impl_name<fiction::technology<Lyt>>);
         }
     };
 

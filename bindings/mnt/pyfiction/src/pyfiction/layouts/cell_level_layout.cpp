@@ -52,6 +52,11 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
     std::ranges::transform(tech_name, tech_name.begin(), ::tolower);
+    if constexpr (std::is_same_v<Technology, fiction::mol_qca_technology>)
+    {
+        // Keep the Python technology name readable by preserving the word boundary in molQCA.
+        tech_name = "mol_qca";
+    }
 
     /**
      * FCN cell technology.
@@ -61,7 +66,17 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     py::enum_<typename Technology::cell_type> cell_type(tech, "cell_type");
 
     cell_type.value("EMPTY", Technology::cell_type::EMPTY);
-    cell_type.value("NORMAL", Technology::cell_type::NORMAL);
+    if constexpr (std::is_same_v<Technology, fiction::mol_qca_technology>)
+    {
+        cell_type.value("NORMAL1", Technology::cell_type::NORMAL1, DOC(fiction_mol_qca_technology_cell_type_NORMAL1));
+        cell_type.value("NORMAL2", Technology::cell_type::NORMAL2, DOC(fiction_mol_qca_technology_cell_type_NORMAL2));
+        cell_type.value("NORMAL3", Technology::cell_type::NORMAL3, DOC(fiction_mol_qca_technology_cell_type_NORMAL3));
+        cell_type.value("NORMAL4", Technology::cell_type::NORMAL4, DOC(fiction_mol_qca_technology_cell_type_NORMAL4));
+    }
+    else
+    {
+        cell_type.value("NORMAL", Technology::cell_type::NORMAL);
+    }
     cell_type.value("INPUT", Technology::cell_type::INPUT);
     cell_type.value("OUTPUT", Technology::cell_type::OUTPUT);
 
@@ -69,6 +84,11 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     {
         cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_qca_technology_cell_type_CONST_0));
         cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_qca_technology_cell_type_CONST_1));
+    }
+    else if constexpr (std::is_same_v<Technology, fiction::mol_qca_technology>)
+    {
+        cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_mol_qca_technology_cell_type_CONST_0));
+        cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_mol_qca_technology_cell_type_CONST_1));
     }
     else if constexpr (std::is_same_v<Technology, fiction::inml_technology>)
     {
@@ -207,6 +227,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 void cell_level_layouts(nanobind::module_& m)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca_technology>(m);
+    detail::fcn_technology_cell_level_layout<fiction::mol_qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::sidb_technology>(m);
 }
