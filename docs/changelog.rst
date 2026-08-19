@@ -59,6 +59,8 @@ Changed
     - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
       ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
       directly must be renamed
+    - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
+      and physics as a topic on PyPI
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
@@ -92,6 +94,9 @@ Changed
     - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
       and ``tests-slim`` presets
     - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
+    - ``vcs-versioning`` replaces ``setuptools-scm`` for deriving the version from git, which drops
+      ``setuptools`` from the build. Building from source now requires ``scikit-build-core`` 1.0
+    - The CMake policy range now ends at 4.4
 - Experiments:
     - Modernized ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
       directory to it. Apart from the out-of-bounds fix below, the surface it generates is unchanged
@@ -134,6 +139,7 @@ Changed
     - Halved the OS matrices; ``docs/getting_started.rst`` records the combinations we verify
     - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
       only smoke-testing the import
+    - ``prek`` now validates ``.codecov.yml`` against its schema
 
 Removed
 #######
