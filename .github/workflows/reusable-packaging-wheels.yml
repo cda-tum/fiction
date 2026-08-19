@@ -20,7 +20,7 @@ env:
 
 jobs:
   build_wheels:
-    name: Build
+    name: 🛞 ${{ inputs.runs-on }}
     runs-on: ${{ inputs.runs-on }}
     permissions:
       contents: read # required to check out the repository

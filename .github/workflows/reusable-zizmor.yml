@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   zizmor:
-    name: Audit the workflows
+    name: 🌈 Zizmor
     # zizmor-action shells out to Docker, which ubuntu-slim's unprivileged container does not support
     runs-on: ubuntu-latest
     timeout-minutes: 15

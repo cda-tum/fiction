@@ -14,7 +14,7 @@ env:
 
 jobs:
   clangtidy:
-    name: Run Clang-Tidy
+    name: 🚨 Clang-Tidy
     runs-on: ubuntu-latest
     permissions:
       contents: read # required to check out the repository

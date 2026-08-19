@@ -24,7 +24,7 @@ permissions: {}
 
 jobs:
   build:
-    name: ${{ inputs.push && 'Build and publish' || 'Build' }} the image
+    name: 🐳 Image
     runs-on: ubuntu-latest
     permissions:
       packages: write # required to push the image to ghcr.io on release

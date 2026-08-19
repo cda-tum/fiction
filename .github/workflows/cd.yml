@@ -17,13 +17,13 @@ permissions: {}
 
 jobs:
   build-sdist:
-    name: 📦 SDist
+    name: 🚀 CD
     permissions:
       contents: read # required to check out the repository
     uses: ./.github/workflows/reusable-packaging-sdist.yml
 
   build-wheels:
-    name: 🛞 Wheels for ${{ matrix.runs-on }}
+    name: 🚀 CD
     permissions:
       contents: read # required to check out the repository
     strategy:
@@ -67,7 +67,7 @@ jobs:
           verbose: true
 
   publish-docker-image:
-    name: 🐳 Docker
+    name: 🚀 CD
     permissions:
       contents: read # required to check out the repository
       packages: write # required to push the image to ghcr.io on release

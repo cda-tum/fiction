@@ -22,7 +22,7 @@ env:
 
 jobs:
   build_experiments:
-    name: Build
+    name: 🧪 Experiments
     runs-on: ubuntu-24.04
     permissions:
       contents: read # required to check out the repository

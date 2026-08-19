@@ -18,7 +18,7 @@ env:
 
 jobs:
   analyze:
-    name: Analyze ${{ matrix.language }}
+    name: 📝 Analyze ${{ matrix.language }}
     runs-on: ubuntu-24.04
     permissions:
       actions: read # required by github/codeql-action/init to check the workflow run

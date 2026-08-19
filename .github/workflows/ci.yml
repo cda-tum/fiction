@@ -30,11 +30,12 @@ jobs:
       contents: read # required to check out the repository
     uses: ./.github/workflows/reusable-change-detection.yml
 
-  # One job per OS and compiler, each building and testing Debug and Release. Naming the
-  # caller job after the matrix entry suppresses the parenthetical GitHub would otherwise
-  # append, so the check reads `🐧 ubuntu-24.04 with g++-13 / Build and test`.
+  # One job per OS and compiler, each building and testing Debug and Release. The caller job's
+  # name is the group its checks appear under, so it stays a short label and deliberately does
+  # not mention the matrix — GitHub appends the entry itself, and the called job spells it out:
+  # `🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 with g++-13`.
   cpp-tests-ubuntu:
-    name: 🐧 ${{ matrix.config.os }} with ${{ matrix.config.compiler }}
+    name: 🐧 Test
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -45,22 +46,30 @@ jobs:
         # Each entry costs a full Debug *and* Release build of a header-only, template-heavy
         # library, so the matrix carries the ends of each compiler family and one point in
         # between, not every version. g++-11 on 22.04 is the oldest combination we support.
-        config:
-          - { os: ubuntu-22.04, compiler: g++-11 }
-          - { os: ubuntu-24.04, compiler: g++-13 }
-          - { os: ubuntu-24.04, compiler: g++-14 }
-          - { os: ubuntu-24.04, compiler: clang++-18 }
-          - { os: ubuntu-24.04, compiler: clang++-19 }
-          - { os: ubuntu-24.04, compiler: clang++-20 }
-          - { os: ubuntu-24.04-arm, compiler: clang++-19 }
-          - { os: ubuntu-24.04-arm, compiler: clang++-20 }
+        include:
+          - runs-on: ubuntu-22.04
+            compiler: g++-11
+          - runs-on: ubuntu-24.04
+            compiler: g++-13
+          - runs-on: ubuntu-24.04
+            compiler: g++-14
+          - runs-on: ubuntu-24.04
+            compiler: clang++-18
+          - runs-on: ubuntu-24.04
+            compiler: clang++-19
+          - runs-on: ubuntu-24.04
+            compiler: clang++-20
+          - runs-on: ubuntu-24.04-arm
+            compiler: clang++-19
+          - runs-on: ubuntu-24.04-arm
+            compiler: clang++-20
     uses: ./.github/workflows/reusable-cpp-tests-ubuntu.yml
     with:
-      runs-on: ${{ matrix.config.os }}
-      compiler: ${{ matrix.config.compiler }}
+      runs-on: ${{ matrix.runs-on }}
+      compiler: ${{ matrix.compiler }}
 
   cpp-tests-macos:
-    name: 🍎 ${{ matrix.config.os }} with ${{ matrix.config.compiler }}
+    name: 🍎 Test
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -68,15 +77,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - { os: macos-15, compiler: clang++ }
+        include:
+          - runs-on: macos-15
+            compiler: clang++
     uses: ./.github/workflows/reusable-cpp-tests-macos.yml
     with:
-      runs-on: ${{ matrix.config.os }}
-      compiler: ${{ matrix.config.compiler }}
+      runs-on: ${{ matrix.runs-on }}
+      compiler: ${{ matrix.compiler }}
 
   cpp-tests-windows:
-    name: 🪟 ${{ matrix.config.os }} with ${{ matrix.config.toolset }} toolset
+    name: 🪟 Test
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -84,16 +94,18 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        config:
-          - { os: windows-2025, toolset: v143 }
-          - { os: windows-2025, toolset: ClangCL }
+        include:
+          - runs-on: windows-2025
+            toolset: v143
+          - runs-on: windows-2025
+            toolset: ClangCL
     uses: ./.github/workflows/reusable-cpp-tests-windows.yml
     with:
-      runs-on: ${{ matrix.config.os }}
-      toolset: ${{ matrix.config.toolset }}
+      runs-on: ${{ matrix.runs-on }}
+      toolset: ${{ matrix.toolset }}
 
   cpp-experiments:
-    name: 🧪 Experiments
+    name: 🐧 Experiments
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -101,7 +113,7 @@ jobs:
     uses: ./.github/workflows/reusable-cpp-experiments.yml
 
   cpp-linter:
-    name: 🚨 Clang-Tidy
+    name: 🚨 Lint
     permissions:
       contents: read # required to check out the repository
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR
@@ -138,7 +150,7 @@ jobs:
     uses: ./.github/workflows/reusable-python-linter.yml
 
   packaging-sdist:
-    name: 📦 SDist
+    name: 🐍 Packaging
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -148,7 +160,7 @@ jobs:
   # `[tool.cibuildwheel] test-command` runs pytest against every wheel, so these jobs are
   # also what runs the Python test suite
   packaging-wheels:
-    name: 🛞 Wheels for ${{ matrix.runs-on }}
+    name: 🐍 Packaging
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
