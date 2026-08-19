@@ -132,23 +132,6 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-codeql)
     uses: ./.github/workflows/reusable-codeql.yml
 
-  python-tests:
-    name: 🐍 Test
-    permissions:
-      contents: read # required to check out the repository
-    needs: change-detection
-    if: fromJSON(needs.change-detection.outputs.run-python-tests)
-    strategy:
-      fail-fast: false
-      matrix:
-        runs-on: [ubuntu-24.04, macos-15, windows-2025]
-        # the ends of the supported range; `nox -s tests` covers all five locally
-        python-version: ["3.10", "3.14"]
-    uses: ./.github/workflows/reusable-python-tests.yml
-    with:
-      runs-on: ${{ matrix.runs-on }}
-      python-version: ${{ matrix.python-version }}
-
   python-linter:
     name: 🐍 Lint
     permissions:
@@ -214,7 +197,6 @@ jobs:
       - cpp-linter
       - cpp-coverage
       - codeql
-      - python-tests
       - python-linter
       - packaging-sdist
       - packaging-wheels
@@ -235,8 +217,6 @@ jobs:
             && 'cpp-linter,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
             && 'codeql,' || '' }}
-            ${{ !fromJSON(needs.change-detection.outputs.run-python-tests)
-            && 'python-tests,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-linter)
             && 'python-linter,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-packaging)

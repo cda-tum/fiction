@@ -31,8 +31,6 @@ Added
     - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which pre-commit.ci no longer runs
-    - The Python test suite runs in CI again, on the oldest and newest supported interpreter across
-      Linux, macOS, and Windows. It previously ran only inside ``cibuildwheel``
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
@@ -58,6 +56,9 @@ Changed
       the precompiled header the ``dev`` preset already used. Same coverage, no more 2-hour timeouts
     - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
       credentials for PyPI, Docker Hub, and ghcr.io
+    - The wheel jobs now run whenever anything the extension is compiled from changes, not only
+      the packaging metadata. ``cibuildwheel`` runs the Python test suite, so this is what
+      decides whether it runs at all
 - Python bindings:
     - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
       ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
