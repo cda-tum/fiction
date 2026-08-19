@@ -1,32 +1,98 @@
-# this one treats each H-Si as an array value
+#!/usr/bin/env -S uv run --script --quiet
+# /// script
+# requires-python = ">=3.10"
+# dependencies = ["matplotlib", "numpy"]
+# ///
 
+"""Generate a randomly defective H-Si surface and write it out as a lattice of array values.
 
+Each H-Si atom is one array value. The surface is a 2D array of dimer rows, where one dimer
+is made of two H-Si atoms, and every lattice point carries the array value of the defect
+occupying it.
+
+Run it with no arguments to reproduce the published surface, or pass ``--help`` for the
+parameters it accepts.
+"""
+
+from __future__ import annotations
+
+import argparse
+import logging
 import random
 import sys
+from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.axes._axes import _log as matplotlib_axes_logger
 
 np.set_printoptions(threshold=sys.maxsize)
-matplotlib_axes_logger.setLevel("ERROR")
+logging.getLogger("matplotlib.axes._axes").setLevel(logging.ERROR)
+
+DEFECT_NAMES: list[str] = [
+    "H-Si",
+    "DB",
+    "si_vacancy",
+    "dihydride_pair",
+    "single_dihydride",
+    "onebyone",
+    "threebyone",
+    "siloxane",
+    "raised_Si",
+    "etch_pit",
+    "missing_dimer",
+]
+
+# one entry reads (array_value, width, height, ratio). `array_value` is the number assigned to each
+# lattice point the defect occupies, `width` and `height` count H-Si atoms rather than dimer rows,
+# and `ratio` is a fractional percent, so 0.05 is 5%
+DEFECT_PARAMS: list[tuple[int, int, int, float]] = [
+    (0, 1, 1, 1.0),  # HSi
+    (1, 1, 1, 0.0),  # DB
+    (2, 1, 2, 0.0),  # si_vacancy 0.05
+    (3, 1, 2, 0.2),  # dihydride_pair
+    (4, 1, 2, 0.05),  # single_dihydride
+    (5, 4, 2, 0.05),  # onebyone
+    (6, 4, 4, 0.05),  # threebyone
+    (7, 1, 2, 0.1),  # siloxane
+    (8, 1, 2, 0.1),  # raised_si
+    (9, 3, 2, 0.05),  # etch pit
+    (10, 1, 2, 0.05),  # missing_dimer
+]
+
+# one entry reads (colour, marker shape), indexed by the same array value as `DEFECT_PARAMS`
+DEFECT_PLOTTING: list[tuple[tuple[float, float, float], str]] = [
+    ((255 / 255, 0, 0), "o"),  # HSi
+    ((0, 0, 255 / 255), "o"),  # DB
+    ((0, 0, 0), "s"),  # si_vacancy
+    ((58 / 255, 0, 83 / 255), "s"),  # dihydride_pair
+    ((72 / 255, 53 / 255, 4 / 255), "s"),  # single_dihydride
+    ((42 / 255, 56 / 255, 14 / 255), "s"),  # onebyone
+    ((173 / 255, 255 / 255, 47 / 255), "s"),  # threebyone
+    ((64 / 255, 224 / 255, 208 / 255), "s"),  # siloxane
+    ((119 / 255, 136 / 255, 153 / 255), "s"),  # raised_si
+    ((255 / 255, 255 / 255, 0), "s"),  # etch_pit
+    ((227 / 255, 28 / 255, 121 / 255), "s"),  # missing_dimer
+]
 
 
-def rand_int(minimum: int, maximum: int) -> int:
-    return random.randit(minimum, maximum)
+class DefectSurface:
+    """A 2D lattice of H-Si atoms, each holding the array value of the defect that occupies it."""
 
-
-class defect_surface:
-    # creates a 2d array of the surface
-    # the surface is initialized with each surface dimer with a value of -1
-    # surface_width is the number of dimers within a row
-    # surface_height is the number of dimer rows (1 dimer is made of 2 HSi atoms)
-    # self.surface_lattice is the array of the surface
     def __init__(self, surface_width: int = 100, surface_height: int = 100) -> None:
-        self.defects_name = None
-        self.defect_params = None
-        self.defect_plotting = None
-        self.total_defect_lattice_points = None
+        """Initialize every lattice point of the surface to the H-Si array value.
+
+        Args:
+            surface_width: The number of dimers within a row.
+            surface_height: The number of dimer rows. One dimer is made of two H-Si atoms.
+
+        Raises:
+            ValueError: If either dimension is not positive.
+        """
+        if surface_width <= 0 or surface_height <= 0:
+            msg = f"surface dimensions must be positive, got {surface_width}x{surface_height}"
+            raise ValueError(msg)
+
+        self.total_defect_lattice_points = 0
 
         self.surface_width = surface_width
         self.surface_height = surface_height
@@ -37,102 +103,69 @@ class defect_surface:
 
         self.surface_lattice = np.full((self.surface_height, self.surface_width), 0)
 
-    # add_defects function allows you to choose total coverage of defects (fully defected surface is coverage = 1.)
-    # self.defect_params is array used for configuration of ratio and size of defects on the surface
-    # each entry is formatted as [array_value,width,height,ratio]
-    # array_value is number assigned to each lattice point in the self.surface_lattice
-    # width and height are how many HSi atoms are used (note this different than surface_height in init)
-    # ratio is given as fractional percent (0.05 = 5%)
-    # Following
     def add_defects(self, coverage: float = 0.05) -> None:
-        self.defects_name = [
-            "H-Si",
-            "DB",
-            "si_vacancy",
-            "dihydride_pair",
-            "single_dihydride",
-            "onebyone",
-            "threebyone",
-            "siloxane",
-            "raised_Si",
-            "etch_pit",
-            "missing_dimer",
-        ]
-        self.defect_params = [
-            [0, 1, 1, 1.0],  # HSi
-            [1, 1, 1, 0.0],  # [array_value,width,height,ratio] DB
-            [2, 1, 2, 0.0],  # si_vacancy 0.05
-            [3, 1, 2, 0.2],  # dihydride_pair
-            [4, 1, 2, 0.05],  # single_dihydride
-            [5, 4, 2, 0.05],  # onebyone
-            [6, 4, 4, 0.05],  # threebyone
-            [7, 1, 2, 0.1],  # siloxane
-            [8, 1, 2, 0.1],  # raised_si
-            [9, 3, 2, 0.05],  # etch pit
-            [10, 1, 2, 0.05],  # missing_dimer
-        ]
+        """Scatter defects across the surface until the requested coverage is accounted for.
 
-        self.defect_plotting = [
-            [(255 / 255, 0, 0), "o"],  # HSi
-            [(0, 0, 255 / 255), "o"],  # [colour,shape] DB
-            [(0, 0, 0), "s"],  # si_vacancy
-            [(58 / 255, 0, 83 / 255), "s"],  # dihydride_pair
-            [(72 / 255, 53 / 255, 4 / 255), "s"],  # single_dihydride
-            [(42 / 255, 56 / 255, 14 / 255), "s"],  # onebyone
-            [(173 / 255, 255 / 255, 47 / 255), "s"],  # threebyone
-            [(64 / 255, 224 / 255, 208 / 255), "s"],  # siloxane
-            [(119 / 255, 136 / 255, 153 / 255), "s"],  # raised_si
-            [(255 / 255, 255 / 255, 0), "s"],  # etch_pit
-            [(227 / 255, 28 / 255, 121 / 255), "s"],  # missing_dimer
-        ]
+        ``DEFECT_PARAMS`` configures the ratio and size of each defect.
+
+        Args:
+            coverage: The total coverage of defects. A fully defected surface is ``1.0``.
+
+        Raises:
+            ValueError: If ``coverage`` lies outside ``[0.0, 1.0]``.
+        """
+        if not 0.0 <= coverage <= 1.0:
+            msg = f"coverage must be between 0.0 and 1.0, got {coverage}"
+            raise ValueError(msg)
 
         self.total_defect_lattice_points = int(self.surface_width * self.surface_height * coverage)
-        for defect in self.defect_params:
+        for defect in DEFECT_PARAMS:
             num_of_defects = int(defect[3] * self.total_defect_lattice_points)
-            for i in range(1, num_of_defects):
+            # a placement that lands out of bounds or on an already occupied region is skipped, not
+            # retried: the original `i = i - 1` reassigned the loop variable, which `range` discards
+            # on the next iteration, so it never retried either. Retrying would change the surface
+            # this experiment produces
+            for _ in range(1, num_of_defects):
                 random_width = random.randint(0, self.surface_width - 1)
                 random_height = random.randint(0, self.surface_height - 1)
 
-                if (random_width > random_width + defect[1] and random_height > random_height + defect[2]) or (
-                    random_height % 2 == 1 and defect[2] % 2 == 0
+                # a defect whose footprint runs off the right or bottom edge is rejected. numpy
+                # truncates such a slice instead of raising, so before this check the experiment
+                # placed a clipped defect there
+                if (
+                    random_width + defect[1] > self.surface_width
+                    or random_height + defect[2] > self.surface_height
+                    or (random_height % 2 == 1 and defect[2] % 2 == 0)
                 ):
-                    i = i - 1
-                else:
-                    if np.all(
-                        self.surface_lattice[
-                            random_height : random_height + defect[2],
-                            random_width : random_width + defect[1],
-                        ]
-                        == 0,
-                    ):
-                        self.surface_lattice[
-                            random_height : random_height + defect[2],
-                            random_width : random_width + defect[1],
-                        ] = defect[0]
+                    continue
 
-                    else:
-                        i = i - 1
+                if np.all(
+                    self.surface_lattice[
+                        random_height : random_height + defect[2],
+                        random_width : random_width + defect[1],
+                    ]
+                    == 0,
+                ):
+                    self.surface_lattice[
+                        random_height : random_height + defect[2],
+                        random_width : random_width + defect[1],
+                    ] = defect[0]
 
-    def draw_panels(self) -> None:  # DB_panels,DB_pattern_extended, pattern):
-        # draws the DB_pattern_extended with rectangles to show each panel
-
+    def draw_panels(self) -> None:
+        """Plot the surface, one marker per lattice point, coloured and shaped by defect."""
         width_nm = self.a1 * self.surface_width
         height_nm = self.a2 * self.surface_height
-        # print(height_nm,width_nm)
-        # lattice_points = np.where(self.surface_lattice>=-1)
-        # DB_top_points = np.where(self.surface_lattice==0)
-        # DB_bottom_points = np.where(self.surface_lattice==1)
-        # print(lattice_points)
+
         fig = plt.figure(figsize=((width_nm + 1) / 10, (height_nm + 1) / 10), dpi=100)
         fig.add_subplot(1, 1, 1)
         plt.gca().invert_yaxis()
 
-        label_list = np.full((np.shape(self.defect_params)[0]), False)
+        label_list = np.zeros(len(DEFECT_PARAMS), dtype=np.bool_)
 
         for y in range(self.surface_height):
             for x in range(self.surface_width):
                 if not label_list[self.surface_lattice[y][x]]:
-                    lab = self.defects_name[self.surface_lattice[y][x]]
+                    lab = DEFECT_NAMES[self.surface_lattice[y][x]]
                     label_list[self.surface_lattice[y][x]] = True
                 else:
                     lab = ""
@@ -141,34 +174,101 @@ class defect_surface:
                     plt.scatter(
                         x * self.a1,
                         y * self.a2 + self.b2 / 2,
-                        c=self.defect_plotting[self.surface_lattice[y][x]][0],
+                        c=DEFECT_PLOTTING[self.surface_lattice[y][x]][0],
                         label=lab,
-                        marker=self.defect_plotting[self.surface_lattice[y][x]][1],
+                        marker=DEFECT_PLOTTING[self.surface_lattice[y][x]][1],
                     )
                 elif y % 2 == 1:
                     plt.scatter(
                         x * self.a1,
                         y * self.a2 - self.b2 / 2,
-                        c=self.defect_plotting[self.surface_lattice[y][x]][0],
+                        c=DEFECT_PLOTTING[self.surface_lattice[y][x]][0],
                         label=lab,
-                        marker=self.defect_plotting[self.surface_lattice[y][x]][1],
+                        marker=DEFECT_PLOTTING[self.surface_lattice[y][x]][1],
                     )
 
         plt.axis("equal")
         plt.xticks([])
         plt.yticks([])
         plt.legend()
-        # print(self.DB_pattern_extended.shape)
         plt.show()
 
-    def save_to_file(self, filename: str = "test.txt") -> None:
-        np.savetxt(filename, self.surface_lattice)
+    def save_to_file(self, filename: str | Path = "defective_surface.csv") -> None:
+        """Write the surface lattice out as comma-separated array values, one row per line.
+
+        Args:
+            filename: The path to write the lattice to.
+        """
+        np.savetxt(filename, self.surface_lattice, fmt="%d", delimiter=",")
 
 
-surface_width = 740
-surface_height = 1090
-coverage = 0.005
-surface = defect_surface(surface_width=surface_width, surface_height=surface_height)
-surface.add_defects(coverage=coverage)
-# surface.draw_panels()
-# surface.save_to_file('test.txt')
+def _positive_int(value: str) -> int:
+    """Parse a command-line argument that has to be a positive integer.
+
+    Args:
+        value: The raw argument.
+
+    Returns:
+        The parsed integer.
+
+    Raises:
+        argparse.ArgumentTypeError: If the argument is not a positive integer.
+    """
+    number = int(value)
+    if number <= 0:
+        msg = f"expected a positive integer, got {number}"
+        raise argparse.ArgumentTypeError(msg)
+    return number
+
+
+def _coverage(value: str) -> float:
+    """Parse a command-line argument that has to be a coverage fraction.
+
+    Args:
+        value: The raw argument.
+
+    Returns:
+        The parsed coverage.
+
+    Raises:
+        argparse.ArgumentTypeError: If the argument lies outside ``[0.0, 1.0]``.
+    """
+    coverage = float(value)
+    if not 0.0 <= coverage <= 1.0:
+        msg = f"expected a coverage between 0.0 and 1.0, got {coverage}"
+        raise argparse.ArgumentTypeError(msg)
+    return coverage
+
+
+def main() -> None:
+    """Generate a defective surface and write it out."""
+    parser = argparse.ArgumentParser(description="Generate a randomly defective H-Si surface.")
+    parser.add_argument("--width", type=_positive_int, default=740, help="number of dimers within a row")
+    parser.add_argument("--height", type=_positive_int, default=1090, help="number of dimer rows")
+    parser.add_argument(
+        "--coverage",
+        type=_coverage,
+        default=0.005,
+        help="total coverage of defects, where a fully defected surface is 1.0",
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        type=Path,
+        default=Path("defective_surface.csv"),
+        help="path to write the lattice to",
+    )
+    parser.add_argument("--plot", action="store_true", help="also plot the surface")
+    args = parser.parse_args()
+
+    surface = DefectSurface(surface_width=args.width, surface_height=args.height)
+    surface.add_defects(coverage=args.coverage)
+    surface.save_to_file(args.output)
+    print(f"wrote {args.output}")
+
+    if args.plot:
+        surface.draw_panels()
+
+
+if __name__ == "__main__":
+    main()

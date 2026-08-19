@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mnt.pyfiction import clocked_cartesian_layout, clocked_hexagonal_layout, clocked_shifted_cartesian_layout

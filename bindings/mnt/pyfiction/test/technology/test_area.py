@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mnt.pyfiction import area, inml_layout, qca_layout, sidb_layout

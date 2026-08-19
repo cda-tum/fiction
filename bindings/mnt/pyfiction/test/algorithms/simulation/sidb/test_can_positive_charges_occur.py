@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     can_positive_charges_occur,
     sidb_100_lattice,

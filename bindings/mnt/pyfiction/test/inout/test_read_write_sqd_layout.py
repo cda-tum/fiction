@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import read_sqd_layout_100, read_sqd_layout_111
 
 

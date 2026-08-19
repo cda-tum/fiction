@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import eq_type, equivalence_checking, equivalence_checking_stats, read_technology_network
 
 
