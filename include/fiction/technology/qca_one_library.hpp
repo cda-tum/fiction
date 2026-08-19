@@ -146,7 +146,7 @@ class qca_one_library : public fcn_gate_library<qca_technology, 5, 5>
 
   private:
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
         port_list<port_position> p{};
 

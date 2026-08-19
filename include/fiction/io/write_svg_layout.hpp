@@ -960,12 +960,12 @@ class write_qca_layout_svg_impl
         }
         else if (Lyt::technology::is_const_0_cell(ct))
         {
-            cell_color       = "#000000";
+            cell_color       = "000000";
             cell_description = ps.simple ? svg::SIMPLE_CELL : svg::CONST0;
         }
         else if (Lyt::technology::is_const_1_cell(ct))
         {
-            cell_color       = "#000000";
+            cell_color       = "000000";
             cell_description = ps.simple ? svg::SIMPLE_CELL : svg::CONST1;
         }
         else
