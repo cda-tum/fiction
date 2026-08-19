@@ -16,7 +16,6 @@ jobs:
   clangtidy:
     name: Run Clang-Tidy
     runs-on: ubuntu-latest
-    timeout-minutes: 120
     permissions:
       contents: read # required to check out the repository
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR

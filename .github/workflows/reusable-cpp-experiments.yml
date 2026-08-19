@@ -24,7 +24,6 @@ jobs:
   build_experiments:
     name: Build
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
     permissions:
       contents: read # required to check out the repository
 

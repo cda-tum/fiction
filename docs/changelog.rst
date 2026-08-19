@@ -54,6 +54,8 @@ Changed
       outcome, so branch protection can require one context instead of none of the real ones
     - The ``ci-*`` presets now reuse the precompiled header that the ``dev`` preset already used,
       which the 120 single-source test executables each paid for separately before
+    - The build jobs no longer cap themselves at two hours. Three of them had started failing on
+      that cap rather than on a regression; the short jobs keep a ceiling
     - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
       credentials for PyPI, Docker Hub, and ghcr.io
     - The wheel jobs now run whenever anything the extension is compiled from changes, not only

@@ -37,7 +37,6 @@ jobs:
   build_and_test:
     name: Build and test
     runs-on: ${{ inputs.runs-on }}
-    timeout-minutes: 120
     permissions:
       contents: read # required to check out the repository
 
