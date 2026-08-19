@@ -76,13 +76,12 @@ jobs:
         env:
           COMPILER: ${{ inputs.toolset == 'ClangCL' && 'clang-cl' || 'cl' }}
           PRESET: ${{ inputs.preset }}
-          EXTRA_CMAKE_ARGS: >-
-            ${{ inputs.preset == 'ci-release' && '-DFICTION_ENABLE_JEMALLOC=ON' || '' }}
+        # no jemalloc here: it cannot be downloaded and linked automatically on Windows,
+        # which is why the Linux and macOS workflows layer it on and this one does not
         run: >
           cmake -S . --preset "$env:PRESET"
           -DCMAKE_CXX_COMPILER="$env:COMPILER"
           -DCMAKE_C_COMPILER="$env:COMPILER"
-          $env:EXTRA_CMAKE_ARGS
 
       - name: Build
         env:
