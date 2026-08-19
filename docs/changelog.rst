@@ -31,6 +31,8 @@ Added
     - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which pre-commit.ci no longer runs
+    - The Python test suite runs in CI again, on the oldest and newest supported interpreter across
+      Linux, macOS, and Windows. It previously ran only inside ``cibuildwheel``
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
@@ -49,6 +51,13 @@ Changed
     - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
       paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
       ``requires`` clause no longer silences the Doxygen comments that follow it
+    - The twelve workflows are consolidated into ``ci.yml`` and ``cd.yml`` over a set of reusable
+      workflows. Change detection decides what runs, and a single ``🚦 Check`` job aggregates the
+      outcome, so branch protection can require one context instead of none of the real ones
+    - The C++ matrix builds Debug and Release as separate jobs, and the ``ci-*`` presets now reuse
+      the precompiled header the ``dev`` preset already used. Same coverage, no more 2-hour timeouts
+    - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
+      credentials for PyPI, Docker Hub, and ghcr.io
 - Python bindings:
     - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
       ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
@@ -192,6 +201,8 @@ Fixed
       ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
     - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
 - Continuous integration:
+    - The Read the Docs preview guard watched ``.readthedocs.yaml`` while the file is
+      ``.readthedocs.yml``, so editing it never rebuilt the documentation
     - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
       instead of full GitHub URLs, which the datasource requires to resolve tags
     - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge
