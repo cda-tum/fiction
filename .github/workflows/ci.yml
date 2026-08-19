@@ -134,6 +134,30 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
     uses: ./.github/workflows/reusable-python-linter.yml
 
+  packaging-sdist:
+    name: 📦 SDist
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-packaging)
+    uses: ./.github/workflows/reusable-packaging-sdist.yml
+
+  packaging-wheels:
+    name: 🛞 Wheels
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-packaging)
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest]
+    uses: ./.github/workflows/reusable-packaging-wheels.yml
+    with:
+      runs-on: ${{ matrix.runs-on }}
+
+  docker:
+    name: 🐳 Build
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-docker)
+    uses: ./.github/workflows/reusable-docker.yml
+
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the
   # guard, and a skipped required context leaves a pull request waiting forever.
@@ -151,6 +175,9 @@ jobs:
       - codeql
       - python-tests
       - python-linter
+      - packaging-sdist
+      - packaging-wheels
+      - docker
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the needed jobs succeeded or failed
@@ -170,4 +197,8 @@ jobs:
             && 'python-tests,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-linter)
             && 'python-linter,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-packaging)
+            && 'packaging-sdist,packaging-wheels,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-docker)
+            && 'docker,' || '' }}
           jobs: ${{ toJSON(needs) }}

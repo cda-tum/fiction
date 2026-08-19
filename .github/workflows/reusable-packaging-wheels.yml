@@ -1,0 +1,71 @@
+name: 🛞 • Wheels
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: The runner to execute on
+        required: true
+        type: string
+
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-wheels-${{ inputs.runs-on }}
+  cancel-in-progress: true
+
+permissions: {}
+
+env:
+  Z3_VERSION: 4.13.4
+
+jobs:
+  build_wheels:
+    name: 🛞 Wheels for ${{ inputs.runs-on }}
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 180
+    permissions:
+      contents: read # required to check out the repository
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up MSVC development environment (Windows only)
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          key: "${{ inputs.runs-on }}-pyfiction"
+          save: true
+          max-size: 10G
+
+      # on Linux, the action does not work because it can't install to the manylinux container
+      - if: runner.os != 'Linux'
+        name: Install Z3
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        with:
+          version: ${{ env.Z3_VERSION }}
+
+      - if: runner.os == 'Linux'
+        name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
+
+      - name: Upload wheel as an artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cibw-wheels-${{ inputs.runs-on }}
+          path: ./wheelhouse/*.whl
+          overwrite: true
