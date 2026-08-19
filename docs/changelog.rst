@@ -206,6 +206,8 @@ Fixed
 - Continuous integration:
     - The Read the Docs preview guard watched ``.readthedocs.yaml`` while the file is
       ``.readthedocs.yml``, so editing it never rebuilt the documentation
+    - Publishing the Docker image no longer clears its Docker Hub short description, which it
+      derived from a field that never held one
     - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
       instead of full GitHub URLs, which the datasource requires to resolve tags
     - Fixed patch-level CMake ``GIT_TAG`` bumps being eligible for Renovate's automerge

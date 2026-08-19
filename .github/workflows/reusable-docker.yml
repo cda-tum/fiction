@@ -81,7 +81,9 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ secrets.DOCKER_USERNAME }}/fiction
-          short-description: ${{ steps.meta.outputs.labels.description || '' }}
+          # no `short-description`: `metadata-action` emits `labels` as newline-delimited
+          # text, so the `.description` dereference always yielded the empty string and
+          # every release overwrote the Docker Hub blurb with nothing
           readme-filepath: ${{ github.workspace }}/README.md
 
       - name: Generate artifact attestation
