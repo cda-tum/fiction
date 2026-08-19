@@ -1,4 +1,4 @@
-name: 🚀 • CD
+name: CD
 
 # Everything that publishes. Kept apart from `ci.yml` so that no workflow reachable from
 # a pull request ever holds the credentials to release: PyPI, Docker Hub, and ghcr.io are

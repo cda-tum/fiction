@@ -1,4 +1,4 @@
-name: 🔍 • CI
+name: CI
 
 # The thin caller. Every real job lives in a `reusable-*.yml` beside this file; the only
 # work done here is deciding what runs and aggregating the outcome into `🚦 Check`.
