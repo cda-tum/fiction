@@ -15,7 +15,7 @@
 #include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
-#include <fiction/technology/molecular_qca_library.hpp>
+#include <fiction/technology/sim7_mol_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -23,13 +23,13 @@ using namespace fiction;
 
 TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 {
-    CHECK(!has_post_layout_optimization_v<molecular_qca_library, mol_qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<molecular_qca_library, qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<molecular_qca_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<molecular_qca_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<molecular_qca_library, cart_gate_clk_lyt>);
-    CHECK(!has_get_functional_implementations_v<molecular_qca_library>);
-    CHECK(!has_get_gate_ports_v<molecular_qca_library>);
+    CHECK(!has_post_layout_optimization_v<sim7_mol_library, mol_qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<sim7_mol_library, qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<sim7_mol_library, inml_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<sim7_mol_library, sidb_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<sim7_mol_library, cart_gate_clk_lyt>);
+    CHECK(!has_get_functional_implementations_v<sim7_mol_library>);
+    CHECK(!has_get_gate_ports_v<sim7_mol_library>);
 }
 
 TEST_CASE("Molecular QCA technology helpers", "[molecular-qca-library]")
@@ -68,8 +68,8 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_input_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -83,8 +83,8 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_output_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -98,8 +98,8 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate disjunction{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate disjunction{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -113,8 +113,8 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate bent_inverter{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate bent_inverter{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -130,11 +130,11 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == molecular_qca_library::rotate_90(disjunction));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == bent_inverter);
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == sim7_mol_library::rotate_90(disjunction));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == bent_inverter);
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(primary_output_port));
 }
 
 TEST_CASE("Setting up wires", "[molecular-qca-library]")
@@ -145,8 +145,8 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_input_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -160,8 +160,8 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_output_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -175,8 +175,8 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate wire{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate wire{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -192,21 +192,21 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 0}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 2}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 4}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 4}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 0}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 4}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 0}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 2}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 4}) == molecular_qca_library::rotate_270(wire));
-    CHECK(molecular_qca_library::set_up_gate(layout, {4, 0}) == molecular_qca_library::rotate_270(primary_output_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {4, 2}) == molecular_qca_library::rotate_270(primary_output_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {4, 4}) == molecular_qca_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 0}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 4}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 4}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 4}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {3, 0}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {3, 2}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {3, 4}) == sim7_mol_library::rotate_270(wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 0}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 4}) == sim7_mol_library::rotate_270(primary_output_port));
 }
 
 TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
@@ -217,8 +217,8 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_input_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -232,8 +232,8 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_output_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -247,8 +247,8 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate fanout{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate fanout{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -262,8 +262,8 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate fanout_d{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate fanout_d{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -277,8 +277,8 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate bent_wire{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate bent_wire{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
@@ -294,13 +294,13 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_output_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 0}) == molecular_qca_library::rotate_180(primary_output_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_90(primary_output_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == molecular_qca_library::rotate_180(fanout));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == molecular_qca_library::rotate_90(fanout_d));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_270(bent_wire));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_180(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_90(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == sim7_mol_library::rotate_180(fanout));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_90(fanout_d));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_270(bent_wire));
 }
 
 TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
@@ -315,8 +315,8 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const molecular_qca_library::fcn_gate fanout_1_3{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate fanout_1_3{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -380,13 +380,10 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     western_input_layout.create_po(west_fanout, "e", {2, 1});
     western_input_layout.create_po(west_fanout, "s", {1, 2});
 
-    CHECK(molecular_qca_library::set_up_gate(northern_input_layout, {1, 1}) == fanout_1_3);
-    CHECK(molecular_qca_library::set_up_gate(eastern_input_layout, {1, 1}) ==
-          molecular_qca_library::rotate_90(fanout_1_3));
-    CHECK(molecular_qca_library::set_up_gate(southern_input_layout, {1, 1}) ==
-          molecular_qca_library::rotate_180(fanout_1_3));
-    CHECK(molecular_qca_library::set_up_gate(western_input_layout, {1, 1}) ==
-          molecular_qca_library::rotate_270(fanout_1_3));
+    CHECK(sim7_mol_library::set_up_gate(northern_input_layout, {1, 1}) == fanout_1_3);
+    CHECK(sim7_mol_library::set_up_gate(eastern_input_layout, {1, 1}) == sim7_mol_library::rotate_90(fanout_1_3));
+    CHECK(sim7_mol_library::set_up_gate(southern_input_layout, {1, 1}) == sim7_mol_library::rotate_180(fanout_1_3));
+    CHECK(sim7_mol_library::set_up_gate(western_input_layout, {1, 1}) == sim7_mol_library::rotate_270(fanout_1_3));
 
     auto       clocked_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<gate_layout>()};
     const auto clocked_pi     = clocked_layout.create_pi("x", {1, 0});
@@ -399,7 +396,7 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     CHECK(clocked_layout.is_fanout(clocked_fanout_node));
     CHECK(clocked_layout.fanout_size(clocked_fanout_node) == 2u);
     CHECK(clocked_layout.template fanout_size<false>(clocked_fanout_node) == 3u);
-    CHECK(molecular_qca_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
+    CHECK(sim7_mol_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
 
     auto missing_input_layout  = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<gate_layout>()};
     const auto non_adjacent_pi = missing_input_layout.create_pi("x", {0, 0});
@@ -411,7 +408,7 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     const auto missing_input_fanout_node = missing_input_layout.get_node({1, 1});
     CHECK(missing_input_layout.is_fanout(missing_input_fanout_node));
     CHECK(missing_input_layout.template fanout_size<false>(missing_input_fanout_node) == 3u);
-    CHECK_THROWS_AS((molecular_qca_library::set_up_gate(missing_input_layout, {1, 1})), orientation_exception);
+    CHECK_THROWS_AS((sim7_mol_library::set_up_gate(missing_input_layout, {1, 1})), orientation_exception);
 }
 
 TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
@@ -422,8 +419,8 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_input_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -437,8 +434,8 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_output_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -452,8 +449,8 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate majority{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate majority{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -469,11 +466,11 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
     // clang-format on
 
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 1}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == molecular_qca_library::rotate_270(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == majority);
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == primary_output_port);
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 1}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == sim7_mol_library::rotate_270(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == majority);
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == primary_output_port);
 }
 
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
@@ -486,8 +483,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     // clang-format off
 
     // Boundary tiles are represented by dedicated primary input and output port templates.
-    static constexpr const molecular_qca_library::fcn_gate primary_input_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_input_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -501,8 +498,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate primary_output_port{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate primary_output_port{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -517,8 +514,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     }})};
 
     // Inverters can appear in straight and bent forms depending on the local tile neighborhood.
-    static constexpr const molecular_qca_library::fcn_gate straight_inverter{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate straight_inverter{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -532,8 +529,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate bent_inverter_r{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate bent_inverter_r{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
         {' ', ' ', ' ', 'd', 'c', 'c', 'd', ' ', ' ', ' '},
@@ -548,8 +545,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     }})};
 
     // AND and OR gates are encoded as majority gates with fixed 0 and 1 polarization inputs, respectively.
-    static constexpr const molecular_qca_library::fcn_gate conjunction{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate conjunction{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -563,8 +560,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate conjunction_r{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate conjunction_r{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -578,8 +575,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate disjunction{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate disjunction{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -594,8 +591,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     }})};
 
     // Fanout and bent-wire templates cover the remaining internal routing cases in this blueprint.
-    static constexpr const molecular_qca_library::fcn_gate fanout{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate fanout{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -609,8 +606,8 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const molecular_qca_library::fcn_gate bent_wire{
-    molecular_qca_library::cell_list_to_gate<char>(
+    static constexpr const sim7_mol_library::fcn_gate bent_wire{
+    sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -627,19 +624,19 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     // clang-format on
 
     // Primary I/O ports are matched with the rotation implied by their border orientation.
-    CHECK(molecular_qca_library::set_up_gate(layout, {0, 2}) == molecular_qca_library::rotate_90(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 0}) == molecular_qca_library::rotate_180(primary_input_port));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 0}) == molecular_qca_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {0, 2}) == sim7_mol_library::rotate_90(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 0}) == sim7_mol_library::rotate_180(primary_input_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 0}) == sim7_mol_library::rotate_90(primary_input_port));
 
     // Internal tiles must resolve to the exact gate template and rotation dictated by their port routing.
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 2}) == molecular_qca_library::rotate_270(straight_inverter));
-    CHECK(molecular_qca_library::set_up_gate(layout, {1, 1}) == bent_wire);
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 1}) == fanout);
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 0}) == molecular_qca_library::rotate_180(bent_inverter_r));
-    CHECK(molecular_qca_library::set_up_gate(layout, {2, 2}) == molecular_qca_library::rotate_180(disjunction));
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 1}) == molecular_qca_library::rotate_90(conjunction_r));
-    CHECK(molecular_qca_library::set_up_gate(layout, {3, 2}) == molecular_qca_library::rotate_180(conjunction));
-    CHECK(molecular_qca_library::set_up_gate(layout, {4, 2}) == molecular_qca_library::rotate_270(primary_output_port));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 2}) == sim7_mol_library::rotate_270(straight_inverter));
+    CHECK(sim7_mol_library::set_up_gate(layout, {1, 1}) == bent_wire);
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 1}) == fanout);
+    CHECK(sim7_mol_library::set_up_gate(layout, {3, 0}) == sim7_mol_library::rotate_180(bent_inverter_r));
+    CHECK(sim7_mol_library::set_up_gate(layout, {2, 2}) == sim7_mol_library::rotate_180(disjunction));
+    CHECK(sim7_mol_library::set_up_gate(layout, {3, 1}) == sim7_mol_library::rotate_90(conjunction_r));
+    CHECK(sim7_mol_library::set_up_gate(layout, {3, 2}) == sim7_mol_library::rotate_180(conjunction));
+    CHECK(sim7_mol_library::set_up_gate(layout, {4, 2}) == sim7_mol_library::rotate_270(primary_output_port));
 }
 
 TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
@@ -648,6 +645,5 @@ TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 
     auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
 
-    REQUIRE_THROWS_AS(molecular_qca_library::set_up_gate(layout, {1, 2}),
-                      unsupported_gate_type_exception<offset::ucoord_t>);
+    REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}), unsupported_gate_type_exception<offset::ucoord_t>);
 }

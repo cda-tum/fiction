@@ -47,9 +47,9 @@ QCA ONE Library
 Molecular QCA Library
 ---------------------
 
-**Header:** ``fiction/technology/molecular_qca_library.hpp``
+**Header:** ``fiction/technology/sim7_mol_library.hpp``
 
-.. doxygenclass:: fiction::molecular_qca_library
+.. doxygenclass:: fiction::sim7_mol_library
    :members:
 
 

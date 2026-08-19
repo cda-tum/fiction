@@ -18634,7 +18634,7 @@ static const char *mkd_doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"
 
 static const char *mkd_doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
-static const char *mkd_doc_fiction_molecular_qca_library =
+static const char *mkd_doc_fiction_sim7_mol_library =
 R"doc(SIM(7)-MolPDK molecular QCA gate library.
 
 This MolQCA gate library corresponds to the physically simulated
@@ -18649,7 +18649,7 @@ simulations using the SCERPA tool, and tiles represent uniform
 More information and the open-source implementation are available at
 https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
 
-static const char *mkd_doc_fiction_molecular_qca_library_determine_port_routing =
+static const char *mkd_doc_fiction_sim7_mol_library_determine_port_routing =
 R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
 at `t`.
 
@@ -18672,9 +18672,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_molecular_qca_library_molecular_qca_library = R"doc(Deleted constructor to prevent instantiation.)doc";
+static const char *mkd_doc_fiction_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
-static const char *mkd_doc_fiction_molecular_qca_library_set_up_1_to_3_fanout =
+static const char *mkd_doc_fiction_sim7_mol_library_set_up_1_to_3_fanout =
 R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
 tile.
 
@@ -18694,7 +18694,7 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_molecular_qca_library_set_up_gate =
+static const char *mkd_doc_fiction_sim7_mol_library_set_up_gate =
 R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
 
 Overrides the corresponding function in fcn_gate_library. Given a tile

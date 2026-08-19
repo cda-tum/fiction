@@ -2,8 +2,8 @@
 // Created by benjamin on 15.07.25.
 //
 
-#ifndef FICTION_MOLECULAR_QCA_LIBRARY_HPP
-#define FICTION_MOLECULAR_QCA_LIBRARY_HPP
+#ifndef FICTION_SIM7_MOL_LIBRARY_HPP
+#define FICTION_SIM7_MOL_LIBRARY_HPP
 
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
@@ -30,13 +30,13 @@ namespace fiction
  * More information and the open-source implementation are available at
  * https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.
  */
-class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10>
+class sim7_mol_library : public fcn_gate_library<mol_qca_technology, 10, 10>
 {
   public:
     /**
      * Deleted constructor to prevent instantiation.
      */
-    explicit molecular_qca_library() = delete;
+    explicit sim7_mol_library() = delete;
     /**
      * @brief Maps a gate-level tile to its MolQCA standard-cell implementation.
      *
@@ -671,4 +671,4 @@ class molecular_qca_library : public fcn_gate_library<mol_qca_technology, 10, 10
 
 }  // namespace fiction
 
-#endif  // FICTION_MOLECULAR_QCA_LIBRARY_HPP
+#endif  // FICTION_SIM7_MOL_LIBRARY_HPP

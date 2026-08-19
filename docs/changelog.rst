@@ -38,7 +38,7 @@ Added
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space
 - Gate libraries:
-    - Added ``molecular_qca_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK
+    - Added ``sim7_mol_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK
       molecular QCA standard-cell library to gate-level layouts, including QLL/SVG export support,
       Python bindings, and tests
 - Python bindings:
@@ -47,7 +47,7 @@ Added
     - Exposed ``number_of_threads`` on ``operational_domain_params`` and
       ``displacement_robustness_domain_params``
     - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
-      ``apply_mol_qca_library``
+      ``apply_sim7_mol_library``
 
 Changed
 #######
