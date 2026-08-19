@@ -30,6 +30,11 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  # ccache refuses to cache a compilation that uses a precompiled header unless told that
+  # the PCH's macro definitions and __DATE__/__TIME__ expansions can be ignored. On Unix
+  # cmake/Cache.cmake wraps the launcher with this; on Windows it cannot, so it is set here
+  # instead — otherwise turning PCH on for the CI presets turns caching off.
+  CCACHE_SLOPPINESS: pch_defines,time_macros
 
 jobs:
   build_and_test:
