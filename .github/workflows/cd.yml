@@ -18,10 +18,14 @@ permissions: {}
 jobs:
   build-sdist:
     name: 📦 SDist
+    permissions:
+      contents: read # required to check out the repository
     uses: ./.github/workflows/reusable-packaging-sdist.yml
 
   build-wheels:
     name: 🛞 Wheels
+    permissions:
+      contents: read # required to check out the repository
     strategy:
       fail-fast: false
       matrix:
@@ -64,6 +68,11 @@ jobs:
 
   publish-docker-image:
     name: 🐳 Publish
+    permissions:
+      contents: read # required to check out the repository
+      packages: write # required to push the image to ghcr.io on release
+      attestations: write # required to publish the build provenance attestation on release
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
     if: github.event_name == 'release' && github.event.action == 'published'
     uses: ./.github/workflows/reusable-docker.yml
     with:

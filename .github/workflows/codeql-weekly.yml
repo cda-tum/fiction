@@ -17,4 +17,8 @@ permissions: {}
 jobs:
   codeql:
     name: 📝 CodeQL
+    permissions:
+      actions: read # required by github/codeql-action/init to check the workflow run
+      contents: read # required to check out the repository
+      security-events: write # required to upload the SARIF results
     uses: ./.github/workflows/reusable-codeql.yml

@@ -26,10 +26,14 @@ permissions: {}
 jobs:
   change-detection:
     name: 🔍 Change
+    permissions:
+      contents: read # required to check out the repository
     uses: ./.github/workflows/reusable-change-detection.yml
 
   cpp-tests-ubuntu:
     name: 🐧 Test
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
     strategy:
@@ -56,6 +60,8 @@ jobs:
 
   cpp-tests-macos:
     name: 🍎 Test
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
     strategy:
@@ -72,6 +78,8 @@ jobs:
 
   cpp-tests-windows:
     name: 🪟 Test
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
     strategy:
@@ -89,18 +97,25 @@ jobs:
 
   cpp-experiments:
     name: 🧪 Build
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
     uses: ./.github/workflows/reusable-cpp-experiments.yml
 
   cpp-linter:
     name: 🚨 Lint
+    permissions:
+      contents: read # required to check out the repository
+      pull-requests: write # required to post/update the clang-tidy thread comment on the PR
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-linter)
     uses: ./.github/workflows/reusable-cpp-linter.yml
 
   cpp-coverage:
     name: ☂️ Coverage
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
     uses: ./.github/workflows/reusable-cpp-coverage.yml
@@ -109,12 +124,18 @@ jobs:
 
   codeql:
     name: 📝 CodeQL
+    permissions:
+      actions: read # required by github/codeql-action/init to check the workflow run
+      contents: read # required to check out the repository
+      security-events: write # required to upload the SARIF results
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-codeql)
     uses: ./.github/workflows/reusable-codeql.yml
 
   python-tests:
     name: 🐍 Test
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-python-tests)
     strategy:
@@ -130,18 +151,24 @@ jobs:
 
   python-linter:
     name: 🐍 Lint
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
     uses: ./.github/workflows/reusable-python-linter.yml
 
   packaging-sdist:
     name: 📦 SDist
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-packaging)
     uses: ./.github/workflows/reusable-packaging-sdist.yml
 
   packaging-wheels:
     name: 🛞 Wheels
+    permissions:
+      contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-packaging)
     strategy:
@@ -154,12 +181,20 @@ jobs:
 
   docker:
     name: 🐳 Build
+    permissions:
+      contents: read # required to check out the repository
+      packages: write # required to push the image to ghcr.io on release
+      attestations: write # required to publish the build provenance attestation on release
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-docker)
     uses: ./.github/workflows/reusable-docker.yml
 
   zizmor:
     name: 🌈 Audit
+    permissions:
+      contents: read # required to check out the repository
+      security-events: write # required to upload results to the code scanning API
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-workflows)
     uses: ./.github/workflows/reusable-zizmor.yml
