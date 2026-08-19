@@ -24,7 +24,7 @@ permissions: {}
 
 jobs:
   build:
-    name: 🐳 ${{ inputs.push && 'Build and publish' || 'Build' }} the Docker image
+    name: ${{ inputs.push && 'Build and publish' || 'Build' }} the image
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:

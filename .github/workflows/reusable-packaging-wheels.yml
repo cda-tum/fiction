@@ -20,7 +20,7 @@ env:
 
 jobs:
   build_wheels:
-    name: 🛞 Wheels for ${{ inputs.runs-on }}
+    name: Build
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 180
     permissions:

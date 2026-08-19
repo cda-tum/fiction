@@ -1,10 +1,5 @@
 name: 🐧 • C++ Tests
 
-# One matrix leg: one compiler in one build type. `ubuntu.yml` used to build and test
-# Debug *and* Release inside a single job, which is what pushed the g++-13 and g++-14
-# legs into the 120-minute ceiling. Splitting them halves the wall clock per job on the
-# same total compute and with the same coverage.
-
 on:
   workflow_call:
     inputs:
@@ -16,15 +11,11 @@ on:
         description: The C++ compiler package and binary name, e.g. `g++-13`
         required: true
         type: string
-      preset:
-        description: The CMake configure and build preset, `ci-debug` or `ci-release`
-        required: true
-        type: string
 
 concurrency:
   group: >-
     ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-cpp-tests-${{
-    inputs.runs-on }}-${{ inputs.compiler }}-${{ inputs.preset }}
+    inputs.runs-on }}-${{ inputs.compiler }}
   cancel-in-progress: true
 
 permissions: {}
@@ -35,10 +26,12 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  # Z3 has no ARM build in `cda-tum/setup-z3`
+  EXTRA_CMAKE_ARGS: ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
 
 jobs:
   build_and_test:
-    name: 🐧 ${{ inputs.runs-on }} with ${{ inputs.compiler }} (${{ inputs.preset }})
+    name: Build and test
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 120
     permissions:
@@ -58,9 +51,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          # Debug and Release are separate jobs now, so they need separate caches; sharing
-          # one key would have them overwrite each other's objects on every run
-          key: "${{ inputs.runs-on }}-${{ inputs.compiler }}-${{ inputs.preset }}"
+          key: "${{ inputs.runs-on }}-${{ inputs.compiler }}"
           variant: ccache
           save: true
           max-size: 10G
@@ -79,25 +70,35 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Configure CMake
+      # Build and test pipeline for Debug mode
+
+      - name: Configure CMake (Debug)
         env:
           COMPILER: ${{ inputs.compiler }}
-          PRESET: ${{ inputs.preset }}
-          # jemalloc is a Release-only measure; Z3 has no ARM build in `cda-tum/setup-z3`
-          EXTRA_CMAKE_ARGS: >-
-            ${{ inputs.preset == 'ci-release' && '-DFICTION_ENABLE_JEMALLOC=ON' || '' }}
-            ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
         run: >
-          cmake -S . --preset "$PRESET"
+          cmake -S . --preset ci-debug
           -DCMAKE_CXX_COMPILER="$COMPILER"
           $EXTRA_CMAKE_ARGS
 
-      - name: Build
-        env:
-          PRESET: ${{ inputs.preset }}
-        run: cmake --build --preset "$PRESET" --parallel 4
+      - name: Build (Debug)
+        run: cmake --build --preset ci-debug --parallel 4
 
-      - name: Test
+      - name: Test (Debug)
+        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3 --parallel 4
+
+      # Build and test pipeline for Release mode
+
+      - name: Configure CMake (Release)
         env:
-          PRESET: ${{ inputs.preset }}
-        run: ctest --preset "$PRESET" --output-on-failure --repeat until-pass:3 --parallel 4
+          COMPILER: ${{ inputs.compiler }}
+        run: >
+          cmake -S . --preset ci-release
+          -DCMAKE_CXX_COMPILER="$COMPILER"
+          -DFICTION_ENABLE_JEMALLOC=ON
+          $EXTRA_CMAKE_ARGS
+
+      - name: Build (Release)
+        run: cmake --build --preset ci-release --parallel 4
+
+      - name: Test (Release)
+        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3 --parallel 4

@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   build_sdist:
-    name: 📦 Build Source Distribution
+    name: Build source distribution
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

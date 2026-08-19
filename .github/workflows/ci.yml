@@ -30,8 +30,11 @@ jobs:
       contents: read # required to check out the repository
     uses: ./.github/workflows/reusable-change-detection.yml
 
+  # One job per OS and compiler, each building and testing Debug and Release. Naming the
+  # caller job after the matrix entry suppresses the parenthetical GitHub would otherwise
+  # append, so the check reads `🐧 ubuntu-24.04 with g++-13 / Build and test`.
   cpp-tests-ubuntu:
-    name: 🐧 Test
+    name: 🐧 ${{ matrix.config.os }} with ${{ matrix.config.compiler }}
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -39,10 +42,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        preset: [ci-debug, ci-release]
-        # Each entry costs a full build of a header-only, template-heavy library, so the
-        # matrix carries the ends of each compiler family and one point in between, not
-        # every version. g++-11 on 22.04 is the oldest combination we support.
+        # Each entry costs a full Debug *and* Release build of a header-only, template-heavy
+        # library, so the matrix carries the ends of each compiler family and one point in
+        # between, not every version. g++-11 on 22.04 is the oldest combination we support.
         config:
           - { os: ubuntu-22.04, compiler: g++-11 }
           - { os: ubuntu-24.04, compiler: g++-13 }
@@ -56,10 +58,9 @@ jobs:
     with:
       runs-on: ${{ matrix.config.os }}
       compiler: ${{ matrix.config.compiler }}
-      preset: ${{ matrix.preset }}
 
   cpp-tests-macos:
-    name: 🍎 Test
+    name: 🍎 ${{ matrix.config.os }} with ${{ matrix.config.compiler }}
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -67,17 +68,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        preset: [ci-debug, ci-release]
         config:
           - { os: macos-15, compiler: clang++ }
     uses: ./.github/workflows/reusable-cpp-tests-macos.yml
     with:
       runs-on: ${{ matrix.config.os }}
       compiler: ${{ matrix.config.compiler }}
-      preset: ${{ matrix.preset }}
 
   cpp-tests-windows:
-    name: 🪟 Test
+    name: 🪟 ${{ matrix.config.os }} with ${{ matrix.config.toolset }} toolset
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -85,7 +84,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        preset: [ci-debug, ci-release]
         config:
           - { os: windows-2025, toolset: v143 }
           - { os: windows-2025, toolset: ClangCL }
@@ -93,10 +91,9 @@ jobs:
     with:
       runs-on: ${{ matrix.config.os }}
       toolset: ${{ matrix.config.toolset }}
-      preset: ${{ matrix.preset }}
 
   cpp-experiments:
-    name: 🧪 Build
+    name: 🧪 Experiments
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -104,7 +101,7 @@ jobs:
     uses: ./.github/workflows/reusable-cpp-experiments.yml
 
   cpp-linter:
-    name: 🚨 Lint
+    name: 🚨 Clang-Tidy
     permissions:
       contents: read # required to check out the repository
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR
@@ -148,8 +145,10 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-packaging)
     uses: ./.github/workflows/reusable-packaging-sdist.yml
 
+  # `[tool.cibuildwheel] test-command` runs pytest against every wheel, so these jobs are
+  # also what runs the Python test suite
   packaging-wheels:
-    name: 🛞 Wheels
+    name: 🛞 Wheels for ${{ matrix.runs-on }}
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
@@ -163,7 +162,7 @@ jobs:
       runs-on: ${{ matrix.runs-on }}
 
   docker:
-    name: 🐳 Build
+    name: 🐳 Docker
     permissions:
       contents: read # required to check out the repository
       packages: write # required to push the image to ghcr.io on release
@@ -174,7 +173,7 @@ jobs:
     uses: ./.github/workflows/reusable-docker.yml
 
   zizmor:
-    name: 🌈 Audit
+    name: 🌈 Zizmor
     permissions:
       contents: read # required to check out the repository
       security-events: write # required to upload results to the code scanning API

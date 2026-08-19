@@ -11,7 +11,7 @@ permissions: {}
 
 jobs:
   mypy:
-    name: 🐍 Type check
+    name: Type check
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:

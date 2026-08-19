@@ -22,7 +22,7 @@ env:
 
 jobs:
   build_experiments:
-    name: 🧪 experiments
+    name: Build
     runs-on: ubuntu-24.04
     timeout-minutes: 120
     permissions:

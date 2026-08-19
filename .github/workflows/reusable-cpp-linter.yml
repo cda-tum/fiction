@@ -14,7 +14,7 @@ env:
 
 jobs:
   clangtidy:
-    name: 🚨 Clang-Tidy
+    name: Run Clang-Tidy
     runs-on: ubuntu-latest
     timeout-minutes: 120
     permissions:

@@ -11,15 +11,11 @@ on:
         description: The MSVC toolset, `v143` or `ClangCL`
         required: true
         type: string
-      preset:
-        description: The CMake configure and build preset, `ci-debug` or `ci-release`
-        required: true
-        type: string
 
 concurrency:
   group: >-
     ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-cpp-tests-${{
-    inputs.runs-on }}-${{ inputs.toolset }}-${{ inputs.preset }}
+    inputs.runs-on }}-${{ inputs.toolset }}
   cancel-in-progress: true
 
 permissions: {}
@@ -30,6 +26,7 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  COMPILER: ${{ inputs.toolset == 'ClangCL' && 'clang-cl' || 'cl' }}
   # ccache refuses to cache a compilation that uses a precompiled header unless told that
   # the PCH's macro definitions and __DATE__/__TIME__ expansions can be ignored. On Unix
   # cmake/Cache.cmake wraps the launcher with this; on Windows it cannot, so it is set here
@@ -38,7 +35,7 @@ env:
 
 jobs:
   build_and_test:
-    name: 🪟 ${{ inputs.runs-on }} with ${{ inputs.toolset }} toolset (${{ inputs.preset }})
+    name: Build and test
     runs-on: ${{ inputs.runs-on }}
     timeout-minutes: 120
     permissions:
@@ -61,7 +58,7 @@ jobs:
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
-          key: "${{ inputs.runs-on }}-${{ inputs.toolset }}-${{ inputs.preset }}"
+          key: "${{ inputs.runs-on }}-${{ inputs.toolset }}"
           variant: ccache
           save: true
           max-size: 10G
@@ -72,23 +69,32 @@ jobs:
         with:
           version: ${{ env.Z3_VERSION }}
 
-      - name: Configure CMake
-        env:
-          COMPILER: ${{ inputs.toolset == 'ClangCL' && 'clang-cl' || 'cl' }}
-          PRESET: ${{ inputs.preset }}
-        # no jemalloc here: it cannot be downloaded and linked automatically on Windows,
-        # which is why the Linux and macOS workflows layer it on and this one does not
+      # Build and test pipeline for Debug mode.
+      # jemalloc is absent throughout: it cannot be downloaded and linked automatically on
+      # Windows, which is why the Linux and macOS Release builds layer it on and this one does not
+
+      - name: Configure CMake (Debug)
         run: >
-          cmake -S . --preset "$env:PRESET"
+          cmake -S . --preset ci-debug
           -DCMAKE_CXX_COMPILER="$env:COMPILER"
           -DCMAKE_C_COMPILER="$env:COMPILER"
 
-      - name: Build
-        env:
-          PRESET: ${{ inputs.preset }}
-        run: cmake --build --preset "$env:PRESET" --parallel 4
+      - name: Build (Debug)
+        run: cmake --build --preset ci-debug --parallel 4
 
-      - name: Test
-        env:
-          PRESET: ${{ inputs.preset }}
-        run: ctest --preset "$env:PRESET" --output-on-failure --repeat until-pass:3 --parallel 4
+      - name: Test (Debug)
+        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3 --parallel 4
+
+      # Build and test pipeline for Release mode
+
+      - name: Configure CMake (Release)
+        run: >
+          cmake -S . --preset ci-release
+          -DCMAKE_CXX_COMPILER="$env:COMPILER"
+          -DCMAKE_C_COMPILER="$env:COMPILER"
+
+      - name: Build (Release)
+        run: cmake --build --preset ci-release --parallel 4
+
+      - name: Test (Release)
+        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3 --parallel 4

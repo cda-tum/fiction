@@ -52,8 +52,8 @@ Changed
     - The twelve workflows are consolidated into ``ci.yml`` and ``cd.yml`` over a set of reusable
       workflows. Change detection decides what runs, and a single ``🚦 Check`` job aggregates the
       outcome, so branch protection can require one context instead of none of the real ones
-    - The C++ matrix builds Debug and Release as separate jobs, and the ``ci-*`` presets now reuse
-      the precompiled header the ``dev`` preset already used. Same coverage, no more 2-hour timeouts
+    - The ``ci-*`` presets now reuse the precompiled header that the ``dev`` preset already used,
+      which the 120 single-source test executables each paid for separately before
     - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
       credentials for PyPI, Docker Hub, and ghcr.io
     - The wheel jobs now run whenever anything the extension is compiled from changes, not only
