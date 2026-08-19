@@ -1,30 +1,13 @@
 name: 🐍 • Lint
 
 on:
-  merge_group:
-  push:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.pyi"
-      - "pyproject.toml"
-      - ".pre-commit-config.yaml"
-      - ".github/workflows/python-linter.yml"
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.pyi"
-      - "pyproject.toml"
-      - ".pre-commit-config.yaml"
-      - ".github/workflows/python-linter.yml"
-  workflow_dispatch:
-
-permissions: {}
+  workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-python-linter
   cancel-in-progress: true
+
+permissions: {}
 
 jobs:
   mypy:

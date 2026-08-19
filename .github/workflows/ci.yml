@@ -113,6 +113,27 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-codeql)
     uses: ./.github/workflows/reusable-codeql.yml
 
+  python-tests:
+    name: 🐍 Test
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-python-tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-24.04, macos-15, windows-2025]
+        # the ends of the supported range; `nox -s tests` covers all five locally
+        python-version: ["3.10", "3.14"]
+    uses: ./.github/workflows/reusable-python-tests.yml
+    with:
+      runs-on: ${{ matrix.runs-on }}
+      python-version: ${{ matrix.python-version }}
+
+  python-linter:
+    name: 🐍 Lint
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-python-linter)
+    uses: ./.github/workflows/reusable-python-linter.yml
+
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the
   # guard, and a skipped required context leaves a pull request waiting forever.
@@ -128,6 +149,8 @@ jobs:
       - cpp-linter
       - cpp-coverage
       - codeql
+      - python-tests
+      - python-linter
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the needed jobs succeeded or failed
@@ -143,4 +166,8 @@ jobs:
             && 'cpp-linter,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
             && 'codeql,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-python-tests)
+            && 'python-tests,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-python-linter)
+            && 'python-linter,' || '' }}
           jobs: ${{ toJSON(needs) }}
