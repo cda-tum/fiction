@@ -142,6 +142,9 @@ Changed
     - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
       only smoke-testing the import
     - ``prek`` now validates ``.codecov.yml`` against its schema
+    - The ``prek`` hooks now carry explicit priorities, which run the read-only checks
+      concurrently and cut a warm ``prek run -a`` by about 18%. Hooks that rewrite the same file
+      keep exclusive priorities, since ``prek`` runs hooks that share one concurrently
     - The docstring generator runs on ``main`` only. It pushes with a token that starts no workflow
       run, so its commit on a pull request head would carry no ``🚦 Check``
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
