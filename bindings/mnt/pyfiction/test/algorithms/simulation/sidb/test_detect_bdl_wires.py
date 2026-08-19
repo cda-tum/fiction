@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     bdl_wire_selection,
     charge_distribution_surface_100,

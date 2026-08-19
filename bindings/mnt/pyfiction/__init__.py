@@ -4,6 +4,8 @@ This file is part of the MNT fiction framework released under the MIT license.
 See https://github.com/cda-tum/fiction for more information.
 """
 
+from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path

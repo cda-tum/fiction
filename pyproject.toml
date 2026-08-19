@@ -75,37 +75,25 @@ install.components = ["fiction_Python"]
 
 metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 
+# The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
+# `cmake/`. Two rules keep it readable: name directories, never a source glob, and anchor every
+# pattern to the repository root. The published sdist shipped no C++ sources at all because
+# `**/include` also matched `bindings/mnt/pyfiction/include/` and `**.hpp` matched the library
+# itself. `[tool.check-sdist]` below now fails on a pattern that drops a tracked source, so the
+# two rules are style rather than the only defense.
 sdist.exclude = [
-    "**/.git",
-    "**/.github",
-    "**/app",
-    "**/apps",
-    "**/bib",
-    "**/css",
-    "**/cli",
-    "**/html",
-    "**/doc",
-    "**/docs",
-    "**/benchmark",
-    "**/benchmarks",
-    "**/experiment",
-    "**/experiments",
-    "**/examples",
-    "**/include",
-    "**/cmake-build-**",
-    "**/plots",
-    "**/test",
-    "**/tests",
-    "**/nauty",
-    "**.cpp",
-    "**.hpp",
-    "**.pdf",
-    "**.ans",
-    "**.out",
-    "**.log",
-    "**.xml",
-    "**CMakeList.txt",
-    "**__pycache__"
+    "/.github",
+    "/benchmarks",
+    "/bib",
+    "/cli",
+    "/docs",
+    "/experiments",
+    "/test",
+    # the wheel does not ship the Python suite either; `[tool.cibuildwheel] test-sources` copies
+    # it in from the source tree
+    "/bindings/mnt/pyfiction/test",
+    "**/cmake-build-*",
+    "**/__pycache__"
 ]
 
 [tool.scikit-build.cmake.define]
@@ -141,6 +129,26 @@ cmake.define.DISABLE_GIL = "1"
 
 
 [tool.setuptools_scm]
+
+
+[tool.check-sdist]
+# `build-backend = "none"` is what makes this check load-bearing. The default `"auto"` resolves the
+# scikit-build-core adapter, whose `git_only_excludes` subtracts `sdist.exclude` from the set of
+# files it expects to find -- so it takes that list on trust and forgives exactly the bug that
+# emptied the published sdist. `"none"` subtracts nothing, so `git-only` below becomes the list
+# that has to account for every tracked file the sdist drops, and an over-broad exclude fails here.
+# The two lists overlap by design: that duplication is the check.
+build-backend = "none"
+git-only = [
+    "/.github",
+    "/benchmarks",
+    "/bib",
+    "/cli",
+    "/docs",
+    "/experiments",
+    "/test",
+    "/bindings/mnt/pyfiction/test",
+]
 
 
 [tool.pytest]
@@ -204,7 +212,9 @@ cache-keys = [
 ]
 
 [tool.mypy]
-files = ["bindings/mnt/pyfiction", "noxfile.py"]
+# Every Python file the repository owns, so a new one is checked without anyone remembering to
+# add it here
+files = ["bindings/mnt/pyfiction", "docs/conf.py", "experiments", "noxfile.py", "scripts"]
 mypy_path = ["$MYPY_CONFIG_FILE_DIR/bindings"]
 warn_unused_configs = true
 enable_error_code = ["ignore-without-code", "redundant-expr", "truthy-bool"]
@@ -217,6 +227,9 @@ warn_unreachable = true
 [tool.ruff]
 line-length = 120
 namespace-packages = ["mnt"]
+# Load-bearing, not just extra rules: the `# ruff: ignore[<name>]` suppressions in `docs/conf.py`
+# and the `rule-codes-in-selectors` rule that puts rule names in the selectors below are both
+# preview features. Turning this off makes those suppressions inert
 preview = true
 fix = true
 unsafe-fixes = true
@@ -227,46 +240,63 @@ src = ["bindings"]
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
-    "ISC001", # Conflicts with formatter
-    "PLR09", # Too many <...>
-    "PLR2004", # Magic value used in comparison
-    "S101", # Use of assert detected
-
-    # TODO checks to be added back in and addressed:
-    "D", # pydocstyle
-    "N", # flake8-naming
-    "PL", # pylint
-    "S", # flake8-bandit
-    "ERA001", # Found commented-out code
-    "CPY001", # Missing copyright notice at top of file
-    "FBT003", # Boolean positional value in function call
-    "INP001", # File is part of an implicit namespace package
-    "TD002", # Missing author in TODO
-    "TD003", # Missing issue link in TODO
-    "TD004", # Missing colon in TODO
-    "FIX002", # Line contains TODO
-    "RUF067", # `__init__` module should only contain docstrings and re-exports
-    "COM812", # rule may cause conflicts when used with the formatter
+    "single-line-implicit-string-concatenation", # conflicts with the formatter
+    "missing-trailing-comma", # conflicts with the formatter
+    "PLR09", # too many <...>
+    "missing-copyright-notice", # the project uses no per-file copyright headers; see #1091
+    # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
+    # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
+    "line-contains-todo",
 ]
 future-annotations = true
 
 [tool.ruff.lint.isort]
 known-first-party = ["mnt.pyfiction"]
+# `future-annotations = true` above lets ruff assume PEP 563 semantics when it rewrites an
+# annotation, which only holds in files that carry the import. Requiring it closes the gap.
+required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 # E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
-"bindings/mnt/pyfiction/test/inout/test_write_svg_layout.py" = ["E501"]
+"bindings/mnt/pyfiction/test/inout/test_write_svg_layout.py" = ["line-too-long"]
 # RUF069: a test that stores a float through a binding and reads it back asserts that it
 # comes back unchanged, which is exact; pytest.approx there would hide a broken setter
-"bindings/mnt/pyfiction/test/**" = ["T20", "ANN", "D", "RUF069"]
-"docs/**" = ["T20", "A"]
-"noxfile.py" = ["T20", "TID251"]
+# PLR6201: a set literal tests membership by hash, a list literal by `__eq__`. The coordinate
+# bindings compare equal to the tuples these tests write but do not hash equal to them, so the
+# rule's rewrite turns a passing assertion into a failing one
+"bindings/mnt/pyfiction/test/**" = [
+    "T20",
+    "ANN",
+    "D",
+    "assert", # a test suite asserts
+    "magic-value-comparison", # a test suite compares against the numbers it expects
+    "float-equality-comparison",
+    "literal-membership",
+]
+# `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
+"docs/**" = ["T20", "A", "implicit-namespace-package"]
+"noxfile.py" = ["T20", "banned-api"]
 "scripts/**" = ["T20"]  # maintenance scripts report progress on stdout
-"*.pyi" = ["D418", "PYI021"]  # pydocstyle
+"*.pyi" = ["overload-with-docstring", "docstring-in-stub"]  # pydocstyle
+# these three run real initialization: the two binding packages register the Windows DLL search
+# path before the extension is imported, and the test package does the same before the tests are
+# collected. A re-export-only `__init__` cannot do that
+"bindings/mnt/__init__.py" = ["non-empty-init-module"]
+"bindings/mnt/pyfiction/__init__.py" = ["non-empty-init-module"]
+"bindings/mnt/pyfiction/test/__init__.py" = ["non-empty-init-module"]
+# standalone scripts run by path, not modules anything imports, so an `__init__.py` would be wrong
+".github/scripts/**" = ["implicit-namespace-package"]
+"experiments/**" = [
+    "T20", # an experiment reports on stdout, as the C++ experiments do
+    "implicit-namespace-package",
+    # an experiment samples with `random`; a cryptographic source would draw a different
+    # surface, and an experiment keeps producing the result it reproduces
+    "suspicious-non-cryptographic-random-usage",
+]
 "*.ipynb" = [
     "D", # pydocstyle
-    "E402", # Allow imports to appear anywhere in Jupyter notebooks
-    "I002", # Allow missing `from __future__ import annotations` import
+    "module-import-not-at-top-of-file", # Allow imports to appear anywhere in Jupyter notebooks
+    "missing-required-import", # Allow missing `from __future__ import annotations` import
 ]
 
 [tool.ruff.lint.pydocstyle]

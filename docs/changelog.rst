@@ -27,6 +27,10 @@ Added
       no longer caps at three dimensions
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- Continuous integration:
+    - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which fails if the source
+      distribution drops a tracked source or ships an untracked one
+    - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which pre-commit.ci no longer runs
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
@@ -88,6 +92,13 @@ Changed
     - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
       and ``tests-slim`` presets
     - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
+- Experiments:
+    - Modernized ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
+      directory to it. Apart from the out-of-bounds fix below, the surface it generates is unchanged
+    - ``generate_defective_surface.py`` is executable and declares its dependencies in a PEP 723
+      block, so running it needs nothing installed first
+    - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
+      discarded, and takes the parameters it used to hard-code as command-line arguments
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
@@ -111,6 +122,12 @@ Changed
     - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
     - Migrated the ``pyfiction`` test suite from ``unittest`` to pytest and enabled ruff's ``PT``,
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
+    - Every Python file now carries ``from __future__ import annotations``, which ruff's
+      ``future-annotations`` setting had assumed of all of them and only six of them had
+    - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
+      including ``CPY001``, which stays off pending #1091
+    - ``mypy`` now checks every Python file the repository owns, where it previously checked only
+      the bindings and ``noxfile.py``
 - Continuous integration:
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
@@ -157,6 +174,19 @@ Fixed
       traced contour came out empty and every reachable point was marked operational without simulation
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
+- Experiments:
+    - **Breaking:** fixed the always-false out-of-bounds guard in ``generate_defective_surface.py``
+      that let a defect be placed clipped at the surface edge. The generated surface changes
+    - ``generate_defective_surface.py`` now rejects a coverage outside ``[0.0, 1.0]`` and a
+      non-positive surface dimension, where it used to write an empty surface and report success
+- Build system:
+    - ``.gitignore`` now covers the build, virtual environment, and editor droppings that a local
+      ``uv build --sdist`` would otherwise ship into the source distribution
+    - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
+      ``pip install mnt.pyfiction`` fail wherever no matching wheel exists
+- Documentation:
+    - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a
+      function without a Doxygen brief description
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL

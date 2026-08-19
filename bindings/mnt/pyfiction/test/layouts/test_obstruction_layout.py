@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mnt.pyfiction import (
@@ -237,7 +239,7 @@ def test_cartesian_obstruction_layout_gate_level_inheritance():
     assert tp == 1
 
     drv_params = gate_level_drv_params()
-    assert gate_level_drvs(layout, drv_params, False) == (0, 0)
+    assert gate_level_drvs(layout, drv_params) == (0, 0)
 
 
 def test_hexagonal_obstruction_layout_gate_level_inheritance():
@@ -366,4 +368,4 @@ def test_hexagonal_obstruction_layout_gate_level_inheritance():
     assert tp == 1
 
     drv_params = gate_level_drv_params()
-    assert gate_level_drvs(layout, drv_params, False) == (0, 0)
+    assert gate_level_drvs(layout, drv_params) == (0, 0)

@@ -12,6 +12,10 @@ ci:
   autoupdate_commit_msg: "⬆️ Bump pre-commit hooks"
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
   autoupdate_schedule: quarterly
+  # `mypy` needs `numpy`, `matplotlib`, and `sphinx` to resolve the imports of the files it
+  # checks, which puts its environment over the 250 MiB pre-commit.ci allows a hook. The
+  # 🐍 Lint workflow runs it instead
+  skip: [mypy]
 
 exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
@@ -78,17 +82,28 @@ repos:
       - id: ruff-format
       - id: ruff-check
         require_serial: true
+        # ruff lints `pyproject.toml`, where the rule selectors live, and skips every other TOML
+        # file. `uv.lock` is the exception: it carries no extension, so `identify` labels it TOML
+        # while ruff falls back to parsing it as Python
+        types_or: [python, pyi, jupyter, toml]
+        exclude: ^uv\.lock$
 
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v2.3.1
     hooks:
       - id: mypy
-        files: ^(bindings/mnt/pyfiction|noxfile.py)
+        files: ^(bindings/mnt/pyfiction|docs/conf\.py|experiments|noxfile\.py|scripts)
         args: []
         additional_dependencies:
           - nox
           - pytest
+          # `docs/conf.py` subclasses `docutils`' `Directive` and annotates a Sphinx `app`
+          - sphinx
+          - types-docutils
+          # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
+          - matplotlib
+          - numpy
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier

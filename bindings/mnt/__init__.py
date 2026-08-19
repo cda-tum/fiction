@@ -1,3 +1,12 @@
+"""Namespace package for the MNT tools.
+
+Windows resolves the DLLs a native extension links against through an explicit search path, so
+the directories holding the Z3 libraries are registered here, before anything imports
+``mnt.pyfiction``.
+"""
+
+from __future__ import annotations
+
 import os
 import sys
 from pathlib import Path

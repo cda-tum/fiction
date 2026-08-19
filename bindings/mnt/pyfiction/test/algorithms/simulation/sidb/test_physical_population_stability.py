@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     physical_population_stability_100,
     physical_population_stability_111,

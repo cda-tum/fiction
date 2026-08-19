@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mnt.pyfiction import bdl_input_iterator_100, sidb_100_lattice, sidb_technology
@@ -48,13 +50,13 @@ def test_iteration_empty_layout():
     assert bii == 0
     assert bii.get_layout().num_cells() == 0
 
-    bii = bii + 1
+    bii += 1
 
     assert bii.num_input_pairs() == 0
     assert bii == 1
     assert bii.get_layout().num_cells() == 0
 
-    bii = bii - 1
+    bii -= 1
 
     assert bii.num_input_pairs() == 0
     assert bii == 0
@@ -74,28 +76,28 @@ def test_manual_bdl_wire_iteration(bdl_wire):
     assert lyt0.get_cell_type((0, 0, 0)) == sidb_technology.cell_type.INPUT
     assert lyt0.get_cell_type((2, 0, 0)) == sidb_technology.cell_type.EMPTY
 
-    bii = bii + 1
+    bii += 1
 
     lyt1 = bii.get_layout()
 
     assert lyt1.get_cell_type((0, 0, 0)) == sidb_technology.cell_type.EMPTY
     assert lyt1.get_cell_type((2, 0, 0)) == sidb_technology.cell_type.INPUT
 
-    bii = bii + 1
+    bii += 1
 
     lyt2 = bii.get_layout()
 
     assert lyt2.get_cell_type((0, 0, 0)) == sidb_technology.cell_type.INPUT
     assert lyt2.get_cell_type((2, 0, 0)) == sidb_technology.cell_type.EMPTY
 
-    bii = bii - 1
+    bii -= 1
 
     lyt1 = bii.get_layout()
 
     assert lyt1.get_cell_type((0, 0, 0)) == sidb_technology.cell_type.EMPTY
     assert lyt1.get_cell_type((2, 0, 0)) == sidb_technology.cell_type.INPUT
 
-    bii = bii - 1
+    bii -= 1
 
     lyt0 = bii.get_layout()
 

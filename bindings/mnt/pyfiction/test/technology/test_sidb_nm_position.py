@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_layout, sidb_nm_position
 
 

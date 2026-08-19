@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import (
     apply_bestagon_library,
     apply_mol_qca_library,

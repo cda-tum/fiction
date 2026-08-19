@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pytest
 
 from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_nm_distance_100, sidb_nm_distance_111

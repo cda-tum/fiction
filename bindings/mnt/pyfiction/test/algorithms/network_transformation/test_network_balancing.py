@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import is_balanced, network_balancing, network_balancing_params
 
 

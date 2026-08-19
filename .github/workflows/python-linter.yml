@@ -1,0 +1,54 @@
+name: 🐍 • Lint
+
+on:
+  merge_group:
+  push:
+    branches: ["main"]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - "pyproject.toml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/python-linter.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "**/*.py"
+      - "**/*.pyi"
+      - "pyproject.toml"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/python-linter.yml"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  mypy:
+    name: 🐍 Type check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read # required to check out the repository
+
+    # `mypy` is the one hook `.pre-commit-config.yaml` lists under `ci: skip`. Its environment
+    # needs `numpy`, `matplotlib`, and `sphinx` to resolve the imports of the files it checks,
+    # which puts it over the 250 MiB pre-commit.ci allows a hook. It runs here instead, so the
+    # dependencies it needs cost nothing and `prek run -a` stays complete locally.
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Run mypy
+        run: uvx prek run mypy --all-files

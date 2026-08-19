@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from mnt.pyfiction import exact_cartesian, exact_params, read_technology_network, simulate
 
 

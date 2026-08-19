@@ -62,12 +62,35 @@ docs/html/
 
 # Coverage files
 lcov.info
+.coverage
+.coverage.*
+coverage.xml
 
 # Python
 __pycache__
 venv/
+.venv*/
+dist/
+.tox/
+.nox/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 *.egg-info
 *.env
+
+# OS and editor droppings. These are untracked but not otherwise ignored, and the source
+# distribution is built from the working tree, so without these it can ship them
+.DS_Store
+# a literal `?`, not a wildcard: `check-sdist --inject-junk` plants a file by that name
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+*.swp
 
 # Archive files
 *.zip
