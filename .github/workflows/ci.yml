@@ -93,6 +93,26 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
     uses: ./.github/workflows/reusable-cpp-experiments.yml
 
+  cpp-linter:
+    name: 🚨 Lint
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-linter)
+    uses: ./.github/workflows/reusable-cpp-linter.yml
+
+  cpp-coverage:
+    name: ☂️ Coverage
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
+    uses: ./.github/workflows/reusable-cpp-coverage.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
+  codeql:
+    name: 📝 CodeQL
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-codeql)
+    uses: ./.github/workflows/reusable-codeql.yml
+
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the
   # guard, and a skipped required context leaves a pull request waiting forever.
@@ -105,6 +125,9 @@ jobs:
       - cpp-tests-macos
       - cpp-tests-windows
       - cpp-experiments
+      - cpp-linter
+      - cpp-coverage
+      - codeql
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the needed jobs succeeded or failed
@@ -115,5 +138,9 @@ jobs:
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
-            && 'cpp-tests-ubuntu,cpp-tests-macos,cpp-tests-windows,cpp-experiments' || '' }}
+            && 'cpp-tests-ubuntu,cpp-tests-macos,cpp-tests-windows,cpp-experiments,cpp-coverage,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-linter)
+            && 'cpp-linter,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
+            && 'codeql,' || '' }}
           jobs: ${{ toJSON(needs) }}
