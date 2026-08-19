@@ -1,18 +1,10 @@
 name: 🌈 • Zizmor
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - ".github/workflows/**"
-  pull_request:
-    branches: ["main"]
-    paths:
-      - ".github/workflows/**"
-  merge_group:
+  workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-zizmor
   cancel-in-progress: true
 
 permissions: {}
@@ -22,7 +14,9 @@ jobs:
     name: 🌈 Zizmor
     # zizmor-action shells out to Docker, which ubuntu-slim's unprivileged container does not support
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
+      contents: read # required to check out the repository
       security-events: write # required to upload results to the code scanning API
 
     steps:

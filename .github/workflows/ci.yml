@@ -158,6 +158,12 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-docker)
     uses: ./.github/workflows/reusable-docker.yml
 
+  zizmor:
+    name: 🌈 Audit
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-workflows)
+    uses: ./.github/workflows/reusable-zizmor.yml
+
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the
   # guard, and a skipped required context leaves a pull request waiting forever.
@@ -178,6 +184,7 @@ jobs:
       - packaging-sdist
       - packaging-wheels
       - docker
+      - zizmor
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the needed jobs succeeded or failed
@@ -201,4 +208,6 @@ jobs:
             && 'packaging-sdist,packaging-wheels,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-docker)
             && 'docker,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-workflows)
+            && 'zizmor' || '' }}
           jobs: ${{ toJSON(needs) }}
