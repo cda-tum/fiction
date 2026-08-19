@@ -18634,88 +18634,6 @@ static const char *mkd_doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"
 
 static const char *mkd_doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
-static const char *mkd_doc_fiction_sim7_mol_library =
-R"doc(SIM(7)-MolPDK molecular QCA gate library.
-
-This MolQCA gate library corresponds to the physically simulated
-standard-cell library SIM(7)-MolPDK, introduced in "Bridging the Gap
-Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
-Physically Simulated Standard-Cell Library" by B. Hien, D. Quinci, Y.
-Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
-IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
-simulations using the SCERPA tool, and tiles represent uniform
-:math:`10 \times 10` MolQCA cell blocks.
-
-More information and the open-source implementation are available at
-https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
-
-static const char *mkd_doc_fiction_sim7_mol_library_determine_port_routing =
-R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
-at `t`.
-
-Connector coordinates are placed at the center of the respective tile
-borders: north `(4, 0)`, east `(9, 4)`, south `(5, 9)`, and west `(0,
-5)`. Primary inputs and outputs without explicit incoming or outgoing
-signals are assigned to the west and east borders, respectively.
-
-Args:
-    lyt: Layout that hosts tile `t`.
-    t: Tile whose port routing is determined.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    RespectClocking: Whether to respect the layout clocking while
-                     tracing incoming and outgoing signals.
-
-Returns:
-    Incoming and outgoing molQCA connector positions for `t`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
-
-static const char *mkd_doc_fiction_sim7_mol_library_set_up_1_to_3_fanout =
-R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
-tile.
-
-1-to-3 fan-outs always drive all three non-input sides. Their
-orientation is therefore determined by the missing outgoing connector
-side, which is the incoming side of the physical fan-out cell.
-
-Args:
-    p: Incoming and outgoing connector positions for the fan-out tile.
-
-Returns:
-    1-to-3 fan-out gate matching `p`'s missing outgoing connector.
-
-Raises:
-    std::out_of_range: If `p` does not describe a supported 1-to-3
-                       fan-out orientation.
-
-)doc";
-
-static const char *mkd_doc_fiction_sim7_mol_library_set_up_gate =
-R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
-
-Overrides the corresponding function in fcn_gate_library. Given a tile
-`t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
-
-Args:
-    lyt: Layout that hosts tile `t`.
-    t: Tile to be realized as a molQCA gate.
-
-Template Args:
-    GateLyt: Cartesian gate-level layout type.
-
-Returns:
-    molQCA gate representation of `t` including I/Os, rotation, const
-    cells, etc.
-
-)doc";
-
 static const char *mkd_doc_fiction_multi_simulated_annealing =
 R"doc(This variation of Simulated Annealing (SA) does not start from just
 one provided initial state, but generates a number of random initial
@@ -23058,6 +22976,88 @@ Returns:
     sidb_charge_state representation of `sg`.
 
 )doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library =
+R"doc(SIM(7)-MolPDK molecular QCA gate library.
+
+This MolQCA gate library corresponds to the physically simulated
+standard-cell library SIM(7)-MolPDK, introduced in "Bridging the Gap
+Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
+Physically Simulated Standard-Cell Library" by B. Hien, D. Quinci, Y.
+Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
+IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
+simulations using the SCERPA tool, and tiles represent uniform
+:math:`10 \times 10` MolQCA cell blocks.
+
+More information and the open-source implementation are available at
+https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_determine_port_routing =
+R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
+at `t`.
+
+Connector coordinates are placed at the center of the respective tile
+borders: north `(4, 0)`, east `(9, 4)`, south `(5, 9)`, and west `(0,
+5)`. Primary inputs and outputs without explicit incoming or outgoing
+signals are assigned to the west and east borders, respectively.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile whose port routing is determined.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    RespectClocking: Whether to respect the layout clocking while
+                     tracing incoming and outgoing signals.
+
+Returns:
+    Incoming and outgoing molQCA connector positions for `t`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_set_up_1_to_3_fanout =
+R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
+tile.
+
+1-to-3 fan-outs always drive all three non-input sides. Their
+orientation is therefore determined by the missing outgoing connector
+side, which is the incoming side of the physical fan-out cell.
+
+Args:
+    p: Incoming and outgoing connector positions for the fan-out tile.
+
+Returns:
+    1-to-3 fan-out gate matching `p`'s missing outgoing connector.
+
+Raises:
+    std::out_of_range: If `p` does not describe a supported 1-to-3
+                       fan-out orientation.
+
+)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_set_up_gate =
+R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
+
+Overrides the corresponding function in fcn_gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to choose the correct fcn_gate representation for
+that tile. May it be a gate or wires. Rotation and special marks like
+input and output, const cells etc. are computed additionally.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile to be realized as a molQCA gate.
+
+Template Args:
+    GateLyt: Cartesian gate-level layout type.
+
+Returns:
+    molQCA gate representation of `t` including I/Os, rotation, const
+    cells, etc.
+
+)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
 static const char *mkd_doc_fiction_simple_gate_layout_tile_drawer =
 R"doc(Base class for a simple gate-level layout DOT drawer.
