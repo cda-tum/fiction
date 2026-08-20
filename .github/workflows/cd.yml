@@ -39,6 +39,12 @@ jobs:
     needs: [build-sdist, build-wheels]
     runs-on: ubuntu-latest
     if: github.event_name == 'release' && github.event.action == 'published'
+    # the one place in the repository that can reach PyPI. Naming a deployment environment
+    # gives that step somewhere to hang required reviewers or a wait timer; until such a rule
+    # is configured the environment imposes nothing
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mnt.pyfiction
     permissions:
       attestations: write # required to publish the build provenance attestation
       id-token: write # required by actions/attest-build-provenance to mint the attestation
