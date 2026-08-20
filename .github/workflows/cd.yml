@@ -17,20 +17,20 @@ permissions: {}
 
 jobs:
   build-sdist:
-    name: 🚀 CD
+    name: 🐍 Packaging
     permissions:
       contents: read # required to check out the repository
-    uses: ./.github/workflows/reusable-packaging-sdist.yml
+    uses: ./.github/workflows/packaging-sdist.yml
 
   build-wheels:
-    name: 🚀 CD
+    name: 🐍 Packaging
     permissions:
       contents: read # required to check out the repository
     strategy:
       fail-fast: false
       matrix:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest]
-    uses: ./.github/workflows/reusable-packaging-wheels.yml
+    uses: ./.github/workflows/packaging-wheels.yml
     with:
       runs-on: ${{ matrix.runs-on }}
 
@@ -67,14 +67,14 @@ jobs:
           verbose: true
 
   publish-docker-image:
-    name: 🚀 CD
+    name: 🐳 Docker
     permissions:
       contents: read # required to check out the repository
       packages: write # required to push the image to ghcr.io on release
       attestations: write # required to publish the build provenance attestation on release
       id-token: write # required by actions/attest-build-provenance to mint the attestation
     if: github.event_name == 'release' && github.event.action == 'published'
-    uses: ./.github/workflows/reusable-docker.yml
+    uses: ./.github/workflows/docker.yml
     with:
       push: true
     secrets:

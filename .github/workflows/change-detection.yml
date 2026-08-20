@@ -81,11 +81,11 @@ jobs:
             CMakeLists.txt
             CMakePresets.json
             .github/workflows/ci.yml
-            .github/workflows/reusable-change-detection.yml
-            .github/workflows/reusable-cpp-tests-ubuntu.yml
-            .github/workflows/reusable-cpp-tests-macos.yml
-            .github/workflows/reusable-cpp-tests-windows.yml
-            .github/workflows/reusable-cpp-coverage.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/cpp-tests-ubuntu.yml
+            .github/workflows/cpp-tests-macos.yml
+            .github/workflows/cpp-tests-windows.yml
+            .github/workflows/cpp-coverage.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the C++ tests
         if: >-
@@ -113,8 +113,8 @@ jobs:
             CMakePresets.json
             .clang-tidy
             .github/workflows/ci.yml
-            .github/workflows/reusable-change-detection.yml
-            .github/workflows/reusable-cpp-linter.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/cpp-linter.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
             !bindings/mnt/pyfiction/include/pyfiction/documentation.hpp
       - name: Set a flag for running Clang-Tidy
@@ -142,8 +142,8 @@ jobs:
             **/*.py
             .github/codeql-config.yml
             .github/workflows/ci.yml
-            .github/workflows/reusable-change-detection.yml
-            .github/workflows/reusable-codeql.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/codeql.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running CodeQL
         if: >-
@@ -164,8 +164,8 @@ jobs:
             uv.lock
             .pre-commit-config.yaml
             .github/workflows/ci.yml
-            .github/workflows/reusable-change-detection.yml
-            .github/workflows/reusable-python-linter.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/python-linter.yml
       - name: Set a flag for running the Python linter
         if: >-
           github.event_name != 'pull_request'
@@ -195,9 +195,9 @@ jobs:
             **/*.py
             .github/workflows/ci.yml
             .github/workflows/cd.yml
-            .github/workflows/reusable-change-detection.yml
-            .github/workflows/reusable-packaging-sdist.yml
-            .github/workflows/reusable-packaging-wheels.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/packaging-sdist.yml
+            .github/workflows/packaging-wheels.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the packaging and Python test jobs
         if: >-
@@ -222,8 +222,8 @@ jobs:
             CMakePresets.json
             .github/workflows/ci.yml
             .github/workflows/cd.yml
-            .github/workflows/reusable-change-detection.yml
-            .github/workflows/reusable-docker.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/docker.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for building the Docker image
         if: >-

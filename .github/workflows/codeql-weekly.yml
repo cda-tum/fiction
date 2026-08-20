@@ -1,4 +1,4 @@
-name: 📝 • CodeQL (weekly)
+name: CodeQL Weekly
 
 # CodeQL runs per change from `ci.yml`. This scheduled sweep exists so that new queries
 # shipped by GitHub also reach code that has not been touched since the last scan.
@@ -21,4 +21,4 @@ jobs:
       actions: read # required by github/codeql-action/init to check the workflow run
       contents: read # required to check out the repository
       security-events: write # required to upload the SARIF results
-    uses: ./.github/workflows/reusable-codeql.yml
+    uses: ./.github/workflows/codeql.yml

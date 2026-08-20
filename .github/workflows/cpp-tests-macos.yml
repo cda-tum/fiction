@@ -29,7 +29,7 @@ env:
 
 jobs:
   build_and_test:
-    name: 🍎 ${{ inputs.runs-on }} with ${{ inputs.compiler }}
+    name: 🍎 ${{ inputs.runs-on }} ${{ inputs.compiler }}
     runs-on: ${{ inputs.runs-on }}
     permissions:
       contents: read # required to check out the repository

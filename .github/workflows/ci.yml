@@ -1,12 +1,12 @@
 name: CI
 
-# The thin caller. Every real job lives in a `reusable-*.yml` beside this file; the only
+# The thin caller. Every real job lives in a callable workflow beside this file; the only
 # work done here is deciding what runs and aggregating the outcome into `🚦 Check`.
 #
 # Deliberately no `on: paths:` filters. A workflow that `paths:` skips never reports a
 # status context, so it can never be required by branch protection — which is why
 # `docs/readthedocs.org:fiction` used to be the only required check in this repository.
-# Filtering moved into `reusable-change-detection.yml`, whose flags skip *jobs* while
+# Filtering moved into `change-detection.yml`, whose flags skip *jobs* while
 # `🚦 Check` still concludes.
 
 on:
@@ -28,12 +28,12 @@ jobs:
     name: 🔍 Change
     permissions:
       contents: read # required to check out the repository
-    uses: ./.github/workflows/reusable-change-detection.yml
+    uses: ./.github/workflows/change-detection.yml
 
   # One job per OS and compiler, each building and testing Debug and Release. The caller job's
   # name is the group its checks appear under, so it stays a short label and deliberately does
   # not mention the matrix — GitHub appends the entry itself, and the called job spells it out:
-  # `🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 with g++-13`.
+  # `🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 g++-13`.
   cpp-tests-ubuntu:
     name: 🐧 Test
     permissions:
@@ -63,7 +63,7 @@ jobs:
             compiler: clang++-19
           - runs-on: ubuntu-24.04-arm
             compiler: clang++-20
-    uses: ./.github/workflows/reusable-cpp-tests-ubuntu.yml
+    uses: ./.github/workflows/cpp-tests-ubuntu.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       compiler: ${{ matrix.compiler }}
@@ -80,7 +80,7 @@ jobs:
         include:
           - runs-on: macos-15
             compiler: clang++
-    uses: ./.github/workflows/reusable-cpp-tests-macos.yml
+    uses: ./.github/workflows/cpp-tests-macos.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       compiler: ${{ matrix.compiler }}
@@ -99,18 +99,18 @@ jobs:
             toolset: v143
           - runs-on: windows-2025
             toolset: ClangCL
-    uses: ./.github/workflows/reusable-cpp-tests-windows.yml
+    uses: ./.github/workflows/cpp-tests-windows.yml
     with:
       runs-on: ${{ matrix.runs-on }}
       toolset: ${{ matrix.toolset }}
 
   cpp-experiments:
-    name: 🐧 Experiments
+    name: 🧪 Experiments
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
-    uses: ./.github/workflows/reusable-cpp-experiments.yml
+    uses: ./.github/workflows/cpp-experiments.yml
 
   cpp-linter:
     name: 🚨 Lint
@@ -119,7 +119,7 @@ jobs:
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-linter)
-    uses: ./.github/workflows/reusable-cpp-linter.yml
+    uses: ./.github/workflows/cpp-linter.yml
 
   cpp-coverage:
     name: ☂️ Coverage
@@ -127,7 +127,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-cpp-tests)
-    uses: ./.github/workflows/reusable-cpp-coverage.yml
+    uses: ./.github/workflows/cpp-coverage.yml
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
@@ -139,7 +139,7 @@ jobs:
       security-events: write # required to upload the SARIF results
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-codeql)
-    uses: ./.github/workflows/reusable-codeql.yml
+    uses: ./.github/workflows/codeql.yml
 
   python-linter:
     name: 🐍 Lint
@@ -147,7 +147,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
-    uses: ./.github/workflows/reusable-python-linter.yml
+    uses: ./.github/workflows/python-linter.yml
 
   packaging-sdist:
     name: 🐍 Packaging
@@ -155,7 +155,7 @@ jobs:
       contents: read # required to check out the repository
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-packaging)
-    uses: ./.github/workflows/reusable-packaging-sdist.yml
+    uses: ./.github/workflows/packaging-sdist.yml
 
   # `[tool.cibuildwheel] test-command` runs pytest against every wheel, so these jobs are
   # also what runs the Python test suite
@@ -169,7 +169,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest]
-    uses: ./.github/workflows/reusable-packaging-wheels.yml
+    uses: ./.github/workflows/packaging-wheels.yml
     with:
       runs-on: ${{ matrix.runs-on }}
 
@@ -182,7 +182,7 @@ jobs:
       id-token: write # required by actions/attest-build-provenance to mint the attestation
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-docker)
-    uses: ./.github/workflows/reusable-docker.yml
+    uses: ./.github/workflows/docker.yml
 
   zizmor:
     name: 🌈 Zizmor
@@ -191,7 +191,7 @@ jobs:
       security-events: write # required to upload results to the code scanning API
     needs: change-detection
     if: fromJSON(needs.change-detection.outputs.run-workflows)
-    uses: ./.github/workflows/reusable-zizmor.yml
+    uses: ./.github/workflows/zizmor.yml
 
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the

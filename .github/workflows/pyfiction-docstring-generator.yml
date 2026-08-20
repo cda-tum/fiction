@@ -1,4 +1,4 @@
-name: 🐍 • Docstring Generator
+name: Docstring Generator
 
 on:
   push:

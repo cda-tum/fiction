@@ -22,7 +22,7 @@ env:
 
 jobs:
   coverage:
-    name: ☂️ ubuntu-24.04 with g++-13
+    name: ☂️ ubuntu-24.04 g++-13
     runs-on: ubuntu-24.04
     permissions:
       contents: read # required to check out the repository
