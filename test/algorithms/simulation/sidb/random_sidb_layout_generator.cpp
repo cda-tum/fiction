@@ -175,13 +175,17 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
     SECTION("Check uniqueness of two layouts")
     {
+        // a 21x21 region this densely packed lets greedy placement corner itself, after which the generator
+        // spends its whole attempt budget rejecting every remaining position. These budgets bound that worst
+        // case at tens of milliseconds; the defaults let it run for tens of seconds
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0}, {20, 20}},
-            8,
-            generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            2};
+            .coordinate_pair       = {{0, 0}, {20, 20}},
+            .number_of_sidbs       = 8,
+            .positive_sidbs        = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = 10'000,
+            .number_of_unique_generated_layouts    = 2,
+            .maximal_attempts_for_multiple_layouts = 1'000};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
@@ -231,8 +235,11 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("design is impossible")
     {
+        // the default region spans a single cell, so no attempt budget can place two SiDBs; a small budget keeps
+        // the section from burning the default 10^7 attempts
         generate_random_sidb_layout_params<offset::ucoord_t> params{};
-        params.number_of_sidbs = 2;
+        params.number_of_sidbs  = 2;
+        params.maximal_attempts = 100;
 
         const auto lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         CHECK(!lyt.has_value());
@@ -359,13 +366,17 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("Check uniqueness of two layouts")
     {
+        // a 21x21 region this densely packed lets greedy placement corner itself, after which the generator
+        // spends its whole attempt budget rejecting every remaining position. These budgets bound that worst
+        // case at tens of milliseconds; the defaults let it run for tens of seconds
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {20, 20}},
-            10,
-            generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            2};
+            .coordinate_pair       = {{0, 0}, {20, 20}},
+            .number_of_sidbs       = 10,
+            .positive_sidbs        = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = 10'000,
+            .number_of_unique_generated_layouts    = 2,
+            .maximal_attempts_for_multiple_layouts = 1'000};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
@@ -418,7 +429,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("Check if std::nullptr_t is returned when no layout can be designed")
     {
+        // the default region spans a single cell, so no attempt budget can place two SiDBs; a small budget keeps
+        // the section from burning the default 10^7 attempts five times over
         generate_random_sidb_layout_params<offset::ucoord_t> params{};
+        params.maximal_attempts                      = 100;
         params.maximal_attempts_for_multiple_layouts = 5;
         params.number_of_sidbs                       = 2;
 
