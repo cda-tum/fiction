@@ -29,7 +29,20 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["cpp", "python"]
+        # Declaring the build mode is what keeps the two languages honest about how their
+        # database is built. C++ is `manual`: the CMake build between `init` and `analyze`
+        # below is what CodeQL traces. Python has no build at all, which is `none`.
+        #
+        # `none` is also the only mode CodeQL's overlay analysis supports, so this job builds
+        # a full database on every run rather than an incremental one. That is the right trade
+        # here: extracting a header-only, template-heavy library without a build leaves CodeQL
+        # guessing at the include paths and defines that `FetchContent` puts under `_deps`,
+        # and the analysis is worth more than the minutes.
+        include:
+          - language: cpp
+            build-mode: manual
+          - language: python
+            build-mode: none
 
     steps:
       - name: Free Disk Space (Ubuntu)
@@ -86,6 +99,7 @@ jobs:
         uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
           config-file: .github/codeql-config.yml
 
       - if: matrix.language == 'cpp'
