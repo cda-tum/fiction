@@ -7,6 +7,7 @@
 #
 # Licensed under the MIT License
 
+# Keep the blank line above: `license-tools` reads an unbroken run of `#` lines as its own header and deletes it
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["matplotlib", "numpy"]
