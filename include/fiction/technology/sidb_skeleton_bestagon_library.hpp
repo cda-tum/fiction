@@ -109,7 +109,7 @@ class sidb_skeleton_bestagon_library
      * @return port directions of the given tile are returned as `port_list`.
      */
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
         port_list<port_direction> p{};
 

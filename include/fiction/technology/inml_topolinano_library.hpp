@@ -380,7 +380,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     }
 
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
         static_assert(fiction::has_is_inv_v<Lyt>, "Lyt must implement the is_inv function");
         static_assert(fiction::has_is_po_v<Lyt>, "Lyt must implement the is_po function");
