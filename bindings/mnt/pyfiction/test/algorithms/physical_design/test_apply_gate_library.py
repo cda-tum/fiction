@@ -3,6 +3,7 @@ from __future__ import annotations
 from mnt.pyfiction import (
     apply_bestagon_library,
     apply_qca_one_library,
+    apply_sim7_mol_library,
     apply_topolinano_library,
     exact_hexagonal,
     exact_params,
@@ -16,6 +17,14 @@ def test_apply_qca_one_library(mux21):
     layout = orthogonal(mux21)
 
     apply_qca_one_library(layout)
+
+
+def test_apply_sim7_mol_library(mux21):
+    layout = orthogonal(mux21)
+
+    cell_layout = apply_sim7_mol_library(layout)
+    assert cell_layout is not None
+    assert cell_layout.num_cells() > 0
 
 
 def test_apply_bestagon_library(mux21):

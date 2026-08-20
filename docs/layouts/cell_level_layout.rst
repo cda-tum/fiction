@@ -27,3 +27,5 @@ A cell-level layout can be obtained from a ``gate_level_layout`` by the :ref:`ap
             :members:
         .. autoclass:: mnt.pyfiction.sidb_layout
             :members:
+        .. autoclass:: mnt.pyfiction.mol_qca_layout
+            :members:

@@ -12098,6 +12098,37 @@ static const char *mkd_doc_fiction_detail_write_location_and_ground_state_impl_s
 
 static const char *mkd_doc_fiction_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl = R"doc()doc";
 
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
+
+Args:
+    c: The cell for which to generate the description and color.
+
+Returns:
+    A pair of strings representing the description and color of the
+    given cell `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl = R"doc(Default constructor.)doc";
+
 static const char *mkd_doc_fiction_detail_write_qca_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_detail_write_qca_layout_impl_lyt = R"doc()doc";
@@ -12236,8 +12267,6 @@ static const char *mkd_doc_fiction_detail_write_qll_layout_impl_sorted_pis = R"d
 static const char *mkd_doc_fiction_detail_write_qll_layout_impl_sorted_po_list = R"doc()doc";
 
 static const char *mkd_doc_fiction_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
-
-static const char *mkd_doc_fiction_detail_write_qll_layout_impl_tech_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_detail_write_qll_layout_impl_write_components = R"doc()doc";
 
@@ -18512,6 +18541,99 @@ static const char *mkd_doc_fiction_missing_sidb_position_exception_missing_sidb_
 
 static const char *mkd_doc_fiction_missing_sidb_position_exception_where = R"doc()doc";
 
+static const char *mkd_doc_fiction_mol_qca_technology =
+R"doc(Molecular Quantum-dot Cellular Automata (molQCA) technology
+implementation of the FCN concept.
+
+MolQCA normal cell symbols encode their SCERPA clock phase directly.
+The helper predicates below keep phase handling centralized for
+writers and gate libraries that need to translate cell symbols into
+simulator-specific metadata.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_clock_number =
+R"doc(Returns the SCERPA clock number encoded by a molQCA normal cell type.
+
+Non-normal cell types do not encode a clock phase and are mapped to
+phase 0 for callers that need a deterministic fallback.
+
+Args:
+    c: Cell type to inspect.
+
+Returns:
+    Clock number in the range 0 to 3.
+
+)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mark_EMPTY = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mark_INPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mark_OUTPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mode = R"doc(Possible cell modes for molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mode_NORMAL = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mode_ROTATED = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_mode_VERTICAL = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type = R"doc(Possible types of molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking 0.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking 1.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking 2.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking 3.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output molQCA cells.)doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_const_0_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_const_1_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_constant_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_crossover_cell_mode = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_empty_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_input_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_normal_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_normal_cell1 = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_normal_cell2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_normal_cell3 = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_normal_cell4 = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_normal_cell_mode = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_output_cell = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_rotated_cell_mode = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"doc()doc";
+
+static const char *mkd_doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
+
 static const char *mkd_doc_fiction_multi_simulated_annealing =
 R"doc(This variation of Simulated Annealing (SA) does not start from just
 one provided initial state, but generates a number of random initial
@@ -22855,6 +22977,88 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sim7_mol_library =
+R"doc(SIM(7)-MolPDK molecular QCA gate library.
+
+This MolQCA gate library corresponds to the physically simulated
+standard-cell library SIM(7)-MolPDK, introduced in "Bridging the Gap
+Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A
+Physically Simulated Standard-Cell Library" by B. Hien, D. Quinci, Y.
+Ardesi, G. Beretta, F. Ravera, M. Walter, and R. Wille, published at
+IEEE LANANO 2025 in Cusco, Peru. It is based on detailed physical
+simulations using the SCERPA tool, and tiles represent uniform
+:math:`10 \times 10` MolQCA cell blocks.
+
+More information and the open-source implementation are available at
+https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_determine_port_routing =
+R"doc(Determines the 10x10 MolQCA connector positions used by the gate tile
+at `t`.
+
+Connector coordinates are placed at the center of the respective tile
+borders: north `(4, 0)`, east `(9, 4)`, south `(5, 9)`, and west `(0,
+5)`. Primary inputs and outputs without explicit incoming or outgoing
+signals are assigned to the west and east borders, respectively.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile whose port routing is determined.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    RespectClocking: Whether to respect the layout clocking while
+                     tracing incoming and outgoing signals.
+
+Returns:
+    Incoming and outgoing molQCA connector positions for `t`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_set_up_1_to_3_fanout =
+R"doc(Selects the MolQCA 1-to-3 fan-out implementation for a routed gate
+tile.
+
+1-to-3 fan-outs always drive all three non-input sides. Their
+orientation is therefore determined by the missing outgoing connector
+side, which is the incoming side of the physical fan-out cell.
+
+Args:
+    p: Incoming and outgoing connector positions for the fan-out tile.
+
+Returns:
+    1-to-3 fan-out gate matching `p`'s missing outgoing connector.
+
+Raises:
+    std::out_of_range: If `p` does not describe a supported 1-to-3
+                       fan-out orientation.
+
+)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_set_up_gate =
+R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
+
+Overrides the corresponding function in fcn_gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to choose the correct fcn_gate representation for
+that tile. May it be a gate or wires. Rotation and special marks like
+input and output, const cells etc. are computed additionally.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile to be realized as a molQCA gate.
+
+Template Args:
+    GateLyt: Cartesian gate-level layout type.
+
+Returns:
+    molQCA gate representation of `t` including I/Os, rotation, const
+    cells, etc.
+
+)doc";
+
+static const char *mkd_doc_fiction_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
+
 static const char *mkd_doc_fiction_simple_gate_layout_tile_drawer =
 R"doc(Base class for a simple gate-level layout DOT drawer.
 
@@ -24948,6 +25152,46 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_write_mol_qca_layout_svg =
+R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
+output stream. Only cell-based layouts are supported, since the
+clocking scheme is not uniform at the gate level. Currently, only a
+uniform gate size of :math:`10 \times 10` is supported.
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
+
+Args:
+    lyt: The layout to be written.
+    os: The output stream to write into.
+    ps: Parameters.
+
+Template Args:
+    Lyt: Cell-level molQCA layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_write_mol_qca_layout_svg_2 =
+R"doc(Writes an SVG representation of a cell-level MolQCA layout to a file.
+Only cell-based layouts are supported, since the clocking scheme is
+not uniform at the gate level. Currently, only a uniform gate size of
+:math:`10 \times 10` is supported.
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
+
+Args:
+    lyt: The layout to be written.
+    filename: The file name to create and write into. Should
+              preferably use the `.svg` extension.
+    ps: Parameters.
+
+Template Args:
+    Lyt: Cell-level molQCA layout type.
+
+)doc";
+
 static const char *mkd_doc_fiction_write_operational_domain =
 R"doc( Writes a CSV representation of an operational domain to the specified
  output stream. The data are written as rows, each corresponding to
@@ -25202,30 +25446,29 @@ static const char *mkd_doc_fiction_write_qcc_layout_params_filename = R"doc(File
 static const char *mkd_doc_fiction_write_qcc_layout_params_use_filename_as_component_name = R"doc(Use the given filename as the component name inside the QCC file.)doc";
 
 static const char *mkd_doc_fiction_write_qll_layout =
-R"doc(Writes a cell-level QCA or iNML layout to a qll file that is used by
-ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
-physical simulator for the iNML technology platform as well as SCERPA
-(https://ieeexplore.ieee.org/document/8935211), a physical simulator
-for the mQCA technology platform.
+R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
+used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
+tool and a physical simulator for the iNML technology platform as well
+as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
+simulator for the molQCA (mQCA) technology platform.
 
 This overload uses an output stream to write into.
 
 Args:
     lyt: The layout to be written.
     os: The output stream to write into.
-    ps: Parameters.
 
 Template Args:
-    Lyt: Cell-level QCA or iNML layout type.
+    Lyt: Cell-level QCA, molQCA, or iNML layout type.
 
 )doc";
 
 static const char *mkd_doc_fiction_write_qll_layout_2 =
-R"doc(Writes a cell-level QCA or iNML layout to a qll file that is used by
-ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
-physical simulator for the iNML technology platform as well as SCERPA
-(https://ieeexplore.ieee.org/document/8935211), a physical simulator
-for the mQCA technology platform.
+R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
+used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
+tool and a physical simulator for the iNML technology platform as well
+as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
+simulator for the molQCA (mQCA) technology platform.
 
 This overload uses a file name to create and write into.
 
@@ -25233,10 +25476,9 @@ Args:
     lyt: The layout to be written.
     filename: The file name to create and write into. Should
               preferably use the `.qll` extension.
-    ps: Parameters.
 
 Template Args:
-    Lyt: Cell-level iNML layout type.
+    Lyt: Cell-level QCA, molQCA, or iNML layout type.
 
 )doc";
 

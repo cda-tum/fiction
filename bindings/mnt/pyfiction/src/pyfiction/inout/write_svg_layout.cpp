@@ -68,6 +68,21 @@ void write_qca_layout_svg_impl(nanobind::module_& m)
           py::arg("params") = fiction::write_qca_layout_svg_params{}, DOC(fiction_write_qca_layout_svg));
 }
 
+template <typename Lyt>
+void write_mol_qca_layout_svg_impl(nanobind::module_& m)
+{
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+
+    // MolQCA plot
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_mol_qca_layout_svg_pointer)(const py_mol_qca_layout&, const std::string_view&,
+                                                   const fiction::write_qca_layout_svg_params&) =
+        &fiction::write_mol_qca_layout_svg<py_mol_qca_layout>;
+
+    m.def("write_mol_qca_layout_svg", write_mol_qca_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("params") = fiction::write_qca_layout_svg_params{}, DOC(fiction_write_mol_qca_layout_svg));
+}
+
 }  // namespace detail
 
 void write_svg_layout(nanobind::module_& m)
@@ -119,6 +134,7 @@ void write_svg_layout(nanobind::module_& m)
     detail::write_sidb_layout_svg_impl<py_sidb_100_lattice>(m);
     detail::write_sidb_layout_svg_impl<py_sidb_layout>(m);
     detail::write_qca_layout_svg_impl<py_sidb_layout>(m);
+    detail::write_mol_qca_layout_svg_impl<py_mol_qca_layout>(m);
 }
 
 }  // namespace pyfiction

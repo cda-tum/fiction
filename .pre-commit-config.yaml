@@ -116,6 +116,7 @@ repos:
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.38.0
     hooks:
+      - id: check-codecov
       - id: check-github-workflows
       - id: check-readthedocs
       - id: check-renovate

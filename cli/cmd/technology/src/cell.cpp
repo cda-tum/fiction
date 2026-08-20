@@ -4,6 +4,7 @@
 
 #include "cmd/technology/include/cell.hpp"
 
+#include "fiction/technology/sim7_mol_library.hpp"
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>
@@ -30,7 +31,8 @@ cell_command::cell_command(const environment::ptr& e) :
         command(e, "Compiles the current gate layout in store down to a cell-level layout. A gate library must be "
                    "specified in order to instruct the algorithm how to map gate tiles to cell blocks.")
 {
-    add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, ToPoliNano, Bestagon}", true);
+    add_option("--library,-l", library, "Gate library to use for mapping {QCA-ONE, SIM7-MOL, ToPoliNano, Bestagon}",
+               true);
 }
 
 void cell_command::execute()
@@ -46,7 +48,8 @@ void cell_command::execute()
     }
 
     const auto lib_orig = library;
-    std::transform(library.begin(), library.end(), library.begin(), ::toupper);
+    std::ranges::transform(library, library.begin(),
+                           [](const unsigned char c) { return static_cast<char>(std::toupper(c)); });
 
     if (library == "QCA-ONE" || library == "QCAONE" || library == "QCA ONE")
     {
@@ -57,6 +60,21 @@ void cell_command::execute()
         };
 
         const auto visitor = [&apply_qca_one](auto&& source) { return std::visit(apply_qca_one, source); };
+
+        if (const auto result = apply_with_error_handling(visitor, s.current()); result.has_value())
+        {
+            store<fiction::cell_layout_t>().extend() = *result;
+        }
+    }
+    else if (library == "SIM7" || library == "SIM7MOL" || library == "SIM7-MOL" || library == "SIM7_MOL")
+    {
+        const auto apply_sim7_mol = [](auto&& lyt_ptr)
+        {
+            return std::make_shared<fiction::mol_qca_cell_clk_lyt>(
+                fiction::apply_gate_library<fiction::mol_qca_cell_clk_lyt, fiction::sim7_mol_library>(*lyt_ptr));
+        };
+
+        const auto visitor = [&apply_sim7_mol](auto&& source) { return std::visit(apply_sim7_mol, source); };
 
         if (const auto result = apply_with_error_handling(visitor, s.current()); result.has_value())
         {

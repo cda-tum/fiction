@@ -582,6 +582,8 @@ inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Ly
 template <typename Lyt>
 inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
 template <typename Lyt>
+inline constexpr const bool has_mol_qca_technology_v = std::is_same_v<technology<Lyt>, mol_qca_technology>;
+template <typename Lyt>
 inline constexpr const bool has_offset_ucoord_v = is_offset_ucoord_v<coordinate<Lyt>>;
 template <typename Lyt>
 inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;

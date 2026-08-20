@@ -377,7 +377,7 @@ dependencies = [
 build = [
     { name = "nanobind" },
     { name = "scikit-build-core" },
-    { name = "setuptools-scm" },
+    { name = "vcs-versioning" },
 ]
 dev = [
     { name = "nanobind" },
@@ -386,11 +386,10 @@ dev = [
     { name = "pytest-sugar" },
     { name = "pytest-xdist" },
     { name = "scikit-build-core" },
-    { name = "setuptools-scm" },
+    { name = "vcs-versioning" },
 ]
 docs = [
     { name = "breathe" },
-    { name = "setuptools-scm" },
     { name = "sphinx", version = "8.1.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "sphinx", version = "8.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
     { name = "sphinx-rtd-theme" },
@@ -407,22 +406,21 @@ requires-dist = [{ name = "z3-solver", specifier = ">=4.8.0" }]
 
 [package.metadata.requires-dev]
 build = [
-    { name = "nanobind", specifier = "~=2.13.0" },
-    { name = "scikit-build-core", specifier = ">=0.11.0" },
-    { name = "setuptools-scm", specifier = ">=8.1" },
+    { name = "nanobind", specifier = "~=2.15.0" },
+    { name = "scikit-build-core", specifier = "~=1.0.3" },
+    { name = "vcs-versioning", specifier = "~=2.3.0" },
 ]
 dev = [
-    { name = "nanobind", specifier = "~=2.13.0" },
+    { name = "nanobind", specifier = "~=2.15.0" },
     { name = "nox", specifier = ">=2025.11.12" },
     { name = "pytest", specifier = ">=9.0.1" },
     { name = "pytest-sugar", specifier = ">=1.1.1" },
     { name = "pytest-xdist", specifier = ">=3.8.0" },
-    { name = "scikit-build-core", specifier = ">=0.11.0" },
-    { name = "setuptools-scm", specifier = ">=8.1" },
+    { name = "scikit-build-core", specifier = "~=1.0.3" },
+    { name = "vcs-versioning", specifier = "~=2.3.0" },
 ]
 docs = [
     { name = "breathe", specifier = "==4.36.0" },
-    { name = "setuptools-scm", specifier = ">=8.1" },
     { name = "sphinx", marker = "python_full_version < '3.11'", specifier = "==8.1.3" },
     { name = "sphinx", marker = "python_full_version >= '3.11'", specifier = "==8.2.3" },
     { name = "sphinx-rtd-theme", specifier = "==3.1.0" },
@@ -436,11 +434,11 @@ test = [
 
 [[package]]
 name = "nanobind"
-version = "2.13.0"
+version = "2.15.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/07/e5/a6fc2f024eaef17c68b94b5f8f56098d31859a7840a11a3dd45da2d3908a/nanobind-2.13.0.tar.gz", hash = "sha256:c7b04d6a6a4cd57985571e605539399b51331ae455d7fce576a5e2fcb89b1dcf", size = 1052101, upload-time = "2026-06-18T06:03:49.491Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/08/cef3343279d2bde0baa57aadaacf7196ee336f12449c50c27f799c45b3f7/nanobind-2.15.0.tar.gz", hash = "sha256:3eace37a3b8cdadd531fcc6145263985b29821467161d34ff722b0644cf445b5", size = 1060056, upload-time = "2026-08-15T19:01:04.369Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/39/8d/cec69a0a804711fd89f47fad92cd2a438a1ceaafd9dabaf3b8b403b5cbba/nanobind-2.13.0-py3-none-any.whl", hash = "sha256:9268d7201eaf5519ae61b7a83175f2af77088cb4b99dd3ce5b00550f697da7b7", size = 269387, upload-time = "2026-06-18T06:03:47.508Z" },
+    { url = "https://files.pythonhosted.org/packages/d8/72/16a606cbea58be568475f450ece121b3fd62cffb390fd0f8eb8b410904f5/nanobind-2.15.0-py3-none-any.whl", hash = "sha256:91dae9305c6242cf63ab11a5c41594e234e7a22fd9fcc2c5c4ba80724abc1787", size = 271648, upload-time = "2026-08-15T19:01:02.477Z" },
 ]
 
 [[package]]
@@ -613,31 +611,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/8d/7c/0f69b0c7150ce4bcee78c199fe3b7e03a6e01578451bd5d5d1a58beb32f9/scikit_build_core-1.0.3.tar.gz", hash = "sha256:a4d7a05978ee37975c37743510c8991e2debce7ef83afb0a07c0c576fd4f16e8", size = 477539, upload-time = "2026-07-12T05:08:30.298Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/b0/7ad8fa9aebb0835b2e20afebf1483cbe175d1612fe01e85042ce9ced8755/scikit_build_core-1.0.3-py3-none-any.whl", hash = "sha256:ae95427b7d3c14a6cf8bbfd4d901f6138ab64c99e20cbe8ea7d75cd26093f085", size = 278294, upload-time = "2026-07-12T05:08:28.725Z" },
-]
-
-[[package]]
-name = "setuptools"
-version = "84.0.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/6d/44/f5da03a8ef95d369145c5bb53050e7877c9f3d312e128605fd9504829143/setuptools-84.0.0.tar.gz", hash = "sha256:f4695c21257f0d9b537ec2692c941d02ee143b7cc1276941349a546573b2ef73", size = 1168449, upload-time = "2026-08-08T18:27:58.365Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/95/9c/c510029fc6ef33a6275cd2c5d3cecd6613dfd6aa401d57c54f1c18852ccf/setuptools-84.0.0-py3-none-any.whl", hash = "sha256:51a52592b3b99e102b609654876bd65f19f999935166d1352678931132b0c670", size = 818216, upload-time = "2026-08-08T18:27:56.719Z" },
-]
-
-[[package]]
-name = "setuptools-scm"
-version = "10.2.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "packaging" },
-    { name = "setuptools" },
-    { name = "tomli", marker = "python_full_version < '3.11'" },
-    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
-    { name = "vcs-versioning" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/5d/b1/d0b97ffd2856a7d19c63024a89fb84813cb9d2ed7fa8fdbedf9e2f13a9ab/setuptools_scm-10.2.1.tar.gz", hash = "sha256:4fa7dd82cf8c800df59c9a288c90299b1657ff1ecfc3f5cc00287c5dbf5e27a9", size = 154237, upload-time = "2026-07-21T08:08:04.553Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/c3/b4/02ac1d9833b882c87b3a4e82703e70eac4ab33d0d15fb123e60bb01f3bc1/setuptools_scm-10.2.1-py3-none-any.whl", hash = "sha256:b7c82f4102d389ee57dc66ccdb4f9b4bca3c40ba83b43f1f63d68ccd72db2580", size = 29078, upload-time = "2026-07-21T08:08:03.293Z" },
 ]
 
 [[package]]
@@ -891,16 +864,16 @@ wheels = [
 
 [[package]]
 name = "vcs-versioning"
-version = "2.2.4"
+version = "2.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "packaging" },
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/3c/92/14277e46f415b6a01b6e94960cd6bc3acdc366e990d43ad71d63fef83d1b/vcs_versioning-2.2.4.tar.gz", hash = "sha256:ed718fdee42170e128a8add6f23f53aa64dc7d9ab2de87d3083a691df881a809", size = 145243, upload-time = "2026-08-07T20:20:42.517Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/a6/cb/6f5c4ed4da249ef5eea34ddfbb38174c5533ff3da8703b8252bf44b80396/vcs_versioning-2.3.1.tar.gz", hash = "sha256:806635bd0ea653c96af98a70624be758d408a989f2cd0b390e63474d99f96b63", size = 156292, upload-time = "2026-08-19T07:37:21.034Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/7a/26/7d2b738d2b7e177e729932dbdf1ebfa57c98846777a87a864130cc1e196b/vcs_versioning-2.2.4-py3-none-any.whl", hash = "sha256:48ffea8a6a175c37a718c7ee2e5f508d0e500c2cf3371791f7948bccb2b44628", size = 109066, upload-time = "2026-08-07T20:20:40.963Z" },
+    { url = "https://files.pythonhosted.org/packages/8e/1e/94c0a4b8c8c639e91ff6bce375a2c92460a711b9e040b28674ed492d004d/vcs_versioning-2.3.1-py3-none-any.whl", hash = "sha256:a11299394e101569a62ab061375260d08bc56cd33d685b7067d85312368f4457", size = 114617, upload-time = "2026-08-19T07:37:19.553Z" },
 ]
 
 [[package]]

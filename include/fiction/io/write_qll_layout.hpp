@@ -142,13 +142,13 @@ class write_qll_layout_impl
 
     uint64_t cell_id{1};
 
-    const char* tech_name = []()
+    static constexpr auto tech_name = []
     {
         if constexpr (has_inml_technology_v<Lyt>)
         {
             return "iNML";
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             return "MolFCN";
         }
@@ -233,7 +233,7 @@ class write_qll_layout_impl
         {
             os << qll::INML_SETTINGS;
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_SETTINGS;
         }
@@ -253,7 +253,7 @@ class write_qll_layout_impl
                 os << fmt::format(qll::INML_COMPONENT_ITEM, tech_name, comp);
             }
         }
-        else if constexpr (has_qca_technology_v<Lyt>)
+        else if constexpr (has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>)
         {
             os << qll::MQCA_COMPONENT_ITEM;
         }
@@ -377,6 +377,39 @@ class write_qll_layout_impl
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
                     }
+                    // write molQCA cell
+                    else if constexpr (has_mol_qca_technology_v<Lyt>)
+                    {
+                        const auto mode = lyt.get_cell_mode(c);
+
+                        // write normal cell
+                        if (mol_qca_technology::is_normal_cell(type))
+                        {
+                            // Phase is encoded in the cell symbol, not in the gate-layout clock number, because each
+                            // 10×10 tile spans a full a→d phase cycle; correctness relies on the clocking scheme
+                            // keeping path lengths tile-synchronized.
+                            const auto phase = mol_qca_technology::cell_clock_number(type);
+
+                            os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                            os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
+                            os << qll::CLOSE_LAYOUT_ITEM;
+
+                            // write via cell
+                            if (mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
+                            {
+                                os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
+                                                  (c.z * 2) + 1);
+                                os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
+                                os << qll::CLOSE_LAYOUT_ITEM;
+                            }
+                        }
+                        // constant cells are handled as input pins
+                        else if (mol_qca_technology::is_constant_cell(type))
+                        {
+                            const auto const_name = mol_qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                            os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
+                        }
+                    }
                 }
             }
         }
@@ -391,38 +424,39 @@ class write_qll_layout_impl
 }  // namespace detail
 
 /**
- * Writes a cell-level QCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
- * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the mQCA technology platform.
+ * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the molQCA (mQCA) technology
+ * platform.
  *
  * This overload uses an output stream to write into.
  *
- * @tparam Lyt Cell-level QCA or iNML layout type.
+ * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
  * @param lyt The layout to be written.
  * @param os The output stream to write into.
- * @param ps Parameters.
  */
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt>, "Lyt must be an iNML or a QCA layout");
+    static_assert(has_inml_technology_v<Lyt> || has_qca_technology_v<Lyt> || has_mol_qca_technology_v<Lyt>,
+                  "Lyt must be an iNML, QCA or a molQCA layout");
 
     detail::write_qll_layout_impl p{lyt, os};
 
     p.run();
 }
 /**
- * Writes a cell-level QCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
+ * Writes a cell-level QCA, molQCA or iNML layout to a qll file that is used by ToPoliNano & MagCAD
  * (https://topolinano.polito.it/), an EDA tool and a physical simulator for the iNML technology platform as well as
- * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the mQCA technology platform.
+ * SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical simulator for the molQCA (mQCA) technology
+ * platform.
  *
  * This overload uses a file name to create and write into.
  *
- * @tparam Lyt Cell-level iNML layout type.
+ * @tparam Lyt Cell-level QCA, molQCA, or iNML layout type.
  * @param lyt The layout to be written.
  * @param filename The file name to create and write into. Should preferably use the `.qll` extension.
- * @param ps Parameters.
  */
 template <typename Lyt>
 void write_qll_layout(const Lyt& lyt, const std::string_view& filename)

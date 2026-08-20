@@ -73,6 +73,7 @@ inline constexpr auto tec_name = "TEC";
 
 using logic_network_t = std::variant<aig_ptr, xag_ptr, mig_ptr, tec_ptr>;
 
+// NOLINTBEGIN(readability-avoid-nested-conditional-operator)
 template <class Ntk>
 constexpr const char* get_ntk_type_name()
 {
@@ -148,9 +149,10 @@ using gate_layout_t =
 /**
  * FCN technologies.
  */
-inline constexpr auto qca_name  = "QCA";
-inline constexpr auto inml_name = "iNML";
-inline constexpr auto sidb_name = "SiDB";
+inline constexpr auto qca_name     = "QCA";
+inline constexpr auto mol_qca_name = "molQCA";
+inline constexpr auto inml_name    = "iNML";
+inline constexpr auto sidb_name    = "SiDB";
 
 template <class Tech>
 constexpr const char* get_tech_impl_name()
@@ -158,6 +160,10 @@ constexpr const char* get_tech_impl_name()
     if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
     {
         return qca_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, mol_qca_technology>)
+    {
+        return mol_qca_name;
     }
     else if constexpr (std::is_same_v<std::decay_t<Tech>, inml_technology>)
     {
@@ -176,9 +182,10 @@ constexpr const char* get_tech_impl_name()
 template <class Tech>
 inline constexpr auto tech_impl_name = get_tech_impl_name<Tech>();
 
-inline constexpr auto qca_cell_name  = "cells";
-inline constexpr auto inml_cell_name = "magnets";
-inline constexpr auto sidb_cell_name = "dots";
+inline constexpr auto qca_cell_name     = "cells";
+inline constexpr auto mol_qca_cell_name = "cells";
+inline constexpr auto inml_cell_name    = "magnets";
+inline constexpr auto sidb_cell_name    = "dots";
 
 template <class Tech>
 constexpr const char* get_tech_cell_name()
@@ -186,6 +193,10 @@ constexpr const char* get_tech_cell_name()
     if constexpr (std::is_same_v<std::decay_t<Tech>, qca_technology>)
     {
         return qca_cell_name;
+    }
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, mol_qca_technology>)
+    {
+        return mol_qca_cell_name;
     }
     else if constexpr (std::is_same_v<std::decay_t<Tech>, inml_technology>)
     {
@@ -238,6 +249,9 @@ using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
 using stacked_qca_cell_clk_lyt     = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
+
+using mol_qca_cell_clk_lyt = cell_level_layout<mol_qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+using mol_qca_cell_clk_lyt_ptr = std::shared_ptr<mol_qca_cell_clk_lyt>;
 
 using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
@@ -325,9 +339,9 @@ using cds_sidb_defect_100_cell_clk_lyt_cube =
     charge_distribution_surface<sidb_defect_surface<sidb_100_cell_clk_lyt_cube>>;
 using cds_sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_defect_100_cell_clk_lyt_cube>;
 
-using cell_layout_t =
-    std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr,
-                 sidb_111_cell_clk_lyt_ptr, cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
+using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, mol_qca_cell_clk_lyt_ptr,
+                                   inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr, sidb_111_cell_clk_lyt_ptr,
+                                   cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
 
 }  // namespace fiction
 
