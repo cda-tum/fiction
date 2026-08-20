@@ -50,7 +50,7 @@ jobs:
         # bound the wait instead, and retry the transient failures that bounding surfaces
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
-          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 libtbb-dev clang++-17
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 libtbb-dev clang-17
 
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

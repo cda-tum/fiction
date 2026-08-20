@@ -41,11 +41,16 @@ jobs:
         env:
           COMPILER: ${{ inputs.compiler }}
           DEBIAN_FRONTEND: noninteractive
+        # `inputs.compiler` is the binary name CMake needs. Ubuntu ships the Clang binaries in
+        # `clang-NN`; `clang++-NN` is no package at all and only resolved because apt falls back
+        # to reading an unmatched name as a regex. `g++-NN` is a real package and needs no
+        # translation.
+        #
         # a hung apt mirror used to sit here until GitHub's six-hour ceiling killed the job;
         # bound the wait instead, and retry the transient failures that bounding surfaces
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
-          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 libtbb-dev "$COMPILER"
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 libtbb-dev "${COMPILER/clang++-/clang-}"
 
       - name: Clone Repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
