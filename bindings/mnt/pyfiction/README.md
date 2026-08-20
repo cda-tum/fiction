@@ -63,7 +63,7 @@ You can also run the checks manually:
 
 ### Install Z3
 
-Make sure to have the SMT Solver [`Z3 >= 4.8.0`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
+Make sure to have the SMT Solver [`Z3 >= 4.8.5`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
 a multitude of ways:
 
 - Under Ubuntu 20.04 and newer: `sudo apt-get install libz3-dev`.
