@@ -15,7 +15,10 @@
 #include <fiction/types.hpp>
 #include <fiction/utils/layout_utils.hpp>
 
+#include <cstddef>
 #include <cstdint>
+#include <optional>
+#include <vector>
 
 using namespace fiction;
 
@@ -196,6 +199,30 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         const auto& second_lyt = result_lyts.value().back();
 
         CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
+    }
+
+    SECTION("Check uniqueness of many layouts")
+    {
+        const generate_random_sidb_layout_params<cube::coord_t> params{
+            .coordinate_pair       = {{0, 0}, {20, 20}},
+            .number_of_sidbs       = 8,
+            .positive_sidbs        = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::ALLOWED,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = 10'000,
+            .number_of_unique_generated_layouts = 50};
+
+        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
+        const auto lyts        = result_lyts.value_or(std::vector<sidb_cell_clk_lyt_cube>{});
+
+        REQUIRE(lyts.size() == 50);
+
+        for (std::size_t i = 0; i < lyts.size(); ++i)
+        {
+            for (std::size_t j = i + 1; j < lyts.size(); ++j)
+            {
+                CHECK(!are_cell_layouts_identical(lyts.at(i), lyts.at(j)));
+            }
+        }
     }
 
     SECTION("Check all pairwise distances")
@@ -386,6 +413,27 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         const auto& second_lyt = result_lyts.value().back();
 
         CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
+    }
+
+    SECTION("Check that duplicates are rejected when the region admits only two layouts")
+    {
+        // the region holds two cells and each layout carries a single SiDB, so only two layouts exist; every
+        // further candidate repeats one of them and has to be rejected by the exact comparison behind the digest
+        const generate_random_sidb_layout_params<offset::ucoord_t> params{
+            .coordinate_pair       = {{0, 0}, {1, 0}},
+            .number_of_sidbs       = 1,
+            .positive_sidbs        = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = 10'000,
+            .number_of_unique_generated_layouts    = 5,
+            .maximal_attempts_for_multiple_layouts = 500};
+
+        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(params);
+        const auto lyts        = result_lyts.value_or(std::vector<sidb_cell_clk_lyt>{});
+
+        REQUIRE(lyts.size() == 2);
+
+        CHECK(!are_cell_layouts_identical(lyts.front(), lyts.back()));
     }
 
     SECTION("Check correct use of skeleton layout when generating only one random layout")
@@ -638,6 +686,37 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         CHECK(result_lyt.value().get_sidb_defect({3, 1, 1}) == sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
         CHECK(result_lyt.value().get_sidb_defect({4, 1, 1}) ==
               sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+    }
+
+    SECTION("Check uniqueness of many layouts sharing a defective skeleton")
+    {
+        const generate_random_sidb_layout_params<cell<TestType>> params{
+            .coordinate_pair       = {{0, 0, 0}, {10, 2, 0}},
+            .number_of_sidbs       = 5,
+            .positive_sidbs        = generate_random_sidb_layout_params<cell<TestType>>::positive_charges::ALLOWED,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = 10'000,
+            .number_of_unique_generated_layouts = 20};
+
+        auto defect_layout = TestType{};
+        defect_layout.assign_sidb_defect({2, 2, 0}, sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
+        defect_layout.assign_sidb_defect({4, 1, 0}, sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+
+        const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{defect_layout});
+        const auto lyts        = result_lyts.value_or(std::vector<TestType>{});
+
+        REQUIRE(lyts.size() == 20);
+
+        for (std::size_t i = 0; i < lyts.size(); ++i)
+        {
+            CHECK(lyts.at(i).num_cells() == 5);
+            CHECK(lyts.at(i).num_defects() == 2);
+
+            for (std::size_t j = i + 1; j < lyts.size(); ++j)
+            {
+                CHECK(!are_cell_layouts_identical(lyts.at(i), lyts.at(j)));
+            }
+        }
     }
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")

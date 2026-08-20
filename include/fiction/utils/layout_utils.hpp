@@ -9,15 +9,19 @@
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
+#include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
+#include "fiction/utils/hash.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
+#include <functional>
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -802,6 +806,66 @@ template <typename Lyt>
     }
 
     return true;
+}
+/**
+ * @brief Computes a digest of the given cell-level layout that respects the equality
+ * `are_cell_layouts_identical` implements.
+ *
+ * Identical layouts always share a digest, so layouts with different digests are never identical. That makes the
+ * digest a cheap filter in front of `are_cell_layouts_identical`. Different layouts may share a digest, so a
+ * digest match still has to be confirmed with `are_cell_layouts_identical`.
+ *
+ * The digest covers the cells and their types, the defects of an `sidb_defect_surface`, and the charge states of a
+ * `charge_distribution_surface`. Following `are_cell_layouts_identical`, it ignores the layout's aspect ratio.
+ *
+ * @tparam Lyt The layout type. Must be a cell-level layout.
+ * @param lyt The layout to digest.
+ * @return Hash value that identifies `lyt` up to `are_cell_layouts_identical`.
+ */
+template <typename Lyt>
+[[nodiscard]] inline std::size_t cell_layout_digest(const Lyt& lyt) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+
+    // cells and defects live in hash maps, so two layouts holding the same elements do not agree on the order in
+    // which foreach_cell and foreach_sidb_defect visit them. hash_combine_unordered is commutative and therefore
+    // independent of that order. An ordered container is not an option here: the coordinate types order by x, y,
+    // and z while comparing and hashing the dead indicator as well, so a sorted fold would merge a cell with its
+    // dead twin and lose one of the two
+    std::size_t cell_fold{0};
+
+    lyt.foreach_cell(
+        [&lyt, &cell_fold](const auto& c)
+        {
+            std::size_t cell_hash{0};
+            hash_combine(cell_hash, lyt.get_cell_type(c));
+
+            if constexpr (is_charge_distribution_surface_v<Lyt>)
+            {
+                // the num_negative_sidbs, num_neutral_sidbs, and num_positive_sidbs counts that
+                // are_cell_layouts_identical compares are folds over these very charge states, so the digest
+                // already determines them
+                hash_combine(cell_hash, lyt.get_charge_state(c));
+            }
+
+            hash_combine_unordered(cell_fold, std::pair{c, cell_hash});
+        });
+
+    std::size_t digest{0};
+    hash_combine(digest, lyt.num_cells(), cell_fold);
+
+    if constexpr (is_sidb_defect_surface_v<Lyt>)
+    {
+        std::size_t defect_fold{0};
+
+        lyt.foreach_sidb_defect(
+            [&defect_fold](const auto& defect)
+            { hash_combine_unordered(defect_fold, std::pair{defect.first, std::hash<sidb_defect>{}(defect.second)}); });
+
+        hash_combine(digest, lyt.num_defects(), defect_fold);
+    }
+
+    return digest;
 }
 
 }  // namespace fiction

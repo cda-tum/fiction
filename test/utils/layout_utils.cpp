@@ -992,3 +992,157 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
         }
     }
 }
+
+TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
+{
+    sidb_cell_clk_lyt_siqad lyt_first{{5, 3}};
+
+    lyt_first.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt_first.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::INPUT);
+    lyt_first.assign_cell_type({1, 1}, sidb_cell_clk_lyt::cell_type::INPUT);
+    lyt_first.assign_cell_type({2, 2}, sidb_cell_clk_lyt::cell_type::OUTPUT);
+
+    auto lyt_second{lyt_first.clone()};
+
+    SECTION("cell-level layout")
+    {
+        SECTION("identical layouts share a digest")
+        {
+            CHECK(cell_layout_digest(lyt_first) == cell_layout_digest(lyt_second));
+        }
+        SECTION("the digest ignores the aspect ratio")
+        {
+            lyt_second.resize({42, 42});
+            REQUIRE(are_cell_layouts_identical(lyt_first, lyt_second));
+            CHECK(cell_layout_digest(lyt_first) == cell_layout_digest(lyt_second));
+        }
+        SECTION("the digest ignores the order in which the cells were assigned")
+        {
+            sidb_cell_clk_lyt_siqad lyt_reversed{{5, 3}};
+
+            lyt_reversed.assign_cell_type({2, 2}, sidb_cell_clk_lyt::cell_type::OUTPUT);
+            lyt_reversed.assign_cell_type({1, 1}, sidb_cell_clk_lyt::cell_type::INPUT);
+            lyt_reversed.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::INPUT);
+            lyt_reversed.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+            REQUIRE(are_cell_layouts_identical(lyt_first, lyt_reversed));
+            CHECK(cell_layout_digest(lyt_first) == cell_layout_digest(lyt_reversed));
+        }
+        // the contract allows different layouts to share a digest, so the inequality checks below measure how well
+        // the digest separates a single changed attribute rather than a promise it makes. A failure means the
+        // digest stopped covering that attribute, not that a caller broke
+        SECTION("different cell type")
+        {
+            lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::INPUT);
+            CHECK(cell_layout_digest(lyt_first) != cell_layout_digest(lyt_second));
+        }
+        SECTION("different cell position")
+        {
+            lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
+            lyt_second.assign_cell_type({4, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
+            CHECK(cell_layout_digest(lyt_first) != cell_layout_digest(lyt_second));
+        }
+        SECTION("different number of cells")
+        {
+            lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
+            CHECK(cell_layout_digest(lyt_first) != cell_layout_digest(lyt_second));
+        }
+    }
+
+    charge_distribution_surface cds_first{lyt_first};
+    charge_distribution_surface cds_second{lyt_second};
+
+    SECTION("charge distribution surface")
+    {
+        SECTION("identical layouts share a digest")
+        {
+            CHECK(cell_layout_digest(cds_first) == cell_layout_digest(cds_second));
+        }
+        SECTION("different charge state")
+        {
+            cds_first.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
+            cds_second.assign_charge_state({5, 3}, sidb_charge_state::POSITIVE);
+
+            REQUIRE(!are_cell_layouts_identical(cds_first, cds_second));
+            CHECK(cell_layout_digest(cds_first) != cell_layout_digest(cds_second));
+        }
+        SECTION("charge states restored to their original values")
+        {
+            const auto digest_before = cell_layout_digest(cds_first);
+
+            cds_first.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
+            REQUIRE(cell_layout_digest(cds_first) != digest_before);
+
+            cds_first.assign_charge_state({0, 0}, cds_second.get_charge_state({0, 0}));
+            REQUIRE(are_cell_layouts_identical(cds_first, cds_second));
+            CHECK(cell_layout_digest(cds_first) == digest_before);
+        }
+    }
+
+    SECTION("SiDB defect surface on top of the charge distribution surface")
+    {
+        sidb_defect_surface defect_first{cds_first};
+        defect_first.assign_sidb_defect({1, 1}, sidb_defect{sidb_defect_type::UNKNOWN});
+        defect_first.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY});
+
+        sidb_defect_surface defect_second{cds_second};
+        defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY});
+        defect_second.assign_sidb_defect({1, 1}, sidb_defect{sidb_defect_type::UNKNOWN});
+
+        SECTION("identical layouts share a digest")
+        {
+            REQUIRE(are_cell_layouts_identical(defect_first, defect_second));
+            CHECK(cell_layout_digest(defect_first) == cell_layout_digest(defect_second));
+        }
+        SECTION("different number of defects")
+        {
+            defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
+            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+        }
+        SECTION("different defect type")
+        {
+            defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::DB});
+            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+        }
+        SECTION("different defect position")
+        {
+            defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
+            defect_second.assign_sidb_defect({2, 3}, sidb_defect{sidb_defect_type::SI_VACANCY});
+            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+        }
+        SECTION("different defect charge")
+        {
+            defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY, -1});
+            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+        }
+        SECTION("different defect screening")
+        {
+            defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY, 0, 5.6, 5.0});
+            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+        }
+    }
+}
+
+TEST_CASE("Digest of a layout holding a cell and its dead twin", "[layout-utils]")
+{
+    // the coordinate types order by x, y, and z alone, while comparing and hashing the dead indicator as well. An
+    // ordered fold over the cells therefore treats a cell and its dead twin as one entry and keeps whichever of
+    // the two foreach_cell reaches first, which makes the digest depend on the order the cells were assigned in.
+    // Both layouts below hold the same two cells and differ only in that order
+    const offset::ucoord_t live_cell{0, 2};
+    const auto             dead_twin = live_cell.get_dead();
+
+    sidb_cell_clk_lyt lyt_live_first{};
+    lyt_live_first.assign_cell_type(live_cell, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt_live_first.assign_cell_type(dead_twin, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+    sidb_cell_clk_lyt lyt_dead_first{};
+    lyt_dead_first.assign_cell_type(dead_twin, sidb_cell_clk_lyt::cell_type::NORMAL);
+    lyt_dead_first.assign_cell_type(live_cell, sidb_cell_clk_lyt::cell_type::NORMAL);
+
+    REQUIRE(lyt_live_first.num_cells() == 2);
+    REQUIRE(lyt_dead_first.num_cells() == 2);
+    REQUIRE(are_cell_layouts_identical(lyt_live_first, lyt_dead_first));
+
+    CHECK(cell_layout_digest(lyt_live_first) == cell_layout_digest(lyt_dead_first));
+}

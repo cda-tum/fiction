@@ -25,6 +25,8 @@ Added
     - ``operational_domain_contour_tracing`` now supports three or more sweep dimensions, where it
       collects the boundary surface instead of walking a closed curve. ``operational_domain_flood_fill``
       no longer caps at three dimensions
+    - Added ``cell_layout_digest``, which hashes a cell-level layout in agreement with
+      ``are_cell_layouts_identical`` so that callers can group candidates before comparing them exactly
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
 - CLI:
@@ -34,6 +36,10 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
+- Data structures:
+    - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
+    - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits
+      containers whose iteration order is not canonical
 - Experiments:
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space
@@ -75,6 +81,9 @@ Changed
     - ``quicksim`` and ``multi_simulated_annealing`` no longer pass a parallel execution policy to
       their ``std::find`` and ``std::min_element``, which scan a handful of elements where the
       dispatch costs an order of magnitude more than the scan
+    - ``generate_multiple_random_sidb_layouts`` now rejects duplicate candidates through a digest
+      lookup instead of comparing each candidate against every layout it has already collected.
+      Collecting 4000 layouts of 10 SiDBs takes about 7 ms instead of 160 ms
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
     - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s

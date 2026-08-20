@@ -9,11 +9,13 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/execution_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
 
+#include <algorithm>
+#include <cstddef>
 #include <cstdint>
 #include <optional>
+#include <unordered_map>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -198,6 +200,11 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     std::vector<Lyt> unique_lyts{};
     unique_lyts.reserve(params.number_of_unique_generated_layouts);
 
+    // maps the digest of each collected layout to its index in unique_lyts, which reduces the uniqueness check to
+    // the layouts that share the candidate's digest
+    std::unordered_multimap<std::size_t, std::size_t> collected_digests{};
+    collected_digests.reserve(params.number_of_unique_generated_layouts);
+
     // counter for unsuccessful generation attempts
     uint64_t unsuccessful_generation_attempt_counter = 0;
 
@@ -206,15 +213,20 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     {
         if (auto random_lyt = generate_random_sidb_layout(params, skeleton); random_lyt.has_value())
         {
-            // check if the layout is unique; the execution policy pays off from roughly a thousand collected
-            // layouts onwards, and costs well under a millisecond below that
-            const auto is_identical = std::any_of(FICTION_EXECUTION_POLICY_PAR_UNSEQ unique_lyts.cbegin(),
-                                                  unique_lyts.cend(), [&](const auto& old_lyt)
-                                                  { return are_cell_layouts_identical(random_lyt.value(), old_lyt); });
+            const auto digest = cell_layout_digest(random_lyt.value());
+
+            // only a collected layout that shares the candidate's digest can be identical to it; comparing those
+            // exactly keeps the result independent of digest collisions
+            const auto [first_match, last_match] = collected_digests.equal_range(digest);
+
+            const auto is_identical =
+                std::any_of(first_match, last_match, [&random_lyt, &unique_lyts](const auto& match)
+                            { return are_cell_layouts_identical(random_lyt.value(), unique_lyts[match.second]); });
 
             // add layout if unique
             if (!is_identical)
             {
+                collected_digests.emplace(digest, unique_lyts.size());
                 unique_lyts.emplace_back(std::move(random_lyt.value()));
                 continue;
             }
