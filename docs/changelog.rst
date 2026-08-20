@@ -51,11 +51,6 @@ Added
 
 Changed
 #######
-- Code quality:
-    - **Breaking:** ``qca_technology::cell_type``, ``inml_technology::cell_type``, and
-      ``sidb_technology::cell_type`` are now scoped ``enum class``, consistent with
-      ``mol_qca_technology::cell_type``. Unqualified access such as ``sidb_technology::INPUT`` must be
-      updated to ``sidb_technology::cell_type::INPUT``
 - Continuous integration:
     - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
       paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
@@ -105,6 +100,10 @@ Changed
     - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
       discarded, and takes the parameters it used to hard-code as command-line arguments
 - Code quality:
+    - **Breaking:** ``qca_technology::cell_type``, ``inml_technology::cell_type``, and
+      ``sidb_technology::cell_type`` are now scoped ``enum class``, consistent with
+      ``mol_qca_technology::cell_type``. Unqualified access such as ``sidb_technology::INPUT`` must be
+      updated to ``sidb_technology::cell_type::INPUT``
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
     - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``

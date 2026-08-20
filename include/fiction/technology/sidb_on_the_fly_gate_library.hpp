@@ -764,27 +764,31 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
                 switch (cell)
                 {
-                    case 'x':  // normal cell
+                    case Lyt::technology::cell_type::NORMAL:  // normal cell
                     {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::NORMAL);
                         break;
                     }
-                    case 'i':  // input cell
+                    case Lyt::technology::cell_type::INPUT:  // input cell
                     {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::INPUT);
                         break;
                     }
-                    case 'o':  // output cell
+                    case Lyt::technology::cell_type::OUTPUT:  // output cell
                     {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::OUTPUT);
                         break;
                     }
-                    case 'l':  // output cell
+                    case Lyt::technology::cell_type::LOGIC:  // output cell
                     {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::LOGIC);
                         break;
                     }
-                    case ' ':
+                    case Lyt::technology::cell_type::EMPTY:
+                    {
+                        break;
+                    }
+                    default:
                     {
                         break;
                     }
