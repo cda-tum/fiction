@@ -34,6 +34,8 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
+    - Added a weekly canary that builds and tests against the head of the ``mnt`` branch of the
+      ``marcelwa/mockturtle`` fork, and opens or updates one tracking issue when that breaks
 - Experiments:
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space

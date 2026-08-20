@@ -11,6 +11,13 @@ on:
         description: The C++ compiler package and binary name, e.g. `g++-13`
         required: true
         type: string
+      mockturtle-ref:
+        description: >-
+          A `marcelwa/mockturtle` ref to build against instead of the revision
+          `cmake/Dependencies.cmake` pins. Empty keeps the pin.
+        required: false
+        default: ""
+        type: string
 
 concurrency:
   group: >-
@@ -28,13 +35,21 @@ env:
   Z3_VERSION: 4.13.4
   CMAKE_BUILD_PARALLEL_LEVEL: 4
   CTEST_PARALLEL_LEVEL: 4
-  # Z3 has no ARM build in `cda-tum/setup-z3`
-  EXTRA_CMAKE_ARGS: ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
+  # First argument: Z3 has no ARM build in `cda-tum/setup-z3`. Second: FetchContent adopts the
+  # tree at `FETCHCONTENT_SOURCE_DIR_MOCKTURTLE` and skips its own clone, which is how the
+  # weekly canary reaches a branch head without editing the pin in `cmake/Dependencies.cmake`.
+  EXTRA_CMAKE_ARGS: >-
+    ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
+    ${{ inputs.mockturtle-ref != ''
+    && format('-DFETCHCONTENT_SOURCE_DIR_MOCKTURTLE={0}/mockturtle', github.workspace) || '' }}
 
 jobs:
   build_and_test:
     name: 🐧 ${{ inputs.runs-on }} ${{ inputs.compiler }}
     runs-on: ${{ inputs.runs-on }}
+    # Roughly three times the slowest observed run, and far below the six-hour default. The
+    # weekly canary is the one caller nobody watches, so a hung step has to end on its own.
+    timeout-minutes: 150
     permissions:
       contents: read # required to check out the repository
 
@@ -59,12 +74,28 @@ jobs:
         with:
           persist-credentials: false
 
+      # Has to follow the step above: that one cleans the workspace and would delete this
+      # checkout. `submodules` is what makes the tree usable — mockturtle carries
+      # `lib/parallel-hashmap` as one, and `#include <parallel_hashmap/phmap.h>` needs it.
+      - name: Clone the mockturtle revision to build against
+        if: inputs.mockturtle-ref != ''
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: marcelwa/mockturtle
+          ref: ${{ inputs.mockturtle-ref }}
+          path: mockturtle
+          submodules: recursive
+          persist-credentials: false
+
       - name: Setup ccache
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "${{ inputs.runs-on }}-${{ inputs.compiler }}"
           variant: ccache
-          save: true
+          # A canary run restores this cache, where most objects stay valid, and never writes
+          # back to it. It shares the key with the mainline matrix and runs on `main`, so its
+          # objects would land in the default-branch scope every pull request restores from.
+          save: ${{ inputs.mockturtle-ref == '' }}
           max-size: 10G
 
       - name: Setup mold
@@ -90,6 +121,19 @@ jobs:
           cmake -S . --preset ci-debug
           -DCMAKE_CXX_COMPILER="$COMPILER"
           $EXTRA_CMAKE_ARGS
+
+      # A canary that quietly fell back to the pinned revision would pass forever while testing
+      # nothing. FetchContent writes `_deps/mockturtle-src` only when it clones, so the absence
+      # of that directory is what proves the override took.
+      - name: Verify the build adopted the mockturtle checkout
+        if: inputs.mockturtle-ref != ''
+        run: |
+          if [ -e build-ci-debug/_deps/mockturtle-src ]; then
+            echo "::error::FetchContent cloned mockturtle; FETCHCONTENT_SOURCE_DIR_MOCKTURTLE did not apply"
+            exit 1
+          fi
+          echo "built against $(git -C mockturtle rev-parse HEAD)"
+          echo "pinned        $(grep -oE 'GIT_TAG [0-9a-f]{40}' cmake/Dependencies.cmake | cut -d' ' -f2)"
 
       - name: Build (Debug)
         run: cmake --build --preset ci-debug

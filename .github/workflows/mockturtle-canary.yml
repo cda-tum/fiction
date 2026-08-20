@@ -1,0 +1,94 @@
+name: mockturtle Canary
+
+# `cmake/Dependencies.cmake` pins mockturtle to a commit on the `mnt` branch of a fork, and
+# Renovate bumps that pin. Between bumps nobody learns whether *fiction* still builds against
+# the branch, so drift surfaces at the next bump as one large failure with an unclear cause.
+# This run builds and tests against the branch head every week and files a single tracking
+# issue when that breaks.
+#
+# Deliberately not a job in `ci.yml`: the run reports on an external branch and must never
+# gate a contributor's pull request. The cron slot avoids `codeql-weekly.yml`'s.
+#
+# Coverage is one compiler on one operating system, so a break that only shows on Clang,
+# arm64, macOS, Windows, or the Python bindings still gets through. The Renovate bump this
+# de-risks runs the full fleet; the canary buys early warning, not proof.
+
+on:
+  schedule:
+    - cron: "40 4 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  # Named apart from `ci.yml`'s `🐧 Test` on purpose. A scheduled run attaches its check runs
+  # to `main`'s head commit, so a shared name would put a red and a green check with the same
+  # context on the same commit.
+  canary:
+    name: 🐤 Canary
+    permissions:
+      contents: read # required to check out the repository
+    uses: ./.github/workflows/cpp-tests-ubuntu.yml
+    with:
+      runs-on: ubuntu-24.04
+      compiler: g++-13
+      mockturtle-ref: mnt
+
+  report:
+    name: 🐤 Report
+    needs: canary
+    # The branch guard keeps a `workflow_dispatch` from a topic branch from filing a real,
+    # labelled, assigned public issue while someone is testing this workflow.
+    if: failure() && github.ref == 'refs/heads/main'
+    # `ubuntu-24.04`, not `ubuntu-slim`: the step below shells out to `gh`, `jq`, and `sed`.
+    # The slim image carries all three today, but nothing promises it always will, and this is
+    # the one job whose failure means nobody hears that the canary broke.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read # required to read the issue body out of the repository
+      issues: write # required to open or update the tracking issue
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # One standing issue, never one per run. Listing the open issues and comparing titles
+      # exactly beats `--search`, whose index lags behind issue creation and tokenizes the
+      # emoji. `gh issue edit --body-file` rewrites only the body, so the run link refreshes
+      # while the title, labels, and assignee stay put. Closing the issue is the reset signal:
+      # the next failure finds no open match and opens a fresh one.
+      - name: Open or update the tracking issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_TITLE: "🐛 fiction does not build against the head of the mockturtle mnt branch"
+          ISSUE_LABELS: dependencies
+          ISSUE_ASSIGNEES: marcelwa
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+
+          sed "s|{{ RUN_URL }}|${RUN_URL}|" \
+            .github/mockturtle-canary-issue.md > "${RUNNER_TEMP}/issue-body.md"
+
+          number=$(gh issue list --state open --limit 200 --json number,title \
+            --jq '[.[] | select(.title == env.ISSUE_TITLE) | .number] | first // empty')
+
+          if [ -n "${number}" ]; then
+            gh issue edit "${number}" --body-file "${RUNNER_TEMP}/issue-body.md"
+            echo "Refreshed the standing tracking issue #${number}"
+          else
+            gh issue create --title "${ISSUE_TITLE}" \
+              --body-file "${RUNNER_TEMP}/issue-body.md" \
+              --label "${ISSUE_LABELS}" --assignee "${ISSUE_ASSIGNEES}"
+          fi
