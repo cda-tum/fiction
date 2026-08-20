@@ -13,9 +13,11 @@ namespace alice
 {
 
 /**
- * Generates a ToPoliNano/MagCAD layout file for the current cell layout in store and writes it to the given path.
+ * Generates a ToPoliNano/MagCAD/SCERPA layout file for the current iNML, QCA, or molQCA cell layout in store and
+ * writes it to the given path.
  *
- * ToPoliNano and MagCAD are available at: https://topolinano.polito.it/
+ * ToPoliNano and MagCAD are available at: https://topolinano.polito.it/. SCERPA is available at:
+ * https://ieeexplore.ieee.org/document/8935211
  */
 class qll_command final : public command
 {
@@ -29,7 +31,7 @@ class qll_command final : public command
 
   protected:
     /**
-     * Function to perform the output call. Generates a ToPoliNano/MagCAD layout file.
+     * Function to perform the output call. Generates a ToPoliNano/MagCAD/SCERPA layout file.
      */
     void execute() override;
 
