@@ -9,8 +9,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
-#include "fiction/utils/hash.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <phmap.h>

@@ -9,13 +9,14 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <phmap.h>
 
 #include <algorithm>
+#include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction
@@ -142,7 +143,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     {
         static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt must be a cell-level layout");
 
-        enum class status
+        enum class status : std::uint8_t
         {
             SEARCH,
             COLLECT,
@@ -212,7 +213,8 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             }
         };
 
-        do
+        do  // NOLINT(cppcoreguidelines-avoid-do-while): the loop body must run at least once to
+            // discover whether any improvement is possible
         {
             status st = status::SEARCH;
 
