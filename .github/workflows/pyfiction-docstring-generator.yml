@@ -1,7 +1,11 @@
 name: Docstring Generator
 
 on:
+  # `main` only. This workflow pushes with the default token, which by design starts no
+  # workflow run, so a commit it lands on a pull request head would carry no `🚦 Check` and
+  # block the merge behind a context that never arrives.
   push:
+    branches: ["main"]
     paths:
       - "**/*.hpp"
       - ".github/workflows/pyfiction-docstring-generator.yml"
