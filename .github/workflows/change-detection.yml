@@ -80,11 +80,13 @@ jobs:
             cmake/**
             CMakeLists.txt
             CMakePresets.json
+            .codecov.yml
             .github/workflows/ci.yml
             .github/workflows/change-detection.yml
             .github/workflows/cpp-tests-ubuntu.yml
             .github/workflows/cpp-tests-macos.yml
             .github/workflows/cpp-tests-windows.yml
+            .github/workflows/cpp-experiments.yml
             .github/workflows/cpp-coverage.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the C++ tests
