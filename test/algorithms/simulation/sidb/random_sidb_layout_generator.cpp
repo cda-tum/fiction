@@ -16,6 +16,7 @@
 #include <fiction/utils/layout_utils.hpp>
 
 #include <cstdint>
+#include <optional>
 
 using namespace fiction;
 
@@ -28,21 +29,21 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
 
         REQUIRE(lyt.has_value());
-        CHECK(lyt.value().num_cells() == 0);
-        CHECK(lyt.value().x() == 0);
-        CHECK(lyt.value().y() == 0);
+        CHECK(lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(lyt.value().x() == 0);          // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(lyt.value().y() == 0);          // NOLINT(bugprone-unchecked-optional-access)
     }
 
     SECTION("given corner coordinates, wrong order")
     {
-        const generate_random_sidb_layout_params<cube::coord_t> params{{{5, 7, 2}, {-10, -10, 0}}};
+        const generate_random_sidb_layout_params<cube::coord_t> params{.coordinate_pair = {{5, 7, 2}, {-10, -10, 0}}};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
 
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -53,13 +54,13 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
     SECTION("given corner coordinates")
     {
-        const generate_random_sidb_layout_params<cube::coord_t> params{{{-10, -10, 0}, {5, 7, 2}}};
+        const generate_random_sidb_layout_params<cube::coord_t> params{.coordinate_pair = {{-10, -10, 0}, {5, 7, 2}}};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -70,13 +71,15 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<cube::coord_t> params{{{-10, -10, 1}, {-10, -10, 1}}, 1};
+        const generate_random_sidb_layout_params<cube::coord_t> params{
+            .coordinate_pair = {{-10, -10, 1}, {-10, -10, 1}},
+            .number_of_sidbs = 1};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 1);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x == -10);
@@ -87,13 +90,14 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
 
     SECTION("given corner coordinates and number of placed SiDBs")
     {
-        const generate_random_sidb_layout_params<cube::coord_t> params{{{-10, -10, 0}, {5, 7, 1}}, 10};
+        const generate_random_sidb_layout_params<cube::coord_t> params{.coordinate_pair = {{-10, -10, 0}, {5, 7, 1}},
+                                                                       .number_of_sidbs = 10};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 10);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(              // NOLINT(bugprone-unchecked-optional-access)
             [&](const auto& cell)
             {
                 CHECK(cell.x < 6);
@@ -108,15 +112,15 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0, 0}, {90, 90, 0}},
-            100,
-            generate_random_sidb_layout_params<cube::coord_t>::positive_charges::ALLOWED};
+            .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
+            .number_of_sidbs = 100,
+            .positive_sidbs  = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::ALLOWED};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 100);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(               // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
@@ -127,40 +131,41 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0, 0}, {200, 200, 0}},
-            50,
-            generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN};
+            .coordinate_pair = {{0, 0, 0}, {200, 200, 0}},
+            .number_of_sidbs = 50,
+            .positive_sidbs  = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 50);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 50);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(              // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x <= 200);
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt.value(), sidb_simulation_parameters{}));
+        CHECK(!can_positive_charges_occur(result_lyt.value(),  // NOLINT(bugprone-unchecked-optional-access)
+                                          sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{-5, -2}, {20, 20}},
-            6,
-            generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            3};
+            .coordinate_pair       = {{-5, -2}, {20, 20}},
+            .number_of_sidbs       = 6,
+            .positive_sidbs        = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 3};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
 
-        CHECK(result_lyts.value().size() == 3);
+        CHECK(result_lyts.value().size() == 3);  // NOLINT(bugprone-unchecked-optional-access)
 
-        for (const auto& lyt : result_lyts.value())
+        for (const auto& lyt : result_lyts.value())  // NOLINT(bugprone-unchecked-optional-access)
         {
             lyt.foreach_cell(
                 [](const auto& cell)
@@ -176,20 +181,20 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
     SECTION("Check uniqueness of two layouts")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0}, {20, 20}},
-            8,
-            generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            2};
+            .coordinate_pair       = {{0, 0}, {20, 20}},
+            .number_of_sidbs       = 8,
+            .positive_sidbs        = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 2};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
 
-        REQUIRE(result_lyts.value().size() == 2);
+        REQUIRE(result_lyts.value().size() == 2);  // NOLINT(bugprone-unchecked-optional-access)
 
-        const auto& first_lyt  = result_lyts.value().front();
-        const auto& second_lyt = result_lyts.value().back();
+        const auto& first_lyt  = result_lyts.value().front();  // NOLINT(bugprone-unchecked-optional-access)
+        const auto& second_lyt = result_lyts.value().back();   // NOLINT(bugprone-unchecked-optional-access)
 
         CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
     }
@@ -197,18 +202,18 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
     SECTION("Check all pairwise distances")
     {
         const generate_random_sidb_layout_params<cube::coord_t> params{
-            {{0, 0}, {40, 40}},
-            10,
-            generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            10};
+            .coordinate_pair       = {{0, 0}, {40, 40}},
+            .number_of_sidbs       = 10,
+            .positive_sidbs        = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 10};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
-        REQUIRE(result_lyts.value().size() == 10);
+        REQUIRE(result_lyts.value().size() == 10);  // NOLINT(bugprone-unchecked-optional-access)
 
-        for (const auto& lyt : result_lyts.value())
+        for (const auto& lyt : result_lyts.value())  // NOLINT(bugprone-unchecked-optional-access)
         {
             CHECK(!can_positive_charges_occur(lyt, sidb_simulation_parameters{}));
         }
@@ -224,9 +229,9 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         const auto lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(lyt.has_value());
 
-        CHECK(lyt.value().num_cells() == 0);
-        CHECK(lyt.value().x() == 0);
-        CHECK(lyt.value().y() == 0);
+        CHECK(lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(lyt.value().x() == 0);          // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(lyt.value().y() == 0);          // NOLINT(bugprone-unchecked-optional-access)
     }
 
     SECTION("design is impossible")
@@ -240,13 +245,13 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("given corner coordinates")
     {
-        const generate_random_sidb_layout_params<offset::ucoord_t> params{{{1, 1, 0}, {5, 7, 2}}};
+        const generate_random_sidb_layout_params<offset::ucoord_t> params{.coordinate_pair = {{1, 1, 0}, {5, 7, 2}}};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [&](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -257,13 +262,14 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<offset::ucoord_t> params{{{5, 5, 1}, {5, 5, 1}}, 1};
+        const generate_random_sidb_layout_params<offset::ucoord_t> params{.coordinate_pair = {{5, 5, 1}, {5, 5, 1}},
+                                                                          .number_of_sidbs = 1};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 1);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x == 5);
@@ -274,13 +280,14 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
     SECTION("given corner coordinates and number of placed SiDBs")
     {
-        const generate_random_sidb_layout_params<offset::ucoord_t> params{{{1, 1, 0}, {50, 7, 1}}, 10};
+        const generate_random_sidb_layout_params<offset::ucoord_t> params{.coordinate_pair = {{1, 1, 0}, {50, 7, 1}},
+                                                                          .number_of_sidbs = 10};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 10);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(              // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x < 51);
@@ -295,15 +302,15 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0, 0}, {90, 90, 0}},
-            100,
-            generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED};
+            .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
+            .number_of_sidbs = 100,
+            .positive_sidbs  = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::ALLOWED};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 100);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(               // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
@@ -314,39 +321,40 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0, 0}, {200, 200, 0}},
-            100,
-            generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN};
+            .coordinate_pair = {{0, 0, 0}, {200, 200, 0}},
+            .number_of_sidbs = 100,
+            .positive_sidbs  = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 100);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(               // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x <= 200);
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt.value(), sidb_simulation_parameters{}));
+        CHECK(!can_positive_charges_occur(result_lyt.value(),  // NOLINT(bugprone-unchecked-optional-access)
+                                          sidb_simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {40, 40}},
-            10,
-            generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            3};
+            .coordinate_pair       = {{0, 0}, {40, 40}},
+            .number_of_sidbs       = 10,
+            .positive_sidbs        = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 3};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
-        CHECK(result_lyts.value().size() == 3);
+        CHECK(result_lyts.value().size() == 3);  // NOLINT(bugprone-unchecked-optional-access)
 
-        for (const auto& lyt : result_lyts.value())
+        for (const auto& lyt : result_lyts.value())  // NOLINT(bugprone-unchecked-optional-access)
         {
             lyt.foreach_cell(
                 [](const auto& cell)
@@ -360,26 +368,27 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
     SECTION("Check uniqueness of two layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {20, 20}},
-            10,
-            generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            2};
+            .coordinate_pair       = {{0, 0}, {20, 20}},
+            .number_of_sidbs       = 10,
+            .positive_sidbs        = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 2};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
-        REQUIRE(result_lyts.value().size() == 2);
+        REQUIRE(result_lyts.value().size() == 2);  // NOLINT(bugprone-unchecked-optional-access)
 
-        const auto& first_lyt  = result_lyts.value().front();
-        const auto& second_lyt = result_lyts.value().back();
+        const auto& first_lyt  = result_lyts.value().front();  // NOLINT(bugprone-unchecked-optional-access)
+        const auto& second_lyt = result_lyts.value().back();   // NOLINT(bugprone-unchecked-optional-access)
 
         CHECK(!are_cell_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check correct use of skeleton layout when generating only one random layout")
     {
-        const generate_random_sidb_layout_params<offset::ucoord_t> params{{{0, 0}, {9, 9}}, 10};
+        const generate_random_sidb_layout_params<offset::ucoord_t> params{.coordinate_pair = {{0, 0}, {9, 9}},
+                                                                          .number_of_sidbs = 10};
 
         sidb_100_cell_clk_lyt skeleton_layout{};
         skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
@@ -389,18 +398,18 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{skeleton_layout});
 
         REQUIRE(result_lyt.has_value());
-        CHECK(result_lyt.value().num_cells() == 13);
+        CHECK(result_lyt.value().num_cells() == 13);  // NOLINT(bugprone-unchecked-optional-access)
     }
 
     SECTION("Check correct use of skeleton layout when generating multiple random layouts")
     {
         const generate_random_sidb_layout_params<offset::ucoord_t> params{
-            {{0, 0}, {40, 40}},
-            10,
-            generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            2};
+            .coordinate_pair       = {{0, 0}, {40, 40}},
+            .number_of_sidbs       = 10,
+            .positive_sidbs        = generate_random_sidb_layout_params<offset::ucoord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 2};
 
         sidb_100_cell_clk_lyt skeleton_layout{};
 
@@ -410,10 +419,10 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{skeleton_layout});
         REQUIRE(result_lyts.has_value());
-        REQUIRE(result_lyts.value().size() == 2);
+        REQUIRE(result_lyts.value().size() == 2);  // NOLINT(bugprone-unchecked-optional-access)
 
-        CHECK(result_lyts.value().front().num_cells() == 13);
-        CHECK(result_lyts.value().back().num_cells() == 13);
+        CHECK(result_lyts.value().front().num_cells() == 13);  // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(result_lyts.value().back().num_cells() == 13);   // NOLINT(bugprone-unchecked-optional-access)
     }
 
     SECTION("Check if std::nullptr_t is returned when no layout can be designed")
@@ -436,20 +445,21 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
         const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(lyt.has_value());
 
-        CHECK(lyt.value().num_cells() == 0);
-        CHECK(lyt.value().x() == 0);
-        CHECK(lyt.value().y() == 0);
+        CHECK(lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(lyt.value().x() == 0);          // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(lyt.value().y() == 0);          // NOLINT(bugprone-unchecked-optional-access)
     }
 
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<siqad::coord_t> params{{{5, 5, 1}, {5, 5, 1}}, 1};
+        const generate_random_sidb_layout_params<siqad::coord_t> params{.coordinate_pair = {{5, 5, 1}, {5, 5, 1}},
+                                                                        .number_of_sidbs = 1};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 1);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x == 5);
@@ -460,13 +470,13 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
 
     SECTION("given corner coordinates")
     {
-        const generate_random_sidb_layout_params<siqad::coord_t> params{{{1, 1, 0}, {5, 7, 1}}};
+        const generate_random_sidb_layout_params<siqad::coord_t> params{.coordinate_pair = {{1, 1, 0}, {5, 7, 1}}};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 0);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 0);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [&](const auto& cell)
             {
                 CHECK(cell.x == 0);
@@ -477,13 +487,14 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
 
     SECTION("given corner coordinates and number of placed SiDBs")
     {
-        const generate_random_sidb_layout_params<siqad::coord_t> params{{{1, 1, 0}, {50, 7, 1}}, 10};
+        const generate_random_sidb_layout_params<siqad::coord_t> params{.coordinate_pair = {{1, 1, 0}, {50, 7, 1}},
+                                                                        .number_of_sidbs = 10};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 10);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(              // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x < 51);
@@ -497,15 +508,15 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
         const generate_random_sidb_layout_params<siqad::coord_t> params{
-            {{0, 0, 0}, {90, 90, 0}},
-            100,
-            generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::ALLOWED};
+            .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
+            .number_of_sidbs = 100,
+            .positive_sidbs  = generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::ALLOWED};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 100);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 100);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(               // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
@@ -516,14 +527,14 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
         const generate_random_sidb_layout_params<siqad::coord_t> params{
-            {{0, 0, 0}, {90, 90, 0}},
-            10,
-            generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN};
+            .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
+            .number_of_sidbs = 10,
+            .positive_sidbs  = generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 10);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(              // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x < 91);
@@ -535,18 +546,18 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
     SECTION("given previous layouts")
     {
         const generate_random_sidb_layout_params<siqad::coord_t> params{
-            {{0, 0, 1}, {20, 20, 1}},
-            10,
-            generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN,
-            sidb_simulation_parameters{},
-            static_cast<uint64_t>(10E6),
-            3};
+            .coordinate_pair       = {{0, 0, 1}, {20, 20, 1}},
+            .number_of_sidbs       = 10,
+            .positive_sidbs        = generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN,
+            .simulation_parameters = sidb_simulation_parameters{},
+            .maximal_attempts      = static_cast<uint64_t>(10E6),
+            .number_of_unique_generated_layouts = 3};
 
         const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyts.has_value());
-        CHECK(result_lyts.value().size() == 3);
+        CHECK(result_lyts.value().size() == 3);  // NOLINT(bugprone-unchecked-optional-access)
 
-        for (const auto& lyt : result_lyts.value())
+        for (const auto& lyt : result_lyts.value())  // NOLINT(bugprone-unchecked-optional-access)
         {
             lyt.foreach_cell(
                 [](const auto& cell)
@@ -571,8 +582,8 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         const auto result_lyt = generate_random_sidb_layout<TestType>(params);
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        result_lyt.value().foreach_cell(
+        CHECK(result_lyt.value().num_cells() == 1);  // NOLINT(bugprone-unchecked-optional-access)
+        result_lyt.value().foreach_cell(             // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell.x == 5);
@@ -617,12 +628,14 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 1);
-        CHECK(result_lyt.value().num_defects() == 2);
+        CHECK(result_lyt.value().num_cells() == 1);    // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(result_lyt.value().num_defects() == 2);  // NOLINT(bugprone-unchecked-optional-access)
 
-        CHECK(result_lyt.value().get_cell_type({2, 1, 1}) == TestType::technology::cell_type::LOGIC);
-        CHECK(result_lyt.value().get_sidb_defect({3, 1, 1}) == sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
-        CHECK(result_lyt.value().get_sidb_defect({4, 1, 1}) ==
+        CHECK(result_lyt.value().get_cell_type({2, 1, 1}) ==  // NOLINT(bugprone-unchecked-optional-access)
+              TestType::technology::cell_type::LOGIC);
+        CHECK(result_lyt.value().get_sidb_defect({3, 1, 1}) ==  // NOLINT(bugprone-unchecked-optional-access)
+              sidb_defect{sidb_defect_type::DB, -1, 5.6, 5});
+        CHECK(result_lyt.value().get_sidb_defect({4, 1, 1}) ==  // NOLINT(bugprone-unchecked-optional-access)
               sidb_defect{sidb_defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
     }
 
@@ -644,11 +657,11 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
         REQUIRE(result_lyt.has_value());
 
-        CHECK(result_lyt.value().num_cells() == 10);
-        CHECK(result_lyt.value().num_defects() == 5);
+        CHECK(result_lyt.value().num_cells() == 10);   // NOLINT(bugprone-unchecked-optional-access)
+        CHECK(result_lyt.value().num_defects() == 5);  // NOLINT(bugprone-unchecked-optional-access)
 
         // check if all cells are not closer than two cells (Euclidean distance).
-        result_lyt.value().foreach_cell(
+        result_lyt.value().foreach_cell(  // NOLINT(bugprone-unchecked-optional-access)
             [](const auto& cell)
             {
                 CHECK(cell != siqad::coord_t{2, 2, 0});
@@ -665,11 +678,11 @@ TEST_CASE("Random cube::coord_t layout generation with defects", "[random-sidb-l
     using lyt = sidb_defect_cell_clk_lyt_cube;
 
     const generate_random_sidb_layout_params<cube::coord_t> params{
-        {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}),
-         siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 2, 0})},
-        10,
-        generate_random_sidb_layout_params<cube::coord_t>::positive_charges::ALLOWED,
-        sidb_simulation_parameters{}};
+        .coordinate_pair       = {siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}),
+                                  siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 2, 0})},
+        .number_of_sidbs       = 10,
+        .positive_sidbs        = generate_random_sidb_layout_params<cube::coord_t>::positive_charges::ALLOWED,
+        .simulation_parameters = sidb_simulation_parameters{}};
 
     lyt layout{};
 
@@ -687,11 +700,11 @@ TEST_CASE("Random cube::coord_t layout generation with defects", "[random-sidb-l
     const auto result_lyt = generate_random_sidb_layout(params, std::optional{layout});
 
     REQUIRE(result_lyt.has_value());
-    CHECK(result_lyt.value().num_cells() == 10);
-    CHECK(result_lyt.value().num_defects() == 5);
+    CHECK(result_lyt.value().num_cells() == 10);   // NOLINT(bugprone-unchecked-optional-access)
+    CHECK(result_lyt.value().num_defects() == 5);  // NOLINT(bugprone-unchecked-optional-access)
 
     // check if all cells are not closer than two cells (Euclidean distance).
-    result_lyt.value().foreach_cell(
+    result_lyt.value().foreach_cell(  // NOLINT(bugprone-unchecked-optional-access)
         [](const auto& cell)
         {
             CHECK(cell != siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 2, 0}));
