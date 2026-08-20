@@ -61,12 +61,13 @@ Pull Request Workflow
 
 * Create PRs early. It is ok to create work-in-progress PRs. You may mark these as draft PRs on GitHub.
 * Describe your PR. Start with a descriptive title, reference any related issues by including the issue number in the PR description, and add a comprehensive description of the changes. We provide a PR template that you can (and should) follow to create a PR.
-* Whenever a PR is created or updated, several workflows on all supported platforms are executed. Make sure your PR passes *all* of these continuous integration (CI) checks. Here are some tips for finding the cause of certain failures:
-   * If any of the :code:`Ubuntu CI`, :code:`macOS CI`, :code:`Windows CI`, or :code:`Docker Image CI` checks fail, this most likely indicates build errors or test failures in the C++ part of the code base. Look through the respective logs on GitHub for any error or failure messages.
-   * If the :code:`Coverage CI` check fails, this means that your changes are not appropriately covered by tests or that the overall project coverage decreased too much. Ensure that you include tests for all your changes in the PR.
-   * If the :code:`pyfiction` check fails, this indicates an error in the Python part of the code base. Look through the respective logs on GitHub for any error or failure messages.
-   * If the :code:`CodeQL` check fails, this indicates a security vulnerability in the code base. Look through the respective logs on GitHub for any error or failure messages.
-   * If :code:`clang-tidy` comments on your PR with a list of suggestions/warnings, these have been raised when checking the C++ part of your changes for warnings or style guideline violations. The individual messages frequently provide helpful suggestions on how to fix the warnings.
+* Whenever a PR is created or updated, the :code:`CI` workflow runs. Its :code:`🔍 Change` job classifies your diff and skips the jobs your changes cannot affect, so a documentation-only PR does not pay for the C++ matrix. :code:`🚦 Check` aggregates every job and is the one status that has to be green. Here are some tips for finding the cause of certain failures:
+   * If any of the :code:`🐧 Test`, :code:`🍎 Test`, :code:`🪟 Test`, :code:`🧪 Experiments`, or :code:`🐳 Docker` checks fail, this most likely indicates build errors or test failures in the C++ part of the code base. Look through the respective logs on GitHub for any error or failure messages.
+   * If the :code:`☂️ Coverage` check fails, this means that your changes are not appropriately covered by tests or that the overall project coverage decreased too much. Ensure that you include tests for all your changes in the PR.
+   * If a :code:`🐍 Packaging` check fails, this indicates an error in the Python part of the code base. :code:`cibuildwheel` runs the :code:`pyfiction` test suite against every wheel it builds, so a failing test shows up here. Look through the respective logs on GitHub for any error or failure messages.
+   * If the :code:`📝 CodeQL` check fails, this indicates a security vulnerability in the code base. Look through the respective logs on GitHub for any error or failure messages.
+   * If :code:`🚨 Lint` comments on your PR with a list of suggestions/warnings, :code:`clang-tidy` raised them when checking the C++ part of your changes for warnings or style guideline violations. The individual messages frequently provide helpful suggestions on how to fix the warnings.
+   * If :code:`🚦 Check` fails while every job below it looks green, a job was skipped for a reason change detection did not predict — usually because something it depends on failed first.
 
 
 * Once your PR is ready, change it from a draft PR to a regular PR and request a review from one of the project maintainers.
@@ -77,7 +78,7 @@ Code Review
 
 Two automated reviewers comment on every pull request, and they carry different weight.
 
-* The :code:`Clang-Tidy Review` workflow posts static-analysis findings. Treat these as **binding**: fix them, or suppress the specific check with a :code:`// NOLINT(check-name)` comment that states the reason.
+* The :code:`🚨 Lint` check posts :code:`clang-tidy` findings. Treat these as **binding**: fix them, or suppress the specific check with a :code:`// NOLINT(check-name)` comment that states the reason.
 * `CodeRabbit <https://coderabbit.ai>`_ performs the first substantive review pass, covering design, contracts, tests, and documentation. Treat its findings as **suggestions**.
 
 When working with CodeRabbit:
