@@ -176,10 +176,10 @@ Changed
 Removed
 #######
 - Algorithms:
-    - Removed Mugen support: the vendored Glucose SAT solver (``vendors/mugen/``), the ``onepass`` CLI
-      command, and ``one_pass_synthesis()``. Use ``exact_physical_design()`` instead
-    - Removed ``jump_point_search()``. Use ``a_star()`` instead
-    - Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+    - **Breaking:** removed Mugen support: the vendored Glucose SAT solver (``vendors/mugen/``), the
+      ``onepass`` CLI command, and ``one_pass_synthesis()``. Use ``exact()`` instead
+    - **Breaking:** removed ``jump_point_search()``. Use ``a_star()`` instead
+    - **Breaking:** removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
 - Build system:
     - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
       ``INTERFACE`` target and therefore never did anything
@@ -189,9 +189,9 @@ Removed
     - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
       remains the local entry point
 - Data structures:
-    - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
-      ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
-      change in usage
+    - **Breaking:** removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and
+      ``hexagonal_layout``'s ``coordinates()``/``ground_coordinates()`` now return a
+      ``std::ranges::subrange`` instead, with no change in usage
 
 Fixed
 #####

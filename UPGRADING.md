@@ -39,6 +39,24 @@ drop-in. It places and routes a network that already exists and takes
 The overload that accepted truth tables has no counterpart: synthesize a network from the
 specification first, then pass that network to `exact`.
 
+Before:
+
+```c++
+#include <fiction/algorithms/physical_design/one_pass_synthesis.hpp>
+
+fiction::one_pass_synthesis_params ps{};
+const auto lyt = fiction::one_pass_synthesis<Lyt>(ntk, ps);
+```
+
+After:
+
+```c++
+#include <fiction/algorithms/physical_design/exact.hpp>
+
+fiction::exact_physical_design_params ps{};
+const auto lyt = fiction::exact<Lyt>(ntk, ps);
+```
+
 `qca_energy_dissipation` and the `energy` command have no replacement.
 
 `range_t` and `fiction/utils/range.hpp` are gone. `coordinates()` and
@@ -126,10 +144,12 @@ After:
 inline constexpr auto mkd_doc_fiction_cartesian_layout_overridden = R"doc(...)doc";
 ```
 
-One substitution covers a fork that carries its own docstrings:
+One substitution covers a fork that carries its own docstrings. The word boundary is what
+keeps a name that merely contains the token, such as `foo__doc_bar`, out of the rewrite;
+`perl` rather than `sed` because GNU and BSD `sed` disagree on both `-i` and `\b`.
 
 ```bash
-sed -i 's/\b__doc_/mkd_doc_/g' <files>
+perl -pi -e 's/\b__doc_/mkd_doc_/g' <files>
 ```
 
 ### `generate_defective_surface.py` produces a different surface

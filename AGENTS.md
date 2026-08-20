@@ -250,7 +250,9 @@ enforces the following:
       entry shows the migration. Neither belongs there without the other.
     - Write the entry as prose with before-and-after code, never as a list of symbol
       names. The reader arrives with code that stopped working and needs the replacement,
-      which is the one thing a symbol list withholds.
+      which is the one thing a symbol list withholds. Where the calling code does not
+      change — a removal with no replacement, a behavior change behind an untouched
+      interface — the prose stands alone. Never invent a pair to satisfy the form.
     - Entries go under `## Unreleased` as `###` sections, ordered by how much code they
       touch, most first. A release renames that heading to match the changelog's:
       `## v0.7.0 - 2026-07-31`.

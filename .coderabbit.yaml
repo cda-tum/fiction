@@ -52,11 +52,14 @@ reviews:
         work happened all belong in the pull request or a code comment, not here.
     - path: "UPGRADING.md"
       instructions: >-
-        Migration notes for breaking changes, newest release first. Every entry is prose
-        with before-and-after code blocks. Flag an entry written as a list of symbol names,
-        and flag a before-and-after pair whose two blocks do not differ. An entry here and
-        a **Breaking:** bullet in docs/changelog.rst co-occur, so flag one that arrives
-        without the other.
+        Migration notes for breaking changes, newest release first. Every entry is prose,
+        carrying before-and-after code wherever the calling code changes. A removal with no
+        replacement, or a change that leaves the interface alone and only alters behavior,
+        takes the prose alone; do not ask for an invented pair. Flag an entry written as a
+        list of symbol names, and flag a before-and-after pair whose two blocks do not
+        differ. An entry here and a **Breaking:** bullet in docs/changelog.rst co-occur, so
+        flag one that arrives without the other. The file documents the release in
+        development; it does not back-fill the releases before it.
     - path: "docs/**"
       instructions: >-
         reStructuredText built by Sphinx, with Doxygen directives for the C++ API. A new
