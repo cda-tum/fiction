@@ -233,8 +233,9 @@ Fixed
     - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, leaving the slowest runners cold
     - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``
     - The CodeQL jobs now declare their build mode: ``manual`` for C++, whose database comes
-      from the CMake build, and ``none`` for Python, which has no build. Leaving it undefined
-      made CodeQL report on every run that it could not decide
+      from the CMake build, and ``none`` for Python, which has no build. Python stops warning
+      that it cannot build an overlay database; C++ still does, since a leg that builds
+      cannot have one
     - Fixed the packaging path filter still pointing at the removed ``bindings/pyfiction/**``
 - Documentation:
     - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a

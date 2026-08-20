@@ -33,11 +33,18 @@ jobs:
         # database is built. C++ is `manual`: the CMake build between `init` and `analyze`
         # below is what CodeQL traces. Python has no build at all, which is `none`.
         #
-        # `none` is also the only mode CodeQL's overlay analysis supports, so this job builds
-        # a full database on every run rather than an incremental one. That is the right trade
-        # here: extracting a header-only, template-heavy library without a build leaves CodeQL
-        # guessing at the include paths and defines that `FetchContent` puts under `_deps`,
-        # and the analysis is worth more than the minutes.
+        # The C++ leg logs `Cannot build an overlay database because build-mode is set to
+        # "manual" instead of "none"` on every pull request. That is expected and not
+        # actionable. On a pull request the action tries overlay analysis, which reuses a
+        # cached database from the default branch and only re-extracts what changed; it
+        # supports `build-mode: none` alone, so any leg that builds gets a full database
+        # instead. The action offers no way to decline the attempt, so the warning stays.
+        #
+        # Do not answer it by moving C++ to `none`. Extracting a header-only, template-heavy
+        # library without a build leaves CodeQL guessing at the include paths and defines that
+        # `FetchContent` puts under `_deps`, and the analysis is worth more than the minutes.
+        # Declaring `none` for Python does silence it there, and opens the overlay path once a
+        # base database has been cached from `main`.
         include:
           - language: cpp
             build-mode: manual
