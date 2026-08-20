@@ -8,7 +8,6 @@
 from __future__ import annotations
 
 import contextlib
-import os
 import shutil
 import tempfile
 from typing import TYPE_CHECKING
@@ -26,13 +25,24 @@ nox.options.sessions = ["lint", "tests"]
 PYTHON_ALL_VERSIONS = ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
 
-if os.environ.get("CI", None):
-    nox.options.error_on_missing_interpreters = True
-
-
 @contextlib.contextmanager
-def preserve_lockfile() -> Generator[None]:
-    """Preserve the lockfile by moving it to a temporary directory."""
+def preserve_lockfile(session: nox.Session) -> Generator[None]:
+    """Move `uv.lock` aside for the duration of the block and restore it afterwards.
+
+    A session that resolves differently would otherwise leave its own resolution in `uv.lock`.
+    While the block runs, the real lockfile is absent from the working tree and `uv` writes a
+    stand-in in its place. That stand-in is internally consistent, so `uv lock --check` and the
+    `uv-lock` hook accept it, and anything that reads or commits `uv.lock` in that window records
+    the stand-in instead of the real lockfile. Run one such session at a time per worktree, and do
+    not commit from a worktree while one runs.
+
+    Starting on a `uv.lock` that already differs from `HEAD` aborts the session, because restoring
+    would overwrite that difference.
+    """
+    pending = session.run("git", "diff", "--name-only", "--", "uv.lock", external=True, silent=True)
+    if pending and pending.strip():
+        session.error("`uv.lock` differs from HEAD. Commit or restore it before running this session")
+
     with tempfile.TemporaryDirectory() as temp_dir_name:
         shutil.move("uv.lock", f"{temp_dir_name}/uv.lock")
         try:
@@ -103,6 +113,27 @@ def _run_tests(
 def tests(session: nox.Session) -> None:
     """Run the test suite."""
     _run_tests(session)
+
+
+@nox.session(python="3.10", reuse_venv=True)
+def minimums(session: nox.Session) -> None:
+    """Run the test suite against the lowest declared direct dependencies.
+
+    Every other entry point resolves each dependency to the newest compatible version, so a lower
+    bound in `pyproject.toml` is only ever asserted. This session resolves each direct dependency
+    to the oldest version its declared bound allows, so the test suite exercises the bounds
+    themselves.
+
+    The session pins Python 3.10, the `requires-python` floor, because the oldest interpreter
+    combined with the oldest dependencies is the one combination nothing else in the project
+    covers. CI passes `--error-on-missing-interpreters`, without which a runner that lacks Python
+    3.10 skips the session and reports success.
+
+    `preserve_lockfile` keeps the lockfile out of the resolution; read its caveat before running
+    this session next to anything else in the same worktree.
+    """
+    with preserve_lockfile(session):
+        _run_tests(session, install_args=["--resolution", "lowest-direct"])
 
 
 @nox.session(reuse_venv=True)

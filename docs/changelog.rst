@@ -48,6 +48,9 @@ Added
       ``displacement_robustness_domain_params``
     - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
       ``apply_sim7_mol_library``
+- Tooling:
+    - Added the ``minimums`` nox session, which runs the Python test suite on Python 3.10 against
+      the lowest declared direct dependencies instead of the newest compatible ones
 
 Changed
 #######

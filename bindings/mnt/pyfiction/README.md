@@ -105,6 +105,14 @@ A `nox` session is provided to conveniently run the Python tests.
 This installs all dependencies for running the tests in an isolated environment, builds the Python package, and then
 runs the tests.
 
+The `minimums` session runs the same tests against the lowest declared direct dependencies instead of the newest
+compatible ones, which exercises the lower bounds in `pyproject.toml`. It requires Python 3.10, the oldest version
+_fiction_ supports.
+
+```bash
+(venv) $ nox -s minimums
+```
+
 ## Usage
 
 The bindings are available as a Python module named `pyfiction` in the namespace `mnt`. To use the bindings, simply
