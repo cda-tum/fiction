@@ -216,8 +216,9 @@ Fixed
       ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
     - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
 - Continuous integration:
-    - The Read the Docs preview guard watched ``.readthedocs.yaml`` while the file is
-      ``.readthedocs.yml``, so editing it never rebuilt the documentation
+    - Renamed ``.readthedocs.yml`` to ``.readthedocs.yaml``. The preview guard and the
+      ``check-readthedocs`` hook both expect that name, so editing the file now rebuilds the
+      documentation preview instead of skipping it
     - Publishing the Docker image no longer clears its Docker Hub short description, which it
       derived from a field that never held one
     - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
