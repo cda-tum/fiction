@@ -1,4 +1,12 @@
 #!/usr/bin/env -S uv run --script --quiet
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["matplotlib", "numpy"]
