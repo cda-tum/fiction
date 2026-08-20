@@ -21,7 +21,6 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
-#include <functional>
 #include <limits>
 #include <random>
 #include <type_traits>
@@ -838,7 +837,7 @@ template <typename Lyt>
         [&lyt, &cell_fold](const auto& c)
         {
             std::size_t cell_hash{0};
-            hash_combine(cell_hash, lyt.get_cell_type(c));
+            hash_combine(cell_hash, c, lyt.get_cell_type(c));
 
             if constexpr (is_charge_distribution_surface_v<Lyt>)
             {
@@ -848,7 +847,7 @@ template <typename Lyt>
                 hash_combine(cell_hash, lyt.get_charge_state(c));
             }
 
-            hash_combine_unordered(cell_fold, std::pair{c, cell_hash});
+            hash_combine_unordered(cell_fold, cell_hash);
         });
 
     std::size_t digest{0};
@@ -860,7 +859,12 @@ template <typename Lyt>
 
         lyt.foreach_sidb_defect(
             [&defect_fold](const auto& defect)
-            { hash_combine_unordered(defect_fold, std::pair{defect.first, std::hash<sidb_defect>{}(defect.second)}); });
+            {
+                std::size_t defect_hash{0};
+                hash_combine(defect_hash, defect.first, defect.second);
+
+                hash_combine_unordered(defect_fold, defect_hash);
+            });
 
         hash_combine(digest, lyt.num_defects(), defect_fold);
     }
