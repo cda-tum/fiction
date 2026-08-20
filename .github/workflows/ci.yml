@@ -12,8 +12,9 @@ name: CI
 on:
   push:
     branches: ["main"]
+  # deliberately unfiltered: a pull request onto any other base still has to report `🚦 Check`,
+  # and a required context that never arrives blocks that pull request forever
   pull_request:
-    branches: ["main"]
   merge_group:
   workflow_dispatch:
 
