@@ -785,9 +785,6 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         break;
                     }
                     case Lyt::technology::cell_type::EMPTY:
-                    {
-                        break;
-                    }
                     default:
                     {
                         break;
