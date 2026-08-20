@@ -1,0 +1,22 @@
+{
+  "author": {
+    "name": "Marcel Walter\nCopyright (c) 2023 - present Chair for Design Automation, Technical University of Munich",
+    "years": [2018, 2023]
+  },
+  "force_author": true,
+  "force_license": true,
+  "license": "MIT",
+  "title": false,
+  "style_override_for_suffix": {
+    ".pyi": "DOCSTRING_STYLE"
+  },
+  "include": ["**/*.py", "**/*.pyi"],
+  "exclude": [
+    "^vendors/",
+    "^benchmarks/",
+    "(^|/)\\.(ai|git|mypy_cache|nox|pytest_cache|ruff_cache|tox|venv[^/]*)/",
+    "(^|/)(build|cmake-build)[^/]*/",
+    "(^|/)(dist|venv|_deps|__pycache__)/",
+    "\\.egg-info/"
+  ]
+}

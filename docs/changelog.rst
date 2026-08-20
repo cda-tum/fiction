@@ -50,6 +50,9 @@ Added
       ``apply_sim7_mol_library``
     - Exposed ``state_type``, which makes ``calculate_energy_and_state_type_with_kinks_accepted``/``_rejected``
       and ``occupation_probability_gate_based`` callable from Python
+- Tooling:
+    - Added the ``license-tools`` prek hook, which puts an MIT copyright header on every Python
+      file and rewrites any that departs from the canonical text
 
 Changed
 #######
@@ -115,7 +118,8 @@ Changed
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
       ``future-annotations`` setting had assumed of all of them and only six of them had
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
-      including ``CPY001``, which stays off pending #1091
+      including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
+      headers instead
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
 - Continuous integration:
