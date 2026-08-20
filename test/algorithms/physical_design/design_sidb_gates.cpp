@@ -472,9 +472,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     lyt.foreach_cell(
         [&lyt](const auto& c)
         {
-            if (lyt.get_cell_type(c) == sidb_technology::LOGIC)
+            if (lyt.get_cell_type(c) == sidb_technology::cell_type::LOGIC)
             {
-                lyt.assign_cell_type(c, sidb_technology::EMPTY);
+                lyt.assign_cell_type(c, sidb_technology::cell_type::EMPTY);
             }
         });
 

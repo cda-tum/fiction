@@ -605,7 +605,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         for (const auto& l_cells : logic_cells)
         {
-            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb_technology::LOGIC);
+            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb_technology::cell_type::LOGIC);
         }
 
         const auto status =

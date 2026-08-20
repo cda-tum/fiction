@@ -51,6 +51,11 @@ Added
 
 Changed
 #######
+- Code quality:
+    - **Breaking:** ``qca_technology::cell_type``, ``inml_technology::cell_type``, and
+      ``sidb_technology::cell_type`` are now scoped ``enum class``, consistent with
+      ``mol_qca_technology::cell_type``. Unqualified access such as ``sidb_technology::INPUT`` must be
+      updated to ``sidb_technology::cell_type::INPUT``
 - Continuous integration:
     - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
       paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
