@@ -532,6 +532,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
             .positive_sidbs  = generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);  // NOLINT(bugprone-unchecked-optional-access)
         result_lyt.value().foreach_cell(              // NOLINT(bugprone-unchecked-optional-access)
