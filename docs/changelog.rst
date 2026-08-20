@@ -174,6 +174,9 @@ Fixed
       traced contour came out empty and every reachable point was marked operational without simulation
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
+- I/O:
+    - Fixed ``write_qca_layout_svg``'s simple-mode output emitting malformed ``fill:##000000`` for
+      constant-0/1 QCA cells instead of ``fill:#000000``
 - Experiments:
     - **Breaking:** fixed the always-false out-of-bounds guard in ``generate_defective_surface.py``
       that let a defect be placed clipped at the surface edge. The generated surface changes

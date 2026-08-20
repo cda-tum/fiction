@@ -200,6 +200,7 @@ inline constexpr const char* CLOCK_ZONE_12_TEXT    = "000000";
 inline constexpr const char* CLOCK_ZONE_34_TEXT    = "ffffff";
 inline constexpr const char* PI_CELL               = "008dc8";
 inline constexpr const char* PO_CELL               = "e28686";
+inline constexpr const char* CONST_CELL            = "000000";
 
 // SVG parts with placeholders
 inline constexpr const char* HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
@@ -960,12 +961,12 @@ class write_qca_layout_svg_impl
         }
         else if (Lyt::technology::is_const_0_cell(ct))
         {
-            cell_color       = "000000";
+            cell_color       = svg::CONST_CELL;
             cell_description = ps.simple ? svg::SIMPLE_CELL : svg::CONST0;
         }
         else if (Lyt::technology::is_const_1_cell(ct))
         {
-            cell_color       = "000000";
+            cell_color       = svg::CONST_CELL;
             cell_description = ps.simple ? svg::SIMPLE_CELL : svg::CONST1;
         }
         else
@@ -1261,12 +1262,12 @@ class write_mol_qca_layout_svg_impl
         }
         else if (Lyt::technology::is_const_0_cell(ct))
         {
-            cell_color       = "000000";
+            cell_color       = svg::CONST_CELL;
             cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST0;
         }
         else if (Lyt::technology::is_const_1_cell(ct))
         {
-            cell_color       = "000000";
+            cell_color       = svg::CONST_CELL;
             cell_description = ps.simple ? svg::MOL_QCA_SIMPLE_CELL : svg::MOL_QCA_CONST1;
         }
         else
