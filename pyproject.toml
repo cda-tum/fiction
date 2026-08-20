@@ -2,7 +2,7 @@
 requires = [
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.3.0",
-    "nanobind~=2.13.0"
+    "nanobind~=2.15.0"
 ]
 build-backend = "scikit_build_core.build"
 
@@ -314,7 +314,7 @@ docstring-code-format = true
 build = [
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.3.0",
-    "nanobind~=2.13.0",
+    "nanobind~=2.15.0",
 ]
 docs = [
     "sphinx==8.1.3; python_version < '3.11'",
