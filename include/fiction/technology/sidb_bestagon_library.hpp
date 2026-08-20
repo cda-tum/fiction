@@ -303,8 +303,7 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
      * @return port directions of the given tile are returned as `port_list`.
      */
     template <typename GateLyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const GateLyt&       lyt,
-                                                                          const tile<GateLyt>& t)
+    [[nodiscard]] static port_list<port_direction> determine_port_routing(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
