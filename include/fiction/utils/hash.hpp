@@ -115,6 +115,12 @@ struct hash<std::multiset<T>>
 template <typename T1, typename T2>
 struct hash<std::pair<T1, T2>>
 {
+    /**
+     * @brief Computes the hash value of a given `std::pair`.
+     *
+     * @param p Pair to hash.
+     * @return Hash value of `p`.
+     */
     std::size_t operator()(const std::pair<T1, T2>& p) const noexcept
     {
         std::size_t h = 0;
