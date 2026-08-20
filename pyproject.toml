@@ -248,7 +248,10 @@ ignore = [
     "single-line-implicit-string-concatenation", # conflicts with the formatter
     "missing-trailing-comma", # conflicts with the formatter
     "PLR09", # too many <...>
-    "missing-copyright-notice", # the project uses no per-file copyright headers; see #1091
+    # the `license-tools` prek hook writes the per-file copyright headers and rewrites any
+    # that departs from the canonical text. Ruff only reports what that hook already fixes,
+    # and it matches against a preview default regex that can diverge from the emitted header
+    "missing-copyright-notice",
     # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
     # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
     "line-contains-todo",

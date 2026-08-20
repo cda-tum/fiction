@@ -51,6 +51,8 @@ Added
     - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
       ``apply_sim7_mol_library``
 - Tooling:
+    - Added the ``license-tools`` prek hook, which puts an MIT copyright header on every Python
+      file and rewrites any that departs from the canonical text
     - Added the ``minimums`` nox session, which runs the Python test suite on Python 3.10 against
       the lowest declared direct dependencies instead of the newest compatible ones
 
@@ -118,7 +120,8 @@ Changed
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
       ``future-annotations`` setting had assumed of all of them and only six of them had
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
-      including ``CPY001``, which stays off pending #1091
+      including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
+      headers instead
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
 - Continuous integration:

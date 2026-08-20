@@ -58,6 +58,7 @@ docs/html/
 # Experiment files
 *.json
 !CMakePresets.json
+!.license-tools-config.json
 *.csv
 
 # Coverage files
