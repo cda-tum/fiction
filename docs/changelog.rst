@@ -184,7 +184,8 @@ Removed
     - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
       ``INTERFACE`` target and therefore never did anything
 - CLI:
-    - Removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap`` does not support
+    - **Breaking:** removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap``
+      does not support
 - Continuous integration:
     - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
       remains the local entry point
