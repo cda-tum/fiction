@@ -146,13 +146,13 @@ FetchContent_MakeAvailable(alice)
 # submodule directories empty, so a tarball build fails on `#include
 # <parallel_hashmap/phmap.h>`. Do not convert this to a `URL` without first
 # arranging for that header to resolve.
-set(MOCKTURTLE_EXAMPLES
+set(MOCKTURTLE_BUILD_EXAMPLES
     OFF
     CACHE BOOL "" FORCE)
-set(MOCKTURTLE_EXPERIMENTS
+set(MOCKTURTLE_BUILD_EXPERIMENTS
     OFF
     CACHE BOOL "" FORCE)
-set(MOCKTURTLE_TEST
+set(MOCKTURTLE_BUILD_TESTS
     OFF
     CACHE BOOL "" FORCE)
 FetchContent_Declare(

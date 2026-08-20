@@ -83,7 +83,6 @@
       "inherits": "base",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "MOCKTURTLE_EXAMPLES": "OFF",
         "FICTION_PROGRESS_BARS": "OFF",
         "FICTION_CLI": "OFF",
         "FICTION_TEST": "OFF",
@@ -117,8 +116,7 @@
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
         "FICTION_PROGRESS_BARS": "ON",
-        "FICTION_WARNINGS_AS_ERRORS": "OFF",
-        "MOCKTURTLE_EXAMPLES": "OFF"
+        "FICTION_WARNINGS_AS_ERRORS": "OFF"
       }
     },
     {
@@ -150,7 +148,6 @@
         "FICTION_ALGLIB": "ON",
         "FICTION_PROGRESS_BARS": "OFF",
         "FICTION_WARNINGS_AS_ERRORS": "OFF",
-        "MOCKTURTLE_EXAMPLES": "OFF",
         "FICTION_ENABLE_PCH": "ON"
       }
     },
@@ -198,8 +195,7 @@
         "FICTION_PROGRESS_BARS": "ON",
         "FICTION_Z3": "ON",
         "FICTION_ALGLIB": "ON",
-        "FICTION_PYTHON_BINDINGS": "ON",
-        "MOCKTURTLE_EXAMPLES": "OFF"
+        "FICTION_PYTHON_BINDINGS": "ON"
       }
     }
   ],

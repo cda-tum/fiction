@@ -214,6 +214,8 @@ Fixed
       ``uv build --sdist`` would otherwise ship into the source distribution
     - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
       ``pip install mnt.pyfiction`` fail wherever no matching wheel exists
+    - Fixed the misspelled ``mockturtle`` build options, which left its 13 example executables in
+      every build graph because ``MOCKTURTLE_BUILD_EXAMPLES`` defaults to ``ON``
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
