@@ -27,13 +27,13 @@ Added
       no longer caps at three dimensions
 - Build system:
     - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
-- Continuous integration:
-    - The 🐍 Packaging workflow now runs ``check-sdist --inject-junk``, which fails if the source
-      distribution drops a tracked source or ships an untracked one
-    - Added a 🐍 Lint workflow that runs the ``mypy`` hook, which pre-commit.ci no longer runs
 - CLI:
     - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
       physical simulation. It implies kink rejection, since the filtering steps are only defined there
+- Continuous integration:
+    - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
+      distribution drops a tracked source or ships an untracked one
+    - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
 - Experiments:
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space
@@ -51,28 +51,6 @@ Added
 
 Changed
 #######
-- Continuous integration:
-    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
-      paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
-      ``requires`` clause no longer silences the Doxygen comments that follow it
-    - The twelve workflows are consolidated into ``ci.yml`` and ``cd.yml`` over a set of reusable
-      workflows. Change detection decides what runs, and a single ``🚦 Check`` job aggregates the
-      outcome, so branch protection can require one context instead of none of the real ones
-    - The ``ci-*`` presets now reuse the precompiled header that the ``dev`` preset already used,
-      which the 120 single-source test executables each paid for separately before
-    - The build jobs no longer cap themselves at two hours. Three of them had started failing on
-      that cap rather than on a regression; the short jobs keep a ceiling
-    - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
-      credentials for PyPI, Docker Hub, and ghcr.io
-    - The wheel jobs now run whenever anything the extension is compiled from changes, not only
-      the packaging metadata. ``cibuildwheel`` runs the Python test suite, so this is what
-      decides whether it runs at all
-- Python bindings:
-    - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
-      ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
-      directly must be renamed
-    - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
-      and physics as a topic on PyPI
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
@@ -105,17 +83,10 @@ Changed
       ``FICTION_LIGHTWEIGHT_DEBUG_BUILDS``, which cuts Debug compile time and memory substantially
     - ``FICTION_ENABLE_PCH`` now covers the test suite as well as the CLI, and is on in the ``dev``
       and ``tests-slim`` presets
-    - The CI presets no longer build the experiments; one dedicated 🐧 job compiles them instead
+    - The CI presets no longer build the experiments; the 🧪 Experiments job compiles them instead
     - ``vcs-versioning`` replaces ``setuptools-scm`` for deriving the version from git, which drops
       ``setuptools`` from the build. Building from source now requires ``scikit-build-core`` 1.0
     - The CMake policy range now ends at 4.4
-- Experiments:
-    - Modernized ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
-      directory to it. Apart from the out-of-bounds fix below, the surface it generates is unchanged
-    - ``generate_defective_surface.py`` is executable and declares its dependencies in a PEP 723
-      block, so running it needs nothing installed first
-    - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
-      discarded, and takes the parameters it used to hard-code as command-line arguments
 - Code quality:
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
@@ -146,12 +117,53 @@ Changed
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
 - Continuous integration:
+    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
+      paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
+      ``requires`` clause no longer silences the Doxygen comments that follow it
+    - The twelve workflows are consolidated into ``ci.yml`` and ``cd.yml`` over a set of callable
+      workflows. Change detection decides what runs, and a single ``🚦 Check`` job aggregates the
+      outcome
+    - **Action required:** the workflows that produced the former status contexts are gone, so an
+      administrator must repoint branch protection at ``🚦 Check`` together with
+      ``🔍 Change / 🕵️ Check``, ``pre-commit.ci - pr``, and ``docs/readthedocs.org:fiction``. Never
+      require an individual matrix leg; ``🚦 Check`` covers them and survives a matrix change
+    - The ``ci-*`` presets now reuse the precompiled header that the ``dev`` preset already used,
+      which the 120 single-source test executables each paid for separately before
+    - The build jobs no longer cap themselves at two hours. Three of them had started failing on
+      that cap rather than on a regression; the short jobs keep a ceiling
+    - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
+      credentials for PyPI, Docker Hub, and ghcr.io
+    - The wheel jobs now run whenever anything the extension is compiled from changes, not only
+      the packaging metadata. ``cibuildwheel`` runs the Python test suite, so this is what
+      decides whether it runs at all
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
     - Halved the OS matrices; ``docs/getting_started.rst`` records the combinations we verify
     - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
       only smoke-testing the import
     - ``prek`` now validates ``.codecov.yml`` against its schema
+    - The docstring generator runs on ``main`` only. It pushes with a token that starts no workflow
+      run, so its commit on a pull request head would carry no ``🚦 Check``
+    - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
+      reviewer or a wait timer on releases would go
+- Documentation:
+    - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
+      matching the two workflows that remain
+    - ``docs/contributing.rst`` describes the checks a pull request now reports and what
+      ``🚦 Check`` means
+- Experiments:
+    - Modernized ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
+      directory to it. Apart from the out-of-bounds fix below, the surface it generates is unchanged
+    - ``generate_defective_surface.py`` is executable and declares its dependencies in a PEP 723
+      block, so running it needs nothing installed first
+    - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
+      discarded, and takes the parameters it used to hard-code as command-line arguments
+- Python bindings:
+    - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
+      ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
+      directly must be renamed
+    - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
+      and physics as a topic on PyPI
 
 Removed
 #######
@@ -160,18 +172,18 @@ Removed
       command, and ``one_pass_synthesis()``. Use ``exact_physical_design()`` instead
     - Removed ``jump_point_search()``. Use ``a_star()`` instead
     - Removed ``qca_energy_dissipation()`` and the ``energy`` CLI command
+- Build system:
+    - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
+      ``INTERFACE`` target and therefore never did anything
 - CLI:
     - Removed the ``--logic_sharing`` flag from ``map``, which ``mockturtle::emap`` does not support
+- Continuous integration:
+    - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
+      remains the local entry point
 - Data structures:
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
-- Build system:
-    - Removed ``FICTION_ENABLE_UNITY_BUILD``, which set a non-propagating property on an
-      ``INTERFACE`` target and therefore never did anything
-- Continuous integration:
-    - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
-      remains the local entry point
 
 Fixed
 #####
@@ -192,19 +204,11 @@ Fixed
       traced contour came out empty and every reachable point was marked operational without simulation
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
-- Experiments:
-    - **Breaking:** fixed the always-false out-of-bounds guard in ``generate_defective_surface.py``
-      that let a defect be placed clipped at the surface edge. The generated surface changes
-    - ``generate_defective_surface.py`` now rejects a coverage outside ``[0.0, 1.0]`` and a
-      non-positive surface dimension, where it used to write an empty surface and report success
 - Build system:
     - ``.gitignore`` now covers the build, virtual environment, and editor droppings that a local
       ``uv build --sdist`` would otherwise ship into the source distribution
     - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
       ``pip install mnt.pyfiction`` fail wherever no matching wheel exists
-- Documentation:
-    - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a
-      function without a Doxygen brief description
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
@@ -228,7 +232,15 @@ Fixed
       instead of floating on ``master``
     - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, leaving the slowest runners cold
     - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``
-    - Fixed the 🐍 Packaging path filter still pointing at the removed ``bindings/pyfiction/**``
+    - Fixed the packaging path filter still pointing at the removed ``bindings/pyfiction/**``
+- Documentation:
+    - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a
+      function without a Doxygen brief description
+- Experiments:
+    - **Breaking:** fixed the always-false out-of-bounds guard in ``generate_defective_surface.py``
+      that let a defect be placed clipped at the surface edge. The generated surface changes
+    - ``generate_defective_surface.py`` now rejects a coverage outside ``[0.0, 1.0]`` and a
+      non-positive surface dimension, where it used to write an empty surface and report success
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
@@ -236,7 +248,6 @@ Fixed
       ``*_stats`` runtime members are now documented under their real names
     - Fixed ``bdl_input_iterator.py`` never being collected, as its name did not match pytest's
       ``python_files`` pattern, so its five tests had never run
-
 v0.7.0 - 2026-07-31
 -------------------
 
