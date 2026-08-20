@@ -19,6 +19,7 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
 
 jobs:
   build_experiments:
@@ -72,4 +73,4 @@ jobs:
           -DFICTION_CLI=OFF
 
       - name: Build
-        run: cmake --build --preset ci-debug --parallel 4
+        run: cmake --build --preset ci-debug

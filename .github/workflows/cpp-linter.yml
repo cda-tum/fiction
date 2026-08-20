@@ -9,13 +9,17 @@ concurrency:
 
 permissions: {}
 
+defaults:
+  run:
+    shell: bash
+
 env:
   Z3_VERSION: 4.13.4
 
 jobs:
   clangtidy:
     name: 🚨 Clang-Tidy
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read # required to check out the repository
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR

@@ -13,7 +13,7 @@ jobs:
   zizmor:
     name: 🌈 Zizmor
     # zizmor-action shells out to Docker, which ubuntu-slim's unprivileged container does not support
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read # required to check out the repository

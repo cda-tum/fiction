@@ -34,7 +34,7 @@ env:
 jobs:
   get_docstrings:
     name: 🐍 Auto-generate docstrings for pyfiction from C++ code
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write # required to commit and push the generated docstrings
     steps:

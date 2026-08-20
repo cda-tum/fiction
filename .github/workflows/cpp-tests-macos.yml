@@ -26,6 +26,8 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  CMAKE_BUILD_PARALLEL_LEVEL: 3
+  CTEST_PARALLEL_LEVEL: 3
 
 jobs:
   build_and_test:
@@ -76,10 +78,10 @@ jobs:
           -DCMAKE_CXX_COMPILER="$COMPILER"
 
       - name: Build (Debug)
-        run: cmake --build --preset ci-debug --parallel 3
+        run: cmake --build --preset ci-debug
 
       - name: Test (Debug)
-        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3 --parallel 3
+        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3
 
       # Build and test pipeline for Release mode
 
@@ -92,7 +94,7 @@ jobs:
           -DFICTION_ENABLE_JEMALLOC=ON
 
       - name: Build (Release)
-        run: cmake --build --preset ci-release --parallel 3
+        run: cmake --build --preset ci-release
 
       - name: Test (Release)
-        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3 --parallel 3
+        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3

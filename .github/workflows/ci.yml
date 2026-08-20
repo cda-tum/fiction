@@ -169,7 +169,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-latest]
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
     uses: ./.github/workflows/packaging-wheels.yml
     with:
       runs-on: ${{ matrix.runs-on }}

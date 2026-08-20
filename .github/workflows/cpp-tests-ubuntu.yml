@@ -26,6 +26,8 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_PARALLEL_LEVEL: 4
   # Z3 has no ARM build in `cda-tum/setup-z3`
   EXTRA_CMAKE_ARGS: ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
 
@@ -90,10 +92,10 @@ jobs:
           $EXTRA_CMAKE_ARGS
 
       - name: Build (Debug)
-        run: cmake --build --preset ci-debug --parallel 4
+        run: cmake --build --preset ci-debug
 
       - name: Test (Debug)
-        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3
 
       # Build and test pipeline for Release mode
 
@@ -107,7 +109,7 @@ jobs:
           $EXTRA_CMAKE_ARGS
 
       - name: Build (Release)
-        run: cmake --build --preset ci-release --parallel 4
+        run: cmake --build --preset ci-release
 
       - name: Test (Release)
-        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3

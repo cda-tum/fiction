@@ -19,6 +19,8 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_PARALLEL_LEVEL: 4
 
 jobs:
   coverage:
@@ -69,10 +71,10 @@ jobs:
         run: cmake -S . --preset coverage -DCMAKE_CXX_COMPILER=g++-13
 
       - name: Build
-        run: cmake --build --preset coverage --parallel 4
+        run: cmake --build --preset coverage
 
       - name: Test
-        run: ctest --preset coverage --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset coverage --output-on-failure --repeat until-pass:3
 
       - name: Generate Coverage Report
         run: |

@@ -15,6 +15,7 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
 
 jobs:
   analyze:
@@ -93,7 +94,7 @@ jobs:
 
       - if: matrix.language == 'cpp'
         name: Build fiction
-        run: cmake --build --preset ci-codeql --parallel 4
+        run: cmake --build --preset ci-codeql
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7

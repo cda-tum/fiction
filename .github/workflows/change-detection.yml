@@ -40,6 +40,10 @@ concurrency:
 
 permissions: {}
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   change-detection:
     name: 🕵️ Check

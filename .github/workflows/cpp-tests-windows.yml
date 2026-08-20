@@ -26,6 +26,8 @@ defaults:
 
 env:
   Z3_VERSION: 4.13.4
+  CMAKE_BUILD_PARALLEL_LEVEL: 4
+  CTEST_PARALLEL_LEVEL: 4
   COMPILER: ${{ inputs.toolset == 'ClangCL' && 'clang-cl' || 'cl' }}
   # ccache refuses to cache a compilation that uses a precompiled header unless told that
   # the PCH's macro definitions and __DATE__/__TIME__ expansions can be ignored. On Unix
@@ -79,10 +81,10 @@ jobs:
           -DCMAKE_C_COMPILER="$env:COMPILER"
 
       - name: Build (Debug)
-        run: cmake --build --preset ci-debug --parallel 4
+        run: cmake --build --preset ci-debug
 
       - name: Test (Debug)
-        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-debug --output-on-failure --repeat until-pass:3
 
       # Build and test pipeline for Release mode
 
@@ -93,7 +95,7 @@ jobs:
           -DCMAKE_C_COMPILER="$env:COMPILER"
 
       - name: Build (Release)
-        run: cmake --build --preset ci-release --parallel 4
+        run: cmake --build --preset ci-release
 
       - name: Test (Release)
-        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3 --parallel 4
+        run: ctest --preset ci-release --output-on-failure --repeat until-pass:3
