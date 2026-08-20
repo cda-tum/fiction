@@ -1,3 +1,11 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Test package for the ``pyfiction`` bindings.
 
 Windows resolves the DLLs a native extension links against through an explicit search path,
