@@ -11,7 +11,7 @@ reviews:
     drafts: false
 
   # Keep in sync with `exclude:` in .pre-commit-config.yaml and `ignore:` in
-  # .github/workflows/clang-tidy-review.yml
+  # .github/workflows/cpp-linter.yml
   path_filters:
     - "!vendors/**"
     - "!benchmarks/**"
@@ -22,7 +22,7 @@ reviews:
     - path: "include/fiction/**"
       instructions: >-
         Header-only C++20. Identifier naming, casing, and formatting are enforced by
-        .clang-tidy and .clang-format, and the Clang-Tidy Review workflow already reports
+        .clang-tidy and .clang-format, and the 🚨 Lint check already reports
         them on every pull request; do not comment on them. Do review contracts, template
         constraints, compile-time cost, and Doxygen coverage: every public symbol needs a
         Doxygen block.
@@ -56,7 +56,7 @@ reviews:
         page needs a matching entry in a toctree in docs/index.rst.
 
   tools:
-    # The Clang-Tidy Review workflow already reports C++ static-analysis findings on every
+    # The 🚨 Lint check already reports C++ static-analysis findings on every
     # pull request; a second C++ reviewer duplicates threads without adding signal.
     cppcheck:
       enabled: false

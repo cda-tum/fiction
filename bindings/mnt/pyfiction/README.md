@@ -152,7 +152,8 @@ to adjust certain docstrings for Python bindings, this can be done here.
 The docstrings are extended and updated automatically by the GitHub
 Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml),
 which regenerates `pybind11_mkdoc_docstrings.hpp` and overrides the existing one every time changes to
-any `*.hpp` file are pushed to a branch.
+any `*.hpp` file, to the workflow, or to `mkdoc_compile_flags.py` reach `main`. It does not run on pull
+request branches, so regenerate locally if you need the docstrings before your pull request merges.
 
 Alternatively, you can run `pybind11_mkdoc` locally (not recommended). It parses with libclang, so it needs the same
 include paths, defines, and language standard as the real build. Without them it parses this C++20 code base as C++11

@@ -1,0 +1,253 @@
+name: ❓ • Change Detection
+
+# Decides which parts of CI run for a pull request. Every flag defaults to `true` off
+# pull requests, because `push`, `merge_group`, `schedule`, and `workflow_dispatch` have
+# no diff base to compare against — a merge group therefore always runs the full fleet.
+#
+# This replaces the `on: paths:` filters the individual workflows used to carry. A
+# workflow skipped by `paths:` never reports its status context at all, so it can never
+# be a required check; a job skipped by one of these flags still lets the `🚦 Check`
+# guard in `ci.yml` conclude. That difference is the reason this file exists.
+
+on:
+  workflow_call:
+    outputs:
+      run-cpp-tests:
+        description: Whether to build and test the C++ library
+        value: ${{ jobs.change-detection.outputs.run-cpp-tests || false }}
+      run-cpp-linter:
+        description: Whether to run Clang-Tidy
+        value: ${{ jobs.change-detection.outputs.run-cpp-linter || false }}
+      run-codeql:
+        description: Whether to run the CodeQL analysis
+        value: ${{ jobs.change-detection.outputs.run-codeql || false }}
+      run-python-linter:
+        description: Whether to type check the Python sources
+        value: ${{ jobs.change-detection.outputs.run-python-linter || false }}
+      run-packaging:
+        description: Whether to build the source distribution and the wheels
+        value: ${{ jobs.change-detection.outputs.run-packaging || false }}
+      run-docker:
+        description: Whether to build the Docker image
+        value: ${{ jobs.change-detection.outputs.run-docker || false }}
+      run-workflows:
+        description: Whether to audit the workflow definitions
+        value: ${{ jobs.change-detection.outputs.run-workflows || false }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-change-detection
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  change-detection:
+    name: 🕵️ Check
+    runs-on: ubuntu-slim
+    timeout-minutes: 1
+    permissions:
+      contents: read # required to check out the repository
+    outputs:
+      run-cpp-tests: ${{ steps.cpp-tests-changes.outputs.run-cpp-tests || false }}
+      run-cpp-linter: ${{ steps.cpp-linter-changes.outputs.run-cpp-linter || false }}
+      run-codeql: ${{ steps.codeql-changes.outputs.run-codeql || false }}
+      run-python-linter: ${{ steps.python-linter-changes.outputs.run-python-linter || false }}
+      run-packaging: ${{ steps.packaging-changes.outputs.run-packaging || false }}
+      run-docker: ${{ steps.docker-changes.outputs.run-docker || false }}
+      run-workflows: ${{ steps.workflows-changes.outputs.run-workflows || false }}
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # The generated docstring header is excluded everywhere it could appear. The
+      # docstring generator rewrites its 25k lines on every `.hpp` push, and that commit
+      # must not drag the whole fleet along behind it.
+
+      - name: Get the changed files relevant for the C++ tests
+        if: github.event_name == 'pull_request'
+        id: changed-cpp-testable-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            include/fiction/**
+            test/**
+            cli/**
+            experiments/**
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            .codecov.yml
+            .github/workflows/ci.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/cpp-tests-ubuntu.yml
+            .github/workflows/cpp-tests-macos.yml
+            .github/workflows/cpp-tests-windows.yml
+            .github/workflows/cpp-experiments.yml
+            .github/workflows/cpp-coverage.yml
+            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+      - name: Set a flag for running the C++ tests
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-cpp-testable-files.outputs.all != ''
+        id: cpp-tests-changes
+        run: echo "run-cpp-tests=true" >> "${GITHUB_OUTPUT}"
+
+      # The `ci-tidy` preset additionally builds the Python bindings, the benchmarks, and
+      # the experiments, so Clang-Tidy watches a wider tree than the test matrix does.
+      - name: Get the changed files relevant for Clang-Tidy
+        if: github.event_name == 'pull_request'
+        id: changed-cpp-linter-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            include/fiction/**
+            test/**
+            cli/**
+            bindings/**
+            experiments/**
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            .clang-tidy
+            .github/workflows/ci.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/cpp-linter.yml
+            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            !bindings/mnt/pyfiction/include/pyfiction/documentation.hpp
+      - name: Set a flag for running Clang-Tidy
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-cpp-linter-files.outputs.all != ''
+        id: cpp-linter-changes
+        run: echo "run-cpp-linter=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Get the changed files relevant for CodeQL
+        if: github.event_name == 'pull_request'
+        id: changed-codeql-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            include/fiction/**
+            test/**
+            cli/**
+            bindings/**
+            experiments/**
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            **/*.py
+            .github/codeql-config.yml
+            .github/workflows/ci.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/codeql.yml
+            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+      - name: Set a flag for running CodeQL
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-codeql-files.outputs.all != ''
+        id: codeql-changes
+        run: echo "run-codeql=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Get the changed files relevant for the Python linter
+        if: github.event_name == 'pull_request'
+        id: changed-python-linter-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            **/*.py
+            **/*.pyi
+            pyproject.toml
+            uv.lock
+            .pre-commit-config.yaml
+            .github/workflows/ci.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/python-linter.yml
+      - name: Set a flag for running the Python linter
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-python-linter-files.outputs.all != ''
+        id: python-linter-changes
+        run: echo "run-python-linter=true" >> "${GITHUB_OUTPUT}"
+
+      # `[tool.cibuildwheel] test-command` runs pytest against every wheel it builds, so
+      # this is also what gates the Python test suite — there is no separate test job. The
+      # filter therefore has to cover everything the extension is compiled from, not just
+      # what shapes the distribution.
+      - name: Get the changed files relevant for packaging and the Python tests
+        if: github.event_name == 'pull_request'
+        id: changed-packaging-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            bindings/**
+            include/fiction/**
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            noxfile.py
+            pyproject.toml
+            uv.lock
+            **/*.py
+            .github/workflows/ci.yml
+            .github/workflows/cd.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/packaging-sdist.yml
+            .github/workflows/packaging-wheels.yml
+            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+      - name: Set a flag for running the packaging and Python test jobs
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-packaging-files.outputs.all != ''
+        id: packaging-changes
+        run: echo "run-packaging=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Get the changed files relevant for the Docker image
+        if: github.event_name == 'pull_request'
+        id: changed-docker-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            Dockerfile
+            .dockerignore
+            include/fiction/**
+            cli/**
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            .github/workflows/ci.yml
+            .github/workflows/cd.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/docker.yml
+            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+      - name: Set a flag for building the Docker image
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-docker-files.outputs.all != ''
+        id: docker-changes
+        run: echo "run-docker=true" >> "${GITHUB_OUTPUT}"
+
+      - name: Get the changed workflow definitions
+        if: github.event_name == 'pull_request'
+        id: changed-workflow-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            .github/workflows/**
+      - name: Set a flag for auditing the workflow definitions
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-workflow-files.outputs.all != ''
+        id: workflows-changes
+        run: echo "run-workflows=true" >> "${GITHUB_OUTPUT}"

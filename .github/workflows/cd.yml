@@ -1,0 +1,88 @@
+name: CD
+
+# Everything that publishes. Kept apart from `ci.yml` so that no workflow reachable from
+# a pull request ever holds the credentials to release: PyPI, Docker Hub, and ghcr.io are
+# only ever touched from a published release.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  build-sdist:
+    name: 🐍 Packaging
+    permissions:
+      contents: read # required to check out the repository
+    uses: ./.github/workflows/packaging-sdist.yml
+
+  build-wheels:
+    name: 🐍 Packaging
+    permissions:
+      contents: read # required to check out the repository
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
+    uses: ./.github/workflows/packaging-wheels.yml
+    with:
+      runs-on: ${{ matrix.runs-on }}
+
+  publish-to-pypi:
+    name: 🚀 Publish to PyPI
+    needs: [build-sdist, build-wheels]
+    runs-on: ubuntu-24.04
+    if: github.event_name == 'release' && github.event.action == 'published'
+    # the one place in the repository that can reach PyPI. Naming a deployment environment
+    # gives that step somewhere to hang required reviewers or a wait timer; until such a rule
+    # is configured the environment imposes nothing
+    environment:
+      name: pypi
+      url: https://pypi.org/p/mnt.pyfiction
+    permissions:
+      attestations: write # required to publish the build provenance attestation
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
+    steps:
+      - name: Download the previously stored artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          pattern: cibw-*
+          path: dist
+          merge-multiple: true
+
+      - name: Generate artifact attestation for sdist and wheel(s)
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: "dist/*"
+
+      - name: Deploy to PyPI
+        # zizmor: ignore[use-trusted-publishing] switching to OIDC trusted publishing requires
+        # registering this workflow as a trusted publisher on the PyPI project first (external,
+        # not something this repo alone controls); tracked as follow-up, not done here
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          password: ${{ secrets.PYPI_DEPLOY_TOKEN }}
+          attestations: true
+          skip-existing: true
+          verbose: true
+
+  publish-docker-image:
+    name: 🐳 Docker
+    permissions:
+      contents: read # required to check out the repository
+      packages: write # required to push the image to ghcr.io on release
+      attestations: write # required to publish the build provenance attestation on release
+      id-token: write # required by actions/attest-build-provenance to mint the attestation
+    if: github.event_name == 'release' && github.event.action == 'published'
+    uses: ./.github/workflows/docker.yml
+    with:
+      push: true
+    secrets:
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}

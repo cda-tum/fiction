@@ -1,35 +1,22 @@
 name: 🐍 • Lint
 
 on:
-  merge_group:
-  push:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.pyi"
-      - "pyproject.toml"
-      - ".pre-commit-config.yaml"
-      - ".github/workflows/python-linter.yml"
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.pyi"
-      - "pyproject.toml"
-      - ".pre-commit-config.yaml"
-      - ".github/workflows/python-linter.yml"
-  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-python-linter
+  cancel-in-progress: true
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
 
 jobs:
   mypy:
     name: 🐍 Type check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read # required to check out the repository

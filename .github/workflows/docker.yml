@@ -1,46 +1,31 @@
 name: 🐳 • Docker Image
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - "**/*.hpp"
-      - "**/*.cpp"
-      - "**/*.cmake"
-      - "**/CMakeLists.txt"
-      - "libs/**"
-      - ".github/workflows/docker-image.yml"
-      - "Dockerfile"
-      - ".dockerignore"
-      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "**/*.hpp"
-      - "**/*.cpp"
-      - "**/*.cmake"
-      - "**/CMakeLists.txt"
-      - "libs/**"
-      - ".github/workflows/docker-image.yml"
-      - "Dockerfile"
-      - ".dockerignore"
-      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
-  merge_group:
-  workflow_dispatch:
-  release:
-    types: [published]
+  workflow_call:
+    inputs:
+      push:
+        description: Whether to push the built image to Docker Hub and ghcr.io
+        required: false
+        default: false
+        type: boolean
+    secrets:
+      DOCKER_USERNAME:
+        description: Docker Hub user the image is published under
+        required: false
+      DOCKER_PASSWORD:
+        description: Docker Hub token
+        required: false
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-docker
   cancel-in-progress: true
 
 permissions: {}
 
 jobs:
   build:
-    name: 🐳 Build and publish Docker image
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
+    name: 🐳 Image
+    runs-on: ubuntu-24.04
     permissions:
       packages: write # required to push the image to ghcr.io on release
       contents: read # required to check out the repository
@@ -54,14 +39,14 @@ jobs:
           persist-credentials: false
 
       - name: Log in to Docker Hub
-        if: github.event_name == 'release' && github.event.action == 'published'
+        if: inputs.push
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Log in to GitHub Container Registry
-        if: github.event_name == 'release' && github.event.action == 'published'
+        if: inputs.push
         uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
         with:
           registry: ghcr.io
@@ -69,7 +54,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        if: github.event_name == 'release' && github.event.action == 'published'
+        if: inputs.push
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
@@ -85,22 +70,24 @@ jobs:
         with:
           context: ${{ github.workspace }}
           file: Dockerfile
-          push: ${{ github.event_name == 'release' && github.event.action == 'published' }}
+          push: ${{ inputs.push }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels || '' }}
 
       - name: Push README as DockerHub project description
-        if: github.event_name == 'release' && github.event.action == 'published'
+        if: inputs.push
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: ${{ secrets.DOCKER_USERNAME }}/fiction
-          short-description: ${{ steps.meta.outputs.labels.description || '' }}
+          # no `short-description`: `metadata-action` emits `labels` as newline-delimited
+          # text, so the `.description` dereference always yielded the empty string and
+          # every release overwrote the Docker Hub blurb with nothing
           readme-filepath: ${{ github.workspace }}/README.md
 
       - name: Generate artifact attestation
-        if: github.event_name == 'release' && github.event.action == 'published'
+        if: inputs.push
         uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-name: docker.io/${{ secrets.DOCKER_USERNAME }}/fiction
