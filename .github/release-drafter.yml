@@ -113,3 +113,5 @@ template: |
   $CHANGES
 
   **Full [CHANGELOG](https://fiction.readthedocs.io/en/latest/changelog.html)**: https://github.com/$OWNER/$REPOSITORY/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION
+
+  **Upgrade guide**: https://github.com/$OWNER/$REPOSITORY/blob/v$RESOLVED_VERSION/UPGRADING.md

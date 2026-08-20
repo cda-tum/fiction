@@ -33,6 +33,10 @@ The `Writing` rules in the root `AGENTS.md` apply here in full. In addition:
 Every user-facing change adds a bullet to the `Unreleased` section under `Added`,
 `Changed`, `Fixed`, or `Removed`, matching the existing category order and bullet style.
 
+A breaking change needs a second entry in the root `UPGRADING.md`, which carries the
+migration this file has no room for. Mark the bullet here `**Breaking:**` so the two are
+findable together; the root `AGENTS.md` states which changes qualify.
+
 ### Length
 
 **One or two sentences per entry.** Aim for 90 characters and treat 350 as the ceiling —

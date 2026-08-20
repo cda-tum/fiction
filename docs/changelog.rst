@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+`UPGRADING.md <https://github.com/cda-tum/fiction/blob/main/UPGRADING.md>`_ shows how to
+migrate the code that a breaking change below affects.
+
 Unreleased
 ----------
 
@@ -34,6 +37,8 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
+- Documentation:
+    - Added ``UPGRADING.md``, which explains how to migrate across each breaking change
 - Experiments:
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space

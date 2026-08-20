@@ -240,6 +240,20 @@ enforces the following:
     Python).
   - Update `docs/changelog.rst`'s `Unreleased` section for any user-facing change; see
     `docs/AGENTS.md` for the entry style.
+  - Add an `UPGRADING.md` entry for a change that breaks working code: one that stops code
+    compiling or running against the previous release, or silently makes it do something
+    else. The cases are a renamed symbol, a removed symbol, a moved header, a changed
+    default, and a moved module. A new function or a new optional parameter is none of
+    them and goes in the changelog only.
+    - Such a change lands in **both** files, and the two entries co-occur: a
+      `**Breaking:**` bullet in `docs/changelog.rst` names the change, an `UPGRADING.md`
+      entry shows the migration. Neither belongs there without the other.
+    - Write the entry as prose with before-and-after code, never as a list of symbol
+      names. The reader arrives with code that stopped working and needs the replacement,
+      which is the one thing a symbol list withholds.
+    - Entries go under `## Unreleased` as `###` sections, ordered by how much code they
+      touch, most first. A release renames that heading to match the changelog's:
+      `## v0.7.0 - 2026-07-31`.
   - Satisfy every box in `.github/pull_request_template.md` before calling a PR done.
   - Use `const` correctness and braced initialization.
   - Keep plans, notes, analyses, and worktrees in `.ai/` (gitignored). Never write them to
