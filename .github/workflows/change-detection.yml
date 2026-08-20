@@ -24,6 +24,9 @@ on:
       run-python-linter:
         description: Whether to type check the Python sources
         value: ${{ jobs.change-detection.outputs.run-python-linter || false }}
+      run-python-minimums:
+        description: Whether to test against the lowest declared dependency versions
+        value: ${{ jobs.change-detection.outputs.run-python-minimums || false }}
       run-packaging:
         description: Whether to build the source distribution and the wheels
         value: ${{ jobs.change-detection.outputs.run-packaging || false }}
@@ -56,6 +59,7 @@ jobs:
       run-cpp-linter: ${{ steps.cpp-linter-changes.outputs.run-cpp-linter || false }}
       run-codeql: ${{ steps.codeql-changes.outputs.run-codeql || false }}
       run-python-linter: ${{ steps.python-linter-changes.outputs.run-python-linter || false }}
+      run-python-minimums: ${{ steps.python-minimums-changes.outputs.run-python-minimums || false }}
       run-packaging: ${{ steps.packaging-changes.outputs.run-packaging || false }}
       run-docker: ${{ steps.docker-changes.outputs.run-docker || false }}
       run-workflows: ${{ steps.workflows-changes.outputs.run-workflows || false }}
@@ -178,6 +182,31 @@ jobs:
           || steps.changed-python-linter-files.outputs.all != ''
         id: python-linter-changes
         run: echo "run-python-linter=true" >> "${GITHUB_OUTPUT}"
+
+      # Deliberately narrow. The job checks the declared dependency floors, and those live in
+      # `pyproject.toml`, `uv.lock`, and the session itself. The wheel jobs already build the
+      # extension on Python 3.10, so a C++ change cannot break this job without breaking those
+      # too. The test suite is in the filter because a test that reaches for a newer pytest API
+      # is exactly the kind of floor violation this job exists to catch.
+      - name: Get the changed files relevant for the lowest-dependency test run
+        if: github.event_name == 'pull_request'
+        id: changed-python-minimums-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            pyproject.toml
+            uv.lock
+            noxfile.py
+            bindings/mnt/pyfiction/test/**
+            .github/workflows/ci.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/python-minimums.yml
+      - name: Set a flag for running the lowest-dependency test run
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-python-minimums-files.outputs.all != ''
+        id: python-minimums-changes
+        run: echo "run-python-minimums=true" >> "${GITHUB_OUTPUT}"
 
       # `[tool.cibuildwheel] test-command` runs pytest against every wheel it builds, so
       # this is also what gates the Python test suite — there is no separate test job. The
