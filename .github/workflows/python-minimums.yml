@@ -54,7 +54,7 @@ jobs:
           # had the repository sitting at 10.19 GB against GitHub's 10 GB limit,
           # evicting caches faster than they could be reused.
           save: ${{ github.ref == 'refs/heads/main' }}
-          max-size: 10G
+          max-size: 500M
 
       - name: Install Z3
         uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
