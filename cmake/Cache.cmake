@@ -16,6 +16,15 @@ function(fiction_enable_cache)
 
   find_program(CACHE_BINARY NAMES ${CACHE_OPTION_VALUES})
   if(CACHE_BINARY)
+    # The Visual Studio generator ignores compiler launchers outright, so
+    # configuring one there looks like it works and caches nothing.
+    if(CMAKE_GENERATOR MATCHES "Visual Studio")
+      message(
+        WARNING
+          "${CACHE_BINARY} was found, but the '${CMAKE_GENERATOR}' generator ignores "
+          "compiler launchers, so nothing will be cached. Configure with -G Ninja "
+          "to make the cache effective.")
+    endif()
     message(STATUS "${CACHE_BINARY} found and enabled")
 
     set(CACHE_LAUNCHER ${CACHE_BINARY})
