@@ -56,6 +56,8 @@ Added
       ``displacement_robustness_domain_params``
     - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
       ``apply_sim7_mol_library``
+    - Exposed ``state_type``, which makes ``calculate_energy_and_state_type_with_kinks_accepted``/``_rejected``
+      and ``occupation_probability_gate_based`` callable from Python
 - Tooling:
     - Added the ``license-tools`` prek hook, which puts an MIT copyright header on every Python
       file and rewrites any that departs from the canonical text
