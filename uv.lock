@@ -479,7 +479,7 @@ test = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "z3-solver", specifier = ">=4.8.0" }]
+requires-dist = [{ name = "z3-solver", specifier = ">=4.8.5" }]
 
 [package.metadata.requires-dev]
 build = [

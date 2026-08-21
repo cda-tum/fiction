@@ -37,6 +37,8 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
+    - Added a 🐍 Minimums job that runs ``nox -s minimums``, so a lower bound that is too low fails
+      CI instead of a downstream install
 - Documentation:
     - Added ``UPGRADING.md``, which explains how to migrate across each breaking change
 - Experiments:
@@ -53,6 +55,11 @@ Added
       ``displacement_robustness_domain_params``
     - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
       ``apply_sim7_mol_library``
+- Tooling:
+    - Added the ``license-tools`` prek hook, which puts an MIT copyright header on every Python
+      file and rewrites any that departs from the canonical text
+    - Added the ``minimums`` nox session, which runs the Python test suite on Python 3.10 against
+      the lowest declared direct dependencies instead of the newest compatible ones
 
 Changed
 #######
@@ -118,7 +125,8 @@ Changed
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
       ``future-annotations`` setting had assumed of all of them and only six of them had
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
-      including ``CPY001``, which stays off pending #1091
+      including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
+      headers instead
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
 - Continuous integration:
@@ -154,6 +162,10 @@ Changed
       run, so its commit on a pull request head would carry no ``🚦 Check``
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
+- Dependencies:
+    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.8.5, which is the
+      version ``find_package(Z3 4.8.5)`` has required all along. A pin between 4.8.0 and 4.8.4 no
+      longer resolves
 - Documentation:
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain

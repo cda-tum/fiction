@@ -150,6 +150,16 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
     uses: ./.github/workflows/python-linter.yml
 
+  # Builds the extension from source outside the wheel jobs' `cibuildwheel` path, so it stays a
+  # single runner on a single interpreter. See `python-minimums.yml` for why.
+  python-minimums:
+    name: 🐍 Minimums
+    permissions:
+      contents: read # required to check out the repository
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-python-minimums)
+    uses: ./.github/workflows/python-minimums.yml
+
   packaging-sdist:
     name: 🐍 Packaging
     permissions:
@@ -210,6 +220,7 @@ jobs:
       - cpp-coverage
       - codeql
       - python-linter
+      - python-minimums
       - packaging-sdist
       - packaging-wheels
       - docker
@@ -231,6 +242,8 @@ jobs:
             && 'codeql,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-linter)
             && 'python-linter,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-python-minimums)
+            && 'python-minimums,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-packaging)
             && 'packaging-sdist,packaging-wheels,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-docker)

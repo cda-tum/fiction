@@ -46,7 +46,7 @@ classifiers = [
 
 requires-python = ">=3.10"
 dependencies = [
-    "z3-solver>=4.8.0"
+    "z3-solver>=4.8.5"
 ]
 
 [project.urls]
@@ -184,7 +184,7 @@ test-command = "pytest"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
-before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.0"
+before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.5"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
     "auditwheel repair -w {dest_dir} {wheel}",
@@ -248,7 +248,10 @@ ignore = [
     "single-line-implicit-string-concatenation", # conflicts with the formatter
     "missing-trailing-comma", # conflicts with the formatter
     "PLR09", # too many <...>
-    "missing-copyright-notice", # the project uses no per-file copyright headers; see #1091
+    # the `license-tools` prek hook writes the per-file copyright headers and rewrites any
+    # that departs from the canonical text. Ruff only reports what that hook already fixes,
+    # and it matches against a preview default regex that can diverge from the emitted header
+    "missing-copyright-notice",
     # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
     # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
     "line-contains-todo",
