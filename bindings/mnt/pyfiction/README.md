@@ -63,7 +63,7 @@ You can also run the checks manually:
 
 ### Install Z3
 
-Make sure to have the SMT Solver [`Z3 >= 4.8.0`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
+Make sure to have the SMT Solver [`Z3 >= 4.8.5`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
 a multitude of ways:
 
 - Under Ubuntu 20.04 and newer: `sudo apt-get install libz3-dev`.
@@ -104,6 +104,14 @@ A `nox` session is provided to conveniently run the Python tests.
 
 This installs all dependencies for running the tests in an isolated environment, builds the Python package, and then
 runs the tests.
+
+The `minimums` session runs the same tests against the lowest declared direct dependencies instead of the newest
+compatible ones, which exercises the lower bounds in `pyproject.toml`. It requires Python 3.10, the oldest version
+_fiction_ supports.
+
+```bash
+(venv) $ nox -s minimums
+```
 
 ## Usage
 
@@ -152,7 +160,8 @@ to adjust certain docstrings for Python bindings, this can be done here.
 The docstrings are extended and updated automatically by the GitHub
 Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml),
 which regenerates `pybind11_mkdoc_docstrings.hpp` and overrides the existing one every time changes to
-any `*.hpp` file are pushed to a branch.
+any `*.hpp` file, to the workflow, or to `mkdoc_compile_flags.py` reach `main`. It does not run on pull
+request branches, so regenerate locally if you need the docstrings before your pull request merges.
 
 Alternatively, you can run `pybind11_mkdoc` locally (not recommended). It parses with libclang, so it needs the same
 include paths, defines, and language standard as the real build. Without them it parses this C++20 code base as C++11

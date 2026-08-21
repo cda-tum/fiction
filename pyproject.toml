@@ -1,8 +1,8 @@
 [build-system]
 requires = [
-    "scikit-build-core>=0.10.1",
-    "setuptools-scm>=8.1",
-    "nanobind~=2.13.0"
+    "scikit-build-core~=1.0.3",
+    "vcs-versioning~=2.3.0",
+    "nanobind~=2.15.0"
 ]
 build-backend = "scikit_build_core.build"
 
@@ -22,28 +22,31 @@ keywords = ["MNT", "fiction", "nanotechnology", "FCN", "QCA", "NML", "SiDB", "de
 license = { file = "LICENSE.txt" }
 
 classifiers = [
-    'Development Status :: 4 - Beta',
-    'Programming Language :: Python :: 3',
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: C++",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    'Programming Language :: C++',
-    'Environment :: Console',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: Microsoft :: Windows',
-    'Operating System :: MacOS',
-    'Operating System :: POSIX :: Linux',
-    'Intended Audience :: Science/Research',
-    'Natural Language :: English',
-    'Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)',
+    "Topic :: Scientific/Engineering :: Electronic Design Automation (EDA)",
+    "Topic :: Scientific/Engineering :: Physics",
 ]
 
 requires-python = ">=3.10"
 dependencies = [
-    "z3-solver>=4.8.0"
+    "z3-solver>=4.8.5"
 ]
 
 [project.urls]
@@ -72,8 +75,6 @@ wheel.py-api = "cp312"
 build.targets = ["pyfiction"]
 # Only install the Python package component
 install.components = ["fiction_Python"]
-
-metadata.version.provider = "scikit_build_core.metadata.setuptools_scm"
 
 # The sdist has to build the extension, so it keeps `include/`, `bindings/`, `vendors/`, and
 # `cmake/`. Two rules keep it readable: name directories, never a source glob, and anchor every
@@ -128,7 +129,11 @@ inherit.cmake.define = "append"
 cmake.define.DISABLE_GIL = "1"
 
 
-[tool.setuptools_scm]
+[[tool.dynamic-metadata]]
+provider = "vcs_versioning"
+
+
+[tool.vcs-versioning]
 
 
 [tool.check-sdist]
@@ -179,7 +184,7 @@ test-command = "pytest"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
-before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.0"
+before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.5"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
     "auditwheel repair -w {dest_dir} {wheel}",
@@ -243,7 +248,10 @@ ignore = [
     "single-line-implicit-string-concatenation", # conflicts with the formatter
     "missing-trailing-comma", # conflicts with the formatter
     "PLR09", # too many <...>
-    "missing-copyright-notice", # the project uses no per-file copyright headers; see #1091
+    # the `license-tools` prek hook writes the per-file copyright headers and rewrites any
+    # that departs from the canonical text. Ruff only reports what that hook already fixes,
+    # and it matches against a preview default regex that can diverge from the emitted header
+    "missing-copyright-notice",
     # `TD002`/`TD003`/`TD004` stay on and demand that a TODO name an author, link an issue, and
     # end in a colon. `FIX002` fires on every TODO regardless of form, so the two cannot both hold
     "line-contains-todo",
@@ -307,12 +315,11 @@ docstring-code-format = true
 
 [dependency-groups]
 build = [
-    "scikit-build-core>=0.11.0",
-    "setuptools-scm>=8.1",
-    "nanobind~=2.13.0",
+    "scikit-build-core~=1.0.3",
+    "vcs-versioning~=2.3.0",
+    "nanobind~=2.15.0",
 ]
 docs = [
-    "setuptools-scm>=8.1",
     "sphinx==8.1.3; python_version < '3.11'",
     "sphinx==8.2.3; python_version >= '3.11'",
     "breathe==4.36.0",

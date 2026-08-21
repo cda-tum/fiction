@@ -1,4 +1,13 @@
 #!/usr/bin/env -S uv run --script --quiet
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
+# Keep the blank line above: `license-tools` reads an unbroken run of `#` lines as its own header and deletes it
 # /// script
 # requires-python = ">=3.10"
 # dependencies = ["matplotlib", "numpy"]

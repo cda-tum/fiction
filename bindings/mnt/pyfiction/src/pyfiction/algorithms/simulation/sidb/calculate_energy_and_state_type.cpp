@@ -40,6 +40,12 @@ void calculate_energy_and_state_type_impl(nanobind::module_& m)
 
 void calculate_energy_and_state_type(nanobind::module_& m)
 {
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+
+    py::enum_<fiction::state_type>(m, "state_type", DOC(fiction_state_type))
+        .value("ACCEPTED", fiction::state_type::ACCEPTED, DOC(fiction_state_type_ACCEPTED))
+        .value("REJECTED", fiction::state_type::REJECTED, DOC(fiction_state_type_REJECTED));
+
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::calculate_energy_and_state_type_impl<py_sidb_100_lattice>(m);
     detail::calculate_energy_and_state_type_impl<py_sidb_111_lattice>(m);
