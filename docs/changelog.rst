@@ -170,8 +170,11 @@ Changed
     - The ``prek`` hooks now carry explicit priorities, which run the read-only checks
       concurrently and cut a warm ``prek run -a`` by about 18%. Hooks that rewrite the same file
       keep exclusive priorities, since ``prek`` runs hooks that share one concurrently
-    - The docstring generator runs on ``main`` only. It pushes with a token that starts no workflow
-      run, so its commit on a pull request head would carry no ``🚦 Check``
+    - The docstring generator is a ``🐍 Docstrings`` check on a pull request instead of a job that
+      commits the regenerated header. It could no longer commit anywhere: ``main`` rejects a direct
+      push, and on a pull request head it pushes with a token that starts no workflow run, so its
+      commit would carry no ``🚦 Check``. The job now uploads the regenerated header and fails if
+      the committed one differs, which is what a contributor downloads and commits
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
 - Dependencies:
