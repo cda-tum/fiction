@@ -213,8 +213,9 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             }
         };
 
-        do  // NOLINT(cppcoreguidelines-avoid-do-while): the loop body must run at least once to
-            // discover whether any improvement is possible
+        do  // NOLINT(cppcoreguidelines-avoid-do-while): the exit condition (`improvement_found`) is
+            // computed by the body itself, so a `while` would need to duplicate the body or introduce
+            // a flag variable just to seed the first iteration
         {
             status st = status::SEARCH;
 

@@ -959,6 +959,13 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
     }
 }
 
+TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]")
+{
+    const mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA SVG"};
+
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"), std::ofstream::failure);
+}
+
 TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-qca-layout-svg]")
 {
     qca_cell_clk_lyt layout{{1, 0}, "QCA constant cells"};
@@ -974,11 +981,4 @@ TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-
 
     CHECK(contains(svg, "fill:#000000"));
     CHECK_FALSE(contains(svg, "fill:##"));
-}
-
-TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]")
-{
-    const mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA SVG"};
-
-    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"), std::ofstream::failure);
 }
