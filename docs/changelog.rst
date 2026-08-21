@@ -175,6 +175,9 @@ Changed
       push, and on a pull request head it pushes with a token that starts no workflow run, so its
       commit would carry no ``🚦 Check``. The job now uploads the regenerated header and fails if
       the committed one differs, which is what a contributor downloads and commits
+    - The docstring generator parses the headers in sorted order. It numbers repeated symbol
+      names in the order it meets them, so the numbering used to depend on the order the
+      filesystem reported the files in
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
 - Dependencies:
