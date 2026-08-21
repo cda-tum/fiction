@@ -1,4 +1,12 @@
 #!/usr/bin/env python3
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Recompute the ``URL_HASH`` values in ``cmake/Dependencies.cmake``.
 
 Renovate bumps the ``*_VERSION`` and ``ALICE_REV`` variables in that file but

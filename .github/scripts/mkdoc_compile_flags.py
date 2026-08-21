@@ -1,3 +1,11 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """Emit the include and define flags that ``pybind11_mkdoc`` needs to parse *fiction*.
 
 ``pybind11_mkdoc`` invokes libclang directly, so it needs the same include paths and
