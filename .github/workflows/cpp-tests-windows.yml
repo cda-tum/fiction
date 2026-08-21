@@ -56,17 +56,33 @@ jobs:
       - name: Set up MSVC development environment
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+      # EXPERIMENT ARM: sccache instead of ccache, with PCH necessarily off --
+      # sccache cannot cache a precompiled-header compilation at all. Comparison
+      # arm is #1150. Saves on every run, unlike #1150, so the arms stay
+      # comparable while neither is merged.
+      - name: Configure sccache
+        shell: bash
+        run: |
+          echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_CACHE_SIZE=900M" >> "$GITHUB_ENV"
+          # The server shuts down after 600s idle, and ctest between the Debug
+          # and Release builds exceeds that. The restart resets the counters:
+          # the previous run reported 301 compile requests where Ninja executed
+          # 602, so its hit rate described half the job.
+          echo "SCCACHE_IDLE_TIMEOUT=0" >> "$GITHUB_ENV"
+
+      - name: Cache sccache objects
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: "${{ inputs.runs-on }}-${{ inputs.toolset }}"
-          variant: ccache
-          # Only `main` writes, so a pull request restores main's cache without
-          # adding an entry of its own. Every job saving 400-700 MB on every push
-          # had the repository sitting at 10.19 GB against GitHub's 10 GB limit,
-          # evicting caches faster than they could be reused.
-          save: ${{ github.ref == 'refs/heads/main' }}
-          max-size: 800M
+          path: .sccache
+          key: sccache-${{ inputs.runs-on }}-${{ inputs.toolset }}-${{ github.run_id }}
+          restore-keys: sccache-${{ inputs.runs-on }}-${{ inputs.toolset }}-
+
+      - name: Install sccache
+        shell: bash
+        run: |
+          python -m pip install --disable-pip-version-check sccache
+          python -c "import shutil,sys; print(shutil.which('sccache') or sys.exit('sccache not on PATH'))"
 
       - name: Setup Z3 Solver
         id: z3
@@ -83,6 +99,8 @@ jobs:
           cmake -S . --preset ci-debug
           -DCMAKE_CXX_COMPILER="$env:COMPILER"
           -DCMAKE_C_COMPILER="$env:COMPILER"
+          -DFICTION_ENABLE_PCH=OFF
+          -DCACHE_OPTION=sccache
 
       - name: Build (Debug)
         run: cmake --build --preset ci-debug
@@ -97,9 +115,17 @@ jobs:
           cmake -S . --preset ci-release
           -DCMAKE_CXX_COMPILER="$env:COMPILER"
           -DCMAKE_C_COMPILER="$env:COMPILER"
+          -DFICTION_ENABLE_PCH=OFF
+          -DCACHE_OPTION=sccache
 
       - name: Build (Release)
         run: cmake --build --preset ci-release
 
       - name: Test (Release)
         run: ctest --preset ci-release --output-on-failure --repeat until-pass:3
+
+      - if: always()
+        name: sccache statistics
+        run: |
+          sccache --show-stats
+          sccache --stop-server || true
