@@ -54,7 +54,7 @@ jobs:
           # had the repository sitting at 10.19 GB against GitHub's 10 GB limit,
           # evicting caches faster than they could be reused.
           save: ${{ github.ref == 'refs/heads/main' }}
-          max-size: 10G
+          max-size: 500M
 
       - name: Setup mold
         uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
