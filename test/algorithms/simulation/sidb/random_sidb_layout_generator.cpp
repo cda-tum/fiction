@@ -253,7 +253,6 @@ TEST_CASE("Random cube::coord_t layout generation", "[random-sidb-layout-generat
         }
     }
 }
-
 TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-generator]")
 {
     SECTION("empty parameters")
@@ -452,9 +451,9 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
                                                                           .number_of_sidbs = 10};
 
         sidb_100_cell_clk_lyt skeleton_layout{};
-        skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::NORMAL);
-        skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::NORMAL);
-        skeleton_layout.assign_cell_type({5, 0}, sidb_100_cell_clk_lyt::technology::NORMAL);
+        skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
+        skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
+        skeleton_layout.assign_cell_type({5, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
 
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{skeleton_layout});
 
@@ -474,9 +473,9 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
 
         sidb_100_cell_clk_lyt skeleton_layout{};
 
-        skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::NORMAL);
-        skeleton_layout.assign_cell_type({3, 0}, sidb_100_cell_clk_lyt::technology::NORMAL);
-        skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::NORMAL);
+        skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
+        skeleton_layout.assign_cell_type({3, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
+        skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
 
         const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{skeleton_layout});
         REQUIRE(result_lyts.has_value());
@@ -499,7 +498,6 @@ TEST_CASE("Random offset::ucoord_t layout generation", "[random-sidb-layout-gene
         CHECK(!result_lyts.has_value());
     }
 }
-
 TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-generator]")
 {
     SECTION("empty parameters")
@@ -596,6 +594,7 @@ TEST_CASE("Random siqad::coord_t layout generation", "[random-sidb-layout-genera
             .positive_sidbs  = generate_random_sidb_layout_params<siqad::coord_t>::positive_charges::FORBIDDEN};
 
         const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);
         result_lyt.value().foreach_cell(
@@ -765,7 +764,6 @@ TEMPLATE_TEST_CASE("Random siqad::coord_t layout generation with defects", "[ran
             });
     }
 }
-
 TEST_CASE("Random cube::coord_t layout generation with defects", "[random-sidb-layout-generator]")
 {
     using lyt = sidb_defect_cell_clk_lyt_cube;
