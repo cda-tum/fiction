@@ -9,13 +9,14 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
 #include <phmap.h>
 
 #include <algorithm>
+#include <cstdint>
+#include <stdexcept>
 #include <vector>
 
 namespace fiction
@@ -142,7 +143,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     {
         static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt must be a cell-level layout");
 
-        enum class status
+        enum class status : std::uint8_t
         {
             SEARCH,
             COLLECT,
@@ -212,7 +213,9 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
             }
         };
 
-        do
+        do  // NOLINT(cppcoreguidelines-avoid-do-while): the exit condition (`improvement_found`) is
+            // computed by the body itself, so a `while` would need to duplicate the body or introduce
+            // a flag variable just to seed the first iteration
         {
             status st = status::SEARCH;
 
@@ -380,7 +383,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     }
 
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
         static_assert(fiction::has_is_inv_v<Lyt>, "Lyt must implement the is_inv function");
         static_assert(fiction::has_is_po_v<Lyt>, "Lyt must implement the is_po function");

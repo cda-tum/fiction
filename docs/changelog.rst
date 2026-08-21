@@ -226,6 +226,8 @@ Fixed
       ``uv build --sdist`` would otherwise ship into the source distribution
     - Fixed the source distribution shipping none of the C++ sources it needs to build, which made
       ``pip install mnt.pyfiction`` fail wherever no matching wheel exists
+- CLI:
+    - Updated the ``qll`` command's description to mention molQCA layouts and SCERPA simulations
 - Code quality:
     - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
       before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
@@ -262,6 +264,9 @@ Fixed
       that let a defect be placed clipped at the surface edge. The generated surface changes
     - ``generate_defective_surface.py`` now rejects a coverage outside ``[0.0, 1.0]`` and a
       non-positive surface dimension, where it used to write an empty surface and report success
+- I/O:
+    - Fixed ``write_qca_layout_svg``'s simple-mode output emitting malformed ``fill:##000000`` for
+      constant-0/1 QCA cells instead of ``fill:#000000``
 - Python bindings:
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized

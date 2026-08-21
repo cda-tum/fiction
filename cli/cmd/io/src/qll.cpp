@@ -25,8 +25,9 @@ namespace alice
 {
 
 qll_command::qll_command(const environment::ptr& e) :
-        command(e, "Generates a ToPoliNano/MagCAD layout file for the current iNML or QCA cell layout in store. "
-                   "ToPoliNano can reuse the layout while MagCAD is able to perform physical simulations.")
+        command(e, "Generates a ToPoliNano/MagCAD/SCERPA layout file for the current iNML, QCA, or molQCA cell "
+                   "layout in store. ToPoliNano can reuse the layout while MagCAD and SCERPA are able to perform "
+                   "physical simulations.")
 {
     add_option("filename", filename, "QLL file name");
 }

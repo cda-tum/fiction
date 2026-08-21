@@ -136,7 +136,7 @@ class sim7_mol_library : public fcn_gate_library<mol_qca_technology, 10, 10>
      * @return Incoming and outgoing molQCA connector positions for `t`.
      */
     template <typename Lyt, bool RespectClocking = true>
-    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t) noexcept
+    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
         port_list<port_position> p{};
 
