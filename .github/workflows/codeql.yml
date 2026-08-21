@@ -84,7 +84,11 @@ jobs:
         with:
           key: "codeql-ubuntu-24.04-clang++-17"
           variant: ccache
-          save: true
+          # Only `main` writes, so a pull request restores main's cache without
+          # adding an entry of its own. Every job saving 400-700 MB on every push
+          # had the repository sitting at 10.19 GB against GitHub's 10 GB limit,
+          # evicting caches faster than they could be reused.
+          save: ${{ github.ref == 'refs/heads/main' }}
           max-size: 10G
 
       - name: Setup mold
