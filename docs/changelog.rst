@@ -170,11 +170,10 @@ Changed
     - The ``prek`` hooks now carry explicit priorities, which run the read-only checks
       concurrently and cut a warm ``prek run -a`` by about 18%. Hooks that rewrite the same file
       keep exclusive priorities, since ``prek`` runs hooks that share one concurrently
-    - The docstring generator is a ``🐍 Docstrings`` check on a pull request instead of a job that
-      commits the regenerated header. It could no longer commit anywhere: ``main`` rejects a direct
-      push, and on a pull request head it pushes with a token that starts no workflow run, so its
-      commit would carry no ``🚦 Check``. The job now uploads the regenerated header and fails if
-      the committed one differs, which is what a contributor downloads and commits
+    - The docstring generator is a ``🐍 Docstrings`` check instead of a job that commits the
+      regenerated header, which it could no longer push to a protected ``main``. It uploads the
+      header as an artifact and fails when the committed one differs; download that artifact and
+      commit it
     - The docstring generator parses the headers in sorted order. It numbers repeated symbol
       names in the order it meets them, so the numbering used to depend on the order the
       filesystem reported the files in

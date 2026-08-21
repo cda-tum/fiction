@@ -181,14 +181,24 @@ Configure a build to produce the compile database the flags are read from, then 
 _fiction_'s base directory:
 
 ```bash
-cmake --preset pyfiction
-python3 -m pybind11_mkdoc \
-  -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
-  -std=c++20 \
-  "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
-  $(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction) \
-  $(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)
+(
+  set -euo pipefail
+  cmake --preset pyfiction
+  mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
+  mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
+  python3 -m pybind11_mkdoc \
+    -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
+    -std=c++20 \
+    "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
+    ${mkdoc_flags} \
+    ${mkdoc_headers}
+)
 ```
+
+Resolve the flags and the header list before the generator runs, as the subshell above does and as CI does. Passing
+them inline as `$(...)` hides a failure of either: the generator still runs, just without include paths or without
+inputs, and writes a header that is truncated rather than absent. The subshell keeps `set -euo pipefail` from
+reaching your interactive shell.
 
 Expect zero parse errors. A drop in the number of generated symbols means the flags did not take effect.
 
