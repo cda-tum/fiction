@@ -200,7 +200,11 @@ inline constexpr const char* CLOCK_ZONE_12_TEXT    = "000000";
 inline constexpr const char* CLOCK_ZONE_34_TEXT    = "ffffff";
 inline constexpr const char* PI_CELL               = "008dc8";
 inline constexpr const char* PO_CELL               = "e28686";
-inline constexpr const char* CONST_CELL            = "000000";
+/**
+ * Fill color for constant-0/1 cells. Omits the leading `#`, like every other color in this group,
+ * because the SVG templates that consume it (e.g. `SIMPLE_CELL`'s `fill:#{0}`) already supply one.
+ */
+inline constexpr const char* CONST_CELL = "000000";
 
 // SVG parts with placeholders
 inline constexpr const char* HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
