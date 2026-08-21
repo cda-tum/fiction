@@ -153,16 +153,34 @@ struct qca_technology
         return m == cell_mode::NORMAL;
     }
 
+    /**
+     * Checks whether the given cell mode is the rotated mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::ROTATED`.
+     */
     [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::ROTATED;
     }
 
+    /**
+     * Checks whether the given cell mode is the vertical mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::VERTICAL`.
+     */
     [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::VERTICAL;
     }
 
+    /**
+     * Checks whether the given cell mode is the crossover mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::CROSSOVER`.
+     */
     [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::CROSSOVER;
@@ -260,31 +278,68 @@ struct mol_qca_technology
         OUTPUT = static_cast<uint8_t>(cell_type::OUTPUT)
     };
 
+    /**
+     * Checks whether the given cell type is empty.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::EMPTY`.
+     */
     [[nodiscard]] static constexpr bool is_empty_cell(const cell_type& c) noexcept
     {
         return c == cell_type::EMPTY;
     }
 
+    /**
+     * Checks whether the given cell type is a normal cell, i.e., any of the four clocking phases.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::NORMAL1`, `cell_type::NORMAL2`, `cell_type::NORMAL3`, or
+     * `cell_type::NORMAL4`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell(const cell_type& c) noexcept
     {
         return is_normal_cell1(c) || is_normal_cell2(c) || is_normal_cell3(c) || is_normal_cell4(c);
     }
 
+    /**
+     * Checks whether the given cell type is a normal cell with clocking 0.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::NORMAL1`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell1(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL1;
     }
 
+    /**
+     * Checks whether the given cell type is a normal cell with clocking 1.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::NORMAL2`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell2(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL2;
     }
 
+    /**
+     * Checks whether the given cell type is a normal cell with clocking 2.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::NORMAL3`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell3(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL3;
     }
 
+    /**
+     * Checks whether the given cell type is a normal cell with clocking 3.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::NORMAL4`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell4(const cell_type& c) noexcept
     {
         return c == cell_type::NORMAL4;
@@ -317,46 +372,100 @@ struct mol_qca_technology
         return 0u;
     }
 
+    /**
+     * Checks whether the given cell type is an input cell.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::INPUT`.
+     */
     [[nodiscard]] static constexpr bool is_input_cell(const cell_type& c) noexcept
     {
         return c == cell_type::INPUT;
     }
 
+    /**
+     * Checks whether the given cell type is an output cell.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::OUTPUT`.
+     */
     [[nodiscard]] static constexpr bool is_output_cell(const cell_type& c) noexcept
     {
         return c == cell_type::OUTPUT;
     }
 
+    /**
+     * Checks whether the given cell type is a constant-0 input cell.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::CONST_0`.
+     */
     [[nodiscard]] static constexpr bool is_const_0_cell(const cell_type& c) noexcept
     {
         return c == cell_type::CONST_0;
     }
 
+    /**
+     * Checks whether the given cell type is a constant-1 input cell.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::CONST_1`.
+     */
     [[nodiscard]] static constexpr bool is_const_1_cell(const cell_type& c) noexcept
     {
         return c == cell_type::CONST_1;
     }
 
+    /**
+     * Checks whether the given cell type is a constant input cell, i.e., either `CONST_0` or `CONST_1`.
+     *
+     * @param c Cell type to check.
+     * @return `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
+     */
     [[nodiscard]] static constexpr bool is_constant_cell(const cell_type& c) noexcept
     {
         return is_const_0_cell(c) || is_const_1_cell(c);
     }
 
+    /**
+     * Checks whether the given cell mode is the normal mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::NORMAL`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::NORMAL;
     }
 
+    /**
+     * Checks whether the given cell mode is the rotated mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::ROTATED`.
+     */
     [[nodiscard]] static constexpr bool is_rotated_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::ROTATED;
     }
 
+    /**
+     * Checks whether the given cell mode is the vertical mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::VERTICAL`.
+     */
     [[nodiscard]] static constexpr bool is_vertical_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::VERTICAL;
     }
 
+    /**
+     * Checks whether the given cell mode is the crossover mode.
+     *
+     * @param m Cell mode to check.
+     * @return `true` iff `m` is `cell_mode::CROSSOVER`.
+     */
     [[nodiscard]] static constexpr bool is_crossover_cell_mode(const cell_mode& m) noexcept
     {
         return m == cell_mode::CROSSOVER;
@@ -556,6 +665,11 @@ struct inml_technology
         return c == cell_type::FANOUT_COUPLER_MAGNET;
     }
 
+    /**
+     * Checks whether the given cell mode is the normal mode. iNML cells do not have modes, so this always holds.
+     *
+     * @return `true`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell_mode([[maybe_unused]] const cell_mode& m) noexcept
     {
         return true;
@@ -685,6 +799,11 @@ struct sidb_technology
         return c == cell_type::LOGIC;
     }
 
+    /**
+     * Checks whether the given cell mode is the normal mode. SiDB cells do not have modes, so this always holds.
+     *
+     * @return `true`.
+     */
     [[nodiscard]] static constexpr bool is_normal_cell_mode([[maybe_unused]] const cell_mode& m) noexcept
     {
         return true;

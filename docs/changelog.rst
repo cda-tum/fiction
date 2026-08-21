@@ -99,8 +99,10 @@ Changed
 - Code quality:
     - **Breaking:** ``qca_technology::cell_type``, ``inml_technology::cell_type``, and
       ``sidb_technology::cell_type`` are now scoped ``enum class``, consistent with
-      ``mol_qca_technology::cell_type``. Unqualified access such as ``sidb_technology::INPUT`` must be
-      updated to ``sidb_technology::cell_type::INPUT``
+      ``mol_qca_technology::cell_type``. Replace references to the leaked enumerators, e.g.,
+      ``sidb_technology::INPUT``, with ``sidb_technology::cell_type::INPUT``, and add an
+      explicit ``static_cast`` wherever a cell type was implicitly converted to an integer
+      or ``char``. ``pyfiction`` is unaffected
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
     - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``

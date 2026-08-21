@@ -779,13 +779,12 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::OUTPUT);
                         break;
                     }
-                    case Lyt::technology::cell_type::LOGIC:  // output cell
+                    case Lyt::technology::cell_type::LOGIC:  // logic cell
                     {
                         lyt.assign_cell_type(all_cell[counter], Lyt::technology::cell_type::LOGIC);
                         break;
                     }
                     case Lyt::technology::cell_type::EMPTY:
-                    default:
                     {
                         break;
                     }
