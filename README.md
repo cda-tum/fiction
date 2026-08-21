@@ -1,7 +1,5 @@
 # _fiction_ &ndash; Design Automation for Field-coupled Nanotechnologies
 
-[![CI](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/ci.yml?branch=main&label=CI&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
-[![CD](https://img.shields.io/github/actions/workflow/status/cda-tum/fiction/cd.yml?label=CD&logo=github&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/cd.yml)
 [![Ubuntu](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%90%A7%20Ubuntu&label=Ubuntu&logo=ubuntu&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
 [![macOS](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%8D%8E%20macOS&label=macOS&logo=apple&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
 [![Windows](https://img.shields.io/github/check-runs/cda-tum/fiction/main?nameFilter=%F0%9F%AA%9F%20Windows&label=Windows&logo=data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyMyAyMyIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KIDxwYXRoIGQ9Ik0xIDFoMTB2MTBIMXoiIGZpbGw9IiNmMzUzMjUiLz4KIDxwYXRoIGQ9Ik0xMiAxaDEwdjEwSDEyeiIgZmlsbD0iIzgxYmMwNiIvPgogPHBhdGggZD0iTTEgMTJoMTB2MTBIMXoiIGZpbGw9IiMwNWE2ZjAiLz4KIDxwYXRoIGQ9Ik0xMiAxMmgxMHYxMEgxMnoiIGZpbGw9IiNmZmJhMDgiLz4KPC9zdmc+Cg==&style=flat-square)](https://github.com/cda-tum/fiction/actions/workflows/ci.yml)
