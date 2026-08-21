@@ -35,12 +35,25 @@ jobs:
       - name: Set up MSVC development environment (Windows only)
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+      # ccache was configured here and never invoked once: every wheel job ended
+      # with `Cache size (GB): 0.0 / 10.0` and no cacheable calls. It is replaced
+      # on Windows by sccache, which at least gets invoked, and dropped elsewhere.
+      # Whether sccache can actually hit here is being measured -- see the PR.
+      - if: runner.os == 'Windows'
+        name: Configure sccache
+        shell: bash
+        run: |
+          echo "CMAKE_GENERATOR=Ninja" >> "$GITHUB_ENV"
+          echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.sccache" >> "$GITHUB_ENV"
+          echo "SCCACHE_CACHE_SIZE=600M" >> "$GITHUB_ENV"
+
+      - if: runner.os == 'Windows'
+        name: Cache sccache objects
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
-          key: "${{ inputs.runs-on }}-pyfiction"
-          save: true
-          max-size: 10G
+          path: .sccache
+          key: sccache-${{ inputs.runs-on }}-pyfiction-${{ github.run_id }}
+          restore-keys: sccache-${{ inputs.runs-on }}-pyfiction-
 
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
@@ -59,8 +72,18 @@ jobs:
           version: "latest"
           enable-cache: false
 
+      - if: runner.os == 'Windows'
+        name: Install sccache
+        run: uv tool install sccache
+
       - name: Build wheels
         uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
+
+      - if: always() && runner.os == 'Windows'
+        name: sccache statistics
+        run: |
+          sccache --show-stats
+          sccache --stop-server
 
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
