@@ -187,7 +187,10 @@ python3 -m pybind11_mkdoc \
   -std=c++20 \
   "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
   $(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction) \
-  $(find include/fiction -name "*.hpp" -print)
+  $(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)
 ```
 
 Expect zero parse errors. A drop in the number of generated symbols means the flags did not take effect.
+
+Keep the `sort`. The generator numbers repeated symbol names in the order it meets them, so an unsorted header list
+produces a file that disagrees with CI's for no reason other than the order your filesystem reports.

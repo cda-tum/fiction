@@ -79,10 +79,17 @@ jobs:
         # Resolve the flags and the header list into variables first. Inline command
         # substitution would swallow a failure of either: the generator would still run, just
         # without include paths or without inputs, and write a truncated header.
+        #
+        # The header list is sorted because the generator numbers repeated symbol names in the
+        # order it meets them -- `mkd_doc_std_hash_7` is the seventh `std::hash` it parsed --
+        # while `find` reports whatever order the filesystem hands back. Unsorted, the same
+        # tree can renumber symbols on a different machine, which is a diff this job would
+        # report as a stale header and a `DOC(std, hash, 7)` that silently moves to another
+        # specialization.
         run: |
           set -euo pipefail
           mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
-          mkdoc_headers="$(find include/fiction -name "*.hpp" -print)"
+          mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
           python3 -m pybind11_mkdoc \
             -o "${DOCSTRINGS}" \
             -std=c++20 \
