@@ -2346,6 +2346,33 @@ static const char *mkd_doc_fiction_cds_configuration_CHARGE_LOCATION_ONLY =
 R"doc(The charge distribution is exclusively used to store the charge
 states.)doc";
 
+static const char *mkd_doc_fiction_cell_layout_digest =
+R"doc(Computes a digest of the given cell-level layout that respects the
+equality `are_cell_layouts_identical` implements.
+
+Identical layouts always share a digest, so layouts with different
+digests are never identical. That makes the digest a cheap filter in
+front of `are_cell_layouts_identical`. Different layouts may share a
+digest, so a digest match still has to be confirmed with
+`are_cell_layouts_identical`.
+
+The digest covers the cells and their types, the defects of an
+`sidb_defect_surface`, and the charge states of a
+`charge_distribution_surface`. Following `are_cell_layouts_identical`,
+it ignores the layout's aspect ratio.
+
+Args:
+    lyt: The layout to digest.
+
+Template Args:
+    Lyt: The layout type. Must be a cell-level layout.
+
+Returns:
+    Hash value that identifies `lyt` up to
+    `are_cell_layouts_identical`.
+
+)doc";
+
 static const char *mkd_doc_fiction_cell_level_layout =
 R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of individual cells to clock zones in accordance with an
@@ -16557,6 +16584,34 @@ Template Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_hash_combine_unordered =
+R"doc(Combines a hash value into a seed independently of the order in which
+the values arrive.
+
+`hash_combine` is order-dependent by construction, which rules it out
+for folding over a container whose iteration order is not canonical,
+such as a hash map. This function adds instead, which is commutative,
+so the seed depends only on which values were combined and how often,
+not on their order.
+
+The scrambling step is not optional. `std::hash` of the cube and SiQAD
+coordinate types weighs the coordinate components linearly, so a plain
+sum over their hash values makes the cell sets `{(0, 0), (3, 0)}` and
+`{(1, 0), (2, 0)}` collide. The splitmix64 finalizer applied here
+spreads every input bit across the whole word before the sum sees it.
+
+Overrides the passed seed.
+
+Args:
+    seed: Hashing seed. This value is overridden with the combined
+          hash value.
+    v: Value to hash next.
+
+Template Args:
+    T: Type to hash.
+
+)doc";
+
 static const char *mkd_doc_fiction_heuristic_sidb_simulation_engine = R"doc(Selector exclusively for heuristic SiDB simulation engines.)doc";
 
 static const char *mkd_doc_fiction_heuristic_sidb_simulation_engine_QUICKSIM =
@@ -25959,6 +26014,8 @@ static const char *mkd_doc_std_hash_5 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_6 = R"doc()doc";
 
+static const char *mkd_doc_std_hash_7 = R"doc(Provides a hash implementation for `fiction::sidb_defect`.)doc";
+
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_2 = R"doc()doc";
@@ -25970,6 +26027,20 @@ static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
 static const char *mkd_doc_std_hash_operator_call_5 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_6 = R"doc()doc";
+
+static const char *mkd_doc_std_hash_operator_call_7 =
+R"doc(Computes the hash value of a given SiDB defect.
+
+Every member that `fiction::sidb_defect`'s equality operator compares
+contributes to the hash value.
+
+Args:
+    defect: Defect to hash.
+
+Returns:
+    Hash value of `defect`.
+
+)doc";
 
 static const char *mkd_doc_std_iterator_traits = R"doc()doc";
 
