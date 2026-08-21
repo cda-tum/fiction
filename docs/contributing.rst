@@ -67,6 +67,7 @@ Pull Request Workflow
    * If a :code:`🐍 Packaging` check fails, this indicates an error in the Python part of the code base. :code:`cibuildwheel` runs the :code:`pyfiction` test suite against every wheel it builds, so a failing test shows up here. Look through the respective logs on GitHub for any error or failure messages.
    * If the :code:`📝 CodeQL` check fails, this indicates a security vulnerability in the code base. Look through the respective logs on GitHub for any error or failure messages.
    * If :code:`🚨 Lint` comments on your PR with a list of suggestions/warnings, :code:`clang-tidy` raised them when checking the C++ part of your changes for warnings or style guideline violations. The individual messages frequently provide helpful suggestions on how to fix the warnings.
+   * If the :code:`🐍 Docstrings` check fails, the generated :code:`pybind11_mkdoc_docstrings.hpp` no longer matches the Doxygen comments in :code:`include/fiction/`. Download the :code:`pyfiction-docstrings` artifact from that run, put it in place of :code:`bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. Never edit that file by hand; the job's summary carries the same instructions.
    * If :code:`🚦 Check` fails while every job below it looks green, a job was skipped for a reason change detection did not predict — usually because something it depends on failed first.
 
 

@@ -150,6 +150,16 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
     uses: ./.github/workflows/python-linter.yml
 
+  # Regenerates the docstring header and fails if the committed one differs. It cannot commit
+  # the regeneration itself; `docstrings.yml` explains why.
+  docstrings:
+    name: 🐍 Docstrings
+    permissions:
+      contents: read # required to check out the repository
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-docstrings)
+    uses: ./.github/workflows/docstrings.yml
+
   # Builds the extension from source outside the wheel jobs' `cibuildwheel` path, so it stays a
   # single runner on a single interpreter. See `python-minimums.yml` for why.
   python-minimums:
@@ -220,6 +230,7 @@ jobs:
       - cpp-coverage
       - codeql
       - python-linter
+      - docstrings
       - python-minimums
       - packaging-sdist
       - packaging-wheels
@@ -242,6 +253,8 @@ jobs:
             && 'codeql,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-linter)
             && 'python-linter,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-docstrings)
+            && 'docstrings,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-minimums)
             && 'python-minimums,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-packaging)
