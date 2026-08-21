@@ -9,7 +9,9 @@
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+// cell_layout_digest names no symbol from this header, but relies on the std::hash<sidb_defect>
+// specialization it provides
+#include "fiction/technology/sidb_defects.hpp"  // IWYU pragma: keep
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -313,7 +315,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 
     auto process_layout = [](auto& lyt_orig, auto lyt_new)
     {
-        lyt_new.resize({lyt_orig.x(), (lyt_orig.y() - lyt_orig.y() % 2) / 2});
+        lyt_new.resize({lyt_orig.x(), (lyt_orig.y() - (lyt_orig.y() % 2)) / 2});
         lyt_new.set_layout_name(lyt_orig.get_layout_name());
         lyt_new.set_tile_size_x(lyt_orig.get_tile_size_x());
         lyt_new.set_tile_size_y(lyt_orig.get_tile_size_y());
@@ -442,7 +444,7 @@ template <typename LytDest, typename LytSrc>
     {
         if constexpr (is_sidb_lattice_v<LytSrc>)
         {
-            lyt_new.resize({lyt.x(), lyt.y() * 2 + 1});
+            lyt_new.resize({lyt.x(), (lyt.y() * 2) + 1});
             lyt_new.set_layout_name(lyt.get_layout_name());
             lyt_new.set_tile_size_x(lyt.get_tile_size_x());
             lyt_new.set_tile_size_y(lyt.get_tile_size_y());

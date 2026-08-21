@@ -3,6 +3,7 @@
 //
 
 #include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -71,7 +72,7 @@ TEMPLATE_TEST_CASE("siqad layout is normalized, shifted to positive coordinates"
 template <typename T1, typename T2>
 inline auto area_with_padding(const uint64_t& area, const T1& x, const T2& y) noexcept
 {
-    return area + (static_cast<uint64_t>(x) + 1) * ((static_cast<uint64_t>(y) + 1) % 2ul);
+    return area + ((static_cast<uint64_t>(x) + 1) * ((static_cast<uint64_t>(y) + 1) % 2ul));
 }
 
 TEST_CASE("Convert offset::ucoord_t layout (100 lattice orientation) to SiQAD coordinate layout", "[layout-utils]")
