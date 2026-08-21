@@ -63,7 +63,7 @@ You can also run the checks manually:
 
 ### Install Z3
 
-Make sure to have the SMT Solver [`Z3 >= 4.8.0`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
+Make sure to have the SMT Solver [`Z3 >= 4.8.5`](https://github.com/Z3Prover/z3) installed. This can be accomplished in
 a multitude of ways:
 
 - Under Ubuntu 20.04 and newer: `sudo apt-get install libz3-dev`.
@@ -104,6 +104,14 @@ A `nox` session is provided to conveniently run the Python tests.
 
 This installs all dependencies for running the tests in an isolated environment, builds the Python package, and then
 runs the tests.
+
+The `minimums` session runs the same tests against the lowest declared direct dependencies instead of the newest
+compatible ones, which exercises the lower bounds in `pyproject.toml`. It requires Python 3.10, the oldest version
+_fiction_ supports.
+
+```bash
+(venv) $ nox -s minimums
+```
 
 ## Usage
 
