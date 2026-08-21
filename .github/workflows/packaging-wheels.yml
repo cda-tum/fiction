@@ -79,15 +79,18 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
 
-      - if: always() && runner.os == 'Windows'
-        name: sccache statistics
-        run: |
-          sccache --show-stats
-          sccache --stop-server
-
       - name: Upload wheel as an artifact
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: cibw-wheels-${{ inputs.runs-on }}
           path: ./wheelhouse/*.whl
           overwrite: true
+
+      # Never gate the job: `--stop-server` exits non-zero when sccache was
+      # never invoked, which is itself one of the outcomes being measured.
+      - if: always() && runner.os == 'Windows'
+        name: sccache statistics
+        continue-on-error: true
+        run: |
+          sccache --show-stats || true
+          sccache --stop-server || true
