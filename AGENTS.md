@@ -143,6 +143,8 @@ Use these commands to validate your work.
 
 - **Test (Full)**: `nox -s tests` (Runs pytest in isolated environments)
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
+- **Test (Floors)**: `nox -s minimums` (Runs pytest on Python 3.10 against the lowest declared
+  dependency versions)
 - **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
 
 ### General

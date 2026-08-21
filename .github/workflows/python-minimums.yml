@@ -1,0 +1,72 @@
+name: 🐍 • Minimums
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-python-minimums
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_VERSION: 4.13.4
+
+jobs:
+  minimums:
+    name: 🐍 Lowest dependencies
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    permissions:
+      contents: read # required to check out the repository
+
+    # Every other entry point resolves each dependency to the newest compatible version, so a lower
+    # bound in `pyproject.toml` is only ever asserted -- locally, in `cibuildwheel`, and on Read the
+    # Docs alike. This job resolves each direct dependency to the oldest version its bound allows,
+    # on the oldest interpreter the project supports, and runs the test suite against that
+    # combination. A floor that is too low fails here instead of in a downstream install.
+    #
+    # One runner and one interpreter: the wheel jobs already cover every other combination, and this
+    # one builds the extension from source outside their ccache-warmed `cibuildwheel` path.
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # `vcs-versioning` derives the version from the tag history
+          persist-credentials: false
+
+      # The session pins Python 3.10, so the interpreter has to be on `PATH` before nox runs.
+      - name: Set up Python 3.10
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.10"
+
+      - name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          key: "ubuntu-24.04-minimums"
+          save: true
+          max-size: 10G
+
+      - name: Install Z3
+        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        with:
+          version: ${{ env.Z3_VERSION }}
+
+      - name: Setup mold
+        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "latest"
+          enable-cache: false
+
+      # `--error-on-missing-interpreters` is what makes the pin load-bearing: without it, a runner
+      # without Python 3.10 skips the session and the job reports success having tested nothing.
+      - name: Run the test suite against the lowest declared dependencies
+        run: uvx nox -s minimums --error-on-missing-interpreters
