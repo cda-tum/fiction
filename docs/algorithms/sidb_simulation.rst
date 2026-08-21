@@ -186,6 +186,8 @@ Temperature Behavior
         .. autofunction:: mnt.pyfiction.occupation_probability_gate_based
         .. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
 
+        .. autoclass:: mnt.pyfiction.state_type
+            :members:
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
         .. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 

@@ -143,6 +143,8 @@ Use these commands to validate your work.
 
 - **Test (Full)**: `nox -s tests` (Runs pytest in isolated environments)
 - **Test (Quick)**: `pytest` (Use if only Python code changed to avoid C++ rebuilds)
+- **Test (Floors)**: `nox -s minimums` (Runs pytest on Python 3.10 against the lowest declared
+  dependency versions)
 - **Lint**: `nox -s lint` (Runs prek hooks including ruff and mypy)
 
 ### General
@@ -160,8 +162,8 @@ current code before acting:
 - wrong or out of scope — reply with one sentence saying why, change nothing;
 - valid — fix it, and consolidate duplicates into one reply.
 
-`clang-tidy` findings from the `Clang-Tidy Review` workflow are binding: fix them, or
-suppress the specific check with a `// NOLINT(check-name)` comment stating the reason.
+`clang-tidy` findings from the `🚨 Lint` check are binding: fix them, or suppress the
+specific check with a `// NOLINT(check-name)` comment stating the reason.
 CodeRabbit findings are suggestions; disagreeing with a stated reason is a normal outcome,
 and LLM reviewers skew conservative. CodeRabbit skips drafts, and marking a draft ready
 does not trigger a pass — ask for one with a `@coderabbitai review` comment. Reply to

@@ -150,7 +150,8 @@
         "FICTION_ALGLIB": "ON",
         "FICTION_PROGRESS_BARS": "OFF",
         "FICTION_WARNINGS_AS_ERRORS": "OFF",
-        "MOCKTURTLE_EXAMPLES": "OFF"
+        "MOCKTURTLE_EXAMPLES": "OFF",
+        "FICTION_ENABLE_PCH": "ON"
       }
     },
     {
@@ -180,7 +181,8 @@
       "description": "Mirrors the 📝 CodeQL CI workflow: no CLI",
       "inherits": "ci-debug",
       "cacheVariables": {
-        "FICTION_CLI": "OFF"
+        "FICTION_CLI": "OFF",
+        "FICTION_ENABLE_PCH": "OFF"
       }
     },
     {

@@ -1,31 +1,27 @@
-name: Clang-Tidy Review
+name: 🚨 • Clang-Tidy
 
 on:
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "**/*.hpp"
-      - "**/*.cpp"
-      - ".github/workflows/clang-tidy-review.yml"
-      - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
-      - "!bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
+  workflow_call:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-cpp-linter
   cancel-in-progress: true
 
 permissions: {}
+
+defaults:
+  run:
+    shell: bash
 
 env:
   Z3_VERSION: 4.13.4
 
 jobs:
   clangtidy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 120
     name: 🚨 Clang-Tidy
+    runs-on: ubuntu-24.04
     permissions:
-      contents: read
+      contents: read # required to check out the repository
       pull-requests: write # required to post/update the clang-tidy thread comment on the PR
 
     steps:
@@ -36,7 +32,13 @@ jobs:
           persist-credentials: false
 
       - name: Install dependencies
-        run: sudo apt-get update && sudo apt-get install -y cmake libreadline-dev libtbb-dev python3-dev
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        # a hung apt mirror used to sit here until GitHub's six-hour ceiling killed the job;
+        # bound the wait instead, and retry the transient failures that bounding surfaces
+        run: |
+          timeout 10m sudo -E apt-get update -o Acquire::Retries=3
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libreadline-dev libtbb-dev python3-dev
 
       - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
@@ -49,13 +51,15 @@ jobs:
         id: z3
         uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
         with:
-          version: ${{env.Z3_VERSION}}
+          version: ${{ env.Z3_VERSION }}
           platform: linux
           architecture: x64
         env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Generate compilation database
+        # `ci-tidy` keeps unity builds off on purpose: Clang-Tidy needs one entry per
+        # translation unit, and a unity build collapses them
         run: cmake -S . --preset ci-tidy
 
       - name: Run clang-tidy

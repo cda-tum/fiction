@@ -1,0 +1,56 @@
+name: 📦 • Source Distribution
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-sdist
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  build_sdist:
+    name: 📦 SDist
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # required to check out the repository
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "latest"
+          enable-cache: false
+
+      - name: Build sdist
+        run: uv build --sdist
+
+      - name: Check metadata
+        run: uvx twine check dist/*
+
+      # `sdist.exclude` is a hand-maintained list and nothing else checks that it still matches the
+      # repository. check-sdist builds the sdist and diffs it against the files git tracks, so an
+      # entry that goes stale, or one broad enough to drop a source the extension needs, fails here
+      # instead of in a release. `--inject-junk` additionally plants the usual editor, cache, and
+      # virtual-environment droppings and fails if any reaches the sdist. It needs a build
+      # environment, which is why it does not run as a pre-commit hook
+      - name: Check sdist contents against git
+        run: uvx check-sdist --inject-junk
+
+      - name: Upload sdist as an artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: cibw-sdist
+          path: dist/*.tar.gz
+          overwrite: true

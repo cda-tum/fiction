@@ -1,35 +1,22 @@
 name: 🐍 • Lint
 
 on:
-  merge_group:
-  push:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.pyi"
-      - "pyproject.toml"
-      - ".pre-commit-config.yaml"
-      - ".github/workflows/python-linter.yml"
-  pull_request:
-    branches: ["main"]
-    paths:
-      - "**/*.py"
-      - "**/*.pyi"
-      - "pyproject.toml"
-      - ".pre-commit-config.yaml"
-      - ".github/workflows/python-linter.yml"
-  workflow_dispatch:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-python-linter
+  cancel-in-progress: true
 
 permissions: {}
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-  cancel-in-progress: true
+defaults:
+  run:
+    shell: bash
 
 jobs:
   mypy:
     name: 🐍 Type check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions:
       contents: read # required to check out the repository
@@ -45,7 +32,7 @@ jobs:
           persist-credentials: false
 
       - name: Install the latest version of uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
         with:
           version: "latest"
           enable-cache: false

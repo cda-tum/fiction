@@ -17,7 +17,32 @@ ci:
   # 🐍 Lint workflow runs it instead
   skip: [mypy]
 
+# The fourth copy of this list. The others are `path_filters:` in `.coderabbit.yaml`,
+# `ignore:` in `.github/workflows/cpp-linter.yml`, and `exclude` in
+# `.license-tools-config.json`, which is JSON and cannot say so itself. Keep them in sync
 exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
+
+# `prek` runs hooks that share a `priority` concurrently and ascends from there; an unset
+# `priority` falls back to file order, which is fully serial. The tiers below are therefore
+# a correctness constraint, not a preference:
+#
+#   0     read-only checks and validators, plus `uv-lock`, which writes only `uv.lock`
+#   1-5   the hooks that rewrite every text file, one tier each. `end-of-file-fixer`,
+#         `mixed-line-ending`, `trailing-whitespace`, `fix-ligatures`, and `fix-smartquotes`
+#         all take `types: [text]`, so any two of them sharing a tier would read-modify-write
+#         the same file at the same time and lose one of the two edits
+#   6     the language formatters. These share a tier because their file types are disjoint
+#   7-9   the hooks that must observe the formatters' result
+#
+# Do not collapse tiers 1-5 to win back the wall clock; those hooks are cheap, and the
+# concurrency that matters is already in tiers 0 and 6. `require_serial` is not a substitute:
+# it only prevents concurrent batches of the same hook.
+#
+# `license-tools` rewrites a file whole, header and body alike, so it cannot share a tier with
+# another hook that writes Python, and tiers 1 to 6 and tier 8 all do. It sits at 7 rather
+# than 9 so that `ruff-check` at 8 lints the header in the same pass. Its `types_or` is what
+# makes it disjoint from `nb-clean`, which also sits at 7 and takes `types: [text]`, so both
+# would otherwise receive the same notebooks.
 
 repos:
   # Standard hooks
@@ -25,32 +50,49 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        priority: 0
       - id: check-case-conflict
+        priority: 0
       - id: check-vcs-permalinks
+        priority: 0
       - id: check-merge-conflict
+        priority: 0
       - id: check-symlinks
+        priority: 0
       - id: check-json
+        priority: 0
       - id: check-toml
+        priority: 0
       - id: check-yaml
+        priority: 0
       - id: debug-statements
+        priority: 0
       - id: end-of-file-fixer
+        priority: 1
       - id: mixed-line-ending
+        priority: 2
       - id: trailing-whitespace
+        priority: 3
 
   # Handle unwanted unicode characters
   - repo: https://github.com/sirosen/texthooks
     rev: 0.7.1
     hooks:
       - id: fix-ligatures
+        priority: 4
       - id: fix-smartquotes
+        priority: 5
 
   # Check for common RST mistakes
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.10.0
     hooks:
       - id: rst-backticks
+        priority: 0
       - id: rst-directive-colons
+        priority: 0
       - id: rst-inline-touching-normal
+        priority: 0
 
   # CMake format and lint the CMakeLists.txt files
   - repo: https://github.com/cheshirekow/cmake-format-precommit
@@ -60,6 +102,7 @@ repos:
         additional_dependencies: [pyyaml]
         types: [file]
         files: (\.cmake|CMakeLists.txt)(.in)?$
+        priority: 6
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
@@ -68,18 +111,21 @@ repos:
       - id: clang-format
         types_or: [c++, c]
         args: ["-style=file"]
+        priority: 6
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.12.5
     hooks:
       - id: uv-lock
+        priority: 0
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.3
     hooks:
       - id: ruff-format
+        priority: 6
       - id: ruff-check
         require_serial: true
         # ruff lints `pyproject.toml`, where the rule selectors live, and skips every other TOML
@@ -87,6 +133,21 @@ repos:
         # while ruff falls back to parsing it as Python
         types_or: [python, pyi, jupyter, toml]
         exclude: ^uv\.lock$
+        priority: 8
+
+  # Add and update the Python copyright headers. `types_or` repeats what `include` in
+  # `.license-tools-config.json` already says, on purpose: the config scopes a bare `lictool`
+  # run, this line scopes the hook. The config carries the second copyright holder as free
+  # text in `author.name` after a newline, so the `- present` in it is literal and is never
+  # parsed back as a year. That survives a round trip only because `force_author: true`
+  # discards the author the tool mis-parses out of the line; turning that off emits a
+  # garbage name
+  - repo: https://github.com/emzeat/mz-lictools
+    rev: v2.9.0
+    hooks:
+      - id: license-tools
+        types_or: [python, pyi]
+        priority: 7
 
   # Check static types with mypy
   - repo: https://github.com/pre-commit/mirrors-mypy
@@ -104,6 +165,7 @@ repos:
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
+        priority: 9
 
   # Format configuration files with prettier
   - repo: https://github.com/rbubley/mirrors-prettier
@@ -111,21 +173,28 @@ repos:
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
+        priority: 6
 
   # Check JSON schemata
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.38.0
     hooks:
+      - id: check-codecov
+        priority: 0
       - id: check-github-workflows
+        priority: 0
       - id: check-readthedocs
+        priority: 0
       - id: check-renovate
         additional_dependencies: ["json5"]
+        priority: 0
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
     rev: 2026.08.15
     hooks:
       - id: validate-pyproject
+        priority: 0
 
   # Clean jupyter notebooks
   - repo: https://github.com/srstevenson/nb-clean
@@ -137,3 +206,4 @@ repos:
           - --preserve-cell-metadata
           - raw_mimetype
           - --
+        priority: 7

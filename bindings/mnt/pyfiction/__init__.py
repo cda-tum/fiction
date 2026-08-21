@@ -1,3 +1,11 @@
+# Copyright (c) 2018 - 2023 Marcel Walter
+# Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+# All rights reserved.
+#
+# SPDX-License-Identifier: MIT
+#
+# Licensed under the MIT License
+
 """MNT fiction framework.
 
 This file is part of the MNT fiction framework released under the MIT license.
@@ -286,6 +294,7 @@ from .pyfiction import (  # type: ignore[import-not-found]
     siqad_volume,
     sqd_parsing_error,
     squared_euclidean_distance,
+    state_type,
     substitution_strategy,
     sweep_parameter,
     technology_constraints,
@@ -600,6 +609,7 @@ __all__ = [
     "siqad_volume",
     "sqd_parsing_error",
     "squared_euclidean_distance",
+    "state_type",
     "substitution_strategy",
     "sweep_parameter",
     "technology_constraints",
