@@ -5,8 +5,12 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
+#include "fiction/utils/hash.hpp"
+
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <optional>
 #include <utility>
 
@@ -248,5 +252,33 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 }
 
 }  // namespace fiction
+
+namespace std
+{
+
+/**
+ * @brief Provides a hash implementation for `fiction::sidb_defect`.
+ */
+template <>
+struct hash<fiction::sidb_defect>
+{
+    /**
+     * @brief Computes the hash value of a given SiDB defect.
+     *
+     * Every member that `fiction::sidb_defect`'s equality operator compares contributes to the hash value.
+     *
+     * @param defect Defect to hash.
+     * @return Hash value of `defect`.
+     */
+    std::size_t operator()(const fiction::sidb_defect& defect) const noexcept
+    {
+        std::size_t h{0};
+        fiction::hash_combine(h, defect.type, defect.charge, defect.epsilon_r, defect.lambda_tf);
+
+        return h;
+    }
+};
+
+}  // namespace std
 
 #endif  // FICTION_SIDB_DEFECTS_HPP

@@ -9,8 +9,6 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
-#include "fiction/utils/hash.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <phmap.h>
@@ -303,8 +301,7 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
      * @return port directions of the given tile are returned as `port_list`.
      */
     template <typename GateLyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const GateLyt&       lyt,
-                                                                          const tile<GateLyt>& t) noexcept
+    [[nodiscard]] static port_list<port_direction> determine_port_routing(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt must be a hexagonal layout");
