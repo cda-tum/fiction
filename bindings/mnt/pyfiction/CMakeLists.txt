@@ -37,8 +37,19 @@ if(NOT nanobind_exec_result EQUAL 0)
 endif()
 find_package(nanobind CONFIG REQUIRED PATHS "${nanobind_ROOT}" NO_DEFAULT_PATH)
 
-nanobind_add_module(pyfiction STABLE_ABI FREE_THREADED LTO NB_SUPPRESS_WARNINGS
-                    pyfiction.cpp)
+# Split mode: the extension links no nanobind library code and resolves it at
+# import time from the `nanobind-backend` wheel, so one abi3 binary covers
+# Python 3.10 up. It implies STABLE_ABI. Free-threaded interpreters need the
+# `abi3t` of Python 3.15 (PEP 803); below that, nanobind stops the configure
+# with a message naming the version.
+nanobind_add_module(
+  pyfiction
+  BACKEND_MODULE
+  nanobind_backend
+  FREE_THREADED
+  LTO
+  NB_SUPPRESS_WARNINGS
+  pyfiction.cpp)
 target_link_libraries(pyfiction PRIVATE libfiction)
 target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)

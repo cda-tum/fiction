@@ -309,6 +309,15 @@ there.
    ``-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3`` (or the equivalent ``.venv\Scripts\python.exe`` on
    Windows) if CMake would otherwise pick up a different interpreter.
 
+.. note::
+
+   nanobind is used in *split mode*: the extension contains no nanobind library code and resolves it at import time
+   from the separate ``nanobind-backend`` package, which is therefore a runtime dependency of ``mnt.pyfiction``.
+   That is what lets a single ``abi3`` wheel per platform serve every supported interpreter. Free-threaded
+   interpreters are not supported until Python 3.15 gives them a stable ABI
+   (`PEP 803 <https://peps.python.org/pep-0803/>`_); building on an earlier one stops the CMake configure with a
+   message naming that version.
+
 ---
 
 Advanced Configuration
