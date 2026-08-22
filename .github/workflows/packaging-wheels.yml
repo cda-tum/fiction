@@ -36,9 +36,16 @@ jobs:
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
       # ccache was configured here and never invoked once: every wheel job ended
-      # with `Cache size (GB): 0.0 / 10.0` and no cacheable calls. It is replaced
-      # on Windows by sccache, which at least gets invoked, and dropped elsewhere.
-      # Whether sccache can actually hit here is being measured -- see the PR.
+      # with `Cache size (GB): 0.0 / 10.0` and no cacheable calls.
+      #
+      # sccache replaces it on Windows, deliberately without cross-run
+      # persistence. Measured: 93 of 573 hits cold, 124 warm -- so persisting it
+      # buys 31 hits for a ~500 MB entry, in a repository already at its 10 GB
+      # cache limit where that pressure starves the C++ jobs. Nearly all of the
+      # benefit is dedup within the job, between the four wheel builds, and that
+      # costs nothing. The Python-dependent compilations cannot cache at all:
+      # uv's build-isolation directory is named randomly per run, so their
+      # include path differs on every build.
       - if: runner.os == 'Windows'
         name: Configure sccache
         shell: bash
@@ -50,14 +57,6 @@ jobs:
           # launcher has to be named explicitly or nothing is cached at all --
           # the previous run reported `Compile requests 0`.
           echo "CMAKE_ARGS=-DCACHE_OPTION=sccache" >> "$GITHUB_ENV"
-
-      - if: runner.os == 'Windows'
-        name: Cache sccache objects
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .sccache
-          key: sccache-${{ inputs.runs-on }}-pyfiction-${{ github.run_id }}
-          restore-keys: sccache-${{ inputs.runs-on }}-pyfiction-
 
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
