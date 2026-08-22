@@ -196,6 +196,9 @@ Changed
       directly must be renamed
     - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
       and physics as a topic on PyPI
+    - Adopted nanobind's split mode, so one ``abi3`` wheel per platform now covers Python 3.10 and
+      up instead of four. ``mnt.pyfiction`` gains ``nanobind-backend`` as a runtime dependency,
+      which ``pip`` installs along with it
 
 Removed
 #######
@@ -216,6 +219,12 @@ Removed
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
+- Python bindings:
+    - Removed the free-threaded (``cp314t``) wheel. Free-threaded interpreters are unsupported,
+      source builds included, until Python 3.15 gives them the ``abi3t`` stable ABI
+      (`PEP 803 <https://peps.python.org/pep-0803/>`_)
+    - Removed the ``DISABLE_GIL`` scikit-build-core override for free-threaded Windows builds. No
+      CMake code ever read the define, and split mode rejects free-threaded interpreters outright
 
 Fixed
 #####
