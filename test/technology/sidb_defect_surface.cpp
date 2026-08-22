@@ -24,11 +24,20 @@ using namespace fiction;
 
 TEMPLATE_TEST_CASE(
     "SiDB surface traits and construction", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     SECTION("Without SiDB lattice")
     {
@@ -114,15 +123,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "SiDB surface construction with aspect ratio as input", "[sidb-surface]",
-    (sidb_defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>),
-    (sidb_defect_surface<
-        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>),
-    (sidb_defect_surface<
-        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>),
-    (sidb_defect_surface<
-        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>),
-    (sidb_defect_surface<
-        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>))
+    (sidb_defect_surface<layouts::cell_level_layout<
+         sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>),
+    (sidb_defect_surface<layouts::cell_level_layout<
+         sidb_technology,
+         layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>>),
+    (sidb_defect_surface<layouts::cell_level_layout<
+         sidb_technology,
+         layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>>),
+    (sidb_defect_surface<layouts::cell_level_layout<
+         sidb_technology,
+         layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>>),
+    (sidb_defect_surface<layouts::cell_level_layout<
+         sidb_technology,
+         layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>>))
 {
     TestType defect_layout{{4, 4}};
 
@@ -175,11 +189,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Overwrite SiDB defect", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     TestType lyt{{1, 1}};
 
@@ -197,11 +220,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Non-defective SiDB surface", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     TestType lyt{{4, 4}};
 
@@ -215,11 +247,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Assigning SiDB surface defects", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     static const std::map<cell<TestType>, sidb_defect> defect_map{
         {{{0, 0}, sidb_defect{sidb_defect_type::NONE}},
@@ -270,11 +311,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Charged and neutral SiDB defect extent", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     TestType lyt{aspect_ratio<TestType>{11, 9}};
 
@@ -425,11 +475,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Charged and neutral SiDB defect extent at layout edges", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     TestType lyt{aspect_ratio<TestType>{11, 9}};
 
@@ -502,11 +561,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Ignore SiDB defect types", "[sidb-surface]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     TestType lyt{aspect_ratio<TestType>{4, 4}};
 

@@ -31,7 +31,8 @@ void remove_clocking(Lyt& lyt) noexcept
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto lyt = orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
     remove_clocking(lyt);

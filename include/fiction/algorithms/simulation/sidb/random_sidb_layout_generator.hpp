@@ -7,9 +7,9 @@
 
 #include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
 #include <cstddef>
@@ -126,8 +126,9 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
     while (lyt.num_cells() < number_of_sidbs_of_final_layout && attempt_counter < params.maximal_attempts)
     {
         // random coordinate within the area specified by two coordinates
-        const auto random_coord = random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
-        bool       next_to_neutral_defect = false;
+        const auto random_coord =
+            layouts::utils::random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
+        bool next_to_neutral_defect = false;
 
         if (sidbs_affected_by_defects.count(random_coord) > 0)
         {
@@ -213,15 +214,15 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     {
         if (auto random_lyt = generate_random_sidb_layout(params, skeleton); random_lyt.has_value())
         {
-            const auto digest = cell_layout_digest(random_lyt.value());
+            const auto digest = layouts::utils::cell_layout_digest(random_lyt.value());
 
             // only a collected layout that shares the candidate's digest can be identical to it; comparing those
             // exactly keeps the result independent of digest collisions
             const auto [first_match, last_match] = collected_digests.equal_range(digest);
 
-            const auto is_identical =
-                std::any_of(first_match, last_match, [&random_lyt, &unique_lyts](const auto& match)
-                            { return are_cell_layouts_identical(random_lyt.value(), unique_lyts[match.second]); });
+            const auto is_identical = std::any_of(
+                first_match, last_match, [&random_lyt, &unique_lyts](const auto& match)
+                { return layouts::utils::are_cell_layouts_identical(random_lyt.value(), unique_lyts[match.second]); });
 
             // add layout if unique
             if (!is_identical)

@@ -33,10 +33,10 @@ Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_fu
 
 TEST_CASE("Benchmark distance maps", "[benchmark]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, use_clocking<clk_lyt>()};
+    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, layouts::use_clocking<clk_lyt>()};
 
     BENCHMARK("without distance maps")
     {
@@ -62,10 +62,10 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
 
 TEST_CASE("Benchmark smart distance cache", "[benchmark]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, use_clocking<clk_lyt>()};
+    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, layouts::use_clocking<clk_lyt>()};
 
     BENCHMARK("smart_distance_cache (cold start)")
     {

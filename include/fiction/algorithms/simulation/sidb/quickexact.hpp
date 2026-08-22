@@ -30,7 +30,7 @@ namespace fiction
  *
  * @tparam CellType Cell type.
  */
-template <typename CellType = offset::ucoord_t>
+template <typename CellType = layouts::offset::ucoord_t>
 struct quickexact_params
 {
     /**
@@ -306,7 +306,7 @@ class quickexact_impl
         charge_layout.assign_base_number(2);
         uint64_t previous_charge_index = 0;
 
-        utils::stl::gray_code_iterator gci{0};
+        fiction::utils::stl::gray_code_iterator gci{0};
 
         for (gci = 0; gci <= charge_layout.get_max_charge_index(); ++gci)
         {

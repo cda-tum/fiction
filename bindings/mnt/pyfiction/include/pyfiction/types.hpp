@@ -37,64 +37,66 @@ using py_logic_network = mockturtle::names_view<fiction::technology_network>;
 /**
  * Coordinates.
  */
-using py_offset_coordinate = fiction::offset::ucoord_t;
-using py_cube_coordinate   = fiction::cube::coord_t;
-using py_siqad_coordinate  = fiction::siqad::coord_t;
+using py_offset_coordinate = fiction::layouts::offset::ucoord_t;
+using py_cube_coordinate   = fiction::layouts::cube::coord_t;
+using py_siqad_coordinate  = fiction::layouts::siqad::coord_t;
 /**
  * Cartesian layout.
  */
-using py_cartesian_layout = fiction::cartesian_layout<py_offset_coordinate>;
+using py_cartesian_layout = fiction::layouts::cartesian_layout<py_offset_coordinate>;
 /**
  * Shifted Cartesian layout.
  */
 using py_shifted_cartesian_layout =
-    fiction::shifted_cartesian_layout<py_offset_coordinate, fiction::odd_column_cartesian>;
+    fiction::layouts::shifted_cartesian_layout<py_offset_coordinate, fiction::layouts::odd_column_cartesian>;
 /**
  * Hexagonal layout.
  */
-using py_hexagonal_layout = fiction::hexagonal_layout<py_offset_coordinate, fiction::even_row_hex>;
+using py_hexagonal_layout = fiction::layouts::hexagonal_layout<py_offset_coordinate, fiction::layouts::even_row_hex>;
 /**
  * Cartesian clocked layout.
  */
-using py_cartesian_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_cartesian_layout>>;
+using py_cartesian_clocked_layout =
+    fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<py_cartesian_layout>>;
 /**
  * Shifted Cartesian clocked layout.
  */
 using py_shifted_cartesian_clocked_layout =
-    fiction::clocked_layout<fiction::tile_based_layout<py_shifted_cartesian_layout>>;
+    fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<py_shifted_cartesian_layout>>;
 /**
  * Hexagonal clocked layout.
  */
-using py_hexagonal_clocked_layout = fiction::clocked_layout<fiction::tile_based_layout<py_hexagonal_layout>>;
+using py_hexagonal_clocked_layout =
+    fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<py_hexagonal_layout>>;
 /**
  * Cartesian gate layout.
  */
-using py_cartesian_gate_layout = fiction::gate_level_layout<py_cartesian_clocked_layout>;
+using py_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_cartesian_clocked_layout>;
 /**
  * Shifted Cartesian gate layout.
  */
-using py_shifted_cartesian_gate_layout = fiction::gate_level_layout<py_shifted_cartesian_clocked_layout>;
+using py_shifted_cartesian_gate_layout = fiction::layouts::gate_level_layout<py_shifted_cartesian_clocked_layout>;
 /**
  * Hexagonal gate layout.
  */
-using py_hexagonal_gate_layout = fiction::gate_level_layout<py_hexagonal_clocked_layout>;
+using py_hexagonal_gate_layout = fiction::layouts::gate_level_layout<py_hexagonal_clocked_layout>;
 /**
  * Cartesian gate-level obstruction layout.
  */
-using py_cartesian_obstruction_layout = fiction::obstruction_layout<py_cartesian_gate_layout>;
+using py_cartesian_obstruction_layout = fiction::layouts::obstruction_layout<py_cartesian_gate_layout>;
 /**
  * Shifted Cartesian gate-level obstruction layout.
  */
-using py_shifted_cartesian_obstruction_layout = fiction::obstruction_layout<py_shifted_cartesian_gate_layout>;
+using py_shifted_cartesian_obstruction_layout = fiction::layouts::obstruction_layout<py_shifted_cartesian_gate_layout>;
 /**
  * Hexagonal gate-level obstruction layout.
  */
-using py_hexagonal_obstruction_layout = fiction::obstruction_layout<py_hexagonal_gate_layout>;
+using py_hexagonal_obstruction_layout = fiction::layouts::obstruction_layout<py_hexagonal_gate_layout>;
 /**
  * Cartesian cell layout.
  */
 template <typename Technology>
-using py_cartesian_cell_layout = fiction::cell_level_layout<Technology, py_cartesian_clocked_layout>;
+using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<Technology, py_cartesian_clocked_layout>;
 /**
  * QCA cell layout.
  */

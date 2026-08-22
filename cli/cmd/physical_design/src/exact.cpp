@@ -174,7 +174,7 @@ void exact_command::exact_physical_design()
                                       std::visit(get_name, ntk_ptr));
         }
     }
-    catch (const fiction::unsupported_clocking_scheme_exception&)
+    catch (const fiction::layouts::unsupported_clocking_scheme_exception&)
     {
         env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme\n", ps.scheme);
     }

@@ -17,9 +17,9 @@ using namespace fiction;
 
 TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    auto open3 = open_clocking<clk_lyt>(num_clks::THREE);
+    auto open3 = layouts::open_clocking<clk_lyt>(layouts::num_clks::THREE);
 
     CHECK(open3.num_clocks == 3u);
     CHECK(open3.max_in_degree == 3u);
@@ -76,9 +76,9 @@ TEST_CASE("3-phase open clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase open clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    auto open4 = open_clocking<clk_lyt>(num_clks::FOUR);
+    auto open4 = layouts::open_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
     CHECK(open4.num_clocks == 4u);
     CHECK(open4.max_in_degree == 3u);
@@ -135,9 +135,9 @@ TEST_CASE("4-phase open clocking", "[clocking-scheme]")
 
 TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto columnar3 = columnar_clocking<clk_lyt>(num_clks::THREE);
+    const auto columnar3 = layouts::columnar_clocking<clk_lyt>(layouts::num_clks::THREE);
 
     CHECK(columnar3.num_clocks == 3u);
     CHECK(columnar3.max_in_degree == 3u);
@@ -187,9 +187,9 @@ TEST_CASE("3-phase columnar clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto columnar4 = columnar_clocking<clk_lyt>(num_clks::FOUR);
+    const auto columnar4 = layouts::columnar_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
     CHECK(columnar4.num_clocks == 4u);
     CHECK(columnar4.max_in_degree == 3u);
@@ -267,9 +267,9 @@ TEST_CASE("4-phase columnar clocking", "[clocking-scheme]")
 
 TEST_CASE("3-phase row clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto row3 = row_clocking<clk_lyt>(num_clks::THREE);
+    const auto row3 = layouts::row_clocking<clk_lyt>(layouts::num_clks::THREE);
 
     CHECK(row3.num_clocks == 3u);
     CHECK(row3.max_in_degree == 3u);
@@ -319,9 +319,9 @@ TEST_CASE("3-phase row clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase row clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto row4 = row_clocking<clk_lyt>(num_clks::FOUR);
+    const auto row4 = layouts::row_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
     CHECK(row4.num_clocks == 4u);
     CHECK(row4.max_in_degree == 3u);
@@ -399,9 +399,9 @@ TEST_CASE("4-phase row clocking", "[clocking-scheme]")
 
 TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto twoddwave3 = twoddwave_clocking<clk_lyt>(num_clks::THREE);
+    const auto twoddwave3 = layouts::twoddwave_clocking<clk_lyt>(layouts::num_clks::THREE);
 
     CHECK(twoddwave3.num_clocks == 3u);
     CHECK(twoddwave3.max_in_degree == 2u);
@@ -451,9 +451,9 @@ TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
 
 TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto twoddwave4 = twoddwave_clocking<clk_lyt>(num_clks::FOUR);
+    const auto twoddwave4 = layouts::twoddwave_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
     CHECK(twoddwave4.num_clocks == 4u);
     CHECK(twoddwave4.max_in_degree == 2u);
@@ -533,9 +533,10 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>;
 
-        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
+        const auto twoddwave_hex_3 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::THREE);
 
         CHECK(twoddwave_hex_3.num_clocks == 3u);
         CHECK(twoddwave_hex_3.max_in_degree == 2u);
@@ -620,9 +621,10 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>;
 
-        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
+        const auto twoddwave_hex_3 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::THREE);
 
         CHECK(twoddwave_hex_3.num_clocks == 3u);
         CHECK(twoddwave_hex_3.max_in_degree == 2u);
@@ -707,9 +709,10 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("odd column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>;
 
-        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
+        const auto twoddwave_hex_3 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::THREE);
 
         CHECK(twoddwave_hex_3.num_clocks == 3u);
         CHECK(twoddwave_hex_3.max_in_degree == 2u);
@@ -794,9 +797,10 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>;
 
-        const auto twoddwave_hex_3 = twoddwave_hex_clocking<clk_lyt>(num_clks::THREE);
+        const auto twoddwave_hex_3 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::THREE);
 
         CHECK(twoddwave_hex_3.num_clocks == 3u);
         CHECK(twoddwave_hex_3.max_in_degree == 2u);
@@ -885,9 +889,10 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>;
 
-        const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
+        const auto twoddwave_hex_4 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
         CHECK(twoddwave_hex_4.num_clocks == 4u);
         CHECK(twoddwave_hex_4.max_in_degree == 2u);
@@ -1028,9 +1033,10 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even row")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>;
 
-        const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
+        const auto twoddwave_hex_4 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
         CHECK(twoddwave_hex_4.num_clocks == 4u);
         CHECK(twoddwave_hex_4.max_in_degree == 2u);
@@ -1171,9 +1177,10 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("odd column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>;
 
-        const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
+        const auto twoddwave_hex_4 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
         CHECK(twoddwave_hex_4.num_clocks == 4u);
         CHECK(twoddwave_hex_4.max_in_degree == 2u);
@@ -1314,9 +1321,10 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
     }
     SECTION("even column")
     {
-        using clk_lyt = clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>;
+        using clk_lyt =
+            layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>;
 
-        const auto twoddwave_hex_4 = twoddwave_hex_clocking<clk_lyt>(num_clks::FOUR);
+        const auto twoddwave_hex_4 = layouts::twoddwave_hex_clocking<clk_lyt>(layouts::num_clks::FOUR);
 
         CHECK(twoddwave_hex_4.num_clocks == 4u);
         CHECK(twoddwave_hex_4.max_in_degree == 2u);
@@ -1459,9 +1467,9 @@ TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
 
 TEST_CASE("4-phase USE", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto use4 = use_clocking<clk_lyt>();
+    const auto use4 = layouts::use_clocking<clk_lyt>();
 
     CHECK(use4.num_clocks == 4u);
     CHECK(use4.max_in_degree == 2u);
@@ -1539,9 +1547,9 @@ TEST_CASE("4-phase USE", "[clocking-scheme]")
 
 TEST_CASE("4-phase RES", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto res4 = res_clocking<clk_lyt>();
+    const auto res4 = layouts::res_clocking<clk_lyt>();
 
     CHECK(res4.num_clocks == 4u);
     CHECK(res4.max_in_degree == 3u);
@@ -1619,9 +1627,9 @@ TEST_CASE("4-phase RES", "[clocking-scheme]")
 
 TEST_CASE("4-phase CFE", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto cfe4 = cfe_clocking<clk_lyt>();
+    const auto cfe4 = layouts::cfe_clocking<clk_lyt>();
 
     CHECK(cfe4.num_clocks == 4u);
     CHECK(cfe4.max_in_degree == 3u);
@@ -1699,9 +1707,9 @@ TEST_CASE("4-phase CFE", "[clocking-scheme]")
 
 TEST_CASE("4-phase Ripple", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto ripple4 = ripple_clocking<clk_lyt>();
+    const auto ripple4 = layouts::ripple_clocking<clk_lyt>();
 
     CHECK(ripple4.num_clocks == 4u);
     CHECK(ripple4.max_in_degree == 3u);
@@ -1779,9 +1787,9 @@ TEST_CASE("4-phase Ripple", "[clocking-scheme]")
 
 TEST_CASE("4-phase SRS", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto srs4 = srs_clocking<clk_lyt>();
+    const auto srs4 = layouts::srs_clocking<clk_lyt>();
 
     CHECK(srs4.num_clocks == 4u);
     CHECK(srs4.max_in_degree == 3u);
@@ -1859,9 +1867,9 @@ TEST_CASE("4-phase SRS", "[clocking-scheme]")
 
 TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto bancs3 = bancs_clocking<clk_lyt>();
+    const auto bancs3 = layouts::bancs_clocking<clk_lyt>();
 
     CHECK(bancs3.num_clocks == 3u);
     CHECK(bancs3.max_in_degree == 2u);
@@ -1947,9 +1955,9 @@ TEST_CASE("3-phase BANCS", "[clocking-scheme]")
 
 TEST_CASE("Override clocking", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    auto twoddwave4 = twoddwave_clocking<clk_lyt>();
+    auto twoddwave4 = layouts::twoddwave_clocking<clk_lyt>();
 
     CHECK(twoddwave4.is_regular());
 
@@ -1987,9 +1995,9 @@ TEST_CASE("Override clocking", "[clocking-scheme]")
 
 TEST_CASE("4-phase ESR", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const auto esr4 = esr_clocking<clk_lyt>();
+    const auto esr4 = layouts::esr_clocking<clk_lyt>();
 
     CHECK(esr4.num_clocks == 4u);
     CHECK(esr4.max_in_degree == 3u);
@@ -2067,69 +2075,69 @@ TEST_CASE("4-phase ESR", "[clocking-scheme]")
 
 TEST_CASE("Clocking lookup", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
     auto check = [](const std::vector<std::string>& vec, const auto& name)
     {
         for (const auto& n : vec)
         {
-            auto cs = get_clocking_scheme<clk_lyt>(n);
+            auto cs = layouts::get_clocking_scheme<clk_lyt>(n);
             REQUIRE(cs.has_value());
             CHECK(*cs == name);
         }
     };
 
-    check({"open", "OPEN", "oPeN", "OpEn"}, clock_name::OPEN);
-    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, clock_name::COLUMNAR);
-    check({"row", "ROW", "RoW", "rOw"}, clock_name::ROW);
-    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, clock_name::TWODDWAVE);
-    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, clock_name::TWODDWAVE);
-    check({"use", "USE", "uSe", "UsE"}, clock_name::USE);
-    check({"res", "RES", "rEs", "ReS"}, clock_name::RES);
-    check({"esr", "ESR", "eSr", "EsR"}, clock_name::ESR);
-    check({"cfe", "CFE", "cFe", "CfE"}, clock_name::CFE);
-    check({"ripple", "RIPPLE", "RiPpLe", "RIppLE"}, clock_name::RIPPLE);
-    check({"srs", "SRS", "sRs", "SrS"}, clock_name::SRS);
-    check({"bancs", "BANCS", "BaNCs", "banCS"}, clock_name::BANCS);
+    check({"open", "OPEN", "oPeN", "OpEn"}, layouts::clock_name::OPEN);
+    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, layouts::clock_name::COLUMNAR);
+    check({"row", "ROW", "RoW", "rOw"}, layouts::clock_name::ROW);
+    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, layouts::clock_name::TWODDWAVE);
+    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, layouts::clock_name::TWODDWAVE);
+    check({"use", "USE", "uSe", "UsE"}, layouts::clock_name::USE);
+    check({"res", "RES", "rEs", "ReS"}, layouts::clock_name::RES);
+    check({"esr", "ESR", "eSr", "EsR"}, layouts::clock_name::ESR);
+    check({"cfe", "CFE", "cFe", "CfE"}, layouts::clock_name::CFE);
+    check({"ripple", "RIPPLE", "RiPpLe", "RIppLE"}, layouts::clock_name::RIPPLE);
+    check({"srs", "SRS", "sRs", "SrS"}, layouts::clock_name::SRS);
+    check({"bancs", "BANCS", "BaNCs", "banCS"}, layouts::clock_name::BANCS);
 
-    CHECK(!get_clocking_scheme<clk_lyt>("").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("Column").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("Rows").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("2DDWave6").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("SUE").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("SER").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("ERS").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("CEF").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("RPIPLE").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("SSR").has_value());
-    CHECK(!get_clocking_scheme<clk_lyt>("BNCS").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("Column").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("Rows").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("TwoDDWave").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("2DDWave6").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("SUE").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("SER").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("ERS").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("CEF").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("RPIPLE").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("SSR").has_value());
+    CHECK(!layouts::get_clocking_scheme<clk_lyt>("BNCS").has_value());
 }
 
 TEST_CASE("Linear schemes", "[clocking-scheme]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
     auto check_linear_scheme = [](const auto& name, bool expected)
     {
-        auto cs = get_clocking_scheme<clk_lyt>(name);
+        auto cs = layouts::get_clocking_scheme<clk_lyt>(name);
         REQUIRE(cs.has_value());
-        CHECK(is_linear_scheme<clk_lyt>(*cs) == expected);
+        CHECK(layouts::is_linear_scheme<clk_lyt>(*cs) == expected);
     };
 
     // Linear clocking schemes
-    check_linear_scheme(clock_name::COLUMNAR, true);
-    check_linear_scheme(clock_name::ROW, true);
-    check_linear_scheme(clock_name::TWODDWAVE, true);
-    check_linear_scheme(clock_name::TWODDWAVE_HEX, true);
+    check_linear_scheme(layouts::clock_name::COLUMNAR, true);
+    check_linear_scheme(layouts::clock_name::ROW, true);
+    check_linear_scheme(layouts::clock_name::TWODDWAVE, true);
+    check_linear_scheme(layouts::clock_name::TWODDWAVE_HEX, true);
 
     // Non-linear clocking schemes
-    check_linear_scheme(clock_name::OPEN, false);
-    check_linear_scheme(clock_name::USE, false);
-    check_linear_scheme(clock_name::RES, false);
-    check_linear_scheme(clock_name::ESR, false);
-    check_linear_scheme(clock_name::CFE, false);
-    check_linear_scheme(clock_name::RIPPLE, false);
-    check_linear_scheme(clock_name::SRS, false);
-    check_linear_scheme(clock_name::BANCS, false);
+    check_linear_scheme(layouts::clock_name::OPEN, false);
+    check_linear_scheme(layouts::clock_name::USE, false);
+    check_linear_scheme(layouts::clock_name::RES, false);
+    check_linear_scheme(layouts::clock_name::ESR, false);
+    check_linear_scheme(layouts::clock_name::CFE, false);
+    check_linear_scheme(layouts::clock_name::RIPPLE, false);
+    check_linear_scheme(layouts::clock_name::SRS, false);
+    check_linear_scheme(layouts::clock_name::BANCS, false);
 }

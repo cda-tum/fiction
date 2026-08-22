@@ -10,11 +10,11 @@
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp"
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/layout_utils.hpp"
 
 #include <kitty/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -165,8 +165,8 @@ class defect_influence_impl
     grid_search(const std::size_t step_size, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        const auto            all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
-        const std::size_t     num_positions                 = all_possible_defect_positions.size();
+        const auto all_possible_defect_positions = layouts::utils::all_coordinates_in_spanned_area(nw_cell, se_cell);
+        const std::size_t num_positions          = all_possible_defect_positions.size();
 
         // floored at `1` so that the slice arithmetic below stays well-defined when there is nothing to distribute;
         // the `start >= end` guard in the loop then keeps the worker from being launched
@@ -233,7 +233,7 @@ class defect_influence_impl
         mockturtle::stopwatch stop{stats.time_total};
 
         // Get all possible defect positions within the grid spanned by nw_cell and se_cell
-        auto all_possible_defect_positions = all_coordinates_in_spanned_area(nw_cell, se_cell);
+        auto all_possible_defect_positions = layouts::utils::all_coordinates_in_spanned_area(nw_cell, se_cell);
 
         // Shuffle the vector using std::ranges::shuffle
         std::ranges::shuffle(all_possible_defect_positions, generator);
@@ -486,7 +486,7 @@ class defect_influence_impl
     void determine_nw_se_cells() noexcept
     {
         // bounding box around the given layout to have north-west and south-east cells.
-        bounding_box_2d bb{layout};
+        layouts::bounding_box_2d bb{layout};
 
         auto nw = bb.get_min();  // north-west cell
         auto se = bb.get_max();  // south-east cell

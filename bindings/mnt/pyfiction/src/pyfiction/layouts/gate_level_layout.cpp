@@ -5,8 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -34,7 +34,7 @@ namespace detail
 {
 
 template <typename LytBase, typename GateLyt>
-void gate_level_layout(nanobind::module_& m, const std::string& topology)
+void layouts::gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -47,7 +47,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             [](py::pointer_and_handle<GateLyt> self, const fiction::aspect_ratio<GateLyt>& dimension,
                const std::string& scheme_name, const std::string& layout_name)
             {
-                if (const auto scheme = fiction::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::layouts::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())
                 {
                     new (self.p) GateLyt{dimension, *scheme, layout_name};
                     return;
@@ -303,7 +303,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             "bounding_box_2d",
             [](const GateLyt& layout)
             {
-                const auto bb = fiction::bounding_box_2d<GateLyt>(layout);
+                const auto bb = fiction::layouts::bounding_box_2d<GateLyt>(layout);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
@@ -313,7 +313,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             [](const GateLyt& lyt) -> std::string
             {
                 std::stringstream stream{};
-                fiction::print_layout(lyt, stream);
+                fiction::layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
             "Returns a string representation of the layout.")

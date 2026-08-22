@@ -92,7 +92,7 @@ int main()  // NOLINT
         });
 
     // determine bounding-box of the surface to set the aspect ratio of the surface lattice.
-    const auto bb_defect_surface = fiction::bounding_box_2d{surface_lattice};
+    const auto bb_defect_surface = fiction::layouts::bounding_box_2d{surface_lattice};
     surface_lattice.resize(bb_defect_surface.get_max());
 
     const auto lattice_tiling = gate_lyt{{11, 30}};

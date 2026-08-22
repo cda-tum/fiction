@@ -37,8 +37,8 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt =
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    using gate_lyt = fiction::layouts::gate_level_layout<
+        fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, uint64_t,
                             double, float, std::string>
@@ -76,7 +76,7 @@ int main()  // NOLINT
             const auto layout_copy       = gate_level_layout.clone();
 
             // calculate bounding box
-            const auto bounding_box_before_optimization = fiction::bounding_box_2d(gate_level_layout);
+            const auto bounding_box_before_optimization = fiction::layouts::bounding_box_2d(gate_level_layout);
 
             const auto width_before_optimization  = bounding_box_before_optimization.get_x_size() + 1;
             const auto height_before_optimization = bounding_box_before_optimization.get_y_size() + 1;
@@ -102,7 +102,7 @@ int main()  // NOLINT
                                                                                  "NO";
 
             // calculate bounding box
-            const auto bounding_box_after_optimization = fiction::bounding_box_2d(gate_level_layout);
+            const auto bounding_box_after_optimization = fiction::layouts::bounding_box_2d(gate_level_layout);
 
             const auto width_after_optimization  = bounding_box_after_optimization.get_x_size() + 1;
             const auto height_after_optimization = bounding_box_after_optimization.get_y_size() + 1;

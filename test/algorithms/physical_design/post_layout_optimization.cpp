@@ -99,14 +99,16 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
         check_layout_equiv_all<gate_layout>();
     }
 
     SECTION("Corner cases")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         SECTION("optimization_layout_corner_case_outputs_1")
         {
@@ -159,7 +161,8 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Maximum gate relocations")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
@@ -176,7 +179,8 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Optimize POs only")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -190,7 +194,8 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Timeout")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -204,7 +209,8 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Timeout exceeded")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -219,7 +225,8 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Planar optimization with planar layout")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = blueprints::planar_unoptimized_layout<gate_layout>();
 
@@ -234,7 +241,8 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
     SECTION("Planar optimization with crossing layout")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = blueprints::planar_optimization_layout<gate_layout>();
 
@@ -253,10 +261,11 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
 TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
     const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
-    auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
+    auto       obstr_lyt = layouts::obstruction_layout<gate_layout>(layout);
 
     SECTION("Call functions")
     {
@@ -268,7 +277,8 @@ TEST_CASE("Wrong clocking scheme", "[post_layout_optimization]")
 
 TEST_CASE("PI and PO border validation", "[post_layout_optimization]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
     SECTION("Invalid layout with PI not in borders")
     {

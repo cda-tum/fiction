@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>
+#include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/traits.hpp>
 
 #include <cstdint>
@@ -25,7 +25,7 @@
 namespace pyfiction
 {
 
-void shifted_cartesian_layout(nanobind::module_& m)
+void layouts::shifted_cartesian_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -217,7 +217,7 @@ void shifted_cartesian_layout(nanobind::module_& m)
             [](const py_shifted_cartesian_layout& lyt) -> std::string
             {
                 std::stringstream stream{};
-                print_layout(lyt, stream);
+                layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
             "Returns a string representation of the layout.")

@@ -5,7 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "../utils/blueprints/layout_blueprints.hpp"
-#include "fiction/io/print_layout.hpp"
+#include "fiction/layouts/io/print_layout.hpp"
 
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/traits.hpp>
@@ -27,7 +27,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
 {
     const auto layout = blueprints::shifted_cart_and_or_inv_gate_layout<fiction::cart_odd_col_gate_clk_lyt>();
 
-    print_gate_level_layout(std::cout, layout);
+    layouts::io::print_gate_level_layout(std::cout, layout);
 
     // clang-format off
 

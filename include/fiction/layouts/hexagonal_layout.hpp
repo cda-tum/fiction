@@ -21,7 +21,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -260,7 +260,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return fiction::area(strg->dimension);
+        return fiction::layouts::area(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -1090,6 +1090,5 @@ class hexagonal_layout
     storage strg;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_HEXAGONAL_LAYOUT_HPP

@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -526,6 +526,5 @@ class cell_level_layout : public ClockedLayout
     storage strg;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_CELL_LEVEL_LAYOUT_HPP

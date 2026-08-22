@@ -413,8 +413,8 @@ class critical_temperature_impl
             // Check if there is at least one ground state that satisfies the logic (transparent). Round the energy
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
-            if (std::abs(utils::math::round_to_n_decimal_places(energy, 6) -
-                         utils::math::round_to_n_decimal_places(min_energy, 6)) < constants::ERROR_MARGIN &&
+            if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
+                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) < constants::ERROR_MARGIN &&
                 state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;

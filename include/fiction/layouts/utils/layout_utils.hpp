@@ -2,8 +2,8 @@
 // Created by marcel on 14.10.21.
 //
 
-#ifndef FICTION_LAYOUT_UTILS_HPP
-#define FICTION_LAYOUT_UTILS_HPP
+#ifndef FICTION_LAYOUTS_UTILS_LAYOUT_UTILS_HPP
+#define FICTION_LAYOUTS_UTILS_LAYOUT_UTILS_HPP
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/cell_ports.hpp"
@@ -29,7 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts::utils
 {
 
 /**
@@ -839,21 +839,21 @@ template <typename Lyt>
         [&lyt, &cell_fold](const auto& c)
         {
             std::size_t cell_hash{0};
-            utils::stl::hash_combine(cell_hash, c, lyt.get_cell_type(c));
+            fiction::utils::stl::hash_combine(cell_hash, c, lyt.get_cell_type(c));
 
             if constexpr (is_charge_distribution_surface_v<Lyt>)
             {
                 // the num_negative_sidbs, num_neutral_sidbs, and num_positive_sidbs counts that
                 // are_cell_layouts_identical compares are folds over these very charge states, so the digest
                 // already determines them
-                utils::stl::hash_combine(cell_hash, lyt.get_charge_state(c));
+                fiction::utils::stl::hash_combine(cell_hash, lyt.get_charge_state(c));
             }
 
-            utils::stl::hash_combine_unordered(cell_fold, cell_hash);
+            fiction::utils::stl::hash_combine_unordered(cell_fold, cell_hash);
         });
 
     std::size_t digest{0};
-    utils::stl::hash_combine(digest, lyt.num_cells(), cell_fold);
+    fiction::utils::stl::hash_combine(digest, lyt.num_cells(), cell_fold);
 
     if constexpr (is_sidb_defect_surface_v<Lyt>)
     {
@@ -863,17 +863,16 @@ template <typename Lyt>
             [&defect_fold](const auto& defect)
             {
                 std::size_t defect_hash{0};
-                utils::stl::hash_combine(defect_hash, defect.first, defect.second);
+                fiction::utils::stl::hash_combine(defect_hash, defect.first, defect.second);
 
-                utils::stl::hash_combine_unordered(defect_fold, defect_hash);
+                fiction::utils::stl::hash_combine_unordered(defect_fold, defect_hash);
             });
 
-        utils::stl::hash_combine(digest, lyt.num_defects(), defect_fold);
+        fiction::utils::stl::hash_combine(digest, lyt.num_defects(), defect_fold);
     }
 
     return digest;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_LAYOUT_UTILS_HPP
+}  // namespace fiction::layouts::utils
+#endif  // FICTION_LAYOUTS_UTILS_LAYOUT_UTILS_HPP

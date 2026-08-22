@@ -155,7 +155,8 @@ class a_star_impl
      * C++ is weird at times...
      */
     using a_star_priority_queue =
-        utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<coordinate_f>>;
+        fiction::utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>,
+                                                       std::greater<coordinate_f>>;
     /**
      * Open list that contains all coordinates to process next sorted by their f-value.
      */

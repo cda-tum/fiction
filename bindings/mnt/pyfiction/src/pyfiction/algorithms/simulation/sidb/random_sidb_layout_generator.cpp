@@ -41,46 +41,50 @@ void random_sidb_layout_generator(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::enum_<typename fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges>(
+    py::enum_<
+        typename fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::positive_charges>(
         m, "positive_charges", DOC(fiction_generate_random_sidb_layout_params_positive_charges))
-        .value("ALLOWED",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::ALLOWED,
-               DOC(fiction_generate_random_sidb_layout_params_positive_charges_ALLOWED))
+        .value(
+            "ALLOWED",
+            fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::positive_charges::ALLOWED,
+            DOC(fiction_generate_random_sidb_layout_params_positive_charges_ALLOWED))
         .value("FORBIDDEN",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::FORBIDDEN,
+               fiction::generate_random_sidb_layout_params<
+                   fiction::layouts::offset::ucoord_t>::positive_charges::FORBIDDEN,
                DOC(fiction_generate_random_sidb_layout_params_positive_charges_FORBIDDEN))
         .value("MAY_OCCUR",
-               fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_charges::MAY_OCCUR,
+               fiction::generate_random_sidb_layout_params<
+                   fiction::layouts::offset::ucoord_t>::positive_charges::MAY_OCCUR,
                DOC(fiction_generate_random_sidb_layout_params_positive_charges_MAY_OCCUR));
 
     /**
      * Parameters.
      */
-    py::class_<fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>>(
+    py::class_<fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>>(
         m, "generate_random_sidb_layout_params", DOC(fiction_generate_random_sidb_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("coordinate_pair",
-                &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::coordinate_pair,
+                &fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::coordinate_pair,
                 DOC(fiction_generate_random_sidb_layout_params_coordinate_pair))
         .def_rw("number_of_sidbs",
-                &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::number_of_sidbs,
+                &fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::number_of_sidbs,
                 DOC(fiction_generate_random_sidb_layout_params_number_of_sidbs))
         .def_rw("positive_sidbs",
-                &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::positive_sidbs,
+                &fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::positive_sidbs,
                 DOC(fiction_generate_random_sidb_layout_params_positive_sidbs))
         .def_rw("simulation_parameters",
-                &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::simulation_parameters,
+                &fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::simulation_parameters,
                 DOC(fiction_generate_random_sidb_layout_params_simulation_parameters))
         .def_rw("maximal_attempts",
-                &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::maximal_attempts,
+                &fiction::generate_random_sidb_layout_params<fiction::layouts::offset::ucoord_t>::maximal_attempts,
                 DOC(fiction_generate_random_sidb_layout_params_maximal_attempts))
-        .def_rw(
-            "number_of_unique_generated_layouts",
-            &fiction::generate_random_sidb_layout_params<fiction::offset::ucoord_t>::number_of_unique_generated_layouts,
-            DOC(fiction_generate_random_sidb_layout_params_number_of_unique_generated_layouts))
+        .def_rw("number_of_unique_generated_layouts",
+                &fiction::generate_random_sidb_layout_params<
+                    fiction::layouts::offset::ucoord_t>::number_of_unique_generated_layouts,
+                DOC(fiction_generate_random_sidb_layout_params_number_of_unique_generated_layouts))
         .def_rw("maximal_attempts_for_multiple_layouts",
                 &fiction::generate_random_sidb_layout_params<
-                    fiction::offset::ucoord_t>::maximal_attempts_for_multiple_layouts,
+                    fiction::layouts::offset::ucoord_t>::maximal_attempts_for_multiple_layouts,
                 DOC(fiction_generate_random_sidb_layout_params_maximal_attempts_for_multiple_layouts));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!

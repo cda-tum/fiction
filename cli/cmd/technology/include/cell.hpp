@@ -62,17 +62,17 @@ class cell_command final : public command
         {
             return std::forward<ApplyFunc>(apply_func)(std::forward<Source>(source));
         }
-        catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
+        catch (const fiction::unsupported_gate_type_exception<fiction::layouts::offset::ucoord_t>& e)
         {
             env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
         }
-        catch (
-            const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
+        catch (const fiction::unsupported_gate_orientation_exception<fiction::layouts::offset::ucoord_t,
+                                                                     fiction::port_position>& e)
         {
             env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
                                       e.which_ports());
         }
-        catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
+        catch (const fiction::unsupported_gate_orientation_exception<fiction::layouts::offset::ucoord_t,
                                                                      fiction::port_direction>& e)
         {
             env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}\n",

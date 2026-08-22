@@ -109,21 +109,21 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 {
     TestType lyt{};
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{0, 0, 0}),
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{0, 0, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{5, 0, 0}),
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{5, 0, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{7, 0, 0}),
-                         TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{11, 0, 0}),
-                         TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{13, 0, 0}),
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{7, 0, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{17, 0, 0}),
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{11, 0, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{19, 0, 0}),
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{13, 0, 0}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{17, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{19, 0, 0}),
                          TestType::cell_type::NORMAL);
 
     const sidb_simulation_parameters params{2, -0.32};
@@ -142,20 +142,20 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 
     const auto& charge_lyt_first = simulation_results_after.charge_distributions.front();
 
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{0, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{5, 0, 0})) ==
-          sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{7, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{11, 0, 0})) ==
-          sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{13, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{17, 0, 0})) ==
-          sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<offset::ucoord_t>(siqad::coord_t{19, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{0, 0, 0})) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{5, 0, 0})) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{7, 0, 0})) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{11, 0, 0})) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{13, 0, 0})) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{17, 0, 0})) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
+              layouts::siqad::coord_t{19, 0, 0})) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
                Catch::Matchers::WithinAbs(0.2460493219, constants::ERROR_MARGIN));
@@ -167,15 +167,22 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 {
     TestType lyt{};
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{5, 0, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{7, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{0, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{5, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{7, 0, 0}),
+                         TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{11, 0, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{13, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{11, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{13, 0, 0}),
+                         TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{17, 0, 0}), TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{19, 0, 0}), TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{17, 0, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{19, 0, 0}),
+                         TestType::cell_type::NORMAL);
 
     const sidb_simulation_parameters params{2, -0.32};
 
@@ -193,20 +200,20 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 
     const auto& charge_lyt_first = simulation_results_after.charge_distributions.front();
 
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{5, 0, 0})) ==
-          sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{7, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{11, 0, 0})) ==
-          sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{13, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{17, 0, 0})) ==
-          sidb_charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{19, 0, 0})) ==
-          sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{0, 0, 0})) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{5, 0, 0})) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{7, 0, 0})) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{11, 0, 0})) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{13, 0, 0})) == sidb_charge_state::NEGATIVE);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{17, 0, 0})) == sidb_charge_state::NEUTRAL);
+    CHECK(charge_lyt_first.get_charge_state(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
+              layouts::siqad::coord_t{19, 0, 0})) == sidb_charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
                Catch::Matchers::WithinAbs(0.2460493219, constants::ERROR_MARGIN));

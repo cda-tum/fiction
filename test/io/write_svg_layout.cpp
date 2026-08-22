@@ -7,8 +7,8 @@
 
 #include "fiction/utils/version_info.hpp"
 
-#include <fiction/io/write_svg_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/io/write_svg_layout.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
@@ -635,9 +635,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::LIGHT};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -654,9 +654,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::DARK};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -673,10 +673,10 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{
-                .color_background = write_sidb_layout_svg_params::color_mode::DARK,
-                .lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::DARK,
+                .lattice_mode     = layouts::io::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -702,9 +702,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(cds, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::LIGHT};
+            layouts::io::write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -722,9 +722,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(cds, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::DARK};
+            layouts::io::write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -756,9 +756,9 @@ TEMPLATE_TEST_CASE(
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::LIGHT};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -775,9 +775,9 @@ TEMPLATE_TEST_CASE(
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::DARK};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -803,9 +803,9 @@ TEMPLATE_TEST_CASE(
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(cds, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::LIGHT};
+            layouts::io::write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -823,9 +823,9 @@ TEMPLATE_TEST_CASE(
 
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(cds, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::DARK};
+            layouts::io::write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -856,9 +856,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::LIGHT};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -875,9 +875,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         {
             std::stringstream os_light_cds;
 
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(layout, os_light_cds, params);
+            layouts::io::write_sidb_layout_svg_params const params{
+                .color_background = layouts::io::write_sidb_layout_svg_params::color_mode::DARK};
+            layouts::io::write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -898,11 +898,11 @@ TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-s
     layout.assign_cell_type({0, 0, 0}, mol_qca_technology::cell_type::NORMAL1);
     layout.assign_cell_type({0, 0, 1}, mol_qca_technology::cell_type::NORMAL2);
 
-    std::ostringstream                layout_stream{};
-    const write_qca_layout_svg_params params{.simple = true};
+    std::ostringstream                             layout_stream{};
+    const layouts::io::write_qca_layout_svg_params params{.simple = true};
 
-    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream, params),
-                    unsupported_cell_type_exception<offset::ucoord_t>);
+    CHECK_THROWS_AS(layouts::io::write_mol_qca_layout_svg(layout, layout_stream, params),
+                    layouts::io::unsupported_cell_type_exception<layouts::offset::ucoord_t>);
 }
 
 TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
@@ -921,7 +921,7 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
     {
         std::ostringstream layout_stream{};
 
-        write_mol_qca_layout_svg(layout, layout_stream);
+        layouts::io::write_mol_qca_layout_svg(layout, layout_stream);
 
         const auto svg = layout_stream.str();
 
@@ -930,10 +930,10 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
 
     SECTION("simple mode")
     {
-        std::ostringstream                layout_stream{};
-        const write_qca_layout_svg_params params{.simple = true};
+        std::ostringstream                             layout_stream{};
+        const layouts::io::write_qca_layout_svg_params params{.simple = true};
 
-        write_mol_qca_layout_svg(layout, layout_stream, params);
+        layouts::io::write_mol_qca_layout_svg(layout, layout_stream, params);
 
         const auto svg = layout_stream.str();
 
@@ -944,7 +944,7 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
     {
         const auto filename = std::filesystem::temp_directory_path() / "fiction_mol_qca_layout.svg";
 
-        write_mol_qca_layout_svg(layout, filename.string());
+        layouts::io::write_mol_qca_layout_svg(layout, filename.string());
 
         std::ifstream file{filename};
         REQUIRE(file.is_open());
@@ -963,7 +963,8 @@ TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]"
 {
     const mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA SVG"};
 
-    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"), std::ofstream::failure);
+    CHECK_THROWS_AS(layouts::io::write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"),
+                    std::ofstream::failure);
 }
 
 TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-qca-layout-svg]")
@@ -972,10 +973,10 @@ TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-
     layout.assign_cell_type({0, 0}, qca_technology::cell_type::CONST_0);
     layout.assign_cell_type({1, 0}, qca_technology::cell_type::CONST_1);
 
-    std::ostringstream                layout_stream{};
-    const write_qca_layout_svg_params params{.simple = true};
+    std::ostringstream                             layout_stream{};
+    const layouts::io::write_qca_layout_svg_params params{.simple = true};
 
-    write_qca_layout_svg(layout, layout_stream, params);
+    layouts::io::write_qca_layout_svg(layout, layout_stream, params);
 
     const auto svg = layout_stream.str();
 

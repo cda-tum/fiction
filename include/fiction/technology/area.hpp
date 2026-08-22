@@ -112,7 +112,7 @@ double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_st
  * @return Area requirements in nm².
  */
 template <typename Lyt>
-double area(const bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {},
+double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {},
             area_stats* pst = nullptr) noexcept
 {
     static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

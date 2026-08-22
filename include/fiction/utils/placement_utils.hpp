@@ -451,7 +451,7 @@ struct branching_signal_container
      * Storage for all branches.
      */
     std::array<std::shared_ptr<branching_signal>, fanout_size> branches =
-        utils::stl::create_array<fanout_size, std::shared_ptr<branching_signal>>(nullptr);
+        fiction::utils::stl::create_array<fanout_size, std::shared_ptr<branching_signal>>(nullptr);
 };
 /**
  * Place any gate from a network. This function automatically identifies the arity of the passed node and fetches its

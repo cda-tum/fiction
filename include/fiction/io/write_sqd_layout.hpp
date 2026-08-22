@@ -194,7 +194,7 @@ class write_sqd_layout_impl
         header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
 
         const auto current_time = std::time(nullptr);
-        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time));
+        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time));
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
@@ -297,7 +297,7 @@ class write_sqd_layout_impl
                     }
                     else
                     {
-                        const auto siqad_coord = fiction::siqad::to_siqad_coord(c);
+                        const auto siqad_coord = fiction::layouts::siqad::to_siqad_coord(c);
 
                         design << fmt::format(
                             siqad::DBDOT_BLOCK,
@@ -386,7 +386,7 @@ class write_sqd_layout_impl
                     }
                     else
                     {
-                        const auto cell = fiction::siqad::to_siqad_coord(cd.first);
+                        const auto cell = fiction::layouts::siqad::to_siqad_coord(cd.first);
 
                         design << fmt::format(
                             siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),

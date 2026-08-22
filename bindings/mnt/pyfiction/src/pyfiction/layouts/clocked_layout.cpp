@@ -5,8 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -32,7 +32,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(nanobind::module_& m, const std::string& topology)
+void layouts::clocked_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;
 
@@ -48,7 +48,8 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
             [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension,
                const std::string& scheme_name)
             {
-                if (const auto scheme = fiction::get_clocking_scheme<ClockedLyt>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::layouts::get_clocking_scheme<ClockedLyt>(scheme_name);
+                    scheme.has_value())
                 {
                     new (self.p) ClockedLyt{dimension, *scheme};
                     return;
@@ -88,7 +89,7 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
             [](const ClockedLyt& lyt) -> std::string
             {
                 std::stringstream stream{};
-                print_layout(lyt, stream);
+                layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
             "Returns a string representation of the layout.")

@@ -9,14 +9,14 @@
 #include "utils/equivalence_checking_utils.hpp"
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/io/read_fgl_layout.hpp>
-#include <fiction/io/write_fgl_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/io/read_fgl_layout.hpp>
+#include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/traits.hpp>
@@ -34,8 +34,8 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
 {
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 
-    const bounding_box_2d<WLyt> wbb{wlyt};
-    const bounding_box_2d<RLyt> rbb{wlyt};
+    const layouts::bounding_box_2d<WLyt> wbb{wlyt};
+    const layouts::bounding_box_2d<RLyt> rbb{wlyt};
 
     CHECK(wbb.get_min() == rbb.get_min());
     CHECK(wbb.get_max() == rbb.get_max());
@@ -53,9 +53,9 @@ void check_parsing_equiv(const Ntk& ntk)
     const auto layout = orthogonal<Lyt>(ntk, {});
 
     std::stringstream layout_stream{};
-    write_fgl_layout(layout, layout_stream);
+    layouts::io::write_fgl_layout(layout, layout_stream);
 
-    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, get_name(layout));
+    const auto read_layout = layouts::io::read_fgl_layout<Lyt>(layout_stream, get_name(layout));
 
     compare_written_and_read_layout(layout, read_layout);
 
@@ -68,8 +68,8 @@ template <typename Lyt>
 void check_parsing_equiv_layout(const Lyt& lyt)
 {
     std::stringstream layout_stream{};
-    write_fgl_layout(lyt, layout_stream);
-    const auto read_layout = read_fgl_layout<Lyt>(layout_stream, lyt.get_layout_name());
+    layouts::io::write_fgl_layout(lyt, layout_stream);
+    const auto read_layout = layouts::io::read_fgl_layout<Lyt>(layout_stream, lyt.get_layout_name());
 
     compare_written_and_read_layout(lyt, read_layout);
 
@@ -138,19 +138,21 @@ void check_parsing_equiv_layout_all()
 
 TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
-    write_fgl_layout(layout, layout_stream);
-    const auto read_layout = read_fgl_layout<gate_layout>(layout_stream, "empty");
+    layouts::io::write_fgl_layout(layout, layout_stream);
+    const auto read_layout = layouts::io::read_fgl_layout<gate_layout>(layout_stream, "empty");
 
     compare_written_and_read_layout(layout, read_layout);
 }
 
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();

@@ -48,7 +48,7 @@ template <typename Lyt>
 void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
                                    const write_defect_influence_domain_params& params = {})
 {
-    utils::stl::csv_writer writer{os};
+    fiction::utils::stl::csv_writer writer{os};
 
     writer.write_line("x", "y", "operational status");
 

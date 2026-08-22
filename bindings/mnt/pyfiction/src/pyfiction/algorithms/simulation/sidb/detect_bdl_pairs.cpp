@@ -36,13 +36,14 @@ void detect_bdl_pairs(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::bdl_pair<fiction::offset::ucoord_t>>(m, "bdl_pair", DOC(fiction_bdl_pair))
+    py::class_<fiction::bdl_pair<fiction::layouts::offset::ucoord_t>>(m, "bdl_pair", DOC(fiction_bdl_pair))
         .def(py::init<>(), DOC(fiction_bdl_pair_bdl_pair))
-        .def(py::init<fiction::sidb_technology::cell_type, fiction::offset::ucoord_t, fiction::offset::ucoord_t>(),
+        .def(py::init<fiction::sidb_technology::cell_type, fiction::layouts::offset::ucoord_t,
+                      fiction::layouts::offset::ucoord_t>(),
              py::arg("t"), py::arg("u"), py::arg("l"), DOC(fiction_bdl_pair_bdl_pair_2))
-        .def_ro("type", &fiction::bdl_pair<fiction::offset::ucoord_t>::type, DOC(fiction_bdl_pair_type))
-        .def_ro("upper", &fiction::bdl_pair<fiction::offset::ucoord_t>::upper, DOC(fiction_bdl_pair_upper))
-        .def_ro("lower", &fiction::bdl_pair<fiction::offset::ucoord_t>::lower, DOC(fiction_bdl_pair_lower));
+        .def_ro("type", &fiction::bdl_pair<fiction::layouts::offset::ucoord_t>::type, DOC(fiction_bdl_pair_type))
+        .def_ro("upper", &fiction::bdl_pair<fiction::layouts::offset::ucoord_t>::upper, DOC(fiction_bdl_pair_upper))
+        .def_ro("lower", &fiction::bdl_pair<fiction::layouts::offset::ucoord_t>::lower, DOC(fiction_bdl_pair_lower));
 
     py::class_<fiction::detect_bdl_pairs_params>(m, "detect_bdl_pairs_params", DOC(fiction_detect_bdl_pairs_params))
         .def(py::init<>(), "Default constructor.")

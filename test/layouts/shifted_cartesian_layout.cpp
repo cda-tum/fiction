@@ -44,7 +44,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 {
     SECTION("odd row")
     {
-        using layout = shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>;
 
         CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -57,7 +57,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("even row")
     {
-        using layout = shifted_cartesian_layout<offset::ucoord_t, even_row_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_row_cartesian>;
 
         CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -70,7 +70,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("odd column")
     {
-        using layout = shifted_cartesian_layout<offset::ucoord_t, odd_column_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_column_cartesian>;
 
         CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -83,7 +83,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("even column")
     {
-        using layout = shifted_cartesian_layout<offset::ucoord_t, even_column_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_column_cartesian>;
 
         CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -98,7 +98,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 
 TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
 {
-    const shifted_cartesian_layout original{{5, 5, 0}};
+    const layouts::shifted_cartesian_layout original{{5, 5, 0}};
 
     auto copy = original.clone();
 

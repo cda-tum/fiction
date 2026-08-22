@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_fgl_layout.hpp>
+#include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/name_utils.hpp>
@@ -48,7 +48,7 @@ void fgl_command::execute()
 
         if constexpr (fiction::is_gate_level_layout_v<Lyt>)
         {
-            fiction::write_fgl_layout(*lyt_ptr, filename);
+            fiction::layouts::io::write_fgl_layout(*lyt_ptr, filename);
         }
         else
         {

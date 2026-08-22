@@ -21,7 +21,8 @@ using namespace fiction;
 
 TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
     auto params = fiction::graph_oriented_layout_design_params{};

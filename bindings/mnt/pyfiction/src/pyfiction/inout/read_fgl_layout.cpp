@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/read_fgl_layout.hpp>
+#include <fiction/layouts/io/read_fgl_layout.hpp>
 
 #include <string_view>
 
@@ -19,26 +19,29 @@
 namespace pyfiction
 {
 
-void read_fgl_layout(nanobind::module_& m)
+void layouts::io::read_fgl_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::fgl_parsing_error>(
+    py::exception<fiction::layouts::io::fgl_parsing_error>(
         m, "fgl_parsing_error",
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     // NOLINTNEXTLINE(misc-const-correctness)
-    py_cartesian_gate_layout (*const read_cartesian_fgl_layout_function_pointer)(
-        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_cartesian_gate_layout>;
+    py_cartesian_gate_layout (*const read_cartesian_fgl_layout_function_pointer)(const std::string_view&,
+                                                                                 const std::string_view&) =
+        &fiction::layouts::io::read_fgl_layout<py_cartesian_gate_layout>;
     // NOLINTNEXTLINE(misc-const-correctness)
     py_shifted_cartesian_gate_layout (*const read_shifted_cartesian_fgl_layout_function_pointer)(
-        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_shifted_cartesian_gate_layout>;
+        const std::string_view&, const std::string_view&) =
+        &fiction::layouts::io::read_fgl_layout<py_shifted_cartesian_gate_layout>;
     // NOLINTNEXTLINE(misc-const-correctness)
-    py_hexagonal_gate_layout (*const read_hexagonal_fgl_layout_function_pointer)(
-        const std::string_view&, const std::string_view&) = &fiction::read_fgl_layout<py_hexagonal_gate_layout>;
+    py_hexagonal_gate_layout (*const read_hexagonal_fgl_layout_function_pointer)(const std::string_view&,
+                                                                                 const std::string_view&) =
+        &fiction::layouts::io::read_fgl_layout<py_hexagonal_gate_layout>;
 
     m.def("read_cartesian_fgl_layout", read_cartesian_fgl_layout_function_pointer, py::arg("filename"),
           py::arg("layout_name") = "", DOC(fiction_read_fgl_layout_3));

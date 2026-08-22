@@ -14,7 +14,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -182,6 +182,5 @@ class obstruction_layout<Lyt, false> : public Lyt
 template <class T>
 obstruction_layout(const T&) -> obstruction_layout<T>;
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_OBSTRUCTION_LAYOUT_HPP

@@ -6,13 +6,13 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): used via ADL for print_layout(...)
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): used via ADL for print_layout(...)
+#include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -199,7 +199,7 @@ void charge_distribution_surface_layout(nanobind::module_& m, const std::string&
             "bounding_box_2d",
             [](const py_cds& lyt)
             {
-                const auto bb = fiction::bounding_box_2d<py_cds>(lyt);
+                const auto bb = fiction::layouts::bounding_box_2d<py_cds>(lyt);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
@@ -209,7 +209,7 @@ void charge_distribution_surface_layout(nanobind::module_& m, const std::string&
             [](const py_cds& lyt)
             {
                 std::stringstream ss;
-                print_layout(fiction::convert_layout_to_siqad_coordinates(lyt), ss);
+                layouts::io::print_layout(fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt), ss);
                 return ss.str();
             },
             "Returns a string representation of the layout.")

@@ -129,7 +129,7 @@ class write_qcc_layout_impl
   private:
     const Lyt& lyt;
 
-    const bounding_box_2d<Lyt> bb;
+    const layouts::bounding_box_2d<Lyt> bb;
 
     std::vector<cell<Lyt>> sorted_pi_list, sorted_po_list;
 

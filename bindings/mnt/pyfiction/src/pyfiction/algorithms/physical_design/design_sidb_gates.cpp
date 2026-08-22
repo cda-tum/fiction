@@ -55,48 +55,52 @@ void design_sidb_gates(nanobind::module_& m)
     /**
      * Design approach selector type.
      */
-    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode>(
+    py::enum_<typename fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::design_sidb_gates_mode>(
         m, "design_sidb_gates_mode", DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode))
         .value("QUICKCELL",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL,
+               fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::design_sidb_gates_mode::QUICKCELL,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL))
         .value("AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER",
                fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+                   fiction::layouts::offset::ucoord_t>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER))
-        .value("RANDOM", fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
+        .value("RANDOM",
+               fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::design_sidb_gates_mode::RANDOM,
                DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_RANDOM))
-        .value("PRUNING_ONLY",
-               fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_ONLY,
-               DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY));
+        .value(
+            "PRUNING_ONLY",
+            fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::design_sidb_gates_mode::PRUNING_ONLY,
+            DOC(fiction_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY));
     /**
      * Termination condition selector type.
      */
-    py::enum_<typename fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition>(
+    py::enum_<typename fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::termination_condition>(
         m, "termination_condition")
-        .value(
-            "AFTER_FIRST_SOLUTION",
-            fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_condition::AFTER_FIRST_SOLUTION)
+        .value("AFTER_FIRST_SOLUTION",
+               fiction::design_sidb_gates_params<
+                   fiction::layouts::offset::ucoord_t>::termination_condition::AFTER_FIRST_SOLUTION)
         .value("ALL_COMBINATIONS_ENUMERATED",
                fiction::design_sidb_gates_params<
-                   fiction::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED);
+                   fiction::layouts::offset::ucoord_t>::termination_condition::ALL_COMBINATIONS_ENUMERATED);
 
     /**
      * Parameters.
      */
-    py::class_<fiction::design_sidb_gates_params<fiction::offset::ucoord_t>>(m, "design_sidb_gates_params",
-                                                                             DOC(fiction_design_sidb_gates_params))
+    py::class_<fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>>(
+        m, "design_sidb_gates_params", DOC(fiction_design_sidb_gates_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("operational_params", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::operational_params,
+        .def_rw("operational_params",
+                &fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::operational_params,
                 DOC(fiction_design_sidb_gates_params_operational_params))
-        .def_rw("design_mode", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::design_mode,
+        .def_rw("design_mode", &fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::design_mode,
                 DOC(fiction_design_sidb_gates_params_design_mode))
-        .def_rw("canvas", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::canvas,
+        .def_rw("canvas", &fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::canvas,
                 DOC(fiction_design_sidb_gates_params_canvas))
         .def_rw("number_of_canvas_sidbs",
-                &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::number_of_canvas_sidbs,
+                &fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::number_of_canvas_sidbs,
                 DOC(fiction_design_sidb_gates_params_number_of_canvas_sidbs))
-        .def_rw("termination_cond", &fiction::design_sidb_gates_params<fiction::offset::ucoord_t>::termination_cond,
+        .def_rw("termination_cond",
+                &fiction::design_sidb_gates_params<fiction::layouts::offset::ucoord_t>::termination_cond,
                 DOC(fiction_design_sidb_gates_params_termination_condition));
 
     detail::design_sidb_gates_impl<py_sidb_100_lattice>(m);

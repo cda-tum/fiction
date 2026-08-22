@@ -130,8 +130,8 @@ enum class search_direction : uint8_t
  * @tparam OffsetCoordinateType The type of coordinates used in the layout. Defaults to `offset::ucoord_t` if not
  * explicitly provided.
  */
-template <typename OffsetCoordinateType = offset::ucoord_t>
-class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
+template <typename OffsetCoordinateType = layouts::offset::ucoord_t>
+class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinateType>
 {
   public:
     /**
@@ -140,9 +140,10 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
      * @param ar The aspect ratio for the layout. Defaults to an empty aspect ratio if not provided.
      * @param direction The search direction to be used. Defaults to HORIZONTAL if not provided.
      */
-    explicit wiring_reduction_layout(const typename cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
-                                     search_direction direction = search_direction::HORIZONTAL) :
-            cartesian_layout<OffsetCoordinateType>(ar),
+    explicit wiring_reduction_layout(
+        const typename layouts::cartesian_layout<OffsetCoordinateType>::aspect_ratio& ar = {},
+        search_direction direction = search_direction::HORIZONTAL) :
+            layouts::cartesian_layout<OffsetCoordinateType>(ar),
             search_dir(direction)
     {}
     /**
@@ -174,7 +175,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
                 wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_column(
                     c, std::forward<Fn>(fn));
             }
-            else if (c.x == cartesian_layout<OffsetCoordinateType>::x())
+            else if (c.x == layouts::cartesian_layout<OffsetCoordinateType>::x())
             {
                 wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_column(
                     c, std::forward<Fn>(fn));
@@ -192,7 +193,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
                 wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_first_row(
                     c, std::forward<Fn>(fn));
             }
-            else if (c.y == cartesian_layout<OffsetCoordinateType>::y())
+            else if (c.y == layouts::cartesian_layout<OffsetCoordinateType>::y())
             {
                 wiring_reduction_layout<OffsetCoordinateType>::foreach_adjacent_coordinate_last_row(
                     c, std::forward<Fn>(fn));
@@ -225,10 +226,12 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         };
 
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(cartesian_layout<OffsetCoordinateType>::north(c)));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(cartesian_layout<OffsetCoordinateType>::south(c)));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
+            layouts::cartesian_layout<OffsetCoordinateType>::north(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
+            layouts::cartesian_layout<OffsetCoordinateType>::south(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle columns.
@@ -251,9 +254,11 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         };
 
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(cartesian_layout<OffsetCoordinateType>::north(c)));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(cartesian_layout<OffsetCoordinateType>::south(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
+            layouts::cartesian_layout<OffsetCoordinateType>::north(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(
+            layouts::cartesian_layout<OffsetCoordinateType>::south(c)));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last column.
@@ -276,7 +281,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         };
 
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the first row.
@@ -299,10 +304,12 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         };
 
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::east(c)));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::west(c)));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
+            layouts::cartesian_layout<OffsetCoordinateType>::east(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
+            layouts::cartesian_layout<OffsetCoordinateType>::west(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the middle rows.
@@ -325,9 +332,11 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         };
 
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::east(c)));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(c));
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::south(cartesian_layout<OffsetCoordinateType>::west(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
+            layouts::cartesian_layout<OffsetCoordinateType>::east(c)));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::south(
+            layouts::cartesian_layout<OffsetCoordinateType>::west(c)));
     }
     /**
      * Iterates over adjacent coordinates of a given coordinate in the last row.
@@ -350,7 +359,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
             }
         };
 
-        apply_if_not_c(cartesian_layout<OffsetCoordinateType>::east(c));
+        apply_if_not_c(layouts::cartesian_layout<OffsetCoordinateType>::east(c));
     }
 
   private:
@@ -364,7 +373,7 @@ class wiring_reduction_layout : public cartesian_layout<OffsetCoordinateType>
  * Type alias for an obstruction layout specialized for finding excess wiring.
  */
 template <typename OffsetCoordinateType>
-using wiring_reduction_layout_type = obstruction_layout<wiring_reduction_layout<OffsetCoordinateType>>;
+using wiring_reduction_layout_type = layouts::obstruction_layout<wiring_reduction_layout<OffsetCoordinateType>>;
 
 /**
  * Create a wiring_reduction_layout suitable for finding excess wiring based on a Cartesian layout.
@@ -1049,7 +1058,7 @@ void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
     }
 
     // calculate bounding box for optimized layout size
-    const auto bounding_box = bounding_box_2d(lyt);
+    const auto bounding_box = layouts::bounding_box_2d(lyt);
 
     // resize the layout to the optimized size
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
@@ -1080,7 +1089,7 @@ class wiring_reduction_impl
         pst.y_size_before    = plyt.y() + 1;
 
         // create an obstruction layout based on the original layout
-        auto layout = obstruction_layout<Lyt>(plyt);
+        auto layout = layouts::obstruction_layout<Lyt>(plyt);
 
         // initialize the list of wires to delete
         layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
@@ -1159,7 +1168,7 @@ class wiring_reduction_impl
         }
 
         // calculate the final bounding box and resize the layout accordingly
-        const auto bounding_box = bounding_box_2d(layout);
+        const auto bounding_box = layouts::bounding_box_2d(layout);
         layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
 
         // update final layout statistics
@@ -1237,7 +1246,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     // check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    if (!lyt.is_clocking_scheme(layouts::clock_name::TWODDWAVE))
     {
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;

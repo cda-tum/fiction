@@ -97,14 +97,16 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
         check_layout_equiv_all<gate_layout>();
     }
 
     SECTION("Corner Cases")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout_corner_case_1 = blueprints::optimization_layout_corner_case_outputs_1<gate_layout>();
         wiring_reduction_stats stats_corner_case_1{};
@@ -139,7 +141,8 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
 
     SECTION("Timeout")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -153,7 +156,8 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
 
     SECTION("Timeout exceeded")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
 
@@ -169,10 +173,11 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
 
 TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
     const auto layout    = blueprints::use_and_gate_layout<gate_layout>();
-    auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
+    auto       obstr_lyt = layouts::obstruction_layout<gate_layout>(layout);
 
     SECTION("Call functions")
     {
@@ -186,10 +191,11 @@ TEST_CASE("Wrong clocking scheme", "[wiring_reduction]")
 
 TEST_CASE("Search Direction", "[wiring_reduction]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
     const auto layout    = blueprints::straight_wire_gate_layout<gate_layout>();
-    auto       obstr_lyt = obstruction_layout<gate_layout>(layout);
+    auto       obstr_lyt = layouts::obstruction_layout<gate_layout>(layout);
 
     SECTION("Get")
     {
@@ -200,7 +206,8 @@ TEST_CASE("Search Direction", "[wiring_reduction]")
 
 TEST_CASE("PI and PO border validation", "[wiring_reduction]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+    using gate_layout =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
     SECTION("Invalid layout with PI not in borders")
     {

@@ -247,7 +247,7 @@ void optimize_output_positions(Lyt& lyt) noexcept
         }
     }
     // calculate bounding box
-    auto bounding_box = bounding_box_2d(lyt);
+    auto bounding_box = layouts::bounding_box_2d(lyt);
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 
     // check for misplaced POs in second last row and move them one row down
@@ -398,7 +398,7 @@ void check_and_optimize_po_positions(Lyt& lyt, uint64_t& moved_gates) noexcept
         });
 
     // update bounding box after PO optimizations
-    const auto bounding_box = bounding_box_2d(lyt);
+    const auto bounding_box = layouts::bounding_box_2d(lyt);
     lyt.resize({bounding_box.get_max().x, bounding_box.get_max().y, lyt.z()});
 }
 /**
@@ -449,7 +449,7 @@ class post_layout_optimization_impl
         max_gate_relocations = ps.max_gate_relocations.value_or((plyt.x() + 1) * (plyt.y() + 1));
 
         // create an obstruction layout based on the original layout
-        auto layout = obstruction_layout<Lyt>(plyt);
+        auto layout = layouts::obstruction_layout<Lyt>(plyt);
 
         // initialize flags to control the optimization loop
         bool moved_at_least_one_gate = true;
@@ -540,7 +540,7 @@ class post_layout_optimization_impl
                 }
 
                 // resize the layout to fit within the new bounding box after relocations
-                const auto bounding_box = bounding_box_2d(layout);
+                const auto bounding_box = layouts::bounding_box_2d(layout);
                 layout.resize({bounding_box.get_max().x, bounding_box.get_max().y, layout.z()});
 
                 // check and optimize PO positions after each full gate relocation iteration
@@ -560,7 +560,7 @@ class post_layout_optimization_impl
         }
 
         // final bounding box calculation and layout resizing
-        const auto final_bounding_box = bounding_box_2d(layout);
+        const auto final_bounding_box = layouts::bounding_box_2d(layout);
         layout.resize({final_bounding_box.get_max().x, final_bounding_box.get_max().y, layout.z()});
 
         // update final layout statistics
@@ -582,7 +582,7 @@ class post_layout_optimization_impl
     /**
      * Alias for an obstruction layout based on the given layout type.
      */
-    using ObstrLyt = obstruction_layout<Lyt>;
+    using ObstrLyt = layouts::obstruction_layout<Lyt>;
     /**
      * 2DDWave-clocked Cartesian gate-level layout to optimize.
      */
@@ -1238,7 +1238,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     // check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(clock_name::TWODDWAVE))
+    if (!lyt.is_clocking_scheme(layouts::clock_name::TWODDWAVE))
     {
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;

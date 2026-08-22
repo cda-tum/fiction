@@ -2,8 +2,8 @@
 // Created by sophia on 12/30/18.
 //
 
-#ifndef FICTION_WRITE_SVG_LAYOUT_HPP
-#define FICTION_WRITE_SVG_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_IO_WRITE_SVG_LAYOUT_HPP
+#define FICTION_LAYOUTS_IO_WRITE_SVG_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
@@ -29,7 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts::io
 {
 
 /**
@@ -634,16 +634,16 @@ class write_sidb_layout_svg_impl
         if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
         {
             // fiction namespace is needed to avoid windows and linux conflict
-            background_color = fiction::detail::svg::BACKGROUND_COLOR_BRIGHT;
-            sidb_color       = fiction::detail::svg::SIDB_DOT_BRIGHT_MODE;
-            sidb_edge_color  = fiction::detail::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
+            background_color = fiction::layouts::io::detail::svg::BACKGROUND_COLOR_BRIGHT;
+            sidb_color       = fiction::layouts::io::detail::svg::SIDB_DOT_BRIGHT_MODE;
+            sidb_edge_color  = fiction::layouts::io::detail::svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
         }
         else
         {
             // fiction namespace is needed to avoid windows and linux conflict
-            background_color = fiction::detail::svg::BACKGROUND_COLOR_DARK;
-            sidb_color       = fiction::detail::svg::SIDB_DOT_DARK_MODE;
-            sidb_edge_color  = fiction::detail::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
+            background_color = fiction::layouts::io::detail::svg::BACKGROUND_COLOR_DARK;
+            sidb_color       = fiction::layouts::io::detail::svg::SIDB_DOT_DARK_MODE;
+            sidb_edge_color  = fiction::layouts::io::detail::svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
         }
     }
 
@@ -685,14 +685,14 @@ class write_sidb_layout_svg_impl
             {
                 case sidb_charge_state::POSITIVE:
                 {
-                    fill_color   = fiction::detail::svg::POSITIVE_COLOR;
-                    border_color = fiction::detail::svg::POSITIVE_COLOR;
+                    fill_color   = fiction::layouts::io::detail::svg::POSITIVE_COLOR;
+                    border_color = fiction::layouts::io::detail::svg::POSITIVE_COLOR;
                     break;
                 }
                 case sidb_charge_state::NEGATIVE:
                 {
-                    fill_color   = fiction::detail::svg::NEGATIVE_COLOR;
-                    border_color = fiction::detail::svg::NEGATIVE_COLOR;
+                    fill_color   = fiction::layouts::io::detail::svg::NEGATIVE_COLOR;
+                    border_color = fiction::layouts::io::detail::svg::NEGATIVE_COLOR;
                     break;
                 }
                 case sidb_charge_state::NEUTRAL:
@@ -702,7 +702,7 @@ class write_sidb_layout_svg_impl
                 }
                 default:
                 {
-                    border_color = fiction::detail::svg::NEUTRAL_COLOR;
+                    border_color = fiction::layouts::io::detail::svg::NEUTRAL_COLOR;
                     fill_opacity = 0.0;
                     break;
                 }
@@ -722,18 +722,18 @@ class write_sidb_layout_svg_impl
         std::stringstream svg_content{};
 
         // Prepare the PATH_DEFINITION_TEMPLATE with the sizes
-        const std::string path_definition_template =
-            fmt::format(fiction::detail::svg::PATH_DEFINITION_TEMPLATE, ps.lattice_point_size, ps.sidb_size);
+        const std::string path_definition_template = fmt::format(
+            fiction::layouts::io::detail::svg::PATH_DEFINITION_TEMPLATE, ps.lattice_point_size, ps.sidb_size);
 
         // Compute the bounding box of the layout
-        const auto bb        = bounding_box_2d{lyt};
+        const auto bb        = layouts::bounding_box_2d{lyt};
         const auto min_coord = bb.get_min();
         const auto max_coord = bb.get_max();
 
         if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
         {
             // Generate all lattice points
-            const auto all_coords = all_coordinates_in_spanned_area(min_coord, max_coord);
+            const auto all_coords = layouts::utils::all_coordinates_in_spanned_area(min_coord, max_coord);
 
             for (const auto& coord : all_coords)
             {
@@ -754,7 +754,7 @@ class write_sidb_layout_svg_impl
                 const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
 
                 svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
-                                                      fiction::detail::svg::SI_LATTICE);
+                                                      fiction::layouts::io::detail::svg::SI_LATTICE);
             }
         }
 
@@ -836,8 +836,9 @@ class write_sidb_layout_svg_impl
                         viewbox_width, viewbox_height, background_color);
 
         // Generate the final SVG content
-        os << fmt::format(fiction::detail::svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y,
-                          viewbox_width, viewbox_height, path_definition_template, background_rect, svg_content.str());
+        os << fmt::format(fiction::layouts::io::detail::svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x,
+                          viewbox_y, viewbox_width, viewbox_height, path_definition_template, background_rect,
+                          svg_content.str());
     }
 };
 
@@ -1473,6 +1474,5 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_SVG_LAYOUT_HPP
+}  // namespace fiction::layouts::io
+#endif  // FICTION_LAYOUTS_IO_WRITE_SVG_LAYOUT_HPP

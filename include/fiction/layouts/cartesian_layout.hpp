@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -147,7 +147,7 @@ class cartesian_layout
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return fiction::area(strg->dimension);
+        return fiction::layouts::area(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -828,6 +828,5 @@ class cartesian_layout
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_CARTESIAN_LAYOUT_HPP

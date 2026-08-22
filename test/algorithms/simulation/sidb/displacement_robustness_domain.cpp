@@ -10,10 +10,10 @@
 
 #include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
+#include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/constants.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <cmath>
@@ -227,7 +227,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
 {
     auto lyt = blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>();
 
-    const auto lyt_offset = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+    const auto lyt_offset = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
     SECTION("one displacement variation in y-direction")
     {

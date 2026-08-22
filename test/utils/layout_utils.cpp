@@ -9,6 +9,7 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
+#include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
@@ -17,37 +18,39 @@
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 
 #include <cstdint>
 
 using namespace fiction;
 
-TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]", (cartesian_layout<offset::ucoord_t>),
-                   (hexagonal_layout<offset::ucoord_t, odd_row_hex>),
-                   (hexagonal_layout<offset::ucoord_t, even_row_hex>),
-                   (hexagonal_layout<offset::ucoord_t, odd_column_hex>),
-                   (hexagonal_layout<offset::ucoord_t, even_column_hex>))
+TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]",
+                   (layouts::cartesian_layout<layouts::offset::ucoord_t>),
+                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>),
+                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>),
+                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>),
+                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>))
 {
     TestType lyt{{4, 4}};
 
     lyt.foreach_coordinate(
         [&lyt](const auto& c)
         {
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH}) ==
-                  lyt.north(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_EAST}) ==
-                  lyt.north_east(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::EAST}) == lyt.east(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH_EAST}) ==
-                  lyt.south_east(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH}) ==
-                  lyt.south(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::SOUTH_WEST}) ==
-                  lyt.south_west(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::WEST}) == lyt.west(c));
-            CHECK(port_direction_to_coordinate(lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) ==
-                  lyt.north_west(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::NORTH}) == lyt.north(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::NORTH_EAST}) == lyt.north_east(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::EAST}) == lyt.east(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::SOUTH_EAST}) == lyt.south_east(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::SOUTH}) == lyt.south(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::SOUTH_WEST}) == lyt.south_west(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::WEST}) == lyt.west(c));
+            CHECK(layouts::utils::port_direction_to_coordinate(
+                      lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) == lyt.north_west(c));
         });
 }
 
@@ -61,7 +64,7 @@ TEMPLATE_TEST_CASE("siqad layout is normalized, shifted to positive coordinates"
         lyt.assign_cell_type({-5, -1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1}, TestType::cell_type::NORMAL);
 
-        auto lyt_transformed = normalize_layout_coordinates<TestType>(lyt);
+        auto lyt_transformed = layouts::utils::normalize_layout_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.get_cell_type({0, 0}) == TestType::cell_type::NORMAL);
         CHECK(lyt_transformed.get_cell_type({10, 2}) == TestType::cell_type::NORMAL);
@@ -83,7 +86,7 @@ TEST_CASE("Convert offset::ucoord_t layout (100 lattice orientation) to SiQAD co
 
         const sidb_100_cell_clk_lyt lyt{{x, y}, "test"};
 
-        auto lyt_transformed = convert_layout_to_siqad_coordinates(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(lyt);
 
         CHECK(lyt.get_layout_name() == "test");
         CHECK(lyt_transformed.is_empty());
@@ -101,7 +104,7 @@ TEST_CASE("Convert offset::ucoord_t layout (100 lattice orientation) to SiQAD co
         lyt.assign_cell_type({5, 3}, sidb_100_cell_clk_lyt::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1}, sidb_100_cell_clk_lyt::cell_type::INPUT);
 
-        auto lyt_transformed = convert_layout_to_siqad_coordinates(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(lyt);
 
         CHECK(lyt_transformed.num_cells() == 2);
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
@@ -122,7 +125,7 @@ TEST_CASE("Convert offset::ucoord_t layout (100 lattice orientation) to SiQAD co
         lyt.assign_cell_name({5, 3}, "input cell");
         lyt.assign_cell_name({5, 1}, "output cell");
 
-        auto lyt_transformed = convert_layout_to_siqad_coordinates(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
@@ -143,7 +146,7 @@ TEST_CASE("Convert offset::ucoord_t layout (without lattice orientation) to SiQA
 
         const sidb_cell_clk_lyt lyt{{x, y}, "test"};
 
-        auto lyt_transformed = convert_layout_to_siqad_coordinates(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(lyt);
 
         CHECK(lyt.get_layout_name() == "test");
         CHECK(lyt_transformed.is_empty());
@@ -160,7 +163,7 @@ TEST_CASE("Convert offset::ucoord_t layout (without lattice orientation) to SiQA
         lyt.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1}, sidb_cell_clk_lyt::cell_type::INPUT);
 
-        auto lyt_transformed = convert_layout_to_siqad_coordinates(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(lyt);
 
         CHECK(lyt_transformed.num_cells() == 2);
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
@@ -181,7 +184,7 @@ TEST_CASE("Convert offset::ucoord_t layout (without lattice orientation) to SiQA
         lyt.assign_cell_name({5, 3}, "input cell");
         lyt.assign_cell_name({5, 1}, "output cell");
 
-        auto lyt_transformed = convert_layout_to_siqad_coordinates(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
         CHECK(lyt_transformed.area() == area_with_padding(lyt.area(), x, y));
@@ -213,7 +216,7 @@ TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in offs
     cds.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
     cds.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
-    auto lyt_transformed = convert_layout_to_siqad_coordinates(cds);
+    auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(cds);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
     CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
 
@@ -242,7 +245,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in offset::
     sidb_surface.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
     sidb_surface.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
-    auto lyt_transformed = convert_layout_to_siqad_coordinates(sidb_surface);
+    auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(sidb_surface);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
 
     CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::NORMAL);
@@ -269,7 +272,7 @@ TEST_CASE("Convert cds (without lattice information) in offset::ucoord_t layout 
     cds.assign_charge_state({1, 0, 0}, sidb_charge_state::POSITIVE);
     cds.assign_charge_state({0, 3, 0}, sidb_charge_state::NEGATIVE);
 
-    auto lyt_transformed = convert_layout_to_siqad_coordinates(cds);
+    auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(cds);
     CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
 
     CHECK(lyt_transformed.get_cell_type({0, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::NORMAL);
@@ -299,7 +302,7 @@ TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to offset:
     cds.assign_sidb_defect({5, 5, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
     cds.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
-    auto lyt_transformed = convert_layout_to_fiction_coordinates<cds_sidb_defect_100_cell_clk_lyt>(cds);
+    auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<cds_sidb_defect_100_cell_clk_lyt>(cds);
     CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
     CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
@@ -334,7 +337,7 @@ TEST_CASE("Convert cds (without lattice information) in SiQAD coordinates to off
     cds.assign_charge_state({1, 0, 0}, sidb_charge_state::POSITIVE);
     cds.assign_charge_state({0, 3, 0}, sidb_charge_state::NEGATIVE);
 
-    auto lyt_transformed = convert_layout_to_fiction_coordinates<cds_sidb_100_cell_clk_lyt>(cds);
+    auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<cds_sidb_100_cell_clk_lyt>(cds);
     CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(is_charge_distribution_surface_v<decltype(lyt_transformed)>);
 
@@ -364,7 +367,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD co
     sidb_surface.assign_sidb_defect({1, 1, 0}, sidb_defect{sidb_defect_type::UNKNOWN});
 
     auto lyt_transformed =
-        convert_layout_to_fiction_coordinates<sidb_defect_surface<sidb_100_cell_clk_lyt>>(sidb_surface);
+        layouts::utils::convert_layout_to_fiction_coordinates<sidb_defect_surface<sidb_100_cell_clk_lyt>>(sidb_surface);
     CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
 
@@ -385,7 +388,7 @@ TEST_CASE("Convert SiQAD layout (100) to offset::ucoord_t coordinate layout", "[
     {
         const sidb_100_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == lyt.area());
@@ -401,7 +404,7 @@ TEST_CASE("Convert SiQAD layout (100) to offset::ucoord_t coordinate layout", "[
         CHECK(lyt.x() == 5);
         CHECK(lyt.y() == 3);
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.x() == 10);
         CHECK(lyt_transformed.y() == 9);
@@ -421,7 +424,7 @@ TEST_CASE("Convert SiQAD layout (100) to offset::ucoord_t coordinate layout", "[
         lyt.assign_cell_name({0, 0}, "input cell");
         lyt.assign_cell_name({5, 1}, "output cell");
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
         CHECK(lyt_transformed.area() == lyt.area());
@@ -440,7 +443,7 @@ TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to offset::ucoord_t c
     {
         const sidb_100_cell_clk_lyt_siqad lyt{};
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == lyt.area());
@@ -456,7 +459,7 @@ TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to offset::ucoord_t c
         CHECK(lyt.x() == 5);
         CHECK(lyt.y() == 3);
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.x() == 10);
         CHECK(lyt_transformed.y() == 9);
@@ -476,7 +479,7 @@ TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to offset::ucoord_t c
         lyt.assign_cell_name({0, 0}, "input cell");
         lyt.assign_cell_name({5, 1}, "output cell");
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
         CHECK(lyt_transformed.area() == lyt.area());
@@ -495,7 +498,7 @@ TEST_CASE("Convert SiQAD layout (without SiDB lattice layout) to offset::ucoord_
     {
         const sidb_cell_clk_lyt_siqad lyt{};
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == lyt.area());
@@ -511,7 +514,7 @@ TEST_CASE("Convert SiQAD layout (without SiDB lattice layout) to offset::ucoord_
         CHECK(lyt.x() == 5);
         CHECK(lyt.y() == 3);
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.x() == 10);
         CHECK(lyt_transformed.y() == 9);
@@ -531,7 +534,7 @@ TEST_CASE("Convert SiQAD layout (without SiDB lattice layout) to offset::ucoord_
         lyt.assign_cell_name({0, 0}, "input cell");
         lyt.assign_cell_name({5, 1}, "output cell");
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<sidb_100_cell_clk_lyt>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
         CHECK(lyt_transformed.area() == lyt.area());
@@ -551,7 +554,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
     {
         const sidb_100_cell_clk_lyt_siqad lyt{{}, "layout based on siqad coordinates"};
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<TestType>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.is_empty());
         CHECK(lyt_transformed.area() == lyt.area());
@@ -565,7 +568,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
         lyt.assign_cell_type({5, -1, 1}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<TestType>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 2);
         CHECK(lyt_transformed.area() == lyt.area());
@@ -584,7 +587,7 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
         lyt.assign_cell_name({0, 0}, "input cell");
         lyt.assign_cell_name({5, 3}, "output cell");
 
-        auto lyt_transformed = convert_layout_to_fiction_coordinates<TestType>(lyt);
+        auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
         CHECK(lyt_transformed.num_cells() == 3);
         CHECK(lyt_transformed.area() == lyt.area());
@@ -601,12 +604,14 @@ TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_coordinate = random_coordinate<offset::ucoord_t>({0, 0, 0}, {0, 0, 0});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({0, 0, 0}, {0, 0, 0});
         CHECK(randomly_generated_coordinate.x == 0);
         CHECK(randomly_generated_coordinate.y == 0);
         CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_coordinate_second = random_coordinate<offset::ucoord_t>({1, 0, 0}, {1, 0, 0});
+        const auto randomly_generated_coordinate_second =
+            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -614,7 +619,8 @@ TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_coordinate_second = random_coordinate<offset::ucoord_t>({1, 1, 1}, {5, 2, 3});
+        const auto randomly_generated_coordinate_second =
+            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({1, 1, 1}, {5, 2, 3});
         CHECK(randomly_generated_coordinate_second.x >= 1);
         CHECK(randomly_generated_coordinate_second.x <= 5);
         CHECK(randomly_generated_coordinate_second.y <= 2);
@@ -625,7 +631,8 @@ TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<offset::ucoord_t>({5, 2, 3}, {1, 1, 1});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({5, 2, 3}, {1, 1, 1});
         CHECK(randomly_generated_coordinate.x >= 1);
         CHECK(randomly_generated_coordinate.x <= 5);
         CHECK(randomly_generated_coordinate.y <= 2);
@@ -639,12 +646,14 @@ TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_coordinate = random_coordinate<cube::coord_t>({-10, -5, 0}, {-10, -5, 0});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::cube::coord_t>({-10, -5, 0}, {-10, -5, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -5);
         CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_coordinate_second = random_coordinate<cube::coord_t>({1, 0, 0}, {1, 0, 0});
+        const auto randomly_generated_coordinate_second =
+            layouts::utils::random_coordinate<layouts::cube::coord_t>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -652,7 +661,8 @@ TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<cube::coord_t>({-10, -1, 3}, {-10, -1, 6});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::cube::coord_t>({-10, -1, 3}, {-10, -1, 6});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 3);
@@ -661,7 +671,8 @@ TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<cube::coord_t>({-10, -1, 6}, {-10, -1, 3});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::cube::coord_t>({-10, -1, 6}, {-10, -1, 3});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 3);
@@ -673,12 +684,14 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
-        const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -5);
         CHECK(randomly_generated_coordinate.z == 0);
 
-        const auto randomly_generated_coordinate_second = random_coordinate<siqad::coord_t>({1, 0, 0}, {1, 0, 0});
+        const auto randomly_generated_coordinate_second =
+            layouts::utils::random_coordinate<layouts::siqad::coord_t>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -686,7 +699,8 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -1, 0}, {-10, -1, 1});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::siqad::coord_t>({-10, -1, 0}, {-10, -1, 1});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z <= 1);
@@ -694,7 +708,8 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
 
     SECTION("two unidentical cells as input, switched correct order")
     {
-        const auto randomly_generated_coordinate = random_coordinate<siqad::coord_t>({-10, -1, 1}, {-10, -1, 0});
+        const auto randomly_generated_coordinate =
+            layouts::utils::random_coordinate<layouts::siqad::coord_t>({-10, -1, 1}, {-10, -1, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z <= 1);
@@ -705,7 +720,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 {
     SECTION("two identical cells")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -715,7 +731,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("two cells at the same y and z coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, -5, 0}, {10, -5, 0});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, -5, 0}, {10, -5, 0});
         REQUIRE(all_area_cells.size() == 21);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -730,7 +747,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("two cells at the same y coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, 5, 0}, {10, 5, 1});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, 5, 0}, {10, 5, 1});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -745,7 +763,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("two cells at the same x coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({10, 2, 0}, {10, 5, 1});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({10, 2, 0}, {10, 5, 1});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -760,7 +779,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("north-south and south-west cells are given, positive coordinates")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({10, 0}, {0, 11, 1});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({10, 0}, {0, 11, 1});
         REQUIRE(all_area_cells.size() == 264);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -775,7 +795,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
 
     SECTION("north-south and south-west cells are given, negative coordinates")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<siqad::coord_t>({-10, 0}, {0, -11, 1});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, 0}, {0, -11, 1});
         REQUIRE(all_area_cells.size() == 242);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -793,7 +814,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 {
     SECTION("two identical cells")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({-10, -10, 0}, {-10, -10, 0});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({-10, -10, 0}, {-10, -10, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -808,7 +830,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 
     SECTION("two cells at the same y coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({-10, 10}, {10, 11});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({-10, 10}, {10, 11});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -823,7 +846,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 
     SECTION("two cells at the same x coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({10, 4, 0}, {10, 11});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({10, 4, 0}, {10, 11});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -838,7 +862,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 
     SECTION("north-south and south-west cells are given, positive coordinates")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({10, 0}, {0, 11});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({10, 0}, {0, 11});
         REQUIRE(all_area_cells.size() == 132);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -853,7 +878,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
 
     SECTION("north-south and south-west cells are given, negative coordinates")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<cube::coord_t>({-10, 0}, {0, -11});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({-10, 0}, {0, -11});
         REQUIRE(all_area_cells.size() == 132);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -871,7 +897,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
 {
     SECTION("two identical cells")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<offset::ucoord_t>({10, 10, 0}, {10, 10, 0});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({10, 10, 0}, {10, 10, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -886,7 +913,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
 
     SECTION("two cells at the same y coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<offset::ucoord_t>({0, 10}, {20, 11});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({0, 10}, {20, 11});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -901,7 +929,8 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
 
     SECTION("two cells at the same x coordinate ")
     {
-        const auto all_area_cells = all_coordinates_in_spanned_area<offset::ucoord_t>({10, 4, 0}, {10, 11});
+        const auto all_area_cells =
+            layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({10, 4, 0}, {10, 11});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -930,17 +959,17 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
     {
         SECTION("identical layouts")
         {
-            CHECK(are_cell_layouts_identical(lyt_first, lyt_second));
+            CHECK(layouts::utils::are_cell_layouts_identical(lyt_first, lyt_second));
         }
         SECTION("different cell type")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::INPUT);
-            CHECK(!are_cell_layouts_identical(lyt_first, lyt_second));
+            CHECK(!layouts::utils::are_cell_layouts_identical(lyt_first, lyt_second));
         }
         SECTION("different number of cells")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
-            CHECK(!are_cell_layouts_identical(lyt_first, lyt_second));
+            CHECK(!layouts::utils::are_cell_layouts_identical(lyt_first, lyt_second));
         }
     }
 
@@ -951,7 +980,7 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
     {
         SECTION("identical layouts")
         {
-            CHECK(are_cell_layouts_identical(cds_first, cds_second));
+            CHECK(layouts::utils::are_cell_layouts_identical(cds_first, cds_second));
         }
         SECTION("different charge state")
         {
@@ -960,7 +989,7 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
             CHECK(cds_first.num_negative_sidbs() == cds_second.num_negative_sidbs());
             CHECK(cds_first.num_positive_sidbs() == cds_second.num_positive_sidbs());
             CHECK(cds_first.num_neutral_sidbs() == cds_second.num_neutral_sidbs());
-            CHECK(!are_cell_layouts_identical(cds_first, cds_second));
+            CHECK(!layouts::utils::are_cell_layouts_identical(cds_first, cds_second));
         }
     }
 
@@ -976,19 +1005,19 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
 
         SECTION("identical layouts")
         {
-            CHECK(are_cell_layouts_identical(defect_first, defect_second));
+            CHECK(layouts::utils::are_cell_layouts_identical(defect_first, defect_second));
         }
         SECTION("different layouts")
         {
             SECTION("different number of defects")
             {
                 defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
-                CHECK(!are_cell_layouts_identical(defect_first, defect_second));
+                CHECK(!layouts::utils::are_cell_layouts_identical(defect_first, defect_second));
             }
             SECTION("different defect type")
             {
                 defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::DB});
-                CHECK(!are_cell_layouts_identical(defect_first, defect_second));
+                CHECK(!layouts::utils::are_cell_layouts_identical(defect_first, defect_second));
             }
         }
     }
@@ -1009,13 +1038,13 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
     {
         SECTION("identical layouts share a digest")
         {
-            CHECK(cell_layout_digest(lyt_first) == cell_layout_digest(lyt_second));
+            CHECK(layouts::utils::cell_layout_digest(lyt_first) == layouts::utils::cell_layout_digest(lyt_second));
         }
         SECTION("the digest ignores the aspect ratio")
         {
             lyt_second.resize({42, 42});
-            REQUIRE(are_cell_layouts_identical(lyt_first, lyt_second));
-            CHECK(cell_layout_digest(lyt_first) == cell_layout_digest(lyt_second));
+            REQUIRE(layouts::utils::are_cell_layouts_identical(lyt_first, lyt_second));
+            CHECK(layouts::utils::cell_layout_digest(lyt_first) == layouts::utils::cell_layout_digest(lyt_second));
         }
         SECTION("the digest ignores the order in which the cells were assigned")
         {
@@ -1026,8 +1055,8 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
             lyt_reversed.assign_cell_type({0, 0}, sidb_cell_clk_lyt::cell_type::INPUT);
             lyt_reversed.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
 
-            REQUIRE(are_cell_layouts_identical(lyt_first, lyt_reversed));
-            CHECK(cell_layout_digest(lyt_first) == cell_layout_digest(lyt_reversed));
+            REQUIRE(layouts::utils::are_cell_layouts_identical(lyt_first, lyt_reversed));
+            CHECK(layouts::utils::cell_layout_digest(lyt_first) == layouts::utils::cell_layout_digest(lyt_reversed));
         }
         // the contract allows different layouts to share a digest, so the inequality checks below measure how well
         // the digest separates a single changed attribute rather than a promise it makes. A failure means the
@@ -1035,18 +1064,18 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
         SECTION("different cell type")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::INPUT);
-            CHECK(cell_layout_digest(lyt_first) != cell_layout_digest(lyt_second));
+            CHECK(layouts::utils::cell_layout_digest(lyt_first) != layouts::utils::cell_layout_digest(lyt_second));
         }
         SECTION("different cell position")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
             lyt_second.assign_cell_type({4, 3}, sidb_cell_clk_lyt::cell_type::NORMAL);
-            CHECK(cell_layout_digest(lyt_first) != cell_layout_digest(lyt_second));
+            CHECK(layouts::utils::cell_layout_digest(lyt_first) != layouts::utils::cell_layout_digest(lyt_second));
         }
         SECTION("different number of cells")
         {
             lyt_second.assign_cell_type({5, 3}, sidb_cell_clk_lyt::cell_type::EMPTY);
-            CHECK(cell_layout_digest(lyt_first) != cell_layout_digest(lyt_second));
+            CHECK(layouts::utils::cell_layout_digest(lyt_first) != layouts::utils::cell_layout_digest(lyt_second));
         }
     }
 
@@ -1057,26 +1086,26 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
     {
         SECTION("identical layouts share a digest")
         {
-            CHECK(cell_layout_digest(cds_first) == cell_layout_digest(cds_second));
+            CHECK(layouts::utils::cell_layout_digest(cds_first) == layouts::utils::cell_layout_digest(cds_second));
         }
         SECTION("different charge state")
         {
             cds_first.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
             cds_second.assign_charge_state({5, 3}, sidb_charge_state::POSITIVE);
 
-            REQUIRE(!are_cell_layouts_identical(cds_first, cds_second));
-            CHECK(cell_layout_digest(cds_first) != cell_layout_digest(cds_second));
+            REQUIRE(!layouts::utils::are_cell_layouts_identical(cds_first, cds_second));
+            CHECK(layouts::utils::cell_layout_digest(cds_first) != layouts::utils::cell_layout_digest(cds_second));
         }
         SECTION("charge states restored to their original values")
         {
-            const auto digest_before = cell_layout_digest(cds_first);
+            const auto digest_before = layouts::utils::cell_layout_digest(cds_first);
 
             cds_first.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
-            REQUIRE(cell_layout_digest(cds_first) != digest_before);
+            REQUIRE(layouts::utils::cell_layout_digest(cds_first) != digest_before);
 
             cds_first.assign_charge_state({0, 0}, cds_second.get_charge_state({0, 0}));
-            REQUIRE(are_cell_layouts_identical(cds_first, cds_second));
-            CHECK(cell_layout_digest(cds_first) == digest_before);
+            REQUIRE(layouts::utils::are_cell_layouts_identical(cds_first, cds_second));
+            CHECK(layouts::utils::cell_layout_digest(cds_first) == digest_before);
         }
     }
 
@@ -1092,34 +1121,40 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
 
         SECTION("identical layouts share a digest")
         {
-            REQUIRE(are_cell_layouts_identical(defect_first, defect_second));
-            CHECK(cell_layout_digest(defect_first) == cell_layout_digest(defect_second));
+            REQUIRE(layouts::utils::are_cell_layouts_identical(defect_first, defect_second));
+            CHECK(layouts::utils::cell_layout_digest(defect_first) ==
+                  layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different number of defects")
         {
             defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
-            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+            CHECK(layouts::utils::cell_layout_digest(defect_first) !=
+                  layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect type")
         {
             defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::DB});
-            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+            CHECK(layouts::utils::cell_layout_digest(defect_first) !=
+                  layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect position")
         {
             defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::NONE});
             defect_second.assign_sidb_defect({2, 3}, sidb_defect{sidb_defect_type::SI_VACANCY});
-            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+            CHECK(layouts::utils::cell_layout_digest(defect_first) !=
+                  layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect charge")
         {
             defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY, -1});
-            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+            CHECK(layouts::utils::cell_layout_digest(defect_first) !=
+                  layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect screening")
         {
             defect_second.assign_sidb_defect({1, 2}, sidb_defect{sidb_defect_type::SI_VACANCY, 0, 5.6, 5.0});
-            CHECK(cell_layout_digest(defect_first) != cell_layout_digest(defect_second));
+            CHECK(layouts::utils::cell_layout_digest(defect_first) !=
+                  layouts::utils::cell_layout_digest(defect_second));
         }
     }
 }
@@ -1130,8 +1165,8 @@ TEST_CASE("Digest of a layout holding a cell and its dead twin", "[layout-utils]
     // ordered fold over the cells therefore treats a cell and its dead twin as one entry and keeps whichever of
     // the two foreach_cell reaches first, which makes the digest depend on the order the cells were assigned in.
     // Both layouts below hold the same two cells and differ only in that order
-    const offset::ucoord_t live_cell{0, 2};
-    const auto             dead_twin = live_cell.get_dead();
+    const layouts::offset::ucoord_t live_cell{0, 2};
+    const auto                      dead_twin = live_cell.get_dead();
 
     sidb_cell_clk_lyt lyt_live_first{};
     lyt_live_first.assign_cell_type(live_cell, sidb_cell_clk_lyt::cell_type::NORMAL);
@@ -1143,7 +1178,7 @@ TEST_CASE("Digest of a layout holding a cell and its dead twin", "[layout-utils]
 
     REQUIRE(lyt_live_first.num_cells() == 2);
     REQUIRE(lyt_dead_first.num_cells() == 2);
-    REQUIRE(are_cell_layouts_identical(lyt_live_first, lyt_dead_first));
+    REQUIRE(layouts::utils::are_cell_layouts_identical(lyt_live_first, lyt_dead_first));
 
-    CHECK(cell_layout_digest(lyt_live_first) == cell_layout_digest(lyt_dead_first));
+    CHECK(layouts::utils::cell_layout_digest(lyt_live_first) == layouts::utils::cell_layout_digest(lyt_dead_first));
 }

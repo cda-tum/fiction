@@ -417,7 +417,7 @@ class hexagonalization_impl
         static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
 
         // ensure the layout uses the correct clocking scheme
-        assert(layout.is_clocking_scheme(clock_name::TWODDWAVE));
+        assert(layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
 
         // get Cartesian layout dimensions
         const auto layout_width  = layout.x() + 1;
@@ -438,7 +438,7 @@ class hexagonalization_impl
         }
 
         // create the initial hexagonal layout
-        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, row_clocking<HexLyt>()};
+        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, layouts::row_clocking<HexLyt>()};
 
         // initialize statistics for hexagonalization
         hexagonalization_stats stats{};
@@ -777,7 +777,7 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
+                auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
                 const a_star_params params_astar{crossings};
@@ -889,7 +889,7 @@ class hexagonalization_impl
                 }
 
                 // perform routing using A*
-                auto layout_obstruct = obstruction_layout<HexLyt>(hex_layout);
+                auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
                 using path           = layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;

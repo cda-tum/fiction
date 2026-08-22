@@ -28,10 +28,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
-{
-
-namespace detail
+namespace fiction::detail
 {
 /**
  * Forward declaration for the friend declaration in `gate_level_layout`. Including
@@ -41,7 +38,10 @@ namespace detail
 template <typename Lyt>
 class gate_level_drvs_impl;
 
-}  // namespace detail
+}  // namespace fiction::detail
+
+namespace fiction::layouts
+{
 
 /**
  * A layout type to layer on top of a clocked layout that allows the assignment of gates to clock zones (aka tiles in
@@ -1710,7 +1710,7 @@ class gate_level_layout : public ClockedLayout
     event_storage evnts;
 
     template <typename>
-    friend class detail::gate_level_drvs_impl;
+    friend class fiction::detail::gate_level_drvs_impl;
 
     /**
      * Populates the truth table cache with the constant and elementary functions used by the fundamental gate
@@ -1846,6 +1846,5 @@ class gate_level_layout : public ClockedLayout
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_GATE_LEVEL_LAYOUT_HPP

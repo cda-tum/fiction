@@ -34,7 +34,7 @@ void detect_bdl_wires_impl(nanobind::module_& m, const std::string& lattice)
 
     py::class_<bdl_wire_t>(m, fmt::format("bdl_wire_{}", lattice).c_str(), DOC(fiction_bdl_wire))
         .def(py::init<>(), DOC(fiction_bdl_wire_bdl_wire))
-        .def(py::init<std::vector<fiction::bdl_pair<fiction::offset::ucoord_t>>>(), py::arg("p"),
+        .def(py::init<std::vector<fiction::bdl_pair<fiction::layouts::offset::ucoord_t>>>(), py::arg("p"),
              DOC(fiction_bdl_wire_bdl_wire_2))
         .def_rw("pairs", &bdl_wire_t::pairs, DOC(fiction_bdl_wire_pairs))
         .def_rw("direction", &bdl_wire_t::port, DOC(fiction_bdl_wire_port))

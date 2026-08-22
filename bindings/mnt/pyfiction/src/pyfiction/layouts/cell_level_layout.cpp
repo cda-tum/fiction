@@ -5,15 +5,15 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/layouts/utils/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 
 #include <fmt/format.h>
 
@@ -114,9 +114,9 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     /**
      * Cell-level clocked Cartesian layout.
      */
-    py::class_<
-        py_cartesian_technology_cell_layout,
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>(
+    py::class_<py_cartesian_technology_cell_layout,
+               fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<
+                   fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>>(
         m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>(), DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
@@ -127,7 +127,8 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
                const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension,
                const std::string& scheme_name, const std::string& layout_name)
             {
-                if (const auto scheme = fiction::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
+                if (const auto scheme =
+                        fiction::layouts::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
                     scheme.has_value())
                 {
                     new (self.p) py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};
@@ -195,7 +196,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
             "bounding_box_2d",
             [](const py_cartesian_technology_cell_layout& lyt)
             {
-                const auto bb = fiction::bounding_box_2d<py_cartesian_technology_cell_layout>(lyt);
+                const auto bb = fiction::layouts::bounding_box_2d<py_cartesian_technology_cell_layout>(lyt);
                 return std::make_pair(bb.get_min(), bb.get_max());
             },
             DOC(fiction_bounding_box_2d_overridden))
@@ -208,11 +209,11 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
                 if constexpr (std::is_same_v<Technology, fiction::sidb_technology>)
                 {
-                    print_layout(convert_layout_to_siqad_coordinates(lyt), stream);
+                    layouts::io::print_layout(layouts::utils::convert_layout_to_siqad_coordinates(lyt), stream);
                 }
                 else
                 {
-                    print_layout(lyt, stream);
+                    layouts::io::print_layout(lyt, stream);
                 }
 
                 return stream.str();

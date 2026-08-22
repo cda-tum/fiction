@@ -32,8 +32,8 @@
 
 int main()  // NOLINT
 {
-    using gate_lyt = fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+    using gate_lyt = fiction::layouts::gate_level_layout<fiction::layouts::clocked_layout<
+        fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>>;
     using hex_lyt  = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt;
 

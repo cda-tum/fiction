@@ -16,7 +16,7 @@ TEST_CASE("Unit cost", "[cost]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
 
         CHECK(unit_cost<layout>({0, 0}, {0, 0}) == 1);
         CHECK(unit_cost<layout>({1, 1}, {1, 1}) == 1);
@@ -32,7 +32,7 @@ TEST_CASE("Unit cost", "[cost]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<cube::coord_t>;
+        using layout = layouts::cartesian_layout<layouts::cube::coord_t>;
 
         CHECK(unit_cost<layout>({0, 0}, {0, 0}) == 1);
         CHECK(unit_cost<layout>({1, 1}, {1, 1}) == 1);
@@ -57,7 +57,7 @@ TEST_CASE("Unit cost functor", "[cost]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
 
         unit_cost_functor<layout> cost{};
 
@@ -75,7 +75,7 @@ TEST_CASE("Unit cost functor", "[cost]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<cube::coord_t>;
+        using layout = layouts::cartesian_layout<layouts::cube::coord_t>;
 
         unit_cost_functor<layout> cost{};
 
@@ -102,7 +102,7 @@ TEST_CASE("Random cost", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
 
         auto r = random_cost<layout>({0, 0}, {0, 0});
         CHECK((r >= 0 && r <= 1));
@@ -129,7 +129,7 @@ TEST_CASE("Random cost", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<cube::coord_t>;
+        using layout = layouts::cartesian_layout<layouts::cube::coord_t>;
 
         auto r = random_cost<layout>({0, 0}, {0, 0});
         CHECK((r >= 0 && r <= 1));
@@ -168,7 +168,7 @@ TEST_CASE("Random cost functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using layout = cartesian_layout<offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
 
         random_cost_functor<layout> cost{};
 
@@ -197,7 +197,7 @@ TEST_CASE("Random cost functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using layout = cartesian_layout<cube::coord_t>;
+        using layout = layouts::cartesian_layout<layouts::cube::coord_t>;
 
         random_cost_functor<layout> cost{};
 

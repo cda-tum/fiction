@@ -10,7 +10,7 @@
 
 #include <type_traits>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -192,6 +192,5 @@ class shifted_cartesian_layout
     using typename HexagonalLayout::hex_arrangement;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP

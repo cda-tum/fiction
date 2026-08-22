@@ -151,7 +151,8 @@ TEST_CASE("Layout conversion", "[network-conversion]")
 {
     SECTION("Gate layout to X")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
         REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 

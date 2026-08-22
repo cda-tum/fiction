@@ -6,8 +6,8 @@
 #define FICTION_BOUNDING_BOX_HPP
 
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -17,7 +17,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 
-namespace fiction
+namespace fiction::layouts
 {
 /**
  * A 2D bounding box object that computes a minimum-sized box around all non-empty coordinates in a given layout.
@@ -82,8 +82,8 @@ class bounding_box_2d
                 min_coord_cube.y = std::min(min_coord_cube.y, coord_siqad.y);
                 max_coord_cube.y = std::max(max_coord_cube.y, coord_siqad.y);
 
-                min_coord = fiction::siqad::to_siqad_coord(min_coord_cube);
-                max_coord = fiction::siqad::to_siqad_coord(max_coord_cube);
+                min_coord = fiction::layouts::siqad::to_siqad_coord(min_coord_cube);
+                max_coord = fiction::layouts::siqad::to_siqad_coord(max_coord_cube);
             }
             else
             {
@@ -250,8 +250,7 @@ class bounding_box_2d
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #pragma GCC diagnostic pop
 
 #endif  // FICTION_BOUNDING_BOX_HPP

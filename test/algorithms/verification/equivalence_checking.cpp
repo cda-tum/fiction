@@ -80,7 +80,8 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
 {
     SECTION("Cartesian layout")
     {
-        using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
+        using gate_lyt = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
         check_for_strong_equiv(mockturtle::aig_network{}, gate_lyt{});
         check_for_strong_equiv(mockturtle::mig_network{}, gate_lyt{});
@@ -96,7 +97,8 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
     }
     SECTION("Hexagonal layout")
     {
-        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<>>>>;
+        using gate_layout = layouts::gate_level_layout<
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::hexagonal_layout<>>>>;
 
         check_for_strong_equiv(mockturtle::aig_network{}, gate_layout{});
         check_for_strong_equiv(mockturtle::mig_network{}, gate_layout{});
@@ -112,11 +114,11 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
     }
     SECTION("Obstruction layout")
     {
-        check_for_strong_equiv(mockturtle::aig_network{}, obstruction_layout<cart_gate_clk_lyt>{});
-        check_for_strong_equiv(mockturtle::mig_network{}, obstruction_layout<cart_gate_clk_lyt>{});
+        check_for_strong_equiv(mockturtle::aig_network{}, layouts::obstruction_layout<cart_gate_clk_lyt>{});
+        check_for_strong_equiv(mockturtle::mig_network{}, layouts::obstruction_layout<cart_gate_clk_lyt>{});
 
         const auto lyt       = blueprints::and_or_gate_layout<cart_gate_clk_lyt>();
-        const auto obstr_lyt = obstruction_layout{lyt};
+        const auto obstr_lyt = layouts::obstruction_layout{lyt};
 
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::aig_network>(), obstr_lyt);
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::mig_network>(), obstr_lyt);

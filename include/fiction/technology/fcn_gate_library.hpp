@@ -181,7 +181,7 @@ class fcn_gate_library
     template <typename T>
     static constexpr fcn_gate cell_list_to_gate(const cell_list<T>& c) noexcept
     {
-        return utils::stl::convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
+        return fiction::utils::stl::convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
     }
     /**
      * Rotates the given `fcn_gate` by 90° clockwise at compile time.

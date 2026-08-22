@@ -17,12 +17,13 @@ using namespace fiction;
 
 TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{1, 1}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{1, 1}, layouts::twoddwave_clocking<gate_lyt>()};
 
         SECTION("Disjoint paths")
         {
@@ -69,7 +70,7 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{1, 1}, use_clocking<gate_lyt>()};
+        gate_lyt layout{{1, 1}, layouts::use_clocking<gate_lyt>()};
 
         SECTION("Disjoint paths")
         {
@@ -119,12 +120,13 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{2, 2}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{2, 2}, layouts::twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
@@ -164,12 +166,13 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, layouts::twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -187,7 +190,7 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, layouts::use_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
@@ -207,12 +210,13 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
     generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+        gate_lyt layout{{3, 3}, layouts::twoddwave_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
         {
@@ -233,7 +237,7 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+        gate_lyt layout{{3, 3}, layouts::use_clocking<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
         {

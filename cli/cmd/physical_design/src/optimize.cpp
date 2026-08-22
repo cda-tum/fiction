@@ -59,7 +59,7 @@ void optimize_command::execute()
     const auto& lyt = gls.current();
 
     const auto is_twoddwave_clocked = [](auto&& lyt_ptr) -> bool
-    { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
+    { return lyt_ptr->is_clocking_scheme(fiction::layouts::clock_name::TWODDWAVE); };
 
     // error case: layout is not 2DDWave-clocked
     if (!std::visit(is_twoddwave_clocked, lyt))

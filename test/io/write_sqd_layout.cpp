@@ -36,8 +36,8 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
 {
     CHECK(wlyt.get_layout_name() == rlyt.get_layout_name());
 
-    const bounding_box_2d<WLyt> wbb{wlyt};
-    const bounding_box_2d<RLyt> rbb{wlyt};
+    const layouts::bounding_box_2d<WLyt> wbb{wlyt};
+    const layouts::bounding_box_2d<RLyt> rbb{wlyt};
 
     CHECK(wbb.get_min() == rbb.get_min());
     CHECK(wbb.get_max() == rbb.get_max());
@@ -165,8 +165,8 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 
 TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 {
-    using gate_layout =
-        gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
+    using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
+        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>>;
     using sidb_layout = sidb_cell_clk_lyt;
 
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();

@@ -14,7 +14,7 @@ using namespace fiction;
 
 TEST_CASE("Clocked layout traits", "[clocked-layout]")
 {
-    using layout = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using layout = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
     CHECK(has_is_incoming_clocked_v<layout>);
     CHECK(has_is_outgoing_clocked_v<layout>);
@@ -24,36 +24,36 @@ TEST_CASE("Clocked layout traits", "[clocked-layout]")
 
 TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const clk_lyt original{{5, 5, 0}, twoddwave_clocking<clk_lyt>()};
+    const clk_lyt original{{5, 5, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
     auto copy = original.clone();
 
     copy.resize({10, 10, 1});
-    copy.replace_clocking_scheme(use_clocking<clk_lyt>());
+    copy.replace_clocking_scheme(layouts::use_clocking<clk_lyt>());
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(clock_name::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
 
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(clock_name::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clock_name::USE));
 }
 
 TEST_CASE("Clock zone assignment", "[clocked-layout]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, twoddwave_clocking<clk_lyt>()};
+    clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
     SECTION("2DDWave Clocking")
     {
-        CHECK(layout.is_clocking_scheme(clock_name::TWODDWAVE));
-        CHECK(!layout.is_clocking_scheme(clock_name::RES));
+        CHECK(layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+        CHECK(!layout.is_clocking_scheme(layouts::clock_name::RES));
         CHECK(layout.is_regularly_clocked());
         CHECK(layout.num_clocks() == 4);
 
@@ -100,10 +100,10 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 
     SECTION("Replace with USE")
     {
-        layout.replace_clocking_scheme(use_clocking<clk_lyt>());
+        layout.replace_clocking_scheme(layouts::use_clocking<clk_lyt>());
 
-        CHECK(!layout.is_clocking_scheme(clock_name::TWODDWAVE));
-        CHECK(layout.is_clocking_scheme(clock_name::USE));
+        CHECK(!layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+        CHECK(layout.is_clocking_scheme(layouts::clock_name::USE));
         CHECK(layout.is_regularly_clocked());
 
         CHECK(layout.get_clock_number({0, 0}) == 0);
@@ -139,9 +139,9 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 
 TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
-    const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
+    const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
     CHECK(layout.incoming_clocked_zones({0, 0}).empty());
     CHECK(layout.outgoing_clocked_zones({2, 2}).empty());
@@ -167,11 +167,11 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 
 TEST_CASE("Clocked layout properties", "[clocked-layout]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
 
     SECTION("2DDWave Clocking")
     {
-        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
         CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(0));
         CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));
@@ -193,7 +193,7 @@ TEST_CASE("Clocked layout properties", "[clocked-layout]")
     }
     SECTION("USE Clocking")
     {
-        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, use_clocking<clk_lyt>()};
+        const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, layouts::use_clocking<clk_lyt>()};
 
         CHECK(layout.in_degree({0, 0}) == static_cast<clk_lyt::degree_t>(1));
         CHECK(layout.in_degree({1, 0}) == static_cast<clk_lyt::degree_t>(1));

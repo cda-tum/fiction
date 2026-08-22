@@ -5,7 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/dot_drawers.hpp>
+#include <fiction/layouts/io/layout_drawers.hpp>
+#include <fiction/networks/io/dot_drawers.hpp>
 #include <fiction/traits.hpp>
 
 #include <mockturtle/io/write_dot.hpp>
@@ -31,7 +32,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_dot_layout(nanobind::module_& m)
+void layouts::io::write_dot_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -41,11 +42,13 @@ void write_dot_layout(nanobind::module_& m)
         {
             if constexpr (fiction::is_cartesian_layout_v<Lyt>)
             {
-                fiction::write_dot_layout<Lyt, fiction::gate_layout_cartesian_drawer<Lyt>>(lyt, filename);
+                fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt>>(
+                    lyt, filename);
             }
             else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
             {
-                fiction::write_dot_layout<Lyt, fiction::gate_layout_hexagonal_drawer<Lyt>>(lyt, filename);
+                fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt>>(
+                    lyt, filename);
             }
         },
         py::arg("layout"), py::arg("filename"), DOC(fiction_write_dot_layout));
@@ -58,13 +61,13 @@ void write_dot_network(nanobind::module_& m)
 
     m.def(
         "write_dot_network", [](const Ntk& ntk, const std::string_view& filename)
-        { mockturtle::write_dot(ntk, std::string{filename}, fiction::technology_dot_drawer<Ntk>{}); },
+        { mockturtle::write_dot(ntk, std::string{filename}, fiction::networks::io::technology_dot_drawer<Ntk>{}); },
         py::arg("network"), py::arg("filename"));
 }
 
 }  // namespace detail
 
-void write_dot_layout(nanobind::module_& m)
+void layouts::io::write_dot_layout(nanobind::module_& m)
 {
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);

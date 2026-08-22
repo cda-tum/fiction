@@ -3,7 +3,7 @@
 #include <fiction/algorithms/network_transformation/network_conversion.hpp>  // conversion of networks
 #include <fiction/algorithms/physical_design/determine_clocking.hpp>         // SAT-based clock number assignment
 #include <fiction/algorithms/verification/equivalence_checking.hpp>          // SAT-based equivalence checking
-#include <fiction/io/read_fgl_layout.hpp>                                    // custom reader for layouts
+#include <fiction/layouts/io/read_fgl_layout.hpp>                            // custom reader for layouts
 #include <fiction/types.hpp>                                                 // pre-defined types
 #include <fiction/utils/name_utils.hpp>                                      // name utilities
 
@@ -30,8 +30,8 @@ int main()  // NOLINT
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH);
 
-    using gate_lyt =
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    using gate_lyt = fiction::layouts::gate_level_layout<
+        fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<>>>>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -58,7 +58,7 @@ int main()  // NOLINT
                 const auto benchmark = path.stem().string();
 
                 // read layout from file
-                auto original_layout = fiction::read_fgl_layout<gate_lyt>(path.string(), benchmark);
+                auto original_layout = fiction::layouts::io::read_fgl_layout<gate_lyt>(path.string(), benchmark);
 
                 fmt::print("[i] processing {}\n", benchmark);
 

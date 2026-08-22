@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/write_fgl_layout.hpp>
+#include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/utils/name_utils.hpp>  // NOLINT(misc-include-cleaner): Required by write_fgl_layout.hpp.
 
 #include <string_view>
@@ -25,19 +25,19 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_fgl_layout(nanobind::module_& m)
+void layouts::io::write_fgl_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
-        "write_fgl_layout",
-        [](const Lyt& lyt, const std::string_view& filename) { fiction::write_fgl_layout<Lyt>(lyt, filename); },
-        py::arg("layout"), py::arg("filename"), DOC(fiction_write_fgl_layout_2));
+        "write_fgl_layout", [](const Lyt& lyt, const std::string_view& filename)
+        { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename); }, py::arg("layout"), py::arg("filename"),
+        DOC(fiction_write_fgl_layout_2));
 }
 
 }  // namespace detail
 
-void write_fgl_layout(nanobind::module_& m)
+void layouts::io::write_fgl_layout(nanobind::module_& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

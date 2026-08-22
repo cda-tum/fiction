@@ -16,7 +16,7 @@ using namespace fiction;
 
 TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 {
-    using lyt  = cartesian_layout<>;
+    using lyt  = layouts::cartesian_layout<>;
     using path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -110,11 +110,11 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = clocked_layout<lyt>;
+        using clk_lyt = layouts::clocked_layout<lyt>;
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{1, 1}, twoddwave_clocking<clk_lyt>()};
+            const clk_lyt layout{{1, 1}, layouts::twoddwave_clocking<clk_lyt>()};
 
             SECTION("k = 1")
             {
@@ -197,7 +197,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{1, 1}, use_clocking<clk_lyt>()};
+            const clk_lyt layout{{1, 1}, layouts::use_clocking<clk_lyt>()};
 
             SECTION("k = 1")
             {
@@ -262,7 +262,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 
 TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 {
-    using lyt  = cartesian_layout<>;
+    using lyt  = layouts::cartesian_layout<>;
     using path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -316,11 +316,11 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
     }
     SECTION("clocking paths")
     {
-        using clk_lyt = clocked_layout<lyt>;
+        using clk_lyt = layouts::clocked_layout<lyt>;
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{3, 3}, twoddwave_clocking<clk_lyt>()};
+            const clk_lyt layout{{3, 3}, layouts::twoddwave_clocking<clk_lyt>()};
 
             SECTION("k = 1")
             {
@@ -369,7 +369,7 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{3, 3}, use_clocking<clk_lyt>()};
+            const clk_lyt layout{{3, 3}, layouts::use_clocking<clk_lyt>()};
 
             SECTION("k = 1")
             {
@@ -421,7 +421,8 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
 {
-    using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -430,7 +431,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 
         SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
         {
-            obstruction_layout obstr_lyt{static_cast<cartesian_layout<>>(layout)};
+            layouts::obstruction_layout obstr_lyt{static_cast<layouts::cartesian_layout<>>(layout)};
 
             // create some PIs as obstruction
             obstr_lyt.obstruct_coordinate({3, 0});
@@ -461,11 +462,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::twoddwave_clocking<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction via PIs")  // path of length 7
             {
-                obstruction_layout obstr_lyt{layout};
+                layouts::obstruction_layout obstr_lyt{layout};
 
                 // create some PIs as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});
@@ -488,7 +489,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
-                obstruction_layout obstr_lyt{layout};
+                layouts::obstruction_layout obstr_lyt{layout};
 
                 // create some PIs as obstruction
                 obstr_lyt.obstruct_coordinate({3, 0});
@@ -518,11 +519,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
         }
         SECTION("USE")
         {
-            const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::use_clocking<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction via PIs")  // path of length 7
             {
-                obstruction_layout obstr_lyt{layout};
+                layouts::obstruction_layout obstr_lyt{layout};
 
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
@@ -541,7 +542,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
             }
             SECTION("(0,0) to (3,3) with coordinate obstruction via declaration")  // path of length 7
             {
-                obstruction_layout obstr_lyt{layout};
+                layouts::obstruction_layout obstr_lyt{layout};
 
                 // create a PI as obstruction
                 obstr_lyt.obstruct_coordinate({3, 0});  // blocks 3 paths
@@ -567,8 +568,9 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 
 TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[A*]")
 {
-    using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
-    using obst_lyt   = obstruction_layout<gate_lyt>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+    using obst_lyt   = layouts::obstruction_layout<gate_lyt>;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
     // enable crossings
@@ -580,11 +582,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{2, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{2, 2, 1}, layouts::twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
-                    obstruction_layout obstr_lyt{layout};
+                    layouts::obstruction_layout obstr_lyt{layout};
 
                     // create a path as obstruction
                     const auto pi = obstr_lyt.create_pi("obstruction PI", {1, 0});  // obstructs 1 coordinate
@@ -600,11 +602,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
             }
             SECTION("USE")
             {
-                const gate_lyt layout{{2, 2, 1}, use_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{2, 2, 1}, layouts::use_clocking<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
-                    obstruction_layout obstr_lyt{layout};
+                    layouts::obstruction_layout obstr_lyt{layout};
 
                     // create a path as obstruction
                     const auto pi = obstr_lyt.create_pi("obstruction PI", {2, 1});  // obstructs 1 coordinate
@@ -626,11 +628,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{3, 3, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{3, 3, 1}, layouts::twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
-                    obstruction_layout obstr_lyt{layout};
+                    layouts::obstruction_layout obstr_lyt{layout};
 
                     // create two paths as obstruction
                     const auto pi1 = obstr_lyt.create_pi("obstruction PI 1", {1, 0});  // obstructs 1 coordinate
@@ -660,11 +662,11 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{3, 2, 1}, twoddwave_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{3, 2, 1}, layouts::twoddwave_clocking<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
-                    obstruction_layout obstr_lyt{layout};
+                    layouts::obstruction_layout obstr_lyt{layout};
 
                     // create two paths as obstruction
                     const auto pi1 = obstr_lyt.create_pi("obstruction PI 1", {1, 0});  // obstructs 1 coordinate
@@ -688,7 +690,8 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
 {
-    using gate_lyt   = gate_level_layout<clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+    using gate_lyt =
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -697,7 +700,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 
         SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
         {
-            obstruction_layout obstr_lyt{static_cast<cartesian_layout<>>(layout)};
+            layouts::obstruction_layout obstr_lyt{static_cast<layouts::cartesian_layout<>>(layout)};
 
             // create some connection obstructions
             obstr_lyt.obstruct_connection({0, 0}, {1, 0});
@@ -726,11 +729,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{{3, 3}, twoddwave_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::twoddwave_clocking<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                obstruction_layout obstr_lyt{layout};
+                layouts::obstruction_layout obstr_lyt{layout};
 
                 // create some connection obstructions
                 obstr_lyt.obstruct_connection({0, 0}, {1, 0});
@@ -758,11 +761,11 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
         }
         SECTION("USE")
         {
-            const gate_lyt layout{{3, 3}, use_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::use_clocking<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
-                obstruction_layout obstr_lyt{layout};
+                layouts::obstruction_layout obstr_lyt{layout};
 
                 obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 

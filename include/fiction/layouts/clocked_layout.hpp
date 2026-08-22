@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -345,6 +345,5 @@ class clocked_layout : public CoordinateLayout
     storage strg;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_CLOCKED_LAYOUT_HPP

@@ -21,7 +21,8 @@ using namespace fiction;
 
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
     const auto layout = orthogonal<gate_layout>(ntk);

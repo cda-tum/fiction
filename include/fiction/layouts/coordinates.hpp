@@ -28,7 +28,7 @@
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -871,13 +871,13 @@ uint64_t area(const CoordinateType& coord) noexcept
 {
     if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
     {
-        return (static_cast<uint64_t>(utils::math::integral_abs(coord.x)) + 1) *
-               ((2 * static_cast<uint64_t>(utils::math::integral_abs(coord.y))) +
-                static_cast<uint64_t>(utils::math::integral_abs(coord.z)) + 1);
+        return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
+               ((2 * static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y))) +
+                static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.z)) + 1);
     }
 
-    return (static_cast<uint64_t>(utils::math::integral_abs(coord.x)) + 1) *
-           (static_cast<uint64_t>(utils::math::integral_abs(coord.y)) + 1);
+    return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
+           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y)) + 1);
 }
 /**
  * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
@@ -895,9 +895,9 @@ uint64_t volume(const CoordinateType& coord) noexcept
         return area(coord);
     }
 
-    return (static_cast<uint64_t>(utils::math::integral_abs(coord.x)) + 1) *
-           (static_cast<uint64_t>(utils::math::integral_abs(coord.y)) + 1) *
-           (static_cast<uint64_t>(utils::math::integral_abs(coord.z)) + 1);
+    return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
+           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y)) + 1) *
+           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.z)) + 1);
 }
 
 /**
@@ -1036,8 +1036,7 @@ class coord_iterator
     CoordinateType coord;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 // NOLINTBEGIN(cert-dcl58-cpp)
 
 namespace std
@@ -1045,29 +1044,29 @@ namespace std
 
 // define std::hash overload for offset::ucoord_t
 template <>
-struct hash<fiction::offset::ucoord_t>
+struct hash<fiction::layouts::offset::ucoord_t>
 {
-    std::size_t operator()(const fiction::offset::ucoord_t& c) const noexcept
+    std::size_t operator()(const fiction::layouts::offset::ucoord_t& c) const noexcept
     {
         return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
     }
 };
 // define std::hash overload for cube::coord_t
 template <>
-struct hash<fiction::cube::coord_t>
+struct hash<fiction::layouts::cube::coord_t>
 {
     // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
-    std::size_t operator()(const fiction::cube::coord_t& c) const noexcept
+    std::size_t operator()(const fiction::layouts::cube::coord_t& c) const noexcept
     {
         return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
     }
 };
 // define std::hash overload for siqad::coord_t
 template <>
-struct hash<fiction::siqad::coord_t>
+struct hash<fiction::layouts::siqad::coord_t>
 {
     // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
-    std::size_t operator()(const fiction::siqad::coord_t& c) const noexcept
+    std::size_t operator()(const fiction::layouts::siqad::coord_t& c) const noexcept
     {
         return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
     }
@@ -1080,7 +1079,7 @@ struct hash<fiction::siqad::coord_t>
  * @tparam Coordinate Coordinate type enumerated by the `coord_iterator`.
  */
 template <typename Coordinate>
-struct iterator_traits<fiction::coord_iterator<Coordinate>>
+struct iterator_traits<fiction::layouts::coord_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
@@ -1097,7 +1096,7 @@ namespace fmt
 
 // make offset::ucoord_t compatible with fmt::format
 template <>
-struct formatter<fiction::offset::ucoord_t>
+struct formatter<fiction::layouts::offset::ucoord_t>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -1106,14 +1105,14 @@ struct formatter<fiction::offset::ucoord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx) const
+    auto format(const fiction::layouts::offset::ucoord_t& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{},{})"), c.x, c.y, c.z);
     }
 };
 // make cube::coord_t compatible with fmt::format
 template <>
-struct formatter<fiction::cube::coord_t>
+struct formatter<fiction::layouts::cube::coord_t>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -1122,14 +1121,14 @@ struct formatter<fiction::cube::coord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::cube::coord_t& c, FormatContext& ctx) const
+    auto format(const fiction::layouts::cube::coord_t& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{},{})"), c.x, c.y, c.z);
     }
 };
 // make siqad::coord_t compatible with fmt::format
 template <>
-struct formatter<fiction::siqad::coord_t>
+struct formatter<fiction::layouts::siqad::coord_t>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -1138,7 +1137,7 @@ struct formatter<fiction::siqad::coord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::siqad::coord_t& c, FormatContext& ctx) const
+    auto format(const fiction::layouts::siqad::coord_t& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{},{})"), c.x, c.y, c.z);
     }

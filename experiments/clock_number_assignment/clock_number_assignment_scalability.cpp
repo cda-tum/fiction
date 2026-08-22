@@ -35,8 +35,8 @@ int main()  // NOLINT
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
-    using gate_lyt =
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    using gate_lyt = fiction::layouts::gate_level_layout<
+        fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",

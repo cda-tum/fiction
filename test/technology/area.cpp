@@ -27,8 +27,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(98.0, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(9604.0, 0.0001));
 
-        const bounding_box_2d bb{lyt};
-        const auto            area_bb = area<qca_cell_clk_lyt>(bb, area_params<qca_technology>{});
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     area_bb = area<qca_cell_clk_lyt>(bb, area_params<qca_technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(324.0, 0.0001));
     }
 
@@ -46,8 +46,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(600.0, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(174000.0, 0.0001));
 
-        const bounding_box_2d bb{lyt};
-        const auto            area_bb = area<inml_cell_clk_lyt>(bb, area_params<inml_technology>{});
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     area_bb = area<inml_cell_clk_lyt>(bb, area_params<inml_technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(5000.0, 0.0001));
     }
 
@@ -65,8 +65,8 @@ TEST_CASE("Area computation for different technologies", "[area]")
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(1.536, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(2.359296, 0.000001));
 
-        const bounding_box_2d bb{lyt};
-        const auto            area_bb = area<sidb_cell_clk_lyt>(bb, area_params<sidb_technology>{});
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     area_bb = area<sidb_cell_clk_lyt>(bb, area_params<sidb_technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 }

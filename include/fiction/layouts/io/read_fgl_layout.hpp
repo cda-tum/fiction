@@ -2,8 +2,8 @@
 // Created by simon on 25.09.23.
 //
 
-#ifndef FICTION_READ_FGL_LAYOUT_HPP
-#define FICTION_READ_FGL_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_IO_READ_FGL_LAYOUT_HPP
+#define FICTION_LAYOUTS_IO_READ_FGL_LAYOUT_HPP
 
 // clang-format off
 // NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but clocked_layout.hpp's
@@ -36,7 +36,7 @@
 #include <string_view>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts::io
 {
 
 /**
@@ -254,7 +254,7 @@ class read_fgl_layout_impl
             if (auto* const clocking_scheme_name = clocking->FirstChildElement("name");
                 clocking_scheme_name != nullptr && (clocking_scheme_name->GetText() != nullptr))
             {
-                const auto clocking_scheme = get_clocking_scheme<Lyt>(clocking_scheme_name->GetText());
+                const auto clocking_scheme = layouts::get_clocking_scheme<Lyt>(clocking_scheme_name->GetText());
                 if (clocking_scheme.has_value())
                 {
                     lyt.replace_clocking_scheme(*clocking_scheme);
@@ -826,6 +826,5 @@ void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
     is.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_READ_FGL_LAYOUT_HPP
+}  // namespace fiction::layouts::io
+#endif  // FICTION_LAYOUTS_IO_READ_FGL_LAYOUT_HPP

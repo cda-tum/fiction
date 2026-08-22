@@ -5,8 +5,8 @@
 #ifndef FICTION_APPLY_GATE_LIBRARY_HPP
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/name_utils.hpp"
 
 #include <optional>
@@ -55,7 +55,7 @@ class apply_gate_library_impl
         // otherwise, try to find a matching clocking scheme (this will discard overwritten clock numbers)
         else
         {
-            if (const auto clk_scheme = get_clocking_scheme<CellLyt>(gate_lyt.get_clocking_scheme().name);
+            if (const auto clk_scheme = layouts::get_clocking_scheme<CellLyt>(gate_lyt.get_clocking_scheme().name);
                 clk_scheme.has_value())
             {
                 cell_lyt.replace_clocking_scheme(clk_scheme.value());
@@ -89,9 +89,9 @@ class apply_gate_library_impl
                     const auto t = gate_lyt.get_tile(n);
 
                     // retrieve the top-leftmost cell in tile t
-                    const auto c =
-                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
-                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+                    const auto c = layouts::utils::relative_to_absolute_cell_position<
+                        GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt, CellLyt>(gate_lyt, t,
+                                                                                                  cell<CellLyt>{0, 0});
 
                     assign_gate(c, GateLibrary::set_up_gate(gate_lyt, t), n);
                 }
@@ -165,9 +165,9 @@ class apply_gate_library_impl
                     const auto t = gate_lyt.get_tile(n);
 
                     // retrieve the top-leftmost cell in tile t
-                    const auto c =
-                        relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
-                                                           GateLyt, CellLyt>(gate_lyt, t, cell<CellLyt>{0, 0});
+                    const auto c = layouts::utils::relative_to_absolute_cell_position<
+                        GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt, CellLyt>(gate_lyt, t,
+                                                                                                  cell<CellLyt>{0, 0});
 
                     assign_gate(c,
                                 GateLibrary::template set_up_gate<GateLyt, CellLyt, Params>(gate_lyt, t, params,
@@ -255,8 +255,8 @@ class apply_gate_library_impl
     static aspect_ratio<CellLyt> determine_aspect_ratio_for_cell_level_layout(const GateLyt& gate_lyt) noexcept
     {
         const std::function<cell<CellLyt>(GateLyt, tile<GateLyt>, cell<CellLyt>)> rel_to_abs_cell_pos =
-            relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt,
-                                               CellLyt>;
+            layouts::utils::relative_to_absolute_cell_position<GateLibrary::gate_x_size(), GateLibrary::gate_y_size(),
+                                                               GateLyt, CellLyt>;
 
         const cell<CellLyt> max_rel_coord = {GateLibrary::gate_x_size() - 1, GateLibrary::gate_y_size() - 1};
 

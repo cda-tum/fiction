@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -350,6 +350,5 @@ class synchronization_element_layout : public ClockedLayout
     storage strg;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP

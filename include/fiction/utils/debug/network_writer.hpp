@@ -5,7 +5,8 @@
 #ifndef FICTION_NETWORK_WRITER_HPP
 #define FICTION_NETWORK_WRITER_HPP
 
-#include "fiction/io/dot_drawers.hpp"
+#include "fiction/layouts/io/layout_drawers.hpp"
+#include "fiction/networks/io/dot_drawers.hpp"
 
 #include <mockturtle/io/write_dot.hpp>
 
@@ -17,7 +18,7 @@
 namespace fiction::utils::debug
 {
 
-template <typename Ntk, typename Drawer = fiction::technology_dot_drawer<Ntk, true>>
+template <typename Ntk, typename Drawer = fiction::networks::io::technology_dot_drawer<Ntk, true>>
 void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
@@ -27,12 +28,12 @@ void write_dot_network(const Ntk& ntk, const std::string& name = "ntk", const st
     file.close();
 }
 
-template <typename Lyt, typename Drawer = fiction::gate_layout_cartesian_drawer<Lyt, false, true>>
+template <typename Lyt, typename Drawer = fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, false, true>>
 void write_dot_layout(const Lyt& lyt, const std::string& name = "lyt", const std::filesystem::path& p = {"./"})
 {
     std::ofstream file{p / (name + ".dot")};
 
-    fiction::write_dot_layout(lyt, file, Drawer{});
+    fiction::layouts::io::write_dot_layout(lyt, file, Drawer{});
 
     file.close();
 }

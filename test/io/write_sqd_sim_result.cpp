@@ -192,7 +192,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
                         "    </elec_dist>\n"
                         "</sim_out>\n",
                         FICTION_VERSION, FICTION_REPO,
-                        fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time)),
+                        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
                         sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
                         sim_result.simulation_parameters.mu_minus);
 
@@ -226,7 +226,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
                         "    </elec_dist>\n"
                         "</sim_out>\n",
                         FICTION_VERSION, FICTION_REPO,
-                        fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time)),
+                        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
                         sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
                         sim_result.simulation_parameters.mu_minus);
 
@@ -263,7 +263,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
                         "    </elec_dist>\n"
                         "</sim_out>\n",
                         FICTION_VERSION, FICTION_REPO,
-                        fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time)),
+                        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
                         sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
                         sim_result.simulation_parameters.mu_minus);
 
@@ -303,40 +303,41 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     std::stringstream simulation_stream{};
 
-    const auto        current_time   = std::time(nullptr);
-    const std::string sim_result_str = fmt::format(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-        "<sim_out>\n"
-        "    <eng_info>\n"
-        "        <engine>ExGS</engine>\n"
-        "        <version>{}</version>\n"
-        "        <repo>{}</repo>\n"
-        "        <return_code>0</return_code>\n"
-        "        <timestamp>{}</timestamp>\n"
-        "        <time_elapsed_s>{}</time_elapsed_s>\n"
-        "    </eng_info>\n"
-        "    <sim_params>\n"
-        "        <debye_length>{}</debye_length>\n"
-        "        <eps_r>{}</eps_r>\n"
-        "        <muzm>{}</muzm>\n"
-        "    </sim_params>\n"
-        "    <physloc>\n"
-        "        <dbdot x=\"0.000000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"19.200000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"42.240000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"49.920000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"65.280000\" y=\"0.000000\"/>\n"
-        "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
-        "    </physloc>\n"
-        "    <elec_dist>\n"
-        "        <dist energy=\"0.246049\" count=\"1\" physically_valid=\"1\" "
-        "state_count=\"3\">-0-0-0-</dist>\n"
-        "    </elec_dist>\n"
-        "</sim_out>\n",
-        FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time)),
-        sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
-        sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
+    const auto        current_time = std::time(nullptr);
+    const std::string sim_result_str =
+        fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                    "<sim_out>\n"
+                    "    <eng_info>\n"
+                    "        <engine>ExGS</engine>\n"
+                    "        <version>{}</version>\n"
+                    "        <repo>{}</repo>\n"
+                    "        <return_code>0</return_code>\n"
+                    "        <timestamp>{}</timestamp>\n"
+                    "        <time_elapsed_s>{}</time_elapsed_s>\n"
+                    "    </eng_info>\n"
+                    "    <sim_params>\n"
+                    "        <debye_length>{}</debye_length>\n"
+                    "        <eps_r>{}</eps_r>\n"
+                    "        <muzm>{}</muzm>\n"
+                    "    </sim_params>\n"
+                    "    <physloc>\n"
+                    "        <dbdot x=\"0.000000\" y=\"0.000000\"/>\n"
+                    "        <dbdot x=\"19.200000\" y=\"0.000000\"/>\n"
+                    "        <dbdot x=\"26.880000\" y=\"0.000000\"/>\n"
+                    "        <dbdot x=\"42.240000\" y=\"0.000000\"/>\n"
+                    "        <dbdot x=\"49.920000\" y=\"0.000000\"/>\n"
+                    "        <dbdot x=\"65.280000\" y=\"0.000000\"/>\n"
+                    "        <dbdot x=\"72.960000\" y=\"0.000000\"/>\n"
+                    "    </physloc>\n"
+                    "    <elec_dist>\n"
+                    "        <dist energy=\"0.246049\" count=\"1\" physically_valid=\"1\" "
+                    "state_count=\"3\">-0-0-0-</dist>\n"
+                    "    </elec_dist>\n"
+                    "</sim_out>\n",
+                    FICTION_VERSION, FICTION_REPO,
+                    fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+                    sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
+                    sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -391,7 +392,8 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
-        FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time)),
+        FICTION_VERSION, FICTION_REPO,
+        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
         sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
         sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
 

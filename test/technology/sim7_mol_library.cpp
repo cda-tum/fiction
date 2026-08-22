@@ -62,7 +62,8 @@ TEST_CASE("Molecular QCA technology helpers", "[molecular-qca-library]")
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -139,7 +140,8 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
 TEST_CASE("Setting up wires", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto layout = blueprints::three_wire_paths_gate_layout<gate_layout>();
 
@@ -211,7 +213,8 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
 TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 
@@ -305,9 +308,10 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
 TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 {
-    using gate_layout    = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
-    using clock_number_t = gate_layout::clock_number_t;
-    using orientation_exception = unsupported_gate_orientation_exception<offset::ucoord_t, port_position>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+    using clock_number_t        = gate_layout::clock_number_t;
+    using orientation_exception = unsupported_gate_orientation_exception<layouts::offset::ucoord_t, port_position>;
 
     static constexpr auto input_clock  = static_cast<clock_number_t>(0);
     static constexpr auto fanout_clock = static_cast<clock_number_t>(1);
@@ -385,8 +389,8 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     CHECK(sim7_mol_library::set_up_gate(southern_input_layout, {1, 1}) == sim7_mol_library::rotate_180(fanout_1_3));
     CHECK(sim7_mol_library::set_up_gate(western_input_layout, {1, 1}) == sim7_mol_library::rotate_270(fanout_1_3));
 
-    auto       clocked_layout = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<gate_layout>()};
-    const auto clocked_pi     = clocked_layout.create_pi("x", {1, 0});
+    auto clocked_layout   = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<gate_layout>()};
+    const auto clocked_pi = clocked_layout.create_pi("x", {1, 0});
     const auto clocked_fanout = clocked_layout.create_buf(clocked_pi, {1, 1});
     clocked_layout.create_po(clocked_fanout, "e", {2, 1});
     clocked_layout.create_po(clocked_fanout, "s", {1, 2});
@@ -398,8 +402,9 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
     CHECK(clocked_layout.template fanout_size<false>(clocked_fanout_node) == 3u);
     CHECK(sim7_mol_library::set_up_gate(clocked_layout, {1, 1}) == fanout_1_3);
 
-    auto missing_input_layout  = gate_layout{gate_layout::aspect_ratio{2, 2, 0}, twoddwave_clocking<gate_layout>()};
-    const auto non_adjacent_pi = missing_input_layout.create_pi("x", {0, 0});
+    auto missing_input_layout =
+        gate_layout{gate_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<gate_layout>()};
+    const auto non_adjacent_pi      = missing_input_layout.create_pi("x", {0, 0});
     const auto missing_input_fanout = missing_input_layout.create_buf(non_adjacent_pi, {1, 1});
     missing_input_layout.create_po(missing_input_fanout, "e", {2, 1});
     missing_input_layout.create_po(missing_input_fanout, "s", {1, 2});
@@ -413,7 +418,8 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 
 TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto layout = blueprints::res_maj_gate_layout<gate_layout>();
 
@@ -475,7 +481,8 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
@@ -641,9 +648,11 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 
 TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = layouts::gate_level_layout<
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 
     auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
 
-    REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}), unsupported_gate_type_exception<offset::ucoord_t>);
+    REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}),
+                      unsupported_gate_type_exception<layouts::offset::ucoord_t>);
 }

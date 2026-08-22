@@ -7,9 +7,9 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/io/network_reader.hpp>
-#include <fiction/io/read_fgl_layout.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -126,64 +126,71 @@ void read_command::execute()
                                     {
                                         store<fiction::gate_layout_t>().extend() =
                                             std::make_shared<fiction::cart_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_gate_clk_lyt>(filename));
+                                                fiction::layouts::io::read_fgl_layout<fiction::cart_gate_clk_lyt>(
+                                                    filename));
                                     }
                                     else if (topology == "odd_row_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_row_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
-                                                    filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "odd_column_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_column_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
-                                                    filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "odd_row_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_row_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "odd_column_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_column_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else
                                     {
                                         env->out() << fmt::format("[e] given topology does not exist: {}\n", topology);
                                     }
                                 }
-                                catch (const fiction::fgl_parsing_error& e)
+                                catch (const fiction::layouts::io::fgl_parsing_error& e)
                                 {
                                     env->out() << fmt::format("[e] {}\n", e.what());
                                 }

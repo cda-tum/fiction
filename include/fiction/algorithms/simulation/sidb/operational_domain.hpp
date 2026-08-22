@@ -596,7 +596,7 @@ class operational_domain_impl
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_index_combinations = utils::math::cartesian_combinations(indices);
+        const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
 
         std::vector<step_point> all_step_points{};
         all_step_points.reserve(all_index_combinations.size());
@@ -1052,7 +1052,7 @@ class operational_domain_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         // Cartesian product of all step point indices
-        const auto all_index_combinations = utils::math::cartesian_combinations(indices);
+        const auto all_index_combinations = fiction::utils::math::cartesian_combinations(indices);
 
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched

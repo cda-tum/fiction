@@ -2,17 +2,17 @@
 // Created by marcel on 19.05.21.
 //
 
-#ifndef FICTION_PRINT_LAYOUT_HPP
-#define FICTION_PRINT_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP
+#define FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 
 #include <fmt/color.h>
 #include <fmt/format.h>
@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts::io
 {
 
 namespace detail
@@ -355,7 +355,8 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
     if constexpr (!has_siqad_coord_v<Lyt>)
     {
-        return print_sidb_layout(os, convert_layout_to_siqad_coordinates(lyt), lat_color, crop_layout, draw_lattice);
+        return print_sidb_layout(os, layouts::utils::convert_layout_to_siqad_coordinates(lyt), lat_color, crop_layout,
+                                 draw_lattice);
     }
 
     if constexpr (!is_sidb_lattice_v<Lyt>)
@@ -384,7 +385,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
             }
         }
 
-        const bounding_box_2d bb{lyt};
+        const layouts::bounding_box_2d bb{lyt};
 
         auto min_nw = bb.get_min();
         auto max_se = bb.get_max();
@@ -558,6 +559,5 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     }
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_PRINT_LAYOUT_HPP
+}  // namespace fiction::layouts::io
+#endif  // FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP

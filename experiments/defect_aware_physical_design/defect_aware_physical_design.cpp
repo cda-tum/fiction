@@ -190,7 +190,7 @@ int main()  // NOLINT
                                                                                                  surface_lattice);
 
             // determine bounding box
-            const auto bb = fiction::bounding_box_2d<cell_lyt>(dot_accurate_layout);
+            const auto bb = fiction::layouts::bounding_box_2d<cell_lyt>(dot_accurate_layout);
 
             // compute area
             fiction::area_stats                            area_stats{};

@@ -105,40 +105,40 @@ inline constexpr auto ntk_type_name = get_ntk_type_name<Ntk>();
 /**
  * FCN gate-level layouts.
  */
-using cart_gate_clk_lyt = gate_level_layout<
-    synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>>;
+using cart_gate_clk_lyt     = layouts::gate_level_layout<layouts::synchronization_element_layout<
+    layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
 using cart_gate_clk_lyt_ptr = std::shared_ptr<cart_gate_clk_lyt>;
 
-using cart_odd_row_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_row_cartesian>>>>;
+using cart_odd_row_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
+    layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>>>>;
 using cart_odd_row_gate_clk_lyt_ptr = std::shared_ptr<cart_odd_row_gate_clk_lyt>;
 
-using cart_even_row_gate_clk_lyt = gate_level_layout<
-    clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_row_cartesian>>>>;
+using cart_even_row_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
+    layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_row_cartesian>>>>;
 using cart_even_row_gate_clk_lyt_ptr = std::shared_ptr<cart_even_row_gate_clk_lyt>;
 
-using cart_odd_col_gate_clk_lyt = gate_level_layout<
-    clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, odd_column_cartesian>>>>;
+using cart_odd_col_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
+    layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_column_cartesian>>>>;
 using cart_odd_col_gate_clk_lyt_ptr = std::shared_ptr<cart_odd_col_gate_clk_lyt>;
 
-using cart_even_col_gate_clk_lyt = gate_level_layout<
-    clocked_layout<tile_based_layout<shifted_cartesian_layout<offset::ucoord_t, even_column_cartesian>>>>;
+using cart_even_col_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
+    layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_column_cartesian>>>>;
 using cart_even_col_gate_clk_lyt_ptr = std::shared_ptr<cart_even_col_gate_clk_lyt>;
 
-using hex_odd_row_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>>;
+using hex_odd_row_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<
+    layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>>;
 using hex_odd_row_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_row_gate_clk_lyt>;
 
-using hex_even_row_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>>;
+using hex_even_row_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<
+    layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>>;
 using hex_even_row_gate_clk_lyt_ptr = std::shared_ptr<hex_even_row_gate_clk_lyt>;
 
-using hex_odd_col_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>>;
+using hex_odd_col_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<
+    layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>>;
 using hex_odd_col_gate_clk_lyt_ptr = std::shared_ptr<hex_odd_col_gate_clk_lyt>;
 
-using hex_even_col_gate_clk_lyt =
-    gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>>;
+using hex_even_col_gate_clk_lyt     = layouts::gate_level_layout<layouts::clocked_layout<
+    layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>>;
 using hex_even_col_gate_clk_lyt_ptr = std::shared_ptr<hex_even_col_gate_clk_lyt>;
 
 using gate_layout_t =
@@ -242,27 +242,40 @@ inline constexpr const char* sidb_lattice_name = get_sidb_lattice_name<Orientati
  * FCN cell-level layouts.
  */
 using qca_cell_clk_lyt =
-    cell_level_layout<qca_technology,
-                      synchronization_element_layout  // se_layouts have only been investigated for QCA technologies
-                      <clocked_layout<cartesian_layout<offset::ucoord_t>>>>;
+    layouts::cell_level_layout<qca_technology,
+                               layouts::synchronization_element_layout  // se_layouts have only been investigated for
+                                                                        // QCA technologies
+                               <layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
-using stacked_qca_cell_clk_lyt     = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+using stacked_qca_cell_clk_lyt =
+    layouts::cell_level_layout<qca_technology,
+                               layouts::clocked_layout<layouts::cartesian_layout<layouts::cube::coord_t>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
 
-using mol_qca_cell_clk_lyt = cell_level_layout<mol_qca_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+using mol_qca_cell_clk_lyt =
+    layouts::cell_level_layout<mol_qca_technology,
+                               layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
 using mol_qca_cell_clk_lyt_ptr = std::shared_ptr<mol_qca_cell_clk_lyt>;
 
-using inml_cell_clk_lyt     = cell_level_layout<inml_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+using inml_cell_clk_lyt =
+    layouts::cell_level_layout<inml_technology,
+                               layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 
-using sidb_cell_clk_lyt     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>;
+using sidb_cell_clk_lyt =
+    layouts::cell_level_layout<sidb_technology,
+                               layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
-using sidb_cell_clk_lyt_siqad = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>;
+using sidb_cell_clk_lyt_siqad =
+    layouts::cell_level_layout<sidb_technology,
+                               layouts::clocked_layout<layouts::cartesian_layout<layouts::siqad::coord_t>>>;
 using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
 
-using sidb_cell_clk_lyt_cube     = cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<cube::coord_t>>>;
+using sidb_cell_clk_lyt_cube =
+    layouts::cell_level_layout<sidb_technology,
+                               layouts::clocked_layout<layouts::cartesian_layout<layouts::cube::coord_t>>>;
 using sidb_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_cell_clk_lyt_cube>;
 
 using sidb_100_cell_clk_lyt     = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt>;

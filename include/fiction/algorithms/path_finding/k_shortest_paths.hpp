@@ -50,8 +50,8 @@ class yen_k_shortest_paths_impl
     {
         // start by determining the shortest path between source and target
         k_shortest_paths.push_back(
-            a_star<Path>(layout, objective, manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
-                         unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), params.astar_params));
+            a_star<Path>(layout, objective, manhattan_distance_functor<layouts::obstruction_layout<Lyt>, uint64_t>(),
+                         unit_cost_functor<layouts::obstruction_layout<Lyt>, uint8_t>(), params.astar_params));
     }
 
     /**
@@ -116,10 +116,10 @@ class yen_k_shortest_paths_impl
                 }
 
                 // find an alternative path from the spur coordinate to the target and check that it is not empty
-                if (const auto spur_path =
-                        a_star<Path>(layout, {spur, objective.target},
-                                     manhattan_distance_functor<obstruction_layout<Lyt>, uint64_t>(),
-                                     unit_cost_functor<obstruction_layout<Lyt>, uint8_t>(), params.astar_params);
+                if (const auto spur_path = a_star<Path>(
+                        layout, {spur, objective.target},
+                        manhattan_distance_functor<layouts::obstruction_layout<Lyt>, uint64_t>(),
+                        unit_cost_functor<layouts::obstruction_layout<Lyt>, uint8_t>(), params.astar_params);
                     !spur_path.empty())
                 {
                     // the final path will be a concatenation of the root path and the spur path
@@ -165,11 +165,11 @@ class yen_k_shortest_paths_impl
     /**
      * The layout in which k shortest paths are to be found extended by an obstruction functionality layer.
      */
-    obstruction_layout<Lyt> layout;
+    layouts::obstruction_layout<Lyt> layout;
     /**
      * Source and target coordinates.
      */
-    const routing_objective<obstruction_layout<Lyt>> objective;
+    const routing_objective<layouts::obstruction_layout<Lyt>> objective;
     /**
      * The number of paths to determine, i.e., k.
      */

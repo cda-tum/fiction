@@ -2,10 +2,11 @@
 // Created by simon on 25.09.23.
 //
 
-#ifndef FICTION_WRITE_FGL_LAYOUT_HPP
-#define FICTION_WRITE_FGL_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP
+#define FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
+#include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -21,7 +22,7 @@
 #include <string>
 #include <string_view>
 
-namespace fiction
+namespace fiction::layouts::io
 {
 
 namespace detail
@@ -92,11 +93,11 @@ class write_fgl_layout_impl
         // metadata
         os << fcn::FGL_HEADER << fcn::OPEN_FGL;
         const auto current_time = std::time(nullptr);
-        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time));
+        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time));
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;
-        const std::string layout_name{get_name(lyt)};
+        const std::string layout_name{fiction::get_name(lyt)};
 
         // check if topology matches Lyt
         std::string topology{};
@@ -369,6 +370,5 @@ void write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_FGL_LAYOUT_HPP
+}  // namespace fiction::layouts::io
+#endif  // FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP

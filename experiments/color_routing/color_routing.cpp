@@ -23,8 +23,8 @@
 #include <string>
 #include <string_view>
 
-using gate_lyt = fiction::gate_level_layout<
-    fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
+using gate_lyt = fiction::layouts::gate_level_layout<fiction::layouts::clocked_layout<
+    fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>>;
 
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string_view, uint64_t, uint64_t, uint64_t,
@@ -64,7 +64,7 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     const auto objectives = fiction::extract_routing_objectives(lyt);
 
     // remove routing
-    clear_routing(lyt);
+    fiction::clear_routing(lyt);
 
     // perform routing
     const auto success = fiction::color_routing(lyt, objectives, routing_params, &routing_stats);

@@ -12,11 +12,11 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <vector>
@@ -28,7 +28,7 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
 
-    const auto cube_lyt = convert_layout_to_fiction_coordinates<TestType>(lyt);
+    const auto cube_lyt = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
     const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
@@ -68,7 +68,7 @@ TEMPLATE_TEST_CASE(
     "[defect-influence]", sidb_cell_clk_lyt_cube)
 {
     const auto lyt      = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
-    const auto lyt_cube = convert_layout_to_fiction_coordinates<TestType>(lyt);
+    const auto lyt_cube = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
     SECTION("Si Vacancy")
     {
@@ -82,7 +82,7 @@ TEMPLATE_TEST_CASE(
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, params);
         const auto clearance_result_vacancy = calculate_defect_clearance(lyt_cube, defect_influence_vacancy);
 
-        CHECK(clearance_result_vacancy.defect_position == cube::coord_t{18, 17});
+        CHECK(clearance_result_vacancy.defect_position == layouts::cube::coord_t{18, 17});
         CHECK_THAT(std::abs(clearance_result_vacancy.defect_clearance_distance - 3.1665),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
 
@@ -100,7 +100,7 @@ TEMPLATE_TEST_CASE(
             CHECK(stats.num_evaluated_defect_positions == 3599);
             CHECK(stats.num_non_influencing_defect_positions == 3062);
             CHECK(stats.num_influencing_defect_positions == 537);
-            CHECK(defect_clearance.defect_position == cube::coord_t{18, 17});
+            CHECK(defect_clearance.defect_position == layouts::cube::coord_t{18, 17});
         }
 #endif
 
@@ -134,7 +134,7 @@ TEMPLATE_TEST_CASE(
 
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
-            CHECK_THAT(utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
+            CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
         }
 
@@ -144,7 +144,7 @@ TEMPLATE_TEST_CASE(
 
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
-            CHECK_THAT(utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
+            CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
         }
 
@@ -170,8 +170,8 @@ TEMPLATE_TEST_CASE(
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, defect_operational_arsenic_params);
         const auto clearance_result_arsenic = calculate_defect_clearance(lyt_cube, defect_influence_arsenic);
 
-        CHECK((((clearance_result_arsenic.defect_position == cube::coord_t{17, 12, 0})) ||
-               (clearance_result_arsenic.defect_position == cube::coord_t{3, 12, 0})));
+        CHECK((((clearance_result_arsenic.defect_position == layouts::cube::coord_t{17, 12, 0})) ||
+               (clearance_result_arsenic.defect_position == layouts::cube::coord_t{3, 12, 0})));
         CHECK_THAT(std::abs(clearance_result_arsenic.defect_clearance_distance - 2.376),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
     }
@@ -198,7 +198,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
             const auto clearance_result = calculate_defect_clearance(lyt, defect_operational_domain);
 
-            CHECK_THAT(utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
+            CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(0.665060, constants::ERROR_MARGIN));
             CHECK((((clearance_result.defect_position.x == -1) && (clearance_result.defect_position.y == -1) ||
                     ((clearance_result.defect_position.x == 1) && (clearance_result.defect_position.y == -1)))));
@@ -220,8 +220,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_operational_domain = defect_influence_grid_search(lyt, defect_operational_params);
         const auto defect_clearance          = calculate_defect_clearance(lyt, defect_operational_domain);
 
-        CHECK_THAT(utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       utils::math::round_to_n_decimal_places(sidb_nm_distance(lyt, {0, 0}, {1, -1}), 4),
+        CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                       fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lyt, {0, 0}, {1, -1}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 
@@ -241,8 +241,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         const auto defect_clearance = calculate_defect_clearance(lat, defect_operational_domain);
 
-        CHECK_THAT(utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
+        CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                       fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 
@@ -266,8 +266,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_operational_domain = defect_influence_grid_search(lat, defect_operational_params);
         const auto defect_clearance          = calculate_defect_clearance(lat, defect_operational_domain);
 
-        CHECK_THAT(utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
+        CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                       fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 
@@ -326,22 +326,23 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         sidb_cell_clk_lyt_cube lyt{{30, 30}};
 
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{10, 0, 0}),
+        lyt.assign_cell_type(
+            layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{10, 0, 0}),
+            sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{0, 1, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{0, 1, 0}),
-                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{8, 1, 0}),
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{8, 1, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{2, 2, 0}),
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{2, 2, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{6, 2, 0}),
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{6, 2, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 4, 0}),
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{4, 4, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 5, 1}),
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{4, 5, 1}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(siqad::to_fiction_coord<cube::coord_t>(siqad::coord_t{4, 7, 1}),
+        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{4, 7, 1}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_100_cell_clk_lyt_cube lat{lyt};

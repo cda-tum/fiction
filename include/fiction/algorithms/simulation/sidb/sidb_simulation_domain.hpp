@@ -98,7 +98,7 @@ class sidb_simulation_domain
     /**
      * The domain values stored in a thread-safe map.
      */
-    utils::stl::locked_parallel_flat_hash_map<Key, std::tuple<MappedTypes...>> domain_values{};
+    fiction::utils::stl::locked_parallel_flat_hash_map<Key, std::tuple<MappedTypes...>> domain_values{};
 };
 
 }  // namespace fiction

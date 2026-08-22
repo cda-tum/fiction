@@ -810,7 +810,7 @@ class graph_oriented_layout_design_impl
         ssg_vec.resize(num_search_space_graphs);
 
         // initialize layout to keep track of current best solution
-        Lyt best_lyt{{}, twoddwave_clocking<Lyt>()};
+        Lyt best_lyt{{}, layouts::twoddwave_clocking<Lyt>()};
 
         // initialize search space graphs
         initialize();
@@ -975,7 +975,7 @@ class graph_oriented_layout_design_impl
     /**
      * Alias for an obstruction layout based on the given layout type.
      */
-    using ObstrLyt = obstruction_layout<Lyt>;
+    using ObstrLyt = layouts::obstruction_layout<Lyt>;
     /**
      * The network to be placed and routed.
      */
@@ -1841,8 +1841,8 @@ class graph_oriented_layout_design_impl
     ObstrLyt initialize_layout(uint64_t min_layout_width)
     {
         const auto layout_depth = ps.planar ? 0 : 1;
-        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, twoddwave_clocking<Lyt>()};
-        return obstruction_layout<Lyt>(lyt);
+        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, layouts::twoddwave_clocking<Lyt>()};
+        return layouts::obstruction_layout<Lyt>(lyt);
     }
     /**
      * Adjusts the layout size based on the last position.
@@ -1869,7 +1869,7 @@ class graph_oriented_layout_design_impl
         uint64_t cost = 0;
         if (cost_function == graph_oriented_layout_design_params::cost_objective::AREA)
         {
-            const auto bb = bounding_box_2d(layout);
+            const auto bb = layouts::bounding_box_2d(layout);
             cost          = static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u);
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::WIRES)
@@ -1882,7 +1882,7 @@ class graph_oriented_layout_design_impl
         }
         else if (cost_function == graph_oriented_layout_design_params::cost_objective::ACP)
         {
-            const auto bb = bounding_box_2d(layout);
+            const auto bb = layouts::bounding_box_2d(layout);
             cost          = (layout.num_crossings() + 1) *
                             (static_cast<uint64_t>(bb.get_max().x + 1u) * static_cast<uint64_t>(bb.get_max().y + 1u));
         }
@@ -2083,7 +2083,7 @@ class graph_oriented_layout_design_impl
                     fiction::post_layout_optimization(layout, plo_params);
                 }
 
-                const auto bb_after_plo = fiction::bounding_box_2d(layout);
+                const auto bb_after_plo = fiction::layouts::bounding_box_2d(layout);
                 layout.resize({bb_after_plo.get_max().x, bb_after_plo.get_max().y, layout.z()});
 
                 desired_cost = calculate_cost(layout, ps.cost);

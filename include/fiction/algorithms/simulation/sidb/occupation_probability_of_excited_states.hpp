@@ -117,8 +117,8 @@ namespace fiction
     energy_distribution.for_each(
         [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
         {
-            if (std::abs(utils::math::round_to_n_decimal_places(energy, 6) -
-                         utils::math::round_to_n_decimal_places(min_energy, 6)) > constants::ERROR_MARGIN)
+            if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
+                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) > constants::ERROR_MARGIN)
             {
                 p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
             }

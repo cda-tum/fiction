@@ -104,13 +104,14 @@ class generate_edge_intersection_graph_impl
                                   if (!ps.path_limit.has_value())
                                   {
                                       // enumerate all paths for the current objective
-                                      obj_paths = enumerate_all_paths<clk_path>(
-                                          obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
+                                      obj_paths =
+                                          enumerate_all_paths<clk_path>(layouts::obstruction_layout{layout},
+                                                                        {obj.source, obj.target}, {ps.crossings});
                                   }
                                   else
                                   {
                                       // enumerate k paths for the current objective
-                                      obj_paths = yen_k_shortest_paths<clk_path>(obstruction_layout{layout},
+                                      obj_paths = yen_k_shortest_paths<clk_path>(layouts::obstruction_layout{layout},
                                                                                  {obj.source, obj.target},
                                                                                  *ps.path_limit, {ps.crossings});
                                   }
@@ -231,8 +232,8 @@ class generate_edge_intersection_graph_impl
             }
 
             // else, check if any of the coordinates (including I/Os) form a shared segment in the stored path
-            return utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),
-                                                 std::cend(*this)) != std::cend(other);
+            return fiction::utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),
+                                                          std::cend(*this)) != std::cend(other);
         }
         /**
          * Label to identify the path in the edge intersection graph.

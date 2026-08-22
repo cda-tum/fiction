@@ -17,7 +17,7 @@ using namespace fiction;
 TEST_CASE("2D bounding box around an empty gate-level layout", "[bounding-box]")
 {
     const auto lyt = cart_gate_clk_lyt{};
-    const auto bb  = bounding_box_2d<cart_gate_clk_lyt>{lyt};
+    const auto bb  = layouts::bounding_box_2d<cart_gate_clk_lyt>{lyt};
     CHECK(bb.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb.get_max() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb.get_x_size() == 0);
@@ -28,7 +28,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 {
     const auto lyt_xor_maj = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
 
-    const bounding_box_2d bb_xor_maj{lyt_xor_maj};
+    const layouts::bounding_box_2d bb_xor_maj{lyt_xor_maj};
 
     CHECK(bb_xor_maj.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_xor_maj.get_max() == tile<cart_gate_clk_lyt>{3, 2});
@@ -37,7 +37,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     const auto lyt_or_not = blueprints::or_not_gate_layout<cart_gate_clk_lyt>();
 
-    const bounding_box_2d bb_or_not{lyt_or_not};
+    const layouts::bounding_box_2d bb_or_not{lyt_or_not};
 
     CHECK(bb_or_not.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_or_not.get_max() == tile<cart_gate_clk_lyt>{2, 2});
@@ -46,7 +46,7 @@ TEST_CASE("Initialize 2D gate-level bounding box", "[bounding-box]")
 
     const auto lyt_crossing = blueprints::crossing_layout<cart_gate_clk_lyt>();
 
-    const bounding_box_2d bb_crossing{lyt_crossing};
+    const layouts::bounding_box_2d bb_crossing{lyt_crossing};
 
     CHECK(bb_crossing.get_min() == tile<cart_gate_clk_lyt>{0, 0});
     CHECK(bb_crossing.get_max() == tile<cart_gate_clk_lyt>{3, 2});
@@ -58,7 +58,7 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
 {
     auto lyt_crossing = blueprints::crossing_layout<cart_gate_clk_lyt>();
 
-    bounding_box_2d bb_crossing{lyt_crossing};
+    layouts::bounding_box_2d bb_crossing{lyt_crossing};
 
     // resize the layout to size of 6 x 6 tiles
     lyt_crossing.resize({5, 5});
@@ -83,7 +83,7 @@ TEST_CASE("Update 2D gate-level bounding box", "[bounding-box]")
 TEST_CASE("2D bounding box around an empty cell-level layout", "[bounding-box]")
 {
     const auto lyt = qca_cell_clk_lyt{};
-    const auto bb  = bounding_box_2d<qca_cell_clk_lyt>{lyt};
+    const auto bb  = layouts::bounding_box_2d<qca_cell_clk_lyt>{lyt};
     CHECK(bb.get_min() == cell<qca_cell_clk_lyt>{0, 0});
     CHECK(bb.get_max() == cell<qca_cell_clk_lyt>{0, 0});
     CHECK(bb.get_x_size() == 0);
@@ -94,7 +94,7 @@ TEST_CASE("Initialize 2D cell-level bounding box", "[bounding-box]")
 {
     const auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
 
-    const bounding_box_2d bb_and{lyt_and};
+    const layouts::bounding_box_2d bb_and{lyt_and};
 
     CHECK(bb_and.get_min() == cell<qca_cell_clk_lyt>{0, 0});
     CHECK(bb_and.get_max() == cell<qca_cell_clk_lyt>{4, 4});
@@ -106,7 +106,7 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
 {
     auto lyt_and = blueprints::single_layer_qca_and_gate<qca_cell_clk_lyt>();
 
-    bounding_box_2d bb_and{lyt_and};
+    layouts::bounding_box_2d bb_and{lyt_and};
 
     // resize the layout to size of 8 x 8 cells
     lyt_and.resize({7, 7});
@@ -142,12 +142,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
     {
         const TestType lyt{};
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t(0, 0, 0));
-        CHECK(se == siqad::coord_t(0, 0, 0));
+        CHECK(nw == layouts::siqad::coord_t(0, 0, 0));
+        CHECK(se == layouts::siqad::coord_t(0, 0, 0));
     }
 
     SECTION("one cell")
@@ -155,12 +155,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
         TestType lyt{};
         lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{1, 0, 0});
-        CHECK(se == siqad::coord_t{1, 0, 0});
+        CHECK(nw == layouts::siqad::coord_t{1, 0, 0});
+        CHECK(se == layouts::siqad::coord_t{1, 0, 0});
     }
 
     SECTION("three cells as input, switched correct order")
@@ -170,12 +170,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
         lyt.assign_cell_type({10, 0, 1}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({5, 8, 0}, TestType::technology::cell_type::NORMAL);
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{0, 0, 1});
-        CHECK(se == siqad::coord_t{10, 8, 0});
+        CHECK(nw == layouts::siqad::coord_t{0, 0, 1});
+        CHECK(se == layouts::siqad::coord_t{10, 8, 0});
     }
 
     SECTION("two cells as input, on the same height in y-direction")
@@ -184,12 +184,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
         lyt.assign_cell_type({-3, 0, 1}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({3, 0, 1}, TestType::technology::cell_type::NORMAL);
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{-3, 0, 1});
-        CHECK(se == siqad::coord_t{3, 0, 1});
+        CHECK(nw == layouts::siqad::coord_t{-3, 0, 1});
+        CHECK(se == layouts::siqad::coord_t{3, 0, 1});
     }
 
     SECTION("four cells as input, three on the same dimer")
@@ -200,12 +200,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
         lyt.assign_cell_type({5, 3, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({10, 3, 1}, TestType::technology::cell_type::NORMAL);
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{0, 0, 0});
-        CHECK(se == siqad::coord_t{10, 3, 1});
+        CHECK(nw == layouts::siqad::coord_t{0, 0, 0});
+        CHECK(se == layouts::siqad::coord_t{10, 3, 1});
     }
 
     SECTION("four cells as input, two on the same dimer")
@@ -216,12 +216,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout", "[bounding-box]", sidb_ce
         lyt.assign_cell_type({-2, 4, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({2, 4, 1}, TestType::technology::cell_type::NORMAL);
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{-2, 0, 0});
-        CHECK(se == siqad::coord_t{2, 4, 1});
+        CHECK(nw == layouts::siqad::coord_t{-2, 0, 0});
+        CHECK(se == layouts::siqad::coord_t{2, 4, 1});
     }
 }
 
@@ -232,12 +232,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
     {
         const TestType lyt{};
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t(0, 0, 0));
-        CHECK(se == siqad::coord_t(0, 0, 0));
+        CHECK(nw == layouts::siqad::coord_t(0, 0, 0));
+        CHECK(se == layouts::siqad::coord_t(0, 0, 0));
     }
 
     SECTION("one cell and one defect")
@@ -246,12 +246,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
         lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{1, 0, 0});
-        CHECK(se == siqad::coord_t{2, 0, 0});
+        CHECK(nw == layouts::siqad::coord_t{1, 0, 0});
+        CHECK(se == layouts::siqad::coord_t{2, 0, 0});
     }
 
     SECTION("two cell and two defect")
@@ -262,12 +262,12 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
         lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0, 1}, sidb_defect{});
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
-        CHECK(nw == siqad::coord_t{-2, 0, 0});
-        CHECK(se == siqad::coord_t{2, 0, 1});
+        CHECK(nw == layouts::siqad::coord_t{-2, 0, 0});
+        CHECK(se == layouts::siqad::coord_t{2, 0, 1});
     }
 }
 
@@ -277,9 +277,9 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
     {
         const TestType lyt{};
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{0, 0, 0});
         CHECK(se == cell<TestType>{0, 0, 0});
@@ -291,9 +291,9 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
         lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_sidb_defect({2, 0, 0}, sidb_defect{});
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{1, 0, 0});
         CHECK(se == cell<TestType>{2, 0, 0});
@@ -307,9 +307,9 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{1, 0});
         CHECK(se == cell<TestType>{3, 0});
@@ -323,9 +323,9 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
     {
         const TestType lyt{};
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{0, 0});
         CHECK(se == cell<TestType>{0, 0});
@@ -337,9 +337,9 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{1, 0});
         CHECK(se == cell<TestType>{2, 0});
@@ -353,9 +353,9 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
-        const bounding_box_2d bb{lyt};
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{lyt};
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{-3, 0});
         CHECK(se == cell<TestType>{2, 0});
@@ -369,9 +369,9 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         lyt.assign_sidb_defect({-3, 0}, sidb_defect{});
         lyt.assign_sidb_defect({2, 0}, sidb_defect{});
 
-        const bounding_box_2d bb{static_cast<TestType>(lyt)};  // NOLINT(cppcoreguidelines-slicing)
-        const auto            nw = bb.get_min();
-        const auto            se = bb.get_max();
+        const layouts::bounding_box_2d bb{static_cast<TestType>(lyt)};  // NOLINT(cppcoreguidelines-slicing)
+        const auto                     nw = bb.get_min();
+        const auto                     se = bb.get_max();
 
         CHECK(nw == cell<TestType>{1, 0, 0});
         CHECK(se == cell<TestType>{2, 0, 0});

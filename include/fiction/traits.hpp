@@ -324,22 +324,22 @@ inline constexpr bool is_shifted_cartesian_layout_v = is_shifted_cartesian_layou
 #pragma region shifted cartesian orientation and arrangement
 template <typename Lyt>
 constexpr bool has_horizontally_shifted_cartesian_orientation_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, horizontal_shift_cartesian>;
+    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, layouts::horizontal_shift_cartesian>;
 template <typename Lyt>
 constexpr bool has_vertically_shifted_cartesian_orientation_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, vertical_shift_cartesian>;
+    std::is_same_v<typename Lyt::cartesian_arrangement::orientation, layouts::vertical_shift_cartesian>;
 template <typename Lyt>
 constexpr bool has_odd_row_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, odd_row_cartesian>;
+    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::odd_row_cartesian>;
 template <typename Lyt>
 constexpr bool has_even_row_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, even_row_cartesian>;
+    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::even_row_cartesian>;
 template <typename Lyt>
 constexpr bool has_odd_column_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, odd_column_cartesian>;
+    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::odd_column_cartesian>;
 template <typename Lyt>
 constexpr bool has_even_column_cartesian_arrangement_v =
-    std::is_same_v<typename Lyt::cartesian_arrangement, even_column_cartesian>;
+    std::is_same_v<typename Lyt::cartesian_arrangement, layouts::even_column_cartesian>;
 #pragma endregion
 
 #pragma region is_hexagonal_layout
@@ -363,21 +363,22 @@ inline constexpr bool is_hexagonal_layout_v = is_hexagonal_layout<Lyt>::value;
 #pragma region hexagonal orientation and arrangement
 template <typename Lyt>
 inline constexpr const bool has_pointy_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, pointy_top_hex>;
+    std::is_same_v<typename Lyt::hex_arrangement::orientation, layouts::pointy_top_hex>;
 template <typename Lyt>
 inline constexpr const bool has_flat_top_hex_orientation_v =
-    std::is_same_v<typename Lyt::hex_arrangement::orientation, flat_top_hex>;
+    std::is_same_v<typename Lyt::hex_arrangement::orientation, layouts::flat_top_hex>;
 template <typename Lyt>
-inline constexpr const bool has_odd_row_hex_arrangement_v = std::is_same_v<typename Lyt::hex_arrangement, odd_row_hex>;
+inline constexpr const bool has_odd_row_hex_arrangement_v =
+    std::is_same_v<typename Lyt::hex_arrangement, layouts::odd_row_hex>;
 template <typename Lyt>
 inline constexpr const bool has_even_row_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, even_row_hex>;
+    std::is_same_v<typename Lyt::hex_arrangement, layouts::even_row_hex>;
 template <typename Lyt>
 inline constexpr const bool has_odd_column_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, odd_column_hex>;
+    std::is_same_v<typename Lyt::hex_arrangement, layouts::odd_column_hex>;
 template <typename Lyt>
 inline constexpr const bool has_even_column_hex_arrangement_v =
-    std::is_same_v<typename Lyt::hex_arrangement, even_column_hex>;
+    std::is_same_v<typename Lyt::hex_arrangement, layouts::even_column_hex>;
 #pragma endregion
 
 /**
@@ -569,11 +570,11 @@ template <typename Lyt>
 using technology = typename Lyt::technology;
 
 template <typename CoordinateType>
-inline constexpr const bool is_offset_ucoord_v = std::is_same_v<CoordinateType, offset::ucoord_t>;
+inline constexpr const bool is_offset_ucoord_v = std::is_same_v<CoordinateType, layouts::offset::ucoord_t>;
 template <typename CoordinateType>
-inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, cube::coord_t>;
+inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, layouts::cube::coord_t>;
 template <typename CoordinateType>
-inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, siqad::coord_t>;
+inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, layouts::siqad::coord_t>;
 
 template <typename Lyt>
 inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca_technology>;

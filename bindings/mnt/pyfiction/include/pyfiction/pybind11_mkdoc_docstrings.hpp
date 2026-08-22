@@ -94,7 +94,7 @@ static const char* mkd_doc_fiction_a_star =
     R"doc(The A* path finding algorithm for shortest loop-less paths between a
 given source and target coordinate in a layout. This function
 automatically detects whether the given layout implements a clocking
-interface (see `clocked_layout`) and respects the underlying
+interface (see `layouts::clocked_layout`) and respects the underlying
 information flow imposed by `layout`'s clocking scheme.
 
 A* is an extension of Dijkstra's algorithm for shortest paths but
@@ -106,11 +106,11 @@ be used are the Manhattan and the Euclidean distance functions. See
 `distance_functor` for implementations.
 
 If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
+`layouts::obstruction_layout`), paths will not be routed via obstructed
 coordinates and connections.
 
 If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstruction_layout`), paths may contain
+obstruction interface (see `layouts::obstruction_layout`), paths may contain
 wire crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
@@ -123,10 +123,10 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
+using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<>>;
+using path = layout_coordinate_path<layouts::cartesian_layout<>>;
 clk_lyt layout = ...;
-auto shortest_path = a_star<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+auto shortest_path = a_star<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target});
 ```
 
 
@@ -545,7 +545,7 @@ ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
 equal to `ucoord_t{0, 0}`. If :math:`n = 2`, the aspect ratios
 :math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
 to `ucoord_t{0, 1}` and `ucoord_t{1, 0}`. Both examples with
-`AspectRatio == offset::ucoord_t`.
+`AspectRatio == layouts::offset::ucoord_t`.
 
 Args:
     n: Starting value of the aspect ratio iteration.
@@ -1377,7 +1377,7 @@ Args:
 static const char* mkd_doc_fiction_bounding_box_2d_get_max =
     R"doc(Returns the maximum corner of the bounding box.
 
-In a `cartesian_layout<offset::ucoord_t>` object, this location
+In a `layouts::cartesian_layout<layouts::offset::ucoord_t>` object, this location
 represents the most south-eastern coordinate of the bounding box
 enclosing every non-empty coordinate.
 
@@ -1389,7 +1389,7 @@ Returns:
 static const char* mkd_doc_fiction_bounding_box_2d_get_min =
     R"doc(Returns the minimum corner of the bounding box.
 
-In a `cartesian_layout<offset::ucoord_t>` object, this location
+In a `layouts::cartesian_layout<layouts::offset::ucoord_t>` object, this location
 represents the most north-western coordinate of the bounding box
 enclosing every non-empty coordinate.
 
@@ -1743,7 +1743,7 @@ static const char* mkd_doc_fiction_cartesian_layout_cartesian_layout_2 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another cartesian_layout.
+    s: Storage of another layouts::cartesian_layout.
 
 )doc";
 
@@ -2460,7 +2460,7 @@ static const char* mkd_doc_fiction_cell_level_layout_cell_level_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another cell_level_layout.
+    s: Storage of another layouts::cell_level_layout.
 
 )doc";
 
@@ -2937,7 +2937,7 @@ Template Args:
 
 static const char* mkd_doc_fiction_clocked_layout =
     R"doc(A layout type to layer on top of a coordinate layout, e.g.,
-`cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
+`layouts::cartesian_layout`, `layouts::hexagonal_layout`, or `layouts::tile_based_layout`. This
 type extends the layout by providing a notion of FCN clocking. To this
 end, it utilizes a clocking scheme that assigns each coordinate in the
 extended coordinate layout a clock number. These clock numbers can be
@@ -2984,7 +2984,7 @@ static const char* mkd_doc_fiction_clocked_layout_clocked_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another clocked_layout.
+    s: Storage of another layouts::clocked_layout.
 
 )doc";
 
@@ -3186,7 +3186,7 @@ static const char* mkd_doc_fiction_clocked_layout_strg = R"doc()doc";
 static const char* mkd_doc_fiction_clocking_scheme =
     R"doc(Clocking scheme type that assigns a clock number to each element of
 the provided type `ClockZone`. Clocking scheme objects are utilized,
-e.g., in clocked_layout.
+e.g., in layouts::clocked_layout.
 
 Usually, a clocking scheme is defined by the means of a cutout that
 can be seamlessly extended in all directions to provide repeating
@@ -3536,7 +3536,7 @@ Returns:
 static const char* mkd_doc_fiction_convert_layout_to_fiction_coordinates =
     R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
 defect surface can be layered on top) to alternative coordinates, such
-as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout
+as `layouts::offset::ucoord_t` or `layouts::cube::coord_t`. Returns a new layout
 equivalent to the original layout but based on the specified
 coordinate system.
 
@@ -3564,7 +3564,7 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type based on fiction coordinates,
-         e.g., `offset::ucoord_t` or `cube::coord_t`.
+         e.g., `layouts::offset::ucoord_t` or `layouts::cube::coord_t`.
 
 Returns:
     A new equivalent layout based on SiQAD coordinates.
@@ -3602,7 +3602,7 @@ Template Args:
     CoordinateType: Type of coordinate to enumerate.
 
 Note:
-    Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t` are
+    Only `layouts::offset::ucoord_t`, `layouts::cube::coord_t`, and `layouts::siqad::coord_t` are
     supported. This is enforced on the boundary-and-start constructor
     via a `requires` clause rather than on the class itself, so that
     the default constructor (required for `std::semiregular`) remains
@@ -3610,7 +3610,7 @@ Note:
 
 static const char* mkd_doc_fiction_coord_iterator_aspect_ratio =
     R"doc(Boundary within to enumerate. Not `const`:
-`std::input_or_output_iterator` requires `coord_iterator` to be
+`std::input_or_output_iterator` requires `layouts::coord_iterator` to be
 `std::movable`, which in turn requires it to be assignable.)doc";
 
 static const char* mkd_doc_fiction_coord_iterator_coord = R"doc()doc";
@@ -3641,7 +3641,7 @@ order of enumeration:
   0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
   2, 1)
 
-coord_iterator is compatible with the STL forward_iterator category.
+layouts::coord_iterator is compatible with the STL forward_iterator category.
 Does not iterate over negative coordinates.
 
 Args:
@@ -4526,7 +4526,7 @@ stream. It provides a variadic member function, `write_line`, that can
 take an arbitrary number of arguments and write them to the provided
 output stream in a line separated by a specified delimiter.
 
-The utils::stl::csv_writer follows some behavior principles:
+The fiction::utils::stl::csv_writer follows some behavior principles:
 - Any standard data type can be written to the output stream. - Data
   arguments written will be separated by the specified delimiter. - A
   newline is written at the end of each line. - If `write_line`
@@ -4538,7 +4538,7 @@ Example usage:
 ```
 {.cpp}
   std::ofstream file("output.csv");
-  utils::stl::csv_writer writer(file);
+  fiction::utils::stl::csv_writer writer(file);
   writer.write_line("Name", "Age", "City");
   writer.write_line("Alice", 20, "New York");
 ```)doc";
@@ -6382,7 +6382,7 @@ based on a Cartesian layout.
 
 This function generates a new layout suitable for finding excess
 wiring by shifting the input layout based on specified offsets. The
-generated layout is wrapped in an obstruction_layout. The shifted
+generated layout is wrapped in an layouts::obstruction_layout. The shifted
 layout is constructed by iterating through the input Cartesian layout
 diagonally and obstructing connections and coordinates accordingly.
 
@@ -7297,9 +7297,9 @@ layout. This function is called recursively until the target
 coordinate is reached. Along each path, each coordinate can occur at
 maximum once. This function does not generate duplicate or looping
 paths. If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
+`layouts::obstruction_layout`), paths will not be routed via obstructed
 coordinates or connections. If the given layout is a gate-level layout
-and implements the obstruction interface (see `obstruction_layout`),
+and implements the obstruction interface (see `layouts::obstruction_layout`),
 paths may contain wire crossings if specified in the parameters. Wire
 crossings are only allowed over other wires and only if the crossing
 layer is not obstructed. Furthermore, it is ensured that crossings do
@@ -12095,16 +12095,16 @@ static const char* mkd_doc_fiction_detail_wiring_reduction_impl_wiring_reduction
 
 static const char* mkd_doc_fiction_detail_wiring_reduction_layout =
     R"doc(Represents a layout used for wiring reduction derived from the
-`cartesian_layout` class.
+`layouts::cartesian_layout` class.
 
 This class provides functionality for a wiring reduction layout based
 on a Cartesian coordinate system. It inherits from the
-`cartesian_layout` class and extends it with specific behavior for
+`layouts::cartesian_layout` class and extends it with specific behavior for
 finding excess wiring.
 
 Template Args:
     OffsetCoordinateType: The type of coordinates used in the layout.
-                          Defaults to `offset::ucoord_t` if not
+                          Defaults to `layouts::offset::ucoord_t` if not
                           explicitly provided.)doc";
 
 static const char* mkd_doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate =
@@ -13305,18 +13305,18 @@ static const char* mkd_doc_fiction_enumerate_all_paths =
     R"doc(Enumerates all possible paths in a layout that start at a given source
 coordinate and lead to given target coordinate. This function
 automatically detects whether the given layout implements a clocking
-interface (see `clocked_layout`) and respects the underlying
+interface (see `layouts::clocked_layout`) and respects the underlying
 information flow imposed by `layout`'s clocking scheme. This algorithm
 does neither generate duplicate nor looping paths, even in a cyclic
 clocking scheme. That is, along each path, each coordinate can occur
 at maximum once.
 
 If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
+`layouts::obstruction_layout`), paths will not be routed via obstructed
 coordinates or connections.
 
 If the given layout is a gate-level layout and implements the
-obstruction interface (see `obstruction_layout`), paths may contain
+obstruction interface (see `layouts::obstruction_layout`), paths may contain
 wire crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
@@ -13329,10 +13329,10 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
+using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<>>;
+using path = layout_coordinate_path<layouts::cartesian_layout<>>;
 clk_lyt layout = ...;
-auto all_paths = enumerate_all_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target});
+auto all_paths = enumerate_all_paths<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target});
 ```
 
 
@@ -14204,7 +14204,7 @@ consecutive elements of the elements in the range `[s_first, s_last)`,
 i.e., for a 2-element sub-sequence shared between the ranges.
 
 Example: Let two ranges be `[0, 1, 1, 2, 3, 3]` and `[1, 2, 3, 3]`. A
-         call to `utils::stl::find_first_two_of` would return an
+         call to `fiction::utils::stl::find_first_two_of` would return an
 iterator to index 2, i.e., the second `1` in the first list, because
 the 2-element sub-sequence `[1,2]` is shared between the two ranges.
 
@@ -14449,7 +14449,7 @@ static const char* mkd_doc_fiction_gate_level_drv_stats_warnings = R"doc(Number 
 
 static const char* mkd_doc_fiction_gate_level_drvs =
     R"doc(Performs design rule violation (DRV) checking on the given gate-level
-layout. The implementation of gate_level_layout allows for layouts
+layout. The implementation of layouts::gate_level_layout allows for layouts
 with structural defects like the connection of non-adjacent tiles or
 connections that defy the clocking scheme. This function checks for
 such violations and documents them in the statistics. A brief report
@@ -14480,13 +14480,13 @@ static const char* mkd_doc_fiction_gate_level_layout =
     R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of gates to clock zones (aka tiles in this context). This
 class represents a gate-level FCN layout and, thus, adds a notion of
-Boolean logic. The gate_level_layout class fulfills the requirements
+Boolean logic. The layouts::gate_level_layout class fulfills the requirements
 of a `mockturtle` logic network so that it can be used in many of
 `mockturtle`'s algorithms. Since a layout has to assign fixed
 positions to its gates (logic nodes), most generative member functions
 like `create_pi`, `create_po`, `create_and`, etc. require additional
 coordinate parameters. Consequently, `mockturtle`'s algorithms cannot
-be used to generate gate_level_layout networks. To make the class
+be used to generate layouts::gate_level_layout networks. To make the class
 compliant with the API anyways, these member functions have their
 parameters defaulted but they are, in fact required to create
 meaningful layouts.
@@ -14827,7 +14827,7 @@ static const char* mkd_doc_fiction_gate_level_layout_gate_level_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another gate_level_layout.
+    s: Storage of another layouts::gate_level_layout.
 
 )doc";
 
@@ -14835,8 +14835,8 @@ static const char* mkd_doc_fiction_gate_level_layout_gate_level_layout_4 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another gate_level_layout.
-    e: Event storage of another gate_level_layout.
+    s: Storage of another layouts::gate_level_layout.
+    e: Event storage of another layouts::gate_level_layout.
 
 )doc";
 
@@ -16253,7 +16253,7 @@ static const char* mkd_doc_fiction_gray_code_iterator =
     R"doc(An iterator type that iterates over Gray code representations for
 decimal numbers.
 
-The `utils::stl::gray_code_iterator` class provides an iterator for generating
+The `fiction::utils::stl::gray_code_iterator` class provides an iterator for generating
 Gray code representations for a range of decimal numbers. It starts
 from a specified number and produces Gray codes in ascending order
 based on bitwise XOR operations.)doc";
@@ -16279,7 +16279,7 @@ static const char* mkd_doc_fiction_gray_code_iterator_current_iteration =
 static const char* mkd_doc_fiction_gray_code_iterator_gray_code_iterator =
     R"doc(Constructs a Gray Code Iterator with a specified starting number.
 
-Constructs a `utils::stl::gray_code_iterator` that generates Gray codes for
+Constructs a `fiction::utils::stl::gray_code_iterator` that generates Gray codes for
 decimal numbers starting from the given `start` number.
 
 Args:
@@ -16515,12 +16515,12 @@ static const char* mkd_doc_fiction_gray_code_iterator_operator_sub =
 gray_code_iterators.
 
 This operator calculates the difference between the current iterator
-and another utils::stl::gray_code_iterator provided as input. The result is
+and another fiction::utils::stl::gray_code_iterator provided as input. The result is
 returned as an int64_t representing the number of positions between
 the iterators.
 
 Args:
-    other: The utils::stl::gray_code_iterator to subtract from the current
+    other: The fiction::utils::stl::gray_code_iterator to subtract from the current
            iterator.
 
 Returns:
@@ -16882,10 +16882,10 @@ polynomial runtime.)doc";
 static const char* mkd_doc_fiction_hexagonal_layout =
     R"doc(A layout type that utilizes offset coordinates to represent a
 hexagonal grid. Its faces are organized in an offset coordinate system
-as provided. Hexagons can be in the pointy_top_hex or flat_top_hex
+as provided. Hexagons can be in the layouts::pointy_top_hex or layouts::flat_top_hex
 orientation. Based on that, two respectively possible coordinate
-systems emerge accordingly: odd_row_hex and even_row_hex for pointy
-tops and odd_column_hex and even_column_hex for flat tops. All are
+systems emerge accordingly: layouts::odd_row_hex and layouts::even_row_hex for pointy
+tops and layouts::odd_column_hex and layouts::even_column_hex for flat tops. All are
 sketched in ASCII above.
 
 Other representations would be using cube or axial coordinates for
@@ -16898,9 +16898,9 @@ on the topic.
 Template Args:
     OffsetCoordinateType: The coordinate implementation to be used.
                           Offset coordinates are required.
-    HexagonalCoordinateSystem: One of the following: odd_row_hex,
-                               even_row_hex, odd_column_hex,
-                               even_column_hex.
+    HexagonalCoordinateSystem: One of the following: layouts::odd_row_hex,
+                               layouts::even_row_hex, layouts::odd_column_hex,
+                               layouts::even_column_hex.
     CubeCoordinateType: Internally, cube coordinates are needed for
                         certain algorithms or calculations.)doc";
 
@@ -16939,9 +16939,9 @@ static const char* mkd_doc_fiction_hexagonal_layout_adjacent_opposite_coordinate
 adjacent coordinates with respect to a given one. In this hexagonal
 layout, the container content depends on the hexagonal orientation.
 
-In case of a pointy_top_hex orientation, the container will contain
+In case of a layouts::pointy_top_hex orientation, the container will contain
 (`east(c)`, `west(c)`), (`north_east(c)`, `south_west(c)`),
-(`north_west(c)`, `south_east(c)`). In case of a flat_top_hex
+(`north_west(c)`, `south_east(c)`). In case of a layouts::flat_top_hex
 orientation, the container will contain (`north(c)`, `south(c)`),
 (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
 instead.
@@ -17082,9 +17082,9 @@ static const char* mkd_doc_fiction_hexagonal_layout_foreach_adjacent_opposite_co
 given one. In this hexagonal layout, the function application depends
 on the hexagonal orientation.
 
-In case of a pointy_top_hex orientation, the function will apply to
+In case of a layouts::pointy_top_hex orientation, the function will apply to
 (`east(c)`, `west(c)`), (`north_east(c)`, `south_west(c)`),
-(`north_west(c)`, `south_east(c)`). In case of a flat_top_hex
+(`north_west(c)`, `south_east(c)`). In case of a layouts::flat_top_hex
 orientation, the function will apply to (`north(c)`, `south(c)`),
 (`north_east(c)`, `south_west(c)`), (`north_west(c)`, `south_east(c)`)
 instead.
@@ -17160,7 +17160,7 @@ Returns:
 
 static const char* mkd_doc_fiction_hexagonal_layout_hexagonal_layout =
     R"doc(Standard constructor. The given aspect ratio points to the highest
-possible coordinate in the layout. That means in the even_column_hex
+possible coordinate in the layout. That means in the layouts::even_column_hex
 ASCII layout representation above `ar = (3,2)`. Consequently, with `ar
 = (0,0)`, the layout has exactly one coordinate.
 
@@ -19277,7 +19277,7 @@ is blocked by something. That could either be due to prior placement
 of cells, gates, and wires or because of fabrication defects.
 
 Currently, this layout type supports obstruction rules for
-gate_level_layout and cell_level_layout.
+layouts::gate_level_layout and layouts::cell_level_layout.
 
 Template Args:
     Lyt: Any coordinate layout type that is to be extended by an
@@ -21306,7 +21306,7 @@ static const char* mkd_doc_fiction_print_layout =
     R"doc(A unified printer of the versions above. Depending on the passed
 layout type, this function will automatically select the appropriate
 printer to use. This simplifies printing by enabling the statement
-`print_layout(lyt)`.
+`layouts::io::print_layout(lyt)`.
 
 Args:
     lyt: The coordinate layout.
@@ -21721,7 +21721,7 @@ static const char* mkd_doc_fiction_read_fgl_layout =
     R"doc(Reads a gate-level layout from an FGL file provided as an input
 stream.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+May throw an `layouts::io::fgl_parsing_error` if the FGL file is malformed.
 
 Args:
     is: The input stream to read from.
@@ -21736,9 +21736,9 @@ static const char* mkd_doc_fiction_read_fgl_layout_2 =
     R"doc(Reads a gate-level layout from an FGL file provided as an input
 stream.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+May throw an `layouts::io::fgl_parsing_error` if the FGL file is malformed.
 
-This is an in-place version of `read_fgl_layout` that utilizes the
+This is an in-place version of `layouts::io::read_fgl_layout` that utilizes the
 given layout as a target to write to.
 
 Args:
@@ -21753,7 +21753,7 @@ Template Args:
 static const char* mkd_doc_fiction_read_fgl_layout_3 =
     R"doc(Reads a gate-level layout from an FGL file provided as a file name.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+May throw an `layouts::io::fgl_parsing_error` if the FGL file is malformed.
 
 Args:
     filename: The file name to open and read from.
@@ -21767,9 +21767,9 @@ Template Args:
 static const char* mkd_doc_fiction_read_fgl_layout_4 =
     R"doc(Reads a gate-level layout from an FGL file provided as a file name.
 
-May throw an `fgl_parsing_error` if the FGL file is malformed.
+May throw an `layouts::io::fgl_parsing_error` if the FGL file is malformed.
 
-This is an in-place version of `read_fgl_layout` that utilizes the
+This is an in-place version of `layouts::io::read_fgl_layout` that utilizes the
 given layout as a target to write to.
 
 Args:
@@ -22325,25 +22325,25 @@ static const char* mkd_doc_fiction_shifted_cartesian_layout =
     R"doc(A layout type that utilizes offset coordinates to represent a
 Cartesian layout with shifted coordinates. Its faces are organizes in
 an offset coordinate system as provided. These can either be the
-horizontal_shift_cartesian or vertical_shift_cartesian orientation.
+layouts::horizontal_shift_cartesian or layouts::vertical_shift_cartesian orientation.
 Based on that, two respectively possible coordinate systems emerge
-accordingly: odd_row_cartesian and even_row_cartesian for horizontal
-shifts and odd_column_cartesian and even_column_cartesian for vertical
+accordingly: layouts::odd_row_cartesian and layouts::even_row_cartesian for horizontal
+shifts and layouts::odd_column_cartesian and layouts::even_column_cartesian for vertical
 shifts. All are sketched in ASCII above.
 
 Template Args:
     OffsetCoordinateType: The coordinate implementation to be used.
                           Offset coordinates are required.
     ShiftedCartesianCoordinateSystem: One of the following:
-                                      odd_row_cartesian,
-                                      even_row_cartesian,
-                                      odd_column_cartesian,
-                                      even_column_cartesian.)doc";
+                                      layouts::odd_row_cartesian,
+                                      layouts::even_row_cartesian,
+                                      layouts::odd_column_cartesian,
+                                      layouts::even_column_cartesian.)doc";
 
 static const char* mkd_doc_fiction_shifted_cartesian_layout_shifted_cartesian_layout =
     R"doc(Standard constructor. The given aspect ratio points to the highest
 possible coordinate in the layout. That means in the
-even_column_cartesian ASCII layout representation above `ar = (3,2)`.
+layouts::even_column_cartesian ASCII layout representation above `ar = (3,2)`.
 Consequently, with `ar = (0,0)`, the layout has exactly one
 coordinate.
 
@@ -23220,7 +23220,7 @@ static const char* mkd_doc_fiction_sidb_on_the_fly_gate_library_sidb_on_the_fly_
 static const char* mkd_doc_fiction_sidb_simulation_domain =
     R"doc(The `sidb_simulation_domain` is designed to represent a generic
 simulation domain where keys are associated with values stored as
-tuples. It uses a `utils::stl::locked_parallel_flat_hash_map` to ensure thread-
+tuples. It uses a `fiction::utils::stl::locked_parallel_flat_hash_map` to ensure thread-
 safe access to the stored data. All methods of this class are thread-
 safe.
 
@@ -24420,7 +24420,7 @@ static const char* mkd_doc_fiction_synchronization_element_layout_synchronizatio
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another synchronization_element_layout.
+    s: Storage of another layouts::synchronization_element_layout.
 
 )doc";
 
@@ -24761,8 +24761,8 @@ static const char* mkd_doc_fiction_technology_network_technology_network_2 = R"d
 static const char* mkd_doc_fiction_tile_based_layout =
     R"doc(This class provides a tile-based naming scheme for coordinate-based
 functions. It does not add any functionality, but it might be useful
-to adopt tile_based_layout to provide an intuition of abstraction in
-the code. For instance, in a gate_level_layout, the coordinates, in
+to adopt layouts::tile_based_layout to provide an intuition of abstraction in
+the code. For instance, in a layouts::gate_level_layout, the coordinates, in
 fact, refer to groups of coordinates in lower-level abstractions.
 These are called 'tiles' in the literature. Therefore, it might be
 helpful for a reader of the code to provide this abstraction level-
@@ -25827,7 +25827,7 @@ output stream. Only cell-based layouts are supported, since the
 clocking scheme is not uniform at the gate level. Currently, only a
 uniform gate size of :math:`10 \times 10` is supported.
 
-May throw an `unsupported_cell_type_exception` if it encounters
+May throw an `layouts::io::unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Args:
@@ -25846,7 +25846,7 @@ Only cell-based layouts are supported, since the clocking scheme is
 not uniform at the gate level. Currently, only a uniform gate size of
 :math:`10 \times 10` is supported.
 
-May throw an `unsupported_cell_type_exception` if it encounters
+May throw an `layouts::io::unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout. May throw an
 `std::ofstream::failure` if it cannot open the file.
 
@@ -26036,7 +26036,7 @@ supported exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an `unsupported_cell_type_exception` if it encounters
+May throw an `layouts::io::unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout.
 
 Args:
@@ -26058,7 +26058,7 @@ exclusively so far.
 The utilized color scheme is based on the standard scheme used in
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
 
-May throw an `unsupported_cell_type_exception` if it encounters
+May throw an `layouts::io::unsupported_cell_type_exception` if it encounters
 unsupported cell types in the layout. May throw an
 `std::ofstream::failure` if it cannot open the file.
 
@@ -26307,18 +26307,18 @@ This implementation uses the A* algorithm with the Manhattan distance
 function internally.
 
 This function automatically detects whether the given layout
-implements a clocking interface (see `clocked_layout`) and respects
+implements a clocking interface (see `layouts::clocked_layout`) and respects
 the underlying information flow imposed by `layout`'s clocking scheme.
 This algorithm does neither generate duplicate nor looping paths, even
 in a cyclic clocking scheme. That is, along each path, each coordinate
 can occur at maximum once.
 
 If the given layout implements the obstruction interface (see
-`obstruction_layout`), paths will not be routed via obstructed
+`layouts::obstruction_layout`), paths will not be routed via obstructed
 coordinates or connections.
 
 If the given layout is a gate-level layout and implements the
-obstruction interface (see obstruction_layout), paths may contain wire
+obstruction interface (see layouts::obstruction_layout), paths may contain wire
 crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
@@ -26331,10 +26331,10 @@ achieved by static-casting the layout to a coordinate layout when
 calling this function:
 ```
 {.cpp}
-using clk_lyt = clocked_layout<cartesian_layout<>>;
-using path = layout_coordinate_path<cartesian_layout<>>;
+using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<>>;
+using path = layout_coordinate_path<layouts::cartesian_layout<>>;
 clk_lyt layout = ...;
-auto k_paths = yen_k_shortest_paths<path>(static_cast<cartesian_layout<>>(layout), {source, target}, k);
+auto k_paths = yen_k_shortest_paths<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target}, k);
 ```
 
 

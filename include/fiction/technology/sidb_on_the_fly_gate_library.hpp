@@ -8,6 +8,7 @@
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
@@ -15,7 +16,6 @@
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/truth_table_utils.hpp"
 
 #include <phmap.h>
@@ -178,11 +178,13 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
         // is chosen.
-        auto center_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-            lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
+        auto center_cell =
+            layouts::utils::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+                lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
         // center cell of the current tile
-        auto absolute_cell = relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-            lyt, t, cell<CellLyt>{0, 0});
+        auto absolute_cell =
+            layouts::utils::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+                lyt, t, cell<CellLyt>{0, 0});
 
         auto complex_gate_param                                      = params;
         complex_gate_param.design_gate_params.number_of_canvas_sidbs = params.canvas_sidb_complex_gates;
@@ -629,7 +631,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     {
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
         const auto                                                 all_coordinates_in_the_spanned_area =
-            all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
+            layouts::utils::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
 
         uint64_t cell_index = 0;
 
@@ -753,7 +755,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         Lyt lyt{};
 
         const auto all_cell =
-            all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
+            layouts::utils::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
         uint64_t counter = 0;
 
         for (std::size_t i = 0; i < gate_y_size(); ++i)
@@ -832,7 +834,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                 }
             });
 
-        const auto bb = bounding_box_2d(skeleton_with_defect);
+        const auto bb = layouts::bounding_box_2d(skeleton_with_defect);
         skeleton_with_defect.resize(bb.get_max());
 
         return skeleton_with_defect;

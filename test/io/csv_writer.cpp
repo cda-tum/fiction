@@ -16,7 +16,7 @@ TEST_CASE("CSV writer", "[csv-writer]")
 {
     std::stringstream ss{};
 
-    utils::stl::csv_writer writer(ss);
+    fiction::utils::stl::csv_writer writer(ss);
 
     SECTION("writing single integer value")
     {

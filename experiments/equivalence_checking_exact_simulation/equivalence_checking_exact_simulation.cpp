@@ -8,10 +8,10 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/layout_utils.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
 
 #include <fmt/format.h>
@@ -34,10 +34,12 @@ using namespace fiction;
 
 int main()  // NOLINT
 {
-    const auto all_cells_in_region = all_coordinates_in_spanned_area<offset::ucoord_t>({0, 0}, {10, 10});
+    const auto all_cells_in_region =
+        layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({0, 0}, {10, 10});
 
-    const auto all_distributions = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-        4, all_cells_in_region.size());
+    const auto all_distributions =
+        fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
+            4, all_cells_in_region.size());
 
     const auto params = sidb_simulation_parameters{3, -0.32};
 

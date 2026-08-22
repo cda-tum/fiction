@@ -10,12 +10,12 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 
 #include <fmt/format.h>
@@ -177,7 +177,8 @@ class design_sidb_gates_impl
             skeleton_layout{skeleton},
             truth_table{spec},
             params{ps},
-            all_sidbs_in_canvas{all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
+            all_sidbs_in_canvas{
+                layouts::utils::all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
             input_bdl_wires{detect_bdl_wires(skeleton_layout,
                                              params.operational_params.input_bdl_iterator_params.bdl_wire_params,
@@ -207,8 +208,9 @@ class design_sidb_gates_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+        auto all_combinations =
+            fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
+                params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
 
@@ -681,8 +683,9 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const noexcept
     {
-        const auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
+        const auto all_combinations =
+            fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
+                params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
         designed_gate_layouts.reserve(all_combinations.size());

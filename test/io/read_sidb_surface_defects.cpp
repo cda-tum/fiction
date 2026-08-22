@@ -19,11 +19,20 @@ using namespace fiction;
 
 TEMPLATE_TEST_CASE(
     "Read empty surface", "[read-sidb-surface-defects]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     static constexpr const char* empty_sidb_surface               = "[]";
     static constexpr const char* sidb_surface_of_one_empty_row    = "[[]]";
@@ -49,11 +58,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Read non-defective surface", "[read-sidb-surface-defects]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     static constexpr const char* sidb_surface = "[[0 0 0 0] [0 0 0 0] [0 0 0 0]]";
 
@@ -74,11 +92,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Read defective surface", "[read-sidb-surface-defects]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     static constexpr const char* sidb_surface = "[[0 1 2 3]"
                                                 " [4 5 6 7]"
@@ -107,11 +134,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Exceptions", "[read-sidb-surface-defects]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     SECTION("unsupported_defect_index_exception")
     {
@@ -137,11 +173,20 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Edge cases", "[read-sidb-surface-defects]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_row_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, odd_column_hex>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<offset::ucoord_t, even_column_hex>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>>>),
+    (layouts::cell_level_layout<
+        sidb_technology,
+        layouts::clocked_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>>>))
 {
     SECTION("ignore lines")
     {

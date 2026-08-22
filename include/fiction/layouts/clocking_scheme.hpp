@@ -21,7 +21,7 @@
 #include <string_view>
 #include <utility>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -839,6 +839,5 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
     return std::nullopt;
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_CLOCKING_SCHEME_HPP

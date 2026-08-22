@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace fiction
+namespace fiction::layouts
 {
 /**
  * This class provides a tile-based naming scheme for coordinate-based functions. It does not add any functionality,
@@ -105,6 +105,5 @@ class tile_based_layout : public CoordinateLayout
 #pragma endregion
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #endif  // FICTION_TILE_BASED_LAYOUT_HPP

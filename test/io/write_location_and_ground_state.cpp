@@ -38,11 +38,14 @@ bool compare_output(const std::string& output, const std::string& expected)
 
 TEMPLATE_TEST_CASE(
     "writes expected output", "[write_txt_sim_result]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<siqad::coord_t>>>>),
-    (charge_distribution_surface<
-        cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<offset::ucoord_t>>>>))
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>),
+    (layouts::cell_level_layout<sidb_technology,
+                                layouts::clocked_layout<layouts::cartesian_layout<layouts::siqad::coord_t>>>),
+    (charge_distribution_surface<layouts::cell_level_layout<
+         sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::siqad::coord_t>>>>),
+    (charge_distribution_surface<layouts::cell_level_layout<
+         sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>))
 {
     lattice lyt{};
 
