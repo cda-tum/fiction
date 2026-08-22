@@ -99,7 +99,7 @@ jobs:
       - name: Commit docstrings
         # zizmor: ignore[superfluous-actions] keeping the well-tested action (handles the
         # no-changes-to-commit case, author fallback, etc.) instead of hand-rolled git scripting
-        uses: EndBug/add-and-commit@645ecc0dd0a57f4d86d26c0aa5fc42c0a856fbca # v11.0.0
+        uses: EndBug/add-and-commit@cc9c08ba6c8df3b93a8f2db63e89b98368ae2ae8 # v11.1.1
         with:
           add: "bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
           commit: "--signoff"
