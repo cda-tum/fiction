@@ -103,7 +103,7 @@ them automatically. Should the repository have been cloned before, the commands:
   git submodule update --init --recursive
 
 will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++20 compiler are
-required for the C++ part. If you want to work with the Python bindings, you need a Python 3.9+ installation.
+required for the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
