@@ -16,7 +16,10 @@ function(fiction_enable_cache)
 
   # Honour the requested cache first. Searching CACHE_OPTION_VALUES directly
   # made CACHE_OPTION inert: ccache comes first in the list and is present on
-  # every runner, so asking for sccache silently got ccache.
+  # every runner, so asking for sccache silently got ccache. find_program
+  # short-circuits on a cached result, so without this a reconfigure keeps
+  # whatever was found last time and CACHE_OPTION is ignored.
+  unset(CACHE_BINARY CACHE)
   find_program(CACHE_BINARY NAMES ${CACHE_OPTION})
   if(NOT CACHE_BINARY)
     list(REMOVE_ITEM CACHE_OPTION_VALUES ${CACHE_OPTION})
