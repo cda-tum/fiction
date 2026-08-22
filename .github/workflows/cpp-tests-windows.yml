@@ -61,8 +61,10 @@ jobs:
         with:
           key: "${{ inputs.runs-on }}-${{ inputs.toolset }}"
           variant: ccache
-          save: true
-          max-size: 10G
+          # Only `main` writes; pull requests restore its cache. Caches are
+          # branch-scoped and the repository shares a 10 GB budget.
+          save: ${{ github.ref == 'refs/heads/main' }}
+          max-size: 800M
 
       - name: Setup Z3 Solver
         id: z3

@@ -108,3 +108,6 @@ Thumbs.db
 CLAUDE.md
 CLAUDE.local.md
 AGENTS.local.md
+
+# compiler cache written by the Windows CI jobs
+.sccache/

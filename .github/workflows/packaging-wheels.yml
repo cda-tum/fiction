@@ -35,12 +35,22 @@ jobs:
       - name: Set up MSVC development environment (Windows only)
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
-      - name: Setup ccache
-        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
-        with:
-          key: "${{ inputs.runs-on }}-pyfiction"
-          save: true
-          max-size: 10G
+      # Job-local only. uv's build-isolation directory is named randomly per
+      # run, so nothing carries across runs; what does help is dedup between the
+      # four wheel builds within one job.
+      - if: runner.os == 'Windows'
+        name: Configure sccache
+        shell: bash
+        run: |
+          {
+            echo "CMAKE_GENERATOR=Ninja"
+            echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.sccache"
+            echo "SCCACHE_CACHE_SIZE=600M"
+            # One server for the whole job; a restart would reset the counters
+            echo "SCCACHE_IDLE_TIMEOUT=0"
+            # ccache is not installed here, so name the launcher explicitly
+            echo "CMAKE_ARGS=-DCACHE_OPTION=sccache"
+          } >> "$GITHUB_ENV"
 
       # on Linux, the action does not work because it can't install to the manylinux container
       - if: runner.os != 'Linux'
@@ -59,6 +69,10 @@ jobs:
           version: "latest"
           enable-cache: false
 
+      - if: runner.os == 'Windows'
+        name: Install sccache
+        run: uv tool install sccache
+
       - name: Build wheels
         uses: pypa/cibuildwheel@298ed2fb2c105540f5ed055e8a6ad78d82dd3a7e # v3.3
 
@@ -68,3 +82,11 @@ jobs:
           name: cibw-wheels-${{ inputs.runs-on }}
           path: ./wheelhouse/*.whl
           overwrite: true
+
+      # `--show-stats` fails only when sccache itself is broken, so it gates the
+      # job; `--stop-server` exits non-zero with no server running, which is fine.
+      - if: always() && runner.os == 'Windows'
+        name: sccache statistics
+        run: |
+          sccache --show-stats
+          sccache --stop-server || true

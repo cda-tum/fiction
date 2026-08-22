@@ -49,8 +49,10 @@ jobs:
         with:
           key: "ubuntu-24.04-g++-13-coverage"
           variant: ccache
-          save: true
-          max-size: 10G
+          # Only `main` writes; pull requests restore its cache. Caches are
+          # branch-scoped and the repository shares a 10 GB budget.
+          save: ${{ github.ref == 'refs/heads/main' }}
+          max-size: 500M
 
       - name: Setup mold
         uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
