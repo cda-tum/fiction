@@ -49,10 +49,8 @@ jobs:
         uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
         with:
           key: "ubuntu-24.04-minimums"
-          # Only `main` writes, so a pull request restores main's cache without
-          # adding an entry of its own. Every job saving 400-700 MB on every push
-          # had the repository sitting at 10.19 GB against GitHub's 10 GB limit,
-          # evicting caches faster than they could be reused.
+          # Only `main` writes; pull requests restore its cache. Caches are
+          # branch-scoped and the repository shares a 10 GB budget.
           save: ${{ github.ref == 'refs/heads/main' }}
           max-size: 500M
 

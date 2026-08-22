@@ -35,17 +35,9 @@ jobs:
       - name: Set up MSVC development environment (Windows only)
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
 
-      # ccache was configured here and never invoked once: every wheel job ended
-      # with `Cache size (GB): 0.0 / 10.0` and no cacheable calls.
-      #
-      # sccache replaces it on Windows, deliberately without cross-run
-      # persistence. Measured: 93 of 573 hits cold, 124 warm -- so persisting it
-      # buys 31 hits for a ~500 MB entry, in a repository already at its 10 GB
-      # cache limit where that pressure starves the C++ jobs. Nearly all of the
-      # benefit is dedup within the job, between the four wheel builds, and that
-      # costs nothing. The Python-dependent compilations cannot cache at all:
-      # uv's build-isolation directory is named randomly per run, so their
-      # include path differs on every build.
+      # Job-local only. uv's build-isolation directory is named randomly per
+      # run, so nothing carries across runs; what does help is dedup between the
+      # four wheel builds within one job.
       - if: runner.os == 'Windows'
         name: Configure sccache
         shell: bash
@@ -54,13 +46,9 @@ jobs:
             echo "CMAKE_GENERATOR=Ninja"
             echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.sccache"
             echo "SCCACHE_CACHE_SIZE=600M"
-            # One server for the whole job. The default 600s idle shutdown fires
-            # during the per-wheel test phases, and the restart resets the
-            # counters, so the reported hit rate would cover only the last build.
+            # One server for the whole job; a restart would reset the counters
             echo "SCCACHE_IDLE_TIMEOUT=0"
-            # `Cache.cmake` defaults to ccache, which is not installed here, so
-            # the launcher has to be named explicitly or nothing is cached at
-            # all -- the previous run reported `Compile requests 0`.
+            # ccache is not installed here, so name the launcher explicitly
             echo "CMAKE_ARGS=-DCACHE_OPTION=sccache"
           } >> "$GITHUB_ENV"
 
@@ -95,10 +83,8 @@ jobs:
           path: ./wheelhouse/*.whl
           overwrite: true
 
-      # `--show-stats` still succeeds when nothing was cached -- it starts a
-      # server and reports zeros -- so it is left to fail the job, since it only
-      # fails when sccache itself is broken. `--stop-server` exits non-zero when
-      # no server was ever started, which is not an error.
+      # `--show-stats` fails only when sccache itself is broken, so it gates the
+      # job; `--stop-server` exits non-zero with no server running, which is fine.
       - if: always() && runner.os == 'Windows'
         name: sccache statistics
         run: |

@@ -124,11 +124,8 @@ macro(fiction_local_options)
   # conform to memory limitations
   if(FICTION_LIGHTWEIGHT_DEBUG_BUILDS)
     if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-      # /Z7 is also what makes a Debug compilation cacheable, since ccache
-      # refuses /Zi. Appending it to the flags is not enough: CMake adds its own
-      # /Zi afterwards and wins, which the build log reports 304 times as
-      # `D9025: overriding '/Z7' with '/Zi'`. Setting the debug information
-      # format is what actually removes the /Zi.
+      # /Z7 also makes Debug compilations cacheable; ccache refuses /Zi. The
+      # format has to be set, not just the flag, or CMake appends /Zi after it.
       set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "Embedded")
       string(REGEX REPLACE "/Zi" "" CMAKE_CXX_FLAGS_DEBUG
                            "${CMAKE_CXX_FLAGS_DEBUG}")

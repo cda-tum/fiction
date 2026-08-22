@@ -14,11 +14,8 @@ function(fiction_enable_cache)
     )
   endif()
 
-  # Honour the requested cache first. Searching CACHE_OPTION_VALUES directly
-  # made CACHE_OPTION inert: ccache comes first in the list and is present on
-  # every runner, so asking for sccache silently got ccache. find_program
-  # short-circuits on a cached result, so without this a reconfigure keeps
-  # whatever was found last time and CACHE_OPTION is ignored.
+  # Search for the requested cache, then the other. find_program keeps a cached
+  # result, so clear it or a reconfigure ignores CACHE_OPTION.
   unset(CACHE_BINARY CACHE)
   find_program(CACHE_BINARY NAMES ${CACHE_OPTION})
   if(NOT CACHE_BINARY)
@@ -31,8 +28,7 @@ function(fiction_enable_cache)
   endif()
 
   if(CACHE_BINARY)
-    # The Visual Studio generator ignores compiler launchers outright, so
-    # configuring one there looks like it works and caches nothing.
+    # The Visual Studio generator ignores compiler launchers.
     if(CMAKE_GENERATOR MATCHES "Visual Studio")
       message(
         WARNING
