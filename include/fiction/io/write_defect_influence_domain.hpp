@@ -6,7 +6,7 @@
 #define FICTION_WRITE_DEFECT_INFLUENCE_DOMAIN_HPP
 
 #include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "fiction/io/csv_writer.hpp"
+#include "fiction/utils/stl/csv_writer.hpp"
 
 #include <fstream>
 #include <ostream>
@@ -48,7 +48,7 @@ template <typename Lyt>
 void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
                                    const write_defect_influence_domain_params& params = {})
 {
-    csv_writer writer{os};
+    utils::stl::csv_writer writer{os};
 
     writer.write_line("x", "y", "operational status");
 

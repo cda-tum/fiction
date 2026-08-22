@@ -139,7 +139,7 @@ int main(int argc, char* argv[])  // NOLINT
     // first, print some properties
     print_network_properties(ntk);
     // and draw the network
-    fiction::debug::write_dot_network(ntk, "ntk", designs);
+    fiction::utils::debug::write_dot_network(ntk, "ntk", designs);
 
     std::cout << std::endl;
 
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])  // NOLINT
     // print network properties again
     print_network_properties(ntk);
     // draw the network again
-    fiction::debug::write_dot_network(ntk, "cut_ntk", designs);
+    fiction::utils::debug::write_dot_network(ntk, "cut_ntk", designs);
 
     std::cout << std::endl;
 
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])  // NOLINT
     // print network properties again
     print_network_properties(top_ntk);
     // draw network again
-    fiction::debug::write_dot_network(top_ntk, "top_ntk", designs);
+    fiction::utils::debug::write_dot_network(top_ntk, "top_ntk", designs);
 
     std::cout << std::endl;
 
@@ -218,8 +218,8 @@ int main(int argc, char* argv[])  // NOLINT
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
     // draw the layout
-    fiction::debug::write_dot_layout<fcn_gate_level_layout,
-                                     fiction::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
+    fiction::utils::debug::write_dot_layout<fcn_gate_level_layout,
+                                            fiction::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
         ortho_gate_lyt, designs + "ortho_lyt");
 
     // apply the QCA ONE gate library to retrieve a cell-level layout
@@ -264,8 +264,8 @@ int main(int argc, char* argv[])  // NOLINT
             // print layout properties
             print_gate_layout_properties(*exact_gate_lyt);
             // draw the layout
-            fiction::debug::write_dot_layout<fcn_gate_level_layout,
-                                             fiction::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
+            fiction::utils::debug::write_dot_layout<fcn_gate_level_layout,
+                                                    fiction::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
                 *exact_gate_lyt, designs + "exact_lyt");
 
             // apply the QCA ONE gate library to retrieve a cell-level layout

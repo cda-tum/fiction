@@ -5,8 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/utils/combination_utils.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include <fiction/utils/math/combination_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -19,40 +19,40 @@ TEST_CASE("round_to_n_decimal_places should round an input number to n decimal p
 {
     SECTION("int64_t")
     {
-        CHECK(round_to_n_decimal_places(-1LL, 0) == -1LL);
-        CHECK(round_to_n_decimal_places(-1LL, 10) == -1LL);
-        CHECK(round_to_n_decimal_places(1LL, 0) == 1LL);
-        CHECK(round_to_n_decimal_places(1LL, 10) == 1LL);
+        CHECK(utils::math::round_to_n_decimal_places(-1LL, 0) == -1LL);
+        CHECK(utils::math::round_to_n_decimal_places(-1LL, 10) == -1LL);
+        CHECK(utils::math::round_to_n_decimal_places(1LL, 0) == 1LL);
+        CHECK(utils::math::round_to_n_decimal_places(1LL, 10) == 1LL);
     }
 
     SECTION("double")
     {
         const double value_positive = 3.145926;
-        CHECK(round_to_n_decimal_places(value_positive, 0) == 3);
-        CHECK(round_to_n_decimal_places(value_positive, 1) == 3.1);
-        CHECK(round_to_n_decimal_places(value_positive, 2) == 3.15);
-        CHECK(round_to_n_decimal_places(value_positive, 3) == 3.146);
-        CHECK(round_to_n_decimal_places(value_positive, 4) == 3.1459);
-        CHECK(round_to_n_decimal_places(value_positive, 5) == 3.14593);
-        CHECK(round_to_n_decimal_places(value_positive, 6) == 3.145926);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 0) == 3);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 1) == 3.1);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 2) == 3.15);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 3) == 3.146);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 4) == 3.1459);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 5) == 3.14593);
+        CHECK(utils::math::round_to_n_decimal_places(value_positive, 6) == 3.145926);
 
         const double value_negative = -3.145926;
-        CHECK(round_to_n_decimal_places(value_negative, 0) == -3);
-        CHECK(round_to_n_decimal_places(value_negative, 1) == -3.1);
-        CHECK(round_to_n_decimal_places(value_negative, 2) == -3.15);
-        CHECK(round_to_n_decimal_places(value_negative, 3) == -3.146);
-        CHECK(round_to_n_decimal_places(value_negative, 4) == -3.1459);
-        CHECK(round_to_n_decimal_places(value_negative, 5) == -3.14593);
-        CHECK(round_to_n_decimal_places(value_negative, 6) == -3.145926);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 0) == -3);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 1) == -3.1);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 2) == -3.15);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 3) == -3.146);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 4) == -3.1459);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 5) == -3.14593);
+        CHECK(utils::math::round_to_n_decimal_places(value_negative, 6) == -3.145926);
     }
 
     SECTION("Edge cases")
     {
-        CHECK(round_to_n_decimal_places(1.005, 2) == 1.0);
-        CHECK(round_to_n_decimal_places(0.000001, 6) == 0.000001);
-        CHECK(round_to_n_decimal_places(0.0000001, 6) == 0);
-        CHECK(round_to_n_decimal_places(-0.000001, 6) == -0.000001);
-        CHECK(round_to_n_decimal_places(-0.0000001, 6) == 0);
+        CHECK(utils::math::round_to_n_decimal_places(1.005, 2) == 1.0);
+        CHECK(utils::math::round_to_n_decimal_places(0.000001, 6) == 0.000001);
+        CHECK(utils::math::round_to_n_decimal_places(0.0000001, 6) == 0);
+        CHECK(utils::math::round_to_n_decimal_places(-0.000001, 6) == -0.000001);
+        CHECK(utils::math::round_to_n_decimal_places(-0.0000001, 6) == 0);
     }
 }
 
@@ -61,61 +61,61 @@ TEMPLATE_TEST_CASE("integral_abs should compute the absolute value of a number o
 {
     const auto x = static_cast<TestType>(-42);
 
-    CHECK(integral_abs(integral_abs(x) - (x < 0 ? -x : x)) == 0);
+    CHECK(utils::math::integral_abs(utils::math::integral_abs(x) - (x < 0 ? -x : x)) == 0);
 }
 
 TEST_CASE("Binomial Coefficient Tests")
 {
     SECTION("C(5, 2)")
     {
-        const uint64_t result = binomial_coefficient(5, 2);
+        const uint64_t result = utils::math::binomial_coefficient(5, 2);
         REQUIRE(result == 10);  // C(5, 2) = 10
     }
 
     SECTION("C(10, 3)")
     {
-        const uint64_t result = binomial_coefficient(10, 3);
+        const uint64_t result = utils::math::binomial_coefficient(10, 3);
         REQUIRE(result == 120);  // C(10, 3) = 120
     }
 
     SECTION("C(0, 0)")
     {
-        const uint64_t result = binomial_coefficient(0, 0);
+        const uint64_t result = utils::math::binomial_coefficient(0, 0);
         REQUIRE(result == 1);  // C(0, 0) = 1
     }
 
     SECTION("C(8, 8)")
     {
-        const uint64_t result = binomial_coefficient(8, 8);
+        const uint64_t result = utils::math::binomial_coefficient(8, 8);
         REQUIRE(result == 1);  // C(8, 8) = 1
     }
 
     SECTION("C(7, 10)")
     {
-        const uint64_t result = binomial_coefficient(7, 10);
+        const uint64_t result = utils::math::binomial_coefficient(7, 10);
         REQUIRE(result == 0);  // C(7, 10) = 0 (k > n)
     }
     SECTION("C(15, 7)")
     {
-        const uint64_t result = binomial_coefficient(15, 7);
+        const uint64_t result = utils::math::binomial_coefficient(15, 7);
         REQUIRE(result == 6435);  // C(15, 7) = 6435
     }
 
     SECTION("C(20, 10)")
     {
-        const uint64_t result = binomial_coefficient(20, 10);
+        const uint64_t result = utils::math::binomial_coefficient(20, 10);
         REQUIRE(result == 184756);  // C(20, 10) = 184,756
     }
 
     SECTION("C(30, 15)")
     {
-        const uint64_t result = binomial_coefficient(30, 15);
+        const uint64_t result = utils::math::binomial_coefficient(30, 15);
         REQUIRE(result == 155117520);  // C(30, 15) = 155,117,520
     }
 
     SECTION("C(50, 25)")
     {
-        const uint64_t result = binomial_coefficient(50, 25);
+        const uint64_t result = utils::math::binomial_coefficient(50, 25);
         REQUIRE(result == 126410606437752);  // C(50, 25) = 126,410,606,437,752
     }
 }
@@ -127,7 +127,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
         const std::vector<std::vector<int>> input{{1, 2, 3}};
         const std::vector<std::vector<int>> expected{{1}, {2}, {3}};
 
-        auto result = cartesian_combinations(input);
+        auto result = utils::math::cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -137,7 +137,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
         const std::vector<std::vector<int>> input{{1, 2}, {3, 4}};
         const std::vector<std::vector<int>> expected{{1, 3}, {1, 4}, {2, 3}, {2, 4}};
 
-        auto result = cartesian_combinations(input);
+        auto result = utils::math::cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -148,7 +148,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
         const std::vector<std::vector<int>> expected{{1, 3, 5}, {1, 3, 6}, {1, 4, 5}, {1, 4, 6},
                                                      {2, 3, 5}, {2, 3, 6}, {2, 4, 5}, {2, 4, 6}};
 
-        auto result = cartesian_combinations(input);
+        auto result = utils::math::cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -158,7 +158,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
         const std::vector<std::vector<int>> input{};
         const std::vector<std::vector<int>> expected{{}};
 
-        auto result = cartesian_combinations(input);
+        auto result = utils::math::cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -168,7 +168,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
         const std::vector<std::vector<int>> input{{1, 2}, {}};
         const std::vector<std::vector<int>> expected{};
 
-        auto result = cartesian_combinations(input);
+        auto result = utils::math::cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -178,7 +178,7 @@ TEST_CASE("Test the computation of the cartesian combinations", "[cartesian_comb
         const std::vector<std::vector<std::string>> input{{"a", "b"}, {"x", "y"}};
         const std::vector<std::vector<std::string>> expected{{"a", "x"}, {"a", "y"}, {"b", "x"}, {"b", "y"}};
 
-        auto result = cartesian_combinations(input);
+        auto result = utils::math::cartesian_combinations(input);
 
         REQUIRE(result == expected);
     }
@@ -193,7 +193,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::size_t                           n = 0;
         const std::vector<std::vector<std::size_t>> expected{};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -204,7 +204,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::size_t                           n = 1;
         const std::vector<std::vector<std::size_t>> expected{{0}};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -215,7 +215,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::size_t                           n = 3;
         const std::vector<std::vector<std::size_t>> expected{{0, 1}, {0, 2}, {1, 2}};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -227,7 +227,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::vector<std::vector<std::size_t>> expected{{0, 1, 2}, {0, 1, 3}, {0, 1, 4}, {0, 2, 3}, {0, 2, 4},
                                                              {0, 3, 4}, {1, 2, 3}, {1, 2, 4}, {1, 3, 4}, {2, 3, 4}};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -238,7 +238,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::size_t                           n = 5;
         const std::vector<std::vector<std::size_t>> expected{};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -249,7 +249,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::size_t                           n = 5;
         const std::vector<std::vector<std::size_t>> expected{{0, 1, 2, 3, 4}};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -260,7 +260,7 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
         const std::size_t                           n = 5;
         const std::vector<std::vector<std::size_t>> expected{};
 
-        auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
+        auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(k, n);
 
         REQUIRE(result == expected);
     }
@@ -268,26 +268,26 @@ TEST_CASE("Test the determination of all combinations of distributing k entities
 
 TEST_CASE("Zero entities", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(0, 5);
+    const auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(0, 5);
     REQUIRE(result.empty());
 }
 
 TEST_CASE("More entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(5, 3);
+    const auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(5, 3);
     REQUIRE(result.empty());
 }
 
 TEST_CASE("Equal entities and positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 3);
+    const auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(3, 3);
     REQUIRE(result.size() == 1);
     REQUIRE(result[0] == std::vector<std::size_t>{0, 1, 2});
 }
 
 TEST_CASE("Less entities than positions", "[determine-all-combinations-of-distributing-k-entities-on-n-positions]")
 {
-    const auto result = determine_all_combinations_of_distributing_k_entities_on_n_positions(2, 3);
+    const auto result = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(2, 3);
     REQUIRE(result.size() == 3);
     REQUIRE(result[0] == std::vector<std::size_t>{0, 1});
     REQUIRE(result[1] == std::vector<std::size_t>{0, 2});

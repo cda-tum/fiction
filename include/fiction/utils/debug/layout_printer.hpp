@@ -9,7 +9,7 @@
 
 #include <iostream>
 
-namespace fiction::debug
+namespace fiction::utils::debug
 {
 
 template <typename Lyt>
@@ -71,6 +71,6 @@ void print_tile_to_node_assignments(const Lyt& lyt)
     std::cout << std::endl << "----------------------" << std::endl;
 }
 
-}  // namespace fiction::debug
+}  // namespace fiction::utils::debug
 
 #endif  // FICTION_LAYOUT_PRINTER_HPP

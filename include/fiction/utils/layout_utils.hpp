@@ -15,7 +15,7 @@
 #include "fiction/technology/sidb_lattice.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -839,21 +839,21 @@ template <typename Lyt>
         [&lyt, &cell_fold](const auto& c)
         {
             std::size_t cell_hash{0};
-            hash_combine(cell_hash, c, lyt.get_cell_type(c));
+            utils::stl::hash_combine(cell_hash, c, lyt.get_cell_type(c));
 
             if constexpr (is_charge_distribution_surface_v<Lyt>)
             {
                 // the num_negative_sidbs, num_neutral_sidbs, and num_positive_sidbs counts that
                 // are_cell_layouts_identical compares are folds over these very charge states, so the digest
                 // already determines them
-                hash_combine(cell_hash, lyt.get_charge_state(c));
+                utils::stl::hash_combine(cell_hash, lyt.get_charge_state(c));
             }
 
-            hash_combine_unordered(cell_fold, cell_hash);
+            utils::stl::hash_combine_unordered(cell_fold, cell_hash);
         });
 
     std::size_t digest{0};
-    hash_combine(digest, lyt.num_cells(), cell_fold);
+    utils::stl::hash_combine(digest, lyt.num_cells(), cell_fold);
 
     if constexpr (is_sidb_defect_surface_v<Lyt>)
     {
@@ -863,12 +863,12 @@ template <typename Lyt>
             [&defect_fold](const auto& defect)
             {
                 std::size_t defect_hash{0};
-                hash_combine(defect_hash, defect.first, defect.second);
+                utils::stl::hash_combine(defect_hash, defect.first, defect.second);
 
-                hash_combine_unordered(defect_fold, defect_hash);
+                utils::stl::hash_combine_unordered(defect_fold, defect_hash);
             });
 
-        hash_combine(digest, lyt.num_defects(), defect_fold);
+        utils::stl::hash_combine(digest, lyt.num_defects(), defect_fold);
     }
 
     return digest;

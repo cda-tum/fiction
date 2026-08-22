@@ -9,7 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/constants.hpp"
-#include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
 
 #include <algorithm>
@@ -40,13 +40,13 @@ class write_location_and_ground_state_impl
     void run()
     {
         // this part searches for the ground state(s) among all physically valid charge distributions
-        const auto min_energy = round_to_n_decimal_places(
+        const auto min_energy = utils::math::round_to_n_decimal_places(
             minimum_energy(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend()), 6);
 
         std::vector<charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
-            if (std::fabs(round_to_n_decimal_places(valid_layout.get_electrostatic_potential_energy(), 6) -
+            if (std::fabs(utils::math::round_to_n_decimal_places(valid_layout.get_electrostatic_potential_energy(), 6) -
                           min_energy) < constants::ERROR_MARGIN)
             {
                 ground_state_layouts.emplace_back(charge_distribution_surface<Lyt>{valid_layout});

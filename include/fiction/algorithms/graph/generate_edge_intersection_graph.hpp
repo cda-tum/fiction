@@ -10,7 +10,7 @@
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
-#include "fiction/utils/stl_utils.hpp"
+#include "fiction/utils/stl/stl_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 #include <phmap.h>
@@ -231,8 +231,8 @@ class generate_edge_intersection_graph_impl
             }
 
             // else, check if any of the coordinates (including I/Os) form a shared segment in the stored path
-            return find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this), std::cend(*this)) !=
-                   std::cend(other);
+            return utils::stl::find_first_two_of(std::cbegin(other), std::cend(other), std::cbegin(*this),
+                                                 std::cend(*this)) != std::cend(other);
         }
         /**
          * Label to identify the path in the edge intersection graph.

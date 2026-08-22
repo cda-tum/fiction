@@ -5,7 +5,6 @@
 #ifndef FICTION_QUICKEXACT_HPP
 #define FICTION_QUICKEXACT_HPP
 
-#include "fiction/algorithms/iter/gray_code_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
@@ -14,6 +13,7 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/stl/gray_code_iterator.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -306,7 +306,7 @@ class quickexact_impl
         charge_layout.assign_base_number(2);
         uint64_t previous_charge_index = 0;
 
-        gray_code_iterator gci{0};
+        utils::stl::gray_code_iterator gci{0};
 
         for (gci = 0; gci <= charge_layout.get_max_charge_index(); ++gci)
         {

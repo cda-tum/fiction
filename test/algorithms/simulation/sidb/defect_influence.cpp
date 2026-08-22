@@ -134,7 +134,7 @@ TEMPLATE_TEST_CASE(
 
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
-            CHECK_THAT(round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
+            CHECK_THAT(utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
         }
 
@@ -144,7 +144,7 @@ TEMPLATE_TEST_CASE(
 
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
-            CHECK_THAT(round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
+            CHECK_THAT(utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
         }
 
@@ -198,7 +198,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
             const auto clearance_result = calculate_defect_clearance(lyt, defect_operational_domain);
 
-            CHECK_THAT(round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
+            CHECK_THAT(utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(0.665060, constants::ERROR_MARGIN));
             CHECK((((clearance_result.defect_position.x == -1) && (clearance_result.defect_position.y == -1) ||
                     ((clearance_result.defect_position.x == 1) && (clearance_result.defect_position.y == -1)))));
@@ -220,8 +220,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_operational_domain = defect_influence_grid_search(lyt, defect_operational_params);
         const auto defect_clearance          = calculate_defect_clearance(lyt, defect_operational_domain);
 
-        CHECK_THAT(round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       round_to_n_decimal_places(sidb_nm_distance(lyt, {0, 0}, {1, -1}), 4),
+        CHECK_THAT(utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                       utils::math::round_to_n_decimal_places(sidb_nm_distance(lyt, {0, 0}, {1, -1}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 
@@ -241,8 +241,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         const auto defect_clearance = calculate_defect_clearance(lat, defect_operational_domain);
 
-        CHECK_THAT(round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       round_to_n_decimal_places(sidb_nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
+        CHECK_THAT(utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                       utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 
@@ -266,8 +266,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_operational_domain = defect_influence_grid_search(lat, defect_operational_params);
         const auto defect_clearance          = calculate_defect_clearance(lat, defect_operational_domain);
 
-        CHECK_THAT(round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
+        CHECK_THAT(utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                       utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
     }
 

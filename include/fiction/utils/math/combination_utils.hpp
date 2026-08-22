@@ -2,10 +2,10 @@
 // Created by Jan Drewniok on 19.04.23.
 //
 
-#ifndef FICTION_COMBINATION_UTILS_HPP
-#define FICTION_COMBINATION_UTILS_HPP
+#ifndef FICTION_UTILS_MATH_COMBINATION_UTILS_HPP
+#define FICTION_UTILS_MATH_COMBINATION_UTILS_HPP
 
-#include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <cstddef>
 #include <numeric>
@@ -13,7 +13,7 @@
 
 #include <combinations.h>
 
-namespace fiction
+namespace fiction::utils::math
 {
 
 /**
@@ -67,6 +67,5 @@ determine_all_combinations_of_distributing_k_entities_on_n_positions(const std::
     return all_combinations;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_COMBINATION_UTILS_HPP
+}  // namespace fiction::utils::math
+#endif  // FICTION_UTILS_MATH_COMBINATION_UTILS_HPP

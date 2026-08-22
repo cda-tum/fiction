@@ -15,8 +15,8 @@
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/combination_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
+#include "fiction/utils/math/combination_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/traits.hpp>
@@ -207,7 +207,7 @@ class design_sidb_gates_impl
     {
         mockturtle::stopwatch stop{stats.time_total};
 
-        auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
+        auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};
@@ -681,7 +681,7 @@ class design_sidb_gates_impl
      */
     [[nodiscard]] std::vector<Lyt> determine_all_possible_canvas_layouts() const noexcept
     {
-        const auto all_combinations = determine_all_combinations_of_distributing_k_entities_on_n_positions(
+        const auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
             params.number_of_canvas_sidbs, static_cast<std::size_t>(all_sidbs_in_canvas.size()));
 
         std::vector<Lyt> designed_gate_layouts = {};

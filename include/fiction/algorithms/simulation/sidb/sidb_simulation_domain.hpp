@@ -5,7 +5,7 @@
 #ifndef FICTION_SIDB_SIMULATION_DOMAIN_HPP
 #define FICTION_SIDB_SIMULATION_DOMAIN_HPP
 
-#include "fiction/utils/phmap_utils.hpp"
+#include "fiction/utils/stl/phmap_utils.hpp"
 
 #include <algorithm>
 #include <cstdio>
@@ -98,7 +98,7 @@ class sidb_simulation_domain
     /**
      * The domain values stored in a thread-safe map.
      */
-    locked_parallel_flat_hash_map<Key, std::tuple<MappedTypes...>> domain_values{};
+    utils::stl::locked_parallel_flat_hash_map<Key, std::tuple<MappedTypes...>> domain_values{};
 };
 
 }  // namespace fiction

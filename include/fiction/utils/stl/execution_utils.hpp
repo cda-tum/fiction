@@ -2,8 +2,8 @@
 // Created by marcel on 15.01.23.
 //
 
-#ifndef FICTION_EXECUTION_UTILS_HPP
-#define FICTION_EXECUTION_UTILS_HPP
+#ifndef FICTION_UTILS_STL_EXECUTION_UTILS_HPP
+#define FICTION_UTILS_STL_EXECUTION_UTILS_HPP
 
 #include <version>  // defines the feature-test macros the guard below reads
 
@@ -68,4 +68,4 @@
 
 #endif
 
-#endif  // FICTION_EXECUTION_UTILS_HPP
+#endif  // FICTION_UTILS_STL_EXECUTION_UTILS_HPP

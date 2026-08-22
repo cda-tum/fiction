@@ -2,13 +2,13 @@
 // Created by marcel on 28.06.21.
 //
 
-#ifndef FICTION_ARRAY_UTILS_HPP
-#define FICTION_ARRAY_UTILS_HPP
+#ifndef FICTION_UTILS_STL_ARRAY_UTILS_HPP
+#define FICTION_UTILS_STL_ARRAY_UTILS_HPP
 
 #include <array>
 #include <utility>
 
-namespace fiction
+namespace fiction::utils::stl
 {
 
 namespace detail
@@ -91,6 +91,5 @@ constexpr auto convert_array_of_arrays(const std::array<std::array<T, M>, N>& a)
     return detail::convert_array_of_arrays<ElementType>(a, std::make_index_sequence<N>());
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_ARRAY_UTILS_HPP
+}  // namespace fiction::utils::stl
+#endif  // FICTION_UTILS_STL_ARRAY_UTILS_HPP

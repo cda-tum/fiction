@@ -2,8 +2,8 @@
 // Created by marcel on 28.06.21.
 //
 
-#ifndef FICTION_HASH_HPP
-#define FICTION_HASH_HPP
+#ifndef FICTION_UTILS_STL_HASH_HPP
+#define FICTION_UTILS_STL_HASH_HPP
 
 #include <algorithm>
 #include <array>
@@ -13,7 +13,7 @@
 #include <set>
 #include <utility>
 
-namespace fiction
+namespace fiction::utils::stl
 {
 
 /**
@@ -66,8 +66,7 @@ void hash_combine_unordered(std::size_t& seed, const T& v) noexcept
     seed += static_cast<std::size_t>(scrambled);
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::utils::stl
 namespace std
 {
 
@@ -89,7 +88,7 @@ struct hash<std::array<T, N>>
     std::size_t operator()(const std::array<T, N>& a) const noexcept
     {
         std::size_t h = 0;
-        std::ranges::for_each(a, [&h](const auto& e) { fiction::hash_combine(h, e); });
+        std::ranges::for_each(a, [&h](const auto& e) { fiction::utils::stl::hash_combine(h, e); });
 
         return h;
     }
@@ -111,7 +110,7 @@ struct hash<std::set<T>>
     std::size_t operator()(const std::set<T>& s) const noexcept
     {
         std::size_t h = 0;
-        std::ranges::for_each(s, [&h](const auto& e) { fiction::hash_combine(h, e); });
+        std::ranges::for_each(s, [&h](const auto& e) { fiction::utils::stl::hash_combine(h, e); });
 
         return h;
     }
@@ -133,7 +132,7 @@ struct hash<std::multiset<T>>
     std::size_t operator()(const std::multiset<T>& s) const noexcept
     {
         std::size_t h = 0;
-        std::ranges::for_each(s, [&h](const auto& e) { fiction::hash_combine(h, e); });
+        std::ranges::for_each(s, [&h](const auto& e) { fiction::utils::stl::hash_combine(h, e); });
 
         return h;
     }
@@ -156,7 +155,7 @@ struct hash<std::pair<T1, T2>>
     std::size_t operator()(const std::pair<T1, T2>& p) const noexcept
     {
         std::size_t h = 0;
-        fiction::hash_combine(h, p.first, p.second);
+        fiction::utils::stl::hash_combine(h, p.first, p.second);
 
         return h;
     }
@@ -164,4 +163,4 @@ struct hash<std::pair<T1, T2>>
 
 }  // namespace std
 
-#endif  // FICTION_HASH_HPP
+#endif  // FICTION_UTILS_STL_HASH_HPP

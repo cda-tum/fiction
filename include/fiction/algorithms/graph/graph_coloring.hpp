@@ -5,7 +5,7 @@
 #ifndef FICTION_GRAPH_COLORING_HPP
 #define FICTION_GRAPH_COLORING_HPP
 
-#include "fiction/utils/hash.hpp"  // NOLINT(misc-include-cleaner): provides std::hash<std::pair<...>> used by variables' unordered_map
+#include "fiction/utils/stl/hash.hpp"  // NOLINT(misc-include-cleaner): provides std::hash<std::pair<...>> used by variables' unordered_map
 
 #include <bill/sat/cardinality.hpp>
 #include <bill/sat/interface/common.hpp>

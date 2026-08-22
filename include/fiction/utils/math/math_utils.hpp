@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 19.04.23.
 //
 
-#ifndef FICTION_MATH_UTILS_HPP
-#define FICTION_MATH_UTILS_HPP
+#ifndef FICTION_UTILS_MATH_MATH_UTILS_HPP
+#define FICTION_UTILS_MATH_MATH_UTILS_HPP
 
 #include <cmath>
 #include <concepts>
@@ -14,7 +14,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace fiction
+namespace fiction::utils::math
 {
 
 /**
@@ -141,6 +141,5 @@ cartesian_combinations(const std::vector<std::vector<VectorDataType>>& sets) noe
     return chi;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_MATH_UTILS_HPP
+}  // namespace fiction::utils::math
+#endif  // FICTION_UTILS_MATH_MATH_UTILS_HPP

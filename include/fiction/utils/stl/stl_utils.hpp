@@ -2,8 +2,8 @@
 // Created by marcel on 15.02.22.
 //
 
-#ifndef FICTION_STL_UTILS_HPP
-#define FICTION_STL_UTILS_HPP
+#ifndef FICTION_UTILS_STL_STL_UTILS_HPP
+#define FICTION_UTILS_STL_STL_UTILS_HPP
 
 #include <algorithm>
 #include <ctime>
@@ -12,7 +12,7 @@
 #include <queue>
 #include <vector>
 
-namespace fiction
+namespace fiction::utils::stl
 {
 
 /**
@@ -141,6 +141,5 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
     return tm_snapshot;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_STL_UTILS_HPP
+}  // namespace fiction::utils::stl
+#endif  // FICTION_UTILS_STL_STL_UTILS_HPP

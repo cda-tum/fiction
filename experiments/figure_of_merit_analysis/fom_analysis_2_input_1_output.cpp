@@ -20,7 +20,7 @@
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 #include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/core.h>
@@ -218,7 +218,7 @@ int main()  // NOLINT
 
             for (auto i = 0u; i < temps.size(); i++)
             {
-                const auto chi = cost_function_chi(
+                const auto chi = utils::math::cost_function_chi(
                     {temps.at(i) / max_temp, percentual_operational_domain[i] / max_relative_op_domain,
                      defect_influence_arsenic.at(i) / max_defect_clearance_arsenic,
                      defect_influence_vacancy.at(i) / max_defect_clearance_vacancy, bbr_all.at(i) / max_bbr},

@@ -9,7 +9,7 @@
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/routing_utils.hpp"
-#include "fiction/utils/stl_utils.hpp"
+#include "fiction/utils/stl/stl_utils.hpp"
 
 #include <phmap.h>
 
@@ -155,7 +155,7 @@ class a_star_impl
      * C++ is weird at times...
      */
     using a_star_priority_queue =
-        searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<coordinate_f>>;
+        utils::stl::searchable_priority_queue<coordinate_f, std::vector<coordinate_f>, std::greater<coordinate_f>>;
     /**
      * Open list that contains all coordinates to process next sorted by their f-value.
      */

@@ -5,7 +5,7 @@
 #ifndef FICTION_NETWORK_UTILS_HPP
 #define FICTION_NETWORK_UTILS_HPP
 
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -51,7 +51,7 @@ struct hash<mockturtle::edge<Ntk>>
     std::size_t operator()(const mockturtle::edge<Ntk>& e) const noexcept
     {
         std::size_t h = 0;
-        fiction::hash_combine(h, e.source, e.target);
+        fiction::utils::stl::hash_combine(h, e.source, e.target);
 
         return h;
     }

@@ -7,7 +7,7 @@
 #include <fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp>
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 using namespace fiction;
 
@@ -23,8 +23,10 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
         energy_distribution distribution{};
         distribution.add_energy_state(energy_state(0.1, 2));
 
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10.0), 6) == 0.0);
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 0.01), 6) == 0.0);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10.0), 6) ==
+              0.0);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 0.01), 6) ==
+              0.0);
     }
 
     SECTION("one state with degeneracy")
@@ -39,8 +41,9 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
         energy_distribution distribution{};
         distribution.add_energy_state(energy_state(0.1, 2));
 
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10), 6) == 0);
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 0.01), 6) == 0);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10), 6) == 0);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 0.01), 6) ==
+              0);
     }
 
     SECTION("a few states with degeneracy")
@@ -60,8 +63,10 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
 
         CHECK(occupation_probability_non_gate_based(distribution, 0.001) == 0.0);
 
-        CHECK(round_to_n_decimal_places(occupation_probability_gate_based(energy_and_state_type, 10E10), 6) == 0.25);
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10E10), 6) == 0.5);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_gate_based(energy_and_state_type, 10E10),
+                                                     6) == 0.25);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10E10), 6) ==
+              0.5);
     }
 
     SECTION("a few states with degeneracy, different oder of the energy_distribution_transparent_erroneous entries")
@@ -82,8 +87,10 @@ TEST_CASE("occupation probability of all erroneous charge distribution states", 
 
         CHECK(occupation_probability_non_gate_based(distribution, 0.001) == 0.0);
 
-        CHECK(round_to_n_decimal_places(occupation_probability_gate_based(energy_and_state_type, 10E10), 2) == 0.25);
-        CHECK(round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10E10), 6) == 0.5);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_gate_based(energy_and_state_type, 10E10),
+                                                     2) == 0.25);
+        CHECK(utils::math::round_to_n_decimal_places(occupation_probability_non_gate_based(distribution, 10E10), 6) ==
+              0.5);
     }
 
     SECTION("one state / true")

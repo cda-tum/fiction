@@ -8,9 +8,9 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/combination_utils.hpp"
 #include "fiction/utils/layout_utils.hpp"
-#include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/math/combination_utils.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -296,8 +296,8 @@ class displacement_robustness_domain_impl
         }
 
         const auto all_combinations_of_fabricating_misplaced_sidbs =
-            determine_all_combinations_of_distributing_k_entities_on_n_positions(number_of_displaced_sidbs,
-                                                                                 sidbs_of_the_original_layout.size());
+            utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
+                number_of_displaced_sidbs, sidbs_of_the_original_layout.size());
 
         const auto number_of_maximal_tested_misplaced_cell_combinations =
             std::max(uint64_t{1},
@@ -510,7 +510,7 @@ class displacement_robustness_domain_impl
      */
     [[nodiscard]] std::vector<Lyt> generate_valid_displaced_sidb_layouts() noexcept
     {
-        auto all_possible_sidb_displacement = cartesian_combinations(all_possible_sidb_displacements);
+        auto all_possible_sidb_displacement = utils::math::cartesian_combinations(all_possible_sidb_displacements);
 
         std::ranges::shuffle(all_possible_sidb_displacement, generator);
 

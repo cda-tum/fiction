@@ -19,8 +19,8 @@
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/constants.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/hash.hpp"
-#include "fiction/utils/math_utils.hpp"
+#include "fiction/utils/math/math_utils.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <btree.h>
 #include <fmt/format.h>
@@ -596,7 +596,7 @@ class operational_domain_impl
     {
         const mockturtle::stopwatch stop{stats.time_total};
 
-        const auto all_index_combinations = cartesian_combinations(indices);
+        const auto all_index_combinations = utils::math::cartesian_combinations(indices);
 
         std::vector<step_point> all_step_points{};
         all_step_points.reserve(all_index_combinations.size());
@@ -1052,7 +1052,7 @@ class operational_domain_impl
         const mockturtle::stopwatch stop{stats.time_total};
 
         // Cartesian product of all step point indices
-        const auto all_index_combinations = cartesian_combinations(indices);
+        const auto all_index_combinations = utils::math::cartesian_combinations(indices);
 
         // number of threads. Floored at `1` so that the slice arithmetic below stays well-defined when there is
         // nothing to distribute; the `start >= end` guard in the loop then keeps the worker from being launched
@@ -2415,7 +2415,7 @@ struct hash<fiction::parameter_point>
             // hash the cell the parameter value falls into, which is what `parameter_point::operator==` compares.
             // Casting the quotient straight to `size_t` would be undefined for the negative values that a `MU_MINUS`
             // sweep produces
-            fiction::hash_combine(hash_value, fiction::parameter_point::quantize(parameter));
+            fiction::utils::stl::hash_combine(hash_value, fiction::parameter_point::quantize(parameter));
         }
 
         return hash_value;

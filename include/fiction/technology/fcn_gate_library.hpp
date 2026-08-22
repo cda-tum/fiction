@@ -6,7 +6,7 @@
 #define FICTION_FCN_GATE_LIBRARY_HPP
 
 #include "fiction/technology/cell_ports.hpp"
-#include "fiction/utils/array_utils.hpp"
+#include "fiction/utils/stl/array_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <kitty/hash.hpp>
@@ -181,7 +181,7 @@ class fcn_gate_library
     template <typename T>
     static constexpr fcn_gate cell_list_to_gate(const cell_list<T>& c) noexcept
     {
-        return convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
+        return utils::stl::convert_array_of_arrays<typename Technology::cell_type, T, GateSizeY, GateSizeX>(c);
     }
     /**
      * Rotates the given `fcn_gate` by 90° clockwise at compile time.
@@ -330,8 +330,8 @@ class fcn_gate_library
      * Single empty gate in given technology and tile size. Used as a blue print to create new ones in merge and
      * transpose for example.
      */
-    static constexpr const fcn_gate EMPTY_GATE =
-        fiction::create_array<GateSizeY>(fiction::create_array<GateSizeX>(Technology::cell_type::EMPTY));
+    static constexpr const fcn_gate EMPTY_GATE = fiction::utils::stl::create_array<GateSizeY>(
+        fiction::utils::stl::create_array<GateSizeX>(Technology::cell_type::EMPTY));
 };
 
 }  // namespace fiction

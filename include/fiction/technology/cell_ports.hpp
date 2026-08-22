@@ -5,7 +5,7 @@
 #ifndef FICTION_CELL_PORTS_HPP
 #define FICTION_CELL_PORTS_HPP
 
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <fmt/format.h>
 #include <fmt/ranges.h>
@@ -243,7 +243,7 @@ struct hash<fiction::port_position>
     std::size_t operator()(const fiction::port_position& port) const noexcept
     {
         std::size_t h = port.x ^ port.y;
-        fiction::hash_combine(h, port.x, port.y);
+        fiction::utils::stl::hash_combine(h, port.x, port.y);
 
         return h;
     }
@@ -264,7 +264,7 @@ struct hash<fiction::port_list<PortType>>
     std::size_t operator()(const fiction::port_list<PortType>& port_list) const noexcept
     {
         std::size_t h = 0;
-        fiction::hash_combine(h, port_list.inp, port_list.out);
+        fiction::utils::stl::hash_combine(h, port_list.inp, port_list.out);
 
         return h;
     }

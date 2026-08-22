@@ -28,7 +28,7 @@
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <algorithm>
 #include <any>
@@ -253,7 +253,8 @@ TEMPLATE_TEST_CASE(
         {
             const auto simulation_results = clustercomplete<TestType>(lyt, params);
             auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
-            ground_state.insert(round_to_n_decimal_places(charge_lyt_first.get_electrostatic_potential_energy(), 6));
+            ground_state.insert(
+                utils::math::round_to_n_decimal_places(charge_lyt_first.get_electrostatic_potential_energy(), 6));
             charge_lyt_first.charge_distribution_to_index_general();
             charge_index.insert(charge_lyt_first.get_charge_index_and_base().first);
         }
@@ -1459,7 +1460,7 @@ TEMPLATE_TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[
 
     for (const auto& layout : simulation_results.charge_distributions)
     {
-        CHECK(round_to_n_decimal_places(layout.get_electrostatic_potential_energy(), 1) <= 0);
+        CHECK(utils::math::round_to_n_decimal_places(layout.get_electrostatic_potential_energy(), 1) <= 0);
     }
 }
 

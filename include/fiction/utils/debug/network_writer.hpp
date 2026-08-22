@@ -14,7 +14,7 @@
 #include <iostream>
 #include <string>
 
-namespace fiction::debug
+namespace fiction::utils::debug
 {
 
 template <typename Ntk, typename Drawer = fiction::technology_dot_drawer<Ntk, true>>
@@ -37,6 +37,6 @@ void write_dot_layout(const Lyt& lyt, const std::string& name = "lyt", const std
     file.close();
 }
 
-}  // namespace fiction::debug
+}  // namespace fiction::utils::debug
 
 #endif  // FICTION_NETWORK_WRITER_HPP

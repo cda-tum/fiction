@@ -6,7 +6,7 @@
 #define FICTION_WRITE_FGL_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/stl_utils.hpp"
+#include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/chrono.h>
@@ -92,7 +92,7 @@ class write_fgl_layout_impl
         // metadata
         os << fcn::FGL_HEADER << fcn::OPEN_FGL;
         const auto current_time = std::time(nullptr);
-        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time));
+        const auto time_str     = fmt::format("{:%Y-%m-%d %H:%M:%S}", utils::stl::safe_localtime(current_time));
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;

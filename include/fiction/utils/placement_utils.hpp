@@ -6,8 +6,8 @@
 #define FICTION_PLACEMENT_UTILS_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/array_utils.hpp"
 #include "fiction/utils/network_utils.hpp"
+#include "fiction/utils/stl/array_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -451,7 +451,7 @@ struct branching_signal_container
      * Storage for all branches.
      */
     std::array<std::shared_ptr<branching_signal>, fanout_size> branches =
-        create_array<fanout_size, std::shared_ptr<branching_signal>>(nullptr);
+        utils::stl::create_array<fanout_size, std::shared_ptr<branching_signal>>(nullptr);
 };
 /**
  * Place any gate from a network. This function automatically identifies the arity of the passed node and fetches its

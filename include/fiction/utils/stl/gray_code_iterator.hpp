@@ -2,14 +2,14 @@
 // Created by Jan Drewniok on 30.08.23.
 //
 
-#ifndef FICTION_GRAY_CODE_ITERATOR_HPP
-#define FICTION_GRAY_CODE_ITERATOR_HPP
+#ifndef FICTION_UTILS_STL_GRAY_CODE_ITERATOR_HPP
+#define FICTION_UTILS_STL_GRAY_CODE_ITERATOR_HPP
 
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
 
-namespace fiction
+namespace fiction::utils::stl
 {
 /**
  * An iterator type that iterates over Gray code representations for decimal numbers.
@@ -324,13 +324,12 @@ class gray_code_iterator
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::utils::stl
 // make `gray_code_iterator` compatible with STL iterator categories
 namespace std
 {
 template <>
-struct iterator_traits<fiction::gray_code_iterator>
+struct iterator_traits<fiction::utils::stl::gray_code_iterator>
 {
     using iterator_category = std::random_access_iterator_tag;
     using value_type        = uint64_t;
@@ -338,4 +337,4 @@ struct iterator_traits<fiction::gray_code_iterator>
 };
 }  // namespace std
 
-#endif  // FICTION_GRAY_CODE_ITERATOR_HPP
+#endif  // FICTION_UTILS_STL_GRAY_CODE_ITERATOR_HPP

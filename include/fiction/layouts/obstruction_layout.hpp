@@ -6,7 +6,7 @@
 #define FICTION_OBSTRUCTION_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <phmap.h>
 

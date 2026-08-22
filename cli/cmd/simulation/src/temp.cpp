@@ -10,7 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/math_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 #include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
@@ -167,9 +167,9 @@ void temp_command::execute()
 
             if (stats.num_valid_lyt > 1)
             {
-                env->out() << fmt::format(
-                    "[i] energy between the ground state and the first erroneous is {} meV\n",
-                    fiction::round_to_n_decimal_places(stats.energy_between_ground_state_and_first_erroneous, 2));
+                env->out() << fmt::format("[i] energy between the ground state and the first erroneous is {} meV\n",
+                                          fiction::utils::math::round_to_n_decimal_places(
+                                              stats.energy_between_ground_state_and_first_erroneous, 2));
             }
         }
     };

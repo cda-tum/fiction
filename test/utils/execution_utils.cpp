@@ -5,7 +5,7 @@
 // clang-format off
 // execution_utils.hpp has to stay the first include: the guard must not depend on which standard
 // headers the translation unit pulled in before it, and any header sorted above it would mask that
-#include <fiction/utils/execution_utils.hpp>
+#include <fiction/utils/stl/execution_utils.hpp>
 // clang-format on
 
 #include <catch2/catch_test_macros.hpp>

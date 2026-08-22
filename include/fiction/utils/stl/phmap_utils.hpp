@@ -2,8 +2,8 @@
 // Created by marcel on 08.08.23.
 //
 
-#ifndef FICTION_PHMAP_UTILS_HPP
-#define FICTION_PHMAP_UTILS_HPP
+#ifndef FICTION_UTILS_STL_PHMAP_UTILS_HPP
+#define FICTION_UTILS_STL_PHMAP_UTILS_HPP
 
 #include <phmap.h>
 #include <phmap_fwd_decl.h>
@@ -12,7 +12,7 @@
 #include <mutex>
 #include <utility>
 
-namespace fiction
+namespace fiction::utils::stl
 {
 
 /**
@@ -25,6 +25,5 @@ using locked_parallel_flat_hash_map =
     phmap::parallel_flat_hash_map<K, V, phmap::priv::hash_default_hash<K>, phmap::priv::hash_default_eq<K>,
                                   std::allocator<std::pair<const K, V>>, 4, std::mutex>;
 
-}  // namespace fiction
-
-#endif  // FICTION_PHMAP_UTILS_HPP
+}  // namespace fiction::utils::stl
+#endif  // FICTION_UTILS_STL_PHMAP_UTILS_HPP

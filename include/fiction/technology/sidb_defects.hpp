@@ -5,7 +5,7 @@
 #ifndef FICTION_SIDB_DEFECTS_HPP
 #define FICTION_SIDB_DEFECTS_HPP
 
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <cassert>
 #include <cstddef>
@@ -273,7 +273,7 @@ struct hash<fiction::sidb_defect>
     std::size_t operator()(const fiction::sidb_defect& defect) const noexcept
     {
         std::size_t h{0};
-        fiction::hash_combine(h, defect.type, defect.charge, defect.epsilon_r, defect.lambda_tf);
+        fiction::utils::stl::hash_combine(h, defect.type, defect.charge, defect.epsilon_r, defect.lambda_tf);
 
         return h;
     }
