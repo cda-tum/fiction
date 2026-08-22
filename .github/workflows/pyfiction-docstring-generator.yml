@@ -58,7 +58,7 @@ jobs:
           "libclang-${LLVM_VERSION}-dev"
 
       - name: Setup Z3 Solver
-        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
         with:
           version: ${{env.Z3_VERSION}}
 
