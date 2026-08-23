@@ -4,20 +4,20 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/obstruction_layout.hpp>
+#include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
 
 using namespace fiction;
 
 TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
     using lyt  = layouts::cartesian_layout<layouts::coords::offset>;
-    using path = layout_coordinate_path<lyt>;
+    using path = physical_design::utils::layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
     {
@@ -25,7 +25,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
         SECTION("(0,0) to (1,1)")  // two valid paths
         {
-            const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {1, 1}});
+            const auto collection = physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {1, 1}});
 
             CHECK(collection.size() == 2);
             CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
@@ -33,7 +33,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
         }
         SECTION("(1,1) to (0,0)")  // two valid paths
         {
-            const auto collection = enumerate_all_paths<path>(layout, {{1, 1}, {0, 0}});
+            const auto collection = physical_design::path_finding::enumerate_all_paths<path>(layout, {{1, 1}, {0, 0}});
 
             CHECK(collection.size() == 2);
             CHECK(collection.contains({{{1, 1}, {0, 1}, {0, 0}}}));
@@ -41,7 +41,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
         }
         SECTION("(0,0) to (0,0)")  // source and target are identical
         {
-            const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
+            const auto collection = physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
 
             CHECK(collection.size() == 1);
             CHECK(collection.contains({{{0, 0}}}));
@@ -59,7 +59,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
             SECTION("(0,0) to (1,1)")  // two valid paths
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {1, 1}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {1, 1}});
 
                 CHECK(collection.size() == 2);
                 CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
@@ -67,7 +68,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
             }
             SECTION("(1,1) to (0,0)")  // no valid paths
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{1, 1}, {0, 0}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{1, 1}, {0, 0}});
 
                 CHECK(collection.empty());
                 CHECK(!collection.contains({{{0, 0}, {0, 1}, {1, 1}}}));
@@ -75,7 +77,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -89,7 +92,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
             SECTION("(0,0) to (0,1)")  // one valid path
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 1}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {0, 1}});
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1}, {0, 1}}}));
@@ -98,7 +102,8 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
             }
             SECTION("(0,0) to (0,0)")  // source and target are identical
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {0, 0}});
 
                 CHECK(collection.size() == 1);
                 CHECK(collection.contains({{{0, 0}}}));
@@ -112,7 +117,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
     using lyt  = layouts::cartesian_layout<layouts::coords::offset>;
-    using path = layout_coordinate_path<lyt>;
+    using path = physical_design::utils::layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
     {
@@ -120,7 +125,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
         SECTION("(0,0) to (3,3) without obstruction")  // 184 valid paths
         {
-            const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
+            const auto collection = physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 184);
         }
@@ -135,7 +140,8 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 20 valid paths
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
 
                 CHECK(collection.size() == 20);
             }
@@ -146,7 +152,8 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 
             SECTION("(0,0) to (3,3) without obstruction")  // 4 valid paths
             {
-                const auto collection = enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(layout, {{0, 0}, {3, 3}});
 
                 CHECK(collection.size() == 4);
             }
@@ -158,7 +165,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using path = layout_coordinate_path<gate_lyt>;
+    using path = physical_design::utils::layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
     {
@@ -171,7 +178,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
             // mark coordinate as obstructed
             obstr_lyt.obstruct_coordinate({3, 0});  // blocks 75 paths
 
-            const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+            const auto collection =
+                physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 108);
         }
@@ -189,7 +197,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 1 path
 
-                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
                 CHECK(collection.size() == 19);
             }
@@ -205,7 +214,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
                 // create a PI as obstruction
                 obstr_lyt.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
                 CHECK(collection.size() == 1);
             }
@@ -217,10 +227,10 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using path = layout_coordinate_path<gate_lyt>;
+    using path = physical_design::utils::layout_coordinate_path<gate_lyt>;
 
     // enable crossings
-    const enumerate_all_paths_params params{true};
+    const physical_design::path_finding::enumerate_all_paths_params params{true};
 
     SECTION("Single crossing")
     {
@@ -239,7 +249,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {1, 2});  // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
+                    const auto collection =
+                        physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
 
                     CHECK(collection.size() == 1);
                     CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1}, {2, 2}}}));
@@ -258,7 +269,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w  = obstr_lyt.create_buf(pi, {1, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w, "obstruction PO", {0, 1});  // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
+                    const auto collection =
+                        physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {2, 2}}, params);
 
                     CHECK(collection.size() == 1);
                     CHECK(collection.contains({{{0, 0}, {1, 0}, {1, 1, 1}, {1, 2}, {2, 2}}}));
@@ -289,7 +301,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w22 = obstr_lyt.create_buf(w21, {2, 2});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w22, "obstruction PO", {2, 3});  // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}}, params);
+                    const auto collection =
+                        physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}}, params);
 
                     CHECK(collection.size() == 2);
                     CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {3, 1}, {3, 2}, {3, 3}}}));
@@ -319,7 +332,8 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
                     const auto w2  = obstr_lyt.create_buf(pi2, {2, 1});  // obstruction that can be crossed over
                     obstr_lyt.create_po(w2, "obstruction PO", {3, 1});   // obstructs 1 coordinate
 
-                    const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 2}}, params);
+                    const auto collection =
+                        physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 2}}, params);
 
                     CHECK(collection.size() == 1);
                     CHECK(collection.contains({{{0, 0}, {0, 1}, {1, 1, 1}, {2, 1, 1}, {2, 2}, {3, 2}}}));
@@ -333,7 +347,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using path = layout_coordinate_path<gate_lyt>;
+    using path = physical_design::utils::layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
     {
@@ -346,7 +360,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
             // create a connection obstruction
             obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 75 paths
 
-            const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+            const auto collection =
+                physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
             CHECK(collection.size() == 108);
         }
@@ -364,7 +379,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
                 // create a connection obstruction
                 obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 1 path
 
-                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
                 CHECK(collection.size() == 19);
             }
@@ -380,7 +396,8 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
                 // create a PI as obstruction
                 obstr_lyt.obstruct_connection({2, 0}, {3, 0});  // blocks 3 paths
 
-                const auto collection = enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
+                const auto collection =
+                    physical_design::path_finding::enumerate_all_paths<path>(obstr_lyt, {{0, 0}, {3, 3}});
 
                 CHECK(collection.size() == 1);
             }

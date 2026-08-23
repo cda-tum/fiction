@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/hexagonalization.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -66,11 +66,12 @@ void hex_command::execute()
     {
         if (this->is_set("planar"))
         {
-            ps.input_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
+            ps.input_pin_extension =
+                fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
         }
         else
         {
-            ps.input_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND;
+            ps.input_pin_extension = fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND;
         }
     }
 
@@ -78,11 +79,12 @@ void hex_command::execute()
     {
         if (this->is_set("planar"))
         {
-            ps.output_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
+            ps.output_pin_extension =
+                fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
         }
         else
         {
-            ps.output_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND;
+            ps.output_pin_extension = fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND;
         }
     }
 
@@ -92,7 +94,7 @@ void hex_command::execute()
 
         if constexpr (fiction::is_cartesian_layout_v<Lyt>)
         {
-            return fiction::hexagonalization<fiction::hex_even_row_gate_clk_lyt>(*lyt_ptr, ps, &st);
+            return fiction::physical_design::hexagonalization<fiction::hex_even_row_gate_clk_lyt>(*lyt_ptr, ps, &st);
         }
         else
         {
@@ -115,7 +117,7 @@ void hex_command::execute()
             gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(*hex_lyt);
         }
     }
-    catch (const fiction::hexagonalization_io_pin_routing_error& e)
+    catch (const fiction::physical_design::hexagonalization_io_pin_routing_error& e)
     {
         ps = {};
         env->out() << fmt::format("[e] {}\n", e.what());

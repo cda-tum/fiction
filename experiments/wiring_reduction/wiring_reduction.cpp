@@ -1,7 +1,5 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>        // scalable heuristic for physical design
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/layouts/bounding_box.hpp>                                       // bounding box
@@ -10,7 +8,9 @@
 #include <fiction/layouts/gate_level_layout.hpp>                                  // gate-level layout
 #include <fiction/layouts/tile_based_layout.hpp>                                  // tile-based layout
 #include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
-#include <fiction/types.hpp>                                                      // tec_nt, tec_ptr
+#include <fiction/physical_design/orthogonal.hpp>        // scalable heuristic for physical design
+#include <fiction/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
+#include <fiction/types.hpp>                             // tec_nt, tec_ptr
 
 #include <fmt/format.h>  // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
@@ -69,8 +69,8 @@ int main()  // NOLINT
                              "equivalent"};
 
     // stats for SMT-based physical design
-    fiction::orthogonal_physical_design_stats orthogonal_stats{};
-    fiction::wiring_reduction_stats           wiring_reduction_stats{};
+    fiction::physical_design::orthogonal_physical_design_stats orthogonal_stats{};
+    fiction::physical_design::wiring_reduction_stats           wiring_reduction_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
@@ -79,8 +79,9 @@ int main()  // NOLINT
         const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
-        const auto layout_copy       = gate_level_layout.clone();
+        auto gate_level_layout =
+            fiction::physical_design::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        const auto layout_copy = gate_level_layout.clone();
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
@@ -94,7 +95,7 @@ int main()  // NOLINT
         const auto area_before_wiring_reduction   = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        fiction::wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
+        fiction::physical_design::wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
         const auto cp_tp_stats_after = fiction::critical_path_length_and_throughput(gate_level_layout);

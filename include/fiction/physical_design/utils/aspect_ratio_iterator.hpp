@@ -2,15 +2,15 @@
 // Created by marcel on 06.01.20.
 //
 
-#ifndef FICTION_ASPECT_RATIO_ITERATOR_HPP
-#define FICTION_ASPECT_RATIO_ITERATOR_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_ASPECT_RATIO_ITERATOR_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_ASPECT_RATIO_ITERATOR_HPP
 
 #include <cmath>
 #include <cstdint>
 #include <iterator>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 /**
  * An iterator type that iterates over increasingly larger 2D aspect ratios via factorization, starting from a number of
@@ -175,17 +175,16 @@ class aspect_ratio_iterator
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::physical_design::utils
 // make `aspect_ratio_iterator` compatible with STL iterator categories
 namespace std
 {
 template <typename AspectRatio>
-struct iterator_traits<fiction::aspect_ratio_iterator<AspectRatio>>
+struct iterator_traits<fiction::physical_design::utils::aspect_ratio_iterator<AspectRatio>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = AspectRatio;
 };
 }  // namespace std
 
-#endif  // FICTION_ASPECT_RATIO_ITERATOR_HPP
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_ASPECT_RATIO_ITERATOR_HPP

@@ -5,7 +5,7 @@
 #ifndef FICTION_NETWORKS_UTILS_NAME_UTILS_HPP
 #define FICTION_NETWORKS_UTILS_NAME_UTILS_HPP
 
-#include "fiction/utils/placement_utils.hpp"
+#include "fiction/physical_design/utils/placement_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -213,7 +213,8 @@ void restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest,
 template <typename NtkSrc, typename NtkDest, uint16_t fanout_size = 2>
 void restore_signal_names(
     const NtkSrc& ntk_src, NtkDest& ntk_dest,
-    const mockturtle::node_map<branching_signal_container<NtkDest, NtkSrc, fanout_size>, NtkSrc>& old2new) noexcept
+    const mockturtle::node_map<physical_design::utils::branching_signal_container<NtkDest, NtkSrc, fanout_size>,
+                               NtkSrc>& old2new) noexcept
 {
     static_assert(mockturtle::is_network_type_v<NtkSrc>, "NtkSrc is not a network type");
     static_assert(mockturtle::is_network_type_v<NtkDest>, "NtkDest is not a network type");

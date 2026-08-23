@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_HEX_HPP
 #define FICTION_CMD_HEX_HPP
 
-#include <fiction/algorithms/physical_design/hexagonalization.hpp>
+#include <fiction/physical_design/hexagonalization.hpp>
 
 #include <alice/alice.hpp>
 
@@ -29,11 +29,11 @@ class hex_command final : public command
     /**
      * Parameters.
      */
-    fiction::hexagonalization_params ps{};
+    fiction::physical_design::hexagonalization_params ps{};
     /**
      * Statistics.
      */
-    fiction::hexagonalization_stats st{};
+    fiction::physical_design::hexagonalization_stats st{};
 
     /**
      * Function to transform a 2DDWave-clocked Cartesian layout into a hexagonal one.

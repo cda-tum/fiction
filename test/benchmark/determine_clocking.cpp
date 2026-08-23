@@ -7,13 +7,13 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/determine_clocking.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/physical_design/determine_clocking.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
@@ -34,30 +34,30 @@ TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
-    auto lyt = orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
+    auto lyt = physical_design::orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
     remove_clocking(lyt);
 
-    auto params = determine_clocking_params{};
+    auto params = physical_design::determine_clocking_params{};
 
     BENCHMARK("determine_clocking: ghack")
     {
         params.sat_engine = bill::solvers::ghack;
 
-        return determine_clocking(lyt, params);
+        return physical_design::determine_clocking(lyt, params);
     };
 
     BENCHMARK("determine_clocking: glucose_41")
     {
         params.sat_engine = bill::solvers::glucose_41;
 
-        return determine_clocking(lyt, params);
+        return physical_design::determine_clocking(lyt, params);
     };
 
     BENCHMARK("determine_clocking: bsat2")
     {
         params.sat_engine = bill::solvers::bsat2;
 
-        return determine_clocking(lyt, params);
+        return physical_design::determine_clocking(lyt, params);
     };
 
 #if !defined(BILL_WINDOWS_PLATFORM)
@@ -65,14 +65,14 @@ TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
     {
         params.sat_engine = bill::solvers::maple;
 
-        return determine_clocking(lyt, params);
+        return physical_design::determine_clocking(lyt, params);
     };
 
     BENCHMARK("determine_clocking: bmcg")
     {
         params.sat_engine = bill::solvers::bmcg;
 
-        return determine_clocking(lyt, params);
+        return physical_design::determine_clocking(lyt, params);
     };
 #endif
 }

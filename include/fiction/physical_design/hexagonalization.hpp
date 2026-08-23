@@ -2,18 +2,18 @@
 // created by simon on 14.04.23.
 //
 
-#ifndef FICTION_HEXAGONALIZATION_HPP
-#define FICTION_HEXAGONALIZATION_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_HEXAGONALIZATION_HPP
+#define FICTION_PHYSICAL_DESIGN_HEXAGONALIZATION_HPP
 
-#include "fiction/algorithms/path_finding/a_star.hpp"
-#include "fiction/algorithms/path_finding/cost.hpp"
-#include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
+#include "fiction/physical_design/path_finding/a_star.hpp"
+#include "fiction/physical_design/path_finding/cost.hpp"
+#include "fiction/physical_design/path_finding/distance.hpp"
+#include "fiction/physical_design/utils/placement_utils.hpp"
+#include "fiction/physical_design/utils/routing_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/placement_utils.hpp"
-#include "fiction/utils/routing_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -33,7 +33,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 /**
@@ -141,7 +141,7 @@ namespace detail
  * @tparam HexLyt The type of the hexagonal layout.
  */
 template <typename HexLyt>
-struct routing_objective_with_fanin_update_information : public routing_objective<HexLyt>
+struct routing_objective_with_fanin_update_information : public physical_design::utils::routing_objective<HexLyt>
 {
     /**
      * Constructs a routing objective with fanin update information.
@@ -156,7 +156,7 @@ struct routing_objective_with_fanin_update_information : public routing_objectiv
      */
     routing_objective_with_fanin_update_information(const coordinate<HexLyt>& src, const coordinate<HexLyt>& tgt,
                                                     const bool update = false) :
-            routing_objective<HexLyt>{src, tgt},
+            physical_design::utils::routing_objective<HexLyt>{src, tgt},
             update_first_fanin{update}
     {}
     /**
@@ -594,7 +594,7 @@ class hexagonalization_impl
                                 if (!layout.is_po(node))
                                 {
                                     [[maybe_unused]] const auto s =
-                                        place(hex_layout, hex_tile, layout, node, hex_signal);
+                                        physical_design::utils::place(hex_layout, hex_tile, layout, node, hex_signal);
                                 }
                             }
                             else if (signals.size() == 2)
@@ -611,8 +611,8 @@ class hexagonalization_impl
                                 const auto hex_signal_a = hex_layout.make_signal(hex_layout.get_node(hex_tile_a));
                                 const auto hex_signal_b = hex_layout.make_signal(hex_layout.get_node(hex_tile_b));
 
-                                [[maybe_unused]] const auto s =
-                                    place(hex_layout, hex_tile, layout, node, hex_signal_a, hex_signal_b);
+                                [[maybe_unused]] const auto s = physical_design::utils::place(
+                                    hex_layout, hex_tile, layout, node, hex_signal_a, hex_signal_b);
                             }
                         }
                     }
@@ -778,11 +778,12 @@ class hexagonalization_impl
 
                 // perform routing using A*
                 auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
-                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
+                using path           = physical_design::utils::layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings = ps.input_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
-                const a_star_params params_astar{crossings};
-                using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
-                using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
+                const physical_design::path_finding::a_star_params params_astar{crossings};
+                using dist =
+                    physical_design::path_finding::manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
+                using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
                 for (const auto& obj : objectives)
@@ -797,8 +798,8 @@ class hexagonalization_impl
                         update_target = true;
                     }
 
-                    if (auto new_path =
-                            a_star<path>(layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
+                    if (auto new_path = physical_design::path_finding::a_star<path>(
+                            layout_obstruct, {obj.source, target}, dist(), cost(), params_astar);
                         !new_path.empty())
                     {
                         // for planar extension, if target is in the crossing layer, update path
@@ -807,7 +808,7 @@ class hexagonalization_impl
                             new_path.back().z = 1;
                         }
 
-                        route_path(hex_layout, new_path);
+                        physical_design::utils::route_path(hex_layout, new_path);
 
                         for (const auto& t : new_path)
                         {
@@ -890,12 +891,13 @@ class hexagonalization_impl
 
                 // perform routing using A*
                 auto layout_obstruct = layouts::obstruction_layout<HexLyt>(hex_layout);
-                using path           = layout_coordinate_path<decltype(layout_obstruct)>;
+                using path           = physical_design::utils::layout_coordinate_path<decltype(layout_obstruct)>;
                 const auto crossings =
                     ps.output_pin_extension == hexagonalization_params::io_pin_extension_mode::EXTEND;
-                const a_star_params params_astar{crossings};
-                using dist = manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
-                using cost = unit_cost_functor<decltype(layout_obstruct), uint8_t>;
+                const physical_design::path_finding::a_star_params params_astar{crossings};
+                using dist =
+                    physical_design::path_finding::manhattan_distance_functor<decltype(layout_obstruct), uint64_t>;
+                using cost = physical_design::path_finding::unit_cost_functor<decltype(layout_obstruct), uint8_t>;
 
                 // for each routing objective, find a path and route it
                 for (const auto& obj : objectives)
@@ -944,8 +946,8 @@ class hexagonalization_impl
                         update_source = true;
                     }
 
-                    if (auto new_path =
-                            a_star<path>(layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
+                    if (auto new_path = physical_design::path_finding::a_star<path>(
+                            layout_obstruct, {source, obj.target}, dist(), cost(), params_astar);
                         !new_path.empty())
                     {
                         // for planar extension, if source or target are in the crossing layer, update path
@@ -954,7 +956,7 @@ class hexagonalization_impl
                             new_path.front().z = 1;
                         }
 
-                        route_path(hex_layout, new_path);
+                        physical_design::utils::route_path(hex_layout, new_path);
 
                         for (const auto& t : new_path)
                         {
@@ -1035,8 +1037,7 @@ template <typename HexLyt, typename CartLyt>
     return impl.run();
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::physical_design
 #pragma GCC diagnostic pop
 
-#endif  // FICTION_HEXAGONALIZATION_HPP
+#endif  // FICTION_PHYSICAL_DESIGN_HEXAGONALIZATION_HPP

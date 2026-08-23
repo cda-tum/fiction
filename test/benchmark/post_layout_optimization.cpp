@@ -7,13 +7,13 @@
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/physical_design/post_layout_optimization.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 
@@ -25,9 +25,9 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
-    const auto layout = orthogonal<gate_layout>(ntk);
+    const auto layout = physical_design::orthogonal<gate_layout>(ntk);
 
-    post_layout_optimization_params full_optimization_params{};
+    physical_design::post_layout_optimization_params full_optimization_params{};
 
     full_optimization_params.max_gate_relocations = (layout.x() + 1) * (layout.y() + 1);
     full_optimization_params.optimize_pos_only    = false;
@@ -36,10 +36,10 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     BENCHMARK("post_layout_optimization: full optimization")
     {
-        post_layout_optimization<gate_layout>(layout.clone(), full_optimization_params);
+        physical_design::post_layout_optimization<gate_layout>(layout.clone(), full_optimization_params);
     };
 
-    post_layout_optimization_params wiring_reduction_only_params{};
+    physical_design::post_layout_optimization_params wiring_reduction_only_params{};
 
     wiring_reduction_only_params.max_gate_relocations = 0;
     wiring_reduction_only_params.optimize_pos_only    = false;
@@ -48,7 +48,7 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     BENCHMARK("post_layout_optimization: wiring reduction only")
     {
-        post_layout_optimization<gate_layout>(layout.clone(), wiring_reduction_only_params);
+        physical_design::post_layout_optimization<gate_layout>(layout.clone(), wiring_reduction_only_params);
     };
 }
 

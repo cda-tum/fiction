@@ -5,11 +5,11 @@
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
@@ -286,8 +286,9 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return lyt;
     };
 
-    const lattice cl_4_seg{apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(
-        create_diagonal_wire_with_n_non_terminating_segments(2))};
+    const lattice cl_4_seg{
+        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(
+            create_diagonal_wire_with_n_non_terminating_segments(2))};
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
@@ -295,8 +296,9 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return clustercomplete<lattice>(cl_4_seg, sim_params);
     };
 
-    const lattice cl_3_seg{apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(
-        create_diagonal_wire_with_n_non_terminating_segments(1))};
+    const lattice cl_3_seg{
+        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library, hex_odd_row_gate_clk_lyt>(
+            create_diagonal_wire_with_n_non_terminating_segments(1))};
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {

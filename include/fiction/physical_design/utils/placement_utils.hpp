@@ -2,8 +2,8 @@
 // Created by marcel on 14.10.21.
 //
 
-#ifndef FICTION_PLACEMENT_UTILS_HPP
-#define FICTION_PLACEMENT_UTILS_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_PLACEMENT_UTILS_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_PLACEMENT_UTILS_HPP
 
 #include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/traits.hpp"
@@ -20,7 +20,7 @@
 #include <optional>
 #include <string>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 
 /**
@@ -515,6 +515,5 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
     return {};      // fix -Wreturn-type warning
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_PLACEMENT_UTILS_HPP
+}  // namespace fiction::physical_design::utils
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_PLACEMENT_UTILS_HPP

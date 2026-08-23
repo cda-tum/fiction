@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_ORTHO_HPP
 #define FICTION_CMD_ORTHO_HPP
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -55,11 +55,11 @@ class ortho_command final : public command
     /**
      * Parameters.
      */
-    fiction::orthogonal_physical_design_params ps{};
+    fiction::physical_design::orthogonal_physical_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::orthogonal_physical_design_stats st{};
+    fiction::physical_design::orthogonal_physical_design_stats st{};
 
     template <typename Lyt>
     void orthogonal_physical_design();

@@ -6,11 +6,11 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
 #include <fiction/networks/technology_network.hpp>           // technology-mapped network type
+#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/area.hpp>                       // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>          // cell implementations
@@ -97,13 +97,13 @@ int main()  // NOLINT
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params exact_params{};
+    fiction::physical_design::exact_physical_design_params exact_params{};
     exact_params.scheme        = "Row";
     exact_params.crossings     = true;
     exact_params.border_io     = true;
     exact_params.desynchronize = true;
     exact_params.timeout       = 3'600'000;  // 1h in ms
-    fiction::exact_physical_design_stats exact_stats{};
+    fiction::physical_design::exact_physical_design_stats exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
                                                    ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &
@@ -133,7 +133,8 @@ int main()  // NOLINT
         mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = fiction::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+        const auto gate_level_layout =
+            fiction::physical_design::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
 
         if (gate_level_layout.has_value())
         {
@@ -148,7 +149,8 @@ int main()  // NOLINT
 
             // apply gate library
             const auto cell_level_layout =
-                fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(*gate_level_layout);
+                fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(
+                    *gate_level_layout);
 
             // compute area
             fiction::area_stats                            area_stats{};

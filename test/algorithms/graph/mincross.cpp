@@ -6,10 +6,10 @@
 
 #include "utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/algorithms/graph/mincross.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/bfs_topo_view.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
+#include <fiction/physical_design/utils/mincross.hpp>
 #include <fiction/synthesis/network_balancing.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -31,9 +31,9 @@ TEST_CASE("Dummy Check", "[mincross]")
 
     const auto aig_r = fiction::networks::views::mutable_rank_view(aig);
 
-    mincross_stats        st{};
-    const mincross_params p{};
-    const auto            ntk = mincross(aig_r, p, &st);
+    physical_design::utils::mincross_stats        st{};
+    const physical_design::utils::mincross_params p{};
+    const auto                                    ntk = physical_design::utils::mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
 }
 
@@ -51,14 +51,14 @@ TEST_CASE("Fixed PIs Check", "[mincross]")
 
     const auto aig_r = fiction::networks::views::mutable_rank_view(tec);
 
-    mincross_stats  st{};
-    mincross_params p{};
+    physical_design::utils::mincross_stats  st{};
+    physical_design::utils::mincross_params p{};
     p.fixed_pis = false;
-    auto ntk    = mincross(aig_r, p, &st);
+    auto ntk    = physical_design::utils::mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
 
     p.fixed_pis = true;
-    ntk         = mincross(aig_r, p, &st);
+    ntk         = physical_design::utils::mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 1);
 }
 
@@ -80,15 +80,15 @@ TEST_CASE("Planar Network", "[mincross]")
     rank1.push_back(aig_r.get_node(f1));
     aig_r.set_ranks(1, rank1);
 
-    mincross_stats  st{};
-    mincross_params p{};
+    physical_design::utils::mincross_stats  st{};
+    physical_design::utils::mincross_params p{};
     p.optimize = false;
 
-    auto ntk = mincross(aig_r, p, &st);  // counts crossings
+    auto ntk = physical_design::utils::mincross(aig_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 3);
 
     p.optimize = true;
-    ntk        = mincross(aig_r, p, &st);
+    ntk        = physical_design::utils::mincross(aig_r, p, &st);
     CHECK(st.num_crossings == 0);
 }
 
@@ -110,15 +110,15 @@ TEST_CASE("Majority", "[mincross]")
     rank1.push_back(tec_r.get_node(f2));
     tec_r.set_ranks(1, rank1);
 
-    mincross_stats  st{};
-    mincross_params p{};
+    physical_design::utils::mincross_stats  st{};
+    physical_design::utils::mincross_params p{};
     p.optimize = false;
 
-    auto ntk = mincross(tec_r, p, &st);  // counts crossings
+    auto ntk = physical_design::utils::mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 2);
 
     p.optimize = true;
-    ntk        = mincross(tec_r, p, &st);
+    ntk        = physical_design::utils::mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 0);
 }
 
@@ -132,14 +132,14 @@ TEST_CASE("Adder", "[mincross]")
 
     auto tec_r = fiction::networks::views::mutable_rank_view(tec_topo);
 
-    mincross_stats  st{};
-    mincross_params p{};
+    physical_design::utils::mincross_stats  st{};
+    physical_design::utils::mincross_params p{};
     p.optimize = false;
 
-    auto ntk = mincross(tec_r, p, &st);  // counts crossings
+    auto ntk = physical_design::utils::mincross(tec_r, p, &st);  // counts crossings
     CHECK(st.num_crossings == 4);
 
     p.optimize = true;
-    ntk        = mincross(tec_r, p, &st);
+    ntk        = physical_design::utils::mincross(tec_r, p, &st);
     CHECK(st.num_crossings == 2);
 }

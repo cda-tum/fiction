@@ -2,8 +2,8 @@
 // Created by marcel on 04.02.22.
 //
 
-#ifndef FICTION_GRAPH_COLORING_HPP
-#define FICTION_GRAPH_COLORING_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_GRAPH_COLORING_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_GRAPH_COLORING_HPP
 
 #include "fiction/utils/stl/hash.hpp"  // NOLINT(misc-include-cleaner): provides std::hash<std::pair<...>> used by variables' unordered_map
 
@@ -35,7 +35,7 @@
 #include <mcs.hpp>
 #include <tabucol.hpp>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 
 /**
@@ -1040,6 +1040,5 @@ vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&            
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_GRAPH_COLORING_HPP
+}  // namespace fiction::physical_design::utils
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_GRAPH_COLORING_HPP

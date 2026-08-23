@@ -5,8 +5,8 @@
 #ifndef FICTION_ON_THE_FLY_SIDB_CIRCUIT_DESIGN_HPP
 #define FICTION_ON_THE_FLY_SIDB_CIRCUIT_DESIGN_HPP
 
-#include "fiction/algorithms/physical_design/apply_gate_library.hpp"
-#include "fiction/algorithms/physical_design/exact.hpp"
+#include "fiction/physical_design/apply_gate_library.hpp"
+#include "fiction/physical_design/exact.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
@@ -72,7 +72,7 @@ struct on_the_fly_sidb_circuit_design_on_defective_surface_params
     /**
      * Parameters for the *exact* placement and routing algorithm.
      */
-    exact_physical_design_params exact_design_parameters = {};
+    physical_design::exact_physical_design_params exact_design_parameters = {};
 };
 
 /**
@@ -104,7 +104,7 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
     /**
      * The `stats` of the *exact* algorithm.
      */
-    exact_physical_design_stats exact_stats{};
+    physical_design::exact_physical_design_stats exact_stats{};
     /**
      * The gate-level layout after P&R.
      */
@@ -152,7 +152,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
     on_the_fly_circuit_design_on_defective_surface_stats<GateLyt> st{};
 
-    exact_physical_design_stats exact_stats{};
+    physical_design::exact_physical_design_stats exact_stats{};
 
     CellLyt result{};
 
@@ -171,8 +171,8 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
         while (!gate_level_layout.has_value())
         {
             // P&R with *exact* and the pre-determined blacklist
-            gate_level_layout =
-                exact_with_blacklist<GateLyt>(ntk, black_list, params.exact_design_parameters, &exact_stats);
+            gate_level_layout = physical_design::exact_with_blacklist<GateLyt>(
+                ntk, black_list, params.exact_design_parameters, &exact_stats);
             st.exact_stats = exact_stats;
 
             if (gate_level_layout.has_value())
@@ -181,7 +181,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
                 try
                 {
-                    lyt = apply_parameterized_gate_library_to_defective_surface<
+                    lyt = physical_design::apply_parameterized_gate_library_to_defective_surface<
                         CellLyt, sidb_on_the_fly_gate_library, GateLyt,
                         sidb_on_the_fly_gate_library_params<cell<CellLyt>>>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
@@ -255,8 +255,8 @@ template <typename CellLyt, typename GateLyt>
 
     try
     {
-        return apply_parameterized_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
-                                                sidb_on_the_fly_gate_library_params<CellLyt>>(
+        return physical_design::apply_parameterized_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
+                                                                 sidb_on_the_fly_gate_library_params<CellLyt>>(
             *gate_lyt, params.sidb_on_the_fly_gate_library_parameters);
     }
 

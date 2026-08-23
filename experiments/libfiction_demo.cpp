@@ -4,24 +4,24 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
-#include <fiction/algorithms/physical_design/orthogonal.hpp>          // scalable physical design of FCN layouts
-#include <fiction/io/write_qca_layout.hpp>            // writer for QCADesigner files (physical simulation)
-#include <fiction/io/write_sqd_layout.hpp>            // writer for SiQAD files (physical simulation)
-#include <fiction/layouts/cartesian_layout.hpp>       // Cartesian grid layouts
-#include <fiction/layouts/cell_level_layout.hpp>      // cell-level abstraction of layouts
-#include <fiction/layouts/coordinates.hpp>            // coordinate systems
-#include <fiction/layouts/gate_level_layout.hpp>      // gate-level abstraction of layouts
-#include <fiction/layouts/io/layout_drawers.hpp>      // DOT drawers for logic networks and layouts
-#include <fiction/layouts/io/write_svg_layout.hpp>    // SVG writer for cell-level layout representation
-#include <fiction/layouts/tile_based_layout.hpp>      // tile-based abstraction of layouts
-#include <fiction/synthesis/fanout_substitution.hpp>  // substitute multi-output gates with fan-out cascades
-#include <fiction/technology/area.hpp>                // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>   // pre-defined cell implementations
-#include <fiction/technology/qca_one_library.hpp>     // a pre-defined QCA gate library
-#include <fiction/types.hpp>                          // pre-defined types suitable for the FCN domain
-#include <fiction/utils/debug/network_writer.hpp>     // DOT writer for logic networks and layouts
+#include <fiction/io/write_qca_layout.hpp>                 // writer for QCADesigner files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>                 // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/cartesian_layout.hpp>            // Cartesian grid layouts
+#include <fiction/layouts/cell_level_layout.hpp>           // cell-level abstraction of layouts
+#include <fiction/layouts/coordinates.hpp>                 // coordinate systems
+#include <fiction/layouts/gate_level_layout.hpp>           // gate-level abstraction of layouts
+#include <fiction/layouts/io/layout_drawers.hpp>           // DOT drawers for logic networks and layouts
+#include <fiction/layouts/io/write_svg_layout.hpp>         // SVG writer for cell-level layout representation
+#include <fiction/layouts/tile_based_layout.hpp>           // tile-based abstraction of layouts
+#include <fiction/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/orthogonal.hpp>          // scalable physical design of FCN layouts
+#include <fiction/synthesis/fanout_substitution.hpp>       // substitute multi-output gates with fan-out cascades
+#include <fiction/technology/area.hpp>                     // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>        // pre-defined cell implementations
+#include <fiction/technology/qca_one_library.hpp>          // a pre-defined QCA gate library
+#include <fiction/types.hpp>                               // pre-defined types suitable for the FCN domain
+#include <fiction/utils/debug/network_writer.hpp>          // DOT writer for logic networks and layouts
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -208,12 +208,13 @@ int main(int argc, char* argv[])  // NOLINT
     std::cout << "[i] orthogonal physical design" << std::endl;
 
     // set up parameters for orthogonal physical design
-    fiction::orthogonal_physical_design_params ortho_params{};
+    fiction::physical_design::orthogonal_physical_design_params ortho_params{};
     ortho_params.number_of_clock_phases = fiction::layouts::num_clks::FOUR;
-    fiction::orthogonal_physical_design_stats ortho_stats{};
+    fiction::physical_design::orthogonal_physical_design_stats ortho_stats{};
 
     // perform layout generation with a scalable algorithm
-    auto ortho_gate_lyt = fiction::orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
+    auto ortho_gate_lyt =
+        fiction::physical_design::orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
 
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
@@ -224,7 +225,7 @@ int main(int argc, char* argv[])  // NOLINT
 
     // apply the QCA ONE gate library to retrieve a cell-level layout
     auto ortho_cell_layout =
-        fiction::apply_gate_library<qca_cell_level_layout, fiction::qca_one_library>(ortho_gate_lyt);
+        fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca_one_library>(ortho_gate_lyt);
 
     // print cell properties
     print_cell_layout_properties(ortho_cell_layout);
@@ -248,15 +249,16 @@ int main(int argc, char* argv[])  // NOLINT
         std::cout << "[i] SMT-based physical design" << std::endl;
 
         // set up parameters for SMT-based physical design
-        fiction::exact_physical_design_params exact_params{};
+        fiction::physical_design::exact_physical_design_params exact_params{};
         exact_params.scheme    = "2DDWave";
         exact_params.crossings = true;
         exact_params.border_io = true;
         exact_params.timeout   = 180000;  // 3min in ms
-        fiction::exact_physical_design_stats exact_stats{};
+        fiction::physical_design::exact_physical_design_stats exact_stats{};
 
         // perform layout generation with an SMT-based exact algorithm
-        auto exact_gate_lyt = fiction::exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
+        auto exact_gate_lyt =
+            fiction::physical_design::exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
 
         // if attempt was successful
         if (exact_gate_lyt.has_value())
@@ -270,7 +272,8 @@ int main(int argc, char* argv[])  // NOLINT
 
             // apply the QCA ONE gate library to retrieve a cell-level layout
             auto exact_cell_layout =
-                fiction::apply_gate_library<qca_cell_level_layout, fiction::qca_one_library>(*exact_gate_lyt);
+                fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca_one_library>(
+                    *exact_gate_lyt);
 
             // print cell properties
             print_cell_layout_properties(exact_cell_layout);

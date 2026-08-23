@@ -2,8 +2,8 @@
 // Created by marcel on 20.01.24.
 //
 
-#ifndef FICTION_DETERMINE_CLOCKING_HPP
-#define FICTION_DETERMINE_CLOCKING_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_DETERMINE_CLOCKING_HPP
+#define FICTION_PHYSICAL_DESIGN_DETERMINE_CLOCKING_HPP
 
 #include "fiction/traits.hpp"
 
@@ -24,7 +24,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 /**
@@ -432,6 +432,5 @@ bool determine_clocking(Lyt& lyt, const determine_clocking_params& params = {},
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_DETERMINE_CLOCKING_HPP
+}  // namespace fiction::physical_design
+#endif  // FICTION_PHYSICAL_DESIGN_DETERMINE_CLOCKING_HPP

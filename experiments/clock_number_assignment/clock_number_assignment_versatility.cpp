@@ -1,11 +1,11 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
-#include <fiction/algorithms/verification/equivalence_checking.hpp>   // SAT-based equivalence checking
-#include <fiction/layouts/io/read_fgl_layout.hpp>                     // custom reader for layouts
-#include <fiction/networks/utils/name_utils.hpp>                      // name utilities
-#include <fiction/synthesis/network_conversion.hpp>                   // conversion of networks
-#include <fiction/types.hpp>                                          // pre-defined types
+#include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
+#include <fiction/layouts/io/read_fgl_layout.hpp>                    // custom reader for layouts
+#include <fiction/networks/utils/name_utils.hpp>                     // name utilities
+#include <fiction/physical_design/determine_clocking.hpp>            // SAT-based clock number assignment
+#include <fiction/synthesis/network_conversion.hpp>                  // conversion of networks
+#include <fiction/types.hpp>                                         // pre-defined types
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
@@ -74,11 +74,11 @@ int main()  // NOLINT
                 remove_clocking(newly_clocked_layout);
 
                 // parameters and statistics of the clock number assignment
-                const fiction::determine_clocking_params params{};
-                fiction::determine_clocking_stats        stats{};
+                const fiction::physical_design::determine_clocking_params params{};
+                fiction::physical_design::determine_clocking_stats        stats{};
 
                 // perform clock number assignment
-                fiction::determine_clocking(newly_clocked_layout, params, &stats);
+                fiction::physical_design::determine_clocking(newly_clocked_layout, params, &stats);
 
                 // check equivalence of the original and the newly clocked layout
                 const auto eq_result =

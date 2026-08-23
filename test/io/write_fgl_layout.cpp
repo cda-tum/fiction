@@ -8,7 +8,6 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -19,6 +18,7 @@
 #include <fiction/layouts/io/write_fgl_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -50,7 +50,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
 template <typename Lyt, typename Ntk>
 void check_parsing_equiv(const Ntk& ntk)
 {
-    const auto layout = orthogonal<Lyt>(ntk, {});
+    const auto layout = physical_design::orthogonal<Lyt>(ntk, {});
 
     std::stringstream layout_stream{};
     layouts::io::write_fgl_layout(layout, layout_stream);

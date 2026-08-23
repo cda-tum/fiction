@@ -1,12 +1,12 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
 #include <fiction/networks/io/network_reader.hpp>                    // custom reader for folders of networks
 #include <fiction/networks/utils/name_utils.hpp>                     // name utilities
-#include <fiction/synthesis/technology_mapping_library.hpp>          // library for technology mapping
-#include <fiction/types.hpp>                                         // pre-defined types
+#include <fiction/physical_design/determine_clocking.hpp>            // SAT-based clock number assignment
+#include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
+#include <fiction/synthesis/technology_mapping_library.hpp>  // library for technology mapping
+#include <fiction/types.hpp>                                 // pre-defined types
 
 #include <fmt/format.h>                       // output formatting
 #include <lorina/lorina.hpp>                  // Verilog/BLIF/AIGER/... file parsing
@@ -76,7 +76,7 @@ int main()  // NOLINT
         const auto mapped_network = mockturtle::map(network, gate_lib, map_params);
 
         // perform layout generation with an exact SMT-based algorithm
-        const auto original_layout = fiction::orthogonal<gate_lyt>(mapped_network);
+        const auto original_layout = fiction::physical_design::orthogonal<gate_lyt>(mapped_network);
 
         // obtain layout characteristics
         const auto width  = original_layout.x() + 1;
@@ -90,11 +90,11 @@ int main()  // NOLINT
         remove_clocking(newly_clocked_layout);
 
         // parameters and statistics of the clock number assignment
-        const fiction::determine_clocking_params params{};
-        fiction::determine_clocking_stats        stats{};
+        const fiction::physical_design::determine_clocking_params params{};
+        fiction::physical_design::determine_clocking_stats        stats{};
 
         // perform clock number assignment
-        fiction::determine_clocking(newly_clocked_layout, params, &stats);
+        fiction::physical_design::determine_clocking(newly_clocked_layout, params, &stats);
 
         // check equivalence of the original and the newly clocked layout
         const auto eq_result =

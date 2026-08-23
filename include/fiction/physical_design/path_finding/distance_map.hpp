@@ -2,10 +2,10 @@
 // Created by marcel on 18.06.23.
 //
 
-#ifndef FICTION_DISTANCE_MAP_HPP
-#define FICTION_DISTANCE_MAP_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_MAP_HPP
+#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_MAP_HPP
 
-#include "fiction/algorithms/path_finding/distance.hpp"
+#include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>
@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design::path_finding
 {
 
 /**
@@ -267,6 +267,5 @@ class smart_distance_cache_functor : public distance_functor<Lyt, Dist>
     mutable sparse_distance_map<Lyt, Dist> distance_cache{};
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_DISTANCE_MAP_HPP
+}  // namespace fiction::physical_design::path_finding
+#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_MAP_HPP

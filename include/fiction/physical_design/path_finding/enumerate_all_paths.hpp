@@ -2,17 +2,17 @@
 // Created by marcel on 01.02.22.
 //
 
-#ifndef FICTION_ENUMERATE_ALL_PATHS_HPP
-#define FICTION_ENUMERATE_ALL_PATHS_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_ENUMERATE_ALL_PATHS_HPP
+#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_ENUMERATE_ALL_PATHS_HPP
 
+#include "fiction/physical_design/utils/routing_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/routing_utils.hpp"
 
 #include <phmap.h>
 
 #include <cassert>
 
-namespace fiction
+namespace fiction::physical_design::path_finding
 {
 
 /**
@@ -33,7 +33,8 @@ template <typename Path, typename Lyt>
 class enumerate_all_paths_impl
 {
   public:
-    enumerate_all_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const enumerate_all_paths_params& p) :
+    enumerate_all_paths_impl(const Lyt& lyt, const physical_design::utils::routing_objective<Lyt>& obj,
+                             const enumerate_all_paths_params& p) :
             layout{lyt},
             objective{obj},
             params{p}
@@ -44,7 +45,7 @@ class enumerate_all_paths_impl
      *
      * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run() noexcept
+    [[nodiscard]] physical_design::utils::path_collection<Path> run() noexcept
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -65,7 +66,7 @@ class enumerate_all_paths_impl
     /**
      * The source-target coordinate pair.
      */
-    const routing_objective<Lyt> objective;
+    const physical_design::utils::routing_objective<Lyt> objective;
     /**
      * Routing parameters.
      */
@@ -77,7 +78,7 @@ class enumerate_all_paths_impl
     /**
      * Collection of all enumerated paths.
      */
-    path_collection<Path> collection{};
+    physical_design::utils::path_collection<Path> collection{};
     /**
      * Mark a coordinate as visited.
      *
@@ -145,7 +146,7 @@ class enumerate_all_paths_impl
                     if (layout.is_obstructed_coordinate(successor) && successor != tgt)
                     {
                         // if crossings are enabled, check if it is possible to switch to the crossing layer
-                        if (params.crossings && is_crossable_wire(layout, src, successor))
+                        if (params.crossings && physical_design::utils::is_crossable_wire(layout, src, successor))
                         {
                             // if the crossing layer is not obstructed
                             if (const auto above_successor = layout.above(successor);
@@ -238,14 +239,14 @@ class enumerate_all_paths_impl
  * @return A collection of all unique paths in `layout` from `objective.source` to `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> enumerate_all_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                        const enumerate_all_paths_params& params = {}) noexcept
+[[nodiscard]] physical_design::utils::path_collection<Path>
+enumerate_all_paths(const Lyt& layout, const physical_design::utils::routing_objective<Lyt>& objective,
+                    const enumerate_all_paths_params& params = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
     return detail::enumerate_all_paths_impl<Path, Lyt>{layout, objective, params}.run();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_ENUMERATE_ALL_PATHS_HPP
+}  // namespace fiction::physical_design::path_finding
+#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_ENUMERATE_ALL_PATHS_HPP

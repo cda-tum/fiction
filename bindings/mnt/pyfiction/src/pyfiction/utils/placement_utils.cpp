@@ -4,8 +4,8 @@
 
 #include "pyfiction/types.hpp"
 
+#include <fiction/physical_design/utils/placement_utils.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/placement_utils.hpp>
 
 #include <mockturtle/traits.hpp>
 
@@ -27,11 +27,12 @@ namespace detail
 {
 
 template <typename Lyt, typename Ntk>
-void reserve_input_nodes(nanobind::module_& m)
+void physical_design::utils::reserve_input_nodes(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("reserve_input_nodes", &fiction::reserve_input_nodes<Lyt, Ntk>, py::arg("lyt"), py::arg("ntk"));
+    m.def("reserve_input_nodes", &fiction::physical_design::utils::reserve_input_nodes<Lyt, Ntk>, py::arg("lyt"),
+          py::arg("ntk"));
 }
 
 template <typename Lyt, typename Ntk>

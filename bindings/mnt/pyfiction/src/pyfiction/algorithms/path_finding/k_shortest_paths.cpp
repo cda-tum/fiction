@@ -1,9 +1,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/path_finding/k_shortest_paths.hpp>
+#include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
+#include <fiction/physical_design/utils/routing_utils.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/routing_utils.hpp>
 
 #include <cstdint>
 #include <vector>
@@ -31,10 +31,10 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
     m.def(
         "yen_k_shortest_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const uint32_t k, const fiction::yen_k_shortest_paths_params& params)
+           const uint32_t k, const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params)
         {
-            const auto k_paths = fiction::yen_k_shortest_paths<fiction::layout_coordinate_path<Lyt>, Lyt>(
-                lyt, {source, target}, k, params);
+            const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
+                fiction::physical_design::utils::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(k_paths.size());
@@ -47,19 +47,20 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
             return paths;
         },
         py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("k"),
-        py::arg("params") = fiction::yen_k_shortest_paths_params{}, DOC(fiction_yen_k_shortest_paths));
+        py::arg("params") = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
+        DOC(fiction_yen_k_shortest_paths));
 }
 
 }  // namespace detail
 
-void yen_k_shortest_paths(nanobind::module_& m)
+void physical_design::path_finding::yen_k_shortest_paths(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::yen_k_shortest_paths_params>(m, "yen_k_shortest_paths_params",
-                                                     DOC(fiction_yen_k_shortest_paths_params))
+    py::class_<fiction::physical_design::path_finding::yen_k_shortest_paths_params>(
+        m, "yen_k_shortest_paths_params", DOC(fiction_yen_k_shortest_paths_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("a_star_params", &fiction::yen_k_shortest_paths_params::astar_params,
+        .def_rw("a_star_params", &fiction::physical_design::path_finding::yen_k_shortest_paths_params::astar_params,
                 DOC(fiction_yen_k_shortest_paths_params_astar_params))
 
         ;

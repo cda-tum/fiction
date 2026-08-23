@@ -1,10 +1,10 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/hexagonalization.hpp>    // layout conversion to hexagonal gird
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
+#include <fiction/physical_design/apply_gate_library.hpp>                         // layout conversion to cell-level
+#include <fiction/physical_design/hexagonalization.hpp>                           // layout conversion to hexagonal gird
+#include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/area.hpp>                       // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>          // cell implementations
@@ -93,11 +93,11 @@ int main()  // NOLINT
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // stats for ortho
-    fiction::orthogonal_physical_design_stats orthogonal_stats{};
+    fiction::physical_design::orthogonal_physical_design_stats orthogonal_stats{};
     // params for hexagonalization
-    const fiction::hexagonalization_params hexagonalization_params{};
+    const fiction::physical_design::hexagonalization_params hexagonalization_params{};
     // stats for hexagonalization
-    fiction::hexagonalization_stats hexagonalization_stats{};
+    fiction::physical_design::hexagonalization_stats hexagonalization_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::log2 &
                                                    ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
@@ -126,13 +126,14 @@ int main()  // NOLINT
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = fiction::orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
+        const auto gate_level_layout =
+            fiction::physical_design::orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
 
         // compute critical path and throughput
         const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
 
-        const auto hex_layout = fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, hexagonalization_params,
-                                                                             &hexagonalization_stats);
+        const auto hex_layout = fiction::physical_design::hexagonalization<hex_lyt, gate_lyt>(
+            gate_level_layout, hexagonalization_params, &hexagonalization_stats);
 
         // check equivalence
         fiction::equivalence_checking_stats eq_stats{};
@@ -144,7 +145,7 @@ int main()  // NOLINT
 
         // apply gate library
         const auto cell_level_layout =
-            fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
+            fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
 
         // compute area
         fiction::area_stats                            area_stats{};

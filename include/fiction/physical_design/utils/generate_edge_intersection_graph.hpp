@@ -2,14 +2,14 @@
 // Created by marcel on 02.02.22.
 //
 
-#ifndef FICTION_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
-#define FICTION_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
 
-#include "fiction/algorithms/path_finding/enumerate_all_paths.hpp"
-#include "fiction/algorithms/path_finding/k_shortest_paths.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/physical_design/path_finding/enumerate_all_paths.hpp"
+#include "fiction/physical_design/path_finding/k_shortest_paths.hpp"
+#include "fiction/physical_design/utils/routing_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/routing_utils.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -25,7 +25,7 @@
 #include <undirected_graph.h>
 #include <undirected_pair.h>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 
 /**
@@ -96,46 +96,45 @@ class generate_edge_intersection_graph_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        std::ranges::for_each(objectives,
-                              [this](const auto& obj)
-                              {
-                                  path_collection<clk_path> obj_paths{};
+        std::ranges::for_each(
+            objectives,
+            [this](const auto& obj)
+            {
+                path_collection<clk_path> obj_paths{};
 
-                                  if (!ps.path_limit.has_value())
-                                  {
-                                      // enumerate all paths for the current objective
-                                      obj_paths =
-                                          enumerate_all_paths<clk_path>(layouts::obstruction_layout{layout},
-                                                                        {obj.source, obj.target}, {ps.crossings});
-                                  }
-                                  else
-                                  {
-                                      // enumerate k paths for the current objective
-                                      obj_paths = yen_k_shortest_paths<clk_path>(layouts::obstruction_layout{layout},
-                                                                                 {obj.source, obj.target},
-                                                                                 *ps.path_limit, {ps.crossings});
-                                  }
+                if (!ps.path_limit.has_value())
+                {
+                    // enumerate all paths for the current objective
+                    obj_paths = physical_design::path_finding::enumerate_all_paths<clk_path>(
+                        layouts::obstruction_layout{layout}, {obj.source, obj.target}, {ps.crossings});
+                }
+                else
+                {
+                    // enumerate k paths for the current objective
+                    obj_paths = physical_design::path_finding::yen_k_shortest_paths<clk_path>(
+                        layouts::obstruction_layout{layout}, {obj.source, obj.target}, *ps.path_limit, {ps.crossings});
+                }
 
-                                  // assign a unique label to each path and create a corresponding node in the graph
-                                  initiate_objective_nodes(obj_paths);
+                // assign a unique label to each path and create a corresponding node in the graph
+                initiate_objective_nodes(obj_paths);
 
-                                  // if there are no paths, the objective could not be fulfilled
-                                  if (obj_paths.empty())
-                                  {
-                                      pst.number_of_unroutable_objectives++;
-                                  }
-                                  else if (obj_paths.size() > 1)
-                                  {
-                                      // since all paths of the same objective have intersections by definition, create
-                                      // edges between all of them by iterating over all possible combinations of size 2
-                                      connect_clique(obj_paths);
-                                  }
-                                  // for each previously stored path, create an edge if there is an intersection
-                                  create_intersection_edges(obj_paths);
+                // if there are no paths, the objective could not be fulfilled
+                if (obj_paths.empty())
+                {
+                    pst.number_of_unroutable_objectives++;
+                }
+                else if (obj_paths.size() > 1)
+                {
+                    // since all paths of the same objective have intersections by definition, create
+                    // edges between all of them by iterating over all possible combinations of size 2
+                    connect_clique(obj_paths);
+                }
+                // for each previously stored path, create an edge if there is an intersection
+                create_intersection_edges(obj_paths);
 
-                                  // add the collection to all paths gathered thus far
-                                  all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
-                              });
+                // add the collection to all paths gathered thus far
+                all_paths.insert(all_paths.end(), obj_paths.cbegin(), obj_paths.cend());
+            });
 
         // store size of the generated graph
         pst.num_vertices = graph.size_vertices();
@@ -370,6 +369,5 @@ edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&        
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
+}  // namespace fiction::physical_design::utils
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_GENERATE_EDGE_INTERSECTION_GRAPH_HPP

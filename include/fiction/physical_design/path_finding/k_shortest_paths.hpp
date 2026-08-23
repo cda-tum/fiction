@@ -2,15 +2,15 @@
 // Created by marcel on 21.02.22.
 //
 
-#ifndef FICTION_K_SHORTEST_PATHS_HPP
-#define FICTION_K_SHORTEST_PATHS_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_K_SHORTEST_PATHS_HPP
+#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_K_SHORTEST_PATHS_HPP
 
-#include "fiction/algorithms/path_finding/a_star.hpp"
-#include "fiction/algorithms/path_finding/cost.hpp"
-#include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/physical_design/path_finding/a_star.hpp"
+#include "fiction/physical_design/path_finding/cost.hpp"
+#include "fiction/physical_design/path_finding/distance.hpp"
+#include "fiction/physical_design/utils/routing_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/routing_utils.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design::path_finding
 {
 
 /**
@@ -41,8 +41,8 @@ template <typename Path, typename Lyt>
 class yen_k_shortest_paths_impl
 {
   public:
-    yen_k_shortest_paths_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const uint32_t k,
-                              const yen_k_shortest_paths_params& p) :
+    yen_k_shortest_paths_impl(const Lyt& lyt, const physical_design::utils::routing_objective<Lyt>& obj,
+                              const uint32_t k, const yen_k_shortest_paths_params& p) :
             layout{lyt},
             objective{obj.source, obj.target},  // create a new objective due to potentially differing types
             num_shortest_paths{k},
@@ -59,7 +59,7 @@ class yen_k_shortest_paths_impl
      *
      * @return A collection of up to k shortest paths in `layout` from `objective.source` to `objective.target`.
      */
-    [[nodiscard]] path_collection<Path> run() noexcept
+    [[nodiscard]] physical_design::utils::path_collection<Path> run() noexcept
     {
         assert(!objective.source.is_dead() && !objective.target.is_dead() &&
                "Neither source nor target coordinate can be dead");
@@ -169,7 +169,7 @@ class yen_k_shortest_paths_impl
     /**
      * Source and target coordinates.
      */
-    const routing_objective<layouts::obstruction_layout<Lyt>> objective;
+    const physical_design::utils::routing_objective<layouts::obstruction_layout<Lyt>> objective;
     /**
      * The number of paths to determine, i.e., k.
      */
@@ -181,11 +181,11 @@ class yen_k_shortest_paths_impl
     /**
      * The list of k shortest paths that is created during the algorithm.
      */
-    path_collection<Path> k_shortest_paths{};
+    physical_design::utils::path_collection<Path> k_shortest_paths{};
     /**
      * A set of potential shortest paths.
      */
-    path_set<Path> shortest_path_candidates{};
+    physical_design::utils::path_set<Path> shortest_path_candidates{};
     /**
      * A temporary storage for coordinates that are obstructed during the algorithm.
      */
@@ -269,15 +269,14 @@ class yen_k_shortest_paths_impl
  * `objective.target`.
  */
 template <typename Path, typename Lyt>
-[[nodiscard]] path_collection<Path> yen_k_shortest_paths(const Lyt& layout, const routing_objective<Lyt>& objective,
-                                                         const uint32_t                     k,
-                                                         const yen_k_shortest_paths_params& params = {}) noexcept
+[[nodiscard]] physical_design::utils::path_collection<Path>
+yen_k_shortest_paths(const Lyt& layout, const physical_design::utils::routing_objective<Lyt>& objective,
+                     const uint32_t k, const yen_k_shortest_paths_params& params = {}) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
     return detail::yen_k_shortest_paths_impl<Path, Lyt>{layout, objective, k, params}.run();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_K_SHORTEST_PATHS_HPP
+}  // namespace fiction::physical_design::path_finding
+#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_K_SHORTEST_PATHS_HPP

@@ -1,8 +1,6 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // post-layout optimization
-#include <fiction/algorithms/verification/equivalence_checking.hpp>         // SAT-based equivalence checking
+#include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -10,6 +8,8 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>  // read networks from files
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
+#include <fiction/physical_design/post_layout_optimization.hpp>  // post-layout optimization
 #include <fiction/types.hpp>
 
 #include <fmt/core.h>
@@ -57,9 +57,9 @@ int main()  // NOLINT
                          "equivalent"};
 
     // stats
-    fiction::orthogonal_physical_design_stats orthogonal_stats{};
-    fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
-    const uint64_t                            max_gate_relocations = 10;
+    fiction::physical_design::orthogonal_physical_design_stats orthogonal_stats{};
+    fiction::physical_design::post_layout_optimization_stats   post_layout_optimization_stats{};
+    const uint64_t                                             max_gate_relocations = 10;
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
@@ -67,13 +67,14 @@ int main()  // NOLINT
     {
         for (uint64_t max_relocations = 0; max_relocations <= (max_gate_relocations + 1); max_relocations++)
         {
-            fiction::post_layout_optimization_params post_layout_optimization_params{};
+            fiction::physical_design::post_layout_optimization_params post_layout_optimization_params{};
 
             const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
 
             // perform layout generation with an OGD-based heuristic algorithm
-            auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
-            const auto layout_copy       = gate_level_layout.clone();
+            auto gate_level_layout =
+                fiction::physical_design::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+            const auto layout_copy = gate_level_layout.clone();
 
             // calculate bounding box
             const auto bounding_box_before_optimization = fiction::layouts::bounding_box_2d(gate_level_layout);
@@ -91,8 +92,8 @@ int main()  // NOLINT
                 max_relocations = (gate_level_layout.x() + 1) * (gate_level_layout.y() + 1);
             }
             // perform post-layout optimization
-            fiction::post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
-                                                        &post_layout_optimization_stats);
+            fiction::physical_design::post_layout_optimization<gate_lyt>(
+                gate_level_layout, post_layout_optimization_params, &post_layout_optimization_stats);
 
             // check equivalence
             const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);

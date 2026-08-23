@@ -2,8 +2,8 @@
 // Created by benjamin on 08.04.25.
 //
 
-#ifndef FICTION_MINCROSS_HPP
-#define FICTION_MINCROSS_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_MINCROSS_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_MINCROSS_HPP
 
 #include "fiction/synthesis/network_balancing.hpp"
 
@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 
 /**
@@ -647,6 +647,5 @@ Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nul
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_MINCROSS_HPP
+}  // namespace fiction::physical_design::utils
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_MINCROSS_HPP

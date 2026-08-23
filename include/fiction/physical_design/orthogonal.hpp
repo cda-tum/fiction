@@ -2,17 +2,17 @@
 // Created by marcel on 13.07.17.
 //
 
-#ifndef FICTION_ORTHOGONAL_HPP
-#define FICTION_ORTHOGONAL_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP
+#define FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
+#include "fiction/physical_design/utils/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/placement_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -34,7 +34,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 /**
@@ -339,7 +339,7 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
         std::swap(pre1_t, pre2_t);
     }
 
-    return place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
+    return physical_design::utils::place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
 }
 
 template <typename Lyt, typename Ntk>
@@ -348,11 +348,11 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
-        return place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
+        return physical_design::utils::place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
     }
     if (lyt.is_northwards_of(t, pre_t))
     {
-        return place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
+        return physical_design::utils::place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
     }
 
     assert(false);  // gates cannot be placed elsewhere
@@ -489,7 +489,7 @@ class orthogonal_impl
                    layouts::twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
-        auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);
+        auto pi2node = physical_design::utils::reserve_input_nodes(layout, ctn.color_ntk);
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
@@ -726,6 +726,5 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_ORTHOGONAL_HPP
+}  // namespace fiction::physical_design
+#endif  // FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP

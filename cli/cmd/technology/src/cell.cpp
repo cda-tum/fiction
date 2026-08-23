@@ -7,7 +7,7 @@
 #include "fiction/technology/sim7_mol_library.hpp"
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -56,7 +56,8 @@ void cell_command::execute()
         const auto apply_qca_one = [](auto&& lyt_ptr)
         {
             return std::make_shared<fiction::qca_cell_clk_lyt>(
-                fiction::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(*lyt_ptr));
+                fiction::physical_design::apply_gate_library<fiction::qca_cell_clk_lyt, fiction::qca_one_library>(
+                    *lyt_ptr));
         };
 
         const auto visitor = [&apply_qca_one](auto&& source) { return std::visit(apply_qca_one, source); };
@@ -71,7 +72,8 @@ void cell_command::execute()
         const auto apply_sim7_mol = [](auto&& lyt_ptr)
         {
             return std::make_shared<fiction::mol_qca_cell_clk_lyt>(
-                fiction::apply_gate_library<fiction::mol_qca_cell_clk_lyt, fiction::sim7_mol_library>(*lyt_ptr));
+                fiction::physical_design::apply_gate_library<fiction::mol_qca_cell_clk_lyt, fiction::sim7_mol_library>(
+                    *lyt_ptr));
         };
 
         const auto visitor = [&apply_sim7_mol](auto&& source) { return std::visit(apply_sim7_mol, source); };
@@ -92,8 +94,8 @@ void cell_command::execute()
                 if constexpr (fiction::has_vertically_shifted_cartesian_orientation_v<Lyt>)
                 {
                     return std::make_shared<fiction::inml_cell_clk_lyt>(
-                        fiction::apply_gate_library<fiction::inml_cell_clk_lyt, fiction::inml_topolinano_library>(
-                            *lyt_ptr));
+                        fiction::physical_design::apply_gate_library<fiction::inml_cell_clk_lyt,
+                                                                     fiction::inml_topolinano_library>(*lyt_ptr));
                 }
                 else
                 {
@@ -127,8 +129,8 @@ void cell_command::execute()
                 if constexpr (fiction::has_pointy_top_hex_orientation_v<Lyt>)
                 {
                     return std::make_shared<fiction::sidb_100_cell_clk_lyt>(
-                        fiction::apply_gate_library<fiction::sidb_100_cell_clk_lyt, fiction::sidb_bestagon_library>(
-                            *lyt_ptr));
+                        fiction::physical_design::apply_gate_library<fiction::sidb_100_cell_clk_lyt,
+                                                                     fiction::sidb_bestagon_library>(*lyt_ptr));
                 }
                 else
                 {

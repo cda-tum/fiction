@@ -7,7 +7,7 @@
 #ifndef FICTION_CMD_EXACT_HPP
 #define FICTION_CMD_EXACT_HPP
 
-#include <fiction/algorithms/physical_design/exact.hpp>
+#include <fiction/physical_design/exact.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -50,11 +50,11 @@ class exact_command final : public command
     /**
      * Parameters.
      */
-    fiction::exact_physical_design_params ps{};
+    fiction::physical_design::exact_physical_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::exact_physical_design_stats st{};
+    fiction::physical_design::exact_physical_design_stats st{};
     /**
      * Tile shift for hexagonal layouts.
      */

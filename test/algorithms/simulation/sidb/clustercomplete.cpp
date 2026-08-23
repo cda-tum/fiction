@@ -10,13 +10,13 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/constants.hpp>
@@ -172,7 +172,8 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     gate_lyt.create_nand({}, {}, {0, 0});
     gate_lyt.create_nand({}, {}, {2, 2});
 
-    const sidb_cell_clk_lyt& cell_lyt{apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)};
+    const sidb_cell_clk_lyt& cell_lyt{
+        physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)};
 
     clustercomplete_params<> params{sidb_simulation_parameters{2}};
 

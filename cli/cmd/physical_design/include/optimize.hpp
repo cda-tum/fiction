@@ -5,8 +5,8 @@
 #ifndef FICTION_CMD_OPTIMIZE_HPP
 #define FICTION_CMD_OPTIMIZE_HPP
 
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>
+#include <fiction/physical_design/post_layout_optimization.hpp>
+#include <fiction/physical_design/wiring_reduction.hpp>
 
 #include <alice/alice.hpp>
 
@@ -36,19 +36,19 @@ class optimize_command final : public command
     /**
      * Post-layout optimization parameters.
      */
-    fiction::post_layout_optimization_params ps{};
+    fiction::physical_design::post_layout_optimization_params ps{};
     /**
      * Wiring reduction parameters.
      */
-    fiction::wiring_reduction_params psw{};
+    fiction::physical_design::wiring_reduction_params psw{};
     /**
      * Post-layout optimization statistics.
      */
-    fiction::post_layout_optimization_stats st{};
+    fiction::physical_design::post_layout_optimization_stats st{};
     /**
      * Wiring reduction statistics.
      */
-    fiction::wiring_reduction_stats stw{};
+    fiction::physical_design::wiring_reduction_stats stw{};
 
     /**
      * Optimizes a 2DDWave-clocked Cartesian layout.

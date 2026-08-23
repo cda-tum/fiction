@@ -6,7 +6,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
@@ -16,6 +15,7 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -172,7 +172,7 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
     g_layout.set_layout_name("Bestagon");
 
-    const auto c_layout = apply_gate_library<sidb_layout, sidb_bestagon_library>(g_layout);
+    const auto c_layout = physical_design::apply_gate_library<sidb_layout, sidb_bestagon_library>(g_layout);
 
     std::stringstream layout_stream{};
 

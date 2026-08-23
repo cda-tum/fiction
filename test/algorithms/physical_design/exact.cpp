@@ -9,13 +9,13 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/physical_design/exact.hpp>
 #include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -39,112 +39,114 @@ using namespace fiction;
 namespace
 {
 
-exact_physical_design_params configuration() noexcept
+physical_design::exact_physical_design_params configuration() noexcept
 {
     return {};
 }
 
-exact_physical_design_params&& open(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& open(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "Open";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& columnar(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& columnar(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "Columnar";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& row(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& row(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "Row";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& twoddwave(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& twoddwave(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "2DDWave";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& use(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& use(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "USE";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& res(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& res(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "RES";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& esr(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& esr(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "ESR";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& cfe(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& cfe(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "CFE";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& srs(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& srs(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.scheme = "SRS";
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& crossings(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& crossings(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.crossings = true;
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& border_io(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& border_io(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.border_io = true;
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& desynchronize(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&&
+desynchronize(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.desynchronize = true;
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& straight_inverter(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&&
+straight_inverter(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.straight_inverters = true;
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& sync_elems(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& sync_elems(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.synchronization_elements = true;
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& topolinano(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&& topolinano(physical_design::exact_physical_design_params&& ps) noexcept
 {
-    ps.technology_specifics = technology_constraints::TOPOLINANO;
+    ps.technology_specifics = physical_design::technology_constraints::TOPOLINANO;
 
     return std::move(ps);
 }
@@ -185,21 +187,23 @@ surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&         
     return std::move(sbl);
 }
 
-exact_physical_design_params&& minimize_wires(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&&
+minimize_wires(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.minimize_wires = true;
 
     return std::move(ps);
 }
 
-exact_physical_design_params&& minimize_crossings(exact_physical_design_params&& ps) noexcept
+physical_design::exact_physical_design_params&&
+minimize_crossings(physical_design::exact_physical_design_params&& ps) noexcept
 {
     ps.minimize_crossings = true;
 
     return std::move(ps);
 }
 
-void check_stats(const exact_physical_design_stats& st)
+void check_stats(const physical_design::exact_physical_design_stats& st)
 {
     CHECK(std::chrono::duration_cast<std::chrono::milliseconds>(st.time_total).count() > 0);
     CHECK(st.x_size > 0);
@@ -229,11 +233,11 @@ void check_drvs(const Lyt& lyt)
 }
 
 template <typename Lyt, typename Ntk>
-Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
+Lyt generate_layout(const Ntk& ntk, const physical_design::exact_physical_design_params& ps)
 {
-    exact_physical_design_stats stats{};
+    physical_design::exact_physical_design_stats stats{};
 
-    const auto layout = exact<Lyt>(ntk, ps, &stats);
+    const auto layout = physical_design::exact<Lyt>(ntk, ps, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -244,11 +248,11 @@ Lyt generate_layout(const Ntk& ntk, const exact_physical_design_params& ps)
 }
 template <typename Lyt, typename Ntk>
 Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
-                                    const exact_physical_design_params& ps)
+                                    const physical_design::exact_physical_design_params& ps)
 {
-    exact_physical_design_stats stats{};
+    physical_design::exact_physical_design_stats stats{};
 
-    const auto layout = exact_with_blacklist<Lyt>(ntk, black_list, ps, &stats);
+    const auto layout = physical_design::exact_with_blacklist<Lyt>(ntk, black_list, ps, &stats);
 
     REQUIRE(layout.has_value());
 
@@ -261,7 +265,7 @@ Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt
 template <typename CellLyt, typename Lib, typename GateLyt>
 void check_apply_lib(const GateLyt& lyt)
 {
-    CHECK_NOTHROW(apply_gate_library<CellLyt, Lib>(lyt));
+    CHECK_NOTHROW(physical_design::apply_gate_library<CellLyt, Lib>(lyt));
 }
 
 template <typename Ntk, typename Lyt>
@@ -284,7 +288,7 @@ void check_io_names(const Ntk& ntk, const Lyt& lyt)
 }
 
 template <typename CellLyt, typename Lib, typename GateLyt, typename Ntk>
-void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params& ps)
+void check_with_gate_library(const Ntk& ntk, const physical_design::exact_physical_design_params& ps)
 {
     const auto layout = generate_layout<GateLyt>(ntk, ps);
 
@@ -295,7 +299,7 @@ void check_with_gate_library(const Ntk& ntk, const exact_physical_design_params&
 }
 
 template <typename Lyt, typename Ntk>
-void check_without_gate_library(const Ntk& ntk, const exact_physical_design_params& ps)
+void check_without_gate_library(const Ntk& ntk, const physical_design::exact_physical_design_params& ps)
 {
     const auto layout = generate_layout<Lyt>(ntk, ps);
 
@@ -668,13 +672,15 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
 
 TEST_CASE("High degree input networks", "[exact]")
 {
-    CHECK_THROWS_AS(
-        exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), twoddwave(configuration())),
-        networks::utils::high_degree_fanin_exception);
-    CHECK_THROWS_AS(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), use(configuration())),
+    CHECK_THROWS_AS(physical_design::exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
+                                                              twoddwave(configuration())),
+                    networks::utils::high_degree_fanin_exception);
+    CHECK_THROWS_AS(physical_design::exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
+                                                              use(configuration())),
                     networks::utils::high_degree_fanin_exception);
 
-    CHECK_NOTHROW(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), res(configuration())));
+    CHECK_NOTHROW(physical_design::exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
+                                                            res(configuration())));
 }
 
 TEST_CASE("Exact physical design with upper bounds", "[exact]")
@@ -686,7 +692,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
         upper_bound_config.upper_bound_area = 5u;  // allow only 5 tiles total; this will fail (and is tested for)
 
         const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-        const auto layout     = exact<cart_gate_clk_lyt>(half_adder, upper_bound_config);
+        const auto layout     = physical_design::exact<cart_gate_clk_lyt>(half_adder, upper_bound_config);
 
         // since a half adder cannot be synthesized on just 5 tiles, layout should not have a value
         CHECK(!layout.has_value());
@@ -696,7 +702,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
         upper_bound_config.upper_bound_y = 3u;  // allow only 3 tiles in y direction; this will work
 
         const auto mux    = blueprints::mux21_network<networks::technology_network>();
-        auto       layout = exact<cart_gate_clk_lyt>(mux, upper_bound_config);
+        auto       layout = physical_design::exact<cart_gate_clk_lyt>(mux, upper_bound_config);
 
         REQUIRE(layout.has_value());
 
@@ -707,7 +713,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
 
         upper_bound_config.upper_bound_x = 2u;  // additionally, allow only 2 tiles in x direction; this will now fail
 
-        layout = exact<cart_gate_clk_lyt>(mux, upper_bound_config);
+        layout = physical_design::exact<cart_gate_clk_lyt>(mux, upper_bound_config);
 
         CHECK(!layout.has_value());
     }
@@ -719,7 +725,7 @@ TEST_CASE("Exact physical design timeout", "[exact]")
     timeout_config.timeout = 1u;  // allow only one second to find a solution; this will fail (and is tested for)
 
     const auto half_adder = blueprints::half_adder_network<mockturtle::aig_network>();
-    const auto layout     = exact<cart_gate_clk_lyt>(half_adder, timeout_config);
+    const auto layout     = physical_design::exact<cart_gate_clk_lyt>(half_adder, timeout_config);
 
     // since a half adder cannot be synthesized in just one second, layout should not have a value
     CHECK(!layout.has_value());
@@ -730,7 +736,7 @@ TEST_CASE("Name conservation after exact physical design", "[exact]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = exact<cart_gate_clk_lyt>(maj, res(configuration()));
+    const auto layout = physical_design::exact<cart_gate_clk_lyt>(maj, res(configuration()));
 
     REQUIRE(layout.has_value());
 

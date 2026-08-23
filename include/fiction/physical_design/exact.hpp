@@ -2,23 +2,23 @@
 // Created by marcel on 06.01.20.
 //
 
-#ifndef FICTION_EXACT_HPP
-#define FICTION_EXACT_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_EXACT_HPP
+#define FICTION_PHYSICAL_DESIGN_EXACT_HPP
 
 #if (FICTION_Z3_SOLVER)
 
-#include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
+#include "fiction/physical_design/utils/aspect_ratio_iterator.hpp"
+#include "fiction/physical_design/utils/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/placement_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/operations.hpp>
@@ -54,7 +54,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 /**
@@ -193,7 +193,7 @@ class exact_impl
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{
+        ari = physical_design::utils::aspect_ratio_iterator<typename Lyt::aspect_ratio>{
             ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
                                      static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y)) :
                             static_cast<uint64_t>(lower_bound)};
@@ -243,7 +243,7 @@ class exact_impl
     /**
      * Iterator for the factorization of possible aspect ratios.
      */
-    aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
+    physical_design::utils::aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
     /**
      * Aspect ratio of found result. Only needed for the asynchronous case.
      */
@@ -503,7 +503,7 @@ class exact_impl
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
         mockturtle::node_map<
-            branching_signal_container<
+            physical_design::utils::branching_signal_container<
                 Lyt, topology_ntk_t, Lyt::max_fanin_size>  // this currently assumes that max_fanin_size is equal to the
                                                            // maximum fanout size of a layout type. Should the maximum
                                                            // fanout size exceed max_fanin_size, this will break
@@ -2745,7 +2745,7 @@ class exact_impl
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular clocking
             // must be made
 
-            const auto pis = reserve_input_nodes(layout, network);
+            const auto pis = physical_design::utils::reserve_input_nodes(layout, network);
 
             // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
             network.foreach_node(
@@ -2774,7 +2774,7 @@ class exact_impl
                                     else
                                     {
                                         // assign n to t in layout and save the resulting signal
-                                        lyt_signal = place(layout, t, network, n, node2pos);
+                                        lyt_signal = physical_design::utils::place(layout, t, network, n, node2pos);
                                     }
 
                                     // check n's outgoing edges
@@ -3336,8 +3336,7 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
     return result;
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::physical_design
 #endif  // FICTION_Z3_SOLVER
 
-#endif  // FICTION_EXACT_HPP
+#endif  // FICTION_PHYSICAL_DESIGN_EXACT_HPP

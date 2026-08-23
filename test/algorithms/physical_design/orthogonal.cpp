@@ -7,14 +7,14 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 
 #include <mockturtle/networks/aig.hpp>
@@ -30,8 +30,8 @@ TEST_CASE("East-south coloring", "[orthogonal]")
 {
     const auto check = [](const auto& ntk)
     {
-        auto container = detail::east_south_edge_coloring(ntk);
-        CHECK(detail::is_east_south_colored(container.color_ntk));
+        auto container = fiction::physical_design::detail::east_south_edge_coloring(ntk);
+        CHECK(fiction::physical_design::detail::is_east_south_colored(container.color_ntk));
     };
 
     check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
@@ -54,7 +54,7 @@ TEST_CASE("East-south coloring", "[orthogonal]")
         blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
-void check_stats(const orthogonal_physical_design_stats& st) noexcept
+void check_stats(const physical_design::orthogonal_physical_design_stats& st) noexcept
 {
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
@@ -65,9 +65,9 @@ void check_stats(const orthogonal_physical_design_stats& st) noexcept
 template <typename Lyt, typename Ntk>
 void check_ortho_equiv(const Ntk& ntk)
 {
-    orthogonal_physical_design_stats stats{};
+    physical_design::orthogonal_physical_design_stats stats{};
 
-    auto layout = orthogonal<Lyt>(ntk, {}, &stats);
+    auto layout = physical_design::orthogonal<Lyt>(ntk, {}, &stats);
 
     check_stats(stats);
     check_eq(ntk, layout);
@@ -143,11 +143,11 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
     const auto check = [](const auto& ntk)
     {
-        orthogonal_physical_design_stats stats{};
+        physical_design::orthogonal_physical_design_stats stats{};
 
-        auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
+        auto layout = physical_design::orthogonal<gate_layout>(ntk, {}, &stats);
 
-        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
+        CHECK_NOTHROW(physical_design::apply_gate_library<cell_layout, qca_one_library>(layout));
     };
 
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
@@ -170,7 +170,7 @@ TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = orthogonal<gate_layout>(maj);
+    const auto layout = physical_design::orthogonal<gate_layout>(maj);
 
     // network name
     CHECK(layout.get_layout_name() == "maj");

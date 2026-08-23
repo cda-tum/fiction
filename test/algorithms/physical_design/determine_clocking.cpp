@@ -8,8 +8,6 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/physical_design/determine_clocking.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
@@ -18,6 +16,8 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/physical_design/determine_clocking.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
@@ -54,9 +54,10 @@ void remove_assign_and_check_clocking(Lyt lyt)
     {
         remove_clocking(lyt);
 
-        determine_clocking_stats st{};
+        physical_design::determine_clocking_stats st{};
 
-        const auto result = determine_clocking(lyt, determine_clocking_params{solver}, &st);
+        const auto result =
+            physical_design::determine_clocking(lyt, physical_design::determine_clocking_params{solver}, &st);
 
         REQUIRE(result == true);
         CHECK(mockturtle::to_seconds(st.time_total) > 0);
@@ -72,7 +73,7 @@ TEST_CASE("Determine clock numbers for an empty layout", "[determine-clocking]")
 
     gate_layout layout{{5, 5}};
 
-    CHECK(determine_clocking(layout) == true);
+    CHECK(physical_design::determine_clocking(layout) == true);
 }
 
 TEST_CASE("Determine clock numbers for simple layouts", "[determine-clocking]")
@@ -95,10 +96,12 @@ TEST_CASE("Determine clock numbers for complex layouts", "[determine-clocking]")
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
-    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>()));
-    remove_assign_and_check_clocking(orthogonal<gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
     remove_assign_and_check_clocking(
-        orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>()));
+        physical_design::orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>()));
+    remove_assign_and_check_clocking(
+        physical_design::orthogonal<gate_layout>(blueprints::maj4_network<mockturtle::aig_network>()));
+    remove_assign_and_check_clocking(
+        physical_design::orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>()));
 }
 
 TEST_CASE("Determine clock numbers for non-Cartesian layout topologies", "[determine-clocking]")
@@ -137,8 +140,8 @@ TEST_CASE("Determine clock numbers for a 3-phase layout", "[determine-clocking]"
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
-    remove_assign_and_check_clocking(
-        orthogonal<gate_layout>(blueprints::maj1_network<mockturtle::aig_network>(), {layouts::num_clks::THREE}));
+    remove_assign_and_check_clocking(physical_design::orthogonal<gate_layout>(
+        blueprints::maj1_network<mockturtle::aig_network>(), {layouts::num_clks::THREE}));
 }
 
 TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-clocking]")
@@ -148,5 +151,5 @@ TEST_CASE("Determine clock numbers for a non-clockable layout", "[determine-cloc
 
     auto lyt = blueprints::unclockable_gate_layout<gate_layout>();
 
-    CHECK(determine_clocking(lyt) == false);
+    CHECK(physical_design::determine_clocking(lyt) == false);
 }

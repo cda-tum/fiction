@@ -2,8 +2,8 @@
 // Created by marcel on 12.12.22.
 //
 
-#ifndef FICTION_SIMULATED_ANNEALING_HPP
-#define FICTION_SIMULATED_ANNEALING_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_SIMULATED_ANNEALING_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_SIMULATED_ANNEALING_HPP
 
 #include <algorithm>
 #include <cassert>
@@ -15,7 +15,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 
 /**
@@ -207,6 +207,5 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
                              [](const auto& lhs, const auto& rhs) { return lhs.second < rhs.second; });
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_SIMULATED_ANNEALING_HPP
+}  // namespace fiction::physical_design::utils
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_SIMULATED_ANNEALING_HPP

@@ -2,8 +2,8 @@
 // Created by marcel on 28.06.21.
 //
 
-#ifndef FICTION_APPLY_GATE_LIBRARY_HPP
-#define FICTION_APPLY_GATE_LIBRARY_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_APPLY_GATE_LIBRARY_HPP
+#define FICTION_PHYSICAL_DESIGN_APPLY_GATE_LIBRARY_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
@@ -30,7 +30,7 @@
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 namespace detail
@@ -410,8 +410,7 @@ template <typename DefectLyt, typename GateLibrary, typename GateLyt, typename P
     return result;
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::physical_design
 #pragma GCC diagnostic pop
 
-#endif  // FICTION_APPLY_GATE_LIBRARY_HPP
+#endif  // FICTION_PHYSICAL_DESIGN_APPLY_GATE_LIBRARY_HPP

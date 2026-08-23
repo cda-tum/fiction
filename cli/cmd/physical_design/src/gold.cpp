@@ -6,9 +6,9 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/networks/utils/network_utils.hpp>
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -124,7 +124,7 @@ void gold_command::graph_oriented_layout_design()
     const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::networks::utils::get_name(*ntk_ptr); };
 
     const auto perform_physical_design = [this](auto&& ntk_ptr)
-    { return fiction::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
+    { return fiction::physical_design::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
 
     const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 

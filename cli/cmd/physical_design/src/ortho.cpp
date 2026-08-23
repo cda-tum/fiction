@@ -6,9 +6,9 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/networks/utils/network_utils.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -103,7 +103,8 @@ nlohmann::json ortho_command::log() const
 template <typename Lyt>
 void ortho_command::orthogonal_physical_design()
 {
-    const auto perform_physical_design = [this](auto&& ntk_ptr) { return fiction::orthogonal<Lyt>(*ntk_ptr, ps, &st); };
+    const auto perform_physical_design = [this](auto&& ntk_ptr)
+    { return fiction::physical_design::orthogonal<Lyt>(*ntk_ptr, ps, &st); };
 
     const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 

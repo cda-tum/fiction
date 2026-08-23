@@ -3,11 +3,11 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>  // graph-oriented layout design algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
 #include <fiction/layouts/bounding_box.hpp>                                       // calculate area of generated layouts
 #include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>  // graph-oriented layout design algorithm
 
 #include <fmt/format.h>  // output formatting
 
@@ -50,9 +50,10 @@ int main()  // NOLINT
                                          "runtime graph_oriented_layout_design (in sec)",
                                          "equivalent"};
 
-    fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.mode = fiction::graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+    fiction::physical_design::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
+    fiction::physical_design::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
+    graph_oriented_layout_design_params.mode =
+        fiction::physical_design::graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
     graph_oriented_layout_design_params.verbose      = true;
     graph_oriented_layout_design_params.return_first = false;
 
@@ -62,7 +63,7 @@ int main()  // NOLINT
     {
         auto network = read_ntk<fiction::tec_nt>(benchmark);
 
-        auto gate_level_layout = fiction::graph_oriented_layout_design<gate_lyt, fiction::tec_nt>(
+        auto gate_level_layout = fiction::physical_design::graph_oriented_layout_design<gate_lyt, fiction::tec_nt>(
             network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
 
         if (gate_level_layout.has_value())

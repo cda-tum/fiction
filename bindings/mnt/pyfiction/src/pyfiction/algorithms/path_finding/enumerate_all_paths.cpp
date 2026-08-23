@@ -1,9 +1,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/path_finding/enumerate_all_paths.hpp>
+#include <fiction/physical_design/path_finding/enumerate_all_paths.hpp>
+#include <fiction/physical_design/utils/routing_utils.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/routing_utils.hpp>
 
 #include <vector>
 
@@ -30,10 +30,10 @@ void enumerate_all_paths_impl(nanobind::module_& m)
     m.def(
         "enumerate_all_paths",
         [](const Lyt& lyt, const fiction::coordinate<Lyt>& source, const fiction::coordinate<Lyt>& target,
-           const fiction::enumerate_all_paths_params& params)
+           const fiction::physical_design::path_finding::enumerate_all_paths_params& params)
         {
-            const auto all_paths =
-                fiction::enumerate_all_paths<fiction::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params);
+            const auto all_paths = fiction::physical_design::path_finding::enumerate_all_paths<
+                fiction::physical_design::utils::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, params);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(all_paths.size());
@@ -46,19 +46,20 @@ void enumerate_all_paths_impl(nanobind::module_& m)
             return paths;
         },
         py::arg("layout"), py::arg("source"), py::arg("target"),
-        py::arg("params") = fiction::enumerate_all_paths_params{}, DOC(fiction_enumerate_all_paths));
+        py::arg("params") = fiction::physical_design::path_finding::enumerate_all_paths_params{},
+        DOC(fiction_enumerate_all_paths));
 }
 
 }  // namespace detail
 
-void enumerate_all_paths(nanobind::module_& m)
+void physical_design::path_finding::enumerate_all_paths(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::enumerate_all_paths_params>(m, "enumerate_all_paths_params",
-                                                    DOC(fiction_enumerate_all_paths_params))
+    py::class_<fiction::physical_design::path_finding::enumerate_all_paths_params>(
+        m, "enumerate_all_paths_params", DOC(fiction_enumerate_all_paths_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("crossings", &fiction::enumerate_all_paths_params::crossings,
+        .def_rw("crossings", &fiction::physical_design::path_finding::enumerate_all_paths_params::crossings,
                 DOC(fiction_enumerate_all_paths_params_crossings))
 
         ;

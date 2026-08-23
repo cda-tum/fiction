@@ -2,8 +2,8 @@
 // Created by marcel on 07.02.22.
 //
 
-#ifndef FICTION_ROUTING_UTILS_HPP
-#define FICTION_ROUTING_UTILS_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_UTILS_ROUTING_UTILS_HPP
+#define FICTION_PHYSICAL_DESIGN_UTILS_ROUTING_UTILS_HPP
 
 #include "fiction/traits.hpp"
 
@@ -15,7 +15,7 @@
 #include <set>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design::utils
 {
 
 /**
@@ -311,6 +311,5 @@ void clear_routing(Lyt& lyt) noexcept
         });
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_ROUTING_UTILS_HPP
+}  // namespace fiction::physical_design::utils
+#endif  // FICTION_PHYSICAL_DESIGN_UTILS_ROUTING_UTILS_HPP

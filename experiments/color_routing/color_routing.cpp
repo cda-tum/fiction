@@ -6,12 +6,12 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/color_routing.hpp>      // routing based on graph coloring
-#include <fiction/algorithms/physical_design/exact.hpp>              // SMT-based physical design of FCN layouts
-#include <fiction/algorithms/physical_design/orthogonal.hpp>         // OGD-based physical design of FCN layouts
 #include <fiction/algorithms/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
+#include <fiction/physical_design/color_routing.hpp>                 // routing based on graph coloring
+#include <fiction/physical_design/exact.hpp>                         // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/orthogonal.hpp>                    // OGD-based physical design of FCN layouts
+#include <fiction/physical_design/utils/routing_utils.hpp>           // routing utility functions
 #include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
-#include <fiction/utils/routing_utils.hpp>                           // routing utility functions
 
 #include <fmt/format.h>                      // output formatting
 #include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
@@ -32,10 +32,10 @@ using color_routing_experiment =
                             bool>;
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-static fiction::exact_physical_design_stats      exact_stats{};
-static fiction::orthogonal_physical_design_stats ortho_stats{};
-static fiction::color_routing_stats              routing_stats{};
-static fiction::equivalence_checking_stats       equiv_stats{};
+static fiction::physical_design::exact_physical_design_stats      exact_stats{};
+static fiction::physical_design::orthogonal_physical_design_stats ortho_stats{};
+static fiction::physical_design::color_routing_stats              routing_stats{};
+static fiction::equivalence_checking_stats                        equiv_stats{};
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 template <typename Ntk>
@@ -54,20 +54,20 @@ Ntk read_ntk(const std::string& name)
 
 template <typename Ntk, typename GateLyt, typename Stats>
 void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt,
-                      const fiction::color_routing_params& routing_params, const Stats& stats,
+                      const fiction::physical_design::color_routing_params& routing_params, const Stats& stats,
                       color_routing_experiment& exp)
 {
     routing_stats = {};
     equiv_stats   = {};
 
     // extract routing objectives
-    const auto objectives = fiction::extract_routing_objectives(lyt);
+    const auto objectives = fiction::physical_design::utils::extract_routing_objectives(lyt);
 
     // remove routing
-    fiction::clear_routing(lyt);
+    fiction::physical_design::utils::clear_routing(lyt);
 
     // perform routing
-    const auto success = fiction::color_routing(lyt, objectives, routing_params, &routing_stats);
+    const auto success = fiction::physical_design::color_routing(lyt, objectives, routing_params, &routing_stats);
 
     if (success)
     {
@@ -115,10 +115,10 @@ void smt_sat_complete()
                                                       "equivalent"};
 
     // parameters for SAT-based color routing
-    fiction::color_routing_params routing_params{};
+    fiction::physical_design::color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
-    routing_params.engine                  = fiction::graph_coloring_engine::SAT;
+    routing_params.engine                  = fiction::physical_design::utils::graph_coloring_engine::SAT;
 
     constexpr const uint64_t bench_select = fiction_experiments::all;
 
@@ -129,7 +129,7 @@ void smt_sat_complete()
         for (const auto& clock : clocking_schemes)
         {
             // parameters for SMT-based physical design
-            fiction::exact_physical_design_params exact_params{};
+            fiction::physical_design::exact_physical_design_params exact_params{};
             exact_params.scheme        = clock;
             exact_params.crossings     = true;
             exact_params.border_io     = true;
@@ -137,7 +137,7 @@ void smt_sat_complete()
             exact_params.timeout       = 3'600'000;  // 1h in ms
 
             // perform layout generation with an SMT-based exact algorithm
-            auto gate_level_layout = fiction::exact<gate_lyt>(network, exact_params, &exact_stats);
+            auto gate_level_layout = fiction::physical_design::exact<gate_lyt>(network, exact_params, &exact_stats);
 
             if (gate_level_layout.has_value())
             {
@@ -153,11 +153,11 @@ void ortho_sat_complete()
     ortho_stats = {};
 
     // parameters for SAT-based color routing
-    fiction::color_routing_params routing_params{};
+    fiction::physical_design::color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
     routing_params.path_limit              = 75;
-    routing_params.engine                  = fiction::graph_coloring_engine::SAT;
+    routing_params.engine                  = fiction::physical_design::utils::graph_coloring_engine::SAT;
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_sat_complete",
                                                       "benchmark",
@@ -189,7 +189,7 @@ void ortho_sat_complete()
         const auto network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &ortho_stats);
+        auto gate_level_layout = fiction::physical_design::orthogonal<gate_lyt>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_level_layout, routing_params, ortho_stats, color_routing_exp);
     }
@@ -200,11 +200,11 @@ void ortho_mcs()
     ortho_stats = {};
 
     // parameters for SAT-based color routing
-    fiction::color_routing_params routing_params{};
+    fiction::physical_design::color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
     routing_params.path_limit              = 75;
-    routing_params.engine                  = fiction::graph_coloring_engine::MCS;
+    routing_params.engine                  = fiction::physical_design::utils::graph_coloring_engine::MCS;
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_mcs",
                                                       "benchmark",
@@ -234,7 +234,7 @@ void ortho_mcs()
         const auto network = read_ntk<fiction::tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_level_layout = fiction::orthogonal<gate_lyt>(network, {}, &ortho_stats);
+        auto gate_level_layout = fiction::physical_design::orthogonal<gate_lyt>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_level_layout, routing_params, ortho_stats, color_routing_exp);
     }

@@ -5,8 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/physical_design/utils/routing_utils.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/utils/routing_utils.hpp>
 
 #include <algorithm>
 #include <utility>
@@ -28,16 +28,16 @@ namespace detail
 {
 
 template <typename Lyt>
-void is_crossable_wire(nanobind::module_& m)
+void physical_design::utils::is_crossable_wire(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("is_crossable_wire", &fiction::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"), py::arg("successor"),
-          DOC(fiction_is_crossable_wire));
+    m.def("is_crossable_wire", &fiction::physical_design::utils::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"),
+          py::arg("successor"), DOC(fiction_is_crossable_wire));
 }
 
 template <typename Lyt>
-void route_path(nanobind::module_& m)
+void physical_design::utils::route_path(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -45,17 +45,17 @@ void route_path(nanobind::module_& m)
         "route_path",
         [](Lyt& lyt, const std::vector<fiction::coordinate<Lyt>>& path)
         {
-            fiction::layout_coordinate_path<Lyt> converted_path{};
+            fiction::physical_design::utils::layout_coordinate_path<Lyt> converted_path{};
             converted_path.resize(path.size());
             converted_path.assign(path.cbegin(), path.cend());
 
-            fiction::route_path(lyt, converted_path);
+            fiction::physical_design::utils::route_path(lyt, converted_path);
         },
         py::arg("layout"), py::arg("path"), DOC(fiction_route_path));
 }
 
 template <typename Lyt>
-void extract_routing_objectives(nanobind::module_& m)
+void physical_design::utils::extract_routing_objectives(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -65,7 +65,7 @@ void extract_routing_objectives(nanobind::module_& m)
         {
             std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>> converted_objectives{};
 
-            const auto objectives = fiction::extract_routing_objectives(lyt);
+            const auto objectives = fiction::physical_design::utils::extract_routing_objectives(lyt);
 
             std::for_each(objectives.cbegin(), objectives.cend(), [&converted_objectives](const auto& objective)
                           { converted_objectives.emplace_back(objective.source, objective.target); });
@@ -76,11 +76,12 @@ void extract_routing_objectives(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void clear_routing(nanobind::module_& m)
+void physical_design::utils::clear_routing(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("clear_routing", &fiction::clear_routing<Lyt>, py::arg("lyt"), DOC(fiction_clear_routing));
+    m.def("clear_routing", &fiction::physical_design::utils::clear_routing<Lyt>, py::arg("lyt"),
+          DOC(fiction_clear_routing));
 }
 
 }  // namespace detail

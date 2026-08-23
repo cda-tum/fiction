@@ -8,10 +8,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/networks/utils/network_utils.hpp>
+#include <fiction/physical_design/exact.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -98,7 +98,7 @@ void exact_command::execute()
     // target technology constraints
     if (this->is_set("topolinano"))
     {
-        ps.technology_specifics = fiction::technology_constraints::TOPOLINANO;
+        ps.technology_specifics = fiction::physical_design::technology_constraints::TOPOLINANO;
 
         // shifted Cartesian layout
         exact_physical_design<fiction::cart_odd_col_gate_clk_lyt>();
@@ -146,7 +146,7 @@ nlohmann::json exact_command::log() const
 
 void exact_command::reset_flags()
 {
-    ps                   = fiction::exact_physical_design_params{};
+    ps                   = fiction::physical_design::exact_physical_design_params{};
     hexagonal_tile_shift = {};
 }
 
@@ -155,7 +155,8 @@ void exact_command::exact_physical_design()
 {
     const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::networks::utils::get_name(*ntk_ptr); };
 
-    const auto perform_physical_design = [this](auto&& ntk_ptr) { return fiction::exact<Lyt>(*ntk_ptr, ps, &st); };
+    const auto perform_physical_design = [this](auto&& ntk_ptr)
+    { return fiction::physical_design::exact<Lyt>(*ntk_ptr, ps, &st); };
 
     const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 

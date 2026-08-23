@@ -6,13 +6,13 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
 #include <fiction/io/read_sqd_layout.hpp>                    // reader for SiDB layouts including surface scan data
 #include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/bounding_box.hpp>                  // bounding box
+#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/area.hpp>                       // area requirement calculations
 #include <fiction/technology/cell_technologies.hpp>          // cell implementations
@@ -131,7 +131,7 @@ int main()  // NOLINT
         fiction::sidb_surface_analysis<fiction::sidb_bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
-    fiction::exact_physical_design_params exact_params{};
+    fiction::physical_design::exact_physical_design_params exact_params{};
     exact_params.scheme        = "ROW4";
     exact_params.crossings     = true;
     exact_params.border_io     = false;
@@ -141,7 +141,7 @@ int main()  // NOLINT
     // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
     // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
     exact_params.timeout = 3'600'000;  // 1h in ms
-    fiction::exact_physical_design_stats exact_stats{};
+    fiction::physical_design::exact_physical_design_stats exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
                                             ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &
@@ -171,8 +171,8 @@ int main()  // NOLINT
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout =
-            fiction::exact_with_blacklist<gate_lyt>(mapped_network, black_list, exact_params, &exact_stats);
+        const auto gate_level_layout = fiction::physical_design::exact_with_blacklist<gate_lyt>(
+            mapped_network, black_list, exact_params, &exact_stats);
 
         if (gate_level_layout.has_value())
         {
@@ -185,10 +185,9 @@ int main()  // NOLINT
             const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto dot_accurate_layout =
-                fiction::apply_gate_library_to_defective_surface<fiction::sidb_defect_surface<cell_lyt>,
-                                                                 fiction::sidb_bestagon_library>(*gate_level_layout,
-                                                                                                 surface_lattice);
+            const auto dot_accurate_layout = fiction::physical_design::apply_gate_library_to_defective_surface<
+                fiction::sidb_defect_surface<cell_lyt>, fiction::sidb_bestagon_library>(*gate_level_layout,
+                                                                                        surface_lattice);
 
             // determine bounding box
             const auto bb = fiction::layouts::bounding_box_2d<cell_lyt>(dot_accurate_layout);

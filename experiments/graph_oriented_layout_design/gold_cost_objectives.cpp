@@ -3,7 +3,6 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -12,6 +11,7 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -53,10 +53,10 @@ int main()  // NOLINT
                                  "runtime (in sec)",
                                  "equivalent"};
 
-    fiction::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    fiction::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
+    fiction::physical_design::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
+    fiction::physical_design::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
     graph_oriented_layout_design_params.mode =
-        fiction::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+        fiction::physical_design::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     graph_oriented_layout_design_params.verbose      = true;
     graph_oriented_layout_design_params.return_first = false;
     graph_oriented_layout_design_params.timeout      = 60000;
@@ -65,19 +65,19 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        for (const auto& cost_pair :
-             std::vector<std::pair<fiction::graph_oriented_layout_design_params::cost_objective, std::string>>{
-                 {fiction::graph_oriented_layout_design_params::cost_objective::AREA, "A"},
-                 {fiction::graph_oriented_layout_design_params::cost_objective::WIRES, "|W|"},
-                 {fiction::graph_oriented_layout_design_params::cost_objective::CROSSINGS, "|C|"},
-                 {fiction::graph_oriented_layout_design_params::cost_objective::ACP, "ACP"}})
+        for (const auto& cost_pair : std::vector<
+                 std::pair<fiction::physical_design::graph_oriented_layout_design_params::cost_objective, std::string>>{
+                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::AREA, "A"},
+                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::WIRES, "|W|"},
+                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::CROSSINGS, "|C|"},
+                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::ACP, "ACP"}})
         {
             const auto& [cost, cost_name]            = cost_pair;
             graph_oriented_layout_design_params.cost = cost;
 
             auto network = read_ntk<fiction::tec_nt>(benchmark);
 
-            auto gate_level_layout = fiction::graph_oriented_layout_design<gate_lyt, fiction::tec_nt>(
+            auto gate_level_layout = fiction::physical_design::graph_oriented_layout_design<gate_lyt, fiction::tec_nt>(
                 network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
 
             if (gate_level_layout.has_value())

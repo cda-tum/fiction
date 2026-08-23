@@ -6,10 +6,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/physical_design/post_layout_optimization.hpp>
+#include <fiction/physical_design/wiring_reduction.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -89,7 +89,7 @@ void optimize_command::execute()
         {
             if (is_set("wiring_reduction_only"))
             {
-                fiction::wiring_reduction(lyt_copy, psw, &stw);
+                fiction::physical_design::wiring_reduction(lyt_copy, psw, &stw);
                 if (is_set("verbose"))
                 {
                     stw.report(env->out());
@@ -97,7 +97,7 @@ void optimize_command::execute()
             }
             else
             {
-                fiction::post_layout_optimization(lyt_copy, ps, &st);
+                fiction::physical_design::post_layout_optimization(lyt_copy, ps, &st);
                 if (is_set("verbose"))
                 {
                     st.report(env->out());

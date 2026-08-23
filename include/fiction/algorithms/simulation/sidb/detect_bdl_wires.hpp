@@ -5,8 +5,8 @@
 #ifndef FICTION_DETECT_BDL_WIRES_HPP
 #define FICTION_DETECT_BDL_WIRES_HPP
 
-#include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
+#include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/traits.hpp"
@@ -309,7 +309,8 @@ struct bdl_wire
 
             for (const auto& pair : pairs)
             {
-                const auto distance = euclidean_distance(Lyt{}, pair.lower, first_bdl_pair.value().lower);
+                const auto distance =
+                    physical_design::path_finding::euclidean_distance(Lyt{}, pair.lower, first_bdl_pair.value().lower);
                 if (distance > max_distance)
                 {
                     max_distance  = distance;
@@ -349,7 +350,8 @@ struct bdl_wire
 
             for (const auto& pair : pairs)
             {
-                const auto distance = euclidean_distance(Lyt{}, pair.lower, last_bdl_pair.value().upper);
+                const auto distance =
+                    physical_design::path_finding::euclidean_distance(Lyt{}, pair.lower, last_bdl_pair.value().upper);
                 if (distance > max_distance)
                 {
                     max_distance   = distance;

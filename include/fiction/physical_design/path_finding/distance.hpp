@@ -2,8 +2,8 @@
 // Created by marcel on 17.02.22.
 //
 
-#ifndef FICTION_DISTANCE_HPP
-#define FICTION_DISTANCE_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_HPP
+#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_HPP
 
 #include "fiction/traits.hpp"
 
@@ -14,7 +14,7 @@
 #include <functional>
 #include <limits>
 
-namespace fiction
+namespace fiction::physical_design::path_finding
 {
 
 /**
@@ -247,6 +247,5 @@ class chebyshev_distance_functor : public distance_functor<Lyt, Dist>
     chebyshev_distance_functor() : distance_functor<Lyt, Dist>(&chebyshev_distance<Lyt, Dist>) {}
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_DISTANCE_HPP
+}  // namespace fiction::physical_design::path_finding
+#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_HPP

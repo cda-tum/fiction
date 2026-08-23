@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_GOLD_HPP
 #define FICTION_CMD_GOLD_HPP
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -18,7 +18,7 @@ namespace alice
 /**
  * Executes a physical design approach utilizing A* path finding in a search space graph.
  *
- * See include/fiction/algorithms/physical_design/graph_oriented_layout_design.hpp for more details.
+ * See include/fiction/physical_design/graph_oriented_layout_design.hpp for more details.
  */
 class gold_command final : public command
 {
@@ -51,11 +51,11 @@ class gold_command final : public command
     /**
      * Parameters.
      */
-    fiction::graph_oriented_layout_design_params ps{};
+    fiction::physical_design::graph_oriented_layout_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::graph_oriented_layout_design_stats st{};
+    fiction::physical_design::graph_oriented_layout_design_stats st{};
 
     template <typename Lyt>
     void graph_oriented_layout_design();

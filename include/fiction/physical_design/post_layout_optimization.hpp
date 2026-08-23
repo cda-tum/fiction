@@ -2,21 +2,21 @@
 // Created by simon on 14.06.23.
 //
 
-#ifndef FICTION_POST_LAYOUT_OPTIMIZATION_HPP
-#define FICTION_POST_LAYOUT_OPTIMIZATION_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_POST_LAYOUT_OPTIMIZATION_HPP
+#define FICTION_PHYSICAL_DESIGN_POST_LAYOUT_OPTIMIZATION_HPP
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 
-#include "fiction/algorithms/path_finding/a_star.hpp"
-#include "fiction/algorithms/path_finding/cost.hpp"
-#include "fiction/algorithms/path_finding/distance.hpp"
-#include "fiction/algorithms/physical_design/wiring_reduction.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/physical_design/path_finding/a_star.hpp"
+#include "fiction/physical_design/path_finding/cost.hpp"
+#include "fiction/physical_design/path_finding/distance.hpp"
+#include "fiction/physical_design/utils/routing_utils.hpp"
+#include "fiction/physical_design/wiring_reduction.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/routing_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -33,7 +33,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 /**
@@ -162,25 +162,25 @@ struct fanin_fanout_data
      * This layout_coordinate_path object represents the path for routing signals from the first fan-in
      * to the gate within the layout.
      */
-    layout_coordinate_path<Lyt> route_fanin_1_to_gate;
+    physical_design::utils::layout_coordinate_path<Lyt> route_fanin_1_to_gate;
 
     /**
      * This layout_coordinate_path object represents the path for routing signals from the second fan-in
      * to the gate within the layout.
      */
-    layout_coordinate_path<Lyt> route_fanin_2_to_gate;
+    physical_design::utils::layout_coordinate_path<Lyt> route_fanin_2_to_gate;
 
     /**
      * This layout_coordinate_path object represents the path for routing signals from the gate to
      * the first fan-out within the layout.
      */
-    layout_coordinate_path<Lyt> route_gate_to_fanout_1;
+    physical_design::utils::layout_coordinate_path<Lyt> route_gate_to_fanout_1;
 
     /**
      * This layout_coordinate_path object represents the path for routing signals from the gate to
      * the second fan-out within the layout.
      */
-    layout_coordinate_path<Lyt> route_gate_to_fanout_2;
+    physical_design::utils::layout_coordinate_path<Lyt> route_gate_to_fanout_2;
 };
 /**
  * Utility function that moves outputs from the last row to the previous row, and from the last column to the previous
@@ -463,7 +463,7 @@ class post_layout_optimization_impl
 
             if (!timeout_limit_reached)
             {
-                fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+                fiction::physical_design::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
             }
         }
         else
@@ -478,7 +478,8 @@ class post_layout_optimization_impl
 
                 if (moved_at_least_one_gate && !ps.optimize_pos_only && !timeout_limit_reached)
                 {
-                    fiction::wiring_reduction(layout, wiring_reduction_params, &wiring_reduction_stats);
+                    fiction::physical_design::wiring_reduction(layout, wiring_reduction_params,
+                                                               &wiring_reduction_stats);
 
                     // check if wiring reduction made any improvements
                     if (wiring_reduction_stats.area_improvement != 0ull ||
@@ -614,11 +615,11 @@ class post_layout_optimization_impl
     /**
      * Wiring reduction parameters.
      */
-    fiction::wiring_reduction_params wiring_reduction_params{};
+    fiction::physical_design::wiring_reduction_params wiring_reduction_params{};
     /**
      * Wiring reduction stats.
      */
-    fiction::wiring_reduction_stats wiring_reduction_stats{};
+    fiction::physical_design::wiring_reduction_stats wiring_reduction_stats{};
     /**
      * Utility function to move wires that cross over empty tiles down one layer. This can happen if the wiring of a
      * gate is deleted.
@@ -827,16 +828,17 @@ class post_layout_optimization_impl
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
      */
-    layout_coordinate_path<ObstrLyt> get_path_and_obstruct(ObstrLyt& lyt, const tile<ObstrLyt>& start_tile,
-                                                           const tile<ObstrLyt>& end_tile)
+    physical_design::utils::layout_coordinate_path<ObstrLyt>
+    get_path_and_obstruct(ObstrLyt& lyt, const tile<ObstrLyt>& start_tile, const tile<ObstrLyt>& end_tile)
     {
-        using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
-        using cost = unit_cost_functor<ObstrLyt, uint8_t>;
-        static a_star_params astar_params{};
+        using dist = physical_design::path_finding::twoddwave_distance_functor<ObstrLyt, uint64_t>;
+        using cost = physical_design::path_finding::unit_cost_functor<ObstrLyt, uint8_t>;
+        static physical_design::path_finding::a_star_params astar_params{};
         astar_params.crossings = !ps.planar_optimization;
 
         const auto path =
-            a_star<layout_coordinate_path<ObstrLyt>>(lyt, {start_tile, end_tile}, dist(), cost(), astar_params);
+            physical_design::path_finding::a_star<physical_design::utils::layout_coordinate_path<ObstrLyt>>(
+                lyt, {start_tile, end_tile}, dist(), cost(), astar_params);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)
@@ -893,8 +895,8 @@ class post_layout_optimization_impl
             lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
 
             // get paths for fanins and fanouts
-            layout_coordinate_path<ObstrLyt> new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
-                new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2;
+            physical_design::utils::layout_coordinate_path<ObstrLyt> new_path_from_fanin_1_to_gate,
+                new_path_from_fanin_2_to_gate, new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2;
             // get paths for fanins and fanouts
             if (!fanins.empty())
             {
@@ -926,7 +928,7 @@ class post_layout_optimization_impl
                 {
                     if (!path.empty())
                     {
-                        route_path(lyt, path);
+                        physical_design::utils::route_path(lyt, path);
                         for (const auto& tile : path)
                         {
                             lyt.obstruct_coordinate(tile);
@@ -1005,12 +1007,12 @@ class post_layout_optimization_impl
      * @param old_pos Original position of the gate before relocation attempt.
      * @param fanouts Vector of fanout tiles connected to the gate.
      */
-    void restore_original_wiring(ObstrLyt& lyt, const layout_coordinate_path<ObstrLyt> old_path_from_fanin_1_to_gate,
-                                 const layout_coordinate_path<ObstrLyt> old_path_from_fanin_2_to_gate,
-                                 const layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_1,
-                                 const layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_2,
-                                 const tile<ObstrLyt>& current_pos, const tile<ObstrLyt>& old_pos,
-                                 const std::vector<tile<Lyt>> fanouts) noexcept
+    void restore_original_wiring(
+        ObstrLyt& lyt, const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_fanin_1_to_gate,
+        const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_fanin_2_to_gate,
+        const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_1,
+        const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_2,
+        const tile<ObstrLyt>& current_pos, const tile<ObstrLyt>& old_pos, const std::vector<tile<Lyt>> fanouts) noexcept
     {
         lyt.move_node(lyt.get_node(current_pos), old_pos, {});
 
@@ -1019,7 +1021,8 @@ class post_layout_optimization_impl
         {
             if (!r.empty())
             {
-                route_path<ObstrLyt, layout_coordinate_path<ObstrLyt>>(lyt, r);
+                physical_design::utils::route_path<ObstrLyt, physical_design::utils::layout_coordinate_path<ObstrLyt>>(
+                    lyt, r);
             }
             for (const auto& t : r)
             {
@@ -1282,8 +1285,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
     }
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::physical_design
 #pragma GCC diagnostic pop
 
-#endif  // FICTION_POST_LAYOUT_OPTIMIZATION_HPP
+#endif  // FICTION_PHYSICAL_DESIGN_POST_LAYOUT_OPTIMIZATION_HPP

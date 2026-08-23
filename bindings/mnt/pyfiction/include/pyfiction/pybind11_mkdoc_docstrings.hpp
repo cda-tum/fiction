@@ -103,7 +103,7 @@ function that estimates the remaining costs towards the target in
 every step. Thus, this heuristic function should neither be complex to
 calculate nor overestimating the remaining costs. Common heuristics to
 be used are the Manhattan and the Euclidean distance functions. See
-`distance_functor` for implementations.
+`physical_design::path_finding::distance_functor` for implementations.
 
 If the given layout implements the obstruction interface (see
 `obstruction_layout`), paths will not be routed via obstructed
@@ -114,7 +114,7 @@ obstruction interface (see `obstruction_layout`), paths may contain
 wire crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
+another wire but cross only in a single point (physical_design::orthogonal crossings +
 knock-knees/double wires).
 
 In certain cases it might be desirable to determine regular coordinate
@@ -124,9 +124,9 @@ calling this function:
 ```
 {.cpp}
 using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<>>;
-using path = layout_coordinate_path<layouts::cartesian_layout<>>;
+using path = physical_design::utils::layout_coordinate_path<layouts::cartesian_layout<>>;
 clk_lyt layout = ...;
-auto shortest_path = a_star<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target});
+auto shortest_path = physical_design::path_finding::a_star<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target});
 ```
 
 
@@ -3283,8 +3283,8 @@ static const char* mkd_doc_fiction_clustercomplete =
 exhaustive state assignment searching for which all local predicates
 hold, given respective local evaluations that may be aggregated from
 individual inter-variable interactions. Applied to the problem of
-exact physical simulation of SiDBs, it is able to efficiently consider
-positive charges that are rare to occur, but drastically blow up exact
+physical_design::exact physical simulation of SiDBs, it is able to efficiently consider
+positive charges that are rare to occur, but drastically blow up physical_design::exact
 simulation runtimes when hierarchical pruning methods are not applied.
 In fact, the exponential growth in problem complexity for added SiDBs
 is tamed by *ClusterComplete*, as SiDB layouts to simulate in practise
@@ -3414,7 +3414,7 @@ vertices that are belonging to the same objective are forming a
 clique, which can be pre-colored. Additionally, lexicographical
 orderings are enforced. For a more scalable (yet incomplete) approach,
 several coloring heuristics are available, from which can be chosen
-(see determine_vertex_coloring).
+(see physical_design::utils::determine_vertex_coloring).
 
 This function will return `true` if all objectives could be satisfied
 or if the partial routing parameter was set. In the case of `true`
@@ -4156,9 +4156,9 @@ performs another number of samples equal to the distance to an edge of
 each operational area. Finally, it performs up to 8 samples for each
 contour point (however, the actual number is usually lower). For each
 sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
+where each operational check consists of up to :math:`2^n` physical_design::exact
 ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
+the layout. Each physical_design::exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
@@ -4222,9 +4222,9 @@ parameter range. From there, it performs another number of samples
 equal to the number of points within the operational domain plus the
 first non-operational point in each direction. For each sample, the
 algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
+operational check consists of up to :math:`2^n` physical_design::exact ground state
 simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
+Each physical_design::exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
 
@@ -4289,8 +4289,8 @@ guaranteed to find the operational domain, if it exists within the
 parameter range. However, the algorithm performs one operational check
 per parameter combination, i.e., the product of the step counts of all
 sweep dimensions, where each operational check consists of up to
-:math:`2^n` exact ground state simulations, where :math:`n` is the
-number of inputs of the layout. Each exact ground state simulation has
+:math:`2^n` physical_design::exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each physical_design::exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
@@ -4344,8 +4344,8 @@ domain that might not be complete. It performs a total of `samples`
 uniformly-distributed random samples within the parameter range. For
 each sample, the algorithm performs one operational check on the
 layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
+physical_design::exact ground state simulations, where :math:`n` is the number of
+inputs of the layout. Each physical_design::exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
@@ -5949,7 +5949,7 @@ Args:
             State Space*, and the simulation following.
 
 Returns:
-    Results of the exact simulation.
+    Results of the physical_design::exact simulation.
 
 )doc";
 
@@ -7304,7 +7304,7 @@ paths may contain wire crossings if specified in the parameters. Wire
 crossings are only allowed over other wires and only if the crossing
 layer is not obstructed. Furthermore, it is ensured that crossings do
 not run along another wire but cross only in a single point
-(orthogonal crossings + knock-knees/double wires).
+(physical_design::orthogonal crossings + knock-knees/double wires).
 
 Args:
     src: Source coordinate.
@@ -7354,7 +7354,7 @@ static const char* mkd_doc_fiction_detail_exact_impl_ari =
     R"doc(Iterator for the factorization of possible aspect ratios.)doc";
 
 static const char* mkd_doc_fiction_detail_exact_impl_ari_mutex =
-    R"doc(Restricts access to the aspect_ratio_iterator and the
+    R"doc(Restricts access to the physical_design::utils::aspect_ratio_iterator and the
 result_aspect_ratio.)doc";
 
 static const char* mkd_doc_fiction_detail_exact_impl_black_list =
@@ -7421,7 +7421,7 @@ Returns:
 static const char* mkd_doc_fiction_detail_exact_impl_scheme = R"doc(The utilized clocking scheme.)doc";
 
 static const char* mkd_doc_fiction_detail_exact_impl_smt_handler =
-    R"doc(Sub-class to exact to handle construction of SMT instances as well as
+    R"doc(Sub-class to physical_design::exact to handle construction of SMT instances as well as
 house-keeping like storing solver states across incremental calls etc.
 Multiple handlers can be created in order to explore possible aspect
 ratios in parallel.)doc";
@@ -8203,19 +8203,19 @@ static const char* mkd_doc_fiction_detail_fanin_fanout_data_fanouts =
 from the gate.)doc";
 
 static const char* mkd_doc_fiction_detail_fanin_fanout_data_route_fanin_1_to_gate =
-    R"doc(This layout_coordinate_path object represents the path for routing
+    R"doc(This physical_design::utils::layout_coordinate_path object represents the path for routing
 signals from the first fan-in to the gate within the layout.)doc";
 
 static const char* mkd_doc_fiction_detail_fanin_fanout_data_route_fanin_2_to_gate =
-    R"doc(This layout_coordinate_path object represents the path for routing
+    R"doc(This physical_design::utils::layout_coordinate_path object represents the path for routing
 signals from the second fan-in to the gate within the layout.)doc";
 
 static const char* mkd_doc_fiction_detail_fanin_fanout_data_route_gate_to_fanout_1 =
-    R"doc(This layout_coordinate_path object represents the path for routing
+    R"doc(This physical_design::utils::layout_coordinate_path object represents the path for routing
 signals from the gate to the first fan-out within the layout.)doc";
 
 static const char* mkd_doc_fiction_detail_fanin_fanout_data_route_gate_to_fanout_2 =
-    R"doc(This layout_coordinate_path object represents the path for routing
+    R"doc(This physical_design::utils::layout_coordinate_path object represents the path for routing
 signals from the gate to the second fan-out within the layout.)doc";
 
 static const char* mkd_doc_fiction_detail_fanin_fanout_data_to_clear =
@@ -8454,7 +8454,7 @@ static const char* mkd_doc_fiction_detail_generate_edge_intersection_graph_impl_
 (labeled_layout_coordinate_lookup_path objects) computed thus far to
 find intersections with new ones. The edge intersection graph stores
 plain paths without the extra set and label. Therefore, after the
-generate_edge_intersection_graph function terminates, the extra memory
+physical_design::utils::generate_edge_intersection_graph function terminates, the extra memory
 overhead is being released again.)doc";
 
 static const char* mkd_doc_fiction_detail_generate_edge_intersection_graph_impl_connect_clique =
@@ -8506,7 +8506,7 @@ Args:
 )doc";
 
 static const char* mkd_doc_fiction_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path =
-    R"doc(Extends the layout_coordinate_path to additionally to the vector
+    R"doc(Extends the physical_design::utils::layout_coordinate_path to additionally to the vector
 representation of the path also hold a set that allows fast lookup
 needed to find intersections (O(log n)). Additionally, a label is
 assigned to each path to identify it in the edge intersection graph.)doc";
@@ -8731,7 +8731,7 @@ before anything else happens, so this class is templated on the layout
 type only. Carrying the caller's network type through the whole
 implementation would duplicate every member for each network type the
 caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `graph_oriented_layout_design` entry
+it. The conversion lives in the `physical_design::graph_oriented_layout_design` entry
 point below.
 
 Template Args:
@@ -10876,14 +10876,14 @@ Template Args:
 )doc";
 
 static const char* mkd_doc_fiction_detail_orthogonal_impl =
-    R"doc(Implementation of the orthogonal physical design algorithm.
+    R"doc(Implementation of the physical_design::orthogonal physical design algorithm.
 
 The specification network is converted to a `networks::technology_network`
 before anything else happens, so this class is templated on the layout
 type only. Carrying the caller's network type through the whole
 implementation would duplicate every member for each network type the
 caller happens to use, without a single line of the body depending on
-it. The conversion lives in the `orthogonal` entry point below.
+it. The conversion lives in the `physical_design::orthogonal` entry point below.
 
 Template Args:
     Lyt: Gate-level layout type.)doc";
@@ -10891,12 +10891,12 @@ Template Args:
 static const char* mkd_doc_fiction_detail_orthogonal_impl_ntk = R"doc()doc";
 
 static const char* mkd_doc_fiction_detail_orthogonal_impl_orthogonal_impl =
-    R"doc(Constructor for the orthogonal physical design algorithm.
+    R"doc(Constructor for the physical_design::orthogonal physical design algorithm.
 
 Args:
     src: The source network to be placed, already fanout-substituted
          into a `networks::technology_network`.
-    p: The parameters for the orthogonal physical design algorithm.
+    p: The parameters for the physical_design::orthogonal physical design algorithm.
     st: The statistics object to record execution details.
 
 )doc";
@@ -12887,12 +12887,12 @@ the graph is said to be :math:`k`-colorable. The minimum value of
 chromatic number of a graph is :math:`NP`-complete in general. The
 provided algorithms attempt to get as close to the optimum coloring as
 possible. However, no heuristic can give an optimality guarantee. If
-the exact chromatic number is required, the SAT-based engine must be
+the physical_design::exact chromatic number is required, the SAT-based engine must be
 used. This may require exponential runtime in the worst case but is,
 on average, a lot faster due to the smart traversal of search spaces
 that SAT solvers provide.
 
-See graph_coloring_engine for a list of all supported engines.
+See physical_design::utils::graph_coloring_engine for a list of all supported engines.
 
 Args:
     graph: The graph whose vertices are to be colored.
@@ -13320,7 +13320,7 @@ obstruction interface (see `obstruction_layout`), paths may contain
 wire crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
+another wire but cross only in a single point (physical_design::orthogonal crossings +
 knock-knees/double wires).
 
 In certain cases it might be desirable to enumerate regular coordinate
@@ -13330,9 +13330,9 @@ calling this function:
 ```
 {.cpp}
 using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<>>;
-using path = layout_coordinate_path<layouts::cartesian_layout<>>;
+using path = physical_design::utils::layout_coordinate_path<layouts::cartesian_layout<>>;
 clk_lyt layout = ...;
-auto all_paths = enumerate_all_paths<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target});
+auto all_paths = physical_design::path_finding::enumerate_all_paths<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target});
 ```
 
 
@@ -13570,7 +13570,7 @@ static const char* mkd_doc_fiction_even_row_hex =
 ```)doc";
 
 static const char* mkd_doc_fiction_exact =
-    R"doc(An exact placement & routing approach using SMT solving as originally
+    R"doc(An physical_design::exact placement & routing approach using SMT solving as originally
 proposed in \"An Exact Method for Design Exploration of Quantum-dot
 Cellular Automata\" by M. Walter, R. Wille, D. Große, F. Sill Torres,
 and R. Drechsler in DATE 2018. A more extensive description can be
@@ -13738,7 +13738,7 @@ static const char* mkd_doc_fiction_exact_sidb_simulation_engine =
     R"doc(Selector exclusively for exact SiDB simulation engines.)doc";
 
 static const char* mkd_doc_fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE =
-    R"doc(*ClusterComplete* is a novel exact simulation engine that requires
+    R"doc(*ClusterComplete* is a novel physical_design::exact simulation engine that requires
 exponential runtime, though, depending on the simulation problem, it
 effectively reduces the base number by a real number, thus allowing
 problem sizes that were previously considered astronomical. Inherent
@@ -13746,16 +13746,16 @@ to the simulation methodology that does not depend on the simulation
 base, it simulates very effectively for either base number (2 or 3).)doc";
 
 static const char* mkd_doc_fiction_exact_sidb_simulation_engine_EXGS =
-    R"doc(*Exhaustive Ground State Search* (EXGS) is an exact simulation engine
+    R"doc(*Exhaustive Ground State Search* (EXGS) is an physical_design::exact simulation engine
 that always has exponential runtime.)doc";
 
 static const char* mkd_doc_fiction_exact_sidb_simulation_engine_QUICKEXACT =
-    R"doc(*QuickExact* is also an exact simulation engine that requires
+    R"doc(*QuickExact* is also an physical_design::exact simulation engine that requires
 exponential runtime, but it scales a lot better than ExGS due to its
 effective search-space pruning.)doc";
 
 static const char* mkd_doc_fiction_exact_with_blacklist =
-    R"doc(The same as `exact` but with a black list of tiles that are not
+    R"doc(The same as `physical_design::exact` but with a black list of tiles that are not
 allowed to be used to a specified set of Boolean functions and their
 orientations. For example, a black list could be used to exclude the
 use of a tile only for an AND gate of a certain rotation, but not for
@@ -13803,7 +13803,7 @@ Returns:
     sidb_simulation_result is returned with all results.
 
 Note:
-    This was the first exact simulation approach. However, it is
+    This was the first physical_design::exact simulation approach. However, it is
     replaced by *QuickExact* and *ClusterComplete* due to the much
     better runtimes and more functionality.
 
@@ -14006,7 +14006,7 @@ embed:rst
 .. code-block:: c++
 
 template <typename CellLyt>
-static void post_layout_optimization(CellLyt& lyt)
+static void physical_design::post_layout_optimization(CellLyt& lyt)
 ```
 
 
@@ -15980,7 +15980,7 @@ but SAT are using the graph-coloring library by Brian Crites.)doc";
 static const char* mkd_doc_fiction_graph_coloring_engine_DSATUR =
     R"doc(Saturation degree algorithm proposed in \"New Methods to Color the
 Vertices of a Graph\" by Daniel Brélaz in Communications of the ACM,
-1979. This algorithm is a heuristic but is exact for bipartite graphs.)doc";
+1979. This algorithm is a heuristic but is physical_design::exact for bipartite graphs.)doc";
 
 static const char* mkd_doc_fiction_graph_coloring_engine_LMXRLF =
     R"doc(A randomized heuristic algorithm that combines various paradigms like
@@ -16003,7 +16003,7 @@ Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
 Werra in Computing 1987. The authors claim that it significantly
 outperforms simulated annealing. However, since it is a
 :math:`k`-coloring algorithm, it is required to set `k_color_value` in
-`determine_vertex_coloring_params` to the chromatic number that is to
+`physical_design::utils::determine_vertex_coloring_params` to the chromatic number that is to
 be checked for.)doc";
 
 static const char* mkd_doc_fiction_graph_coloring_sat_search_tactic =
@@ -16545,8 +16545,8 @@ static const char* mkd_doc_fiction_gray_code_iterator_start_number = R"doc(Start
 
 static const char* mkd_doc_fiction_ground_state_space =
     R"doc(The purely constructive *Ground State Space* algorithm is the key
-ingredient of the *ClusterComplete* exact SiDB simulator that lifts
-exact SiDB simulation to permit multiple gates in connection. It uses
+ingredient of the *ClusterComplete* physical_design::exact SiDB simulator that lifts
+physical_design::exact SiDB simulation to permit multiple gates in connection. It uses
 iterative "loop until fixpoint" concepts to prune the simulation
 search space for not only a flat layout of SiDBs, but rather
 generalizes, and lifts the physically informed space pruning technique
@@ -17706,7 +17706,7 @@ static const char* mkd_doc_fiction_hexagonalization_io_pin_routing_error =
 top/bottom border and rerouting.)doc";
 
 static const char* mkd_doc_fiction_hexagonalization_io_pin_routing_error_hexagonalization_io_pin_routing_error =
-    R"doc(Constructs a `hexagonalization_io_pin_routing_error` object with the
+    R"doc(Constructs a `physical_design::hexagonalization_io_pin_routing_error` object with the
 given error message.
 
 Args:
@@ -17724,7 +17724,7 @@ static const char* mkd_doc_fiction_hexagonalization_params_input_pin_extension =
 
 static const char* mkd_doc_fiction_hexagonalization_params_io_pin_extension_mode =
     R"doc(Specifies how primary inputs/outputs should be handled in the
-hexagonalization process.)doc";
+physical_design::hexagonalization process.)doc";
 
 static const char* mkd_doc_fiction_hexagonalization_params_io_pin_extension_mode_EXTEND =
     R"doc(Extend primary inputs/outputs to the top/bottom row.)doc";
@@ -18200,7 +18200,7 @@ layout is found by a heuristic for the physical simulation (e.g.,
 Args:
     heuristic_results: Simulation results obtained from a heuristic
                        physical simulation.
-    exact_results: Simulation results obtained from an exact physical
+    exact_results: Simulation results obtained from an physical_design::exact physical
                    simulation.
 
 Template Args:
@@ -18687,13 +18687,13 @@ Template Args:
 static const char* mkd_doc_fiction_manhattan_distance_functor_manhattan_distance_functor = R"doc()doc";
 
 static const char* mkd_doc_fiction_mincross =
-    R"doc(Reimplementation of Graphviz's `mincross` algorithm for edge crossing
+    R"doc(Reimplementation of Graphviz's `physical_design::utils::mincross` algorithm for edge crossing
 minimization. This function reorders nodes in a leveled logic network
 to minimize the number of edge crossings using iterative median and
 transpose heuristics.
 
 Reference implementation:
-https://gitlab.com/graphviz/graphviz/-/blob/main/lib/dotgen/mincross.c
+https://gitlab.com/graphviz/graphviz/-/blob/main/lib/dotgen/physical_design::utils::mincross.c
 
 For more on Graphviz's `dot` layout generation:
 https://graphviz.org/docs/layouts/dot/
@@ -18715,7 +18715,7 @@ Returns:
 
 static const char* mkd_doc_fiction_mincross_impl =
     R"doc(Implements the crossing minimization algorithm inspired by Graphviz's
-`mincross`. This algorithm reorders nodes in ranks to reduce edge
+`physical_design::utils::mincross`. This algorithm reorders nodes in ranks to reduce edge
 crossings in a leveled graph representation of the logic network.
 
 Template Args:
@@ -19657,7 +19657,7 @@ static const char* mkd_doc_fiction_on_the_fly_sidb_circuit_design_on_defective_s
 defective SiDB surface.
 
 The process begins with placement and routing using a blacklist and
-the `exact` method. The blacklist includes skeleton-tile pairs that
+the `physical_design::exact` method. The blacklist includes skeleton-tile pairs that
 are excluded due to collisions between skeleton and neutral defects on
 specific tiles. After identifying a valid placement and routing, a
 defect-aware SiDB gate design algorithm is applied. This algorithm
@@ -19784,9 +19784,9 @@ performs another number of samples equal to the distance to an edge of
 each operational area. Finally, it performs up to 8 samples for each
 contour point (however, the actual number is usually lower). For each
 sample, the algorithm performs one operational check on the layout,
-where each operational check consists of up to :math:`2^n` exact
+where each operational check consists of up to :math:`2^n` physical_design::exact
 ground state simulations, where :math:`n` is the number of inputs of
-the layout. Each exact ground state simulation has exponential
+the layout. Each physical_design::exact ground state simulation has exponential
 complexity in of itself. Therefore, the algorithm is only feasible for
 small layouts with few inputs.
 
@@ -19841,9 +19841,9 @@ parameter range. From there, it performs another number of samples
 equal to the number of points within the operational domain plus the
 first non-operational point in each direction. For each sample, the
 algorithm performs one operational check on the layout, where each
-operational check consists of up to :math:`2^n` exact ground state
+operational check consists of up to :math:`2^n` physical_design::exact ground state
 simulations, where :math:`n` is the number of inputs of the layout.
-Each exact ground state simulation has exponential complexity in of
+Each physical_design::exact ground state simulation has exponential complexity in of
 itself. Therefore, the algorithm is only feasible for small layouts
 with few inputs.
 
@@ -19915,8 +19915,8 @@ guaranteed to find the operational domain, if it exists within the
 parameter range. However, the algorithm performs one operational check
 per parameter combination, i.e., the product of the step counts of all
 sweep dimensions, where each operational check consists of up to
-:math:`2^n` exact ground state simulations, where :math:`n` is the
-number of inputs of the layout. Each exact ground state simulation has
+:math:`2^n` physical_design::exact ground state simulations, where :math:`n` is the
+number of inputs of the layout. Each physical_design::exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
@@ -19989,8 +19989,8 @@ domain that might not be complete. It performs a total of `samples`
 uniformly-distributed random samples within the parameter range. For
 each sample, the algorithm performs one operational check on the
 layout, where each operational check consists of up to :math:`2^n`
-exact ground state simulations, where :math:`n` is the number of
-inputs of the layout. Each exact ground state simulation has
+physical_design::exact ground state simulations, where :math:`n` is the number of
+inputs of the layout. Each physical_design::exact ground state simulation has
 exponential complexity in of itself. Therefore, the algorithm is only
 feasible for small layouts with few inputs.
 
@@ -20168,7 +20168,7 @@ Returns:
 )doc";
 
 static const char* mkd_doc_fiction_orthogonal =
-    R"doc(A scalable placement & routing approach based on orthogonal graph
+    R"doc(A scalable placement & routing approach based on physical_design::orthogonal graph
 drawing as originally proposed in \"Scalable Design for Field-coupled
 Nanocomputing Circuits\" by M. Walter, R. Wille, F. Sill Torres, D.
 Große, and R. Drechsler in ASP-DAC 2019. A more extensive description
@@ -20187,7 +20187,7 @@ The imposed restrictions are that the input logic network has to be a
 3-graph, i.e., cannot have any node exceeding degree 3 (combined input
 and output), and that the resulting layout is always 2DDWave-clocked.
 
-This algorithm is based on a modification of \"Improved orthogonal
+This algorithm is based on a modification of \"Improved physical_design::orthogonal
 drawings of 3-graphs\" by Therese C. Biedl in Canadian Conference on
 Computational Geometry 1996. Biedl's original algorithm works for
 undirected graphs only while this modification respects information
@@ -20608,7 +20608,7 @@ Returns:
 static const char* mkd_doc_fiction_place_6 =
     R"doc(Place any gate from a network. This function automatically identifies
 the arity of the passed node and fetches its incoming signals from the
-given network and a provided branching_signal_container
+given network and a provided physical_design::utils::branching_signal_container
 `mockturtle::node_map`. This function does not update the
 `mockturtle::node_map`.
 
@@ -20672,7 +20672,7 @@ required to conduct the transition.)doc";
 
 static const char* mkd_doc_fiction_port_direction =
     R"doc(A port direction is a relative (cardinal) direction of a port within a
-tile. Useful, when no exact port locations within a tile are needed.)doc";
+tile. Useful, when no physical_design::exact port locations within a tile are needed.)doc";
 
 static const char* mkd_doc_fiction_port_direction_cardinal = R"doc()doc";
 
@@ -20842,8 +20842,8 @@ layouts by freeing up space to the right and bottom, as all gates were
 moved to the top left corner.
 
 After moving all gates, this algorithm also checks if excess wiring
-exists on the layout using the `wiring_reduction` algorithm (cf.
-`wiring_reduction.hpp`)
+exists on the layout using the `physical_design::wiring_reduction` algorithm (cf.
+`physical_design::wiring_reduction.hpp`)
 
 As outputs have to lay on the border of a layout for better
 accessibility, they are also moved to new borders determined based on
@@ -21540,7 +21540,7 @@ static const char* mkd_doc_fiction_qca_technology_is_vertical_cell_mode = R"doc(
 static const char* mkd_doc_fiction_qca_technology_qca_technology = R"doc()doc";
 
 static const char* mkd_doc_fiction_quickexact =
-    R"doc(*QuickExact* is a quick and exact physical simulation algorithm
+    R"doc(*QuickExact* is a quick and physical_design::exact physical simulation algorithm
 designed specifically for SiDB layouts. It was proposed in \"The Need
 for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic\"
 by J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2024
@@ -22064,7 +22064,7 @@ Template Args:
     NtkDest: Target network type.
     T: Mapping type to identify signals by. Currently,
        `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
+       `physical_design::utils::branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
        supported.
 
 )doc";
@@ -22126,7 +22126,7 @@ Template Args:
 
 static const char* mkd_doc_fiction_restore_signal_names_2 =
     R"doc(Same as the other restore_signal_names function but this overload uses
-a `mockturtle::node_map` with a branching_signal_container that is
+a `mockturtle::node_map` with a physical_design::utils::branching_signal_container that is
 specifically used for networks or layouts that allow branches to be
 distinct, e.g., by their position on the layout.
 
@@ -22136,7 +22136,7 @@ Args:
     ntk_dest: Target logic network whose signal names are to be
               assigned `ntk_src`'s names.
     old2new: Mapping of signals from `ntk_src` to `ntk_dest` using a
-             branching_signal_container.
+             physical_design::utils::branching_signal_container.
 
 Template Args:
     NtkSrc: Source network type.
@@ -23291,7 +23291,7 @@ static const char* mkd_doc_fiction_sidb_simulation_engine =
     R"doc(Selector for the available SiDB simulation engines.)doc";
 
 static const char* mkd_doc_fiction_sidb_simulation_engine_CLUSTERCOMPLETE =
-    R"doc(*ClusterComplete* is a novel exact simulation engine that requires
+    R"doc(*ClusterComplete* is a novel physical_design::exact simulation engine that requires
 exponential runtime, though, depending on the simulation problem, it
 effectively reduces the base number by a real number, thus allowing
 problem sizes that were previously considered astronomical in size.
@@ -23300,11 +23300,11 @@ simulation base, it simulates very effectively for either base number
 (2 or 3).)doc";
 
 static const char* mkd_doc_fiction_sidb_simulation_engine_EXGS =
-    R"doc(*Exhaustive Ground State Search (EXGS)* is an exact simulation engine
+    R"doc(*Exhaustive Ground State Search (EXGS)* is an physical_design::exact simulation engine
 that always has exponential runtime.)doc";
 
 static const char* mkd_doc_fiction_sidb_simulation_engine_QUICKEXACT =
-    R"doc(*QuickExact* is also an exact simulation engine that requires
+    R"doc(*QuickExact* is also an physical_design::exact simulation engine that requires
 exponential runtime, but it scales a lot better than *ExGS* due to its
 effective search-space pruning.)doc";
 
@@ -23995,8 +23995,8 @@ Returns:
 static const char* mkd_doc_fiction_smart_distance_cache_functor =
     R"doc(A distance functor that internally uses a `sparse_distance_map` as a
 cache to prevent re-computing distances that have already been
-evaluated. In contrast to `distance_map_functor` and
-`sparse_distance_map_functor`, this functor does not require a pre-
+evaluated. In contrast to `physical_design::path_finding::distance_map_functor` and
+`physical_design::path_finding::sparse_distance_map_functor`, this functor does not require a pre-
 computed distance map upon construction, but instead will gradually
 build up its own cache when queried multiple times. It can be used as
 a drop-in replacement for any other distance functor in path-finding
@@ -24814,11 +24814,11 @@ Template Args:
 static const char* mkd_doc_fiction_time_to_solution_for_given_simulation_results =
     R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
 simulation results of a heuristic algorithm in comparison to those of
-an exact algorithm. It provides further statistical metrics, including
+an physical_design::exact algorithm. It provides further statistical metrics, including
 the accuracy of the heuristic algorithm, and individual runtimes.
 
 Args:
-    results_exact: Simulation results of the exact algorithm.
+    results_exact: Simulation results of the physical_design::exact algorithm.
     results_heuristic: Simulation of the heuristic for which the TTS
                        is determined.
     confidence_level: Confidence level for the TTS computation. The
@@ -24859,8 +24859,8 @@ precise to 1 %).)doc";
 static const char* mkd_doc_fiction_time_to_solution_stats =
     R"doc(This struct stores the time-to-solution, the simulation accuracy and
 the average single simulation runtime of *QuickSim*, the single
-runtime of the exact simulator used, and the number of valid charge
-configurations found by the exact algorithm.)doc";
+runtime of the physical_design::exact simulator used, and the number of valid charge
+configurations found by the physical_design::exact algorithm.)doc";
 
 static const char* mkd_doc_fiction_time_to_solution_stats_acc = R"doc(Accuracy of the simulation in %.)doc";
 
@@ -24880,7 +24880,7 @@ Args:
 )doc";
 
 static const char* mkd_doc_fiction_time_to_solution_stats_single_runtime_exact =
-    R"doc(Single simulation runtime of the exact ground state simulation
+    R"doc(Single simulation runtime of the physical_design::exact ground state simulation
 algorithm.)doc";
 
 static const char* mkd_doc_fiction_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
@@ -26322,7 +26322,7 @@ obstruction interface (see obstruction_layout), paths may contain wire
 crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
-another wire but cross only in a single point (orthogonal crossings +
+another wire but cross only in a single point (physical_design::orthogonal crossings +
 knock-knees/double wires).
 
 In certain cases it might be desirable to enumerate regular coordinate
@@ -26332,9 +26332,9 @@ calling this function:
 ```
 {.cpp}
 using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<>>;
-using path = layout_coordinate_path<layouts::cartesian_layout<>>;
+using path = physical_design::utils::layout_coordinate_path<layouts::cartesian_layout<>>;
 clk_lyt layout = ...;
-auto k_paths = yen_k_shortest_paths<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target}, k);
+auto k_paths = physical_design::path_finding::yen_k_shortest_paths<path>(static_cast<layouts::cartesian_layout<>>(layout), {source, target}, k);
 ```
 
 

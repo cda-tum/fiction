@@ -1,23 +1,23 @@
 //
 // Created by Simon Hofmann on 30.01.24.
 //
-#ifndef FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
-#define FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
+#ifndef FICTION_PHYSICAL_DESIGN_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
+#define FICTION_PHYSICAL_DESIGN_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
 
-#include "fiction/algorithms/path_finding/a_star.hpp"
-#include "fiction/algorithms/path_finding/cost.hpp"
-#include "fiction/algorithms/path_finding/distance.hpp"
-#include "fiction/algorithms/physical_design/post_layout_optimization.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
+#include "fiction/physical_design/path_finding/a_star.hpp"
+#include "fiction/physical_design/path_finding/cost.hpp"
+#include "fiction/physical_design/path_finding/distance.hpp"
+#include "fiction/physical_design/post_layout_optimization.hpp"
+#include "fiction/physical_design/utils/placement_utils.hpp"
+#include "fiction/physical_design/utils/routing_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/placement_utils.hpp"
-#include "fiction/utils/routing_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -50,7 +50,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::physical_design
 {
 
 /**
@@ -1185,7 +1185,7 @@ class graph_oriented_layout_design_impl
      * Defaults to `new_gate_location::NONE`.
      * @return A path from `src` to `dest` if one exists.
      */
-    [[nodiscard]] layout_coordinate_path<ObstrLyt>
+    [[nodiscard]] physical_design::utils::layout_coordinate_path<ObstrLyt>
     check_path(const ObstrLyt& layout, const tile<ObstrLyt>& src, const tile<ObstrLyt>& dest,
                const new_gate_location new_gate_loc            = new_gate_location::NONE,
                const bool              check_straight_inverter = false) noexcept
@@ -1196,14 +1196,15 @@ class graph_oriented_layout_design_impl
         if ((layout.is_empty_tile(src) && src_is_new_pos) || (layout.is_empty_tile(dest) && dest_is_new_pos) ||
             (new_gate_loc == new_gate_location::NONE))
         {
-            using dist = twoddwave_distance_functor<ObstrLyt, uint64_t>;
-            using cost = unit_cost_functor<ObstrLyt, uint8_t>;
+            using dist = physical_design::path_finding::twoddwave_distance_functor<ObstrLyt, uint64_t>;
+            using cost = physical_design::path_finding::unit_cost_functor<ObstrLyt, uint8_t>;
 
-            a_star_params a_star_crossing_params{};
+            physical_design::path_finding::a_star_params a_star_crossing_params{};
             a_star_crossing_params.crossings = !ps.planar;
 
             const auto path =
-                a_star<layout_coordinate_path<ObstrLyt>>(layout, {src, dest}, dist(), cost(), a_star_crossing_params);
+                physical_design::path_finding::a_star<physical_design::utils::layout_coordinate_path<ObstrLyt>>(
+                    layout, {src, dest}, dist(), cost(), a_star_crossing_params);
 
             if (path.size() < 2)
             {
@@ -1682,7 +1683,7 @@ class graph_oriented_layout_design_impl
         const auto path = check_path(layout, pre_t, position, new_gate_location::NONE);
         assert(!path.empty());
 
-        route_path(layout, path);
+        physical_design::utils::route_path(layout, path);
 
         for (const auto& el : path)
         {
@@ -1725,8 +1726,8 @@ class graph_oriented_layout_design_impl
             layout.obstruct_coordinate(el);
         }
 
-        route_path(layout, path_1);
-        route_path(layout, path_2);
+        physical_design::utils::route_path(layout, path_1);
+        physical_design::utils::route_path(layout, path_2);
     }
     /**
      * Executes a single placement step in the layout for the given network node. It determines the type of the node,
@@ -1774,8 +1775,8 @@ class graph_oriented_layout_design_impl
                 const auto pre_t = static_cast<tile<ObstrLyt>>(place_info.node2pos[pre]);
                 auto       a     = static_cast<mockturtle::signal<ObstrLyt>>(pre_t);
 
-                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
-                    place(layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a);
+                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = physical_design::utils::place(
+                    layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a);
             }
 
             route_single_input_node(position, layout, place_info.node2pos, fc);
@@ -1789,7 +1790,7 @@ class graph_oriented_layout_design_impl
             const auto a1 = static_cast<mockturtle::signal<ObstrLyt>>(pre1);
             const auto a2 = static_cast<mockturtle::signal<ObstrLyt>>(pre2);
 
-            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = place(
+            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = physical_design::utils::place(
                 layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a1, a2, fc.constant_fanin);
 
             route_double_input_node(position, layout, place_info.node2pos, fc);
@@ -1964,7 +1965,7 @@ class graph_oriented_layout_design_impl
 
         auto layout = initialize_layout(min_layout_width);
 
-        auto                             pi2node = reserve_input_nodes(layout, ssg.network);
+        auto                             pi2node = physical_design::utils::reserve_input_nodes(layout, ssg.network);
         node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
         placement_info<ObstrLyt>         place_info{0ul, 0ul, node2pos, pi2node};
 
@@ -2079,10 +2080,11 @@ class graph_oriented_layout_design_impl
 
                 if (apply_plo)
                 {
-                    const fiction::post_layout_optimization_params plo_params{.optimize_pos_only   = true,
-                                                                              .planar_optimization = ps.planar};
+                    const fiction::physical_design::post_layout_optimization_params plo_params{
+                        .optimize_pos_only   = true,
+                        .planar_optimization = ps.planar};
 
-                    fiction::post_layout_optimization(layout, plo_params);
+                    fiction::physical_design::post_layout_optimization(layout, plo_params);
                 }
 
                 const auto bb_after_plo = fiction::layouts::bounding_box_2d(layout);
@@ -2512,6 +2514,5 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
+}  // namespace fiction::physical_design
+#endif  // FICTION_PHYSICAL_DESIGN_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
