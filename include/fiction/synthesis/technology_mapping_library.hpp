@@ -2,10 +2,10 @@
 // Created by marcel on 08.06.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_MAPPING_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_MAPPING_LIBRARY_HPP
+#ifndef FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_LIBRARY_HPP
+#define FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_LIBRARY_HPP
 
-namespace fiction
+namespace fiction::synthesis
 {
 
 /**
@@ -94,6 +94,5 @@ inline constexpr const char* DECAY_AND_XOR = "GATE  d1_and_xor  1 O=a*b;      PI
                                              "GATE  d2_and_xor  1 O=!a*b;     PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n"
                                              "GATE  d3_and_xor  1 O=a^b;      PIN * NONINV 1 999 1.0 1.0 1.0 1.0\n";
 
-}  // namespace fiction
-
-#endif  // FICTION_TECHNOLOGY_MAPPING_LIBRARY_HPP
+}  // namespace fiction::synthesis
+#endif  // FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_LIBRARY_HPP

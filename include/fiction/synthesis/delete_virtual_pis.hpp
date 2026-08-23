@@ -2,8 +2,8 @@
 // Created by benjamin on 14.06.24.
 //
 
-#ifndef FICTION_DELETE_VIRTUAL_PIS_HPP
-#define FICTION_DELETE_VIRTUAL_PIS_HPP
+#ifndef FICTION_SYNTHESIS_DELETE_VIRTUAL_PIS_HPP
+#define FICTION_SYNTHESIS_DELETE_VIRTUAL_PIS_HPP
 
 #include "fiction/networks/utils/name_utils.hpp"
 
@@ -20,7 +20,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-namespace fiction
+namespace fiction::synthesis
 {
 
 namespace detail
@@ -252,6 +252,5 @@ Ntk delete_virtual_pis(const Ntk& ntk) noexcept
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_DELETE_VIRTUAL_PIS_HPP
+}  // namespace fiction::synthesis
+#endif  // FICTION_SYNTHESIS_DELETE_VIRTUAL_PIS_HPP

@@ -7,7 +7,7 @@
 
 #include "fiction/traits.hpp"
 
-#include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
+#include <fiction/synthesis/delete_virtual_pis.hpp>
 
 #include <mockturtle/traits.hpp>
 
@@ -33,7 +33,7 @@ Ntk handle_virtual_pis(const Ntk& network)
 {
     if constexpr (has_num_virtual_pis_v<Ntk>)
     {
-        Ntk return_ntk = delete_virtual_pis(network);
+        Ntk return_ntk = synthesis::delete_virtual_pis(network);
         if constexpr (has_update_ranks_v<Ntk>)
         {
             return_ntk.update_ranks();

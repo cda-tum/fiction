@@ -5,11 +5,11 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/traits.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -193,10 +193,10 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
     tec.create_po(f2);
     tec.create_po(f3);
 
-    network_balancing_params ps;
+    synthesis::network_balancing_params ps;
     ps.unify_outputs = true;
 
-    const auto tec_balanced = network_balancing<networks::technology_network>(tec, ps);
+    const auto tec_balanced = synthesis::network_balancing<networks::technology_network>(tec, ps);
 
     auto vpi_r = networks::views::mutable_rank_view(tec_balanced);
 
@@ -231,7 +231,7 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
     ntk.create_po(f2_t);
     ntk.create_po(f3_t);
 
-    network_balancing_params ps;
+    synthesis::network_balancing_params ps;
     ps.unify_outputs = true;
 
     const auto ntk_r = networks::views::mutable_rank_view(ntk);

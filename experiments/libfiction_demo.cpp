@@ -4,24 +4,24 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/algorithms/network_transformation/fanout_substitution.hpp>  // substitute multi-output gates with fan-out cascades
 #include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
 #include <fiction/algorithms/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/algorithms/physical_design/orthogonal.hpp>          // scalable physical design of FCN layouts
-#include <fiction/io/write_qca_layout.hpp>           // writer for QCADesigner files (physical simulation)
-#include <fiction/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
-#include <fiction/layouts/cartesian_layout.hpp>      // Cartesian grid layouts
-#include <fiction/layouts/cell_level_layout.hpp>     // cell-level abstraction of layouts
-#include <fiction/layouts/coordinates.hpp>           // coordinate systems
-#include <fiction/layouts/gate_level_layout.hpp>     // gate-level abstraction of layouts
-#include <fiction/layouts/io/layout_drawers.hpp>     // DOT drawers for logic networks and layouts
-#include <fiction/layouts/io/write_svg_layout.hpp>   // SVG writer for cell-level layout representation
-#include <fiction/layouts/tile_based_layout.hpp>     // tile-based abstraction of layouts
-#include <fiction/technology/area.hpp>               // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>  // pre-defined cell implementations
-#include <fiction/technology/qca_one_library.hpp>    // a pre-defined QCA gate library
-#include <fiction/types.hpp>                         // pre-defined types suitable for the FCN domain
-#include <fiction/utils/debug/network_writer.hpp>    // DOT writer for logic networks and layouts
+#include <fiction/io/write_qca_layout.hpp>            // writer for QCADesigner files (physical simulation)
+#include <fiction/io/write_sqd_layout.hpp>            // writer for SiQAD files (physical simulation)
+#include <fiction/layouts/cartesian_layout.hpp>       // Cartesian grid layouts
+#include <fiction/layouts/cell_level_layout.hpp>      // cell-level abstraction of layouts
+#include <fiction/layouts/coordinates.hpp>            // coordinate systems
+#include <fiction/layouts/gate_level_layout.hpp>      // gate-level abstraction of layouts
+#include <fiction/layouts/io/layout_drawers.hpp>      // DOT drawers for logic networks and layouts
+#include <fiction/layouts/io/write_svg_layout.hpp>    // SVG writer for cell-level layout representation
+#include <fiction/layouts/tile_based_layout.hpp>      // tile-based abstraction of layouts
+#include <fiction/synthesis/fanout_substitution.hpp>  // substitute multi-output gates with fan-out cascades
+#include <fiction/technology/area.hpp>                // area requirement calculations
+#include <fiction/technology/cell_technologies.hpp>   // pre-defined cell implementations
+#include <fiction/technology/qca_one_library.hpp>     // a pre-defined QCA gate library
+#include <fiction/types.hpp>                          // pre-defined types suitable for the FCN domain
+#include <fiction/utils/debug/network_writer.hpp>     // DOT writer for logic networks and layouts
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -175,13 +175,13 @@ int main(int argc, char* argv[])  // NOLINT
     std::cout << "[i] fanout substitution" << std::endl;
 
     // set up parameters for fanout substitution
-    fiction::fanout_substitution_params fanout_params{};
-    fanout_params.strategy  = fiction::fanout_substitution_params::substitution_strategy::BREADTH;
+    fiction::synthesis::fanout_substitution_params fanout_params{};
+    fanout_params.strategy  = fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
     fanout_params.degree    = 2;
     fanout_params.threshold = 1;
 
     // substitute high-degree output nodes by fanout nodes (converts network into a topology_network)
-    auto top_ntk = fiction::fanout_substitution<fiction::tec_nt>(ntk, fanout_params);
+    auto top_ntk = fiction::synthesis::fanout_substitution<fiction::tec_nt>(ntk, fanout_params);
 
     // print network properties again
     print_network_properties(top_ntk);

@@ -34,24 +34,24 @@ TEST_CASE("East-south coloring", "[orthogonal]")
         CHECK(detail::is_east_south_colored(container.color_ntk));
     };
 
-    check(mockturtle::fanout_view{fanout_substitution<networks::technology_network>(
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
         blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<networks::technology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<networks::technology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<networks::technology_network>(
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
+        blueprints::maj1_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
+        blueprints::maj4_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
         blueprints::se_coloring_corner_case_network<networks::technology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<networks::technology_network>(
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
         blueprints::fanout_substitution_corner_case_network<networks::technology_network>())});
-    check(mockturtle::fanout_view{fanout_substitution<networks::technology_network>(
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
         blueprints::nary_operation_network<networks::technology_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<networks::technology_network>(blueprints::clpl<networks::technology_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<networks::technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
-    check(mockturtle::fanout_view{
-        fanout_substitution<networks::technology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
+        blueprints::clpl<networks::technology_network>())});
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
+        blueprints::half_adder_network<mockturtle::mig_network>())});
+    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
+        blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
 void check_stats(const orthogonal_physical_design_stats& st) noexcept

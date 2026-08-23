@@ -2,8 +2,8 @@
 // Created by marcel on 20.05.21.
 //
 
-#ifndef FICTION_NETWORK_CONVERSION_HPP
-#define FICTION_NETWORK_CONVERSION_HPP
+#ifndef FICTION_SYNTHESIS_NETWORK_CONVERSION_HPP
+#define FICTION_SYNTHESIS_NETWORK_CONVERSION_HPP
 
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
@@ -22,7 +22,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-namespace fiction
+namespace fiction::synthesis
 {
 
 namespace detail
@@ -232,6 +232,5 @@ NtkDest convert_network(const NtkSrc& ntk)
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_NETWORK_CONVERSION_HPP
+}  // namespace fiction::synthesis
+#endif  // FICTION_SYNTHESIS_NETWORK_CONVERSION_HPP

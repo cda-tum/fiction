@@ -2,10 +2,10 @@
 // Created by marcel on 31.05.21.
 //
 
-#ifndef FICTION_FANOUT_SUBSTITUTION_HPP
-#define FICTION_FANOUT_SUBSTITUTION_HPP
+#ifndef FICTION_SYNTHESIS_FANOUT_SUBSTITUTION_HPP
+#define FICTION_SYNTHESIS_FANOUT_SUBSTITUTION_HPP
 
-#include "fiction/algorithms/network_transformation/network_conversion.hpp"
+#include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -26,7 +26,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-namespace fiction
+namespace fiction::synthesis
 {
 
 /**
@@ -493,6 +493,5 @@ bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) n
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_FANOUT_SUBSTITUTION_HPP
+}  // namespace fiction::synthesis
+#endif  // FICTION_SYNTHESIS_FANOUT_SUBSTITUTION_HPP

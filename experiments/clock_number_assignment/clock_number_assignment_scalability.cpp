@@ -5,7 +5,7 @@
 #include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
 #include <fiction/networks/io/network_reader.hpp>                    // custom reader for folders of networks
 #include <fiction/networks/utils/name_utils.hpp>                     // name utilities
-#include <fiction/technology/technology_mapping_library.hpp>         // library for technology mapping
+#include <fiction/synthesis/technology_mapping_library.hpp>          // library for technology mapping
 #include <fiction/types.hpp>                                         // pre-defined types
 
 #include <fmt/format.h>                       // output formatting
@@ -51,8 +51,8 @@ int main()  // NOLINT
 
     // instantiate a technology mapping library (AND, OR, NOT)
     std::stringstream library_stream{};
-    library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
-                   << fiction::GATE_AND2 << fiction::GATE_OR2;
+    library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
+                   << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2 << fiction::synthesis::GATE_OR2;
 
     std::vector<mockturtle::gate> gates{};
 

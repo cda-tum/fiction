@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/network_transformation/network_balancing.hpp>
+#include <fiction/synthesis/network_balancing.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -38,7 +38,7 @@ void balance_command::execute()
     }
 
     const auto perform_balancing = [this](auto&& ntk_ptr)
-    { return std::make_shared<fiction::tec_nt>(fiction::network_balancing<fiction::tec_nt>(*ntk_ptr, ps)); };
+    { return std::make_shared<fiction::tec_nt>(fiction::synthesis::network_balancing<fiction::tec_nt>(*ntk_ptr, ps)); };
 
     s.extend() = std::visit(perform_balancing, s.current());
 

@@ -5,11 +5,11 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/network_transformation/delete_virtual_pis.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/views/mutable_rank_view.hpp>
 #include <fiction/networks/views/static_depth_view.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/synthesis/delete_virtual_pis.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/algorithms/miter.hpp>
@@ -30,7 +30,7 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
     const auto f1 = vpi.create_and(a, b);
 
     // delete_virtual_pis returns the ntk unchanged if no virtual PIs are present.
-    const auto test_del = delete_virtual_pis(vpi);
+    const auto test_del = synthesis::delete_virtual_pis(vpi);
     CHECK(test_del.num_virtual_pis() == 0);
 
     // continue ntk creation
@@ -47,7 +47,7 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 
     CHECK(vpi.get_real_pi(c) == a);
 
-    const auto non_vpi = delete_virtual_pis(vpi);
+    const auto non_vpi = synthesis::delete_virtual_pis(vpi);
     // network name
     CHECK(non_vpi.get_network_name() == "vpi");
 }
@@ -62,7 +62,7 @@ TEST_CASE("Delete Virtual PIs with depth view", "[delete-virtual-pis]")
     tec_d.create_po(a1_r);
     tec_d.update_levels();
 
-    auto del = delete_virtual_pis(tec_d);
+    auto del = synthesis::delete_virtual_pis(tec_d);
     del.update_levels();
 
     CHECK(tec_d.level(4) == 1);
@@ -80,7 +80,7 @@ TEST_CASE("Delete Virtual PIs with extended rank view", "[delete-virtual-pis]")
     tec_d.create_po(a1_r);
     tec_d.update_ranks();
 
-    auto del = delete_virtual_pis(tec_d);
+    auto del = synthesis::delete_virtual_pis(tec_d);
     del.update_ranks();
 
     CHECK(tec_d.level(4) == 1);
@@ -126,7 +126,7 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtua
     vpi.create_po(f14);
 
     // delete virtualPIs
-    auto non_vpi = delete_virtual_pis(vpi);
+    auto non_vpi = synthesis::delete_virtual_pis(vpi);
     CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis());
 
     // check equivalence
@@ -144,7 +144,7 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtua
             CHECK(maybe_cec_m.value() == 1);
             // check cloning
             const auto clone         = vpi.clone();
-            auto       non_vpi_clone = delete_virtual_pis(clone);
+            auto       non_vpi_clone = synthesis::delete_virtual_pis(clone);
             // check equivalence
             maybe_miter = mockturtle::miter<networks::technology_network>(tec, non_vpi);
 
@@ -192,7 +192,7 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
 
     // When creating the AIG, the nodes will be hashed. Since all AND nodes get mapped to the same two PIs after
     // deleting the virtual PIs, only one node will be created.
-    auto non_vpi = delete_virtual_pis(vpi);
+    auto non_vpi = synthesis::delete_virtual_pis(vpi);
 
     // check size consistency
     CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis() - 2);
@@ -214,7 +214,7 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
 
             // check cloning
             const auto clone         = vpi.clone();
-            auto       non_vpi_clone = delete_virtual_pis(clone);
+            auto       non_vpi_clone = synthesis::delete_virtual_pis(clone);
 
             // check equivalence
             maybe_miter = mockturtle::miter<networks::technology_network>(tec, non_vpi_clone);

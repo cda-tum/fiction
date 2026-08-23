@@ -2,12 +2,12 @@
 // Created by marcel on 06.09.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_MAPPING_HPP
-#define FICTION_TECHNOLOGY_MAPPING_HPP
+#ifndef FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP
+#define FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP
 
-#include "fiction/algorithms/network_transformation/network_conversion.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
-#include "fiction/technology/technology_mapping_library.hpp"
+#include "fiction/synthesis/network_conversion.hpp"
+#include "fiction/synthesis/technology_mapping_library.hpp"
 #include "fiction/types.hpp"
 
 #include <fmt/format.h>
@@ -25,7 +25,7 @@
 #include <string>
 #include <vector>
 
-namespace fiction
+namespace fiction::synthesis
 {
 
 /**
@@ -409,135 +409,135 @@ class technology_mapping_impl
         // gather library description
         std::stringstream library_stream{};
 
-        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF;
+        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF;
 
         // 1-input functions
         if (params.inv)
         {
-            library_stream << fiction::GATE_INV;
+            library_stream << fiction::synthesis::GATE_INV;
         }
         // 2-input functions
         if (params.and2)
         {
-            library_stream << fiction::GATE_AND2;
+            library_stream << fiction::synthesis::GATE_AND2;
         }
         if (params.nand2)
         {
-            library_stream << fiction::GATE_NAND2;
+            library_stream << fiction::synthesis::GATE_NAND2;
         }
         if (params.or2)
         {
-            library_stream << fiction::GATE_OR2;
+            library_stream << fiction::synthesis::GATE_OR2;
         }
         if (params.nor2)
         {
-            library_stream << fiction::GATE_NOR2;
+            library_stream << fiction::synthesis::GATE_NOR2;
         }
         if (params.xor2)
         {
-            library_stream << fiction::GATE_XOR2;
+            library_stream << fiction::synthesis::GATE_XOR2;
         }
         if (params.xnor2)
         {
-            library_stream << fiction::GATE_XNOR2;
+            library_stream << fiction::synthesis::GATE_XNOR2;
         }
         if (params.lt2)
         {
-            library_stream << fiction::GATE_LT2;
+            library_stream << fiction::synthesis::GATE_LT2;
         }
         if (params.gt2)
         {
-            library_stream << fiction::GATE_GT2;
+            library_stream << fiction::synthesis::GATE_GT2;
         }
         if (params.le2)
         {
-            library_stream << fiction::GATE_LE2;
+            library_stream << fiction::synthesis::GATE_LE2;
         }
         if (params.ge2)
         {
-            library_stream << fiction::GATE_GE2;
+            library_stream << fiction::synthesis::GATE_GE2;
         }
         // 3-input functions
         if (params.maj3)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_MAJ3;
+                library_stream << fiction::synthesis::GATE_MAJ3;
             }
 
-            library_stream << fiction::DECAY_MAJ3;
+            library_stream << fiction::synthesis::DECAY_MAJ3;
         }
         if (params.dot)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_DOT;
+                library_stream << fiction::synthesis::GATE_DOT;
             }
 
-            library_stream << fiction::DECAY_DOT;
+            library_stream << fiction::synthesis::DECAY_DOT;
         }
         if (params.and3)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_AND3;
+                library_stream << fiction::synthesis::GATE_AND3;
             }
 
-            library_stream << fiction::DECAY_AND3;
+            library_stream << fiction::synthesis::DECAY_AND3;
         }
         if (params.xor_and)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_XOR_AND;
+                library_stream << fiction::synthesis::GATE_XOR_AND;
             }
 
-            library_stream << fiction::DECAY_XOR_AND;
+            library_stream << fiction::synthesis::DECAY_XOR_AND;
         }
         if (params.or_and)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_OR_AND;
+                library_stream << fiction::synthesis::GATE_OR_AND;
             }
 
-            library_stream << fiction::DECAY_OR_AND;
+            library_stream << fiction::synthesis::DECAY_OR_AND;
         }
         if (params.onehot)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_ONEHOT;
+                library_stream << fiction::synthesis::GATE_ONEHOT;
             }
 
-            library_stream << fiction::DECAY_ONEHOT;
+            library_stream << fiction::synthesis::DECAY_ONEHOT;
         }
         if (params.gamble)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_GAMBLE;
+                library_stream << fiction::synthesis::GATE_GAMBLE;
             }
 
-            library_stream << fiction::DECAY_GAMBLE;
+            library_stream << fiction::synthesis::DECAY_GAMBLE;
         }
         if (params.mux)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_MUX;
+                library_stream << fiction::synthesis::GATE_MUX;
             }
 
-            library_stream << fiction::DECAY_MUX;
+            library_stream << fiction::synthesis::DECAY_MUX;
         }
         if (params.and_xor)
         {
             if (!params.decay)
             {
-                library_stream << fiction::GATE_AND_XOR;
+                library_stream << fiction::synthesis::GATE_AND_XOR;
             }
 
-            library_stream << fiction::DECAY_AND_XOR;
+            library_stream << fiction::synthesis::DECAY_AND_XOR;
         }
 
         // generate technology library
@@ -609,6 +609,5 @@ template <typename Ntk>
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_TECHNOLOGY_MAPPING_HPP
+}  // namespace fiction::synthesis
+#endif  // FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP

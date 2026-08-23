@@ -8,14 +8,14 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
-#include <fiction/algorithms/network_transformation/network_balancing.hpp>
-#include <fiction/algorithms/network_transformation/network_conversion.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/synthesis/fanout_substitution.hpp>
+#include <fiction/synthesis/network_balancing.hpp>
+#include <fiction/synthesis/network_conversion.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -32,28 +32,28 @@ void to_x(const Ntk& ntk)
 {
     SECTION("MIG")
     {
-        const auto converted_mig = convert_network<mockturtle::mig_network>(ntk);
+        const auto converted_mig = synthesis::convert_network<mockturtle::mig_network>(ntk);
 
         check_eq(ntk, converted_mig);
     }
 
     SECTION("AIG")
     {
-        const auto converted_aig = convert_network<mockturtle::aig_network>(ntk);
+        const auto converted_aig = synthesis::convert_network<mockturtle::aig_network>(ntk);
 
         check_eq(ntk, converted_aig);
     }
 
     SECTION("XAG")
     {
-        const auto converted_xag = convert_network<mockturtle::xag_network>(ntk);
+        const auto converted_xag = synthesis::convert_network<mockturtle::xag_network>(ntk);
 
         check_eq(ntk, converted_xag);
     }
 
     SECTION("TEC")
     {
-        const auto converted_tec = convert_network<networks::technology_network>(ntk);
+        const auto converted_tec = synthesis::convert_network<networks::technology_network>(ntk);
 
         check_eq(ntk, converted_tec);
     }
@@ -64,7 +64,8 @@ TEST_CASE("Name conservation after network conversion", "[network-conversion]")
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto converted_maj = convert_network<mockturtle::names_view<fiction::networks::technology_network>>(maj);
+    const auto converted_maj =
+        synthesis::convert_network<mockturtle::names_view<fiction::networks::technology_network>>(maj);
 
     // network name
     CHECK(converted_maj.get_network_name() == "maj");
@@ -166,42 +167,44 @@ TEST_CASE("Consistent network size after multiple conversions", "[network-conver
 {
     const auto tec = blueprints::se_coloring_corner_case_network<networks::technology_network>();
 
-    const auto converted = convert_network<networks::technology_network>(
-        convert_network<networks::technology_network>(convert_network<networks::technology_network>(tec)));
+    const auto converted = synthesis::convert_network<networks::technology_network>(
+        synthesis::convert_network<networks::technology_network>(
+            synthesis::convert_network<networks::technology_network>(tec)));
 
     CHECK(tec.size() == converted.size());
 
     const auto converted_aig =
-        convert_network<networks::technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+        synthesis::convert_network<networks::technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
 
-    const auto converted_converted_aig = convert_network<networks::technology_network>(
-        convert_network<networks::technology_network>(convert_network<networks::technology_network>(converted_aig)));
+    const auto converted_converted_aig = synthesis::convert_network<networks::technology_network>(
+        synthesis::convert_network<networks::technology_network>(
+            synthesis::convert_network<networks::technology_network>(converted_aig)));
 
     CHECK(converted_aig.size() == converted_converted_aig.size());
 }
 
 TEST_CASE("Consistent network size after fanout substitution and conversion", "[network-conversion]")
 {
-    const auto substituted_aig =
-        fanout_substitution<networks::technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
-    const auto converted_substituted_aig = convert_network<networks::technology_network>(substituted_aig);
+    const auto substituted_aig = synthesis::fanout_substitution<networks::technology_network>(
+        blueprints::maj4_network<mockturtle::aig_network>());
+    const auto converted_substituted_aig = synthesis::convert_network<networks::technology_network>(substituted_aig);
     CHECK(substituted_aig.size() == converted_substituted_aig.size());
 
-    const auto substituted_tec = fanout_substitution<networks::technology_network>(
+    const auto substituted_tec = synthesis::fanout_substitution<networks::technology_network>(
         blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
-    const auto converted_substituted_tec = convert_network<networks::technology_network>(substituted_tec);
+    const auto converted_substituted_tec = synthesis::convert_network<networks::technology_network>(substituted_tec);
     CHECK(substituted_tec.size() == converted_substituted_tec.size());
 }
 
 TEST_CASE("Consistent network size after balancing and conversion", "[network-conversion]")
 {
     const auto balanced_aig =
-        network_balancing<networks::technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
-    const auto converted_balanced_aig = convert_network<networks::technology_network>(balanced_aig);
+        synthesis::network_balancing<networks::technology_network>(blueprints::maj4_network<mockturtle::aig_network>());
+    const auto converted_balanced_aig = synthesis::convert_network<networks::technology_network>(balanced_aig);
     CHECK(balanced_aig.size() == converted_balanced_aig.size());
 
-    const auto balanced_tec = network_balancing<networks::technology_network>(
+    const auto balanced_tec = synthesis::network_balancing<networks::technology_network>(
         blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
-    const auto converted_balanced_tec = convert_network<networks::technology_network>(balanced_tec);
+    const auto converted_balanced_tec = synthesis::convert_network<networks::technology_network>(balanced_tec);
     CHECK(balanced_tec.size() == converted_balanced_tec.size());
 }

@@ -7,8 +7,8 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/network_transformation/network_balancing.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/synthesis/network_balancing.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -23,10 +23,10 @@ TEST_CASE("Simple network balancing", "[network-balancing]")
 {
     const auto tec = blueprints::unbalanced_and_inv_network<networks::technology_network>();
 
-    const auto balanced = network_balancing<networks::technology_network>(tec);
+    const auto balanced = synthesis::network_balancing<networks::technology_network>(tec);
 
     CHECK(balanced.size() == tec.size() + 1);
-    CHECK(is_balanced(balanced));
+    CHECK(synthesis::is_balanced(balanced));
 
     check_eq(tec, balanced);
 }
@@ -40,20 +40,20 @@ TEST_CASE("Complex network balancing", "[network-balancing]")
 
     SECTION("without primary output unification")
     {
-        const auto balanced_aig = network_balancing<networks::technology_network>(aig);
-        const auto balanced_mig = network_balancing<networks::technology_network>(mig);
-        const auto balanced_xag = network_balancing<networks::technology_network>(xag);
-        const auto balanced_tec = network_balancing<networks::technology_network>(tec);
+        const auto balanced_aig = synthesis::network_balancing<networks::technology_network>(aig);
+        const auto balanced_mig = synthesis::network_balancing<networks::technology_network>(mig);
+        const auto balanced_xag = synthesis::network_balancing<networks::technology_network>(xag);
+        const auto balanced_tec = synthesis::network_balancing<networks::technology_network>(tec);
 
-        CHECK(is_balanced(balanced_aig));
-        CHECK(is_balanced(balanced_mig));
-        CHECK(is_balanced(balanced_xag));
-        CHECK(is_balanced(balanced_tec));
+        CHECK(synthesis::is_balanced(balanced_aig));
+        CHECK(synthesis::is_balanced(balanced_mig));
+        CHECK(synthesis::is_balanced(balanced_xag));
+        CHECK(synthesis::is_balanced(balanced_tec));
 
-        CHECK(!is_balanced(balanced_aig, {true}));
-        CHECK(!is_balanced(balanced_mig, {true}));
-        CHECK(!is_balanced(balanced_xag, {true}));
-        CHECK(!is_balanced(balanced_tec, {true}));
+        CHECK(!synthesis::is_balanced(balanced_aig, {true}));
+        CHECK(!synthesis::is_balanced(balanced_mig, {true}));
+        CHECK(!synthesis::is_balanced(balanced_xag, {true}));
+        CHECK(!synthesis::is_balanced(balanced_tec, {true}));
 
         check_eq(aig, balanced_aig);
         check_eq(mig, balanced_mig);
@@ -62,15 +62,15 @@ TEST_CASE("Complex network balancing", "[network-balancing]")
     }
     SECTION("with primary output unification")
     {
-        const auto balanced_aig = network_balancing<networks::technology_network>(aig, {true});
-        const auto balanced_mig = network_balancing<networks::technology_network>(mig, {true});
-        const auto balanced_xag = network_balancing<networks::technology_network>(xag, {true});
-        const auto balanced_tec = network_balancing<networks::technology_network>(tec, {true});
+        const auto balanced_aig = synthesis::network_balancing<networks::technology_network>(aig, {true});
+        const auto balanced_mig = synthesis::network_balancing<networks::technology_network>(mig, {true});
+        const auto balanced_xag = synthesis::network_balancing<networks::technology_network>(xag, {true});
+        const auto balanced_tec = synthesis::network_balancing<networks::technology_network>(tec, {true});
 
-        CHECK(is_balanced(balanced_aig, {true}));
-        CHECK(is_balanced(balanced_mig, {true}));
-        CHECK(is_balanced(balanced_xag, {true}));
-        CHECK(is_balanced(balanced_tec, {true}));
+        CHECK(synthesis::is_balanced(balanced_aig, {true}));
+        CHECK(synthesis::is_balanced(balanced_mig, {true}));
+        CHECK(synthesis::is_balanced(balanced_xag, {true}));
+        CHECK(synthesis::is_balanced(balanced_tec, {true}));
 
         check_eq(aig, balanced_aig);
         check_eq(mig, balanced_mig);

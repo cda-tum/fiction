@@ -8,13 +8,13 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction/algorithms/iter/aspect_ratio_iterator.hpp"
-#include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
+#include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -3246,8 +3246,9 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
-        fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, clocking_scheme->max_out_degree, 1ul})};
+        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
+                  clocking_scheme->max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 
@@ -3317,8 +3318,9 @@ std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list
     }
 
     mockturtle::names_view<networks::technology_network> intermediate_ntk{
-        fanout_substitution<mockturtle::names_view<networks::technology_network>>(
-            ntk, {fanout_substitution_params::substitution_strategy::BREADTH, clocking_scheme->max_out_degree, 1ul})};
+        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(
+            ntk, {synthesis::fanout_substitution_params::substitution_strategy::BREADTH,
+                  clocking_scheme->max_out_degree, 1ul})};
 
     exact_physical_design_stats st{};
 

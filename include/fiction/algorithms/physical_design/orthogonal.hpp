@@ -5,12 +5,12 @@
 #ifndef FICTION_ORTHOGONAL_HPP
 #define FICTION_ORTHOGONAL_HPP
 
-#include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
+#include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/placement_utils.hpp"
 
@@ -713,8 +713,8 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
     }
 
     orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt> p{fanout_substitution<mockturtle::names_view<networks::technology_network>>(ntk), ps,
-                                   st};
+    detail::orthogonal_impl<Lyt>     p{
+        synthesis::fanout_substitution<mockturtle::names_view<networks::technology_network>>(ntk), ps, st};
 
     auto result = p.run();
 

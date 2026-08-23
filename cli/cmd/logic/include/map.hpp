@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_MAP_HPP
 #define FICTION_CMD_MAP_HPP
 
-#include <fiction/algorithms/network_transformation/technology_mapping.hpp>
+#include <fiction/synthesis/technology_mapping.hpp>
 
 #include <alice/alice.hpp>
 
@@ -35,7 +35,7 @@ class map_command final : public command
     /**
      * Technology mapping parameters.
      */
-    fiction::technology_mapping_params ps{};
+    fiction::synthesis::technology_mapping_params ps{};
 };
 
 }  // namespace alice

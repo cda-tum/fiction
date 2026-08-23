@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_BALANCE_HPP
 #define FICTION_CMD_BALANCE_HPP
 
-#include <fiction/algorithms/network_transformation/network_balancing.hpp>
+#include <fiction/synthesis/network_balancing.hpp>
 
 #include <alice/alice.hpp>
 
@@ -35,7 +35,7 @@ class balance_command final : public command
     /**
      * Parameters.
      */
-    fiction::network_balancing_params ps{};
+    fiction::synthesis::network_balancing_params ps{};
 };
 
 }  // namespace alice

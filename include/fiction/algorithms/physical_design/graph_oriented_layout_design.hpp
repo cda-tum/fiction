@@ -4,7 +4,6 @@
 #ifndef FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
 #define FICTION_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
 
-#include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/algorithms/path_finding/a_star.hpp"
 #include "fiction/algorithms/path_finding/cost.hpp"
 #include "fiction/algorithms/path_finding/distance.hpp"
@@ -14,6 +13,7 @@
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
+#include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/placement_utils.hpp"
@@ -2259,9 +2259,9 @@ class graph_oriented_layout_design_impl
             }
         };
 
-        fanout_substitution_params params{};
-        params.strategy = fanout_substitution_params::substitution_strategy::BREADTH;
-        mockturtle::fanout_view network_substituted_breadth{fanout_substitution<tec_nt>(ntk, params)};
+        synthesis::fanout_substitution_params params{};
+        params.strategy = synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
+        mockturtle::fanout_view network_substituted_breadth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
         topo_view_co_to_ci<decltype(network_substituted_breadth)> network_breadth_co_to_ci{network_substituted_breadth,
                                                                                            seed};
@@ -2281,8 +2281,8 @@ class graph_oriented_layout_design_impl
         // further network and nodes initialization for high-, highest-, and maximum-effort
         if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY)
         {
-            params.strategy = fanout_substitution_params::substitution_strategy::DEPTH;
-            mockturtle::fanout_view network_substituted_depth{fanout_substitution<tec_nt>(ntk, params)};
+            params.strategy = synthesis::fanout_substitution_params::substitution_strategy::DEPTH;
+            mockturtle::fanout_view network_substituted_depth{synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
             topo_view_ci_to_co<decltype(network_substituted_breadth)> network_breadth_ci_to_co{
                 network_substituted_breadth, seed};
@@ -2328,9 +2328,10 @@ class graph_oriented_layout_design_impl
 
                 if (ps.mode != graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT)
                 {
-                    params.strategy = fanout_substitution_params::substitution_strategy::RANDOM;
+                    params.strategy = synthesis::fanout_substitution_params::substitution_strategy::RANDOM;
                     params.seed     = seed;
-                    mockturtle::fanout_view network_substituted_random{fanout_substitution<tec_nt>(ntk, params)};
+                    mockturtle::fanout_view network_substituted_random{
+                        synthesis::fanout_substitution<tec_nt>(ntk, params)};
 
                     topo_view_co_to_ci_random<decltype(network_substituted_random)> network_breadth_co_to_ci_random{
                         network_substituted_random, seed};
@@ -2498,7 +2499,8 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
     }
 
     graph_oriented_layout_design_stats             st{};
-    detail::graph_oriented_layout_design_impl<Lyt> p{convert_network<tec_nt>(ntk), ps, st, custom_cost_objective};
+    detail::graph_oriented_layout_design_impl<Lyt> p{synthesis::convert_network<tec_nt>(ntk), ps, st,
+                                                     custom_cost_objective};
 
     const auto result = p.run();
 

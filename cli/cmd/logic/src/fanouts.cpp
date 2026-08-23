@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
+#include <fiction/synthesis/fanout_substitution.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -59,7 +59,7 @@ void fanouts_command::execute()
     }
 
     // Convert integer to enum
-    ps.strategy = static_cast<fiction::fanout_substitution_params::substitution_strategy>(strategy_int);
+    ps.strategy = static_cast<fiction::synthesis::fanout_substitution_params::substitution_strategy>(strategy_int);
 
     if (is_set("seed"))
     {
@@ -67,7 +67,10 @@ void fanouts_command::execute()
     }
 
     const auto perform_substitution = [this](auto&& ntk_ptr)
-    { return std::make_shared<fiction::tec_nt>(fiction::fanout_substitution<fiction::tec_nt>(*ntk_ptr, ps)); };
+    {
+        return std::make_shared<fiction::tec_nt>(
+            fiction::synthesis::fanout_substitution<fiction::tec_nt>(*ntk_ptr, ps));
+    };
 
     s.extend() = std::visit(perform_substitution, s.current());
 

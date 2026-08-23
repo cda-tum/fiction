@@ -15,7 +15,7 @@
 #include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/technology/technology_mapping_library.hpp>
+#include <fiction/synthesis/technology_mapping_library.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -126,8 +126,9 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
     SECTION("QCA ONE library")
     {
-        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
-                       << fiction::GATE_AND2 << fiction::GATE_OR2 << fiction::GATE_MAJ3 << fiction::DECAY_MAJ3;
+        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
+                       << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2 << fiction::synthesis::GATE_OR2
+                       << fiction::synthesis::GATE_MAJ3 << fiction::synthesis::DECAY_MAJ3;
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
@@ -137,9 +138,11 @@ TEST_CASE("Technology mapping", "[mockturtle]")
     }
     SECTION("Bestagon library")
     {
-        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
-                       << fiction::GATE_AND2 << fiction::GATE_NAND2 << fiction::GATE_OR2 << fiction::GATE_NOR2
-                       << fiction::GATE_XOR2 << fiction::GATE_XNOR2;
+        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
+                       << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2
+                       << fiction::synthesis::GATE_NAND2 << fiction::synthesis::GATE_OR2
+                       << fiction::synthesis::GATE_NOR2 << fiction::synthesis::GATE_XOR2
+                       << fiction::synthesis::GATE_XNOR2;
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
@@ -149,12 +152,17 @@ TEST_CASE("Technology mapping", "[mockturtle]")
     }
     SECTION("Marakkalage 3-input library")
     {
-        library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
-                       << fiction::GATE_AND3 << fiction::GATE_XOR_AND << fiction::GATE_OR_AND << fiction::GATE_ONEHOT
-                       << fiction::GATE_MAJ3 << fiction::GATE_GAMBLE << fiction::GATE_DOT << fiction::GATE_MUX
-                       << fiction::GATE_AND_XOR << fiction::DECAY_AND3 << fiction::DECAY_XOR_AND
-                       << fiction::DECAY_OR_AND << fiction::DECAY_ONEHOT << fiction::DECAY_MAJ3 << fiction::DECAY_GAMBLE
-                       << fiction::DECAY_DOT << fiction::DECAY_MUX << fiction::DECAY_AND_XOR;
+        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
+                       << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND3
+                       << fiction::synthesis::GATE_XOR_AND << fiction::synthesis::GATE_OR_AND
+                       << fiction::synthesis::GATE_ONEHOT << fiction::synthesis::GATE_MAJ3
+                       << fiction::synthesis::GATE_GAMBLE << fiction::synthesis::GATE_DOT
+                       << fiction::synthesis::GATE_MUX << fiction::synthesis::GATE_AND_XOR
+                       << fiction::synthesis::DECAY_AND3 << fiction::synthesis::DECAY_XOR_AND
+                       << fiction::synthesis::DECAY_OR_AND << fiction::synthesis::DECAY_ONEHOT
+                       << fiction::synthesis::DECAY_MAJ3 << fiction::synthesis::DECAY_GAMBLE
+                       << fiction::synthesis::DECAY_DOT << fiction::synthesis::DECAY_MUX
+                       << fiction::synthesis::DECAY_AND_XOR;
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);

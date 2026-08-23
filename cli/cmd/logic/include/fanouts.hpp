@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_FANOUTS_HPP
 #define FICTION_CMD_FANOUTS_HPP
 
-#include <fiction/algorithms/network_transformation/fanout_substitution.hpp>
+#include <fiction/synthesis/fanout_substitution.hpp>
 
 #include <alice/alice.hpp>
 
@@ -45,7 +45,7 @@ class fanouts_command final : public command
     /**
      * Parameters.
      */
-    fiction::fanout_substitution_params ps{};
+    fiction::synthesis::fanout_substitution_params ps{};
 };
 
 }  // namespace alice

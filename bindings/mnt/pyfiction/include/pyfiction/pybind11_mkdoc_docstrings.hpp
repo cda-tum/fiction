@@ -11963,7 +11963,7 @@ static const char* mkd_doc_fiction_detail_technology_mapping_impl_validate_requi
 the base network type.
 
 Raises:
-    missing_required_gates_exception: if required gates are missing.
+    synthesis::missing_required_gates_exception: if required gates are missing.
 
 )doc";
 
@@ -24512,7 +24512,7 @@ Returns:
     Mapped network exclusively using gates from the provided library.
 
 Raises:
-    missing_required_gates_exception: if the technology library does
+    synthesis::missing_required_gates_exception: if the technology library does
                                       not contain required gates for
                                       the base network type (e.g., AIG
                                       requires INV and AND; XAG
@@ -24588,7 +24588,7 @@ contexts) that copies an incoming signal to two or more data paths.
 This network is used internally for most implemented FCN physical
 design algorithms and extends `klut_network` by some further
 convenience functions but is still fully compatible with the
-mockturtle network API. The function convert_network can be used to
+mockturtle network API. The function synthesis::convert_network can be used to
 convert any other mockturtle network to this type.
 
 Most functions in this class are borrowed and reimplemented directly

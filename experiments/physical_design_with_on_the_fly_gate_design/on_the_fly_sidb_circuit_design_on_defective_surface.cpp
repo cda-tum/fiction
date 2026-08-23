@@ -6,13 +6,13 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/network_transformation/technology_mapping.hpp>
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/physical_design/on_the_fly_sidb_circuit_design.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sidb_surface_defects.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
+#include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/traits.hpp>
@@ -118,7 +118,8 @@ int main()  // NOLINT
         // compute depth
         const mockturtle::depth_view depth_xag{xag};
 
-        const fiction::technology_mapping_params tech_map_params = fiction::all_standard_2_input_functions();
+        const fiction::synthesis::technology_mapping_params tech_map_params =
+            fiction::synthesis::all_standard_2_input_functions();
 
         // parameters for cut rewriting
         mockturtle::cut_rewriting_params cut_params{};
@@ -134,7 +135,7 @@ int main()  // NOLINT
         const auto cut_xag = mockturtle::cut_rewriting(xag, resynthesis_function, cut_params);
 
         // perform technology mapping
-        const auto mapped_network = fiction::technology_mapping(cut_xag, tech_map_params);
+        const auto mapped_network = fiction::synthesis::technology_mapping(cut_xag, tech_map_params);
 
         fiction::on_the_fly_sidb_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>> params{};
 

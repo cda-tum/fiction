@@ -2,10 +2,10 @@
 // Created by marcel on 25.05.21.
 //
 
-#ifndef FICTION_NETWORK_BALANCING_HPP
-#define FICTION_NETWORK_BALANCING_HPP
+#ifndef FICTION_SYNTHESIS_NETWORK_BALANCING_HPP
+#define FICTION_SYNTHESIS_NETWORK_BALANCING_HPP
 
-#include "fiction/algorithms/network_transformation/network_conversion.hpp"
+#include "fiction/synthesis/network_conversion.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -17,7 +17,7 @@
 #include <functional>
 #include <vector>
 
-namespace fiction
+namespace fiction::synthesis
 {
 
 /**
@@ -257,6 +257,5 @@ bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_NETWORK_BALANCING_HPP
+}  // namespace fiction::synthesis
+#endif  // FICTION_SYNTHESIS_NETWORK_BALANCING_HPP

@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/network_transformation/technology_mapping.hpp>
+#include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -79,15 +79,15 @@ void map_command::execute()
 
     if (is_set("all2"))
     {
-        ps = fiction::all_standard_2_input_functions();
+        ps = fiction::synthesis::all_standard_2_input_functions();
     }
     else if (is_set("all3"))
     {
-        ps = fiction::all_standard_3_input_functions();
+        ps = fiction::synthesis::all_standard_3_input_functions();
     }
     else if (is_set("all"))
     {
-        ps = fiction::all_supported_standard_functions();
+        ps = fiction::synthesis::all_supported_standard_functions();
     }
 
     // Restore control flags after aggregate selection
@@ -121,11 +121,11 @@ void map_command::execute()
                 fiction::networks::utils::get_name(*ntk_ptr));
         }
 
-        fiction::technology_mapping_stats st{};
+        fiction::synthesis::technology_mapping_stats st{};
 
         try
         {
-            const auto mapped_ntk = fiction::technology_mapping(*ntk_ptr, ps, &st);
+            const auto mapped_ntk = fiction::synthesis::technology_mapping(*ntk_ptr, ps, &st);
 
             if (st.mapper_stats.mapping_error)
             {
@@ -135,7 +135,7 @@ void map_command::execute()
 
             s.extend() = std::make_shared<fiction::tec_nt>(mapped_ntk);
         }
-        catch (const fiction::missing_required_gates_exception& e)
+        catch (const fiction::synthesis::missing_required_gates_exception& e)
         {
             env->out() << fmt::format("[e] {}\n", e.what());
         }
