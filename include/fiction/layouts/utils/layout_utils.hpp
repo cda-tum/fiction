@@ -302,7 +302,8 @@ Lyt normalize_layout_coordinates(const Lyt& lyt) noexcept
  * Converts the coordinates of a given cell-level layout (cds and defect surface can be layered on top) to SiQAD
  * coordinates. A new equivalent layout based on SiQAD coordinates is returned.
  *
- * @tparam Lyt SiDB cell-level layout type based on fiction coordinates, e.g., `offset::ucoord_t` or `cube::coord_t`.
+ * @tparam Lyt SiDB cell-level layout type based on fiction coordinates, e.g., `coords::offset` or
+ * `coords::cube`.
  * @param lyt The layout that is to be converted to a new layout based on SiQAD coordinates.
  * @return A new equivalent layout based on SiQAD coordinates.
  */
@@ -323,9 +324,9 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
         lyt_orig.foreach_cell(
             [&lyt_new, &lyt_orig](const auto& c)
             {
-                lyt_new.assign_cell_type(siqad::to_siqad_coord(c), lyt_orig.get_cell_type(c));
-                lyt_new.assign_cell_mode(siqad::to_siqad_coord(c), lyt_orig.get_cell_mode(c));
-                lyt_new.assign_cell_name(siqad::to_siqad_coord(c), lyt_orig.get_cell_name(c));
+                lyt_new.assign_cell_type(coords::to_siqad_coord(c), lyt_orig.get_cell_type(c));
+                lyt_new.assign_cell_mode(coords::to_siqad_coord(c), lyt_orig.get_cell_mode(c));
+                lyt_new.assign_cell_name(coords::to_siqad_coord(c), lyt_orig.get_cell_name(c));
             });
 
         if constexpr (is_charge_distribution_surface_v<Lyt> && is_sidb_defect_surface_v<Lyt>)
@@ -334,14 +335,14 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 
             lyt_orig.foreach_sidb_defect(
                 [&lyt_defect](const auto& cd)
-                { lyt_defect.assign_sidb_defect(siqad::to_siqad_coord(cd.first), cd.second); });
+                { lyt_defect.assign_sidb_defect(coords::to_siqad_coord(cd.first), cd.second); });
 
             auto lyt_cds_defect = charge_distribution_surface{lyt_defect};
 
             lyt_orig.foreach_cell(
                 [&lyt_cds_defect, &lyt_orig](const auto& c)
                 {
-                    lyt_cds_defect.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c),
+                    lyt_cds_defect.assign_charge_state(coords::to_siqad_coord(c), lyt_orig.get_charge_state(c),
                                                        charge_index_mode::KEEP_CHARGE_INDEX);
                 });
 
@@ -355,7 +356,8 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
             lyt_orig.foreach_sidb_defect(
                 [&lyt_surface, &lyt_orig](const auto& cd)
                 {
-                    lyt_surface.assign_sidb_defect(siqad::to_siqad_coord(cd.first), lyt_orig.get_sidb_defect(cd.first));
+                    lyt_surface.assign_sidb_defect(coords::to_siqad_coord(cd.first),
+                                                   lyt_orig.get_sidb_defect(cd.first));
                 });
             return lyt_surface;
         }
@@ -366,7 +368,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
             lyt_orig.foreach_cell(
                 [&lyt_new_cds, &lyt_orig](const auto& c)
                 {
-                    lyt_new_cds.assign_charge_state(siqad::to_siqad_coord(c), lyt_orig.get_charge_state(c),
+                    lyt_new_cds.assign_charge_state(coords::to_siqad_coord(c), lyt_orig.get_charge_state(c),
                                                     charge_index_mode::KEEP_CHARGE_INDEX);
                 });
 
@@ -391,7 +393,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
 }
 /**
  * Converts the coordinates of a given SiDB cell-level layout (cds and defect surface can be layered on top) to
- * alternative coordinates, such as `offset::ucoord_t` or `cube::coord_t`. Returns a new layout equivalent to the
+ * alternative coordinates, such as `coords::offset` or `coords::cube`. Returns a new layout equivalent to the
  * original layout but based on the specified coordinate system.
  *
  * @tparam LytDest Source SiDB cell-level layout type.
@@ -435,7 +437,7 @@ template <typename LytDest, typename LytSrc>
             return true;  // keep looping
         });
 
-    if (are_cells_assigned_to_negative_coordinates && has_offset_ucoord_v<LytDest>)
+    if (are_cells_assigned_to_negative_coordinates && has_offset_coord_v<LytDest>)
     {
         return convert_layout_to_fiction_coordinates<LytDest>(normalize_layout_coordinates(lyt));
     }
@@ -452,9 +454,9 @@ template <typename LytDest, typename LytSrc>
             lyt.foreach_cell(
                 [&lyt_new, &lyt](const auto& c)
                 {
-                    lyt_new.assign_cell_type(siqad::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_type(c));
-                    lyt_new.assign_cell_mode(siqad::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_mode(c));
-                    lyt_new.assign_cell_name(siqad::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_name(c));
+                    lyt_new.assign_cell_type(coords::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_type(c));
+                    lyt_new.assign_cell_mode(coords::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_mode(c));
+                    lyt_new.assign_cell_name(coords::to_fiction_coord<coordinate<LytDest>>(c), lyt.get_cell_name(c));
                 });
 
             if constexpr (is_charge_distribution_surface_v<LytSrc> && is_sidb_defect_surface_v<LytSrc>)
@@ -464,7 +466,7 @@ template <typename LytDest, typename LytSrc>
                 lyt.foreach_sidb_defect(
                     [&lyt_defect](const auto& cd)
                     {
-                        lyt_defect.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
+                        lyt_defect.assign_sidb_defect(coords::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                       cd.second);
                     });
 
@@ -473,7 +475,7 @@ template <typename LytDest, typename LytSrc>
                 lyt.foreach_cell(
                     [&lyt_cds_defect, &lyt](const auto& c)
                     {
-                        lyt_cds_defect.assign_charge_state(siqad::to_fiction_coord<coordinate<LytDest>>(c),
+                        lyt_cds_defect.assign_charge_state(coords::to_fiction_coord<coordinate<LytDest>>(c),
                                                            lyt.get_charge_state(c),
                                                            charge_index_mode::KEEP_CHARGE_INDEX);
                     });
@@ -488,7 +490,7 @@ template <typename LytDest, typename LytSrc>
                 lyt.foreach_sidb_defect(
                     [&lyt_surface, &lyt](const auto& cd)
                     {
-                        lyt_surface.assign_sidb_defect(siqad::to_fiction_coord<coordinate<LytDest>>(cd.first),
+                        lyt_surface.assign_sidb_defect(coords::to_fiction_coord<coordinate<LytDest>>(cd.first),
                                                        lyt.get_sidb_defect(cd.first));
                     });
 
@@ -501,7 +503,7 @@ template <typename LytDest, typename LytSrc>
                 lyt.foreach_cell(
                     [&lyt_new_cds, &lyt](const auto& c)
                     {
-                        lyt_new_cds.assign_charge_state(siqad::to_fiction_coord<coordinate<LytDest>>(c),
+                        lyt_new_cds.assign_charge_state(coords::to_fiction_coord<coordinate<LytDest>>(c),
                                                         lyt.get_charge_state(c), charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
@@ -559,7 +561,7 @@ template <typename LytDest, typename LytSrc>
 
     else
     {
-        if constexpr (has_offset_ucoord_v<LytDest>)
+        if constexpr (has_offset_coord_v<LytDest>)
         {
             return process_layout(sidb_lattice<lattice_orientation<LytSrc>, sidb_cell_clk_lyt>{});
         }
@@ -599,7 +601,7 @@ CoordinateType random_coordinate(CoordinateType coordinate1, CoordinateType coor
         std::uniform_int_distribution<> dist_y(coordinate1.y, coordinate2.y);
         std::uniform_int_distribution<> dist_z(0, 1);
 
-        return std::clamp(siqad::coord_t{dist_x(generator), dist_y(generator), dist_z(generator)}, coordinate1,
+        return std::clamp(coords::siqad{dist_x(generator), dist_y(generator), dist_z(generator)}, coordinate1,
                           coordinate2);
     }
     else
@@ -632,15 +634,15 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
                                 const CoordinateType& cell_second_corner) noexcept
 {
     // for SiQAD coordinates
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    if constexpr (std::is_same_v<CoordinateType, coords::siqad>)
     {
-        auto cell_first_corner_cube  = siqad::to_fiction_coord<cube::coord_t>(cell_first_corner);
-        auto cell_second_corner_cube = siqad::to_fiction_coord<cube::coord_t>(cell_second_corner);
+        auto cell_first_corner_cube  = coords::to_fiction_coord<coords::cube>(cell_first_corner);
+        auto cell_second_corner_cube = coords::to_fiction_coord<coords::cube>(cell_second_corner);
 
-        cube::coord_t nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
-                              std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
-        cube::coord_t se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
-                              std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        coords::cube nw_cell{std::min(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                             std::min(cell_first_corner_cube.y, cell_second_corner_cube.y)};
+        coords::cube se_cell{std::max(cell_first_corner_cube.x, cell_second_corner_cube.x),
+                             std::max(cell_first_corner_cube.y, cell_second_corner_cube.y)};
 
         const auto total_cell_count = static_cast<uint64_t>(std::abs(nw_cell.x - se_cell.x) + 1) *
                                       static_cast<uint64_t>(std::abs(nw_cell.y - se_cell.y) + 1);
@@ -654,7 +656,7 @@ all_coordinates_in_spanned_area(const CoordinateType& cell_first_corner,
         // down from left to right.
         while (current_cell <= se_cell)
         {
-            all_cells.push_back(siqad::to_siqad_coord(current_cell));
+            all_cells.push_back(coords::to_siqad_coord(current_cell));
             if (current_cell.x < se_cell.x)
             {
                 current_cell.x += 1;

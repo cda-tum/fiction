@@ -73,17 +73,17 @@ class bounding_box_2d
         {
             if constexpr (has_siqad_coord_v<Lyt>)
             {
-                auto coord_siqad    = siqad::to_fiction_coord<cube::coord_t>(coord);
-                auto min_coord_cube = siqad::to_fiction_coord<cube::coord_t>(min_coord);
-                auto max_coord_cube = siqad::to_fiction_coord<cube::coord_t>(max_coord);
+                auto coord_siqad    = coords::to_fiction_coord<coords::cube>(coord);
+                auto min_coord_cube = coords::to_fiction_coord<coords::cube>(min_coord);
+                auto max_coord_cube = coords::to_fiction_coord<coords::cube>(max_coord);
 
                 min_coord_cube.x = std::min(min_coord_cube.x, coord_siqad.x);
                 max_coord_cube.x = std::max(max_coord_cube.x, coord_siqad.x);
                 min_coord_cube.y = std::min(min_coord_cube.y, coord_siqad.y);
                 max_coord_cube.y = std::max(max_coord_cube.y, coord_siqad.y);
 
-                min_coord = fiction::layouts::siqad::to_siqad_coord(min_coord_cube);
-                max_coord = fiction::layouts::siqad::to_siqad_coord(max_coord_cube);
+                min_coord = fiction::layouts::coords::to_siqad_coord(min_coord_cube);
+                max_coord = fiction::layouts::coords::to_siqad_coord(max_coord_cube);
             }
             else
             {
@@ -165,8 +165,8 @@ class bounding_box_2d
     /**
      * Returns the minimum corner of the bounding box.
      *
-     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most north-western coordinate of
-     * the bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<coords::offset>` object, this location represents the most north-western coordinate
+     * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The minimum enclosing coordinate in the associated layout.
      */
@@ -177,8 +177,8 @@ class bounding_box_2d
     /**
      * Returns the maximum corner of the bounding box.
      *
-     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most south-eastern coordinate of
-     * the bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<coords::offset>` object, this location represents the most south-eastern coordinate
+     * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The maximum enclosing coordinate in the associated layout.
      */

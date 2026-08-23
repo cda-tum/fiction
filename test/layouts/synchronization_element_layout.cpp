@@ -16,7 +16,7 @@ using namespace fiction;
 TEST_CASE("Synchronization element layout traits", "[synchronization-element-layout]")
 {
     using se_layout = layouts::synchronization_element_layout<
-        layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     CHECK(has_synchronization_elements_v<se_layout>);
 }
@@ -24,7 +24,7 @@ TEST_CASE("Synchronization element layout traits", "[synchronization-element-lay
 TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-layout]")
 {
     using se_layout = layouts::synchronization_element_layout<
-        layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     se_layout original{{5, 5, 0}, layouts::twoddwave_clocking<se_layout>()};
     original.assign_synchronization_element({0, 0}, 1);
@@ -55,7 +55,7 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
 TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-element-layout]")
 {
     using se_layout = layouts::synchronization_element_layout<
-        layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<se_layout>()};
 
@@ -91,7 +91,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
 TEST_CASE("Iteration over synchronization elements", "[synchronization-element-layout]")
 {
     using se_layout = layouts::synchronization_element_layout<
-        layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<se_layout>()};
 
@@ -119,7 +119,7 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
 TEST_CASE("Synchronization element layout properties", "[synchronization-element-layout]")
 {
     using se_layout = layouts::synchronization_element_layout<
-        layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<se_layout>()};
 

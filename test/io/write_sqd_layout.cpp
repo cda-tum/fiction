@@ -166,7 +166,7 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 {
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>>;
+        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>;
     using sidb_layout = sidb_cell_clk_lyt;
 
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();

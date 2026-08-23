@@ -139,7 +139,7 @@ void check_parsing_equiv_layout_all()
 TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     const gate_layout layout{{}, "empty"};
 
     std::stringstream layout_stream{};
@@ -152,7 +152,7 @@ TEST_CASE("Write empty gate_level layout", "[write-fgl-layout]")
 TEST_CASE("Write and read layouts", "[write-fgl-layout]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     check_parsing_equiv_all<gate_layout>();
     check_parsing_equiv_layout_all();

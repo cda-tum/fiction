@@ -198,12 +198,12 @@ int main(int argc, char* argv[])  // NOLINT
 
     // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
     using fcn_gate_level_layout = fiction::layouts::gate_level_layout<fiction::layouts::clocked_layout<
-        fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>>;
+        fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>;
 
     // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
     using qca_cell_level_layout = fiction::layouts::cell_level_layout<
         fiction::qca_technology,
-        fiction::layouts::clocked_layout<fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>;
+        fiction::layouts::clocked_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>;
 
     std::cout << "[i] orthogonal physical design" << std::endl;
 

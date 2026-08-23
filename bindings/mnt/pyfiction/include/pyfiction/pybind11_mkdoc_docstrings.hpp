@@ -545,7 +545,7 @@ ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
 equal to `ucoord_t{0, 0}`. If :math:`n = 2`, the aspect ratios
 :math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
 to `ucoord_t{0, 1}` and `ucoord_t{1, 0}`. Both examples with
-`AspectRatio == layouts::offset::ucoord_t`.
+`AspectRatio == layouts::coords::offset`.
 
 Args:
     n: Starting value of the aspect ratio iteration.
@@ -1377,7 +1377,7 @@ Args:
 static const char* mkd_doc_fiction_bounding_box_2d_get_max =
     R"doc(Returns the maximum corner of the bounding box.
 
-In a `layouts::cartesian_layout<layouts::offset::ucoord_t>` object, this location
+In a `layouts::cartesian_layout<layouts::coords::offset>` object, this location
 represents the most south-eastern coordinate of the bounding box
 enclosing every non-empty coordinate.
 
@@ -1389,7 +1389,7 @@ Returns:
 static const char* mkd_doc_fiction_bounding_box_2d_get_min =
     R"doc(Returns the minimum corner of the bounding box.
 
-In a `layouts::cartesian_layout<layouts::offset::ucoord_t>` object, this location
+In a `layouts::cartesian_layout<layouts::coords::offset>` object, this location
 represents the most north-western coordinate of the bounding box
 enclosing every non-empty coordinate.
 
@@ -3536,7 +3536,7 @@ Returns:
 static const char* mkd_doc_fiction_convert_layout_to_fiction_coordinates =
     R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
 defect surface can be layered on top) to alternative coordinates, such
-as `layouts::offset::ucoord_t` or `layouts::cube::coord_t`. Returns a new layout
+as `layouts::coords::offset` or `layouts::coords::cube`. Returns a new layout
 equivalent to the original layout but based on the specified
 coordinate system.
 
@@ -3564,7 +3564,7 @@ Args:
 
 Template Args:
     Lyt: SiDB cell-level layout type based on fiction coordinates,
-         e.g., `layouts::offset::ucoord_t` or `layouts::cube::coord_t`.
+         e.g., `layouts::coords::offset` or `layouts::coords::cube`.
 
 Returns:
     A new equivalent layout based on SiQAD coordinates.
@@ -3602,7 +3602,7 @@ Template Args:
     CoordinateType: Type of coordinate to enumerate.
 
 Note:
-    Only `layouts::offset::ucoord_t`, `layouts::cube::coord_t`, and `layouts::siqad::coord_t` are
+    Only `layouts::coords::offset`, `layouts::coords::cube`, and `layouts::coords::siqad` are
     supported. This is enforced on the boundary-and-start constructor
     via a `requires` clause rather than on the class itself, so that
     the default constructor (required for `std::semiregular`) remains
@@ -3610,13 +3610,13 @@ Note:
 
 static const char* mkd_doc_fiction_coord_iterator_aspect_ratio =
     R"doc(Boundary within to enumerate. Not `const`:
-`std::input_or_output_iterator` requires `layouts::coord_iterator` to be
+`std::input_or_output_iterator` requires `layouts::coords::iterator` to be
 `std::movable`, which in turn requires it to be assignable.)doc";
 
 static const char* mkd_doc_fiction_coord_iterator_coord = R"doc()doc";
 
 static const char* mkd_doc_fiction_coord_iterator_coord_iterator =
-    R"doc(Default constructor. Required so that coord_iterator satisfies
+    R"doc(Default constructor. Required so that coords::iterator satisfies
 `std::semiregular`, which in turn is required for it to serve as its
 own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
 
@@ -3641,7 +3641,7 @@ order of enumeration:
   0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
   2, 1)
 
-layouts::coord_iterator is compatible with the STL forward_iterator category.
+layouts::coords::iterator is compatible with the STL forward_iterator category.
 Does not iterate over negative coordinates.
 
 Args:
@@ -12104,7 +12104,7 @@ finding excess wiring.
 
 Template Args:
     OffsetCoordinateType: The type of coordinates used in the layout.
-                          Defaults to `layouts::offset::ucoord_t` if not
+                          Defaults to `layouts::coords::offset` if not
                           explicitly provided.)doc";
 
 static const char* mkd_doc_fiction_detail_wiring_reduction_layout_foreach_adjacent_coordinate =

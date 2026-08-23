@@ -36,7 +36,7 @@ template <typename Lyt>
     }
     else
     {
-        auto calculate_nm_position = [](const layouts::siqad::coord_t& c_siqad) -> std::pair<double, double>
+        auto calculate_nm_position = [](const layouts::coords::siqad& c_siqad) -> std::pair<double, double>
         {
             const auto x =
                 (c_siqad.x * lattice_orientation<Lyt>::LAT_A + c_siqad.z * lattice_orientation<Lyt>::LAT_C.first) * 0.1;
@@ -52,7 +52,7 @@ template <typename Lyt>
         }
         else
         {
-            const auto cell_in_siqad = layouts::siqad::to_siqad_coord(c);
+            const auto cell_in_siqad = layouts::coords::to_siqad_coord(c);
             return calculate_nm_position(cell_in_siqad);
         }
     }

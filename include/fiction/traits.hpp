@@ -570,11 +570,11 @@ template <typename Lyt>
 using technology = typename Lyt::technology;
 
 template <typename CoordinateType>
-inline constexpr const bool is_offset_ucoord_v = std::is_same_v<CoordinateType, layouts::offset::ucoord_t>;
+inline constexpr const bool is_offset_coord_v = std::is_same_v<CoordinateType, layouts::coords::offset>;
 template <typename CoordinateType>
-inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, layouts::cube::coord_t>;
+inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, layouts::coords::cube>;
 template <typename CoordinateType>
-inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, layouts::siqad::coord_t>;
+inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, layouts::coords::siqad>;
 
 template <typename Lyt>
 inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca_technology>;
@@ -585,7 +585,7 @@ inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Ly
 template <typename Lyt>
 inline constexpr const bool has_mol_qca_technology_v = std::is_same_v<technology<Lyt>, mol_qca_technology>;
 template <typename Lyt>
-inline constexpr const bool has_offset_ucoord_v = is_offset_ucoord_v<coordinate<Lyt>>;
+inline constexpr const bool has_offset_coord_v = is_offset_coord_v<coordinate<Lyt>>;
 template <typename Lyt>
 inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;
 template <typename Lyt>

@@ -24,7 +24,7 @@
 #include <string_view>
 
 using gate_lyt = fiction::layouts::gate_level_layout<fiction::layouts::clocked_layout<
-    fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>>;
+    fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>;
 
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string_view, uint64_t, uint64_t, uint64_t,

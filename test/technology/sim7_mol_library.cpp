@@ -63,7 +63,7 @@ TEST_CASE("Molecular QCA technology helpers", "[molecular-qca-library]")
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -141,7 +141,7 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 TEST_CASE("Setting up wires", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::three_wire_paths_gate_layout<gate_layout>();
 
@@ -214,7 +214,7 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 
@@ -309,9 +309,9 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     using clock_number_t        = gate_layout::clock_number_t;
-    using orientation_exception = unsupported_gate_orientation_exception<layouts::offset::ucoord_t, port_position>;
+    using orientation_exception = unsupported_gate_orientation_exception<layouts::coords::offset, port_position>;
 
     static constexpr auto input_clock  = static_cast<clock_number_t>(0);
     static constexpr auto fanout_clock = static_cast<clock_number_t>(1);
@@ -419,7 +419,7 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::res_maj_gate_layout<gate_layout>();
 
@@ -482,7 +482,7 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
@@ -649,10 +649,10 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
 TEST_CASE("Check unsupported gate type", "[molecular-qca-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
 
     REQUIRE_THROWS_AS(sim7_mol_library::set_up_gate(layout, {1, 2}),
-                      unsupported_gate_type_exception<layouts::offset::ucoord_t>);
+                      unsupported_gate_type_exception<layouts::coords::offset>);
 }

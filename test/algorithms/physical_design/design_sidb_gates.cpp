@@ -133,8 +133,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
                                                         .sim_engine            = sidb_simulation_engine::QUICKEXACT},
             .design_mode =
                 design_sidb_gates_params<cell<cube_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas = {layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{10, 4, 0}),
-                       layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{10, 4, 0})},
+            .canvas = {layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 4, 0}),
+                       layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 4, 0})},
             .number_of_canvas_sidbs = 1};
 
         const auto found_gate_layouts_cube =
@@ -142,8 +142,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts_cube.size() == 1);
         CHECK(found_gate_layouts_cube[0].num_cells() == 14);
-        CHECK(found_gate_layouts_cube[0].get_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(
-                  layouts::siqad::coord_t{10, 4, 0})) == siqad_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts_cube[0].get_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+                  layouts::coords::siqad{10, 4, 0})) == siqad_layout::technology::cell_type::LOGIC);
 
         // using offset coordinates
         const auto lyt_in_offset_coord = layouts::utils::convert_layout_to_fiction_coordinates<offset_layout>(lyt);
@@ -152,8 +152,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
                                                         .sim_engine            = sidb_simulation_engine::QUICKEXACT},
             .design_mode        = design_sidb_gates_params<
                 cell<offset_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas = {layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{10, 4, 0}),
-                       layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(layouts::siqad::coord_t{10, 4, 0})},
+            .canvas = {layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 4, 0}),
+                       layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 4, 0})},
             .number_of_canvas_sidbs = 1};
 
         const auto found_gate_layouts_offset =
@@ -161,8 +161,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts_offset.size() == 1);
         CHECK(found_gate_layouts_offset[0].num_cells() == 14);
-        CHECK(found_gate_layouts_offset[0].get_cell_type(layouts::siqad::to_fiction_coord<layouts::offset::ucoord_t>(
-                  layouts::siqad::coord_t{10, 4, 0})) == offset_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts_offset[0].get_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+                  layouts::coords::siqad{10, 4, 0})) == offset_layout::technology::cell_type::LOGIC);
     }
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
@@ -458,7 +458,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 2);
 
         found_gate_layouts.front().foreach_cell([](const auto& cell)
-                                                { CHECK(cell != layouts::siqad::coord_t{14, 10, 0}); });
+                                                { CHECK(cell != layouts::coords::siqad{14, 10, 0}); });
 
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
@@ -469,7 +469,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         CHECK(found_gate_layouts_quickcell.front().num_cells() == lyt.num_cells() + 2);
 
         found_gate_layouts_quickcell.front().foreach_cell([](const auto& cell)
-                                                          { CHECK(cell != layouts::siqad::coord_t{14, 10, 0}); });
+                                                          { CHECK(cell != layouts::coords::siqad{14, 10, 0}); });
     }
 
     SECTION("QuickCell with defect blocking canvas SiDB placement")

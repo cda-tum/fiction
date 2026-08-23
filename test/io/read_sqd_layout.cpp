@@ -57,7 +57,7 @@ TEST_CASE("Read empty SQD layout", "[sqd]")
 
     using sidb_layout =
         layouts::cell_level_layout<sidb_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     check(read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream));
 }
 
@@ -111,7 +111,7 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
 
     using sidb_layout =
         layouts::cell_level_layout<sidb_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     check(read_sqd_layout<sidb_lattice<sidb_111_lattice, sidb_layout>>(layout_stream));
 }
 
@@ -168,7 +168,7 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
     {
         using sidb_layout =
             layouts::cell_level_layout<sidb_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
         const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
@@ -184,7 +184,7 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
     {
         using siqad_layout =
             layouts::cell_level_layout<sidb_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::siqad::coord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>;
         const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, siqad_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
@@ -257,7 +257,7 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
 
     using sidb_layout =
         layouts::cell_level_layout<sidb_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 2);
@@ -377,7 +377,7 @@ TEST_CASE("Read single defect SQD layout", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
-        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
@@ -467,7 +467,7 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
-        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
@@ -583,7 +583,7 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
-        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
@@ -679,7 +679,7 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
-        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     const sidb_defect_surface_params            params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
     const sidb_layout                           layout{params};
@@ -739,7 +739,7 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
     std::istringstream layout_stream{sqd_layout};
 
     using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
-        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
 
@@ -761,7 +761,7 @@ TEST_CASE("SQD parsing error: missing <siqad> element", "[sqd]")
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -776,7 +776,7 @@ TEST_CASE("SQD parsing error: missing <design> element", "[sqd]")
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -796,7 +796,7 @@ TEST_CASE("SQD parsing error: missing 'type' attribute in <layer> element", "[sq
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -822,7 +822,7 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <dbdot> element", "[
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -848,7 +848,7 @@ TEST_CASE("SQD parsing error: missing 'n' attribute in <latcoord> element", "[sq
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -874,7 +874,7 @@ TEST_CASE("SQD parsing error: missing 'm' attribute in <latcoord> element", "[sq
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -900,7 +900,7 @@ TEST_CASE("SQD parsing error: missing 'l' attribute in <latcoord> element", "[sq
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
     ;
 }
@@ -927,7 +927,7 @@ TEST_CASE("SQD parsing error: negative 'n' attribute in <latcoord> element", "[s
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -953,7 +953,7 @@ TEST_CASE("SQD parsing error: negative 'm' attribute in <latcoord> element", "[s
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -979,7 +979,7 @@ TEST_CASE("SQD parsing error: negative 'l' attribute in <latcoord> element", "[s
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1005,7 +1005,7 @@ TEST_CASE("SQD parsing error: out-of-bounds 'l' attribute in <latcoord> element"
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1033,7 +1033,7 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <incl_coords> elemen
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1060,7 +1060,7 @@ TEST_CASE("SQD parsing error: missing <type> element in <dbdot> element")
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1087,7 +1087,7 @@ TEST_CASE("SQD parsing error: invalid <type> element in <dbdot> element")
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1116,7 +1116,7 @@ TEST_CASE("SQD parsing error: missing 'charge' attribute in <coulomb> element", 
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1145,7 +1145,7 @@ TEST_CASE("SQD parsing error: missing 'eps_r' attribute in <coulomb> element", "
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
 
@@ -1174,6 +1174,6 @@ TEST_CASE("SQD parsing error: missing 'lambda_tf' attribute in <coulomb> element
     using sidb_layout = sidb_lattice<
         sidb_100_lattice,
         sidb_defect_surface<layouts::cell_level_layout<
-            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>>;
+            sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }

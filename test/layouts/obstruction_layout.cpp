@@ -20,7 +20,7 @@ TEST_CASE("Traits and construction", "[obstruction-layout]")
 {
     SECTION("Cartesian layout")
     {
-        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::coords::offset>;
 
         REQUIRE(is_coordinate_layout_v<layout>);
         CHECK(!has_is_obstructed_coordinate_v<layout>);
@@ -46,7 +46,7 @@ TEST_CASE("Traits and construction", "[obstruction-layout]")
     SECTION("Gate-level layout")
     {
         using layout =
-            layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+            layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         REQUIRE(is_gate_level_layout_v<layout>);
         CHECK(!has_is_obstructed_coordinate_v<layout>);
@@ -73,7 +73,7 @@ TEST_CASE("Traits and construction", "[obstruction-layout]")
     {
         using layout =
             layouts::cell_level_layout<qca_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         REQUIRE(is_cell_level_layout_v<layout>);
         CHECK(!has_is_obstructed_coordinate_v<layout>);
@@ -102,7 +102,7 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
 {
     SECTION("Cartesian layout")
     {
-        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::coords::offset>;
 
         const layout lyt{{4, 4}};
 
@@ -146,7 +146,7 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
     SECTION("Gate-level layout")
     {
         using layout =
-            layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+            layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
@@ -207,7 +207,7 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
     {
         using layout =
             layouts::cell_level_layout<qca_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         const auto lyt = blueprints::single_layer_qca_and_gate<layout>();
 
@@ -321,7 +321,7 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
 {
     SECTION("Cartesian layout")
     {
-        using layout = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+        using layout = layouts::cartesian_layout<layouts::coords::offset>;
 
         const layout lyt{{4, 4}};
 
@@ -376,7 +376,7 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     SECTION("Gate-level layout")
     {
         using layout =
-            layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+            layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         const auto lyt = blueprints::xor_maj_gate_layout<layout>();
 
@@ -442,7 +442,7 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     {
         using layout =
             layouts::cell_level_layout<qca_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         const auto lyt = blueprints::single_layer_qca_and_gate<layout>();
 

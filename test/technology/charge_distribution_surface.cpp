@@ -64,11 +64,11 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         const charge_distribution_surface charge_layout{lyt, sidb_simulation_parameters{}};
         CHECK(charge_layout.cell_to_index({5, 4}) != charge_layout.cell_to_index({5, 5}));
         CHECK(charge_layout.cell_to_index({5, 6}) != charge_layout.cell_to_index({5, 5}));
-        CHECK(charge_layout.index_to_cell(4) == (layouts::siqad::coord_t()));
+        CHECK(charge_layout.index_to_cell(4) == (layouts::coords::siqad()));
         uint64_t found = 0;
         for (uint64_t i = 0u; i < 3; i++)
         {
-            if (charge_layout.index_to_cell(i) == (layouts::siqad::coord_t(5, 4)))
+            if (charge_layout.index_to_cell(i) == (layouts::coords::siqad(5, 4)))
             {
                 found += 1;
             }
@@ -78,7 +78,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         found = 0;
         for (uint64_t i = 0u; i < 3; i++)
         {
-            if (charge_layout.index_to_cell(i) == (layouts::siqad::coord_t(5, 5)))
+            if (charge_layout.index_to_cell(i) == (layouts::coords::siqad(5, 5)))
             {
                 found += 1;
             }
@@ -88,7 +88,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         found = 0;
         for (uint64_t i = 0u; i < 3; i++)
         {
-            if (charge_layout.index_to_cell(i) == (layouts::siqad::coord_t(5, 6)))
+            if (charge_layout.index_to_cell(i) == (layouts::coords::siqad(5, 6)))
             {
                 found += 1;
             }
@@ -1295,7 +1295,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         uint64_t loop_counter = 0;
         for (const auto& cell : positive_candidates)
         {
-            if (cell == layouts::siqad::coord_t(6, 2, 0))
+            if (cell == layouts::coords::siqad(6, 2, 0))
             {
                 loop_counter += 1;
             }
@@ -1305,7 +1305,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         uint64_t loop_counter_second = 0;
         for (const auto& cell : positive_candidates)
         {
-            if (cell == layouts::siqad::coord_t(7, 2, 0))
+            if (cell == layouts::coords::siqad(7, 2, 0))
             {
                 loop_counter_second += 1;
             }
@@ -1315,7 +1315,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         uint64_t loop_counter_third = 0;
         for (const auto& cell : positive_candidates)
         {
-            if (cell == layouts::siqad::coord_t(7, 2, 0))
+            if (cell == layouts::coords::siqad(7, 2, 0))
             {
                 loop_counter_third += 1;
             }

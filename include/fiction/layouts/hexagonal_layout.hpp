@@ -148,8 +148,8 @@ struct even_column_hex : flat_top_hex
  * @tparam HexagonalCoordinateSystem One of the following: odd_row_hex, even_row_hex, odd_column_hex, even_column_hex.
  * @tparam CubeCoordinateType Internally, cube coordinates are needed for certain algorithms or calculations.
  */
-template <typename OffsetCoordinateType = offset::ucoord_t, typename HexagonalCoordinateSystem = even_row_hex,
-          typename CubeCoordinateType = cube::coord_t>
+template <typename OffsetCoordinateType = coords::offset, typename HexagonalCoordinateSystem = even_row_hex,
+          typename CubeCoordinateType = coords::cube>
     requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
              std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
              std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
@@ -260,7 +260,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return fiction::layouts::area(strg->dimension);
+        return fiction::layouts::coords::area(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -822,8 +822,8 @@ class hexagonal_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return std::ranges::subrange{
-            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
+            coords::iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -839,8 +839,9 @@ class hexagonal_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, std::forward<Fn>(fn));
+            coords::iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
+            std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -858,8 +859,9 @@ class hexagonal_layout
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return std::ranges::subrange{coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                                     coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
+        return std::ranges::subrange{
+            coords::iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -879,8 +881,8 @@ class hexagonal_layout
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
+            coords::iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal

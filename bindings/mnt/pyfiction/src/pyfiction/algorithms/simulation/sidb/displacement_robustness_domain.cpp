@@ -42,41 +42,42 @@ void determine_displacement_robustness_domain(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::enum_<
-        fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::dimer_displacement_policy>(
+        fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::dimer_displacement_policy>(
         m, "dimer_displacement_policy")
         .value("STAY_ON_ORIGINAL_DIMER",
                fiction::displacement_robustness_domain_params<
-                   fiction::layouts::offset::ucoord_t>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER)
+                   fiction::layouts::coords::offset>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER)
         .value("ALLOW_OTHER_DIMER",
                fiction::displacement_robustness_domain_params<
-                   fiction::layouts::offset::ucoord_t>::dimer_displacement_policy::ALLOW_OTHER_DIMER);
+                   fiction::layouts::coords::offset>::dimer_displacement_policy::ALLOW_OTHER_DIMER);
 
     py::enum_<
-        fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::displacement_analysis_mode>(
+        fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::displacement_analysis_mode>(
         m, "displacement_analysis_mode")
         .value("EXHAUSTIVE", fiction::displacement_robustness_domain_params<
-                                 fiction::layouts::offset::ucoord_t>::displacement_analysis_mode::EXHAUSTIVE)
+                                 fiction::layouts::coords::offset>::displacement_analysis_mode::EXHAUSTIVE)
         .value("RANDOM", fiction::displacement_robustness_domain_params<
-                             fiction::layouts::offset::ucoord_t>::displacement_analysis_mode::RANDOM);
+                             fiction::layouts::coords::offset>::displacement_analysis_mode::RANDOM);
 
-    py::class_<fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>>(
+    py::class_<fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>>(
         m, "displacement_robustness_domain_params")
         .def(py::init<>(), "Default constructor.")
         .def_rw("analysis_mode",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::analysis_mode)
+                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::analysis_mode)
         .def_rw("percentage_of_analyzed_displaced_layouts",
                 &fiction::displacement_robustness_domain_params<
-                    fiction::layouts::offset::ucoord_t>::percentage_of_analyzed_displaced_layouts)
-        .def_rw("displacement_variations", &fiction::displacement_robustness_domain_params<
-                                               fiction::layouts::offset::ucoord_t>::displacement_variations)
+                    fiction::layouts::coords::offset>::percentage_of_analyzed_displaced_layouts)
+        .def_rw(
+            "displacement_variations",
+            &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::displacement_variations)
         .def_rw("operational_params",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::operational_params)
+                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::operational_params)
         .def_rw("fixed_sidbs",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::fixed_sidbs)
+                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::fixed_sidbs)
         .def_rw("dimer_policy",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::dimer_policy)
+                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::dimer_policy)
         .def_rw("number_of_threads",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::offset::ucoord_t>::number_of_threads);
+                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::number_of_threads);
 
     py::class_<fiction::displacement_robustness_domain_stats>(m, "displacement_robustness_domain_stats")
         .def(py::init<>(), "Default constructor.")

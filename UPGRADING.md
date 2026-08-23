@@ -280,16 +280,23 @@ Their namespace still changed — see the tree above.
 
 ### Renamed symbols
 
-48 public symbols changed name as well as namespace. Everything not listed
+59 public symbols changed name as well as namespace. Everything not listed
 here kept its identifier and only gained a namespace.
 
 | old                                               | new                                                          |
 | ------------------------------------------------- | ------------------------------------------------------------ |
+| `fiction::area`                                   | `fiction::layouts::coords::area`                             |
+| `fiction::coord_iterator`                         | `fiction::layouts::coords::iterator`                         |
+| `fiction::cube::coord_t`                          | `fiction::layouts::coords::cube`                             |
 | `fiction::fcn_gate_library`                       | `fiction::fcn::gate_library`                                 |
+| `fiction::has_offset_ucoord_v`                    | `fiction::has_offset_coord_v`                                |
 | `fiction::inml_technology`                        | `fiction::inml::technology`                                  |
 | `fiction::inml_topolinano_library`                | `fiction::inml::topolinano_library`                          |
+| `fiction::is_offset_ucoord_v`                     | `fiction::is_offset_coord_v`                                 |
 | `fiction::is_sidb_gate_design_impossible`         | `fiction::sidb::generators::is_gate_design_impossible`       |
 | `fiction::mol_qca_technology`                     | `fiction::qca::mol_technology`                               |
+| `fiction::offset::ucoord_t`                       | `fiction::layouts::coords::offset`                           |
+| `fiction::offset_to_cube_coord`                   | `fiction::layouts::coords::offset_to_cube`                   |
 | `fiction::on_the_fly_sidb_circuit_design`         | `fiction::sidb::generators::on_the_fly_circuit_design`       |
 | `fiction::qca_one_library`                        | `fiction::qca::qca_one_library`                              |
 | `fiction::qca_technology`                         | `fiction::qca::technology`                                   |
@@ -333,6 +340,10 @@ here kept its identifier and only gained a namespace.
 | `fiction::sidb_surface_analysis`                  | `fiction::sidb::libraries::surface_analysis`                 |
 | `fiction::sidb_technology`                        | `fiction::sidb::technology`                                  |
 | `fiction::sim7_mol_library`                       | `fiction::qca::sim7_mol_library`                             |
+| `fiction::siqad::coord_t`                         | `fiction::layouts::coords::siqad`                            |
+| `fiction::siqad::to_fiction_coord`                | `fiction::layouts::coords::to_fiction_coord`                 |
+| `fiction::siqad::to_siqad_coord`                  | `fiction::layouts::coords::to_siqad_coord`                   |
+| `fiction::volume`                                 | `fiction::layouts::coords::volume`                           |
 
 Two rows change only the namespace. They are listed because the prefix looks droppable
 and deliberately was not dropped: `qca_one_library` is the published name of the QCA ONE
@@ -375,6 +386,39 @@ gate library, and `sim7_mol_library` names the SIM(7)-MolPDK library.
 - **`detail` namespaces** are untouched. They keep working nested.
 - **`experiments/`** changed only its include directives. It reproduces published
   papers and is not refactored.
+
+### The coordinate namespaces
+
+`coordinates.hpp` held three sibling namespaces that each contained exactly one type.
+The namespace now matches the header, and the three coordinate _kinds_ are the type
+names, which is what they always were:
+
+```text
+fiction::offset::ucoord_t  ->  fiction::layouts::coords::offset
+fiction::cube::coord_t     ->  fiction::layouts::coords::cube
+fiction::siqad::coord_t    ->  fiction::layouts::coords::siqad
+```
+
+The helpers that operate on them moved into the same namespace, which also restores
+argument-dependent lookup for `area` and `volume`:
+
+```text
+fiction::siqad::to_fiction_coord -> fiction::layouts::coords::to_fiction_coord
+fiction::siqad::to_siqad_coord   -> fiction::layouts::coords::to_siqad_coord
+fiction::offset_to_cube_coord    -> fiction::layouts::coords::offset_to_cube
+fiction::coord_iterator          -> fiction::layouts::coords::iterator
+fiction::area                    -> fiction::layouts::coords::area
+fiction::volume                  -> fiction::layouts::coords::volume
+```
+
+The two traits whose names referred to `ucoord_t` follow:
+
+```text
+fiction::is_offset_ucoord_v  -> fiction::is_offset_coord_v
+fiction::has_offset_ucoord_v -> fiction::has_offset_coord_v
+```
+
+`is_cube_coord_v`, `is_siqad_coord_v` and their `has_` counterparts keep their names.
 
 ### Notable splits
 

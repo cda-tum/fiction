@@ -98,7 +98,7 @@ TEST_CASE("Layout equivalence", "[wiring_reduction]")
     SECTION("Cartesian layouts")
     {
         using gate_layout = layouts::gate_level_layout<
-            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
         check_layout_equiv_all<gate_layout>();
     }

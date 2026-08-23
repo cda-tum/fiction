@@ -16,7 +16,7 @@ using namespace fiction;
 
 TEST_CASE("Distance map", "[distance-map]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
@@ -95,7 +95,7 @@ TEST_CASE("Distance map", "[distance-map]")
 
 TEST_CASE("Sparse distance map", "[distance-map]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")
@@ -174,7 +174,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
 
 TEST_CASE("Smart distance cache functor", "[distance-map]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
     using dist    = uint64_t;
 
     SECTION("2DDWave clocking")

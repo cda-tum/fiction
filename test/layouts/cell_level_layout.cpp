@@ -31,7 +31,7 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
 {
     using cell_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     cell_layout original{{5, 5, 0}, layouts::twoddwave_clocking<cell_layout>(), "Original", 2, 2};
     original.assign_cell_type({0, 2}, qca_technology::cell_type::NORMAL);
@@ -157,7 +157,7 @@ TEST_CASE("Cell type assignment", "[cell-level-layout]")
 {
     using cell_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     REQUIRE(has_get_layout_name_v<cell_layout>);
     REQUIRE(has_set_layout_name_v<cell_layout>);
@@ -257,7 +257,7 @@ TEST_CASE("Cell mode assignment", "[cell-level-layout]")
 {
     using cell_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
@@ -322,7 +322,7 @@ TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
 {
     using clk_cell_lyt =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, layouts::twoddwave_clocking<clk_cell_lyt>(), "Lyt",
                               2, 2};

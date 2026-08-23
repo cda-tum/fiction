@@ -37,9 +37,9 @@ using py_logic_network = mockturtle::names_view<fiction::technology_network>;
 /**
  * Coordinates.
  */
-using py_offset_coordinate = fiction::layouts::offset::ucoord_t;
-using py_cube_coordinate   = fiction::layouts::cube::coord_t;
-using py_siqad_coordinate  = fiction::layouts::siqad::coord_t;
+using py_offset_coordinate = fiction::layouts::coords::offset;
+using py_cube_coordinate   = fiction::layouts::coords::cube;
+using py_siqad_coordinate  = fiction::layouts::coords::siqad;
 /**
  * Cartesian layout.
  */

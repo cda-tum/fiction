@@ -902,7 +902,7 @@ TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-s
     const layouts::io::write_qca_layout_svg_params params{.simple = true};
 
     CHECK_THROWS_AS(layouts::io::write_mol_qca_layout_svg(layout, layout_stream, params),
-                    layouts::io::unsupported_cell_type_exception<layouts::offset::ucoord_t>);
+                    layouts::io::unsupported_cell_type_exception<layouts::coords::offset>);
 }
 
 TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")

@@ -422,7 +422,7 @@ TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction", "[k-shortest-paths]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -569,7 +569,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "[A*]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using obst_lyt   = layouts::obstruction_layout<gate_lyt>;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
@@ -691,7 +691,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
 TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction", "[k-shortest-paths]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")

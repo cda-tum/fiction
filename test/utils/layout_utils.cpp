@@ -24,11 +24,11 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]",
-                   (layouts::cartesian_layout<layouts::offset::ucoord_t>),
-                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>),
-                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>),
-                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_column_hex>),
-                   (layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_column_hex>))
+                   (layouts::cartesian_layout<layouts::coords::offset>),
+                   (layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>),
+                   (layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>),
+                   (layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>),
+                   (layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>))
 {
     TestType lyt{{4, 4}};
 
@@ -78,7 +78,7 @@ inline auto area_with_padding(const uint64_t& area, const T1& x, const T2& y) no
     return area + ((static_cast<uint64_t>(x) + 1) * ((static_cast<uint64_t>(y) + 1) % 2ul));
 }
 
-TEST_CASE("Convert offset::ucoord_t layout (100 lattice orientation) to SiQAD coordinate layout", "[layout-utils]")
+TEST_CASE("Convert coords::offset layout (100 lattice orientation) to SiQAD coordinate layout", "[layout-utils]")
 {
     SECTION("empty layout")
     {
@@ -138,7 +138,7 @@ TEST_CASE("Convert offset::ucoord_t layout (100 lattice orientation) to SiQAD co
     }
 }
 
-TEST_CASE("Convert offset::ucoord_t layout (without lattice orientation) to SiQAD coordinate layout", "[layout-utils]")
+TEST_CASE("Convert coords::offset layout (without lattice orientation) to SiQAD coordinate layout", "[layout-utils]")
 {
     SECTION("empty layout")
     {
@@ -197,7 +197,7 @@ TEST_CASE("Convert offset::ucoord_t layout (without lattice orientation) to SiQA
     }
 }
 
-TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in offset::ucoord_t layout to SiQAD "
+TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in coords::offset layout to SiQAD "
           "coordinate layout",
           "[layout-utils]")
 {
@@ -232,7 +232,7 @@ TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in offs
     CHECK(lyt_transformed.get_sidb_defect({1, 0, 1}) == sidb_defect{sidb_defect_type::UNKNOWN});
 }
 
-TEST_CASE("Convert sidb_defect_surface (without lattice information) in offset::ucoord_t layout to SiQAD "
+TEST_CASE("Convert sidb_defect_surface (without lattice information) in coords::offset layout to SiQAD "
           "coordinate layout",
           "[layout-utils]")
 {
@@ -256,7 +256,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in offset::
     CHECK(lyt_transformed.get_sidb_defect({1, 0, 1}) == sidb_defect{sidb_defect_type::UNKNOWN});
 }
 
-TEST_CASE("Convert cds (without lattice information) in offset::ucoord_t layout to SiQAD "
+TEST_CASE("Convert cds (without lattice information) in coords::offset layout to SiQAD "
           "coordinate layout",
           "[layout-utils]")
 {
@@ -284,8 +284,7 @@ TEST_CASE("Convert cds (without lattice information) in offset::ucoord_t layout 
     CHECK(lyt_transformed.get_charge_state({0, 1, 1}) == sidb_charge_state::NEGATIVE);
 }
 
-TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to offset::ucoord_t coordinates",
-          "[layout-utils]")
+TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to coords::offset coordinates", "[layout-utils]")
 {
     sidb_defect_surface<sidb_100_cell_clk_lyt_siqad> sidb_surface{};
 
@@ -322,7 +321,7 @@ TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to offset:
     CHECK(lyt_transformed.get_sidb_defect({1, 2}) == sidb_defect{sidb_defect_type::UNKNOWN});
 }
 
-TEST_CASE("Convert cds (without lattice information) in SiQAD coordinates to offset::ucoord_t coordinates",
+TEST_CASE("Convert cds (without lattice information) in SiQAD coordinates to coords::offset coordinates",
           "[layout-utils]")
 {
     sidb_cell_clk_lyt_siqad sidb_surface{};
@@ -353,7 +352,7 @@ TEST_CASE("Convert cds (without lattice information) in SiQAD coordinates to off
     CHECK(lyt_transformed.get_charge_state({0, 6}) == sidb_charge_state::NEGATIVE);
 }
 
-TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD coordinates to offset::ucoord_t "
+TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD coordinates to coords::offset "
           "coordinates",
           "[layout-utils]")
 {
@@ -382,7 +381,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD co
     CHECK(lyt_transformed.get_sidb_defect({1, 2}) == sidb_defect{sidb_defect_type::UNKNOWN});
 }
 
-TEST_CASE("Convert SiQAD layout (100) to offset::ucoord_t coordinate layout", "[layout-utils]")
+TEST_CASE("Convert SiQAD layout (100) to coords::offset coordinate layout", "[layout-utils]")
 {
     SECTION("empty layout")
     {
@@ -437,7 +436,7 @@ TEST_CASE("Convert SiQAD layout (100) to offset::ucoord_t coordinate layout", "[
     }
 }
 
-TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to offset::ucoord_t coordinate layout", "[layout-utils]")
+TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to coords::offset coordinate layout", "[layout-utils]")
 {
     SECTION("empty layout")
     {
@@ -492,7 +491,7 @@ TEST_CASE("Convert SiQAD layout (with sidb lattice layout) to offset::ucoord_t c
     }
 }
 
-TEST_CASE("Convert SiQAD layout (without SiDB lattice layout) to offset::ucoord_t coordinate layout", "[layout-utils]")
+TEST_CASE("Convert SiQAD layout (without SiDB lattice layout) to coords::offset coordinate layout", "[layout-utils]")
 {
     SECTION("empty layout")
     {
@@ -547,7 +546,7 @@ TEST_CASE("Convert SiQAD layout (without SiDB lattice layout) to offset::ucoord_
     }
 }
 
-TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[layout-utils]",
+TEMPLATE_TEST_CASE("Convert SiQAD layout to coords::cube coordinate layout", "[layout-utils]",
                    (sidb_100_cell_clk_lyt_cube))
 {
     SECTION("empty layout")
@@ -600,18 +599,18 @@ TEMPLATE_TEST_CASE("Convert SiQAD layout to cube::coord_t coordinate layout", "[
     }
 }
 
-TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
+TEST_CASE("Generate random coords::offset coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({0, 0, 0}, {0, 0, 0});
+            layouts::utils::random_coordinate<layouts::coords::offset>({0, 0, 0}, {0, 0, 0});
         CHECK(randomly_generated_coordinate.x == 0);
         CHECK(randomly_generated_coordinate.y == 0);
         CHECK(randomly_generated_coordinate.z == 0);
 
         const auto randomly_generated_coordinate_second =
-            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({1, 0, 0}, {1, 0, 0});
+            layouts::utils::random_coordinate<layouts::coords::offset>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -620,7 +619,7 @@ TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
     SECTION("two unidentical cells as input, correct order")
     {
         const auto randomly_generated_coordinate_second =
-            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({1, 1, 1}, {5, 2, 3});
+            layouts::utils::random_coordinate<layouts::coords::offset>({1, 1, 1}, {5, 2, 3});
         CHECK(randomly_generated_coordinate_second.x >= 1);
         CHECK(randomly_generated_coordinate_second.x <= 5);
         CHECK(randomly_generated_coordinate_second.y <= 2);
@@ -632,7 +631,7 @@ TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
     SECTION("two unidentical cells as input, switched correct order")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::offset::ucoord_t>({5, 2, 3}, {1, 1, 1});
+            layouts::utils::random_coordinate<layouts::coords::offset>({5, 2, 3}, {1, 1, 1});
         CHECK(randomly_generated_coordinate.x >= 1);
         CHECK(randomly_generated_coordinate.x <= 5);
         CHECK(randomly_generated_coordinate.y <= 2);
@@ -642,18 +641,18 @@ TEST_CASE("Generate random offset::ucoord_t coordinate", "[layout-utils]")
     }
 }
 
-TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
+TEST_CASE("Generate random coords::cube coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::cube::coord_t>({-10, -5, 0}, {-10, -5, 0});
+            layouts::utils::random_coordinate<layouts::coords::cube>({-10, -5, 0}, {-10, -5, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -5);
         CHECK(randomly_generated_coordinate.z == 0);
 
         const auto randomly_generated_coordinate_second =
-            layouts::utils::random_coordinate<layouts::cube::coord_t>({1, 0, 0}, {1, 0, 0});
+            layouts::utils::random_coordinate<layouts::coords::cube>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -662,7 +661,7 @@ TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
     SECTION("two unidentical cells as input, correct order")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::cube::coord_t>({-10, -1, 3}, {-10, -1, 6});
+            layouts::utils::random_coordinate<layouts::coords::cube>({-10, -1, 3}, {-10, -1, 6});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 3);
@@ -672,7 +671,7 @@ TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
     SECTION("two unidentical cells as input, switched correct order")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::cube::coord_t>({-10, -1, 6}, {-10, -1, 3});
+            layouts::utils::random_coordinate<layouts::coords::cube>({-10, -1, 6}, {-10, -1, 3});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z >= 3);
@@ -680,18 +679,18 @@ TEST_CASE("Generate random cube::coord_t coordinate", "[layout-utils]")
     }
 }
 
-TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
+TEST_CASE("Generate random coords::siqad coordinate", "[layout-utils]")
 {
     SECTION("two identical cells as input")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
+            layouts::utils::random_coordinate<layouts::coords::siqad>({-10, -5, 0}, {-10, -5, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -5);
         CHECK(randomly_generated_coordinate.z == 0);
 
         const auto randomly_generated_coordinate_second =
-            layouts::utils::random_coordinate<layouts::siqad::coord_t>({1, 0, 0}, {1, 0, 0});
+            layouts::utils::random_coordinate<layouts::coords::siqad>({1, 0, 0}, {1, 0, 0});
         CHECK(randomly_generated_coordinate_second.x == 1);
         CHECK(randomly_generated_coordinate_second.y == 0);
         CHECK(randomly_generated_coordinate_second.z == 0);
@@ -700,7 +699,7 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
     SECTION("two unidentical cells as input, correct order")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::siqad::coord_t>({-10, -1, 0}, {-10, -1, 1});
+            layouts::utils::random_coordinate<layouts::coords::siqad>({-10, -1, 0}, {-10, -1, 1});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z <= 1);
@@ -709,7 +708,7 @@ TEST_CASE("Generate random siqad::coord_t coordinate", "[layout-utils]")
     SECTION("two unidentical cells as input, switched correct order")
     {
         const auto randomly_generated_coordinate =
-            layouts::utils::random_coordinate<layouts::siqad::coord_t>({-10, -1, 1}, {-10, -1, 0});
+            layouts::utils::random_coordinate<layouts::coords::siqad>({-10, -1, 1}, {-10, -1, 0});
         CHECK(randomly_generated_coordinate.x == -10);
         CHECK(randomly_generated_coordinate.y == -1);
         CHECK(randomly_generated_coordinate.z <= 1);
@@ -721,7 +720,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
     SECTION("two identical cells")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, -5, 0}, {-10, -5, 0});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::siqad>({-10, -5, 0}, {-10, -5, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -732,7 +731,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
     SECTION("two cells at the same y and z coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, -5, 0}, {10, -5, 0});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::siqad>({-10, -5, 0}, {10, -5, 0});
         REQUIRE(all_area_cells.size() == 21);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -748,7 +747,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
     SECTION("two cells at the same y coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, 5, 0}, {10, 5, 1});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::siqad>({-10, 5, 0}, {10, 5, 1});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -764,7 +763,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
     SECTION("two cells at the same x coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({10, 2, 0}, {10, 5, 1});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::siqad>({10, 2, 0}, {10, 5, 1});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -780,7 +779,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
     SECTION("north-south and south-west cells are given, positive coordinates")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({10, 0}, {0, 11, 1});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::siqad>({10, 0}, {0, 11, 1});
         REQUIRE(all_area_cells.size() == 264);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -796,7 +795,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using siqad coordina
     SECTION("north-south and south-west cells are given, negative coordinates")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::siqad::coord_t>({-10, 0}, {0, -11, 1});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::siqad>({-10, 0}, {0, -11, 1});
         REQUIRE(all_area_cells.size() == 242);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -815,7 +814,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
     SECTION("two identical cells")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({-10, -10, 0}, {-10, -10, 0});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::cube>({-10, -10, 0}, {-10, -10, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -831,7 +830,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
     SECTION("two cells at the same y coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({-10, 10}, {10, 11});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::cube>({-10, 10}, {10, 11});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -847,7 +846,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
     SECTION("two cells at the same x coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({10, 4, 0}, {10, 11});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::cube>({10, 4, 0}, {10, 11});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -863,7 +862,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
     SECTION("north-south and south-west cells are given, positive coordinates")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({10, 0}, {0, 11});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::cube>({10, 0}, {0, 11});
         REQUIRE(all_area_cells.size() == 132);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -879,7 +878,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using cube coordinat
     SECTION("north-south and south-west cells are given, negative coordinates")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::cube::coord_t>({-10, 0}, {0, -11});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::cube>({-10, 0}, {0, -11});
         REQUIRE(all_area_cells.size() == 132);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == -10);
@@ -898,7 +897,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
     SECTION("two identical cells")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({10, 10, 0}, {10, 10, 0});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::offset>({10, 10, 0}, {10, 10, 0});
         REQUIRE(all_area_cells.size() == 1);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -914,7 +913,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
     SECTION("two cells at the same y coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({0, 10}, {20, 11});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::offset>({0, 10}, {20, 11});
         REQUIRE(all_area_cells.size() == 42);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 0);
@@ -930,7 +929,7 @@ TEST_CASE("Generate all cells in area spanned by two cells, using offset coordin
     SECTION("two cells at the same x coordinate ")
     {
         const auto all_area_cells =
-            layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({10, 4, 0}, {10, 11});
+            layouts::utils::all_coordinates_in_spanned_area<layouts::coords::offset>({10, 4, 0}, {10, 11});
         REQUIRE(all_area_cells.size() == 8);
         const auto first_cell = all_area_cells.front();
         CHECK(first_cell.x == 10);
@@ -1165,8 +1164,8 @@ TEST_CASE("Digest of a layout holding a cell and its dead twin", "[layout-utils]
     // ordered fold over the cells therefore treats a cell and its dead twin as one entry and keeps whichever of
     // the two foreach_cell reaches first, which makes the digest depend on the order the cells were assigned in.
     // Both layouts below hold the same two cells and differ only in that order
-    const layouts::offset::ucoord_t live_cell{0, 2};
-    const auto                      dead_twin = live_cell.get_dead();
+    const layouts::coords::offset live_cell{0, 2};
+    const auto                    dead_twin = live_cell.get_dead();
 
     sidb_cell_clk_lyt lyt_live_first{};
     lyt_live_first.assign_cell_type(live_cell, sidb_cell_clk_lyt::cell_type::NORMAL);

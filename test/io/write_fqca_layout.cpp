@@ -50,8 +50,9 @@ TEST_CASE("Write empty FQCA layout", "[fqca]")
 
         SECTION("Cartesian layout")
         {
-            using qca_layout = layouts::cell_level_layout<
-                qca_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+            using qca_layout =
+                layouts::cell_level_layout<qca_technology,
+                                           layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -63,7 +64,7 @@ TEST_CASE("Write empty FQCA layout", "[fqca]")
         {
             using qca_layout =
                 layouts::cell_level_layout<qca_technology,
-                                           layouts::clocked_layout<layouts::cartesian_layout<layouts::cube::coord_t>>>;
+                                           layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -95,8 +96,9 @@ TEST_CASE("Write empty FQCA layout", "[fqca]")
 
         SECTION("Cartesian layout")
         {
-            using qca_layout = layouts::cell_level_layout<
-                qca_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+            using qca_layout =
+                layouts::cell_level_layout<qca_technology,
+                                           layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -108,7 +110,7 @@ TEST_CASE("Write empty FQCA layout", "[fqca]")
         {
             using qca_layout =
                 layouts::cell_level_layout<qca_technology,
-                                           layouts::clocked_layout<layouts::cartesian_layout<layouts::cube::coord_t>>>;
+                                           layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -157,7 +159,7 @@ TEST_CASE("Write single-layer FQCA AND gate", "[fqca]")
     {
         using qca_layout =
             layouts::cell_level_layout<qca_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
 
@@ -167,7 +169,7 @@ TEST_CASE("Write single-layer FQCA AND gate", "[fqca]")
     {
         using qca_layout =
             layouts::cell_level_layout<qca_technology,
-                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::cube::coord_t>>>;
+                                       layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
         write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
 
@@ -179,7 +181,7 @@ TEST_CASE("Exceeding cell names", "[fqca]")
 {
     using qca_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     qca_layout layout{{52, 0}, "[a-z]+[A-Z]+1"};
 

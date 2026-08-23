@@ -35,7 +35,7 @@ using namespace fiction;
 int main()  // NOLINT
 {
     const auto all_cells_in_region =
-        layouts::utils::all_coordinates_in_spanned_area<layouts::offset::ucoord_t>({0, 0}, {10, 10});
+        layouts::utils::all_coordinates_in_spanned_area<layouts::coords::offset>({0, 0}, {10, 10});
 
     const auto all_distributions =
         fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(

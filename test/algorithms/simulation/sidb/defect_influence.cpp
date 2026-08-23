@@ -82,7 +82,7 @@ TEMPLATE_TEST_CASE(
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, params);
         const auto clearance_result_vacancy = calculate_defect_clearance(lyt_cube, defect_influence_vacancy);
 
-        CHECK(clearance_result_vacancy.defect_position == layouts::cube::coord_t{18, 17});
+        CHECK(clearance_result_vacancy.defect_position == layouts::coords::cube{18, 17});
         CHECK_THAT(std::abs(clearance_result_vacancy.defect_clearance_distance - 3.1665),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
 
@@ -100,7 +100,7 @@ TEMPLATE_TEST_CASE(
             CHECK(stats.num_evaluated_defect_positions == 3599);
             CHECK(stats.num_non_influencing_defect_positions == 3062);
             CHECK(stats.num_influencing_defect_positions == 537);
-            CHECK(defect_clearance.defect_position == layouts::cube::coord_t{18, 17});
+            CHECK(defect_clearance.defect_position == layouts::coords::cube{18, 17});
         }
 #endif
 
@@ -170,8 +170,8 @@ TEMPLATE_TEST_CASE(
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, defect_operational_arsenic_params);
         const auto clearance_result_arsenic = calculate_defect_clearance(lyt_cube, defect_influence_arsenic);
 
-        CHECK((((clearance_result_arsenic.defect_position == layouts::cube::coord_t{17, 12, 0})) ||
-               (clearance_result_arsenic.defect_position == layouts::cube::coord_t{3, 12, 0})));
+        CHECK((((clearance_result_arsenic.defect_position == layouts::coords::cube{17, 12, 0})) ||
+               (clearance_result_arsenic.defect_position == layouts::coords::cube{3, 12, 0})));
         CHECK_THAT(std::abs(clearance_result_arsenic.defect_clearance_distance - 2.376),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
     }
@@ -326,23 +326,22 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         sidb_cell_clk_lyt_cube lyt{{30, 30}};
 
-        lyt.assign_cell_type(
-            layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{10, 0, 0}),
-            sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{0, 1, 0}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 0, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{8, 1, 0}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{0, 1, 0}),
+                             sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{8, 1, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{2, 2, 0}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{6, 2, 0}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{4, 4, 0}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 4, 0}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{4, 5, 1}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 5, 1}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type(layouts::siqad::to_fiction_coord<layouts::cube::coord_t>(layouts::siqad::coord_t{4, 7, 1}),
+        lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 7, 1}),
                              sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb_100_cell_clk_lyt_cube lat{lyt};

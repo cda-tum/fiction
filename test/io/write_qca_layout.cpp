@@ -24,7 +24,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
     using qca_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const qca_layout layout{{2, 2, 1}, "empty layout"};
 
@@ -148,7 +148,7 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 {
     using qca_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     qca_layout layout{{4, 4}, "AND"};
 
@@ -766,7 +766,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
 {
     using qca_layout =
         layouts::cell_level_layout<qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     qca_layout layout{{4, 4, 1}, "Crossover"};
 

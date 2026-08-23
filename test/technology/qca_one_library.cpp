@@ -30,7 +30,7 @@ TEST_CASE("QCA ONE library traits", "[qca-one-library]")
 TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::or_not_gate_layout<gate_layout>();
 
@@ -76,7 +76,7 @@ TEST_CASE("Setting up input ports and gates", "[qca-one-library]")
 TEST_CASE("Setting up wires", "[qca-one-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -128,7 +128,7 @@ TEST_CASE("Setting up wires", "[qca-one-library]")
 TEST_CASE("Setting up fanouts", "[qca-one-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::fanout_layout<gate_layout>();
 

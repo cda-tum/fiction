@@ -116,7 +116,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
      */
     py::class_<py_cartesian_technology_cell_layout,
                fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<
-                   fiction::layouts::cartesian_layout<fiction::layouts::offset::ucoord_t>>>>(
+                   fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>(
         m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_cell_level_layout))
         .def(py::init<>(), DOC(fiction_cell_level_layout_cell_level_layout))
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),

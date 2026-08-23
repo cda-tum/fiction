@@ -208,7 +208,7 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
     SECTION("Cartesian layouts")
     {
         using gate_layout = layouts::gate_level_layout<
-            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
         check_mapping_equiv_all<gate_layout>();
     }
@@ -217,46 +217,46 @@ TEST_CASE("Layout equivalence", "[hexagonalization]")
 TEST_CASE("Cartesian to hexagonal")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     using hex_lyt = hex_even_row_gate_clk_lyt;
 
     constexpr const auto layout_height = 3;
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 0), layout_height) ==
-          layouts::offset::ucoord_t(1, 0, 0));
+          layouts::coords::offset(1, 0, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 0, 1), layout_height) ==
-          layouts::offset::ucoord_t(1, 0, 1));
+          layouts::coords::offset(1, 0, 1));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 0), layout_height) ==
-          layouts::offset::ucoord_t(2, 1, 0));
+          layouts::coords::offset(2, 1, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 0, 1), layout_height) ==
-          layouts::offset::ucoord_t(2, 1, 1));
+          layouts::coords::offset(2, 1, 1));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 0), layout_height) ==
-          layouts::offset::ucoord_t(2, 2, 0));
+          layouts::coords::offset(2, 2, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 0, 1), layout_height) ==
-          layouts::offset::ucoord_t(2, 2, 1));
+          layouts::coords::offset(2, 2, 1));
 
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 0), layout_height) ==
-          layouts::offset::ucoord_t(1, 1, 0));
+          layouts::coords::offset(1, 1, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 1, 1), layout_height) ==
-          layouts::offset::ucoord_t(1, 1, 1));
+          layouts::coords::offset(1, 1, 1));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 0), layout_height) ==
-          layouts::offset::ucoord_t(1, 2, 0));
+          layouts::coords::offset(1, 2, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 1, 1), layout_height) ==
-          layouts::offset::ucoord_t(1, 2, 1));
+          layouts::coords::offset(1, 2, 1));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 0), layout_height) ==
-          layouts::offset::ucoord_t(2, 3, 0));
+          layouts::coords::offset(2, 3, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 1, 1), layout_height) ==
-          layouts::offset::ucoord_t(2, 3, 1));
+          layouts::coords::offset(2, 3, 1));
 
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 0), layout_height) ==
-          layouts::offset::ucoord_t(0, 2, 0));
+          layouts::coords::offset(0, 2, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(0, 2, 1), layout_height) ==
-          layouts::offset::ucoord_t(0, 2, 1));
+          layouts::coords::offset(0, 2, 1));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 0), layout_height) ==
-          layouts::offset::ucoord_t(1, 3, 0));
+          layouts::coords::offset(1, 3, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(1, 2, 1), layout_height) ==
-          layouts::offset::ucoord_t(1, 3, 1));
+          layouts::coords::offset(1, 3, 1));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 0), layout_height) ==
-          layouts::offset::ucoord_t(1, 4, 0));
+          layouts::coords::offset(1, 4, 0));
     CHECK(detail::to_hex<gate_layout, hex_lyt>(coordinate<gate_layout>(2, 2, 1), layout_height) ==
-          layouts::offset::ucoord_t(1, 4, 1));
+          layouts::coords::offset(1, 4, 1));
 }

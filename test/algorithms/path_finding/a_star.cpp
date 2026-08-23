@@ -22,7 +22,7 @@ using namespace fiction;
 
 TEST_CASE("A* on 2x2 layouts", "[A*]")
 {
-    using lyt        = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+    using lyt        = layouts::cartesian_layout<layouts::coords::offset>;
     using coord_path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -135,7 +135,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts", "[A*]")
 {
-    using lyt        = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+    using lyt        = layouts::cartesian_layout<layouts::coords::offset>;
     using coord_path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -193,7 +193,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using obst_lyt   = layouts::obstruction_layout<gate_lyt>;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
@@ -288,7 +288,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
 TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using obst_lyt   = layouts::obstruction_layout<gate_lyt>;
     using coord_path = layout_coordinate_path<obst_lyt>;
 
@@ -404,7 +404,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
 TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using coord_path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -489,7 +489,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
 
 TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 {
-    using lyt        = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+    using lyt        = layouts::cartesian_layout<layouts::coords::offset>;
     using clk_lyt    = layouts::clocked_layout<lyt>;
     using coord_path = layout_coordinate_path<lyt>;
 
@@ -591,7 +591,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
 
 TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 {
-    using clk_lyt    = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt    = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
     using coord_path = layout_coordinate_path<clk_lyt>;
 
     const clk_lyt layout{{3, 3}, layouts::use_clocking<clk_lyt>()};
@@ -618,7 +618,7 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
 
 TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]")
 {
-    using lyt        = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+    using lyt        = layouts::cartesian_layout<layouts::coords::offset>;
     using coord_path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")

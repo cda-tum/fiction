@@ -397,7 +397,7 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
 
         // print z dimension only if layout uses cube coordinates
         decltype(lyt_ptr->z()) z{};
-        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::layouts::cube::coord_t>)
+        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::layouts::coords::cube>)
         {
             z = lyt_ptr->z() + 1;
         }
@@ -419,7 +419,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
 
         // print z dimension only if layout uses cube coordinates
         decltype(lyt_ptr->z()) z{};
-        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::layouts::cube::coord_t>)
+        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::layouts::coords::cube>)
         {
             z = lyt_ptr->z() + 1;
         }
@@ -479,7 +479,7 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
             cmd.env->out() << fmt::format("[e] {} has an unsupported cell technology\n", lyt_ptr->get_layout_name());
         }
         else if constexpr ((fiction::has_qca_technology_v<Lyt> || fiction::has_mol_qca_technology_v<Lyt>) &&
-                           !fiction::has_offset_ucoord_v<Lyt>)
+                           !fiction::has_offset_coord_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout\n", lyt_ptr->get_layout_name());
         }

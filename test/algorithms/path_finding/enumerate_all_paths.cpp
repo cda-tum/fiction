@@ -16,7 +16,7 @@ using namespace fiction;
 
 TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
-    using lyt  = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+    using lyt  = layouts::cartesian_layout<layouts::coords::offset>;
     using path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -111,7 +111,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 
 TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
-    using lyt  = layouts::cartesian_layout<layouts::offset::ucoord_t>;
+    using lyt  = layouts::cartesian_layout<layouts::coords::offset>;
     using path = layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
@@ -157,7 +157,7 @@ TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
@@ -216,7 +216,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled", "[enumerate-all-paths]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using path = layout_coordinate_path<gate_lyt>;
 
     // enable crossings
@@ -332,7 +332,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruction", "[enumerate-all-paths]")
 {
     using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using path = layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")

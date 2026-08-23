@@ -30,7 +30,7 @@ namespace fiction
  *
  * @tparam CellType Cell type.
  */
-template <typename CellType = layouts::offset::ucoord_t>
+template <typename CellType = layouts::coords::offset>
 struct quickexact_params
 {
     /**

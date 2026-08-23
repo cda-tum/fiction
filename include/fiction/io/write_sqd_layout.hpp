@@ -297,7 +297,7 @@ class write_sqd_layout_impl
                     }
                     else
                     {
-                        const auto siqad_coord = fiction::layouts::siqad::to_siqad_coord(c);
+                        const auto siqad_coord = fiction::layouts::coords::to_siqad_coord(c);
 
                         design << fmt::format(
                             siqad::DBDOT_BLOCK,
@@ -386,7 +386,7 @@ class write_sqd_layout_impl
                     }
                     else
                     {
-                        const auto cell = fiction::layouts::siqad::to_siqad_coord(cd.first);
+                        const auto cell = fiction::layouts::coords::to_siqad_coord(cd.first);
 
                         design << fmt::format(
                             siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),

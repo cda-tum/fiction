@@ -34,7 +34,7 @@ using namespace fiction;
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     const gate_layout layout{gate_layout::aspect_ratio{2, 2},
                              layouts::open_clocking<gate_layout>(layouts::num_clks::FOUR)};
@@ -57,7 +57,7 @@ TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     gate_layout layout{gate_layout::aspect_ratio{3, 1, 0},
                        layouts::open_clocking<gate_layout>(layouts::num_clks::FOUR)};
@@ -110,7 +110,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -132,8 +132,7 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca_technology,
-        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        fiction::qca_technology, fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
@@ -155,8 +154,7 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca_technology,
-        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        fiction::qca_technology, fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
@@ -191,8 +189,7 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca_technology,
-        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>;
+        fiction::qca_technology, fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
@@ -682,7 +679,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
     }
 }
 
-TEST_CASE("Print H-Si 111 surface with six cells, defined with siqad::coord_t", "[print-charge-layout]")
+TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "[print-charge-layout]")
 {
     sidb_cell_clk_lyt_siqad lyt{};
 
@@ -743,7 +740,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with siqad::coord_t", 
     }
 }
 
-TEST_CASE("Print H-Si 111 surface with six cells, defined with offset::ucoord_t coordinates", "[print-charge-layout]")
+TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset coordinates", "[print-charge-layout]")
 {
     sidb_cell_clk_lyt lyt{};
 

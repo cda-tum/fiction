@@ -14,7 +14,7 @@ using namespace fiction;
 
 TEST_CASE("Clocked layout traits", "[clocked-layout]")
 {
-    using layout = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using layout = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
 
     CHECK(has_is_incoming_clocked_v<layout>);
     CHECK(has_is_outgoing_clocked_v<layout>);
@@ -24,7 +24,7 @@ TEST_CASE("Clocked layout traits", "[clocked-layout]")
 
 TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
 
     const clk_lyt original{{5, 5, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
@@ -46,7 +46,7 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
 
 TEST_CASE("Clock zone assignment", "[clocked-layout]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
 
     clk_lyt layout{clk_lyt::aspect_ratio{1, 1, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
@@ -139,7 +139,7 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 
 TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
 
     const clk_lyt layout{clk_lyt::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<clk_lyt>()};
 
@@ -167,7 +167,7 @@ TEST_CASE("Iteration over clocking zones", "[clocked-layout]")
 
 TEST_CASE("Clocked layout properties", "[clocked-layout]")
 {
-    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>;
+    using clk_lyt = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
 
     SECTION("2DDWave Clocking")
     {

@@ -603,7 +603,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
 TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
 {
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
     const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 

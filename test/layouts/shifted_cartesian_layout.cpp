@@ -44,7 +44,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 {
     SECTION("odd row")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>;
 
         CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -57,7 +57,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("even row")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_row_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_row_cartesian>;
 
         CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -70,7 +70,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("odd column")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_column_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_column_cartesian>;
 
         CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -83,7 +83,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("even column")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_column_cartesian>;
+        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_column_cartesian>;
 
         CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);

@@ -46,7 +46,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
     };
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     check(layouts::io::read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -147,7 +147,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
     };
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     check(layouts::io::read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -248,7 +248,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
     };
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     check(layouts::io::read_fgl_layout<gate_layout>(layout_stream));
 }
 
@@ -272,7 +272,7 @@ TEST_CASE("Parsing error: malformed xml", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -295,7 +295,7 @@ TEST_CASE("Parsing error: no root element 'fgl'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -318,7 +318,7 @@ TEST_CASE("Parsing error: no element 'layout' in 'fgl'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -340,7 +340,7 @@ TEST_CASE("Parsing error: no element 'clocking' in 'layout'", "[read-fgl-layout]
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -364,7 +364,7 @@ TEST_CASE("Parsing error: no element 'name' in 'clocking'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -389,7 +389,7 @@ TEST_CASE("Parsing error: unknown clocking scheme", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -414,7 +414,7 @@ TEST_CASE("Parsing error: no element 'zones' in 'clocking'", "[read-fgl-layout]"
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -445,7 +445,7 @@ TEST_CASE("Parsing error: no element 'x' in 'zone'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -476,7 +476,7 @@ TEST_CASE("Parsing error: no element 'y' in 'zone'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -507,7 +507,7 @@ TEST_CASE("Parsing error: no element 'clock' in 'zone'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -531,7 +531,7 @@ TEST_CASE("Parsing error: no element 'topology' in 'layout'", "[read-fgl-layout]
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -556,7 +556,7 @@ TEST_CASE("Parsing error: unknown topology", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -581,7 +581,7 @@ TEST_CASE("Parsing error: Lyt is not a cartesian layout", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-        layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>>>>;
+        layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -606,7 +606,7 @@ TEST_CASE("Parsing error: Lyt is not a shifted_cartesian layout", "[read-fgl-lay
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -631,7 +631,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_row_cartesian layout", "[read-fgl-la
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-        layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::even_row_cartesian>>>>;
+        layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_row_cartesian>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -656,7 +656,7 @@ TEST_CASE("Parsing error: Lyt is not an even_row_cartesian layout", "[read-fgl-l
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-        layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>>>>;
+        layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -681,7 +681,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_column_cartesian layout", "[read-fgl
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-        layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>>>>;
+        layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -706,7 +706,7 @@ TEST_CASE("Parsing error: Lyt is not an even_column_cartesian layout", "[read-fg
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-        layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>>>>;
+        layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -731,7 +731,7 @@ TEST_CASE("Parsing error: Lyt is not a hexagonal layout", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-        layouts::shifted_cartesian_layout<layouts::offset::ucoord_t, layouts::odd_row_cartesian>>>>;
+        layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -756,7 +756,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_row_hex layout", "[read-fgl-layout]"
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::even_row_hex>>>>;
+        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -781,7 +781,7 @@ TEST_CASE("Parsing error: Lyt is not an even_row_hex layout", "[read-fgl-layout]
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>>;
+        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -806,7 +806,7 @@ TEST_CASE("Parsing error: Lyt is not an odd_column_hex layout", "[read-fgl-layou
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>>;
+        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -831,7 +831,7 @@ TEST_CASE("Parsing error: Lyt is not an even_column_hex layout", "[read-fgl-layo
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::offset::ucoord_t, layouts::odd_row_hex>>>>;
+        layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -854,7 +854,7 @@ TEST_CASE("Parsing error: no element 'size' in 'layout'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -878,7 +878,7 @@ TEST_CASE("Parsing error: no element 'x' in 'size'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -902,7 +902,7 @@ TEST_CASE("Parsing error: no element 'y' in 'size'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -926,7 +926,7 @@ TEST_CASE("Parsing error: no element 'z' in 'size'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -962,7 +962,7 @@ TEST_CASE("Parsing error: no element 'id' in 'gate", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -998,7 +998,7 @@ TEST_CASE("Parsing error: no element 'type' in 'gate", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1034,7 +1034,7 @@ TEST_CASE("Parsing error: no element 'name' in 'gate", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1069,7 +1069,7 @@ TEST_CASE("Parsing error: no element 'loc' in 'gate'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1105,7 +1105,7 @@ TEST_CASE("Parsing error: no element 'x' in 'loc'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1141,7 +1141,7 @@ TEST_CASE("Parsing error: no element 'y' in 'loc'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1177,7 +1177,7 @@ TEST_CASE("Parsing error: no element 'z' in 'loc'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1262,7 +1262,7 @@ TEST_CASE("Parsing error: unknown gate type with 0 incoming signals", "[read-fgl
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1346,7 +1346,7 @@ TEST_CASE("Parsing error: unknown gate type with 1 incoming signal", "[read-fgl-
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1431,7 +1431,7 @@ TEST_CASE("Parsing error: unknown gate type with 2 incoming signals", "[read-fgl
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1531,7 +1531,7 @@ TEST_CASE("Parsing error: unknown gate type with 3 incoming signals", "[read-fgl
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1656,7 +1656,7 @@ TEST_CASE("Parsing error: unknown gate type with more than 3 incoming signals", 
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1740,7 +1740,7 @@ TEST_CASE("Parsing error: no element 'x' in 'signal'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1824,7 +1824,7 @@ TEST_CASE("Parsing error: no element 'y' in 'signal'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }
 
@@ -1908,6 +1908,6 @@ TEST_CASE("Parsing error: no element 'z' in 'signal'", "[read-fgl-layout]")
     std::istringstream layout_stream{fgl_layout};
 
     using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::offset::ucoord_t>>>>;
+        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     CHECK_THROWS_AS(layouts::io::read_fgl_layout<gate_layout>(layout_stream), layouts::io::fgl_parsing_error);
 }

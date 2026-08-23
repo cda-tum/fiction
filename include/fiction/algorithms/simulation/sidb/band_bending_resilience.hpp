@@ -51,7 +51,7 @@ band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(!has_offset_ucoord_v<Lyt>, "Lyt should not be based on offset coordinates");
+    static_assert(!has_offset_coord_v<Lyt>, "Lyt should not be based on offset coordinates");
     static_assert(!is_charge_distribution_surface_v<Lyt>, "Lyt cannot be a charge distribution surface");
 
     assert(lyt.num_pis() > 0 && "skeleton needs input cells");

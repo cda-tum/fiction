@@ -127,10 +127,10 @@ enum class search_direction : uint8_t
  * This class provides functionality for a wiring reduction layout based on a Cartesian coordinate system.
  * It inherits from the `cartesian_layout` class and extends it with specific behavior for finding excess wiring.
  *
- * @tparam OffsetCoordinateType The type of coordinates used in the layout. Defaults to `offset::ucoord_t` if not
+ * @tparam OffsetCoordinateType The type of coordinates used in the layout. Defaults to `coords::offset` if not
  * explicitly provided.
  */
-template <typename OffsetCoordinateType = layouts::offset::ucoord_t>
+template <typename OffsetCoordinateType = layouts::coords::offset>
 class wiring_reduction_layout : public layouts::cartesian_layout<OffsetCoordinateType>
 {
   public:

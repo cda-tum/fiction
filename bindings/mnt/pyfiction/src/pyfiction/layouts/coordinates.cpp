@@ -234,14 +234,14 @@ void coordinate_utility(nanobind::module_& m)
     m.def("cube_volume", &fiction::volume<py_cube_coordinate>, py::arg("coord"), DOC(fiction_volume));
     m.def("siqad_volume", &fiction::volume<py_siqad_coordinate>, py::arg("coord"), DOC(fiction_volume));
 
-    m.def("to_offset_coord", &fiction::layouts::siqad::to_fiction_coord<py_offset_coordinate>, py::arg("coord"),
+    m.def("to_offset_coord", &fiction::layouts::coords::to_fiction_coord<py_offset_coordinate>, py::arg("coord"),
           DOC(fiction_siqad_to_fiction_coord));
-    m.def("to_cube_coord", &fiction::layouts::siqad::to_fiction_coord<py_cube_coordinate>, py::arg("coord"),
+    m.def("to_cube_coord", &fiction::layouts::coords::to_fiction_coord<py_cube_coordinate>, py::arg("coord"),
           DOC(fiction_siqad_to_fiction_coord));
 
-    m.def("to_siqad_coord", &fiction::layouts::siqad::to_siqad_coord<py_offset_coordinate>, py::arg("coord"),
+    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad_coord<py_offset_coordinate>, py::arg("coord"),
           DOC(fiction_siqad_to_siqad_coord));
-    m.def("to_siqad_coord", &fiction::layouts::siqad::to_siqad_coord<py_cube_coordinate>, py::arg("coord"),
+    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad_coord<py_cube_coordinate>, py::arg("coord"),
           DOC(fiction_siqad_to_siqad_coord));
 }
 
