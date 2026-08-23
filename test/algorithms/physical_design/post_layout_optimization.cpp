@@ -51,47 +51,47 @@ static void check_layout_equiv_all()
     }
     SECTION("and_or_network")
     {
-        check_layout_equiv<Lyt>(blueprints::and_or_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::and_or_network<networks::technology_network>());
     }
     SECTION("nary_operation_network")
     {
-        check_layout_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::nary_operation_network<networks::technology_network>());
     }
     SECTION("constant_gate_input_maj_network")
     {
-        check_layout_equiv<Lyt>(blueprints::constant_gate_input_maj_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::constant_gate_input_maj_network<networks::technology_network>());
     }
     SECTION("half_adder_network")
     {
-        check_layout_equiv<Lyt>(blueprints::half_adder_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::half_adder_network<networks::technology_network>());
     }
     SECTION("full_adder_network")
     {
-        check_layout_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::full_adder_network<networks::technology_network>());
     }
     SECTION("mux21_network")
     {
-        check_layout_equiv<Lyt>(blueprints::mux21_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::mux21_network<networks::technology_network>());
     }
     SECTION("se_coloring_corner_case_network")
     {
-        check_layout_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::se_coloring_corner_case_network<networks::technology_network>());
     }
     SECTION("inverter_network")
     {
-        check_layout_equiv<Lyt>(blueprints::inverter_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::inverter_network<networks::technology_network>());
     }
     SECTION("clpl")
     {
-        check_layout_equiv<Lyt>(blueprints::clpl<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::clpl<networks::technology_network>());
     }
     SECTION("fanout_substitution_corner_case_network")
     {
-        check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
     }
     SECTION("nand_xnor_network")
     {
-        check_layout_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+        check_layout_equiv<Lyt>(blueprints::nand_xnor_network<networks::technology_network>());
     }
 }
 
@@ -166,14 +166,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
 
         for (int64_t max_gate_relocations = 0; max_gate_relocations < 10; max_gate_relocations++)
         {
-            const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+            const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<networks::technology_network>(), {});
 
             post_layout_optimization_stats  stats{};
             post_layout_optimization_params params{};
             params.max_gate_relocations = max_gate_relocations;
             post_layout_optimization<gate_layout>(layout, params, &stats);
 
-            check_eq(blueprints::mux21_network<technology_network>(), layout);
+            check_eq(blueprints::mux21_network<networks::technology_network>(), layout);
         }
     }
 
@@ -182,14 +182,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         using gate_layout = layouts::gate_level_layout<
             layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<networks::technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.optimize_pos_only = true;
         post_layout_optimization<gate_layout>(layout, params, &stats);
 
-        check_eq(blueprints::mux21_network<technology_network>(), layout);
+        check_eq(blueprints::mux21_network<networks::technology_network>(), layout);
     }
 
     SECTION("Timeout")
@@ -197,14 +197,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         using gate_layout = layouts::gate_level_layout<
             layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<networks::technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.timeout = 1000000;
         post_layout_optimization<gate_layout>(layout, params, &stats);
 
-        check_eq(blueprints::mux21_network<technology_network>(), layout);
+        check_eq(blueprints::mux21_network<networks::technology_network>(), layout);
     }
 
     SECTION("Timeout exceeded")
@@ -212,14 +212,14 @@ TEST_CASE("Layout equivalence", "[post_layout_optimization]")
         using gate_layout = layouts::gate_level_layout<
             layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<>>>>;
 
-        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<technology_network>(), {});
+        const auto layout = orthogonal<gate_layout>(blueprints::mux21_network<networks::technology_network>(), {});
 
         post_layout_optimization_stats  stats{};
         post_layout_optimization_params params{};
         params.timeout = 0;
         post_layout_optimization<gate_layout>(layout, params, &stats);
 
-        check_eq(blueprints::mux21_network<technology_network>(), layout);
+        check_eq(blueprints::mux21_network<networks::technology_network>(), layout);
         CHECK(stats.area_improvement == 0);
     }
 

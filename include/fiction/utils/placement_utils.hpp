@@ -5,8 +5,8 @@
 #ifndef FICTION_PLACEMENT_UTILS_HPP
 #define FICTION_PLACEMENT_UTILS_HPP
 
+#include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -326,7 +326,7 @@ template <typename Lyt, typename Ntk>
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    const auto fc = fanins(ntk, n);
+    const auto fc = networks::utils::fanins(ntk, n);
 
     // NOLINTBEGIN(*-else-after-return)
 
@@ -359,7 +359,7 @@ template <typename Lyt, typename Ntk>
 
     // NOLINTEND(*-else-after-return)
 
-    assert(false);  // unsupported number of fanins
+    assert(false);  // unsupported number of networks::utils::fanins
     return {};      // fix -Wreturn-type warning
 }
 /**
@@ -477,7 +477,7 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout type");
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
 
-    const auto fc = fanins(ntk, n);
+    const auto fc = networks::utils::fanins(ntk, n);
 
     // NOLINTBEGIN(*-else-after-return)
 
@@ -511,7 +511,7 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
 
     // NOLINTEND(*-else-after-return)
 
-    assert(false);  // unsupported number of fanins
+    assert(false);  // unsupported number of networks::utils::fanins
     return {};      // fix -Wreturn-type warning
 }
 

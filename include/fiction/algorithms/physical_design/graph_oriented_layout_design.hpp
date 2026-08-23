@@ -12,10 +12,10 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
+#include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/name_utils.hpp"
-#include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
@@ -849,7 +849,7 @@ class graph_oriented_layout_design_impl
                                        {
                                            const std::scoped_lock lock(update_best_layout_mutex);
                                            best_lyt = std::move(*result);
-                                           restore_names(ssg_ptr->network, best_lyt);
+                                           networks::utils::restore_names(ssg_ptr->network, best_lyt);
                                            update_stats(best_lyt);
 
                                            if (ps.return_first)
@@ -914,7 +914,7 @@ class graph_oriented_layout_design_impl
                     if (result)
                     {
                         best_lyt = *result;
-                        restore_names(ssg.network, best_lyt);
+                        networks::utils::restore_names(ssg.network, best_lyt);
                         update_stats(best_lyt);
 
                         if (ps.return_first)
@@ -1366,9 +1366,9 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the PO nodes.
      * @return A vector of tiles representing the possible positions for POs.
      */
-    [[nodiscard]] coord_vec_type<ObstrLyt> get_possible_positions_pos(const ObstrLyt&                 layout,
-                                                                      const placement_info<ObstrLyt>& place_info,
-                                                                      const fanin_container<tec_nt>&  fc) noexcept
+    [[nodiscard]] coord_vec_type<ObstrLyt>
+    get_possible_positions_pos(const ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
+                               const networks::utils::fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
 
@@ -1416,7 +1416,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_single_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const fanin_container<tec_nt>& fc) noexcept
+                                        const networks::utils::fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1478,7 +1478,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_double_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const fanin_container<tec_nt>& fc) noexcept
+                                        const networks::utils::fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1563,7 +1563,7 @@ class graph_oriented_layout_design_impl
                                                                   const search_space_graph<ObstrLyt>& ssg,
                                                                   const placement_info<ObstrLyt>& place_info) noexcept
     {
-        const auto fc = fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
+        const auto fc = networks::utils::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
@@ -1671,7 +1671,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      */
     void route_single_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>&               node2pos,
+                                 const networks::utils::fanin_container<tec_nt>& fc) noexcept
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
@@ -1697,7 +1698,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      */
     void route_double_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>& node2pos, const fanin_container<tec_nt>& fc) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>&               node2pos,
+                                 const networks::utils::fanin_container<tec_nt>& fc) noexcept
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -1741,7 +1743,7 @@ class graph_oriented_layout_design_impl
                                        search_space_graph<ObstrLyt>& ssg, placement_info<ObstrLyt>& place_info) noexcept
     {
         // vector to store preceding nodes
-        const auto fc = fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
+        const auto fc = networks::utils::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
@@ -2481,13 +2483,13 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
-                                                 // this is the only relevant check here
+                  "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
+                                                 // therefore, this is the only relevant check here
 
     // check for input degree
-    if (has_high_degree_fanin_nodes(ntk, 2))
+    if (networks::utils::has_high_degree_fanin_nodes(ntk, 2))
     {
-        throw high_degree_fanin_exception();
+        throw networks::utils::high_degree_fanin_exception();
     }
 
     if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM && !custom_cost_objective)

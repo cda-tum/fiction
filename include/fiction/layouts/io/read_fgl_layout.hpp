@@ -15,8 +15,8 @@
 #include "fiction/layouts/tile_based_layout.hpp"
 // NOLINTEND(misc-include-cleaner)
 // clang-format on
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -62,7 +62,7 @@ class read_fgl_layout_impl
   public:
     read_fgl_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
     {
-        set_name(lyt, name);
+        fiction::networks::utils::set_name(lyt, name);
     }
 
     read_fgl_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
@@ -99,7 +99,7 @@ class read_fgl_layout_impl
         if (auto* const name = layout->FirstChildElement("name"); name != nullptr && (name->GetText() != nullptr))
         {
             std::string layout_name = name->GetText();
-            set_name(lyt, layout_name);
+            fiction::networks::utils::set_name(lyt, layout_name);
         }
 
         // check topology

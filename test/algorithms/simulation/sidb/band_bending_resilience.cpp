@@ -11,9 +11,9 @@
 #include <fiction/algorithms/simulation/sidb/band_bending_resilience.hpp>
 #include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/constants.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <vector>
 
@@ -30,31 +30,31 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
 
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {
-        const auto min_potential =
-            band_bending_resilience(lyt, std::vector{create_and_tt()}, params, transition_type::NEUTRAL_TO_NEGATIVE);
+        const auto min_potential = band_bending_resilience(lyt, std::vector{networks::utils::create_and_tt()}, params,
+                                                           transition_type::NEUTRAL_TO_NEGATIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, constants::ERROR_MARGIN));
     }
 
     SECTION("Minimal potential required to conduct a charge change from negative to neutral")
     {
-        const auto min_potential =
-            band_bending_resilience(lyt, std::vector{create_and_tt()}, params, transition_type::NEGATIVE_TO_NEUTRAL);
+        const auto min_potential = band_bending_resilience(lyt, std::vector{networks::utils::create_and_tt()}, params,
+                                                           transition_type::NEGATIVE_TO_NEUTRAL);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.087417, constants::ERROR_MARGIN));
     }
 
     SECTION("Minimal potential required to conduct a charge change from positive to neutral")
     {
-        const auto min_potential =
-            band_bending_resilience(lyt, std::vector{create_and_tt()}, params, transition_type::NEUTRAL_TO_POSITIVE);
+        const auto min_potential = band_bending_resilience(lyt, std::vector{networks::utils::create_and_tt()}, params,
+                                                           transition_type::NEUTRAL_TO_POSITIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.413859, constants::ERROR_MARGIN));
     }
 
     SECTION("Minimal potential required to conduct a charge change")
     {
-        const auto min_potential = band_bending_resilience(lyt, std::vector{create_and_tt()}, params);
+        const auto min_potential = band_bending_resilience(lyt, std::vector{networks::utils::create_and_tt()}, params);
 
         // the minimal potential for any charge change is the same as for neutral to negative
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, constants::ERROR_MARGIN));

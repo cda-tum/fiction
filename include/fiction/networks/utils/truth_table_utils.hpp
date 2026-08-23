@@ -2,8 +2,8 @@
 // Created by marcel on 05.04.22.
 //
 
-#ifndef FICTION_TRUTH_TABLE_UTILS_HPP
-#define FICTION_TRUTH_TABLE_UTILS_HPP
+#ifndef FICTION_NETWORKS_UTILS_TRUTH_TABLE_UTILS_HPP
+#define FICTION_NETWORKS_UTILS_TRUTH_TABLE_UTILS_HPP
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
@@ -14,7 +14,7 @@
 #include <cstdint>
 #include <vector>
 
-namespace fiction
+namespace fiction::networks::utils
 {
 
 // NOLINTBEGIN(*-pointer-arithmetic)
@@ -433,6 +433,5 @@ namespace fiction
 
 // NOLINTEND(*-pointer-arithmetic)
 
-}  // namespace fiction
-
-#endif  // FICTION_TRUTH_TABLE_UTILS_HPP
+}  // namespace fiction::networks::utils
+#endif  // FICTION_NETWORKS_UTILS_TRUTH_TABLE_UTILS_HPP

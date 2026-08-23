@@ -5,8 +5,8 @@
 #ifndef FICTION_NETWORKS_IO_DOT_DRAWERS_HPP
 #define FICTION_NETWORKS_IO_DOT_DRAWERS_HPP
 
+#include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>

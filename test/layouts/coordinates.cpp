@@ -168,23 +168,21 @@ TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
 
 TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
 {
-    using offset = layouts::coords::offset;
-
-    auto t = offset{};
+    auto t = layouts::coords::offset{};
     CHECK(t.is_dead());
     auto fiction_d = layouts::coords::offset_to_cube(t);
     CHECK(fiction_d.is_dead());
 
-    auto t0        = offset{0, 0, 0};
+    auto t0        = layouts::coords::offset{0, 0, 0};
     auto fiction_0 = layouts::coords::offset_to_cube(t0);
     CHECK(!fiction_0.is_dead());
 
-    auto t1      = offset{1, 3, 1};
+    auto t1      = layouts::coords::offset{1, 3, 1};
     auto t1_cube = layouts::coords::offset_to_cube(t1);
     CHECK(t1_cube.x == t1.x);
     CHECK(t1_cube.y == 3);
 
-    auto t2      = offset{1, 2};
+    auto t2      = layouts::coords::offset{1, 2};
     auto t2_cube = layouts::coords::offset_to_cube(t2);
     CHECK(t2_cube.x == t2.x);
     CHECK(t2_cube.y == 2);

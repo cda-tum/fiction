@@ -5,7 +5,7 @@
 #ifndef FICTION_DELETE_VIRTUAL_PIS_HPP
 #define FICTION_DELETE_VIRTUAL_PIS_HPP
 
-#include "fiction/utils/name_utils.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
 
 #include <mockturtle/traits.hpp>
 #include <mockturtle/utils/node_map.hpp>
@@ -134,7 +134,7 @@ class delete_virtual_pis_impl
             });
 
         // restore signal names if applicable
-        restore_names(ntk, ntk_dest, old2new);
+        networks::utils::restore_names(ntk, ntk_dest, old2new);
 
         return ntk_dest;
     }

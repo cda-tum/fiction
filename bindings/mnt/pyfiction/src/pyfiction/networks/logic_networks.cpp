@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/network_reader.hpp>
+#include <fiction/networks/io/network_reader.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/traits.hpp>
@@ -153,7 +153,7 @@ void network(nanobind::module_& m, const std::string& network_name)
         fmt::format("read_{}", network_name).c_str(),
         [](const std::string& filename) -> Ntk
         {
-            auto reader = fiction::network_reader<std::shared_ptr<Ntk>>(filename, std::cout);
+            auto reader = fiction::networks::io::network_reader<std::shared_ptr<Ntk>>(filename, std::cout);
 
             if (const auto ntks = reader.get_networks(); !ntks.empty())
             {

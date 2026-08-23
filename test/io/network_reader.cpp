@@ -7,7 +7,7 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/io/network_reader.hpp>
+#include <fiction/networks/io/network_reader.hpp>
 #include <fiction/types.hpp>
 
 #include <sstream>
@@ -34,7 +34,7 @@ TEST_CASE("Read Verilog", "[network-reader]")
 
     std::ostringstream os{};
 
-    network_reader<aig_ptr> reader{mux21_file_name, os};
+    networks::io::network_reader<aig_ptr> reader{mux21_file_name, os};
 
     // no error messages
     REQUIRE(is_stream_empty(os));

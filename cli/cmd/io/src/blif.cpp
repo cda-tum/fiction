@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/io/write_blif.hpp>
@@ -45,7 +45,8 @@ void blif_command::execute()
 template <typename NtkOrLytVariant>
 void blif_command::write_blif_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
 {
-    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+    { return fiction::networks::utils::get_name(*ntk_or_lyt_ptr); };
 
     const auto write_blif = [this](auto&& ntk_or_lyt_ptr) { mockturtle::write_blif(*ntk_or_lyt_ptr, filename); };
 

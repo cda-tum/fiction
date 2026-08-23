@@ -5,6 +5,8 @@
 #ifndef FICTION_MINCROSS_HPP
 #define FICTION_MINCROSS_HPP
 
+#include "fiction/algorithms/network_transformation/network_balancing.hpp"
+
 #include <mockturtle/traits.hpp>
 #include <mockturtle/views/fanout_view.hpp>
 
@@ -629,7 +631,7 @@ Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nul
     static_assert(mockturtle::is_network_type_v<Ntk>, "Ntk is not a network type");
     static_assert(mockturtle::has_rank_position_v<Ntk>, "Ntk does not implement the rank_position function");
 
-    assert(is_balanced(ntk) && "Networks have to be balanced for level-by-level crossing minimization");
+    assert(fiction::is_balanced(ntk) && "Networks have to be balanced for level-by-level crossing minimization");
 
     mincross_stats st{};
     mincross_impl  p{ntk, ps, st};

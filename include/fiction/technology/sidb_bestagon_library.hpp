@@ -5,11 +5,11 @@
 #ifndef FICTION_SIDB_BESTAGON_LIBRARY_HPP
 #define FICTION_SIDB_BESTAGON_LIBRARY_HPP
 
+#include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <phmap.h>
 
@@ -158,17 +158,18 @@ class sidb_bestagon_library : public fcn_gate_library<sidb_technology, 60, 46>  
     static gate_functions get_functional_implementations() noexcept
     {
         static const gate_functions implementations{
-            {{create_id_tt(),
+            {{networks::utils::create_id_tt(),
               {STRAIGHT_WIRE, MIRRORED_STRAIGHT_WIRE, DIAGONAL_WIRE, MIRRORED_DIAGONAL_WIRE, CROSSING_WIRE,
                HOURGLASS_DOUBLE_WIRE, FANOUT_1_2, MIRRORED_FANOUT_1_2}},
-             {create_not_tt(),
+             {networks::utils::create_not_tt(),
               {STRAIGHT_INVERTER, MIRRORED_STRAIGHT_INVERTER, DIAGONAL_INVERTER, MIRRORED_DIAGONAL_INVERTER}},
-             {create_and_tt(), {CONJUNCTION, MIRRORED_CONJUNCTION}},
-             {create_or_tt(), {DISJUNCTION, MIRRORED_DISJUNCTION}},
-             {create_nand_tt(), {NEGATED_CONJUNCTION, MIRRORED_NEGATED_CONJUNCTION}},
-             {create_nor_tt(), {NEGATED_DISJUNCTION, MIRRORED_NEGATED_DISJUNCTION}},
-             {create_xor_tt(), {EXCLUSIVE_DISJUNCTION, MIRRORED_EXCLUSIVE_DISJUNCTION}},
-             {create_xnor_tt(), {NEGATED_EXCLUSIVE_DISJUNCTION, MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION}}}};
+             {networks::utils::create_and_tt(), {CONJUNCTION, MIRRORED_CONJUNCTION}},
+             {networks::utils::create_or_tt(), {DISJUNCTION, MIRRORED_DISJUNCTION}},
+             {networks::utils::create_nand_tt(), {NEGATED_CONJUNCTION, MIRRORED_NEGATED_CONJUNCTION}},
+             {networks::utils::create_nor_tt(), {NEGATED_DISJUNCTION, MIRRORED_NEGATED_DISJUNCTION}},
+             {networks::utils::create_xor_tt(), {EXCLUSIVE_DISJUNCTION, MIRRORED_EXCLUSIVE_DISJUNCTION}},
+             {networks::utils::create_xnor_tt(),
+              {NEGATED_EXCLUSIVE_DISJUNCTION, MIRRORED_NEGATED_EXCLUSIVE_DISJUNCTION}}}};
 
         return implementations;
     }

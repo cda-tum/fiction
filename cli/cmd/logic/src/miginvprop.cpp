@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -59,13 +59,13 @@ void miginvprop_command::execute()
                                       "[i] node count increase: {}\n",
                                       st.total_gain, st.node_increase);
 
-            fiction::restore_names(*ntk_ptr, *mig_ptr);
+            fiction::networks::utils::restore_names(*ntk_ptr, *mig_ptr);
 
             s.extend() = mig_ptr;
         }
         else  // not an MIG
         {
-            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::get_name(*ntk_ptr));
+            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::networks::utils::get_name(*ntk_ptr));
         }
     };
 

@@ -19,7 +19,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::networks
 {
 
 /**
@@ -460,6 +460,5 @@ class technology_network : public mockturtle::klut_network
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::networks
 #endif  // FICTION_TECHNOLOGY_NETWORK_HPP

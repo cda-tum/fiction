@@ -4,12 +4,12 @@
 #include <fiction/algorithms/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/network_reader.hpp>                                          // read networks from files
 #include <fiction/layouts/bounding_box.hpp>                                       // bounding box
 #include <fiction/layouts/cartesian_layout.hpp>                                   // Cartesian layout
 #include <fiction/layouts/clocked_layout.hpp>                                     // clocked layout
 #include <fiction/layouts/gate_level_layout.hpp>                                  // gate-level layout
 #include <fiction/layouts/tile_based_layout.hpp>                                  // tile-based layout
+#include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
 #include <fiction/types.hpp>                                                      // tec_nt, tec_ptr
 
 #include <fmt/format.h>  // output formatting
@@ -27,7 +27,7 @@ static Ntk read_ntk(const std::string& name)
 
     std::ostringstream os{};
 
-    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    fiction::networks::io::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
 
     const auto nets = reader.get_networks();
 

@@ -2,8 +2,8 @@
 // Created by marcel on 26.05.21.
 //
 
-#ifndef FICTION_NAME_UTILS_HPP
-#define FICTION_NAME_UTILS_HPP
+#ifndef FICTION_NETWORKS_UTILS_NAME_UTILS_HPP
+#define FICTION_NETWORKS_UTILS_NAME_UTILS_HPP
 
 #include "fiction/utils/placement_utils.hpp"
 
@@ -13,7 +13,7 @@
 #include <string>
 #include <string_view>
 
-namespace fiction
+namespace fiction::networks::utils
 {
 
 /**
@@ -277,6 +277,5 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_ma
     restore_output_names(ntk_src, ntk_dest);
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_NAME_UTILS_HPP
+}  // namespace fiction::networks::utils
+#endif  // FICTION_NETWORKS_UTILS_NAME_UTILS_HPP

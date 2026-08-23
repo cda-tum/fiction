@@ -2,8 +2,8 @@
 // Created by marcel on 13.10.21.
 //
 
-#ifndef FICTION_NETWORK_UTILS_HPP
-#define FICTION_NETWORK_UTILS_HPP
+#ifndef FICTION_NETWORKS_UTILS_NETWORK_UTILS_HPP
+#define FICTION_NETWORKS_UTILS_NETWORK_UTILS_HPP
 
 #include "fiction/utils/stl/hash.hpp"
 
@@ -58,7 +58,7 @@ struct hash<mockturtle::edge<Ntk>>
 };
 }  // namespace std
 
-namespace fiction
+namespace fiction::networks::utils
 {
 /**
  * Applies a function to all edges in a `mockturtle` network.
@@ -470,6 +470,5 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
     return inv_levels;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_NETWORK_UTILS_HPP
+}  // namespace fiction::networks::utils
+#endif  // FICTION_NETWORKS_UTILS_NETWORK_UTILS_HPP

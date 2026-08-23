@@ -5,8 +5,8 @@
 #ifndef FICTION_NETWORK_CONVERSION_HPP
 #define FICTION_NETWORK_CONVERSION_HPP
 
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 
 #include <mockturtle/algorithms/cleanup.hpp>
 #include <mockturtle/traits.hpp>
@@ -174,7 +174,7 @@ class convert_network_impl<NtkDest, NtkSrc, false>
             });
 
         // restore signal names if applicable
-        fiction::restore_names(ntk, ntk_dest, old2new);
+        fiction::networks::utils::restore_names(ntk, ntk_dest, old2new);
 
         return ntk_dest;
     }

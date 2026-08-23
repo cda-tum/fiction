@@ -23,7 +23,7 @@ using namespace fiction;
 template <typename Ntk>
 void substitute(const Ntk& ntk, const fanout_substitution_params ps, const uint32_t size)
 {
-    const auto substituted = fanout_substitution<technology_network>(ntk, ps);
+    const auto substituted = fanout_substitution<networks::technology_network>(ntk, ps);
 
     CHECK(substituted.size() == size);
     CHECK(is_fanout_substituted(substituted, ps));
@@ -36,7 +36,8 @@ TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]"
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::mig_network>>();
     maj.set_network_name("maj");
 
-    const auto substituted_maj = fanout_substitution<mockturtle::names_view<fiction::technology_network>>(maj);
+    const auto substituted_maj =
+        fanout_substitution<mockturtle::names_view<fiction::networks::technology_network>>(maj);
 
     // network name
     CHECK(substituted_maj.get_network_name() == "maj");
@@ -52,7 +53,7 @@ TEST_CASE("Name conservation after fanout substitution", "[fanout-substitution]"
 
 TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 {
-    const auto tec = blueprints::multi_output_and_network<technology_network>();
+    const auto tec = blueprints::multi_output_and_network<networks::technology_network>();
 
     const fanout_substitution_params ps_depth{.strategy = fanout_substitution_params::substitution_strategy::DEPTH};
     const fanout_substitution_params ps_breadth{.strategy = fanout_substitution_params::substitution_strategy::BREADTH};
@@ -65,7 +66,7 @@ TEST_CASE("Simple fanout substitution", "[fanout-substitution]")
 
 TEST_CASE("Complex fanout substitution", "[fanout-substitution]")
 {
-    const auto tec = blueprints::maj4_network<technology_network>();
+    const auto tec = blueprints::maj4_network<networks::technology_network>();
     CHECK(!is_fanout_substituted(tec));
 
     const fanout_substitution_params ps_depth{.strategy = fanout_substitution_params::substitution_strategy::DEPTH};
@@ -121,7 +122,7 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
 
         // compute baseline depth using seed = 1
         ps.seed               = 1;
-        const auto base_sub   = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+        const auto base_sub   = mockturtle::depth_view{fanout_substitution<networks::technology_network>(aig, ps)};
         const auto base_depth = base_sub.depth();
 
         bool found_different = false;
@@ -129,7 +130,7 @@ TEST_CASE("Random fanout substitution with fixed vs. varying seeds", "[fanout-su
         for (auto s = 2u; s <= 20u; ++s)
         {
             ps.seed        = s;
-            const auto sub = mockturtle::depth_view{fanout_substitution<technology_network>(aig, ps)};
+            const auto sub = mockturtle::depth_view{fanout_substitution<networks::technology_network>(aig, ps)};
             if (sub.depth() != base_depth)
             {
                 found_different = true;
@@ -145,10 +146,11 @@ TEST_CASE("Consistent network size after multiple fanout substitutions", "[fanou
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
-    auto substituted = fanout_substitution<technology_network>(aig);
+    auto substituted = fanout_substitution<networks::technology_network>(aig);
 
-    auto subsubsubsubstituted = fanout_substitution<technology_network>(
-        fanout_substitution<technology_network>(fanout_substitution<technology_network>(substituted)));
+    auto subsubsubsubstituted =
+        fanout_substitution<networks::technology_network>(fanout_substitution<networks::technology_network>(
+            fanout_substitution<networks::technology_network>(substituted)));
 
     CHECK(substituted.size() == subsubsubsubstituted.size());
 }
@@ -157,16 +159,16 @@ TEST_CASE("Consistent fanout substitution after balancing", "[fanout-substitutio
 {
     const auto aig = blueprints::maj4_network<mockturtle::aig_network>();
 
-    auto substituted = fanout_substitution<technology_network>(aig);
+    auto substituted = fanout_substitution<networks::technology_network>(aig);
 
     CHECK(is_fanout_substituted(substituted));
-    auto balanced = network_balancing<technology_network>(substituted);
+    auto balanced = network_balancing<networks::technology_network>(substituted);
     CHECK(is_fanout_substituted(balanced));
 
-    auto tec = blueprints::fanout_substitution_corner_case_network<technology_network>();
+    auto tec = blueprints::fanout_substitution_corner_case_network<networks::technology_network>();
 
-    auto substituted_tec = fanout_substitution<technology_network>(tec);
+    auto substituted_tec = fanout_substitution<networks::technology_network>(tec);
     CHECK(is_fanout_substituted(substituted_tec));
-    auto balanced_tec = network_balancing<technology_network>(substituted_tec);
+    auto balanced_tec = network_balancing<networks::technology_network>(substituted_tec);
     CHECK(is_fanout_substituted(balanced_tec));
 }

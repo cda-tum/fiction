@@ -5,7 +5,7 @@
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // post-layout optimization
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/network_reader.hpp>                                          // read networks from files
+#include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
 #include <fiction/types.hpp>                                                      // types suitable for the FCN domain
 
 #include <fmt/format.h>                    // output formatting
@@ -23,7 +23,7 @@ Ntk read_ntk(const std::string& name)
 
     std::ostringstream os{};
 
-    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    fiction::networks::io::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
 
     const auto nets = reader.get_networks();
 

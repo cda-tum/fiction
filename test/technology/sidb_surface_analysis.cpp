@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/fcn_gate_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
@@ -11,7 +12,6 @@
 #include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 
@@ -27,7 +27,8 @@ class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
 
     static gate_functions get_functional_implementations() noexcept
     {
-        static const gate_functions implementations{{{create_id_tt(), {LINE}}, {create_and_tt(), {Y}}}};
+        static const gate_functions implementations{
+            {{networks::utils::create_id_tt(), {LINE}}, {networks::utils::create_and_tt(), {Y}}}};
 
         return implementations;
     }
@@ -92,32 +93,32 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         CHECK(black_list.size() == 12);
 
         REQUIRE(black_list.at({1, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 0}), create_and_tt()));
-        CHECK(black_list.at({1, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 0}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({1, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({1, 0}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({1, 0}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 0}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 0}), create_and_tt()));
-        CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({2, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({2, 0}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({2, 0}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 0}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({1, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 1}), create_and_tt()));
-        CHECK(black_list.at({1, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 1}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({1, 1}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({1, 1}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({1, 1}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 1}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 1}), create_and_tt()));
-        CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({2, 1}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({2, 1}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({2, 1}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 1}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({3, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
-        CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({3, 1}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({3, 1}).at(networks::utils::create_and_tt()).front() == y_ports);
     }
     SECTION("single uncharged defect")
     {
@@ -128,10 +129,10 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.at({0, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
-        CHECK(black_list.at({0, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({0, 0}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({0, 0}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({0, 0}).at(networks::utils::create_and_tt()).front() == y_ports);
     }
     SECTION("multi-defect")
     {
@@ -146,52 +147,52 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
         CHECK(black_list.size() == 12);
 
         REQUIRE(black_list.at({1, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 0}), create_and_tt()));
-        CHECK(black_list.at({1, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 0}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({1, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({1, 0}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({1, 0}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 0}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 0}), create_and_tt()));
-        CHECK(black_list.at({2, 0}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 0}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({2, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({2, 0}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({2, 0}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 0}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({3, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({3, 0}), create_and_tt()));
-        CHECK(black_list.at({3, 0}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({3, 0}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({3, 0}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({1, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 1}), create_and_tt()));
-        CHECK(black_list.at({1, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 1}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({1, 1}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({1, 1}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({1, 1}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 1}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 1}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 1}), create_and_tt()));
-        CHECK(black_list.at({2, 1}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 1}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({2, 1}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({2, 1}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({2, 1}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 1}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({3, 1}).size() == 2);
-        CHECK(contains_tt(black_list.at({3, 1}), create_and_tt()));
-        CHECK(black_list.at({3, 1}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({3, 1}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({3, 1}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({0, 2}).size() == 2);
-        CHECK(contains_tt(black_list.at({0, 2}), create_and_tt()));
-        CHECK(black_list.at({0, 2}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({0, 2}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({0, 2}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({1, 2}).size() == 2);
-        CHECK(contains_tt(black_list.at({1, 2}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({1, 2}), create_and_tt()));
-        CHECK(black_list.at({1, 2}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({1, 2}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({1, 2}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({1, 2}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({1, 2}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({1, 2}).at(networks::utils::create_and_tt()).front() == y_ports);
 
         REQUIRE(black_list.at({2, 2}).size() == 2);
-        CHECK(contains_tt(black_list.at({2, 2}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({2, 2}), create_and_tt()));
-        CHECK(black_list.at({2, 2}).at(create_id_tt()).front() == line_ports);
-        CHECK(black_list.at({2, 2}).at(create_and_tt()).front() == y_ports);
+        CHECK(contains_tt(black_list.at({2, 2}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({2, 2}), networks::utils::create_and_tt()));
+        CHECK(black_list.at({2, 2}).at(networks::utils::create_id_tt()).front() == line_ports);
+        CHECK(black_list.at({2, 2}).at(networks::utils::create_and_tt()).front() == y_ports);
     }
 }
 
@@ -218,14 +219,14 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.at({0, 0}).size() == 8);
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_and_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_nand_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_nor_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xor_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_not_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_and_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_or_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_nand_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_nor_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_xor_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_xnor_tt()));
     }
     SECTION("single uncharged defect")
     {
@@ -236,8 +237,8 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.at({0, 0}).size() == 2);
-        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_not_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_id_tt()));
     }
     SECTION("multi-defect")
     {
@@ -252,10 +253,10 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         CHECK(black_list.size() == 1);
 
         REQUIRE(black_list.at({0, 0}).size() == 8);
-        CHECK(contains_tt(black_list.at({0, 0}), create_id_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_not_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_or_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xor_tt()));
-        CHECK(contains_tt(black_list.at({0, 0}), create_xnor_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_id_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_not_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_or_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_xor_tt()));
+        CHECK(contains_tt(black_list.at({0, 0}), networks::utils::create_xnor_tt()));
     }
 }

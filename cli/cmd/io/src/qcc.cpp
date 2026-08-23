@@ -7,9 +7,9 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/io/write_qcc_layout.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -47,7 +47,7 @@ void qcc_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::utils::get_name(*lyt_ptr); };
 
     const auto write_qcc = [this, &get_name](auto&& lyt_ptr)
     {

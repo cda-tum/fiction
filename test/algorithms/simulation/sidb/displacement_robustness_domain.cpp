@@ -11,10 +11,10 @@
 #include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/constants.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <cmath>
 #include <cstdlib>
@@ -66,8 +66,8 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
     {
         displacement_robustness_domain_stats stats{};
 
-        const auto robustness_domain =
-            determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
+        const auto robustness_domain = determine_displacement_robustness_domain(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()}, params, &stats);
         CHECK((stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements) ==
               static_cast<std::size_t>((0.1 * std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())) +
                                        1));  // +1 since the not displaced (aka original layout) is also stored
@@ -86,8 +86,8 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 3.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
-        const auto robustness_domain =
-            determine_displacement_robustness_domain(lyt, std::vector<tt>{create_and_tt()}, params, &stats);
+        const auto robustness_domain = determine_displacement_robustness_domain(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()}, params, &stats);
         CHECK((stats.num_non_operational_sidb_displacements + stats.num_operational_sidb_displacements) <
               static_cast<std::size_t>(std::pow(9, lyt.num_cells() - params.fixed_sidbs.size())));
         CHECK(robustness_domain.operational_values.size() <
@@ -110,8 +110,8 @@ TEST_CASE("Determine the probability of fabricating an operational SiQAD Y-shape
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
-        const auto result =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_and_tt()}, params, 0.3);
+        const auto result = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()}, params, 0.3);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(0.83, 0.1));
     }
 }
@@ -134,8 +134,8 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
             displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::RANDOM;
         params.percentage_of_analyzed_displaced_layouts = 0.1;
 
-        const auto result =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_and_tt()}, params, 0.1);
+        const auto result = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()}, params, 0.1);
         CHECK(result >= -std::numeric_limits<double>::epsilon());
     }
 }
@@ -159,12 +159,12 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
             cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::EXHAUSTIVE;
 
         // Each SiDB can show a displacement.
-        const auto result =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 1.0);
+        const auto result = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_id_tt()}, params, 1.0);
 
         displacement_robustness_domain_stats stats{};
-        const auto                           result_displacement_domain =
-            determine_displacement_robustness_domain(lyt, std::vector<tt>{create_id_tt()}, params, &stats);
+        const auto                           result_displacement_domain = determine_displacement_robustness_domain(
+            lyt, std::vector<tt>{networks::utils::create_id_tt()}, params, &stats);
         CHECK_THAT(static_cast<double>(stats.num_operational_sidb_displacements) /
                        static_cast<double>(stats.num_operational_sidb_displacements +
                                            stats.num_non_operational_sidb_displacements),
@@ -172,8 +172,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
 
         CHECK_THAT(result, Catch::Matchers::WithinAbs(0.67578125, constants::ERROR_MARGIN));
 
-        const auto result_20_percent_error =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
+        const auto result_20_percent_error = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.2);
 
         CHECK(result_20_percent_error > result);
     }
@@ -190,8 +190,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.analysis_mode = displacement_robustness_domain_params<
             cell<sidb_cell_clk_lyt_siqad>>::displacement_analysis_mode::EXHAUSTIVE;
 
-        const auto result =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.2);
+        const auto result = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.2);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(0.66666666666666, constants::ERROR_MARGIN));
     }
 
@@ -203,8 +203,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
-        const auto result =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
+        const auto result = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.0);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, constants::ERROR_MARGIN));
     }
 
@@ -216,8 +216,8 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
-        const auto result =
-            determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
+        const auto result = determine_probability_of_fabricating_operational_gate(
+            lyt, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.0);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, constants::ERROR_MARGIN));
     }
 }
@@ -243,11 +243,11 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
 
         // Each SiDB can show a displacement.
         const auto result = determine_probability_of_fabricating_operational_gate(
-            lyt_offset, std::vector<tt>{create_id_tt()}, params, 1.0);
+            lyt_offset, std::vector<tt>{networks::utils::create_id_tt()}, params, 1.0);
 
         displacement_robustness_domain_stats stats{};
-        const auto                           result_displacement_domain =
-            determine_displacement_robustness_domain(lyt_offset, std::vector<tt>{create_id_tt()}, params, &stats);
+        const auto                           result_displacement_domain = determine_displacement_robustness_domain(
+            lyt_offset, std::vector<tt>{networks::utils::create_id_tt()}, params, &stats);
         CHECK_THAT(static_cast<double>(stats.num_operational_sidb_displacements) /
                        static_cast<double>(stats.num_operational_sidb_displacements +
                                            stats.num_non_operational_sidb_displacements),
@@ -256,7 +256,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         CHECK_THAT(result, Catch::Matchers::WithinAbs(0.63671875, constants::ERROR_MARGIN));
 
         const auto result_20_percent_error = determine_probability_of_fabricating_operational_gate(
-            lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.2);
+            lyt_offset, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.2);
 
         CHECK(result_20_percent_error > result);
     }
@@ -275,7 +275,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
             displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>>::displacement_analysis_mode::EXHAUSTIVE;
 
         const auto result_20_percent_error = determine_probability_of_fabricating_operational_gate(
-            lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.2);
+            lyt_offset, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.2);
         CHECK(result_20_percent_error < 1);
     }
 
@@ -288,7 +288,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result = determine_probability_of_fabricating_operational_gate(
-            lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.0);
+            lyt_offset, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.0);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, constants::ERROR_MARGIN));
     }
 
@@ -301,7 +301,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
         const auto result = determine_probability_of_fabricating_operational_gate(
-            lyt_offset, std::vector<tt>{create_id_tt()}, params, 0.0);
+            lyt_offset, std::vector<tt>{networks::utils::create_id_tt()}, params, 0.0);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, constants::ERROR_MARGIN));
     }
 }

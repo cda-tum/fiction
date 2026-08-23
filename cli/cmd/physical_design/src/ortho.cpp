@@ -8,8 +8,8 @@
 
 #include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -118,7 +118,7 @@ void ortho_command::orthogonal_physical_design()
             st.report(env->out());
         }
     }
-    catch (const fiction::high_degree_fanin_exception& e)
+    catch (const fiction::networks::utils::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {}\n", e.what());
     }

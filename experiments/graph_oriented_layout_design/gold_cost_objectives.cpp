@@ -5,12 +5,12 @@
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
-#include <fiction/io/network_reader.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/io/network_reader.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
 
@@ -29,10 +29,10 @@ Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream                        os{};
-    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto                                nets    = reader.get_networks();
-    const auto                                network = *nets.front();
+    std::ostringstream                                      os{};
+    fiction::networks::io::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto                                              nets    = reader.get_networks();
+    const auto                                              network = *nets.front();
 
     return network;
 }
@@ -83,8 +83,8 @@ int main()  // NOLINT
             if (gate_level_layout.has_value())
             {
                 // check equivalence
-                const auto eq_stats =
-                    fiction::equivalence_checking<fiction::technology_network, gate_lyt>(network, *gate_level_layout);
+                const auto eq_stats = fiction::equivalence_checking<fiction::networks::technology_network, gate_lyt>(
+                    network, *gate_level_layout);
 
                 std::string eq_result = "NO";
                 if (eq_stats == fiction::eq_type::STRONG)

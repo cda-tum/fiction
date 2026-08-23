@@ -9,6 +9,7 @@
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
@@ -16,7 +17,6 @@
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 #include <phmap.h>
 
@@ -207,11 +207,12 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                     defect_surface.value(), skeleton, params.influence_radius_charged_defects,
                                     center_cell, absolute_cell);
 
-                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton_with_defects,
-                                                                                  create_fan_out_tt(), params, p, t);
+                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(
+                                    skeleton_with_defects, networks::utils::create_fan_out_tt(), params, p, t);
                             }
                         }
-                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, create_fan_out_tt(), params, p, t);
+                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(
+                            skeleton, networks::utils::create_fan_out_tt(), params, p, t);
                     }
                 }
             }
@@ -241,13 +242,15 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
                                         if (is_predefined_bestagon_gate_applicable(
                                                 cell_list_to_cell_level_layout<CellLyt>(DOUBLE_WIRE),
-                                                skeleton_with_defects, create_double_wire_tt(), params))
+                                                skeleton_with_defects, networks::utils::create_double_wire_tt(),
+                                                params))
                                         {
                                             return DOUBLE_WIRE;
                                         }
 
                                         return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                            skeleton_with_defects, create_double_wire_tt(), complex_gate_param, p, t);
+                                            skeleton_with_defects, networks::utils::create_double_wire_tt(),
+                                            complex_gate_param, p, t);
                                     }
                                 }
 
@@ -257,8 +260,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                     return DOUBLE_WIRE;
                                 }
 
-                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, create_double_wire_tt(),
-                                                                                  complex_gate_param, p, t);
+                                return design_gate<CellLyt, tt, CellLyt, GateLyt>(
+                                    skeleton, networks::utils::create_double_wire_tt(), complex_gate_param, p, t);
                             }
 
                             if constexpr (is_sidb_defect_surface_v<CellLyt>)
@@ -271,13 +274,14 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
                                     if (is_predefined_bestagon_gate_applicable(
                                             cell_list_to_cell_level_layout<CellLyt>(CROSSING), skeleton_with_defects,
-                                            create_crossing_wire_tt(), params))
+                                            networks::utils::create_crossing_wire_tt(), params))
                                     {
                                         return CROSSING;
                                     }
 
                                     return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                        skeleton_with_defects, create_crossing_wire_tt(), complex_gate_param, p, t);
+                                        skeleton_with_defects, networks::utils::create_crossing_wire_tt(),
+                                        complex_gate_param, p, t);
                                 }
                             }
 
@@ -287,8 +291,8 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
                                 return CROSSING;
                             }
 
-                            return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, create_crossing_wire_tt(),
-                                                                              complex_gate_param, p, t);
+                            return design_gate<CellLyt, tt, CellLyt, GateLyt>(
+                                skeleton, networks::utils::create_crossing_wire_tt(), complex_gate_param, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -704,13 +708,13 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         const auto params = is_sidb_gate_design_impossible_params{
             parameters.design_gate_params.operational_params.simulation_parameters};
 
-        if (spec == create_crossing_wire_tt() || spec == create_double_wire_tt())
+        if (spec == networks::utils::create_crossing_wire_tt() || spec == networks::utils::create_double_wire_tt())
         {
             if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
             {
                 if (is_sidb_gate_design_impossible(skeleton, spec, params))
                 {
-                    throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
+                    throw gate_design_exception<tt, GateLyt>(tile, networks::utils::create_id_tt(), p);
                 }
             }
 
@@ -718,7 +722,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
             if (found_gate_layouts.empty())
             {
-                throw gate_design_exception<tt, GateLyt>(tile, create_id_tt(), p);
+                throw gate_design_exception<tt, GateLyt>(tile, networks::utils::create_id_tt(), p);
             }
 
             return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));

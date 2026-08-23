@@ -98,9 +98,9 @@ TEST_CASE("Simulation", "[mockturtle]")
 }
 
 template <typename Ntk, typename Lib>
-technology_network map(const Ntk& ntk, const Lib& lib)
+networks::technology_network map(const Ntk& ntk, const Lib& lib)
 {
-    return mockturtle::map<technology_network>(ntk, lib);
+    return mockturtle::map<networks::technology_network>(ntk, lib);
 }
 
 template <typename Ntk, typename Lib>

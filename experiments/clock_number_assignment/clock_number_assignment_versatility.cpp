@@ -4,8 +4,8 @@
 #include <fiction/algorithms/physical_design/determine_clocking.hpp>         // SAT-based clock number assignment
 #include <fiction/algorithms/verification/equivalence_checking.hpp>          // SAT-based equivalence checking
 #include <fiction/layouts/io/read_fgl_layout.hpp>                            // custom reader for layouts
+#include <fiction/networks/utils/name_utils.hpp>                             // name utilities
 #include <fiction/types.hpp>                                                 // pre-defined types
-#include <fiction/utils/name_utils.hpp>                                      // name utilities
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements

@@ -14,6 +14,8 @@
 #include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/utils/network_utils.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/cell_ports.hpp>
 #include <fiction/technology/inml_topolinano_library.hpp>
 #include <fiction/technology/qca_one_library.hpp>
@@ -21,8 +23,6 @@
 #include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/network_utils.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -160,7 +160,7 @@ surface_black_list<Lyt, port_direction>&& blacklist_wire(const tile<Lyt>&       
                                                          const std::vector<port_list<port_direction>>& ports,
                                                          surface_black_list<Lyt, port_direction>&&     sbl) noexcept
 {
-    sbl[t].insert({create_id_tt(), ports});
+    sbl[t].insert({networks::utils::create_id_tt(), ports});
 
     return std::move(sbl);
 }
@@ -170,7 +170,7 @@ surface_black_list<Lyt, port_direction>&& blacklist_and(const tile<Lyt>&        
                                                         const std::vector<port_list<port_direction>>& ports,
                                                         surface_black_list<Lyt, port_direction>&&     sbl) noexcept
 {
-    sbl[t].insert({create_and_tt(), ports});
+    sbl[t].insert({networks::utils::create_and_tt(), ports});
 
     return std::move(sbl);
 }
@@ -180,7 +180,7 @@ surface_black_list<Lyt, port_direction>&& blacklist_or(const tile<Lyt>&         
                                                        const std::vector<port_list<port_direction>>& ports,
                                                        surface_black_list<Lyt, port_direction>&&     sbl) noexcept
 {
-    sbl[t].insert({create_or_tt(), ports});
+    sbl[t].insert({networks::utils::create_or_tt(), ports});
 
     return std::move(sbl);
 }
@@ -380,22 +380,23 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
     SECTION("Straight inverters")
     {
         CHECK(has_straight_inverters(generate_layout<cart_gate_clk_lyt>(
-            blueprints::inverter_network<technology_network>(), use(straight_inverter(configuration())))));
+            blueprints::inverter_network<networks::technology_network>(), use(straight_inverter(configuration())))));
         CHECK(has_straight_inverters(generate_layout<cart_gate_clk_lyt>(
-            blueprints::inverter_network<technology_network>(), open(straight_inverter(configuration())))));
+            blueprints::inverter_network<networks::technology_network>(), open(straight_inverter(configuration())))));
     }
     SECTION("Global synchronization")
     {
         SECTION("enabled")
         {
             check_tp(generate_layout<cart_gate_clk_lyt>(
-                         blueprints::one_to_five_path_difference_network<technology_network>(), use(configuration())),
+                         blueprints::one_to_five_path_difference_network<networks::technology_network>(),
+                         use(configuration())),
                      1);
         }
         SECTION("disabled")
         {
             check_tp(generate_layout<cart_gate_clk_lyt>(
-                         blueprints::one_to_five_path_difference_network<technology_network>(),
+                         blueprints::one_to_five_path_difference_network<networks::technology_network>(),
                          use(desynchronize(configuration()))),
                      2);
         }
@@ -405,7 +406,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         SECTION("Without port info")
         {
             const auto lyt = generate_layout_with_black_list<cart_gate_clk_lyt>(
-                blueprints::and_or_network<technology_network>(),
+                blueprints::and_or_network<networks::technology_network>(),
                 blacklist_and<cart_gate_clk_lyt>(
                     {2, 2}, {},
                     blacklist_wire<cart_gate_clk_lyt>(
@@ -415,7 +416,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                             blacklist_wire<cart_gate_clk_lyt>({2, 0}, {}, blacklist<cart_gate_clk_lyt>())))),
                 twoddwave(crossings(configuration())));
 
-            check_eq(blueprints::and_or_network<technology_network>(), lyt);
+            check_eq(blueprints::and_or_network<networks::technology_network>(), lyt);
 
             CHECK(!lyt.is_and(lyt.get_node({2, 2})));
             CHECK(!lyt.is_wire(lyt.get_node({2, 2})));
@@ -425,7 +426,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
         SECTION("With port info")
         {
             const auto lyt = generate_layout_with_black_list<cart_gate_clk_lyt>(
-                blueprints::and_or_network<technology_network>(),
+                blueprints::and_or_network<networks::technology_network>(),
                 blacklist_and<cart_gate_clk_lyt>(
                     {2, 2},
                     {port_list<port_direction>({port_direction(port_direction::cardinal::NORTH),
@@ -443,7 +444,7 @@ TEST_CASE("Exact Cartesian physical design", "[exact]")
                             blacklist<cart_gate_clk_lyt>()))),
                 twoddwave(crossings(configuration())));
 
-            check_eq(blueprints::and_or_network<technology_network>(), lyt);
+            check_eq(blueprints::and_or_network<networks::technology_network>(), lyt);
 
             CHECK((!lyt.is_and(lyt.get_node({2, 2})) ||
                    !(lyt.has_northern_incoming_signal({2, 2}) && lyt.has_western_incoming_signal({2, 2}) &&
@@ -519,7 +520,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
                 blueprints::and_or_network<mockturtle::mig_network>(), row(crossings(border_io(configuration()))));
 
             check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library, hex_lyt>(
-                blueprints::nand_xnor_network<fiction::technology_network>(),
+                blueprints::nand_xnor_network<fiction::networks::technology_network>(),
                 row(crossings(border_io(configuration()))));
         }
         SECTION("2DDWave clocking")
@@ -540,10 +541,12 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  open(straight_inverter(configuration())))));
+            CHECK(has_straight_inverters(
+                generate_layout<hex_lyt>(blueprints::inverter_network<networks::technology_network>(),
+                                         use(straight_inverter(configuration())))));
+            CHECK(has_straight_inverters(
+                generate_layout<hex_lyt>(blueprints::inverter_network<networks::technology_network>(),
+                                         open(straight_inverter(configuration())))));
         }
     }
     SECTION("even row")
@@ -579,8 +582,9 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
+            CHECK(has_straight_inverters(
+                generate_layout<hex_lyt>(blueprints::inverter_network<networks::technology_network>(),
+                                         use(straight_inverter(configuration())))));
         }
     }
     SECTION("odd column")
@@ -615,8 +619,9 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
+            CHECK(has_straight_inverters(
+                generate_layout<hex_lyt>(blueprints::inverter_network<networks::technology_network>(),
+                                         use(straight_inverter(configuration())))));
         }
     }
     SECTION("even column")
@@ -651,10 +656,12 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Straight inverters")
         {
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  use(straight_inverter(configuration())))));
-            CHECK(has_straight_inverters(generate_layout<hex_lyt>(blueprints::inverter_network<technology_network>(),
-                                                                  open(straight_inverter(configuration())))));
+            CHECK(has_straight_inverters(
+                generate_layout<hex_lyt>(blueprints::inverter_network<networks::technology_network>(),
+                                         use(straight_inverter(configuration())))));
+            CHECK(has_straight_inverters(
+                generate_layout<hex_lyt>(blueprints::inverter_network<networks::technology_network>(),
+                                         open(straight_inverter(configuration())))));
         }
     }
 }
@@ -663,9 +670,9 @@ TEST_CASE("High degree input networks", "[exact]")
 {
     CHECK_THROWS_AS(
         exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), twoddwave(configuration())),
-        high_degree_fanin_exception);
+        networks::utils::high_degree_fanin_exception);
     CHECK_THROWS_AS(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), use(configuration())),
-                    high_degree_fanin_exception);
+                    networks::utils::high_degree_fanin_exception);
 
     CHECK_NOTHROW(exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(), res(configuration())));
 }
@@ -688,7 +695,7 @@ TEST_CASE("Exact physical design with upper bounds", "[exact]")
     {
         upper_bound_config.upper_bound_y = 3u;  // allow only 3 tiles in y direction; this will work
 
-        const auto mux    = blueprints::mux21_network<technology_network>();
+        const auto mux    = blueprints::mux21_network<networks::technology_network>();
         auto       layout = exact<cart_gate_clk_lyt>(mux, upper_bound_config);
 
         REQUIRE(layout.has_value());

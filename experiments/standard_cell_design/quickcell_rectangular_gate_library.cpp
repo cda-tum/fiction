@@ -10,9 +10,9 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -44,27 +44,27 @@ int main()  // NOLINT
                        "#Lp3/N [%]"};              // double
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 22>{
-        {{std::vector<tt>{create_not_tt()}, "inv_1i_top_1o_right"},
-         {std::vector<tt>{create_id_tt()}, "wire_1i_top_1o_right"},
-         {std::vector<tt>{create_not_tt()}, "inv_1i_top_1o_down"},
-         {std::vector<tt>{create_id_tt()}, "wire_1i_top_1o_down"},
-         {std::vector<tt>{create_not_tt()}, "inv_1i_left_1o_right"},
-         {std::vector<tt>{create_id_tt()}, "wire_1i_left_1o_right"},
-         {create_fan_out_tt(), "fo2_1i_top_2o_left_right"},
-         {create_fan_out_tt(), "fo2_1i_top_2o_right_down"},
-         {std::vector<tt>{create_and_tt()}, "and_2i_top_left_1o_right"},
-         {std::vector<tt>{create_nand_tt()}, "nand_2i_top_left_1o_right"},
-         {std::vector<tt>{create_or_tt()}, "or_2i_top_left_1o_right"},
-         {std::vector<tt>{create_nor_tt()}, "nor_2i_top_left_1o_right"},
-         {std::vector<tt>{create_xor_tt()}, "xor_2i_top_left_1o_right"},
-         {std::vector<tt>{create_xnor_tt()}, "xnor_2i_top_left_1o_right"},
-         {std::vector<tt>{create_lt_tt()}, "lt_2i_top_left_1o_right"},
-         {std::vector<tt>{create_gt_tt()}, "gt_2i_top_left_1o_right"},
-         {std::vector<tt>{create_le_tt()}, "le_2i_top_left_1o_right"},
-         {std::vector<tt>{create_ge_tt()}, "ge_2i_top_left_1o_right"},
-         {std::vector<tt>{create_crossing_wire_tt()}, "cx_2i_top_left_2o_down_right"},
-         {std::vector<tt>{create_half_adder_tt()}, "ha_2i_top_left_2o_down_right"},
-         {std::vector<tt>{create_double_wire_tt()}, "hourglass_2i_top_left_2o_down_right"}}};
+        {{std::vector<tt>{networks::utils::create_not_tt()}, "inv_1i_top_1o_right"},
+         {std::vector<tt>{networks::utils::create_id_tt()}, "wire_1i_top_1o_right"},
+         {std::vector<tt>{networks::utils::create_not_tt()}, "inv_1i_top_1o_down"},
+         {std::vector<tt>{networks::utils::create_id_tt()}, "wire_1i_top_1o_down"},
+         {std::vector<tt>{networks::utils::create_not_tt()}, "inv_1i_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_id_tt()}, "wire_1i_left_1o_right"},
+         {networks::utils::create_fan_out_tt(), "fo2_1i_top_2o_left_right"},
+         {networks::utils::create_fan_out_tt(), "fo2_1i_top_2o_right_down"},
+         {std::vector<tt>{networks::utils::create_and_tt()}, "and_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_nand_tt()}, "nand_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_or_tt()}, "or_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_nor_tt()}, "nor_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_xor_tt()}, "xor_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_xnor_tt()}, "xnor_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_lt_tt()}, "lt_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_gt_tt()}, "gt_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_le_tt()}, "le_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_ge_tt()}, "ge_2i_top_left_1o_right"},
+         {std::vector<tt>{networks::utils::create_crossing_wire_tt()}, "cx_2i_top_left_2o_down_right"},
+         {std::vector<tt>{networks::utils::create_half_adder_tt()}, "ha_2i_top_left_2o_down_right"},
+         {std::vector<tt>{networks::utils::create_double_wire_tt()}, "hourglass_2i_top_left_2o_down_right"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/rectangular_skeletons/", EXPERIMENTS_PATH);
 

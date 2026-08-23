@@ -3,10 +3,10 @@
 #include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
+#include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fmt/format.h>
@@ -29,15 +29,15 @@ int main()  // NOLINT
     static const std::string output_folder = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 9> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("fo2", std::vector<tt>{create_fan_out_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()})};
+        std::make_pair("and", std::vector<tt>{networks::utils::create_and_tt()}),
+        std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()}),
+        std::make_pair("xnor", std::vector<tt>{networks::utils::create_xnor_tt()}),
+        std::make_pair("fo2", std::vector<tt>{networks::utils::create_fan_out_tt()}),
+        std::make_pair("nor", std::vector<tt>{networks::utils::create_nor_tt()}),
+        std::make_pair("nand", std::vector<tt>{networks::utils::create_nand_tt()}),
+        std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
+        std::make_pair("wire", std::vector<tt>{networks::utils::create_id_tt()})};
 
     auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));

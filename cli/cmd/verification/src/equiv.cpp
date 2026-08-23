@@ -7,8 +7,8 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/algorithms/verification/equivalence_checking.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -112,7 +112,8 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
     const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2)
     { fiction::equivalence_checking(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2, &result); };
 
-    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+    { return fiction::networks::utils::get_name(*ntk_or_lyt_ptr); };
 
     std::visit(equiv_check, ntk_or_lyt_variant1, ntk_or_lyt_variant_2);
 

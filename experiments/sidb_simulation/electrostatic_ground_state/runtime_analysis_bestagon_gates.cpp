@@ -12,8 +12,8 @@
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -41,18 +41,18 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 12> gates = {
-        std::make_pair("hourglass", create_crossing_wire_tt()),
-        std::make_pair("cx", create_crossing_wire_tt()),
-        std::make_pair("ha", create_half_adder_tt()),
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{create_or_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("fo2", std::vector<tt>{create_fan_out_tt()}),
-        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
-        std::make_pair("wire", std::vector<tt>{create_id_tt()})};
+        std::make_pair("hourglass", networks::utils::create_crossing_wire_tt()),
+        std::make_pair("cx", networks::utils::create_crossing_wire_tt()),
+        std::make_pair("ha", networks::utils::create_half_adder_tt()),
+        std::make_pair("and", std::vector<tt>{networks::utils::create_and_tt()}),
+        std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()}),
+        std::make_pair("xnor", std::vector<tt>{networks::utils::create_xnor_tt()}),
+        std::make_pair("fo2", std::vector<tt>{networks::utils::create_fan_out_tt()}),
+        std::make_pair("nor", std::vector<tt>{networks::utils::create_nor_tt()}),
+        std::make_pair("nand", std::vector<tt>{networks::utils::create_nand_tt()}),
+        std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
+        std::make_pair("wire", std::vector<tt>{networks::utils::create_id_tt()})};
 
     const sidb_simulation_parameters                sim_params{2, -0.32};
     const quicksim_params                           qs_params{sim_params};

@@ -23,7 +23,7 @@ using namespace fiction;
 
 TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 {
-    virtual_pi_network<mockturtle::names_view<technology_network>> vpi{};
+    networks::virtual_pi_network<mockturtle::names_view<networks::technology_network>> vpi{};
 
     const auto a  = vpi.create_pi();
     const auto b  = vpi.create_pi();
@@ -54,7 +54,7 @@ TEST_CASE("Check name conservation", "[delete-virtual-pis]")
 
 TEST_CASE("Delete Virtual PIs with depth view", "[delete-virtual-pis]")
 {
-    fiction::static_depth_view<virtual_pi_network<technology_network>> tec_d;
+    fiction::networks::views::static_depth_view<networks::virtual_pi_network<networks::technology_network>> tec_d;
 
     const auto x1_r = tec_d.create_pi();
     const auto x2_r = tec_d.create_virtual_pi(x1_r);
@@ -72,7 +72,7 @@ TEST_CASE("Delete Virtual PIs with depth view", "[delete-virtual-pis]")
 
 TEST_CASE("Delete Virtual PIs with extended rank view", "[delete-virtual-pis]")
 {
-    fiction::mutable_rank_view<virtual_pi_network<technology_network>> tec_d;
+    fiction::networks::views::mutable_rank_view<networks::virtual_pi_network<networks::technology_network>> tec_d;
 
     const auto x1_r = tec_d.create_pi();
     const auto x2_r = tec_d.create_virtual_pi(x1_r);
@@ -91,7 +91,7 @@ TEST_CASE("Delete Virtual PIs with extended rank view", "[delete-virtual-pis]")
 
 TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtual-pis]")
 {
-    technology_network tec{};
+    networks::technology_network tec{};
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -105,7 +105,7 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtua
     tec.create_po(f2);
     tec.create_po(f3);
 
-    virtual_pi_network<technology_network> vpi{};
+    networks::virtual_pi_network<networks::technology_network> vpi{};
 
     const auto a   = vpi.create_pi();
     const auto b   = vpi.create_pi();
@@ -130,7 +130,7 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtua
     CHECK(non_vpi.size() == vpi.size() - vpi.num_virtual_pis());
 
     // check equivalence
-    auto maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    auto maybe_miter = mockturtle::miter<networks::technology_network>(tec, non_vpi);
 
     REQUIRE(maybe_miter.has_value());
     if (maybe_miter.has_value())
@@ -146,7 +146,7 @@ TEST_CASE("Remove PIs and check equivalence technology_network", "[delete-virtua
             const auto clone         = vpi.clone();
             auto       non_vpi_clone = delete_virtual_pis(clone);
             // check equivalence
-            maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+            maybe_miter = mockturtle::miter<networks::technology_network>(tec, non_vpi);
 
             REQUIRE(maybe_miter.has_value());
             if (maybe_miter.has_value())
@@ -177,7 +177,7 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    virtual_pi_network<TestType> vpi{};
+    networks::virtual_pi_network<TestType> vpi{};
 
     const auto a  = vpi.create_pi();
     const auto b  = vpi.create_pi();
@@ -199,7 +199,7 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
     CHECK(non_vpi.real_size() == non_vpi.size());
 
     // check equivalence
-    auto maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi);
+    auto maybe_miter = mockturtle::miter<networks::technology_network>(tec, non_vpi);
 
     REQUIRE(maybe_miter.has_value());
     if (maybe_miter.has_value())
@@ -217,7 +217,7 @@ TEMPLATE_TEST_CASE("Remove PIs and check equivalence", "[delete-virtual-pis]", m
             auto       non_vpi_clone = delete_virtual_pis(clone);
 
             // check equivalence
-            maybe_miter = mockturtle::miter<technology_network>(tec, non_vpi_clone);
+            maybe_miter = mockturtle::miter<networks::technology_network>(tec, non_vpi_clone);
 
             REQUIRE(maybe_miter.has_value());
             if (maybe_miter.has_value())

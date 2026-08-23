@@ -1,6 +1,6 @@
 #include "pyfiction/types.hpp"
 
-#include <fiction/utils/name_utils.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
 
 #include <fmt/format.h>
 #include <kitty/print.hpp>
@@ -74,8 +74,8 @@ void logic_simulation_impl(nanobind::module_& m, const std::string& type_name)
             }
             catch (const std::bad_alloc&)
             {
-                std::cout << "[e] " << fiction::get_name(ntk_or_lyt) << " has too many inputs to store its truth table"
-                          << std::endl;
+                std::cout << "[e] " << fiction::networks::utils::get_name(ntk_or_lyt)
+                          << " has too many inputs to store its truth table" << std::endl;
                 throw;
             }
 

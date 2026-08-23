@@ -5,14 +5,14 @@
 #ifndef FICTION_EDGE_COLOR_VIEW_HPP
 #define FICTION_EDGE_COLOR_VIEW_HPP
 
-#include "fiction/utils/network_utils.hpp"
+#include "fiction/networks/utils/network_utils.hpp"
 
 #include <mockturtle/views/color_view.hpp>
 
 #include <cstdint>
 #include <unordered_map>
 
-namespace fiction
+namespace fiction::networks::views
 {
 /**
  * A view that extends `mockturtle::out_of_place_color_view` such that it can color edges, i.e., tuples of nodes as
@@ -134,6 +134,5 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
     mutable std::unordered_map<edge, uint32_t> edge_colors{};
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::networks::views
 #endif  // FICTION_EDGE_COLOR_VIEW_HPP

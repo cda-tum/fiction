@@ -10,9 +10,9 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -48,18 +48,18 @@ int main()  // NOLINT
             "t_pruning [s]"             // double
         };
 
-    const auto truth_tables_and_names =
-        std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_and3_tt()}, "and3"},
-                                                                 {std::vector<tt>{create_xor_and_tt()}, "xor_and"},
-                                                                 {std::vector<tt>{create_or_and_tt()}, "or_and"},
-                                                                 {std::vector<tt>{create_onehot_tt()}, "onehot"},
-                                                                 {std::vector<tt>{create_maj_tt()}, "maj"},
-                                                                 {std::vector<tt>{create_gamble_tt()}, "gamble"},
-                                                                 {std::vector<tt>{create_dot_tt()}, "dot"},
-                                                                 {std::vector<tt>{create_ite_tt()}, "ite"},
-                                                                 {std::vector<tt>{create_and_xor_tt()}, "and_xor"},
-                                                                 {std::vector<tt>{create_xor3_tt()}, "xor3"},
-                                                                 {std::vector<tt>{create_ite_tt()}, "21_mux"}}};
+    const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 11>{
+        {{std::vector<tt>{networks::utils::create_and3_tt()}, "and3"},
+         {std::vector<tt>{networks::utils::create_xor_and_tt()}, "xor_and"},
+         {std::vector<tt>{networks::utils::create_or_and_tt()}, "or_and"},
+         {std::vector<tt>{networks::utils::create_onehot_tt()}, "onehot"},
+         {std::vector<tt>{networks::utils::create_maj_tt()}, "maj"},
+         {std::vector<tt>{networks::utils::create_gamble_tt()}, "gamble"},
+         {std::vector<tt>{networks::utils::create_dot_tt()}, "dot"},
+         {std::vector<tt>{networks::utils::create_ite_tt()}, "ite"},
+         {std::vector<tt>{networks::utils::create_and_xor_tt()}, "and_xor"},
+         {std::vector<tt>{networks::utils::create_xor3_tt()}, "xor3"},
+         {std::vector<tt>{networks::utils::create_ite_tt()}, "21_mux"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 

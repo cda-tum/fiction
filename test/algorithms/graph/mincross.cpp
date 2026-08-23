@@ -29,7 +29,7 @@ TEST_CASE("Dummy Check", "[mincross]")
     const auto f  = aig.create_xor(x1, x2);
     aig.create_po(f);
 
-    const auto aig_r = fiction::mutable_rank_view(aig);
+    const auto aig_r = fiction::networks::views::mutable_rank_view(aig);
 
     mincross_stats        st{};
     const mincross_params p{};
@@ -39,7 +39,7 @@ TEST_CASE("Dummy Check", "[mincross]")
 
 TEST_CASE("Fixed PIs Check", "[mincross]")
 {
-    fiction::technology_network tec;
+    fiction::networks::technology_network tec;
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -49,7 +49,7 @@ TEST_CASE("Fixed PIs Check", "[mincross]")
     tec.create_po(f);
     tec.create_po(b);
 
-    const auto aig_r = fiction::mutable_rank_view(tec);
+    const auto aig_r = fiction::networks::views::mutable_rank_view(tec);
 
     mincross_stats  st{};
     mincross_params p{};
@@ -74,7 +74,7 @@ TEST_CASE("Planar Network", "[mincross]")
     aig.create_po(f1);
     aig.create_po(f2);
 
-    auto                                                   aig_r = fiction::mutable_rank_view(aig);
+    auto                                                   aig_r = fiction::networks::views::mutable_rank_view(aig);
     std::vector<mockturtle::node<mockturtle::aig_network>> rank1;
     rank1.push_back(aig_r.get_node(f2));
     rank1.push_back(aig_r.get_node(f1));
@@ -94,7 +94,7 @@ TEST_CASE("Planar Network", "[mincross]")
 
 TEST_CASE("Majority", "[mincross]")
 {
-    fiction::technology_network tec{};
+    fiction::networks::technology_network tec{};
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -104,8 +104,8 @@ TEST_CASE("Majority", "[mincross]")
     tec.create_po(f1);
     tec.create_po(f2);
 
-    auto                                                       tec_r = fiction::mutable_rank_view(tec);
-    std::vector<mockturtle::node<fiction::technology_network>> rank1;
+    auto tec_r = fiction::networks::views::mutable_rank_view(tec);
+    std::vector<mockturtle::node<fiction::networks::technology_network>> rank1;
     rank1.push_back(tec_r.get_node(f1));
     rank1.push_back(tec_r.get_node(f2));
     tec_r.set_ranks(1, rank1);
@@ -124,13 +124,13 @@ TEST_CASE("Majority", "[mincross]")
 
 TEST_CASE("Adder", "[mincross]")
 {
-    auto tec = blueprints::full_adder_network<mockturtle::names_view<technology_network>>();
+    auto tec = blueprints::full_adder_network<mockturtle::names_view<networks::technology_network>>();
 
-    auto tec_b = network_balancing<technology_network>(tec);
+    auto tec_b = network_balancing<networks::technology_network>(tec);
 
-    auto tec_topo = fiction::bfs_topo_view(tec_b);
+    auto tec_topo = fiction::networks::views::bfs_topo_view(tec_b);
 
-    auto tec_r = fiction::mutable_rank_view(tec_topo);
+    auto tec_r = fiction::networks::views::mutable_rank_view(tec_topo);
 
     mincross_stats  st{};
     mincross_params p{};

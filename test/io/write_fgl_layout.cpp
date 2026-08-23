@@ -55,7 +55,7 @@ void check_parsing_equiv(const Ntk& ntk)
     std::stringstream layout_stream{};
     layouts::io::write_fgl_layout(layout, layout_stream);
 
-    const auto read_layout = layouts::io::read_fgl_layout<Lyt>(layout_stream, get_name(layout));
+    const auto read_layout = layouts::io::read_fgl_layout<Lyt>(layout_stream, networks::utils::get_name(layout));
 
     compare_written_and_read_layout(layout, read_layout);
 
@@ -83,18 +83,18 @@ void check_parsing_equiv_all()
     check_parsing_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
     check_parsing_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
     check_parsing_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_parsing_equiv<Lyt>(blueprints::and_or_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::constant_gate_input_maj_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::half_adder_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::mux21_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::inverter_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::clpl<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::one_to_five_path_difference_network<technology_network>());
-    check_parsing_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::and_or_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::nary_operation_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::constant_gate_input_maj_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::half_adder_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::full_adder_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::mux21_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::se_coloring_corner_case_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::inverter_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::clpl<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::one_to_five_path_difference_network<networks::technology_network>());
+    check_parsing_equiv<Lyt>(blueprints::nand_xnor_network<networks::technology_network>());
 }
 
 void check_parsing_equiv_layout_all()

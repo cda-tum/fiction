@@ -9,9 +9,9 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
@@ -147,9 +147,9 @@ int main()  // NOLINT
     three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
     const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>>
-        layout_truth_table{{two_one, {create_or_tt()}},
-                           {two_two, create_crossing_wire_tt()},
-                           {three_one, {create_gamble_tt()}},
+        layout_truth_table{{two_one, {networks::utils::create_or_tt()}},
+                           {two_two, networks::utils::create_crossing_wire_tt()},
+                           {three_one, {networks::utils::create_gamble_tt()}},
                            {three_two, create_truth_tables_3i2o()},
                            {three_three, create_truth_tables_3i3o()}};
 

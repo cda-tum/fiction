@@ -10,8 +10,8 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -59,20 +59,20 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::vector<tt>, std::string>, 14> gates = {
-        {{std::vector<tt>{create_id_tt()}, "wire"},
-         {std::vector<tt>{create_id_tt()}, "wire_diag"},
-         {std::vector<tt>{create_not_tt()}, "inv"},
-         {std::vector<tt>{create_not_tt()}, "inv_diag"},
-         {std::vector<tt>{create_and_tt()}, "and"},
-         {std::vector<tt>{create_nand_tt()}, "nand"},
-         {std::vector<tt>{create_or_tt()}, "or"},
-         {std::vector<tt>{create_nor_tt()}, "nor"},
-         {std::vector<tt>{create_xor_tt()}, "xor"},
-         {std::vector<tt>{create_xnor_tt()}, "xnor"},
-         {create_fan_out_tt(), "fo2"},
-         {create_crossing_wire_tt(), "cx"},
-         {create_half_adder_tt(), "ha"},
-         {create_double_wire_tt(), "hourglass"}}};
+        {{std::vector<tt>{networks::utils::create_id_tt()}, "wire"},
+         {std::vector<tt>{networks::utils::create_id_tt()}, "wire_diag"},
+         {std::vector<tt>{networks::utils::create_not_tt()}, "inv"},
+         {std::vector<tt>{networks::utils::create_not_tt()}, "inv_diag"},
+         {std::vector<tt>{networks::utils::create_and_tt()}, "and"},
+         {std::vector<tt>{networks::utils::create_nand_tt()}, "nand"},
+         {std::vector<tt>{networks::utils::create_or_tt()}, "or"},
+         {std::vector<tt>{networks::utils::create_nor_tt()}, "nor"},
+         {std::vector<tt>{networks::utils::create_xor_tt()}, "xor"},
+         {std::vector<tt>{networks::utils::create_xnor_tt()}, "xnor"},
+         {networks::utils::create_fan_out_tt(), "fo2"},
+         {networks::utils::create_crossing_wire_tt(), "cx"},
+         {networks::utils::create_half_adder_tt(), "ha"},
+         {networks::utils::create_double_wire_tt(), "hourglass"}}};
 
     for (const auto& [truth_table, gate] : gates)
     {

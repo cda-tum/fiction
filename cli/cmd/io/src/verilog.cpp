@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/io/write_verilog.hpp>
@@ -47,7 +47,8 @@ void verilog_command::execute()
 template <typename NtkOrLytVariant>
 void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
 {
-    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+    { return fiction::networks::utils::get_name(*ntk_or_lyt_ptr); };
 
     const auto write_verilog = [this](auto&& ntk_or_lyt_ptr)
     {

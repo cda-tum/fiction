@@ -10,8 +10,8 @@
 #include "fiction/algorithms/path_finding/distance.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 #include "fiction/utils/routing_utils.hpp"
 
@@ -978,7 +978,7 @@ class hexagonalization_impl
                                static_cast<decltype(hex_layout.y())>(y_max), hex_layout.z()});
 
             // restore original names from the Cartesian layout
-            restore_names<CartLyt, HexLyt>(layout, hex_layout);
+            networks::utils::restore_names<CartLyt, HexLyt>(layout, hex_layout);
         }
 
         stats.x_size        = hex_layout.x() + 1;

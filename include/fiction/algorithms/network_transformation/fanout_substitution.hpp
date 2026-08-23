@@ -177,7 +177,7 @@ class fanout_substitution_impl
             });
 
         // restore signal names if applicable
-        fiction::restore_names(ntk_topo, substituted, old2new);
+        fiction::networks::utils::restore_names(ntk_topo, substituted, old2new);
 
         return substituted;
     }

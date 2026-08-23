@@ -35,7 +35,7 @@ void test_color_view()
 
     Ntk ntk{};
 
-    using color_ntk = out_of_place_edge_color_view<Ntk>;
+    using color_ntk = networks::views::out_of_place_edge_color_view<Ntk>;
     CHECK(mockturtle::is_network_type_v<color_ntk>);
     CHECK(mockturtle::has_new_color_v<color_ntk>);
     CHECK(mockturtle::has_current_color_v<color_ntk>);
@@ -47,7 +47,7 @@ void test_color_view()
 
     color_ntk color_view{ntk};
 
-    using color_color_ntk = out_of_place_edge_color_view<color_ntk>;
+    using color_color_ntk = networks::views::out_of_place_edge_color_view<color_ntk>;
     CHECK(mockturtle::is_network_type_v<color_color_ntk>);
     CHECK(mockturtle::has_new_color_v<color_color_ntk>);
     CHECK(mockturtle::has_current_color_v<color_color_ntk>);
@@ -67,7 +67,7 @@ TEST_CASE("Create edge color views", "[edge-color-view]")
     test_color_view<mockturtle::xag_network>();
     test_color_view<mockturtle::xmg_network>();
     test_color_view<mockturtle::klut_network>();
-    test_color_view<fiction::technology_network>();
+    test_color_view<fiction::networks::technology_network>();
 }
 
 TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
@@ -90,7 +90,7 @@ TEST_CASE("Out-of-place edge color view", "[edge-color-view]")
     const auto f8 = aig_ntk.create_and(f4, f7);
     aig_ntk.create_po(f8);
 
-    out_of_place_edge_color_view aig_ecv{aig_ntk};
+    networks::views::out_of_place_edge_color_view aig_ecv{aig_ntk};
 
     auto const white  = aig_ecv.new_color();
     auto const yellow = aig_ecv.new_color();

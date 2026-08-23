@@ -66,7 +66,7 @@ using mig_ptr = std::shared_ptr<mig_nt>;
 
 inline constexpr auto mig_name = "MIG";
 
-using tec_nt  = mockturtle::names_view<fiction::technology_network>;
+using tec_nt  = mockturtle::names_view<fiction::networks::technology_network>;
 using tec_ptr = std::shared_ptr<tec_nt>;
 
 inline constexpr auto tec_name = "TEC";

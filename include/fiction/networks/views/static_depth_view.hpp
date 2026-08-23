@@ -16,7 +16,7 @@
 
 #include <parallel_hashmap/phmap.h>
 
-namespace fiction
+namespace fiction::networks::views
 {
 
 /**
@@ -489,6 +489,5 @@ static_depth_view(T const&) -> static_depth_view<T>;
 template <typename T, typename NodeCostFn = mockturtle::unit_cost<T>>
 static_depth_view(T const&, NodeCostFn const&, depth_view_params const&) -> static_depth_view<T, NodeCostFn>;
 
-}  // namespace fiction
-
+}  // namespace fiction::networks::views
 #endif  // FICTION_STATIC_DEPTH_VIEW_HPP

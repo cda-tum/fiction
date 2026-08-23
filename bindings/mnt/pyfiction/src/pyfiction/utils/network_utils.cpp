@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/utils/network_utils.hpp>
+#include <fiction/networks/utils/network_utils.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>     // NOLINT(misc-include-cleaner)
@@ -22,11 +22,11 @@ namespace detail
 {
 
 template <typename Ntk>
-void has_high_degree_fanin_nodes(nanobind::module_& m)
+void networks::utils::has_high_degree_fanin_nodes(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("has_high_degree_fanin_nodes", &fiction::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
+    m.def("has_high_degree_fanin_nodes", &fiction::networks::utils::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
           py::arg("threshold") = 2, DOC(fiction_has_high_degree_fanin_nodes));
 }
 
@@ -38,7 +38,7 @@ void network_utils(nanobind::module_& m)
 
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): registers the exception
     // translator with the module; it is not meant to be thrown here
-    py::exception<fiction::high_degree_fanin_exception>(
+    py::exception<fiction::networks::utils::high_degree_fanin_exception>(
         m, "high_degree_fanin_exception",
         PyExc_ValueError);  // NOLINT(misc-include-cleaner): included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)

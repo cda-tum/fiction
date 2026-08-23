@@ -7,9 +7,9 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/io/write_qca_layout.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -50,7 +50,7 @@ void qca_command::execute()
         ps.create_inter_layer_via_cells = false;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::utils::get_name(*lyt_ptr); };
 
     const auto write_qca = [this, &get_name](auto&& lyt_ptr)
     {

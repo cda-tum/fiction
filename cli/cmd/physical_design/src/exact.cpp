@@ -10,9 +10,9 @@
 
 #include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -153,7 +153,7 @@ void exact_command::reset_flags()
 template <typename Lyt>
 void exact_command::exact_physical_design()
 {
-    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::get_name(*ntk_ptr); };
+    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::networks::utils::get_name(*ntk_ptr); };
 
     const auto perform_physical_design = [this](auto&& ntk_ptr) { return fiction::exact<Lyt>(*ntk_ptr, ps, &st); };
 
@@ -178,7 +178,7 @@ void exact_command::exact_physical_design()
     {
         env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme\n", ps.scheme);
     }
-    catch (const fiction::high_degree_fanin_exception& e)
+    catch (const fiction::networks::utils::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {} of the given clocking scheme\n", e.what());
     }

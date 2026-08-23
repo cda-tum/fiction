@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::networks::views
 {
 
 /**
@@ -293,6 +293,5 @@ bfs_topo_view(const T&) -> bfs_topo_view<T>;
 template <class T>
 bfs_topo_view(const T&, const typename T::signal&) -> bfs_topo_view<T>;
 
-}  // namespace fiction
-
+}  // namespace fiction::networks::views
 #endif  // FICTION_BFS_TOPO_VIEW_HPP

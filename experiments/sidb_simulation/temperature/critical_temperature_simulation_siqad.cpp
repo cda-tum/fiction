@@ -7,8 +7,8 @@
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -33,10 +33,11 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
-        std::make_pair("and", std::vector<tt>{create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
-        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
+        std::make_pair("and", std::vector<tt>{networks::utils::create_and_tt()}),
+        std::make_pair("nand", std::vector<tt>{networks::utils::create_nand_tt()}),
+        std::make_pair("xnor", std::vector<tt>{networks::utils::create_xnor_tt()}),
+        std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()})};
 
     const sidb_simulation_parameters sim_params{2, -0.28};
     critical_temperature_params      ct_params{sim_params};

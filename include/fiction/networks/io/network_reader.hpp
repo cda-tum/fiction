@@ -2,8 +2,8 @@
 // Created by marcel on 01.09.20.
 //
 
-#ifndef FICTION_NETWORK_READER_HPP
-#define FICTION_NETWORK_READER_HPP
+#ifndef FICTION_NETWORKS_IO_NETWORK_READER_HPP
+#define FICTION_NETWORKS_IO_NETWORK_READER_HPP
 
 #include "fiction/algorithms/network_transformation/network_conversion.hpp"
 
@@ -28,7 +28,7 @@
 #include <type_traits>
 #include <vector>
 
-namespace fiction
+namespace fiction::networks::io
 {
 /**
  * Helper class to read directories of mockturtle networks of certain types.
@@ -211,6 +211,5 @@ class network_reader
     }
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_NETWORK_READER_HPP
+}  // namespace fiction::networks::io
+#endif  // FICTION_NETWORKS_IO_NETWORK_READER_HPP

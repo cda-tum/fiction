@@ -8,10 +8,10 @@
 #include "fiction/algorithms/network_transformation/fanout_substitution.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/technology_network.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
+#include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
-#include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/placement_utils.hpp"
 
 #include <fmt/format.h>
@@ -77,7 +77,7 @@ struct coloring_container
             color_south{color_ntk.new_color()}
     {}
 
-    out_of_place_edge_color_view<Ntk> color_ntk;
+    networks::views::out_of_place_edge_color_view<Ntk> color_ntk;
 
     uint32_t color_null = 0ul, color_east, color_south;
 
@@ -88,8 +88,9 @@ struct coloring_container
 };
 
 template <typename Ntk>
-void recursively_paint_edges(const coloring_container<Ntk>&                             ctn,
-                             const mockturtle::edge<out_of_place_edge_color_view<Ntk>>& e, const uint32_t c) noexcept
+void recursively_paint_edges(const coloring_container<Ntk>&                                              ctn,
+                             const mockturtle::edge<networks::views::out_of_place_edge_color_view<Ntk>>& e,
+                             const uint32_t                                                              c) noexcept
 {
     // exit condition: edge is already painted
     if (ctn.color_ntk.edge_color(e) != ctn.color_null)
@@ -101,24 +102,24 @@ void recursively_paint_edges(const coloring_container<Ntk>&                     
     ctn.color_ntk.paint_edge(e, c);
 
     // paint children edges
-    foreach_outgoing_edge(ctn.color_ntk, e.source,
-                          [&ctn, &e, &c](const auto& oe)
-                          {
-                              if (oe != e)
-                              {
-                                  recursively_paint_edges(ctn, oe, ctn.opposite_color(c));
-                              }
-                          });
+    networks::utils::foreach_outgoing_edge(ctn.color_ntk, e.source,
+                                           [&ctn, &e, &c](const auto& oe)
+                                           {
+                                               if (oe != e)
+                                               {
+                                                   recursively_paint_edges(ctn, oe, ctn.opposite_color(c));
+                                               }
+                                           });
 
     // paint spouse edges
-    foreach_incoming_edge(ctn.color_ntk, e.target,
-                          [&ctn, &e, &c](const auto& ie)
-                          {
-                              if (ie != e)
-                              {
-                                  recursively_paint_edges(ctn, ie, c);
-                              }
-                          });
+    networks::utils::foreach_incoming_edge(ctn.color_ntk, e.target,
+                                           [&ctn, &e, &c](const auto& ie)
+                                           {
+                                               if (ie != e)
+                                               {
+                                                   recursively_paint_edges(ctn, ie, c);
+                                               }
+                                           });
 }
 
 template <typename Ntk>
@@ -136,7 +137,7 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
     rtv.foreach_gate_reverse(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
-            const auto finc = fanin_edges(ctn.color_ntk, n);
+            const auto finc = networks::utils::fanin_edges(ctn.color_ntk, n);
 
             // if any incoming edge is colored east, color them all east, and south otherwise
             const auto color = std::ranges::any_of(finc.fanin_edges, [&ctn](const auto& fe)
@@ -450,8 +451,8 @@ class orthogonal_impl
      * @param p The parameters for the orthogonal physical design algorithm.
      * @param st The statistics object to record execution details.
      */
-    orthogonal_impl(const mockturtle::names_view<technology_network>& src, const orthogonal_physical_design_params& p,
-                    orthogonal_physical_design_stats& st) :
+    orthogonal_impl(const mockturtle::names_view<networks::technology_network>& src,
+                    const orthogonal_physical_design_params& p, orthogonal_physical_design_stats& st) :
             ntk{mockturtle::fanout_view{src}},
             ps{p},
             pst{st}
@@ -529,7 +530,7 @@ class orthogonal_impl
                         ++latest_pos.y;
                     }
                     // if n has only one fanin
-                    else if (const auto fc = fanins(ctn.color_ntk, n); fc.fanin_nodes.size() == 1)
+                    else if (const auto fc = networks::utils::fanins(ctn.color_ntk, n); fc.fanin_nodes.size() == 1)
                     {
                         const auto& pre = fc.fanin_nodes[0];
 
@@ -555,7 +556,8 @@ class orthogonal_impl
                             assert(false);
                         }
                     }
-                    else  // if node has two fanins (or three fanins with one of them being constant)
+                    else  // if node has two networks::utils::fanins (or three networks::utils::fanins with one of them
+                          // being constant)
                     {
                         const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];
 
@@ -639,7 +641,7 @@ class orthogonal_impl
         place_outputs(layout, ctn, po_counter, node2pos);
 
         // restore possibly set signal names
-        restore_names(ctn.color_ntk, layout, node2pos);
+        networks::utils::restore_names(ctn.color_ntk, layout, node2pos);
 
         // statistical information
         pst.x_size        = layout.x() + 1;
@@ -652,7 +654,7 @@ class orthogonal_impl
     }
 
   private:
-    mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<technology_network>>> ntk;
+    mockturtle::topo_view<mockturtle::fanout_view<mockturtle::names_view<networks::technology_network>>> ntk;
 
     orthogonal_physical_design_params ps;
     orthogonal_physical_design_stats& pst;
@@ -701,17 +703,18 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(mockturtle::is_network_type_v<Ntk>,
-                  "Ntk is not a network type");  // Ntk is being converted to a technology_network anyway, therefore,
-                                                 // this is the only relevant check here
+                  "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
+                                                 // therefore, this is the only relevant check here
 
     // check for input degree
-    if (has_high_degree_fanin_nodes(ntk, 2))
+    if (networks::utils::has_high_degree_fanin_nodes(ntk, 2))
     {
-        throw high_degree_fanin_exception();
+        throw networks::utils::high_degree_fanin_exception();
     }
 
     orthogonal_physical_design_stats st{};
-    detail::orthogonal_impl<Lyt>     p{fanout_substitution<mockturtle::names_view<technology_network>>(ntk), ps, st};
+    detail::orthogonal_impl<Lyt> p{fanout_substitution<mockturtle::names_view<networks::technology_network>>(ntk), ps,
+                                   st};
 
     auto result = p.run();
 

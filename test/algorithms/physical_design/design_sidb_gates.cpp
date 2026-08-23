@@ -15,12 +15,12 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -50,11 +50,11 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
     {
         design_sidb_gates_stats design_gates_stats{};
         const auto              found_gate_layouts =
-            design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params, &design_gates_stats);
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params, &design_gates_stats);
         REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
-              operational_status::OPERATIONAL);
+        CHECK(is_operational(first_gate, std::vector<tt>{networks::utils::create_and_tt()}, params.operational_params)
+                  .first == operational_status::OPERATIONAL);
 
         CHECK(design_gates_stats.number_of_layouts == 1140);
         CHECK(design_gates_stats.number_of_layouts_after_first_pruning == 167);
@@ -70,11 +70,12 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
         params.termination_cond = design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
-              operational_status::OPERATIONAL);
+        CHECK(is_operational(first_gate, std::vector<tt>{networks::utils::create_and_tt()}, params.operational_params)
+                  .first == operational_status::OPERATIONAL);
     }
 }
 
@@ -120,7 +121,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             .termination_cond =
                 design_sidb_gates_params<cell<siqad_layout>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
@@ -138,7 +140,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             .number_of_canvas_sidbs = 1};
 
         const auto found_gate_layouts_cube =
-            design_sidb_gates(lyt_in_cube_coord, std::vector<tt>{create_xnor_tt()}, params_cube);
+            design_sidb_gates(lyt_in_cube_coord, std::vector<tt>{networks::utils::create_xnor_tt()}, params_cube);
 
         REQUIRE(found_gate_layouts_cube.size() == 1);
         CHECK(found_gate_layouts_cube[0].num_cells() == 14);
@@ -157,7 +159,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             .number_of_canvas_sidbs = 1};
 
         const auto found_gate_layouts_offset =
-            design_sidb_gates(lyt_in_offset_coord, std::vector<tt>{create_xnor_tt()}, params_offset);
+            design_sidb_gates(lyt_in_offset_coord, std::vector<tt>{networks::utils::create_xnor_tt()}, params_offset);
 
         REQUIRE(found_gate_layouts_offset.size() == 1);
         CHECK(found_gate_layouts_offset[0].num_cells() == 14);
@@ -176,7 +178,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
             .termination_cond =
                 design_sidb_gates_params<cell<siqad_layout>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 4);
     }
@@ -194,7 +197,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         design_sidb_gates_stats stats{};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &stats);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_xnor_tt()}, params, &stats);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
@@ -216,7 +220,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         design_sidb_gates_stats stats{};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_xnor_tt()}, params, &stats);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_xnor_tt()}, params, &stats);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
@@ -261,7 +266,8 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     SECTION("Exhaustive Generation")
     {
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
 
@@ -269,7 +275,8 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     {
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM;
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
 
@@ -279,11 +286,13 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params.number_of_canvas_sidbs = 0;
         params.design_mode            = design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        const auto found_gate_layouts_exhaustive = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts_exhaustive =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         CHECK(found_gate_layouts_exhaustive.empty());
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        const auto found_gate_layouts_quickcell = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts_quickcell =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         CHECK(found_gate_layouts_quickcell.empty());
     }
 
@@ -300,11 +309,12 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
                                     params.operational_params.simulation_parameters.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
-            design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+            design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
         CHECK(!found_gate_layouts_exhaustive.empty());
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
-        const auto found_gate_layouts_quickcell = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts_quickcell =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         CHECK(!found_gate_layouts_quickcell.empty());
     }
 }
@@ -358,7 +368,8 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(lyt.get_cell_type({17, 11, 0}) == sidb_100_cell_clk_lyt_siqad::technology::cell_type::EMPTY);
 
         // generate gate by placing one SiDB
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_fan_out_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_fan_out_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 21);
@@ -392,7 +403,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
                                     params.operational_params.simulation_parameters.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
-            design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()}, params);
+            design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_fan_out_tt()}, params);
 
         REQUIRE(found_gate_layouts_exhaustive.size() == 1);
         CHECK(found_gate_layouts_exhaustive[0].num_cells() == 19);
@@ -403,7 +414,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
 
         const auto found_gate_layouts_quickcell =
-            design_sidb_gates(defect_layout, std::vector<tt>{create_fan_out_tt()}, params);
+            design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_fan_out_tt()}, params);
         REQUIRE(found_gate_layouts_quickcell.size() == 1);
         CHECK(found_gate_layouts_quickcell[0].num_cells() == 19);
         CHECK(found_gate_layouts_quickcell[0].get_cell_type({17, 11, 0}) ==
@@ -428,7 +439,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             .canvas      = {{14, 6, 0}, {24, 12, 0}},
             .number_of_canvas_sidbs = 3};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -452,7 +464,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                                                      params.operational_params.simulation_parameters.epsilon_r,
                                                      params.operational_params.simulation_parameters.lambda_tf});
 
-        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_defects() == 1);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 2);
@@ -463,7 +476,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         params.design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
-            design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+            design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
         REQUIRE(!found_gate_layouts_quickcell.empty());
         CHECK(found_gate_layouts_quickcell.front().num_defects() == 1);
         CHECK(found_gate_layouts_quickcell.front().num_cells() == lyt.num_cells() + 2);
@@ -491,7 +504,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                                                      params.operational_params.simulation_parameters.epsilon_r,
                                                      params.operational_params.simulation_parameters.lambda_tf});
 
-        const auto found_gate_layouts = design_sidb_gates(defect_layout, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
         REQUIRE(found_gate_layouts.empty());
     }
 }
@@ -519,7 +533,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             .canvas      = {{10, 11, 0}, {14, 15, 0}},
             .number_of_canvas_sidbs = 3};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_nor_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -539,7 +554,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 #ifdef NDEBUG
         SECTION("all design")
         {
-            const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+            const auto found_gate_layouts =
+                design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() == 14);
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
@@ -549,7 +565,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
         {
             params.termination_cond = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::AFTER_FIRST_SOLUTION;
-            const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+            const auto found_gate_layouts =
+                design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
@@ -572,7 +589,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             .termination_cond       = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -591,7 +609,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             .termination_cond       = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -608,7 +627,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
             .termination_cond       = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::AFTER_FIRST_SOLUTION};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_nor_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -627,7 +647,8 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
         .canvas                 = {{16, 8, 0}, {22, 14, 0}},
         .number_of_canvas_sidbs = 3};
 
-    const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_crossing_wire_tt()}, params);
+    const auto found_gate_layouts =
+        design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_crossing_wire_tt()}, params);
     REQUIRE(found_gate_layouts.size() == 3);
     CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
 }
@@ -651,7 +672,8 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
             .termination_cond       = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_crossing_wire_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_crossing_wire_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -675,7 +697,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
             .termination_cond       = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, create_crossing_wire_tt(), params);
+        const auto found_gate_layouts = design_sidb_gates(lyt, networks::utils::create_crossing_wire_tt(), params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -700,11 +722,12 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
             .termination_cond       = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
-        const auto found_gate_layouts = design_sidb_gates(lyt, std::vector<tt>{create_and_tt()}, params);
+        const auto found_gate_layouts =
+            design_sidb_gates(lyt, std::vector<tt>{networks::utils::create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 234);
         const auto& first_gate = found_gate_layouts.front();
-        CHECK(is_operational(first_gate, std::vector<tt>{create_and_tt()}, params.operational_params).first ==
-              operational_status::OPERATIONAL);
+        CHECK(is_operational(first_gate, std::vector<tt>{networks::utils::create_and_tt()}, params.operational_params)
+                  .first == operational_status::OPERATIONAL);
     }
 }
 

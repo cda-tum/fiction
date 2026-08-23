@@ -6,8 +6,8 @@
 #define FICTION_APPLY_GATE_LIBRARY_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 
 #include <optional>
 
@@ -181,7 +181,7 @@ class apply_gate_library_impl
             });
 
         // if available, recover layout name
-        cell_lyt.set_layout_name(get_name(gate_lyt));
+        cell_lyt.set_layout_name(networks::utils::get_name(gate_lyt));
 
         if constexpr (is_sidb_defect_surface_v<CellLyt>)
         {

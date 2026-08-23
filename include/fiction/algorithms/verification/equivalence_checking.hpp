@@ -7,8 +7,8 @@
 
 #include "fiction/algorithms/properties/critical_path_length_and_throughput.hpp"
 #include "fiction/algorithms/verification/design_rule_violations.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/algorithms/equivalence_checking.hpp>

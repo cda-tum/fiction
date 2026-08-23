@@ -6,10 +6,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/network_reader.hpp>
 #include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
+#include <fiction/networks/io/network_reader.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -88,25 +88,25 @@ void read_command::execute()
         {
             if (is_set("aig"))
             {
-                fiction::network_reader<fiction::aig_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::aig_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
             else if (is_set("xag"))
             {
-                fiction::network_reader<fiction::xag_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::xag_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
             else if (is_set("mig"))
             {
-                fiction::network_reader<fiction::mig_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::mig_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
             else if (is_set("tec"))
             {
-                fiction::network_reader<fiction::tec_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::tec_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }

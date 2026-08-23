@@ -17,7 +17,7 @@
 
 #include <parallel_hashmap/phmap.h>
 
-namespace fiction
+namespace fiction::networks
 {
 /* Network with additional "virtual" PIs.
  *
@@ -306,6 +306,5 @@ class virtual_pi_network : public Ntk
     v_strg v_storage;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::networks
 #endif  // FICTION_VIRTUAL_PI_NETWORK_HPP

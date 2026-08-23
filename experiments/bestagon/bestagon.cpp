@@ -137,8 +137,9 @@ int main()  // NOLINT
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter = mockturtle::miter<fiction::technology_network>(mapped_network, *gate_level_layout);
-            const auto eq    = mockturtle::equivalence_checking(*miter);
+            const auto miter =
+                mockturtle::miter<fiction::networks::technology_network>(mapped_network, *gate_level_layout);
+            const auto eq = mockturtle::equivalence_checking(*miter);
             assert(eq.has_value());
 
             // compute critical path and throughput

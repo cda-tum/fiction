@@ -16,6 +16,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/qca_one_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
@@ -24,7 +25,6 @@
 #include <fiction/technology/sim7_mol_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <string>
 #include <vector>
@@ -99,7 +99,8 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 bestagon_and,
                 fmt::format("{}/resources/sidb_on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
-            CHECK(is_operational(bestagon_and, std::vector<tt>{create_and_tt()}, design_gate_params.operational_params)
+            CHECK(is_operational(bestagon_and, std::vector<tt>{networks::utils::create_and_tt()},
+                                 design_gate_params.operational_params)
                       .first == operational_status::OPERATIONAL);
 
             CHECK(bestagon_and.num_cells() == 19);
@@ -121,7 +122,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 CHECK(bestagon_and_with_defects.get_sidb_defect({30, 20, 0}).type == sidb_defect_type::DB);
                 CHECK(bestagon_and_with_defects.get_sidb_defect({45, 55, 0}).type == sidb_defect_type::DB);
 
-                CHECK(is_operational(bestagon_and_with_defects, std::vector<tt>{create_and_tt()},
+                CHECK(is_operational(bestagon_and_with_defects, std::vector<tt>{networks::utils::create_and_tt()},
                                      design_gate_params.operational_params)
                           .first == operational_status::OPERATIONAL);
 

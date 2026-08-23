@@ -5,11 +5,11 @@
 #ifndef FICTION_READ_SQD_LAYOUT_HPP
 #define FICTION_READ_SQD_LAYOUT_HPP
 
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 
 #include <tinyxml2.h>
 
@@ -51,7 +51,7 @@ class read_sqd_layout_impl
   public:
     read_sqd_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
     {
-        set_name(lyt, name);
+        fiction::networks::utils::set_name(lyt, name);
     }
 
     read_sqd_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}

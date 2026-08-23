@@ -5,11 +5,11 @@
 #ifndef FICTION_SIDB_SKELETON_BESTAGON_LIBRARY_HPP
 #define FICTION_SIDB_SKELETON_BESTAGON_LIBRARY_HPP
 
+#include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/fcn_gate_library.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 
 namespace fiction
 {
@@ -35,20 +35,21 @@ class sidb_skeleton_bestagon_library
     static gate_functions get_functional_implementations() noexcept
     {
         static const gate_functions implementations{
-            {{create_id_tt(),
+            {{networks::utils::create_id_tt(),
               {STRAIGHT_WIRE, MIRRORED_STRAIGHT_WIRE, DIAGONAL_WIRE, MIRRORED_DIAGONAL_WIRE, FANOUT_1_2,
                MIRRORED_FANOUT_1_2, TWO_IN_TWO_OUT}},
-             {create_not_tt(), {STRAIGHT_WIRE, MIRRORED_STRAIGHT_WIRE, DIAGONAL_WIRE, MIRRORED_DIAGONAL_WIRE}},
-             {create_and_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_or_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_nand_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_nor_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_xor_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_xnor_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_le_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_ge_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_lt_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
-             {create_gt_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}}}};
+             {networks::utils::create_not_tt(),
+              {STRAIGHT_WIRE, MIRRORED_STRAIGHT_WIRE, DIAGONAL_WIRE, MIRRORED_DIAGONAL_WIRE}},
+             {networks::utils::create_and_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_or_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_nand_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_nor_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_xor_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_xnor_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_le_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_ge_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_lt_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}},
+             {networks::utils::create_gt_tt(), {TWO_IN_ONE_OUT, MIRRORED_TWO_IN_ONE_OUT}}}};
         return implementations;
     }
     /**

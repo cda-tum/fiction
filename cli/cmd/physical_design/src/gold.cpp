@@ -7,9 +7,9 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -121,7 +121,7 @@ nlohmann::json gold_command::log() const
 template <typename Lyt>
 void gold_command::graph_oriented_layout_design()
 {
-    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::get_name(*ntk_ptr); };
+    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::networks::utils::get_name(*ntk_ptr); };
 
     const auto perform_physical_design = [this](auto&& ntk_ptr)
     { return fiction::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
@@ -142,7 +142,7 @@ void gold_command::graph_oriented_layout_design()
                                       std::visit(get_name, ntk_ptr));
         }
     }
-    catch (const fiction::high_degree_fanin_exception& e)
+    catch (const fiction::networks::utils::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {}\n", e.what());
     }

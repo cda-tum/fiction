@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/utils/name_utils.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
@@ -23,7 +23,7 @@ void get_name(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("get_name", &fiction::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_get_name));
+    m.def("get_name", &fiction::networks::utils::get_name<NtkOrLyt>, py::arg("ntk_or_lyt"), DOC(fiction_get_name));
 }
 
 template <typename NtkOrLyt>
@@ -31,7 +31,8 @@ void set_name(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("set_name", &fiction::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"), DOC(fiction_set_name));
+    m.def("set_name", &fiction::networks::utils::set_name<NtkOrLyt>, py::arg("ntk_or_lyt"), py::arg("name"),
+          DOC(fiction_set_name));
 }
 
 }  // namespace detail

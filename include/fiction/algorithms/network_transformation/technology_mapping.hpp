@@ -6,9 +6,9 @@
 #define FICTION_TECHNOLOGY_MAPPING_HPP
 
 #include "fiction/algorithms/network_transformation/network_conversion.hpp"
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/technology/technology_mapping_library.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/name_utils.hpp"
 
 #include <fmt/format.h>
 #include <lorina/genlib.hpp>
@@ -568,7 +568,7 @@ class technology_mapping_impl
         {
             // convert network
             converted_ntk = convert_network<tec_nt>(mapped_ntk);
-            restore_names(ntk, converted_ntk);
+            networks::utils::restore_names(ntk, converted_ntk);
         }
 
         return converted_ntk;

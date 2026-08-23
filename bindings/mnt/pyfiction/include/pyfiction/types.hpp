@@ -33,7 +33,7 @@ using py_tt = kitty::dynamic_truth_table;
 /**
  * Logic network.
  */
-using py_logic_network = mockturtle::names_view<fiction::technology_network>;
+using py_logic_network = mockturtle::names_view<fiction::networks::technology_network>;
 /**
  * Coordinates.
  */

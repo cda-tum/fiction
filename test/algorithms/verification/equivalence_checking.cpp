@@ -71,8 +71,8 @@ TEST_CASE("Network-network equivalence", "[equiv]")
     check_for_strong_equiv(blueprints::maj4_network<mockturtle::mig_network>(),
                            blueprints::maj4_network<mockturtle::xag_network>());
     check_for_strong_equiv(blueprints::maj4_network<mockturtle::xag_network>(),
-                           blueprints::maj4_network<fiction::technology_network>());
-    check_for_strong_equiv(blueprints::maj4_network<fiction::technology_network>(),
+                           blueprints::maj4_network<fiction::networks::technology_network>());
+    check_for_strong_equiv(blueprints::maj4_network<fiction::networks::technology_network>(),
                            blueprints::maj4_network<mockturtle::aig_network>());
 }
 
@@ -92,7 +92,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
                                blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::xag_network>(),
                                blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
-        check_for_strong_equiv(blueprints::and_or_network<fiction::technology_network>(),
+        check_for_strong_equiv(blueprints::and_or_network<fiction::networks::technology_network>(),
                                blueprints::and_or_gate_layout<cart_gate_clk_lyt>());
     }
     SECTION("Hexagonal layout")
@@ -109,7 +109,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
                                blueprints::and_or_gate_layout<hex_odd_col_gate_clk_lyt>());
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::xag_network>(),
                                blueprints::and_or_gate_layout<hex_even_row_gate_clk_lyt>());
-        check_for_strong_equiv(blueprints::and_or_network<fiction::technology_network>(),
+        check_for_strong_equiv(blueprints::and_or_network<fiction::networks::technology_network>(),
                                blueprints::and_or_gate_layout<hex_odd_row_gate_clk_lyt>());
     }
     SECTION("Obstruction layout")
@@ -123,7 +123,7 @@ TEST_CASE("Network-layout equivalence", "[equiv]")
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::aig_network>(), obstr_lyt);
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::mig_network>(), obstr_lyt);
         check_for_strong_equiv(blueprints::and_or_network<mockturtle::xag_network>(), obstr_lyt);
-        check_for_strong_equiv(blueprints::and_or_network<fiction::technology_network>(), obstr_lyt);
+        check_for_strong_equiv(blueprints::and_or_network<fiction::networks::technology_network>(), obstr_lyt);
     }
 }
 
@@ -169,14 +169,14 @@ TEST_CASE("Weak equivalence", "[equiv]")
                          blueprints::unbalanced_and_layout<hex_odd_col_gate_clk_lyt>());
     check_for_weak_equiv(blueprints::one_to_five_path_difference_network<mockturtle::klut_network>(),
                          blueprints::unbalanced_and_layout<hex_even_row_gate_clk_lyt>());
-    check_for_weak_equiv(blueprints::one_to_five_path_difference_network<fiction::technology_network>(),
+    check_for_weak_equiv(blueprints::one_to_five_path_difference_network<fiction::networks::technology_network>(),
                          blueprints::unbalanced_and_layout<hex_odd_row_gate_clk_lyt>());
 }
 
 TEST_CASE("No equivalence", "[equiv]")
 {
     check_for_no_equiv(blueprints::and_or_network<mockturtle::xag_network>(),
-                       blueprints::half_adder_network<fiction::technology_network>());
+                       blueprints::half_adder_network<fiction::networks::technology_network>());
     check_for_no_equiv(blueprints::full_adder_network<mockturtle::aig_network>(),
                        blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>());
     check_for_no_equiv(blueprints::half_adder_network<mockturtle::mig_network>(),

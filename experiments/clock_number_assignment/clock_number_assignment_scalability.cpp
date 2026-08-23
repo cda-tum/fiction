@@ -3,10 +3,10 @@
 #include <fiction/algorithms/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
 #include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
 #include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
-#include <fiction/io/network_reader.hpp>                             // custom reader for folders of networks
+#include <fiction/networks/io/network_reader.hpp>                    // custom reader for folders of networks
+#include <fiction/networks/utils/name_utils.hpp>                     // name utilities
 #include <fiction/technology/technology_mapping_library.hpp>         // library for technology mapping
 #include <fiction/types.hpp>                                         // pre-defined types
-#include <fiction/utils/name_utils.hpp>                              // name utilities
 
 #include <fmt/format.h>                       // output formatting
 #include <lorina/lorina.hpp>                  // Verilog/BLIF/AIGER/... file parsing
@@ -64,7 +64,7 @@ int main()  // NOLINT
     const mockturtle::map_params map_params{};
 
     // instantiate a network reader
-    fiction::network_reader<fiction::aig_ptr> reader{network_folder, std::cout};
+    fiction::networks::io::network_reader<fiction::aig_ptr> reader{network_folder, std::cout};
 
     for (const auto& benchmark : reader.get_networks(true))  // for each benchmark sorted by size (ascending)
     {

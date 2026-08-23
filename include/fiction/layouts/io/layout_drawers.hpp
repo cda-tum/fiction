@@ -6,8 +6,8 @@
 #define FICTION_LAYOUTS_IO_LAYOUT_DRAWERS_HPP
 
 #include "fiction/networks/io/dot_drawers.hpp"
+#include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/network_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>

@@ -15,8 +15,8 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
+#include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/technology/qca_one_library.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -49,18 +49,19 @@ void check_graph_oriented_layout_design_equiv_all()
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::and_or_network<technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::and_or_network<networks::technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::half_adder_network<mockturtle::mig_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::full_adder_network<technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::full_adder_network<networks::technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(blueprints::mux21_network<mockturtle::xag_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(
-        blueprints::fanout_substitution_corner_case_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::inverter_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::clpl<technology_network>());
+        blueprints::se_coloring_corner_case_network<networks::technology_network>());
     check_graph_oriented_layout_design_equiv<Lyt>(
-        blueprints::one_to_five_path_difference_network<technology_network>());
-    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::nand_xnor_network<technology_network>());
+        blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::inverter_network<networks::technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::clpl<networks::technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(
+        blueprints::one_to_five_path_difference_network<networks::technology_network>());
+    check_graph_oriented_layout_design_equiv<Lyt>(blueprints::nand_xnor_network<networks::technology_network>());
 }
 
 TEST_CASE("Layout equivalence after graph-oriented layout design", "[graph-oriented-layout-design]")
@@ -102,7 +103,7 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
 {
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto ntk = blueprints::mux21_network<technology_network>();
+    const auto ntk = blueprints::mux21_network<networks::technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
     graph_oriented_layout_design_params params{};
@@ -182,9 +183,9 @@ TEST_CASE("Different parameters", "[graph-oriented-layout-design]")
         params.enable_multithreading = true;
         params.straight_inverters    = true;
 
-        for (const auto& network :
-             {blueprints::mux21_network<technology_network>(), blueprints::inverter_network<technology_network>(),
-              blueprints::parity_network<technology_network>()})
+        for (const auto& network : {blueprints::mux21_network<networks::technology_network>(),
+                                    blueprints::inverter_network<networks::technology_network>(),
+                                    blueprints::parity_network<networks::technology_network>()})
         {
             const auto layout = graph_oriented_layout_design<gate_layout>(network, params, &stats);
             REQUIRE(layout.has_value());
@@ -271,7 +272,7 @@ TEST_CASE("Multithreading", "[graph-oriented-layout-design]")
 {
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto ntk = blueprints::mux21_network<technology_network>();
+    const auto ntk = blueprints::mux21_network<networks::technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
     graph_oriented_layout_design_params params{};
@@ -309,7 +310,7 @@ TEST_CASE("Different cost objectives", "[graph-oriented-layout-design]")
 {
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto ntk = blueprints::mux21_network<technology_network>();
+    const auto ntk = blueprints::mux21_network<networks::technology_network>();
 
     graph_oriented_layout_design_stats stats{};
 
@@ -339,7 +340,7 @@ TEST_CASE("Skip tiles for PI placement", "[graph-oriented-layout-design]")
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
-    const auto ntk = blueprints::clpl<technology_network>();
+    const auto ntk = blueprints::clpl<networks::technology_network>();
 
     graph_oriented_layout_design_stats  stats{};
     graph_oriented_layout_design_params params{};
@@ -394,7 +395,7 @@ TEST_CASE("Custom cost objective", "[graph-oriented-layout-design]")
 {
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto ntk = blueprints::mux21_network<technology_network>();
+    const auto ntk = blueprints::mux21_network<networks::technology_network>();
 
     graph_oriented_layout_design_stats stats{};
 
@@ -468,20 +469,21 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
 {
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto ntk = blueprints::maj1_network<technology_network>();
+    const auto ntk = blueprints::maj1_network<networks::technology_network>();
 
     graph_oriented_layout_design_stats stats{};
 
     graph_oriented_layout_design_params params{};
 
-    CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats), high_degree_fanin_exception);
+    CHECK_THROWS_AS(graph_oriented_layout_design<gate_layout>(ntk, params, &stats),
+                    networks::utils::high_degree_fanin_exception);
 }
 
 TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")
 {
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto ntk = blueprints::mux21_network<technology_network>();
+    const auto ntk = blueprints::mux21_network<networks::technology_network>();
 
     graph_oriented_layout_design_stats stats{};
 

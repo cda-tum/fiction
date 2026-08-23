@@ -5,8 +5,8 @@
 #ifndef FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP
 #define FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP
 
+#include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/name_utils.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -97,7 +97,7 @@ class write_fgl_layout_impl
         os << fmt::format(fcn::FICTION_METADATA, FICTION_VERSION, FICTION_REPO, time_str);
 
         os << fcn::OPEN_LAYOUT_METADATA;
-        const std::string layout_name{fiction::get_name(lyt)};
+        const std::string layout_name{fiction::networks::utils::get_name(lyt)};
 
         // check if topology matches Lyt
         std::string topology{};

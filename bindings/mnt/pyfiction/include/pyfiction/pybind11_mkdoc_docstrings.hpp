@@ -45,7 +45,7 @@ static const char* mkd_doc_fiction_4 =
 
 Template Args:
     T: Network type deduced from the construction context of
-       `mutable_rank_view`.
+       `networks::views::mutable_rank_view`.
 
 )doc";
 
@@ -55,7 +55,7 @@ arguments.
 
 Template Args:
     T: Network type deduced from the construction context of
-       `mutable_rank_view`.
+       `networks::views::mutable_rank_view`.
 
 )doc";
 
@@ -64,7 +64,7 @@ static const char* mkd_doc_fiction_6 =
 
 Template Args:
     T: Network type deduced from the construction context of
-       `fiction::static_depth_view`.
+       `fiction::networks::views::static_depth_view`.
 
 )doc";
 
@@ -74,7 +74,7 @@ arguments
 
 Template Args:
     T: Network type deduced from the construction context of
-       `fiction::static_depth_view`.
+       `fiction::networks::views::static_depth_view`.
 
 )doc";
 
@@ -106,11 +106,11 @@ be used are the Manhattan and the Euclidean distance functions. See
 `distance_functor` for implementations.
 
 If the given layout implements the obstruction interface (see
-`layouts::obstruction_layout`), paths will not be routed via obstructed
+`obstruction_layout`), paths will not be routed via obstructed
 coordinates and connections.
 
 If the given layout is a gate-level layout and implements the
-obstruction interface (see `layouts::obstruction_layout`), paths may contain
+obstruction interface (see `obstruction_layout`), paths may contain
 wire crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
@@ -6382,7 +6382,7 @@ based on a Cartesian layout.
 
 This function generates a new layout suitable for finding excess
 wiring by shifting the input layout based on specified offsets. The
-generated layout is wrapped in an layouts::obstruction_layout. The shifted
+generated layout is wrapped in an obstruction_layout. The shifted
 layout is constructed by iterating through the input Cartesian layout
 diagonally and obstructing connections and coordinates accordingly.
 
@@ -7297,9 +7297,9 @@ layout. This function is called recursively until the target
 coordinate is reached. Along each path, each coordinate can occur at
 maximum once. This function does not generate duplicate or looping
 paths. If the given layout implements the obstruction interface (see
-`layouts::obstruction_layout`), paths will not be routed via obstructed
+`obstruction_layout`), paths will not be routed via obstructed
 coordinates or connections. If the given layout is a gate-level layout
-and implements the obstruction interface (see `layouts::obstruction_layout`),
+and implements the obstruction interface (see `obstruction_layout`),
 paths may contain wire crossings if specified in the parameters. Wire
 crossings are only allowed over other wires and only if the crossing
 layer is not obstructed. Furthermore, it is ensured that crossings do
@@ -8726,7 +8726,7 @@ static const char* mkd_doc_fiction_detail_graph_oriented_layout_design_impl =
     R"doc(Implementation of the graph-oriented layout design algorithm. This
 class handles the initialization and execution of the algorithm.
 
-The specification network is converted to a `technology_network`
+The specification network is converted to a `networks::technology_network`
 before anything else happens, so this class is templated on the layout
 type only. Carrying the caller's network type through the whole
 implementation would duplicate every member for each network type the
@@ -8968,7 +8968,7 @@ static const char* mkd_doc_fiction_detail_graph_oriented_layout_design_impl_grap
 
 Args:
     src: The source network to be placed, already converted to a
-         `technology_network`.
+         `networks::technology_network`.
     p: The parameters for the graph-enhanced layout search algorithm.
     st: The statistics object to record execution details.
 
@@ -10878,7 +10878,7 @@ Template Args:
 static const char* mkd_doc_fiction_detail_orthogonal_impl =
     R"doc(Implementation of the orthogonal physical design algorithm.
 
-The specification network is converted to a `technology_network`
+The specification network is converted to a `networks::technology_network`
 before anything else happens, so this class is templated on the layout
 type only. Carrying the caller's network type through the whole
 implementation would duplicate every member for each network type the
@@ -10895,7 +10895,7 @@ static const char* mkd_doc_fiction_detail_orthogonal_impl_orthogonal_impl =
 
 Args:
     src: The source network to be placed, already fanout-substituted
-         into a `technology_network`.
+         into a `networks::technology_network`.
     p: The parameters for the orthogonal physical design algorithm.
     st: The statistics object to record execution details.
 
@@ -13312,11 +13312,11 @@ clocking scheme. That is, along each path, each coordinate can occur
 at maximum once.
 
 If the given layout implements the obstruction interface (see
-`layouts::obstruction_layout`), paths will not be routed via obstructed
+`obstruction_layout`), paths will not be routed via obstructed
 coordinates or connections.
 
 If the given layout is a gate-level layout and implements the
-obstruction interface (see `layouts::obstruction_layout`), paths may contain
+obstruction interface (see `obstruction_layout`), paths may contain
 wire crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along
@@ -13624,7 +13624,7 @@ system. Due to this circumstance, it is excluded from (CLI)
 compilation by default. To enable it, pass `-DFICTION_Z3=ON` to the
 cmake call.
 
-May throw a high_degree_fanin_exception if `ntk` contains any node
+May throw a networks::utils::high_degree_fanin_exception if `ntk` contains any node
 with a fan-in too large to be handled by the specified clocking
 scheme.
 
@@ -14449,7 +14449,7 @@ static const char* mkd_doc_fiction_gate_level_drv_stats_warnings = R"doc(Number 
 
 static const char* mkd_doc_fiction_gate_level_drvs =
     R"doc(Performs design rule violation (DRV) checking on the given gate-level
-layout. The implementation of layouts::gate_level_layout allows for layouts
+layout. The implementation of gate_level_layout allows for layouts
 with structural defects like the connection of non-adjacent tiles or
 connections that defy the clocking scheme. This function checks for
 such violations and documents them in the statistics. A brief report
@@ -14480,13 +14480,13 @@ static const char* mkd_doc_fiction_gate_level_layout =
     R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of gates to clock zones (aka tiles in this context). This
 class represents a gate-level FCN layout and, thus, adds a notion of
-Boolean logic. The layouts::gate_level_layout class fulfills the requirements
+Boolean logic. The gate_level_layout class fulfills the requirements
 of a `mockturtle` logic network so that it can be used in many of
 `mockturtle`'s algorithms. Since a layout has to assign fixed
 positions to its gates (logic nodes), most generative member functions
 like `create_pi`, `create_po`, `create_and`, etc. require additional
 coordinate parameters. Consequently, `mockturtle`'s algorithms cannot
-be used to generate layouts::gate_level_layout networks. To make the class
+be used to generate gate_level_layout networks. To make the class
 compliant with the API anyways, these member functions have their
 parameters defaulted but they are, in fact required to create
 meaningful layouts.
@@ -14827,7 +14827,7 @@ static const char* mkd_doc_fiction_gate_level_layout_gate_level_layout_3 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another layouts::gate_level_layout.
+    s: Storage of another gate_level_layout.
 
 )doc";
 
@@ -14835,8 +14835,8 @@ static const char* mkd_doc_fiction_gate_level_layout_gate_level_layout_4 =
     R"doc(Copy constructor from another layout's storage.
 
 Args:
-    s: Storage of another layouts::gate_level_layout.
-    e: Event storage of another layouts::gate_level_layout.
+    s: Storage of another gate_level_layout.
+    e: Event storage of another gate_level_layout.
 
 )doc";
 
@@ -16884,7 +16884,7 @@ static const char* mkd_doc_fiction_hexagonal_layout =
 hexagonal grid. Its faces are organized in an offset coordinate system
 as provided. Hexagons can be in the layouts::pointy_top_hex or layouts::flat_top_hex
 orientation. Based on that, two respectively possible coordinate
-systems emerge accordingly: layouts::odd_row_hex and layouts::even_row_hex for pointy
+systems emerge accordingly: odd_row_hex and even_row_hex for pointy
 tops and layouts::odd_column_hex and layouts::even_column_hex for flat tops. All are
 sketched in ASCII above.
 
@@ -16898,8 +16898,8 @@ on the topic.
 Template Args:
     OffsetCoordinateType: The coordinate implementation to be used.
                           Offset coordinates are required.
-    HexagonalCoordinateSystem: One of the following: layouts::odd_row_hex,
-                               layouts::even_row_hex, layouts::odd_column_hex,
+    HexagonalCoordinateSystem: One of the following: odd_row_hex,
+                               even_row_hex, layouts::odd_column_hex,
                                layouts::even_column_hex.
     CubeCoordinateType: Internally, cube coordinates are needed for
                         certain algorithms or calculations.)doc";
@@ -19277,7 +19277,7 @@ is blocked by something. That could either be due to prior placement
 of cells, gates, and wires or because of fabrication defects.
 
 Currently, this layout type supports obstruction rules for
-layouts::gate_level_layout and layouts::cell_level_layout.
+gate_level_layout and layouts::cell_level_layout.
 
 Template Args:
     Lyt: Any coordinate layout type that is to be extended by an
@@ -20202,7 +20202,7 @@ where :math:`|N|` is the number of nodes the given network and
 :math:`|L|` is the resulting layout size given by :math:`x \cdot y`,
 which approaches :math:`(\frac{|N|}{2})^2` asymptotically.
 
-May throw a high_degree_fanin_exception if `ntk` contains any node
+May throw a networks::utils::high_degree_fanin_exception if `ntk` contains any node
 with a fan-in larger than 2.
 
 Args:
@@ -22030,8 +22030,8 @@ Template Args:
 static const char* mkd_doc_fiction_restore_names =
     R"doc(Transfers all input and output names as well as the network/layout
 name from one network to another. This function calls
-`restore_network_name`, `restore_input_names`, and
-`restore_output_names`.
+`networks::utils::restore_network_name`, `networks::utils::restore_input_names`, and
+`networks::utils::restore_output_names`.
 
 Args:
     ntk_src: Source logic network whose I/O names are to be
@@ -22048,8 +22048,8 @@ Template Args:
 static const char* mkd_doc_fiction_restore_names_2 =
     R"doc(Transfers all signal and output names as well as the network/layout
 name from one network to another. This function calls
-`restore_network_name`, `restore_signal_names`, and
-`restore_output_names`.
+`networks::utils::restore_network_name`, `networks::utils::restore_signal_names`, and
+`networks::utils::restore_output_names`.
 
 Args:
     ntk_src: Source logic network whose signal names are to be
@@ -22327,17 +22327,17 @@ Cartesian layout with shifted coordinates. Its faces are organizes in
 an offset coordinate system as provided. These can either be the
 layouts::horizontal_shift_cartesian or layouts::vertical_shift_cartesian orientation.
 Based on that, two respectively possible coordinate systems emerge
-accordingly: layouts::odd_row_cartesian and layouts::even_row_cartesian for horizontal
-shifts and layouts::odd_column_cartesian and layouts::even_column_cartesian for vertical
+accordingly: odd_row_cartesian and even_row_cartesian for horizontal
+shifts and odd_column_cartesian and layouts::even_column_cartesian for vertical
 shifts. All are sketched in ASCII above.
 
 Template Args:
     OffsetCoordinateType: The coordinate implementation to be used.
                           Offset coordinates are required.
     ShiftedCartesianCoordinateSystem: One of the following:
-                                      layouts::odd_row_cartesian,
-                                      layouts::even_row_cartesian,
-                                      layouts::odd_column_cartesian,
+                                      odd_row_cartesian,
+                                      even_row_cartesian,
+                                      odd_column_cartesian,
                                       layouts::even_column_cartesian.)doc";
 
 static const char* mkd_doc_fiction_shifted_cartesian_layout_shifted_cartesian_layout =
@@ -24157,7 +24157,7 @@ instead of `mockturtle::node_map`. Additionally, the `add_event`
 functionality has been removed. As a result, if the underlying network
 changes, either `on_add` has to be called when adding a node to the
 network and keep the current depth information or the `update_levels`
-method must be called to refresh the `static_depth_view` information.
+method must be called to refresh the `networks::views::static_depth_view` information.
 These modifications address performance issues encountered with
 `mockturtle::static_depth_view`.
 
@@ -24762,7 +24762,7 @@ static const char* mkd_doc_fiction_tile_based_layout =
     R"doc(This class provides a tile-based naming scheme for coordinate-based
 functions. It does not add any functionality, but it might be useful
 to adopt layouts::tile_based_layout to provide an intuition of abstraction in
-the code. For instance, in a layouts::gate_level_layout, the coordinates, in
+the code. For instance, in a gate_level_layout, the coordinates, in
 fact, refer to groups of coordinates in lower-level abstractions.
 These are called 'tiles' in the literature. Therefore, it might be
 helpful for a reader of the code to provide this abstraction level-
@@ -25503,7 +25503,7 @@ The real size of the network is considered the size without virtual
 PIs.
 
 Returns:
-    The real size of the `virtual_pi_network` as a `uint32_t`.
+    The real size of the `networks::virtual_pi_network` as a `uint32_t`.
 
 )doc";
 
@@ -25523,7 +25523,7 @@ cloning.
 Args:
     ntk: Input network.
     s: Shared pointer to the `virtual_storage` object to be used by
-       this `virtual_pi_network`.
+       this `networks::virtual_pi_network`.
 
 Template Args:
     Ntk: Network type.
@@ -26314,11 +26314,11 @@ in a cyclic clocking scheme. That is, along each path, each coordinate
 can occur at maximum once.
 
 If the given layout implements the obstruction interface (see
-`layouts::obstruction_layout`), paths will not be routed via obstructed
+`obstruction_layout`), paths will not be routed via obstructed
 coordinates or connections.
 
 If the given layout is a gate-level layout and implements the
-obstruction interface (see layouts::obstruction_layout), paths may contain wire
+obstruction interface (see obstruction_layout), paths may contain wire
 crossings if specified in the parameters. Wire crossings are only
 allowed over other wires and only if the crossing layer is not
 obstructed. Furthermore, it is ensured that crossings do not run along

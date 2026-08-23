@@ -9,9 +9,9 @@
 #include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/algorithms/physical_design/wiring_reduction.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -104,7 +104,7 @@ void optimize_command::execute()
                 }
             }
 
-            fiction::restore_names(*lyt_ptr, lyt_copy);
+            fiction::networks::utils::restore_names(*lyt_ptr, lyt_copy);
 
             gls.extend() = std::make_shared<Lyt>(lyt_copy);
         }

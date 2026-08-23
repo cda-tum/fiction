@@ -12,9 +12,9 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
+#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <limits>
 #include <set>
@@ -44,7 +44,8 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
     const auto energy_distribution = calculate_energy_distribution(simulated_charge_distributions);
 
     const auto energy_state_with_state_info = calculate_energy_and_state_type_with_kinks_accepted(
-        energy_distribution, simulated_charge_distributions, output_bdls, std::vector<tt>{create_and_tt()}, 1);
+        energy_distribution, simulated_charge_distributions, output_bdls,
+        std::vector<tt>{networks::utils::create_and_tt()}, 1);
 
     REQUIRE(energy_state_with_state_info.size() == 5);
 
