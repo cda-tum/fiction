@@ -4,7 +4,6 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/io/write_qca_layout.hpp>                 // writer for QCADesigner files (physical simulation)
 #include <fiction/io/write_sqd_layout.hpp>                 // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/cartesian_layout.hpp>            // Cartesian grid layouts
 #include <fiction/layouts/cell_level_layout.hpp>           // cell-level abstraction of layouts
@@ -17,9 +16,10 @@
 #include <fiction/physical_design/exact.hpp>               // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/orthogonal.hpp>          // scalable physical design of FCN layouts
 #include <fiction/synthesis/fanout_substitution.hpp>       // substitute multi-output gates with fan-out cascades
-#include <fiction/technology/area.hpp>                     // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>        // pre-defined cell implementations
-#include <fiction/technology/qca_one_library.hpp>          // a pre-defined QCA gate library
+#include <fiction/technology/fcn/area.hpp>                 // area requirement calculations
+#include <fiction/technology/fcn/cell_technologies.hpp>    // pre-defined cell implementations
+#include <fiction/technology/qca/io/write_qca_layout.hpp>  // writer for QCADesigner files (physical simulation)
+#include <fiction/technology/qca/qca_one_library.hpp>      // a pre-defined QCA gate library
 #include <fiction/types.hpp>                               // pre-defined types suitable for the FCN domain
 #include <fiction/utils/debug/network_writer.hpp>          // DOT writer for logic networks and layouts
 
@@ -68,10 +68,10 @@ void print_gate_layout_properties(const Lyt& lyt)
 template <typename CellLyt>
 void print_cell_layout_properties(const CellLyt& cell_lyt)
 {
-    fiction::area_params<fiction::technology<CellLyt>> ps{};
-    fiction::area_stats                                st{};
+    fiction::fcn::area_params<fiction::technology<CellLyt>> ps{};
+    fiction::fcn::area_stats                                st{};
     // determine area
-    fiction::area(cell_lyt, ps, &st);
+    fiction::fcn::area(cell_lyt, ps, &st);
 
     // print statistics
     std::cout
@@ -202,7 +202,7 @@ int main(int argc, char* argv[])  // NOLINT
 
     // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
     using qca_cell_level_layout = fiction::layouts::cell_level_layout<
-        fiction::qca_technology,
+        fiction::qca::technology,
         fiction::layouts::clocked_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>;
 
     std::cout << "[i] orthogonal physical design" << std::endl;
@@ -225,7 +225,8 @@ int main(int argc, char* argv[])  // NOLINT
 
     // apply the QCA ONE gate library to retrieve a cell-level layout
     auto ortho_cell_layout =
-        fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca_one_library>(ortho_gate_lyt);
+        fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca::qca_one_library>(
+            ortho_gate_lyt);
 
     // print cell properties
     print_cell_layout_properties(ortho_cell_layout);
@@ -233,7 +234,7 @@ int main(int argc, char* argv[])  // NOLINT
     // write an SVG image of the layout
     fiction::layouts::io::write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
     // write a QCADesigner simulation file
-    fiction::write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
+    fiction::qca::io::write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
     // write a SiQAD simulation file
     fiction::write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
 
@@ -272,7 +273,7 @@ int main(int argc, char* argv[])  // NOLINT
 
             // apply the QCA ONE gate library to retrieve a cell-level layout
             auto exact_cell_layout =
-                fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca_one_library>(
+                fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca::qca_one_library>(
                     *exact_gate_lyt);
 
             // print cell properties
@@ -281,7 +282,7 @@ int main(int argc, char* argv[])  // NOLINT
             // write an SVG image of the layout
             fiction::layouts::io::write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
             // write a QCADesigner simulation file
-            fiction::write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
+            fiction::qca::io::write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
             // write a SiQAD simulation file
             fiction::write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
         }

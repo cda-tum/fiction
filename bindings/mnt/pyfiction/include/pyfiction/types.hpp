@@ -15,8 +15,8 @@
 #include <fiction/layouts/shifted_cartesian_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 
@@ -100,19 +100,19 @@ using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<Technology,
 /**
  * QCA cell layout.
  */
-using py_qca_layout = py_cartesian_cell_layout<fiction::qca_technology>;
+using py_qca_layout = py_cartesian_cell_layout<fiction::qca::technology>;
 /**
  * iNML cell layout.
  */
-using py_inml_layout = py_cartesian_cell_layout<fiction::inml_technology>;
+using py_inml_layout = py_cartesian_cell_layout<fiction::inml::technology>;
 /**
  * MolQCA cell layout.
  */
-using py_mol_qca_layout = py_cartesian_cell_layout<fiction::mol_qca_technology>;
+using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_technology>;
 /**
  * SiDB cell layout.
  */
-using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb_technology>;
+using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb::technology>;
 
 /**
  * SiDB lattice layout.

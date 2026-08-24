@@ -2,8 +2,8 @@
 // Created by marcel on 04.10.21.
 //
 
-#ifndef FICTION_READ_FQCA_LAYOUT_HPP
-#define FICTION_READ_FQCA_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_QCA_IO_READ_FQCA_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_QCA_IO_READ_FQCA_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
 
@@ -17,7 +17,7 @@
 #include <string_view>
 #include <unordered_map>
 
-namespace fiction
+namespace fiction::qca::io
 {
 
 class unsupported_character_exception : public std::exception
@@ -168,12 +168,12 @@ class read_fqca_layout_impl
                         // if line indicates a primary input flag
                         else if (substituted_line == qca_stack::CELL_DEFINITION_INPUT)
                         {
-                            lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::INPUT);
+                            lyt.assign_cell_type(current_labeled_cell, fiction::technology<Lyt>::cell_type::INPUT);
                         }
                         // if line indicates a primary output flag
                         else if (substituted_line == qca_stack::CELL_DEFINITION_OUTPUT)
                         {
-                            lyt.assign_cell_type(current_labeled_cell, technology<Lyt>::cell_type::OUTPUT);
+                            lyt.assign_cell_type(current_labeled_cell, fiction::technology<Lyt>::cell_type::OUTPUT);
                         }
                         // if line indicates a cell label
                         else if (std::regex_match(substituted_line, sm, qca_stack::RE_CELL_DEFINITION_LABEL))
@@ -264,7 +264,7 @@ class read_fqca_layout_impl
         // if c is a number
         if (std::isdigit(c) != 0)
         {
-            lyt.assign_cell_type(cell, technology<Lyt>::cell_type::NORMAL);
+            lyt.assign_cell_type(cell, fiction::technology<Lyt>::cell_type::NORMAL);
 
             // assign the clock number modulo the number of clocks in its regime
             lyt.assign_clock_number(cell, to_clock_number(c));
@@ -272,7 +272,7 @@ class read_fqca_layout_impl
         // if c is a letter
         else if (std::isalpha(c) != 0)
         {
-            lyt.assign_cell_type(cell, technology<Lyt>::cell_type::NORMAL);
+            lyt.assign_cell_type(cell, fiction::technology<Lyt>::cell_type::NORMAL);
 
             // store the cell for later lookup
             cell_label_map[c] = cell;
@@ -280,12 +280,12 @@ class read_fqca_layout_impl
         // fixed 0 cell
         else if (c == '-')
         {
-            lyt.assign_cell_type(cell, technology<Lyt>::cell_type::CONST_0);
+            lyt.assign_cell_type(cell, fiction::technology<Lyt>::cell_type::CONST_0);
         }
         // fixed + cell
         else if (c == '+')
         {
-            lyt.assign_cell_type(cell, technology<Lyt>::cell_type::CONST_1);
+            lyt.assign_cell_type(cell, fiction::technology<Lyt>::cell_type::CONST_1);
         }
         else
         {
@@ -298,12 +298,12 @@ class read_fqca_layout_impl
             // if cell is in an even crossing layer
             if (cell.z % 2 == 0)
             {
-                lyt.assign_cell_mode(cell, technology<Lyt>::cell_mode::CROSSOVER);
+                lyt.assign_cell_mode(cell, fiction::technology<Lyt>::cell_mode::CROSSOVER);
             }
             // odd crossing layer (assuming it's a via)
             else
             {
-                lyt.assign_cell_mode(cell, technology<Lyt>::cell_mode::VERTICAL);
+                lyt.assign_cell_mode(cell, fiction::technology<Lyt>::cell_mode::VERTICAL);
             }
         }
 
@@ -375,6 +375,5 @@ Lyt read_fqca_layout(const std::string_view& filename, const std::string_view& l
     return lyt;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_READ_FQCA_LAYOUT_HPP
+}  // namespace fiction::qca::io
+#endif  // FICTION_TECHNOLOGY_QCA_IO_READ_FQCA_LAYOUT_HPP

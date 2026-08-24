@@ -2,10 +2,10 @@
 // Created by Jan Drewniok on 25.07.23.
 //
 
-#ifndef FICTION_CONSTANTS_HPP
-#define FICTION_CONSTANTS_HPP
+#ifndef FICTION_TECHNOLOGY_FCN_CONSTANTS_HPP
+#define FICTION_TECHNOLOGY_FCN_CONSTANTS_HPP
 
-namespace fiction::constants
+namespace fiction::fcn::constants
 {
 
 /**
@@ -43,6 +43,6 @@ inline constexpr double EV_TO_JOULE = ELEMENTARY_CHARGE;
 
 }  // namespace physical
 
-}  // namespace fiction::constants
+}  // namespace fiction::fcn::constants
 
-#endif  // FICTION_CONSTANTS_HPP
+#endif  // FICTION_TECHNOLOGY_FCN_CONSTANTS_HPP

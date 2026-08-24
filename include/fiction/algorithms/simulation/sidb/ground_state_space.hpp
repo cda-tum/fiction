@@ -9,7 +9,7 @@
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/constants.hpp"
+#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_cluster_hierarchy.hpp"
 #include "fiction/traits.hpp"
@@ -131,10 +131,10 @@ class ground_state_space_impl
             top_cluster{to_sidb_cluster(sidb_cluster_hierarchy(lyt))},
             clustering{
                 get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.simulation_parameters))},
-            mu_bounds_with_error{constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
-                                 -constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
-                                 constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
-                                 -constants::ERROR_MARGIN - params.simulation_parameters.mu_plus()}
+            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
+                                 -fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
+                                 fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
+                                 -fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_plus()}
     {}
     /**
      * The main loop in the *Ground State Space* construction. Charge spaces are updated until a fixed point is reached,

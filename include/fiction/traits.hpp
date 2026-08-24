@@ -8,8 +8,8 @@
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
@@ -577,13 +577,13 @@ template <typename CoordinateType>
 inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, layouts::coords::siqad>;
 
 template <typename Lyt>
-inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca_technology>;
+inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca::technology>;
 template <typename Lyt>
-inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml_technology>;
+inline constexpr const bool has_inml_technology_v = std::is_same_v<technology<Lyt>, inml::technology>;
 template <typename Lyt>
-inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb_technology>;
+inline constexpr const bool has_sidb_technology_v = std::is_same_v<technology<Lyt>, sidb::technology>;
 template <typename Lyt>
-inline constexpr const bool has_mol_qca_technology_v = std::is_same_v<technology<Lyt>, mol_qca_technology>;
+inline constexpr const bool has_mol_qca_technology_v = std::is_same_v<technology<Lyt>, qca::mol_technology>;
 template <typename Lyt>
 inline constexpr const bool has_offset_coord_v = is_offset_coord_v<coordinate<Lyt>>;
 template <typename Lyt>
@@ -991,11 +991,11 @@ struct has_get_gate_ports : std::false_type
 {};
 
 template <class Lib>
-struct has_get_gate_ports<Lib,
-                          std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
-                                                          typename Lib::template gate_ports<fiction::port_position>> ||
-                                           std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
-                                                          typename Lib::template gate_ports<fiction::port_direction>>>>
+struct has_get_gate_ports<
+    Lib, std::enable_if_t<std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                         typename Lib::template gate_ports<fiction::fcn::port_position>> ||
+                          std::is_same_v<decltype(std::declval<Lib>().get_gate_ports()),
+                                         typename Lib::template gate_ports<fiction::fcn::port_direction>>>>
         : std::true_type
 {};
 

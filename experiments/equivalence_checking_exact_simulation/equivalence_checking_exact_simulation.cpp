@@ -9,7 +9,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
@@ -81,7 +81,7 @@ int main()  // NOLINT
 
                     for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
                     {
-                        lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
+                        lyt.assign_cell_type(all_cells_in_region[idx], sidb::technology::cell_type::NORMAL);
                     }
 
                     auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);

@@ -2,10 +2,10 @@
 // Created by marcel on 26.07.18.
 //
 
-#ifndef FICTION_FCN_GATE_LIBRARY_HPP
-#define FICTION_FCN_GATE_LIBRARY_HPP
+#ifndef FICTION_TECHNOLOGY_FCN_GATE_LIBRARY_HPP
+#define FICTION_TECHNOLOGY_FCN_GATE_LIBRARY_HPP
 
-#include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -18,7 +18,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::fcn
 {
 
 /**
@@ -91,7 +91,7 @@ class unsupported_gate_orientation_exception : public std::exception
 
 /**
  * Base class for various FCN libraries used to map gate-level layouts to cell-level ones. Any new gate library can
- * extend `fcn_gate_library` if it benefits from its features but does not have to. The only requirement is that it must
+ * extend `gate_library` if it benefits from its features but does not have to. The only requirement is that it must
  * be a static class that provides a
  *
    \verbatim embed:rst
@@ -142,7 +142,7 @@ class unsupported_gate_orientation_exception : public std::exception
  * @tparam GateSizeY Tile size in y-dimension.
  */
 template <typename Technology, uint16_t GateSizeX, uint16_t GateSizeY>
-class fcn_gate_library
+class gate_library
 {
   public:
     using technology = Technology;
@@ -169,7 +169,7 @@ class fcn_gate_library
     /**
      * Gate libraries should not be instantiated but used as static objects.
      */
-    explicit fcn_gate_library() = delete;
+    explicit gate_library() = delete;
     /**
      * Converts a `cell_list` of type `T` to an `fcn_gate` at compile time. This function allows to conveniently
      * specify `fcn_gate` instances in a semi-readable way in code. For examples usages see `qca_one_library.hpp`.
@@ -334,6 +334,5 @@ class fcn_gate_library
         fiction::utils::stl::create_array<GateSizeX>(Technology::cell_type::EMPTY));
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_FCN_GATE_LIBRARY_HPP
+}  // namespace fiction::fcn
+#endif  // FICTION_TECHNOLOGY_FCN_GATE_LIBRARY_HPP

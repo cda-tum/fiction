@@ -6,10 +6,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/read_fqca_layout.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>
+#include <fiction/technology/qca/io/read_fqca_layout.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -242,22 +242,22 @@ void read_command::execute()
 
                                 store<fiction::cell_layout_t>().extend() =
                                     std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
-                                        fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename,
-                                                                                                     layout_name));
+                                        fiction::qca::io::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(
+                                            filename, layout_name));
                             }
-                            catch (const fiction::unsupported_character_exception& e)
+                            catch (const fiction::qca::io::unsupported_character_exception& e)
                             {
                                 env->out() << fmt::format("[e] character '{}' is not supported as a cell designator\n",
                                                           e.which());
                             }
-                            catch (const fiction::undefined_cell_label_exception& e)
+                            catch (const fiction::qca::io::undefined_cell_label_exception& e)
                             {
                                 env->out()
                                     << fmt::format("[e] cell label '{}' was used in the cell definition section but "
                                                    "never defined above\n",
                                                    e.which());
                             }
-                            catch (const fiction::unrecognized_cell_definition_exception& e)
+                            catch (const fiction::qca::io::unrecognized_cell_definition_exception& e)
                             {
                                 env->out() << fmt::format("[e] unsupported cell definition in line {}\n", e.where());
                             }

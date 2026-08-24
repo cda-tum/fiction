@@ -6,9 +6,9 @@
 #define FICTION_SIDB_SKELETON_BESTAGON_LIBRARY_HPP
 
 #include "fiction/networks/utils/truth_table_utils.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/fcn_gate_library.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/traits.hpp"
 
 namespace fiction
@@ -19,7 +19,7 @@ namespace fiction
  * Each wire comprises 2 BDL pairs. The library contains all mirrored versions, a double wire and a crossing.
  */
 class sidb_skeleton_bestagon_library
-        : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
+        : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit sidb_skeleton_bestagon_library() = delete;
@@ -59,44 +59,45 @@ class sidb_skeleton_bestagon_library
      *
      * @return Map of all different gate implementations and their respective port information.
      */
-    static gate_ports<port_direction> get_gate_ports() noexcept
+    static gate_ports<fcn::port_direction> get_gate_ports() noexcept
     {
-        static const gate_ports<port_direction> ports{{{STRAIGHT_WIRE,
-                                                        {{{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}},
-                                                       {MIRRORED_STRAIGHT_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
-                                                       {DIAGONAL_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}},
-                                                          {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                            {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}}},
-                                                       {MIRRORED_DIAGONAL_WIRE,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {TWO_IN_TWO_OUT,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {TWO_IN_ONE_OUT,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST)}}}}},
-                                                       {MIRRORED_TWO_IN_ONE_OUT,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST),
-                                                            port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {FANOUT_1_2,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}},
-                                                       {MIRRORED_FANOUT_1_2,
-                                                        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-                                                           {port_direction(port_direction::cardinal::SOUTH_EAST),
-                                                            port_direction(port_direction::cardinal::SOUTH_WEST)}}}}}}};
+        static const gate_ports<fcn::port_direction> ports{
+            {{STRAIGHT_WIRE,
+              {{{{}, {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
+                {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+                  {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}}}}},
+             {MIRRORED_STRAIGHT_WIRE,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)}, {}},
+                {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+                  {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}}}}}},
+             {DIAGONAL_WIRE,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)}, {}},
+                {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+                  {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}}}}}},
+             {MIRRORED_DIAGONAL_WIRE,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+                 {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}}}},
+             {TWO_IN_TWO_OUT,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST),
+                  fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+                 {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST),
+                  fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}}}},
+             {TWO_IN_ONE_OUT,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST),
+                  fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+                 {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}}}}},
+             {MIRRORED_TWO_IN_ONE_OUT,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST),
+                  fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+                 {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}}}},
+             {FANOUT_1_2,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+                 {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST),
+                  fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}}}},
+             {MIRRORED_FANOUT_1_2,
+              {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+                 {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST),
+                  fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}}}}}};
 
         return ports;
     }
@@ -110,28 +111,28 @@ class sidb_skeleton_bestagon_library
      * @return port directions of the given tile are returned as `port_list`.
      */
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
+    [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
-        port_list<port_direction> p{};
+        fcn::port_list<fcn::port_direction> p{};
 
         // determine incoming connector ports
         if (lyt.has_north_eastern_incoming_signal(t))
         {
-            p.inp.emplace(port_direction::cardinal::NORTH_EAST);
+            p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
         }
         if (lyt.has_north_western_incoming_signal(t))
         {
-            p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+            p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
         }
 
         // determine outgoing connector ports
         if (lyt.has_south_eastern_outgoing_signal(t))
         {
-            p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+            p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
         }
         if (lyt.has_south_western_outgoing_signal(t))
         {
-            p.out.emplace(port_direction::cardinal::SOUTH_WEST);
+            p.out.emplace(fcn::port_direction::cardinal::SOUTH_WEST);
         }
 
         // gates without connector ports
@@ -141,23 +142,23 @@ class sidb_skeleton_bestagon_library
         {
             if (lyt.has_no_incoming_signal(t))
             {
-                p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
             }
             if (lyt.has_no_outgoing_signal(t))
             {
-                p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
             }
         }
         else  // 2-input functions
         {
             if (lyt.has_no_incoming_signal(t))
             {
-                p.inp.emplace(port_direction::cardinal::NORTH_WEST);
-                p.inp.emplace(port_direction::cardinal::NORTH_EAST);
+                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
+                p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
             }
             if (lyt.has_no_outgoing_signal(t))
             {
-                p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
             }
         }
 

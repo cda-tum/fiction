@@ -2,8 +2,8 @@
 // Created by marcel on 29.09.18.
 //
 
-#ifndef FICTION_CELL_PORTS_HPP
-#define FICTION_CELL_PORTS_HPP
+#ifndef FICTION_TECHNOLOGY_FCN_CELL_PORTS_HPP
+#define FICTION_TECHNOLOGY_FCN_CELL_PORTS_HPP
 
 #include "fiction/utils/stl/hash.hpp"
 
@@ -17,7 +17,7 @@
 #include <set>
 #include <utility>
 
-namespace fiction
+namespace fiction::fcn
 {
 /**
  * A port position is a relative location of a cell within a tile.
@@ -231,16 +231,15 @@ struct port_list
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::fcn
 namespace std
 {
 
 // hashing for port_position
 template <>
-struct hash<fiction::port_position>
+struct hash<fiction::fcn::port_position>
 {
-    std::size_t operator()(const fiction::port_position& port) const noexcept
+    std::size_t operator()(const fiction::fcn::port_position& port) const noexcept
     {
         std::size_t h = port.x ^ port.y;
         fiction::utils::stl::hash_combine(h, port.x, port.y);
@@ -250,18 +249,18 @@ struct hash<fiction::port_position>
 };
 // hashing for port_direction
 template <>
-struct hash<fiction::port_direction>
+struct hash<fiction::fcn::port_direction>
 {
-    std::size_t operator()(const fiction::port_direction& port) const noexcept
+    std::size_t operator()(const fiction::fcn::port_direction& port) const noexcept
     {
         return std::hash<std::size_t>{}(static_cast<std::size_t>(port.dir));
     }
 };
 // hashing for port_list
 template <typename PortType>
-struct hash<fiction::port_list<PortType>>
+struct hash<fiction::fcn::port_list<PortType>>
 {
-    std::size_t operator()(const fiction::port_list<PortType>& port_list) const noexcept
+    std::size_t operator()(const fiction::fcn::port_list<PortType>& port_list) const noexcept
     {
         std::size_t h = 0;
         fiction::utils::stl::hash_combine(h, port_list.inp, port_list.out);
@@ -276,7 +275,7 @@ namespace fmt
 {
 // make port_position compatible with fmt::format
 template <>
-struct formatter<fiction::port_position>
+struct formatter<fiction::fcn::port_position>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -285,14 +284,14 @@ struct formatter<fiction::port_position>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_position& p, FormatContext& ctx) const
+    auto format(const fiction::fcn::port_position& p, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{})"), p.x, p.y);
     }
 };
 // make port_direction compatible with fmt::format
 template <>
-struct formatter<fiction::port_direction>
+struct formatter<fiction::fcn::port_direction>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -301,48 +300,48 @@ struct formatter<fiction::port_direction>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_direction& p, FormatContext& ctx) const
+    auto format(const fiction::fcn::port_direction& p, FormatContext& ctx) const
     {
         const auto* dir = "?";
 
         switch (p.dir)
         {
-            case fiction::port_direction::NORTH:
+            case fiction::fcn::port_direction::NORTH:
             {
                 dir = "N";
                 break;
             }
-            case fiction::port_direction::NORTH_EAST:
+            case fiction::fcn::port_direction::NORTH_EAST:
             {
                 dir = "NE";
                 break;
             }
-            case fiction::port_direction::EAST:
+            case fiction::fcn::port_direction::EAST:
             {
                 dir = "E";
                 break;
             }
-            case fiction::port_direction::SOUTH_EAST:
+            case fiction::fcn::port_direction::SOUTH_EAST:
             {
                 dir = "SE";
                 break;
             }
-            case fiction::port_direction::SOUTH:
+            case fiction::fcn::port_direction::SOUTH:
             {
                 dir = "S";
                 break;
             }
-            case fiction::port_direction::SOUTH_WEST:
+            case fiction::fcn::port_direction::SOUTH_WEST:
             {
                 dir = "SW";
                 break;
             }
-            case fiction::port_direction::WEST:
+            case fiction::fcn::port_direction::WEST:
             {
                 dir = "W";
                 break;
             }
-            case fiction::port_direction::NORTH_WEST:
+            case fiction::fcn::port_direction::NORTH_WEST:
             {
                 dir = "NW";
                 break;
@@ -358,7 +357,7 @@ struct formatter<fiction::port_direction>
 };
 // make port_list compatible with fmt::format
 template <typename PortType>
-struct formatter<fiction::port_list<PortType>>
+struct formatter<fiction::fcn::port_list<PortType>>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -367,11 +366,11 @@ struct formatter<fiction::port_list<PortType>>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::port_list<PortType>& pl, FormatContext& ctx) const
+    auto format(const fiction::fcn::port_list<PortType>& pl, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("inp: {}, out: {}"), join(pl.inp, ", "), join(pl.out, ", "));
     }
 };
 }  // namespace fmt
 
-#endif  // FICTION_CELL_PORTS_HPP
+#endif  // FICTION_TECHNOLOGY_FCN_CELL_PORTS_HPP

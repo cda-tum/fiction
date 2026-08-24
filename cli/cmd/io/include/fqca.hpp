@@ -5,7 +5,7 @@
 #ifndef FICTION_FQCA_HPP
 #define FICTION_FQCA_HPP
 
-#include <fiction/io/write_fqca_layout.hpp>
+#include <fiction/technology/qca/io/write_fqca_layout.hpp>
 
 #include <alice/alice.hpp>
 
@@ -41,7 +41,7 @@ class fqca_command final : public command
      */
     std::string filename;
 
-    fiction::write_fqca_layout_params ps{};
+    fiction::qca::io::write_fqca_layout_params ps{};
 };
 
 }  // namespace alice

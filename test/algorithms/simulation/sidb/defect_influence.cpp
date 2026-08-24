@@ -14,7 +14,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
-#include <fiction/technology/constants.hpp>
+#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -44,7 +44,7 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
         const auto             defect_influence_domain = defect_influence_grid_search(
             cube_lyt, std::vector<tt>{networks::utils::create_and_tt()}, params, 3, &stats);
         CHECK_THAT(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance,
-                   Catch::Matchers::WithinAbs(5.81097444496187787, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(5.81097444496187787, fcn::constants::ERROR_MARGIN));
         CHECK(stats.num_evaluated_defect_positions == 676);
         CHECK(stats.num_non_influencing_defect_positions == 527);
         CHECK(stats.num_influencing_defect_positions == 149);
@@ -96,7 +96,7 @@ TEMPLATE_TEST_CASE(
                 lyt_cube, std::vector<tt>{networks::utils::create_and_tt()}, params, 1, &stats);
             const auto defect_clearance = calculate_defect_clearance(lyt_cube, defect_influence_domain);
             CHECK_THAT(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance,
-                       Catch::Matchers::WithinAbs(3.16654512047436443, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(3.16654512047436443, fcn::constants::ERROR_MARGIN));
             CHECK(stats.num_evaluated_defect_positions == 3599);
             CHECK(stats.num_non_influencing_defect_positions == 3062);
             CHECK(stats.num_influencing_defect_positions == 537);
@@ -123,7 +123,7 @@ TEMPLATE_TEST_CASE(
             const auto             defect_influence_domain = defect_influence_quicktrace(
                 lyt_cube, std::vector<tt>{networks::utils::create_and_tt()}, 20, params, &stats);
             CHECK_THAT(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance,
-                       Catch::Matchers::WithinAbs(3.16654512047436443, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(3.16654512047436443, fcn::constants::ERROR_MARGIN));
         }
 
         params.influence_def = defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE;
@@ -135,7 +135,7 @@ TEMPLATE_TEST_CASE(
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
             CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
-                       Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(2.76906300000000005, fcn::constants::ERROR_MARGIN));
         }
 
         SECTION("QuickTrace, considering a change in the ground state as influence")
@@ -145,7 +145,7 @@ TEMPLATE_TEST_CASE(
             const auto clearance_result = calculate_defect_clearance(lyt_cube, defect_operational_domain);
 
             CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
-                       Catch::Matchers::WithinAbs(2.76906300000000005, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(2.76906300000000005, fcn::constants::ERROR_MARGIN));
         }
 
         SECTION("Random Sampling, considering a change in the ground state as influence")
@@ -199,7 +199,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
             const auto clearance_result = calculate_defect_clearance(lyt, defect_operational_domain);
 
             CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
-                       Catch::Matchers::WithinAbs(0.665060, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(0.665060, fcn::constants::ERROR_MARGIN));
             CHECK((((clearance_result.defect_position.x == -1) && (clearance_result.defect_position.y == -1) ||
                     ((clearance_result.defect_position.x == 1) && (clearance_result.defect_position.y == -1)))));
         }
@@ -222,7 +222,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
                        fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lyt, {0, 0}, {1, -1}), 4),
-                   Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
@@ -243,7 +243,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
                        fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
-                   Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("layout with one pertuber and one DB pair, negative defect")
@@ -268,7 +268,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
                        fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
-                   Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01")
@@ -301,7 +301,7 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         CHECK(defect_clearance.defect_position.y == 9);
 
         CHECK_THAT(defect_clearance.defect_clearance_distance,
-                   Catch::Matchers::WithinAbs(2.8999201713, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(2.8999201713, fcn::constants::ERROR_MARGIN));
 
         // high screening
         defect_operational_params.defect =
@@ -354,6 +354,6 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         CHECK(clearance_result.defect_position.z == 0);
 
         CHECK_THAT(clearance_result.defect_clearance_distance,
-                   Catch::Matchers::WithinAbs(2.8999201713, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(2.8999201713, fcn::constants::ERROR_MARGIN));
     }
 }

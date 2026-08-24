@@ -13,7 +13,7 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
-#include <fiction/technology/constants.hpp>
+#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -101,7 +101,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
                                                                     std::log(1.0 - tts_stat_quickexact.acc));
 
         CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
-                   Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -124,7 +124,7 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
                  std::log(1.0 - tts_stat_clustercomplete.acc));
         }
         CHECK_THAT(tts_stat_clustercomplete.time_to_solution - tts_calculated,
-                   Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
 
 #endif  // FICTION_ALGLIB_ENABLED
     }
@@ -171,14 +171,14 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         {
             tts_calculated = tts_stat_quickexact.mean_single_runtime;
             CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
-                       Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
         }
         else if (tts_stat_quickexact.acc != 0)
         {
             tts_calculated = (tts_stat_quickexact.mean_single_runtime * std::log(1.0 - tts_params.confidence_level) /
                               std::log(1.0 - (tts_stat_quickexact.acc / 100)));
             CHECK_THAT(tts_stat_quickexact.time_to_solution - tts_calculated,
-                       Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+                       Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
         }
     }
 }
@@ -227,7 +227,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
                                         st.mean_single_runtime :
                                         (st.mean_single_runtime * std::log(1.0 - 0.997) / std::log(1.0 - st.acc));
 
-        CHECK_THAT(st.time_to_solution - tts_calculated, Catch::Matchers::WithinAbs(0.0, constants::ERROR_MARGIN));
+        CHECK_THAT(st.time_to_solution - tts_calculated, Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 }
 

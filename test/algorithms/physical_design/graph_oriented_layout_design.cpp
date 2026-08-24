@@ -16,7 +16,7 @@
 #include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
-#include <fiction/technology/qca_one_library.hpp>
+#include <fiction/technology/qca/qca_one_library.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -80,7 +80,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     using cell_layout =
-        layouts::cell_level_layout<qca_technology,
+        layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const auto check = [](const auto& ntk)
@@ -93,7 +93,7 @@ TEST_CASE("Gate library application", "[graph-oriented-layout-design]")
         const auto layout = physical_design::graph_oriented_layout_design<gate_layout>(ntk, params, &stats);
         REQUIRE(layout.has_value());
 
-        CHECK_NOTHROW(physical_design::apply_gate_library<cell_layout, qca_one_library>(*layout));
+        CHECK_NOTHROW(physical_design::apply_gate_library<cell_layout, qca::qca_one_library>(*layout));
     };
 
     check(blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>());

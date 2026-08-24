@@ -7,12 +7,12 @@
 #include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/io/write_fqca_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/qca/io/write_fqca_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -51,24 +51,24 @@ TEST_CASE("Write empty FQCA layout", "[fqca]")
         SECTION("Cartesian layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca_technology,
+                layouts::cell_level_layout<qca::technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
-            write_fqca_layout(layout, layout_stream, {true});
+            qca::io::write_fqca_layout(layout, layout_stream, {true});
 
             CHECK(layout_stream.str() == fqca_layout);
         }
         SECTION("Stacked layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca_technology,
+                layouts::cell_level_layout<qca::technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
-            write_fqca_layout(layout, layout_stream, {true});
+            qca::io::write_fqca_layout(layout, layout_stream, {true});
 
             CHECK(layout_stream.str() == fqca_layout);
         }
@@ -97,24 +97,24 @@ TEST_CASE("Write empty FQCA layout", "[fqca]")
         SECTION("Cartesian layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca_technology,
+                layouts::cell_level_layout<qca::technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
-            write_fqca_layout(layout, layout_stream, {false});
+            qca::io::write_fqca_layout(layout, layout_stream, {false});
 
             CHECK(layout_stream.str() == fqca_layout);
         }
         SECTION("Stacked layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca_technology,
+                layouts::cell_level_layout<qca::technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
             const qca_layout layout{{2, 2, 1}, "empty layout"};
 
-            write_fqca_layout(layout, layout_stream, {false});
+            qca::io::write_fqca_layout(layout, layout_stream, {false});
 
             CHECK(layout_stream.str() == fqca_layout);
         }
@@ -158,20 +158,20 @@ TEST_CASE("Write single-layer FQCA AND gate", "[fqca]")
     SECTION("Cartesian layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca_technology,
+            layouts::cell_level_layout<qca::technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-        write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
+        qca::io::write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
 
         CHECK(layout_stream.str() == fqca_layout);
     }
     SECTION("Stacked layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca_technology,
+            layouts::cell_level_layout<qca::technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
-        write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
+        qca::io::write_fqca_layout(blueprints::single_layer_qca_and_gate<qca_layout>(), layout_stream, {false});
 
         CHECK(layout_stream.str() == fqca_layout);
     }
@@ -180,7 +180,7 @@ TEST_CASE("Write single-layer FQCA AND gate", "[fqca]")
 TEST_CASE("Exceeding cell names", "[fqca]")
 {
     using qca_layout =
-        layouts::cell_level_layout<qca_technology,
+        layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     qca_layout layout{{52, 0}, "[a-z]+[A-Z]+1"};
@@ -188,12 +188,12 @@ TEST_CASE("Exceeding cell names", "[fqca]")
     // create layout with 53 named cells
     for (auto i = 0u; i <= 52; ++i)
     {
-        layout.assign_cell_type({i, 0}, qca_technology::cell_type::NORMAL);
+        layout.assign_cell_type({i, 0}, qca::technology::cell_type::NORMAL);
         layout.assign_cell_name({i, 0}, std::to_string(i));
     }
 
     std::ostringstream dummy_stream{};
 
     // since only a-z and A-Z are allowed for named cells, 53 named cells should throw an exception
-    CHECK_THROWS_AS(write_fqca_layout(layout, dummy_stream), out_of_cell_names_exception);
+    CHECK_THROWS_AS(qca::io::write_fqca_layout(layout, dummy_stream), qca::io::out_of_cell_names_exception);
 }

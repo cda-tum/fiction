@@ -2,12 +2,12 @@
 // Created by marcel on 29.07.19.
 //
 
-#ifndef FICTION_INML_TOPOLINANO_LIBRARY_HPP
-#define FICTION_INML_TOPOLINANO_LIBRARY_HPP
+#ifndef FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP
+#define FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP
 
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/fcn_gate_library.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -19,7 +19,7 @@
 #include <stdexcept>
 #include <vector>
 
-namespace fiction
+namespace fiction::inml
 {
 /**
  * A concrete FCN gate library as used in \"ToPoliNano\" (https://topolinano.polito.it/) for the iNML technology. In
@@ -27,12 +27,12 @@ namespace fiction
  * \times 4\f$ magnet positions with one empty row in most tiles (except for MAJ which needs to be handled differently
  * as this library is not uniform otherwise). Theoretically, it allows for multiple wires in the same tile.
  */
-class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
+class topolinano_library : public fcn::gate_library<inml::technology, 4, 4>
 {
   public:
-    explicit inml_topolinano_library() = delete;
+    explicit topolinano_library() = delete;
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
@@ -111,13 +111,13 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                     {
                         const auto inp_mark_pos = p.inp.empty() ? opposite(*p.out.begin()) : *p.inp.begin();
 
-                        wire = mark_cell(wire, inp_mark_pos, inml_technology::cell_mark::INPUT);
+                        wire = mark_cell(wire, inp_mark_pos, inml::technology::cell_mark::INPUT);
                     }
                     if (lyt.is_po(n))
                     {
                         const auto out_mark_pos = p.out.empty() ? opposite(*p.inp.begin()) : *p.out.begin();
 
-                        wire = mark_cell(wire, out_mark_pos, inml_technology::cell_mark::OUTPUT);
+                        wire = mark_cell(wire, out_mark_pos, inml::technology::cell_mark::OUTPUT);
                     }
 
                     return wire;
@@ -126,10 +126,10 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         }
         catch (const std::out_of_range&)
         {
-            throw unsupported_gate_orientation_exception(t, p);
+            throw fcn::unsupported_gate_orientation_exception(t, p);
         }
 
-        throw unsupported_gate_type_exception(t);
+        throw fcn::unsupported_gate_type_exception(t);
     }
 
     /**
@@ -161,9 +161,9 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                 // upper hump
                 if (const auto inp = lyt.get_cell_type(hump.front()), out = lyt.get_cell_type(hump.back()),
                     fts = lyt.get_cell_type(lyt.south(hump.front())), bts = lyt.get_cell_type(lyt.south(hump.back()));
-                    (inp == inml_technology::cell_type::INPUT || fts == inml_technology::cell_type::NORMAL) &&
-                    (bts == inml_technology::cell_type::NORMAL || out == inml_technology::cell_type::OUTPUT ||
-                     bts == inml_technology::cell_type::INVERTER_MAGNET))
+                    (inp == inml::technology::cell_type::INPUT || fts == inml::technology::cell_type::NORMAL) &&
+                    (bts == inml::technology::cell_type::NORMAL || out == inml::technology::cell_type::OUTPUT ||
+                     bts == inml::technology::cell_type::INVERTER_MAGNET))
                 {
                     // hump found, check if there is enough space below for merging
                     if (std::all_of(hump.begin() + 1, hump.end() - 2,
@@ -173,13 +173,13 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                         for (const auto& hc : hump)
                         {
                             const auto s = lyt.south(hc);
-                            if (lyt.get_cell_type(s) != inml_technology::cell_type::INVERTER_MAGNET)
+                            if (lyt.get_cell_type(s) != inml::technology::cell_type::INVERTER_MAGNET)
                             {
                                 lyt.assign_cell_type(s, lyt.get_cell_type(hc));
                                 lyt.assign_cell_mode(s, lyt.get_cell_mode(hc));
                                 lyt.assign_cell_name(s, lyt.get_cell_name(hc));
                             }
-                            lyt.assign_cell_type(hc, inml_technology::cell_type::EMPTY);
+                            lyt.assign_cell_type(hc, inml::technology::cell_type::EMPTY);
                             lyt.assign_cell_name(hc, "");
                         }
 
@@ -189,8 +189,8 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                 // if there are normal cells north of first and last hump cell, this is a lower hump
                 else if (const auto ftn = lyt.get_cell_type(lyt.north(hump.front())),
                          btn            = lyt.get_cell_type(lyt.north(hump.back()));
-                         (inp == inml_technology::cell_type::INPUT || ftn == inml_technology::cell_type::NORMAL) &&
-                         (btn == inml_technology::cell_type::NORMAL || out == inml_technology::cell_type::OUTPUT))
+                         (inp == inml::technology::cell_type::INPUT || ftn == inml::technology::cell_type::NORMAL) &&
+                         (btn == inml::technology::cell_type::NORMAL || out == inml::technology::cell_type::OUTPUT))
                 {
                     // hump found, check if there is enough space above for merging
                     if (std::all_of(hump.begin() + 1, hump.end() - 2,
@@ -203,7 +203,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                             lyt.assign_cell_type(n, lyt.get_cell_type(hc));
                             lyt.assign_cell_mode(n, lyt.get_cell_mode(hc));
                             lyt.assign_cell_name(n, lyt.get_cell_name(hc));
-                            lyt.assign_cell_type(hc, inml_technology::cell_type::EMPTY);
+                            lyt.assign_cell_type(hc, inml::technology::cell_type::EMPTY);
                             lyt.assign_cell_name(hc, "");
                         }
 
@@ -235,16 +235,16 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // encountering a normal, input, or inverter magnet triggers collecting hump cells
-                                case inml_technology::cell_type::NORMAL:
-                                case inml_technology::cell_type::INPUT:
-                                case inml_technology::cell_type::INVERTER_MAGNET:
+                                case inml::technology::cell_type::NORMAL:
+                                case inml::technology::cell_type::INPUT:
+                                case inml::technology::cell_type::INVERTER_MAGNET:
                                 {
                                     st = status::COLLECT;
                                     hump.push_back(c);
                                     break;
                                 }
                                 // remain searching
-                                case inml_technology::cell_type::EMPTY:
+                                case inml::technology::cell_type::EMPTY:
                                 {
                                     break;
                                 }
@@ -262,15 +262,15 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                             switch (const auto t = lyt.get_cell_type(c); t)
                             {
                                 // collect cells
-                                case inml_technology::cell_type::NORMAL:
-                                case inml_technology::cell_type::INVERTER_MAGNET:
+                                case inml::technology::cell_type::NORMAL:
+                                case inml::technology::cell_type::INVERTER_MAGNET:
                                 {
                                     hump.push_back(c);
                                     break;
                                 }
                                 // interesting branch: could be a hump
-                                case inml_technology::cell_type::EMPTY:
-                                case inml_technology::cell_type::OUTPUT:
+                                case inml::technology::cell_type::EMPTY:
+                                case inml::technology::cell_type::OUTPUT:
                                 {
                                     handle(hump);
                                     // discard hump cells and start searching again
@@ -290,7 +290,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
                         }
                         case status::SKIP:
                         {
-                            if (const auto t = lyt.get_cell_type(c); t == inml_technology::cell_type::EMPTY)
+                            if (const auto t = lyt.get_cell_type(c); t == inml::technology::cell_type::EMPTY)
                             {
                                 // skipping over, return to searching
                                 st = status::SEARCH;
@@ -383,7 +383,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
     }
 
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
+    [[nodiscard]] static fcn::port_list<fcn::port_position> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
         static_assert(fiction::has_is_inv_v<Lyt>, "Lyt must implement the is_inv function");
         static_assert(fiction::has_is_po_v<Lyt>, "Lyt must implement the is_po function");
@@ -392,7 +392,7 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         static_assert(mockturtle::has_is_or_v<Lyt>, "Lyt must implement the is_or function");
         static_assert(mockturtle::has_is_maj_v<Lyt>, "Lyt must implement the is_maj function");
 
-        port_list<port_position> p{};
+        fcn::port_list<fcn::port_position> p{};
 
         const auto n = lyt.get_node(t);
 
@@ -567,15 +567,15 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
         return p;
     }
 
-    static port_position opposite(const port_position& p)
+    static fcn::port_position opposite(const fcn::port_position& p)
     {
-        using port_port_map = phmap::flat_hash_map<port_position, port_position>;
+        using port_port_map = phmap::flat_hash_map<fcn::port_position, fcn::port_position>;
 
         static const port_port_map pp_map = {
-            {port_position(0, 0), port_position(3, 0)}, {port_position(0, 1), port_position(3, 1)},
-            {port_position(0, 2), port_position(3, 2)}, {port_position(0, 3), port_position(3, 3)},
-            {port_position(3, 0), port_position(0, 0)}, {port_position(3, 1), port_position(0, 1)},
-            {port_position(3, 2), port_position(0, 2)}, {port_position(3, 3), port_position(0, 3)},
+            {fcn::port_position(0, 0), fcn::port_position(3, 0)}, {fcn::port_position(0, 1), fcn::port_position(3, 1)},
+            {fcn::port_position(0, 2), fcn::port_position(3, 2)}, {fcn::port_position(0, 3), fcn::port_position(3, 3)},
+            {fcn::port_position(3, 0), fcn::port_position(0, 0)}, {fcn::port_position(3, 1), fcn::port_position(0, 1)},
+            {fcn::port_position(3, 2), fcn::port_position(0, 2)}, {fcn::port_position(3, 3), fcn::port_position(0, 3)},
         };
 
         return pp_map.at(p);
@@ -753,29 +753,29 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
 
     // clang-format on
 
-    using port_gate_map = phmap::flat_hash_map<port_list<port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, fcn_gate>;
 
     static inline const port_gate_map WIRE_MAP = {
         // straight wires
-        {{{port_position(0, 2)}, {port_position(3, 2)}}, LOWER_WIRE},
-        {{{}, {port_position(3, 2)}}, LOWER_WIRE},
-        {{{port_position(0, 2)}, {}}, LOWER_WIRE},
-        {{{port_position(0, 0)}, {port_position(3, 0)}}, UPPER_WIRE},
-        {{{}, {port_position(3, 0)}}, UPPER_WIRE},
-        {{{port_position(0, 0)}, {}}, UPPER_WIRE},
-        {{{port_position(0, 3)}, {port_position(3, 3)}}, rotate_180(UPPER_WIRE)},
-        {{{}, {port_position(3, 3)}}, rotate_180(UPPER_WIRE)},
-        {{{port_position(0, 3)}, {}}, rotate_180(UPPER_WIRE)},
+        {{{fcn::port_position(0, 2)}, {fcn::port_position(3, 2)}}, LOWER_WIRE},
+        {{{}, {fcn::port_position(3, 2)}}, LOWER_WIRE},
+        {{{fcn::port_position(0, 2)}, {}}, LOWER_WIRE},
+        {{{fcn::port_position(0, 0)}, {fcn::port_position(3, 0)}}, UPPER_WIRE},
+        {{{}, {fcn::port_position(3, 0)}}, UPPER_WIRE},
+        {{{fcn::port_position(0, 0)}, {}}, UPPER_WIRE},
+        {{{fcn::port_position(0, 3)}, {fcn::port_position(3, 3)}}, rotate_180(UPPER_WIRE)},
+        {{{}, {fcn::port_position(3, 3)}}, rotate_180(UPPER_WIRE)},
+        {{{fcn::port_position(0, 3)}, {}}, rotate_180(UPPER_WIRE)},
         // bent wires
-        {{{port_position(0, 0)}, {port_position(3, 2)}}, TOP_DOWN_BENT_WIRE},
-        {{{port_position(0, 2)}, {port_position(3, 0)}}, BOTTOM_UP_BENT_WIRE},
-        {{{port_position(0, 2)}, {port_position(3, 3)}}, BOTTOM_DOWN_BENT_WIRE},
+        {{{fcn::port_position(0, 0)}, {fcn::port_position(3, 2)}}, TOP_DOWN_BENT_WIRE},
+        {{{fcn::port_position(0, 2)}, {fcn::port_position(3, 0)}}, BOTTOM_UP_BENT_WIRE},
+        {{{fcn::port_position(0, 2)}, {fcn::port_position(3, 3)}}, BOTTOM_DOWN_BENT_WIRE},
         // staircase wires
-        {{{port_position(0, 0)}, {port_position(3, 3)}}, TOP_DOWN_STAIRCASE_WIRE},
-        {{{port_position(0, 3)}, {port_position(3, 0)}}, BOTTOM_UP_STAIRCASE_WIRE},
+        {{{fcn::port_position(0, 0)}, {fcn::port_position(3, 3)}}, TOP_DOWN_STAIRCASE_WIRE},
+        {{{fcn::port_position(0, 3)}, {fcn::port_position(3, 0)}}, BOTTOM_UP_STAIRCASE_WIRE},
         // special wires
-        {{{port_position(0, 0)}, {port_position(1, 0)}}, MAJORITY_WIRE},
-        {{{port_position(0, 3)}, {port_position(3, 2)}}, COUPLER_WIRE}
+        {{{fcn::port_position(0, 0)}, {fcn::port_position(1, 0)}}, MAJORITY_WIRE},
+        {{{fcn::port_position(0, 3)}, {fcn::port_position(3, 2)}}, COUPLER_WIRE}
         // NOTE more wires go here!
     };
     /**
@@ -783,20 +783,19 @@ class inml_topolinano_library : public fcn_gate_library<inml_technology, 4, 4>
      */
     static inline const port_gate_map INVERTER_MAP = {
         // straight inverters
-        {{{port_position(0, 2)}, {port_position(3, 2)}}, LOWER_STRAIGHT_INVERTER},
-        {{{port_position(0, 3)}, {port_position(3, 2)}}, BOTTOM_LOWER_STRAIGHT_INVERTER},
-        {{{port_position(0, 0)}, {port_position(3, 0)}}, UPPER_STRAIGHT_INVERTER},
+        {{{fcn::port_position(0, 2)}, {fcn::port_position(3, 2)}}, LOWER_STRAIGHT_INVERTER},
+        {{{fcn::port_position(0, 3)}, {fcn::port_position(3, 2)}}, BOTTOM_LOWER_STRAIGHT_INVERTER},
+        {{{fcn::port_position(0, 0)}, {fcn::port_position(3, 0)}}, UPPER_STRAIGHT_INVERTER},
         // without outputs
-        {{{port_position(0, 2)}, {}}, LOWER_STRAIGHT_INVERTER},
-        {{{port_position(0, 0)}, {}}, UPPER_STRAIGHT_INVERTER},
+        {{{fcn::port_position(0, 2)}, {}}, LOWER_STRAIGHT_INVERTER},
+        {{{fcn::port_position(0, 0)}, {}}, UPPER_STRAIGHT_INVERTER},
         // without inputs
-        {{{}, {port_position(3, 2)}}, LOWER_STRAIGHT_INVERTER},
-        {{{}, {port_position(3, 0)}}, UPPER_STRAIGHT_INVERTER},
+        {{{}, {fcn::port_position(3, 2)}}, LOWER_STRAIGHT_INVERTER},
+        {{{}, {fcn::port_position(3, 0)}}, UPPER_STRAIGHT_INVERTER},
         // bent inverters
-        {{{port_position(0, 0)}, {port_position(3, 2)}}, TOP_DOWN_BENT_INVERTER},
-        {{{port_position(0, 2)}, {port_position(3, 0)}}, BOTTOM_UP_BENT_INVERTER},
-        {{{port_position(0, 3)}, {port_position(3, 0)}}, BOTTOM_LOWER_UP_BENT_INVERTER}};
+        {{{fcn::port_position(0, 0)}, {fcn::port_position(3, 2)}}, TOP_DOWN_BENT_INVERTER},
+        {{{fcn::port_position(0, 2)}, {fcn::port_position(3, 0)}}, BOTTOM_UP_BENT_INVERTER},
+        {{{fcn::port_position(0, 3)}, {fcn::port_position(3, 0)}}, BOTTOM_LOWER_UP_BENT_INVERTER}};
 };
-}  // namespace fiction
-
-#endif  // FICTION_INML_TOPOLINANO_LIBRARY_HPP
+}  // namespace fiction::inml
+#endif  // FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP

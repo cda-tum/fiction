@@ -126,13 +126,13 @@ TEMPLATE_TEST_CASE("Determine the groundstate of a two BDL pair wire with input 
 {
     TestType lyt{};
 
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({2, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::NORMAL);
 
     const sidb_simulation_parameters params{2, -0.32};
 

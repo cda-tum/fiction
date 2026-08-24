@@ -7,7 +7,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice.hpp"
@@ -463,13 +463,13 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
             }
 
             if (const auto ct = lyt.get_cell_type(loop_coordinate);
-                ct != sidb_technology::cell_type::EMPTY && !already_printed)
+                ct != sidb::technology::cell_type::EMPTY && !already_printed)
             {
-                if (ct == sidb_technology::cell_type::INPUT)
+                if (ct == sidb::technology::cell_type::INPUT)
                 {
                     os << fmt::format(lat_color ? detail::INP_COLOR : detail::NO_COLOR, " ◯ ");
                 }
-                else if (ct == sidb_technology::cell_type::OUTPUT)
+                else if (ct == sidb::technology::cell_type::OUTPUT)
                 {
                     os << fmt::format(lat_color ? detail::OUT_COLOR : detail::NO_COLOR, " ◯ ");
                 }

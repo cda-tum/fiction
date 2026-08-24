@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/read_fqca_layout.hpp>
+#include <fiction/technology/qca/io/read_fqca_layout.hpp>
 
 #include <string_view>
 
@@ -21,13 +21,13 @@ namespace detail
 {
 
 template <typename Lyt>
-void read_fqca_layout(nanobind::module_& m)
+void qca::io::read_fqca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     // NOLINTNEXTLINE(misc-const-correctness)
     Lyt (*const read_fqca_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::read_fqca_layout<Lyt>;
+        &fiction::qca::io::read_fqca_layout<Lyt>;
 
     m.def("read_fqca_layout", read_fqca_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
           DOC(fiction_read_fqca_layout));
@@ -35,15 +35,16 @@ void read_fqca_layout(nanobind::module_& m)
 
 }  // namespace detail
 
-void read_fqca_layout(nanobind::module_& m)
+void qca::io::read_fqca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
     // NOLINTBEGIN(bugprone-throw-keyword-missing,bugprone-unused-raii): register the exception
     // translators with the module; they are not meant to be thrown here
-    py::exception<fiction::unsupported_character_exception>(m, "unsupported_character_exception");
-    py::exception<fiction::undefined_cell_label_exception>(m, "undefined_cell_label_exception");
-    py::exception<fiction::unrecognized_cell_definition_exception>(m, "unrecognized_cell_definition_exception");
+    py::exception<fiction::qca::io::unsupported_character_exception>(m, "unsupported_character_exception");
+    py::exception<fiction::qca::io::undefined_cell_label_exception>(m, "undefined_cell_label_exception");
+    py::exception<fiction::qca::io::unrecognized_cell_definition_exception>(m,
+                                                                            "unrecognized_cell_definition_exception");
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     detail::read_fqca_layout<py_qca_layout>(m);

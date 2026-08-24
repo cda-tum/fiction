@@ -6,12 +6,12 @@
 
 #include "fiction/utils/version_info.hpp"
 
-#include <fiction/io/write_qca_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/qca/io/write_qca_layout.hpp>
 
 #include <fmt/format.h>
 
@@ -23,7 +23,7 @@ using namespace fiction;
 TEST_CASE("Write empty QCAD layout", "[qcad]")
 {
     using qca_layout =
-        layouts::cell_level_layout<qca_technology,
+        layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const qca_layout layout{{2, 2, 1}, "empty layout"};
@@ -81,7 +81,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream, {true});
+        qca::io::write_qca_layout(layout, layout_stream, {true});
 
         CHECK(layout_stream.str() == qcad_layout);
     }
@@ -138,7 +138,7 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream, {false});
+        qca::io::write_qca_layout(layout, layout_stream, {false});
 
         CHECK(layout_stream.str() == qcad_layout);
     }
@@ -147,20 +147,20 @@ TEST_CASE("Write empty QCAD layout", "[qcad]")
 TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 {
     using qca_layout =
-        layouts::cell_level_layout<qca_technology,
+        layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     qca_layout layout{{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, qca::technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, qca::technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, qca::technology::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, qca::technology::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
@@ -757,7 +757,7 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 
     std::ostringstream layout_stream{};
 
-    write_qca_layout(layout, layout_stream, {false});
+    qca::io::write_qca_layout(layout, layout_stream, {false});
 
     CHECK(layout_stream.str() == qcad_layout);
 }
@@ -765,25 +765,25 @@ TEST_CASE("Write single-layer QCAD AND gate", "[qcad]")
 TEST_CASE("Write wire crossing", "[qcad]")
 {
     using qca_layout =
-        layouts::cell_level_layout<qca_technology,
+        layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     qca_layout layout{{4, 4, 1}, "Crossover"};
 
-    layout.assign_cell_type({0, 2, 0}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2, 0}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 1, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3, 1}, qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 4, 0}, qca_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({4, 2, 0}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2, 0}, qca::technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, qca::technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 2, 0}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 0}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 0}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1, 1}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3, 1}, qca::technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4, 0}, qca::technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 0}, qca::technology::cell_type::OUTPUT);
 
-    layout.assign_cell_mode({2, 1, 1}, qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 2, 1}, qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 3, 1}, qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 1, 1}, qca::technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, qca::technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 3, 1}, qca::technology::cell_mode::CROSSOVER);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 0}, "b");
@@ -1442,7 +1442,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
 
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream, {true});
+        qca::io::write_qca_layout(layout, layout_stream, {true});
 
         CHECK(layout_stream.str() == qcad_layout);
     }
@@ -1450,7 +1450,7 @@ TEST_CASE("Write wire crossing", "[qcad]")
     {
         std::ostringstream layout_stream{};
 
-        write_qca_layout(layout, layout_stream);
+        qca::io::write_qca_layout(layout, layout_stream);
 
         CHECK(layout_stream.str() == qcad_layout);
     }

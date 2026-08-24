@@ -3,7 +3,7 @@
 namespace pyfiction
 {
 
-void area(nanobind::module_& m);
+void fcn::area(nanobind::module_& m);
 void charge_distribution_surfaces(nanobind::module_& m);
 void sidb_charge_state(nanobind::module_& m);
 void sidb_defects(nanobind::module_& m);
@@ -13,7 +13,7 @@ void sidb_nm_position(nanobind::module_& m);
 
 void register_technology(nanobind::module_& m)
 {
-    area(m);
+    fcn::area(m);
     sidb_defects(m);
     sidb_charge_state(m);
     sidb_nm_position(m);

@@ -3,7 +3,7 @@
 
 #include <fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 
 #include <fmt/format.h>
 
@@ -38,7 +38,7 @@ void detect_bdl_pairs(nanobind::module_& m)
 
     py::class_<fiction::bdl_pair<fiction::layouts::coords::offset>>(m, "bdl_pair", DOC(fiction_bdl_pair))
         .def(py::init<>(), DOC(fiction_bdl_pair_bdl_pair))
-        .def(py::init<fiction::sidb_technology::cell_type, fiction::layouts::coords::offset,
+        .def(py::init<fiction::sidb::technology::cell_type, fiction::layouts::coords::offset,
                       fiction::layouts::coords::offset>(),
              py::arg("t"), py::arg("u"), py::arg("l"), DOC(fiction_bdl_pair_bdl_pair_2))
         .def_ro("type", &fiction::bdl_pair<fiction::layouts::coords::offset>::type, DOC(fiction_bdl_pair_type))

@@ -8,8 +8,8 @@
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
@@ -60,7 +60,7 @@ template <typename Lyt, typename TT>
     assert(skeleton_with_defects.num_pis() > 0 && "lyt needs input cells");
     assert(skeleton_with_defects.num_pos() > 0 && "lyt needs output cells");
 
-    const auto output_pairs = detect_bdl_pairs(skeleton_with_defects, sidb_technology::cell_type::OUTPUT,
+    const auto output_pairs = detect_bdl_pairs(skeleton_with_defects, sidb::technology::cell_type::OUTPUT,
                                                params.bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
     assert(output_pairs.empty() == false && "lyt needs output BDL pairs");

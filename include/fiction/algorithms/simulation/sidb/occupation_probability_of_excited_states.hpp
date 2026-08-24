@@ -7,7 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp"
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
-#include "fiction/technology/constants.hpp"
+#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <algorithm>
@@ -31,8 +31,8 @@ namespace fiction
 [[nodiscard]] inline double calculate_boltzmann_factor(const double energy, const double min_energy,
                                                        const double temperature) noexcept
 {
-    return std::exp(-((energy - min_energy) * constants::physical::EV_TO_JOULE /
-                      (constants::physical::BOLTZMANN_CONSTANT * temperature)));
+    return std::exp(-((energy - min_energy) * fcn::constants::physical::EV_TO_JOULE /
+                      (fcn::constants::physical::BOLTZMANN_CONSTANT * temperature)));
 }
 
 /**
@@ -118,7 +118,7 @@ namespace fiction
         [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
         {
             if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
-                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) > constants::ERROR_MARGIN)
+                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) > fcn::constants::ERROR_MARGIN)
             {
                 p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
             }

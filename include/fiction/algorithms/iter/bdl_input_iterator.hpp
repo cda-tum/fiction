@@ -7,7 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -85,7 +85,7 @@ class bdl_input_iterator
                                 const bdl_input_iterator_params& ps = bdl_input_iterator_params{}) noexcept :
             layout{lyt.clone()},
             input_pairs{
-                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
+                detect_bdl_pairs<Lyt>(lyt, sidb::technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{detect_bdl_wires<Lyt>(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT)},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
@@ -109,7 +109,7 @@ class bdl_input_iterator
                                 const std::vector<bdl_wire<Lyt>>& input_wires) noexcept :
             layout{lyt.clone()},
             input_pairs{
-                detect_bdl_pairs<Lyt>(lyt, sidb_technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
+                detect_bdl_pairs<Lyt>(lyt, sidb::technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
             num_inputs{static_cast<uint8_t>(input_pairs.size())},
             input_bdl_wires{input_wires},
             last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
@@ -409,7 +409,7 @@ class bdl_input_iterator
         {
             // Find the first BDL pair in the wire with type INPUT
             const auto start_bdl_it{std::ranges::find_if(wire.pairs, [](const bdl_pair<cell<Lyt>>& bdl)
-                                                         { return bdl.type == sidb_technology::cell_type::INPUT; })};
+                                                         { return bdl.type == sidb::technology::cell_type::INPUT; })};
 
             // If no INPUT type BDL pair is found, skip this wire
             if (start_bdl_it == wire.pairs.cend())

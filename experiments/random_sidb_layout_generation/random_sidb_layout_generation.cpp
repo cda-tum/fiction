@@ -4,7 +4,7 @@
 
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>

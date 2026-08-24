@@ -12,8 +12,8 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/types.hpp>
 
 #include <cctype>
@@ -38,14 +38,14 @@ bool compare_output(const std::string& output, const std::string& expected)
 
 TEMPLATE_TEST_CASE(
     "writes expected output", "[write_txt_sim_result]",
-    (layouts::cell_level_layout<sidb_technology,
+    (layouts::cell_level_layout<sidb::technology,
                                 layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<sidb_technology,
+    (layouts::cell_level_layout<sidb::technology,
                                 layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>),
     (charge_distribution_surface<layouts::cell_level_layout<
-         sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>>),
+         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>>),
     (charge_distribution_surface<layouts::cell_level_layout<
-         sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>))
+         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>))
 {
     lattice lyt{};
 

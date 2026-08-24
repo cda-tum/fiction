@@ -5,8 +5,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/networks/utils/truth_table_utils.hpp>
-#include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/fcn_gate_library.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_surface_analysis.hpp>
@@ -20,7 +20,7 @@ using namespace fiction;
 /**
  * This is simply a test library, its gates do not represent real entities that would work when fabricated.
  */
-class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
+class dummy_gate_library : public fcn::gate_library<sidb::technology, 3, 3>
 {
   public:
     dummy_gate_library() = delete;
@@ -33,11 +33,11 @@ class dummy_gate_library : public fcn_gate_library<sidb_technology, 3, 3>
         return implementations;
     }
 
-    static gate_ports<port_position> get_gate_ports() noexcept
+    static gate_ports<fcn::port_position> get_gate_ports() noexcept
     {
-        static const gate_ports<port_position> ports{
-            {{LINE, {{{port_position(0, 1)}, {port_position(2, 1)}}}},
-             {Y, {{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}}}}}};
+        static const gate_ports<fcn::port_position> ports{
+            {{LINE, {{{fcn::port_position(0, 1)}, {fcn::port_position(2, 1)}}}},
+             {Y, {{{fcn::port_position(0, 0), fcn::port_position(0, 2)}, {fcn::port_position(2, 1)}}}}}};
 
         return ports;
     }
@@ -73,8 +73,9 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     static const cart_gate_clk_lyt     gate_lyt{{3, 2}};   // 4 x 3 tiles of size 3 x 3 cells each
     static const sidb_100_cell_clk_lyt cell_lyt{{11, 8}};  // makes for 12 x 9 cells
 
-    static const port_list<port_position> line_ports{{port_position(0, 1)}, {port_position(2, 1)}};
-    static const port_list<port_position> y_ports{{port_position(0, 0), port_position(0, 2)}, {port_position(2, 1)}};
+    static const fcn::port_list<fcn::port_position> line_ports{{fcn::port_position(0, 1)}, {fcn::port_position(2, 1)}};
+    static const fcn::port_list<fcn::port_position> y_ports{{fcn::port_position(0, 0), fcn::port_position(0, 2)},
+                                                            {fcn::port_position(2, 1)}};
 
     sidb_defect_surface defect_layout{cell_lyt};
 

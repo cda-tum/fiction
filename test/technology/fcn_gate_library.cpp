@@ -4,15 +4,15 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/technology/cell_ports.hpp>
-#include <fiction/technology/fcn_gate_library.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/traits.hpp>
 
 using namespace fiction;
 
 TEST_CASE("Construction & traits", "[fcn-gate-library]")
 {
-    using lib_t = fcn_gate_library<qca_technology, 2, 3>;
+    using lib_t = fcn::gate_library<qca::technology, 2, 3>;
 
     CHECK(has_qca_technology_v<lib_t>);
     CHECK(lib_t::gate_x_size() == 2);
@@ -21,7 +21,7 @@ TEST_CASE("Construction & traits", "[fcn-gate-library]")
 
 TEST_CASE("Gate rotation", "[fcn-gate-library]")
 {
-    using lib_t = fcn_gate_library<qca_technology, 3, 3>;
+    using lib_t = fcn::gate_library<qca::technology, 3, 3>;
 
     // clang-format off
 
@@ -61,7 +61,7 @@ TEST_CASE("Gate rotation", "[fcn-gate-library]")
 
 TEST_CASE("Gate merging", "[fcn-gate-library]")
 {
-    using lib_t = fcn_gate_library<qca_technology, 3, 3>;
+    using lib_t = fcn::gate_library<qca::technology, 3, 3>;
 
     // clang-format off
 
@@ -118,7 +118,7 @@ TEST_CASE("Gate merging", "[fcn-gate-library]")
 
 TEST_CASE("Cell marking", "[fcn-gate-library]")
 {
-    using lib_t = fcn_gate_library<qca_technology, 3, 3>;
+    using lib_t = fcn::gate_library<qca::technology, 3, 3>;
 
     // clang-format off
 
@@ -144,12 +144,12 @@ TEST_CASE("Cell marking", "[fcn-gate-library]")
 
     // clang-format on
 
-    CHECK(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::INPUT) == pi_wire);
-    CHECK(lib_t::mark_cell(pi_wire, port_position(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
-    CHECK(lib_t::mark_cell(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::INPUT),
-                           port_position(1, 2), qca_technology::cell_mark::OUTPUT) == io_wire);
-    CHECK(
-        lib_t::mark_cell(lib_t::mark_cell(lib_t::mark_cell(wire, port_position(1, 0), qca_technology::cell_mark::EMPTY),
-                                          port_position(1, 1), qca_technology::cell_mark::EMPTY),
-                         port_position(1, 2), qca_technology::cell_mark::EMPTY) == empty);
+    CHECK(lib_t::mark_cell(wire, fcn::port_position(1, 0), qca::technology::cell_mark::INPUT) == pi_wire);
+    CHECK(lib_t::mark_cell(pi_wire, fcn::port_position(1, 2), qca::technology::cell_mark::OUTPUT) == io_wire);
+    CHECK(lib_t::mark_cell(lib_t::mark_cell(wire, fcn::port_position(1, 0), qca::technology::cell_mark::INPUT),
+                           fcn::port_position(1, 2), qca::technology::cell_mark::OUTPUT) == io_wire);
+    CHECK(lib_t::mark_cell(
+              lib_t::mark_cell(lib_t::mark_cell(wire, fcn::port_position(1, 0), qca::technology::cell_mark::EMPTY),
+                               fcn::port_position(1, 1), qca::technology::cell_mark::EMPTY),
+              fcn::port_position(1, 2), qca::technology::cell_mark::EMPTY) == empty);
 }

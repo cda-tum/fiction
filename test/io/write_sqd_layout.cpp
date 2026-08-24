@@ -16,7 +16,7 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -90,7 +90,7 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     using sidb_layout = sidb_cell_clk_lyt;
 
     sidb_layout layout{{2, 2}};
-    layout.assign_cell_type({1, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, sidb::technology::cell_type::NORMAL);
 
     const sidb_lattice<sidb_100_lattice, sidb_layout> lattice_layout{layout};
 
@@ -106,7 +106,7 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
 TEST_CASE("Write single-dot SQD layout with SiQAD coordinates", "[sqd]")
 {
     sidb_cell_clk_lyt_siqad layout{{2, 2}};
-    layout.assign_cell_type({1, 2}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, sidb::technology::cell_type::NORMAL);
 
     std::stringstream layout_stream{};
 
@@ -123,11 +123,11 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
     using sidb_layout = sidb_cell_clk_lyt;
 
     sidb_layout layout{{4, 4}};
-    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 2}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 4}, sidb::technology::cell_type::NORMAL);
 
     std::stringstream layout_stream{};
 
@@ -145,12 +145,12 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
     using sidb_layout = sidb_cell_clk_lyt;
 
     sidb_layout layout{{4, 6}};
-    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::INPUT);
-    layout.assign_cell_type({4, 6}, sidb_technology::cell_type::LOGIC);
+    layout.assign_cell_type({0, 0}, sidb::technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 1}, sidb::technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb::technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 4}, sidb::technology::cell_type::INPUT);
+    layout.assign_cell_type({4, 6}, sidb::technology::cell_type::LOGIC);
 
     std::stringstream layout_stream{};
 
@@ -229,11 +229,11 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
 TEST_CASE("Write multi-dot SQD layout based on SiQAD coordinates", "[sqd]")
 {
     sidb_cell_clk_lyt_siqad layout{{4, 4}};
-    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({0, 2}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({0, 3}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 4}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 2}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 3}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 4}, sidb::technology::cell_type::NORMAL);
 
     std::stringstream layout_stream{};
 

@@ -308,14 +308,14 @@ Returns:
 static const char* mkd_doc_fiction_apply_gate_library =
     R"doc(Applies a gate library to a given gate-level layout and, thereby,
 creates and returns a cell-level layout. The gate library type should
-provide all functions specified in fcn_gate_library. It is, thus,
-easiest to extend fcn_gate_library to implement a new gate library.
-Examples are `qca_one_library`, `inml_topolinano_library`, and
+provide all functions specified in fcn::gate_library. It is, thus,
+easiest to extend fcn::gate_library to implement a new gate library.
+Examples are `qca::qca_one_library`, `inml::topolinano_library`, and
 `sidb_bestagon_library`.
 
 May pass through, and thereby throw, an
-`unsupported_gate_type_exception` or an
-`unsupported_gate_orientation_exception`.
+`fcn::unsupported_gate_type_exception` or an
+`fcn::unsupported_gate_orientation_exception`.
 
 Args:
     lyt: The gate-level layout.
@@ -334,14 +334,14 @@ Returns:
 static const char* mkd_doc_fiction_apply_gate_library_to_defective_surface =
     R"doc(Applies a gate library to a given gate-level layout and maps the SiDB
 and defect locations onto a defect surface. The gate library type
-should provide all functions specified in fcn_gate_library. It is,
-thus, easiest to extend fcn_gate_library to implement a new gate
-library. Examples are `qca_one_library`, `inml_topolinano_library`,
+should provide all functions specified in fcn::gate_library. It is,
+thus, easiest to extend fcn::gate_library to implement a new gate
+library. Examples are `qca::qca_one_library`, `inml::topolinano_library`,
 and `sidb_bestagon_library`.
 
 May pass through, and thereby throw, an
-`unsupported_gate_type_exception` or an
-`unsupported_gate_orientation_exception`.
+`fcn::unsupported_gate_type_exception` or an
+`fcn::unsupported_gate_orientation_exception`.
 
 Args:
     lyt: The gate-level layout.
@@ -362,8 +362,8 @@ static const char* mkd_doc_fiction_apply_parameterized_gate_library =
 thereby, creates and returns a cell-level layout.
 
 May pass through, and thereby throw, an
-`unsupported_gate_type_exception`, an
-`unsupported_gate_orientation_exception` and any further custom
+`fcn::unsupported_gate_type_exception`, an
+`fcn::unsupported_gate_orientation_exception` and any further custom
 exceptions of the gate libraries.
 
 Args:
@@ -388,8 +388,8 @@ static const char* mkd_doc_fiction_apply_parameterized_gate_library_to_defective
 level layout and, thereby, creates and returns a cell-level layout.
 
 May pass through, and thereby throw, an
-`unsupported_gate_type_exception`, an
-`unsupported_gate_orientation_exception` and any further custom
+`fcn::unsupported_gate_type_exception`, an
+`fcn::unsupported_gate_orientation_exception` and any further custom
 exceptions of the gate libraries.
 
 Args:
@@ -1228,8 +1228,8 @@ wire.
 
 Args:
     t: Type of BDL pair to search for
-       (`sidb_technology::cell_type::INPUT`,
-       `sidb_technology::cell_type::OUTPUT`, etc.).
+       (`sidb::technology::cell_type::INPUT`,
+       `sidb::technology::cell_type::OUTPUT`, etc.).
 
 Returns:
     Optional containing the first BDL pair with the specified type
@@ -1580,7 +1580,7 @@ static const char* mkd_doc_fiction_calculate_energy_distribution =
 objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector. To compare two
 energy values for equality, the comparison uses a tolerance specified
-by `constants::ERROR_MARGIN`.
+by `fcn::constants::ERROR_MARGIN`.
 
 Args:
     charge_distributions: A vector of `charge_distribution_surface`
@@ -12286,7 +12286,7 @@ static const char* mkd_doc_fiction_detail_write_fqca_layout_impl_labeled_cells =
 static const char* mkd_doc_fiction_detail_write_fqca_layout_impl_lyt = R"doc()doc";
 
 static const char* mkd_doc_fiction_detail_write_fqca_layout_impl_next_cell_designator =
-    R"doc(Might throw an 'out_of_cell_names_exception'.
+    R"doc(Might throw an 'qca::io::out_of_cell_names_exception'.
 
 Returns:
     The next cell designator in the alphabet.
@@ -13984,7 +13984,7 @@ Returns:
 static const char* mkd_doc_fiction_fcn_gate_library =
     R"doc( Base class for various FCN libraries used to map gate-level layouts
  to cell-level ones. Any new gate library can extend
- `fcn_gate_library` if it benefits from its features but does not have
+ `fcn::gate_library` if it benefits from its features but does not have
  to. The only requirement is that it must be a static class that
  provides a
 
@@ -14057,7 +14057,7 @@ static const char* mkd_doc_fiction_fcn_gate_library_cell_list_to_gate =
     R"doc(Converts a `cell_list` of type `T` to an `fcn_gate` at compile time.
 This function allows to conveniently specify `fcn_gate` instances in a
 semi-readable way in code. For examples usages see
-`qca_one_library.hpp`.
+`qca::qca_one_library.hpp`.
 
 Args:
     c: Cell list to convert.
@@ -14232,7 +14232,7 @@ Returns:
 static const char* mkd_doc_fiction_find_key_with_tolerance =
     R"doc(This function searches for a floating-point value specified by the
 `key` in the provided map `map`, applying a tolerance specified by
-`fiction::constants::ERROR_MARGIN`. Each key in the map is compared to
+`fiction::fcn::constants::ERROR_MARGIN`. Each key in the map is compared to
 the specified key within this tolerance.
 
 Args:
@@ -18046,7 +18046,7 @@ Template Args:
 )doc";
 
 static const char* mkd_doc_fiction_inml_topolinano_library_set_up_gate =
-    R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+    R"doc(Overrides the corresponding function in fcn::gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to choose the correct fcn_gate representation for
 that tile. May it be a gate or wires. Rotation and special marks like
@@ -20362,7 +20362,7 @@ Returns:
 static const char* mkd_doc_fiction_parameter_point_operator_eq =
     R"doc(Equality operator. Checks if this parameter point is equal to another
 point within a specified tolerance. The tolerance is defined by
-`constants::ERROR_MARGIN`.
+`fcn::constants::ERROR_MARGIN`.
 
 Args:
     other: Other parameter point to compare with.
@@ -20385,12 +20385,12 @@ Args:
 static const char* mkd_doc_fiction_parameter_point_parameters = R"doc(Parameter values for each dimension.)doc";
 
 static const char* mkd_doc_fiction_parameter_point_quantize =
-    R"doc(Maps a parameter value onto the grid of `constants::ERROR_MARGIN`-wide
+    R"doc(Maps a parameter value onto the grid of `fcn::constants::ERROR_MARGIN`-wide
 cells that both this type's equality and its `std::hash`
 specialization are defined on.
 
 Comparing parameter values with a tolerance, as in `std::fabs(lhs -
-rhs) < constants::ERROR_MARGIN`, does not yield an equivalence
+rhs) < fcn::constants::ERROR_MARGIN`, does not yield an equivalence
 relation: it is not transitive, and two values that compare equal can
 still fall on opposite sides of a cell boundary and therefore hash
 differently. That breaks the invariant every hash-based container
@@ -20752,7 +20752,7 @@ static const char* mkd_doc_fiction_port_list =
     R"doc(Port lists are collections of input and output ports.
 
 Template Args:
-    PortType: A port type, e.g., port_position or port_direction.)doc";
+    PortType: A port type, e.g., fcn::port_position or fcn::port_direction.)doc";
 
 static const char* mkd_doc_fiction_port_list_inp = R"doc(Input and output positions.)doc";
 
@@ -20768,7 +20768,7 @@ Returns:
 )doc";
 
 static const char* mkd_doc_fiction_port_list_operator_iadd =
-    R"doc(Merges two `port_list` objects together. The given `port_list` might
+    R"doc(Merges two `fcn::port_list` objects together. The given `fcn::port_list` might
 be altered.
 
 Args:
@@ -21384,7 +21384,7 @@ Template Args:
 static const char* mkd_doc_fiction_qca_one_library_qca_one_library = R"doc()doc";
 
 static const char* mkd_doc_fiction_qca_one_library_set_up_gate =
-    R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+    R"doc(Overrides the corresponding function in fcn::gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to choose the correct fcn_gate representation for
 that tile. May it be a gate or wires. Rotation and special marks like
@@ -21786,9 +21786,9 @@ static const char* mkd_doc_fiction_read_fqca_layout =
 stream. The format is used by QCA-STACK by Willem Lambooy
 (https://github.com/wlambooy/QCA-STACK).
 
-May throw an unsupported_character_exception,
-undefined_cell_label_exception, or
-unrecognized_cell_definition_exception.
+May throw an qca::io::unsupported_character_exception,
+qca::io::undefined_cell_label_exception, or
+qca::io::unrecognized_cell_definition_exception.
 
 Args:
     is: The input stream to read from.
@@ -21805,9 +21805,9 @@ static const char* mkd_doc_fiction_read_fqca_layout_2 =
 name. The format is used by QCA-STACK by Willem Lambooy
 (https://github.com/wlambooy/QCA-STACK).
 
-May throw an unsupported_character_exception,
-undefined_cell_label_exception, or
-unrecognized_cell_definition_exception.
+May throw an qca::io::unsupported_character_exception,
+qca::io::undefined_cell_label_exception, or
+qca::io::unrecognized_cell_definition_exception.
 
 Args:
     filename: The file name to open and read from.
@@ -22391,7 +22391,7 @@ Template Args:
     GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    port directions of the given tile are returned as `port_list`.
+    port directions of the given tile are returned as `fcn::port_list`.
 
 )doc";
 
@@ -22422,7 +22422,7 @@ Returns:
 )doc";
 
 static const char* mkd_doc_fiction_sidb_bestagon_library_set_up_gate =
-    R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+    R"doc(Overrides the corresponding function in fcn::gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to choose the correct fcn_gate representation for
 that tile. May it be a gate or wires. Rotation and special marks like
@@ -23130,7 +23130,7 @@ Template Args:
     GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    port directions of the given tile are returned as `port_list`.
+    port directions of the given tile are returned as `fcn::port_list`.
 
 )doc";
 
@@ -23192,7 +23192,7 @@ static const char*
         R"doc(This variable specifies the policy for complex gate design.)doc";
 
 static const char* mkd_doc_fiction_sidb_on_the_fly_gate_library_set_up_gate =
-    R"doc(Overrides the corresponding function in fcn_gate_library. Given a tile
+    R"doc(Overrides the corresponding function in fcn::gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to design the correct fcn_gate representation for
 that tile. In case there is no possible SiDB design, the blacklist is
@@ -23437,7 +23437,7 @@ Template Args:
     GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    port directions of the given tile are returned as `port_list`.
+    port directions of the given tile are returned as `fcn::port_list`.
 
 )doc";
 
@@ -23670,7 +23670,7 @@ Raises:
 static const char* mkd_doc_fiction_sim7_mol_library_set_up_gate =
     R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
 
-Overrides the corresponding function in fcn_gate_library. Given a tile
+Overrides the corresponding function in fcn::gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
 grid into account to choose the correct fcn_gate representation for
 that tile. May it be a gate or wires. Rotation and special marks like
@@ -25750,7 +25750,7 @@ static const char* mkd_doc_fiction_write_fqca_layout =
 stream. The format is used by QCA-STACK by Willem Lambooy
 (https://github.com/wlambooy/QCA-STACK).
 
-Might throw an out_of_cell_names_exception in case there are more I/O
+Might throw an qca::io::out_of_cell_names_exception in case there are more I/O
 cells in the layout than lowercase + uppercase letters in the English
 alphabet.
 
@@ -25770,7 +25770,7 @@ static const char* mkd_doc_fiction_write_fqca_layout_2 =
 name. The format is used by QCA-STACK by Willem Lambooy
 (https://github.com/wlambooy/QCA-STACK).
 
-Might throw an out_of_cell_names_exception in case there are more I/O
+Might throw an qca::io::out_of_cell_names_exception in case there are more I/O
 cells in the layout than lowercase + uppercase letters in the English
 alphabet.
 

@@ -8,7 +8,7 @@
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/constants.hpp"
+#include "fiction/technology/fcn/constants.hpp"
 
 #include <algorithm>
 #include <any>
@@ -100,7 +100,7 @@ struct sidb_simulation_result
                                                      {
                                                          return cds.get_charge_index_and_base().first == charge_index &&
                                                                 std::abs(cds.get_electrostatic_potential_energy() -
-                                                                         min_energy) < constants::ERROR_MARGIN;
+                                                                         min_energy) < fcn::constants::ERROR_MARGIN;
                                                      });
 
             if (cds_it != charge_distributions.cend())

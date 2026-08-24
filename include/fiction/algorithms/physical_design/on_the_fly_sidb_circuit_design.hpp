@@ -7,8 +7,8 @@
 
 #include "fiction/physical_design/apply_gate_library.hpp"
 #include "fiction/physical_design/exact.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/fcn_gate_library.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
 #include "fiction/technology/sidb_skeleton_bestagon_library.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
@@ -195,7 +195,7 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
                 }
 
-                catch (const unsupported_gate_orientation_exception<cell<CellLyt>, port_direction>& e)
+                catch (const fcn::unsupported_gate_orientation_exception<cell<CellLyt>, fcn::port_direction>& e)
                 {
                     fmt::print(stderr, "[e] Unsupported gate orientation encountered at tile: {} and ports: {}\n",
                                e.where(), e.which_ports());

@@ -19,8 +19,8 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/constants.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -198,7 +198,7 @@ class critical_temperature_impl
                 pre_detected_output_bdl_pairs != nullptr ?
                     std::vector<bdl_pair<cell<Lyt>>>{} :
                     detect_bdl_pairs(
-                        layout, sidb_technology::cell_type::OUTPUT,
+                        layout, sidb::technology::cell_type::OUTPUT,
                         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
             const auto& output_bdl_pairs =
@@ -414,7 +414,8 @@ class critical_temperature_impl
             // value of the given valid_layout to six decimal places to overcome possible rounding errors and for
             // comparability with the min_energy.
             if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
-                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) < constants::ERROR_MARGIN &&
+                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) <
+                    fcn::constants::ERROR_MARGIN &&
                 state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;

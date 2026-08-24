@@ -7,8 +7,8 @@
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -71,7 +71,7 @@ struct bdl_wire
     /**
      * Port of the BDL wire.
      */
-    port_direction port{port_direction::NONE};
+    fcn::port_direction port{fcn::port_direction::NONE};
     /**
      * First BDL pair of the wire.
      */
@@ -144,7 +144,7 @@ struct bdl_wire
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-        other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
+        other.port.dir = fcn::port_direction::NONE;  // Reset the port of the moved-from object
     }
 
     /**
@@ -163,7 +163,7 @@ struct bdl_wire
             port           = other.port;
             first_bdl_pair = std::move(other.first_bdl_pair);
             last_bdl_pair  = std::move(other.last_bdl_pair);
-            other.port.dir = port_direction::NONE;  // Reset the port of the moved-from object
+            other.port.dir = fcn::port_direction::NONE;  // Reset the port of the moved-from object
         }
 
         return *this;
@@ -228,7 +228,7 @@ struct bdl_wire
      *         or `std::nullopt` if no such BDL pair is found.
      */
     [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
-    find_bdl_pair_by_type(const sidb_technology::cell_type& t) const noexcept
+    find_bdl_pair_by_type(const sidb::technology::cell_type& t) const noexcept
     {
         const auto it = std::ranges::find_if(pairs, [&t](const auto& bdl) { return bdl.type == t; });
 
@@ -249,61 +249,61 @@ struct bdl_wire
         // a wire with fewer than 2 BDL pairs does not have a port
         if (pairs.size() < 2)
         {
-            port.dir = port_direction::NONE;
+            port.dir = fcn::port_direction::NONE;
             return;
         }
 
         // a wire without input or output cells does not have a port
-        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; }))
+        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == sidb::technology::cell_type::NORMAL; }))
         {
-            port.dir = port_direction::NONE;
+            port.dir = fcn::port_direction::NONE;
             return;
         }
 
         const auto input_exists =
-            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::INPUT; });
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb::technology::cell_type::INPUT; });
 
         const auto output_exists =
-            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::OUTPUT; });
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb::technology::cell_type::OUTPUT; });
 
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
-            last_bdl_pair  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+            first_bdl_pair = find_bdl_pair_by_type(sidb::technology::cell_type::INPUT);
+            last_bdl_pair  = find_bdl_pair_by_type(sidb::technology::cell_type::OUTPUT);
 
             // determine the port of the wire based on the position of input and output BDL pairs
             if (first_bdl_pair.value() < last_bdl_pair)
             {
-                port.dir = port_direction::SOUTH;
+                port.dir = fcn::port_direction::SOUTH;
 
                 if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y ||
                     first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
                 {
-                    port.dir = port_direction::EAST;
+                    port.dir = fcn::port_direction::EAST;
                 }
             }
             // if the input BDL pair is at the same position as the output BDL pair, the wire has no port
             else if (first_bdl_pair.value().equal_ignore_type(last_bdl_pair.value()))
             {
                 assert(false && "input and output BDL pairs are at the same position");
-                port.dir = port_direction::NONE;
+                port.dir = fcn::port_direction::NONE;
             }
             else
             {
-                port.dir = port_direction::NORTH;
+                port.dir = fcn::port_direction::NORTH;
 
                 if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y &&
                     first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
                 {
-                    port.dir = port_direction::WEST;
+                    port.dir = fcn::port_direction::WEST;
                 }
             }
         }
         // only input cells are present
         else if (input_exists)
         {
-            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT).value();
+            first_bdl_pair = find_bdl_pair_by_type(sidb::technology::cell_type::INPUT).value();
 
             auto max_distance = 0.0;
 
@@ -323,28 +323,28 @@ struct bdl_wire
             if (first_bdl_pair.value().lower.x < last_bdl_pair.value().lower.x &&
                 first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
             {
-                port.dir = port_direction::EAST;
+                port.dir = fcn::port_direction::EAST;
             }
             // Lower cell of the input BDL pair is below the lower cell of the final BDL pair --> SOUTH
             else if (first_bdl_pair.value().lower.y > last_bdl_pair.value().lower.y)
             {
-                port.dir = port_direction::NORTH;
+                port.dir = fcn::port_direction::NORTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> EAST
             else if (first_bdl_pair.value().lower.x > last_bdl_pair.value().lower.x &&
                      first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
             {
-                port.dir = port_direction::WEST;
+                port.dir = fcn::port_direction::WEST;
             }
             else
             {
-                port.dir = port_direction::SOUTH;
+                port.dir = fcn::port_direction::SOUTH;
             }
         }
         // only output cells are present
         else
         {
-            last_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT).value();
+            last_bdl_pair = find_bdl_pair_by_type(sidb::technology::cell_type::OUTPUT).value();
 
             auto max_distance = 0.0;
 
@@ -364,22 +364,22 @@ struct bdl_wire
             if (last_bdl_pair.value().lower.x < first_bdl_pair.value().lower.x &&
                 last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
             {
-                port.dir = port_direction::WEST;
+                port.dir = fcn::port_direction::WEST;
             }
             // Lower cell of the input BDL pair is below the lower cell of the final BDL pair --> SOUTH
             else if (last_bdl_pair.value().lower.y > first_bdl_pair.value().lower.y)
             {
-                port.dir = port_direction::SOUTH;
+                port.dir = fcn::port_direction::SOUTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> EAST
             else if (last_bdl_pair.value().lower.x > first_bdl_pair.value().lower.x &&
                      last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
             {
-                port.dir = port_direction::EAST;
+                port.dir = fcn::port_direction::EAST;
             }
             else
             {
-                port.dir = port_direction::NORTH;
+                port.dir = fcn::port_direction::NORTH;
             };
         }
     }

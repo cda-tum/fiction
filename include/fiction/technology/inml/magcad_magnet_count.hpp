@@ -2,15 +2,15 @@
 // Created by marcel on 07.08.19.
 //
 
-#ifndef FICTION_MAGCAD_MAGNET_COUNT_HPP
-#define FICTION_MAGCAD_MAGNET_COUNT_HPP
+#ifndef FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP
+#define FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP
 
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
 #include <cstdint>
 
-namespace fiction
+namespace fiction::inml
 {
 /**
  * Calculates the number of magnets for an iNML layout the way MagCAD (https://topolinano.polito.it/) would do it.
@@ -33,7 +33,7 @@ uint64_t magcad_magnet_count(const Lyt& lyt) noexcept
     lyt.foreach_cell(
         [&lyt, &num_inv_cells](const auto& c)
         {
-            if (lyt.get_cell_type(c) == inml_technology::cell_type::INVERTER_MAGNET)
+            if (lyt.get_cell_type(c) == inml::technology::cell_type::INVERTER_MAGNET)
             {
                 ++num_inv_cells;
             }
@@ -42,6 +42,5 @@ uint64_t magcad_magnet_count(const Lyt& lyt) noexcept
     return lyt.num_cells() + (num_inv_cells / 4);
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_MAGCAD_MAGNET_COUNT_HPP
+}  // namespace fiction::inml
+#endif  // FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP

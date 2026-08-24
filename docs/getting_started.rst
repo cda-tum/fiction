@@ -203,8 +203,8 @@ Then include what you need:
 
    #include <fiction/layouts/cell_level_layout.hpp>
    #include <fiction/layouts/clocking_scheme.hpp>
-   #include <fiction/technology/qca_one_library.hpp>
-   #include <fiction/io/write_qca_layout.hpp>
+   #include <fiction/technology/qca/qca_one_library.hpp>
+   #include <fiction/technology/qca/io/write_qca_layout.hpp>
    #include <fiction/...>
 
 Everything that can safely be used is directly located inside the ``fiction`` namespace.
@@ -375,8 +375,8 @@ include the desired header files to get started:
 
    #include <fiction/layouts/cell_level_layout.hpp>
    #include <fiction/layouts/clocking_scheme.hpp>
-   #include <fiction/technology/qca_one_library.hpp>
-   #include <fiction/io/write_qca_layout.hpp>
+   #include <fiction/technology/qca/qca_one_library.hpp>
+   #include <fiction/technology/qca/io/write_qca_layout.hpp>
    #include <fiction/...>
 
    int main(int argc, char* argv[])

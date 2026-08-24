@@ -7,8 +7,8 @@
 #include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/types.hpp>
 

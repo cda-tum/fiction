@@ -2,8 +2,8 @@
 // Created by marcel on 27.10.21.
 //
 
-#ifndef FICTION_AREA_HPP
-#define FICTION_AREA_HPP
+#ifndef FICTION_TECHNOLOGY_FCN_AREA_HPP
+#define FICTION_TECHNOLOGY_FCN_AREA_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/traits.hpp"
@@ -12,7 +12,7 @@
 
 #include <iostream>
 
-namespace fiction
+namespace fiction::fcn
 {
 
 /**
@@ -131,6 +131,5 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technolog
     return st.area;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_AREA_HPP
+}  // namespace fiction::fcn
+#endif  // FICTION_TECHNOLOGY_FCN_AREA_HPP

@@ -6,8 +6,8 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb_cluster_hierarchy.hpp>
 #include <fiction/types.hpp>
 
@@ -76,17 +76,17 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
 {
     TestType lyt{};
 
-    lyt.assign_cell_type({50, -11, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({54, -9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({50, -11, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({54, -9, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, -5, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, -3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, -5, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, -3, 1}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({-2, -2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, -2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({-2, -2, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, -2, 1}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({53, 10, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({48, 13, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({53, 10, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({48, 13, 1}, sidb::technology::cell_type::NORMAL);
 
     const sidb_binary_cluster_hierarchy_node& h = sidb_cluster_hierarchy(lyt);
 

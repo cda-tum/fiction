@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/technology/area.hpp>
+#include <fiction/technology/fcn/area.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -17,18 +17,18 @@ TEST_CASE("Area computation for different technologies", "[area]")
     {
         qca_cell_clk_lyt lyt{{4, 4}};
 
-        const auto area_nm2 = area<qca_cell_clk_lyt>(lyt, area_params<qca_technology>{});
+        const auto area_nm2 = fcn::area<qca_cell_clk_lyt>(lyt, fcn::area_params<qca::technology>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(9604.0, 0.0001));
 
-        area_stats stats{};
-        area<qca_cell_clk_lyt>(lyt, area_params<qca_technology>{}, &stats);
+        fcn::area_stats stats{};
+        fcn::area<qca_cell_clk_lyt>(lyt, fcn::area_params<qca::technology>{}, &stats);
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(98.0, 0.0001));
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(98.0, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(9604.0, 0.0001));
 
         const layouts::bounding_box_2d bb{lyt};
-        const auto                     area_bb = area<qca_cell_clk_lyt>(bb, area_params<qca_technology>{});
+        const auto                     area_bb = fcn::area<qca_cell_clk_lyt>(bb, fcn::area_params<qca::technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(324.0, 0.0001));
     }
 
@@ -36,18 +36,18 @@ TEST_CASE("Area computation for different technologies", "[area]")
     {
         inml_cell_clk_lyt lyt{{4, 4}};
 
-        const auto area_nm2 = area<inml_cell_clk_lyt>(lyt, area_params<inml_technology>{});
+        const auto area_nm2 = fcn::area<inml_cell_clk_lyt>(lyt, fcn::area_params<inml::technology>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(174000.0, 0.0001));
 
-        area_stats stats{};
-        area<inml_cell_clk_lyt>(lyt, area_params<inml_technology>{}, &stats);
+        fcn::area_stats stats{};
+        fcn::area<inml_cell_clk_lyt>(lyt, fcn::area_params<inml::technology>{}, &stats);
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(290.0, 0.0001));
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(600.0, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(174000.0, 0.0001));
 
         const layouts::bounding_box_2d bb{lyt};
-        const auto                     area_bb = area<inml_cell_clk_lyt>(bb, area_params<inml_technology>{});
+        const auto                     area_bb = fcn::area<inml_cell_clk_lyt>(bb, fcn::area_params<inml::technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(5000.0, 0.0001));
     }
 
@@ -55,18 +55,18 @@ TEST_CASE("Area computation for different technologies", "[area]")
     {
         sidb_cell_clk_lyt lyt{{4, 4}};
 
-        const auto area_nm2 = area<sidb_cell_clk_lyt>(lyt, area_params<sidb_technology>{});
+        const auto area_nm2 = fcn::area<sidb_cell_clk_lyt>(lyt, fcn::area_params<sidb::technology>{});
         CHECK_THAT(area_nm2, Catch::Matchers::WithinAbs(2.359296, 0.000001));
 
-        area_stats stats{};
-        area<sidb_cell_clk_lyt>(lyt, area_params<sidb_technology>{}, &stats);
+        fcn::area_stats stats{};
+        fcn::area<sidb_cell_clk_lyt>(lyt, fcn::area_params<sidb::technology>{}, &stats);
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(1.536, 0.0001));
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(1.536, 0.0001));
         CHECK_THAT(stats.area, Catch::Matchers::WithinAbs(2.359296, 0.000001));
 
         const layouts::bounding_box_2d bb{lyt};
-        const auto                     area_bb = area<sidb_cell_clk_lyt>(bb, area_params<sidb_technology>{});
+        const auto                     area_bb = fcn::area<sidb_cell_clk_lyt>(bb, fcn::area_params<sidb::technology>{});
         CHECK_THAT(area_bb, Catch::Matchers::WithinAbs(0.0, 0.000001));
     }
 }

@@ -280,12 +280,13 @@ Their namespace still changed — see the tree above.
 
 ### Renamed symbols
 
-59 public symbols changed name as well as namespace. Everything not listed
+60 public symbols changed name as well as namespace. Everything not listed
 here kept its identifier and only gained a namespace.
 
 | old                                               | new                                                          |
 | ------------------------------------------------- | ------------------------------------------------------------ |
 | `fiction::area`                                   | `fiction::layouts::coords::area`                             |
+| `fiction::constants`                              | `fiction::fcn::constants`                                    |
 | `fiction::coord_iterator`                         | `fiction::layouts::coords::iterator`                         |
 | `fiction::cube::coord_t`                          | `fiction::layouts::coords::cube`                             |
 | `fiction::fcn_gate_library`                       | `fiction::fcn::gate_library`                                 |
@@ -387,38 +388,13 @@ gate library, and `sim7_mol_library` names the SIM(7)-MolPDK library.
 - **`experiments/`** changed only its include directives. It reproduces published
   papers and is not refactored.
 
-### The coordinate namespaces
+### A name collision to know about
 
-`coordinates.hpp` held three sibling namespaces that each contained exactly one type.
-The namespace now matches the header, and the three coordinate _kinds_ are the type
-names, which is what they always were:
-
-```text
-fiction::offset::ucoord_t  ->  fiction::layouts::coords::offset
-fiction::cube::coord_t     ->  fiction::layouts::coords::cube
-fiction::siqad::coord_t    ->  fiction::layouts::coords::siqad
-```
-
-The helpers that operate on them moved into the same namespace, which also restores
-argument-dependent lookup for `area` and `volume`:
-
-```text
-fiction::siqad::to_fiction_coord -> fiction::layouts::coords::to_fiction_coord
-fiction::siqad::to_siqad_coord   -> fiction::layouts::coords::to_siqad_coord
-fiction::offset_to_cube_coord    -> fiction::layouts::coords::offset_to_cube
-fiction::coord_iterator          -> fiction::layouts::coords::iterator
-fiction::area                    -> fiction::layouts::coords::area
-fiction::volume                  -> fiction::layouts::coords::volume
-```
-
-The two traits whose names referred to `ucoord_t` follow:
-
-```text
-fiction::is_offset_ucoord_v  -> fiction::is_offset_coord_v
-fiction::has_offset_ucoord_v -> fiction::has_offset_coord_v
-```
-
-`is_cube_coord_v`, `is_siqad_coord_v` and their `has_` counterparts keep their names.
+`fiction::technology<Lyt>` is a trait alias in `traits.hpp` that yields a layout's
+technology tag. The tags themselves are now called `technology` inside their own
+namespace, so within `fiction::qca`, `fiction::inml`, and `fiction::sidb` the struct
+shadows the trait. Code in those namespaces that wants the trait must name it
+`fiction::technology<Lyt>` explicitly. Outside them, both resolve as before.
 
 ### Notable splits
 

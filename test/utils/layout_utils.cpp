@@ -10,8 +10,8 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/technology/charge_distribution_surface.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb_charge_state.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
@@ -36,21 +36,21 @@ TEMPLATE_TEST_CASE("Port directions to coordinates", "[layout-utils]",
         [&lyt](const auto& c)
         {
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::NORTH}) == lyt.north(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::NORTH}) == lyt.north(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::NORTH_EAST}) == lyt.north_east(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::NORTH_EAST}) == lyt.north_east(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::EAST}) == lyt.east(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::EAST}) == lyt.east(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::SOUTH_EAST}) == lyt.south_east(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::SOUTH_EAST}) == lyt.south_east(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::SOUTH}) == lyt.south(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::SOUTH}) == lyt.south(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::SOUTH_WEST}) == lyt.south_west(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::SOUTH_WEST}) == lyt.south_west(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::WEST}) == lyt.west(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::WEST}) == lyt.west(c));
             CHECK(layouts::utils::port_direction_to_coordinate(
-                      lyt, c, port_direction{port_direction::cardinal::NORTH_WEST}) == lyt.north_west(c));
+                      lyt, c, fcn::port_direction{fcn::port_direction::cardinal::NORTH_WEST}) == lyt.north_west(c));
         });
 }
 

@@ -276,8 +276,8 @@ class apply_gate_library_impl
 
 /**
  * Applies a gate library to a given gate-level layout and, thereby, creates and returns a cell-level layout. The gate
- * library type should provide all functions specified in fcn_gate_library. It is, thus, easiest to extend
- * fcn_gate_library to implement a new gate library. Examples are `qca_one_library`, `inml_topolinano_library`, and
+ * library type should provide all functions specified in gate_library. It is, thus, easiest to extend
+ * gate_library to implement a new gate library. Examples are `qca_one_library`, `topolinano_library`, and
  * `sidb_bestagon_library`.
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
@@ -308,8 +308,8 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 
 /**
  * Applies a gate library to a given gate-level layout and maps the SiDB and defect locations onto a defect surface. The
- * gate library type should provide all functions specified in fcn_gate_library. It is, thus, easiest to extend
- * fcn_gate_library to implement a new gate library. Examples are `qca_one_library`, `inml_topolinano_library`, and
+ * gate library type should provide all functions specified in gate_library. It is, thus, easiest to extend
+ * gate_library to implement a new gate library. Examples are `qca_one_library`, `topolinano_library`, and
  * `sidb_bestagon_library`.
  *
  * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an

@@ -10,7 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb_lattice.hpp>
 #include <fiction/technology/sidb_lattice_orientations.hpp>
 #include <fiction/types.hpp>
@@ -22,7 +22,7 @@ using namespace fiction;
 TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
-    lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 0}, sidb::technology::cell_type::NORMAL);
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
@@ -64,9 +64,9 @@ TEMPLATE_TEST_CASE("Three SiDBs with positive charge states", "[assess-physical-
     TestType lyt{};
 
     constexpr auto params = physical_population_stability_params{};
-    lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 1, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::NORMAL);
 
     const auto result = physical_population_stability(lyt, params);
     REQUIRE(result.size() == 3);
@@ -120,34 +120,34 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 
     constexpr auto params = physical_population_stability_params{};
 
-    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({23, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 11, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 9, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 11, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 9, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 8, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({20, 14, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 13, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, sidb::technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, sidb::technology::cell_type::NORMAL);
 
     TestType lat{lyt};
 
@@ -164,8 +164,8 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 
     SECTION("input 00")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({36, 1, 0}, sidb::technology::cell_type::EMPTY);
+        lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::EMPTY);
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
         const auto& population_stability_detail = result[0];
@@ -179,8 +179,8 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 
     SECTION("input 01")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({36, 1, 0}, sidb::technology::cell_type::EMPTY);
+        lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 4);
@@ -195,8 +195,8 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 
     SECTION("input 10")
     {
-        lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({38, 0, 0}, sidb::technology::cell_type::EMPTY);
+        lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 8);
@@ -210,8 +210,8 @@ TEMPLATE_TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]"
 
     SECTION("input 11")
     {
-        lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
-        lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::EMPTY);
+        lyt.assign_cell_type({36, 1, 0}, sidb::technology::cell_type::EMPTY);
+        lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::EMPTY);
 
         const auto result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 2);
@@ -233,79 +233,79 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
     {
         sidb_cell_clk_lyt_cube lyt{};
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{36, 1, 0}),
-                             sidb_technology::cell_type::INPUT);
+                             sidb::technology::cell_type::INPUT);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}),
-                             sidb_technology::cell_type::INPUT);
+                             sidb::technology::cell_type::INPUT);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{20, 12, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{8, 3, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 5, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 11, 1}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{12, 4, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 15, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{26, 4, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 9, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{24, 15, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{12, 16, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{18, 9, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{26, 16, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{24, 13, 1}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{24, 5, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{30, 3, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{16, 13, 1}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{32, 2, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{20, 8, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{30, 17, 0}),
-            sidb_technology::cell_type::OUTPUT);
+            sidb::technology::cell_type::OUTPUT);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 18, 0}),
-                             sidb_technology::cell_type::OUTPUT);
+                             sidb::technology::cell_type::OUTPUT);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{32, 18, 0}),
-            sidb_technology::cell_type::OUTPUT);
+            sidb::technology::cell_type::OUTPUT);
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{8, 17, 0}),
-                             sidb_technology::cell_type::OUTPUT);
+                             sidb::technology::cell_type::OUTPUT);
 
         lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 19, 0}),
-                             sidb_technology::cell_type::NORMAL);
+                             sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{36, 19, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         CHECK(lyt.num_cells() == 27);
 
@@ -328,94 +328,94 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
         constexpr auto params = physical_population_stability_params{};
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{36, 1, 0}),
-            sidb_technology::cell_type::INPUT);
+            sidb::technology::cell_type::INPUT);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{2, 1, 0}),
-            sidb_technology::cell_type::INPUT);
+            sidb::technology::cell_type::INPUT);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{20, 12, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{8, 3, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{14, 5, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{14, 11, 1}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{12, 4, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{14, 15, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{26, 4, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{14, 9, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{24, 15, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{12, 16, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{18, 9, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{26, 16, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{24, 13, 1}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{24, 5, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{30, 3, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{16, 13, 1}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{32, 2, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{20, 8, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{30, 17, 0}),
-            sidb_technology::cell_type::OUTPUT);
+            sidb::technology::cell_type::OUTPUT);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{6, 18, 0}),
-            sidb_technology::cell_type::OUTPUT);
+            sidb::technology::cell_type::OUTPUT);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{32, 18, 0}),
-            sidb_technology::cell_type::OUTPUT);
+            sidb::technology::cell_type::OUTPUT);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{8, 17, 0}),
-            sidb_technology::cell_type::OUTPUT);
+            sidb::technology::cell_type::OUTPUT);
 
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{2, 19, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
         lyt.assign_cell_type(
             layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{36, 19, 0}),
-            sidb_technology::cell_type::NORMAL);
+            sidb::technology::cell_type::NORMAL);
 
         CHECK(lyt.num_cells() == 27);
 

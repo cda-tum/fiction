@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_qcc_layout.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -55,7 +55,7 @@ void qcc_command::execute()
 
         if constexpr (fiction::has_inml_technology_v<Lyt>)
         {
-            fiction::write_qcc_layout(*lyt_ptr, filename, ps);
+            fiction::inml::io::write_qcc_layout(*lyt_ptr, filename, ps);
         }
         else
         {

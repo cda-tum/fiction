@@ -2,11 +2,11 @@
 // Created by marcel on 17.01.22.
 //
 
-#ifndef FICTION_WRITE_QLL_LAYOUT_HPP
-#define FICTION_WRITE_QLL_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_INML_IO_WRITE_QLL_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_INML_IO_WRITE_QLL_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -25,7 +25,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace fiction
+namespace fiction::inml::io
 {
 
 namespace detail
@@ -90,11 +90,11 @@ inline constexpr const char* PIN =
 inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-inline const std::unordered_map<inml_technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
-    {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
-    {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
-    {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
-    {inml_technology::cell_type::INVERTER_MAGNET, 4},  {inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5}};
+inline const std::unordered_map<inml::technology::cell_type, uint8_t> INML_COMPONENT_SELECTOR{
+    {inml::technology::cell_type::NORMAL, 0},           {inml::technology::cell_type::INPUT, 0},
+    {inml::technology::cell_type::OUTPUT, 0},           {inml::technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
+    {inml::technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml::technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
+    {inml::technology::cell_type::INVERTER_MAGNET, 4},  {inml::technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5}};
 
 }  // namespace qll
 
@@ -299,14 +299,14 @@ class write_qll_layout_impl
                     {
                         // if an AND or an OR structure is encountered, the next two magnets in southern direction need
                         // to be skipped
-                        if (type == inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
-                            type == inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
+                        if (type == inml::technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
+                            type == inml::technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
                         {
                             skip.insert({c.x, c.y + 1});
                             skip.insert({c.x, c.y + 2});
                         }
                         // if a coupler is encountered, skip all magnets relating to the fan-out structure
-                        else if (type == inml_technology::cell_type::FANOUT_COUPLER_MAGNET)
+                        else if (type == inml::technology::cell_type::FANOUT_COUPLER_MAGNET)
                         {
                             skip.insert({c.x, c.y + 1});
                             skip.insert({c.x, c.y + 2});
@@ -314,7 +314,7 @@ class write_qll_layout_impl
                             skip.insert({c.x + 1, c.y + 2});
                         }
                         // if a cross wire is encountered, skip all magnets relating to the crossing structure
-                        else if (type == inml_technology::cell_type::CROSSWIRE_MAGNET)
+                        else if (type == inml::technology::cell_type::CROSSWIRE_MAGNET)
                         {
                             skip.insert({c.x + 2, c.y});
                             skip.insert({c.x, c.y + 2});
@@ -323,7 +323,7 @@ class write_qll_layout_impl
                         }
                         // inverters are single structures taking up 4 magnets in the library, so skip the next 3 if
                         // encountered one
-                        else if (type == inml_technology::cell_type::INVERTER_MAGNET)
+                        else if (type == inml::technology::cell_type::INVERTER_MAGNET)
                         {
                             skip.insert({c.x + 1, c.y});
                             skip.insert({c.x + 2, c.y});
@@ -342,7 +342,7 @@ class write_qll_layout_impl
 
                         os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
 
-                        if (type == inml_technology::cell_type::INVERTER_MAGNET)
+                        if (type == inml::technology::cell_type::INVERTER_MAGNET)
                         {
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_LENGTH, 4);
                         }
@@ -355,21 +355,21 @@ class write_qll_layout_impl
                         const auto mode = lyt.get_cell_mode(c);
 
                         // write normal cell
-                        if (qca_technology::is_normal_cell(type))
+                        if (qca::technology::is_normal_cell(type))
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, lyt.get_clock_number(c));
                             os << qll::CLOSE_LAYOUT_ITEM;
                         }
                         // constant cells are handled as input pins
-                        else if (qca_technology::is_constant_cell(type))
+                        else if (qca::technology::is_constant_cell(type))
                         {
-                            const auto const_name = qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                            const auto const_name = qca::technology::is_const_0_cell(type) ? "const0" : "const1";
                             os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                         }
 
                         // write via cell
-                        if (qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
+                        if (qca::technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
                         {
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
                                               (c.z * 2) + 1);
@@ -383,19 +383,19 @@ class write_qll_layout_impl
                         const auto mode = lyt.get_cell_mode(c);
 
                         // write normal cell
-                        if (mol_qca_technology::is_normal_cell(type))
+                        if (qca::mol_technology::is_normal_cell(type))
                         {
                             // Phase is encoded in the cell symbol, not in the gate-layout clock number, because each
                             // 10×10 tile spans a full a→d phase cycle; correctness relies on the clocking scheme
                             // keeping path lengths tile-synchronized.
-                            const auto phase = mol_qca_technology::cell_clock_number(type);
+                            const auto phase = qca::mol_technology::cell_clock_number(type);
 
                             os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                             os << fmt::format(qll::LAYOUT_ITEM_PROPERTY, qll::PROPERTY_PHASE, phase);
                             os << qll::CLOSE_LAYOUT_ITEM;
 
                             // write via cell
-                            if (mol_qca_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
+                            if (qca::mol_technology::is_vertical_cell_mode(mode) && c.z != lyt.z())
                             {
                                 os << fmt::format(qll::OPEN_MQCA_LAYOUT_ITEM, 0, cell_id++, bb_x(c), bb_y(c),
                                                   (c.z * 2) + 1);
@@ -404,9 +404,9 @@ class write_qll_layout_impl
                             }
                         }
                         // constant cells are handled as input pins
-                        else if (mol_qca_technology::is_constant_cell(type))
+                        else if (qca::mol_technology::is_constant_cell(type))
                         {
-                            const auto const_name = mol_qca_technology::is_const_0_cell(type) ? "const0" : "const1";
+                            const auto const_name = qca::mol_technology::is_const_0_cell(type) ? "const0" : "const1";
                             os << fmt::format(qll::PIN, tech_name, const_name, 0, cell_id++, bb_x(c), bb_y(c), c.z * 2);
                         }
                     }
@@ -472,6 +472,5 @@ void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_QLL_LAYOUT_HPP
+}  // namespace fiction::inml::io
+#endif  // FICTION_TECHNOLOGY_INML_IO_WRITE_QLL_LAYOUT_HPP

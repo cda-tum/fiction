@@ -17,12 +17,12 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
-#include <fiction/technology/qca_one_library.hpp>
+#include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_defects.hpp>
 #include <fiction/technology/sidb_on_the_fly_gate_library.hpp>
-#include <fiction/technology/sim7_mol_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -587,7 +587,8 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
     {
         const auto gate_lyt = blueprints::straight_wire_gate_layout<GateLyt>();
 
-        const auto layout = physical_design::apply_gate_library<qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+        const auto layout =
+            physical_design::apply_gate_library<qca_cell_clk_lyt, qca::qca_one_library, GateLyt>(gate_lyt);
 
         CHECK(layout.x() == 16);
         CHECK(layout.y() == 14);
@@ -599,7 +600,7 @@ TEST_CASE("Applying the QCA ONE gate library", "[apply-gate-library]")
         const auto gate_lyt = blueprints::optimization_layout_corner_case_outputs_2<GateLyt>();
 
         const auto layout =
-            physical_design::apply_gate_library<stacked_qca_cell_clk_lyt, qca_one_library, GateLyt>(gate_lyt);
+            physical_design::apply_gate_library<stacked_qca_cell_clk_lyt, qca::qca_one_library, GateLyt>(gate_lyt);
 
         CHECK(layout.x() == 21);
         CHECK(layout.y() == 14);
@@ -614,7 +615,7 @@ TEST_CASE("Apply molecular QCA gate library end-to-end", "[apply-gate-library]")
 
     const auto layout = blueprints::and_or_inv_gate_layout<gate_layout>();
 
-    const auto cell_layout = physical_design::apply_gate_library<mol_qca_cell_clk_lyt, sim7_mol_library>(layout);
+    const auto cell_layout = physical_design::apply_gate_library<mol_qca_cell_clk_lyt, qca::sim7_mol_library>(layout);
 
     CHECK(cell_layout.num_cells() > 0u);
 }

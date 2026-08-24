@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_QCC_HPP
 #define FICTION_CMD_QCC_HPP
 
-#include <fiction/io/write_qcc_layout.hpp>
+#include <fiction/technology/inml/io/write_qcc_layout.hpp>
 
 #include <alice/alice.hpp>
 
@@ -41,7 +41,7 @@ class qcc_command final : public command
      */
     std::string filename;
 
-    fiction::write_qcc_layout_params ps{};
+    fiction::inml::io::write_qcc_layout_params ps{};
 };
 
 }  // namespace alice

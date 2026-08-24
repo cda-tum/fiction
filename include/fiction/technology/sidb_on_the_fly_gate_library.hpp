@@ -10,9 +10,9 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/fcn_gate_library.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/is_sidb_gate_design_impossible.hpp"
 #include "fiction/technology/sidb_nm_distance.hpp"
 #include "fiction/traits.hpp"
@@ -53,7 +53,7 @@ class gate_design_exception : public std::exception
      * @param portlist The port list associated with the error.
      */
     explicit gate_design_exception(const tile<GateLyt>& ti, const TT& spec,
-                                   const port_list<port_direction>& portlist) noexcept :
+                                   const fcn::port_list<fcn::port_direction>& portlist) noexcept :
             std::exception(),
             error_tile{ti},
             truth_table{spec},
@@ -76,7 +76,7 @@ class gate_design_exception : public std::exception
     /**
      * Get the port list associated with the exception.
      */
-    [[nodiscard]] port_list<port_direction> which_port_list() const noexcept
+    [[nodiscard]] fcn::port_list<fcn::port_direction> which_port_list() const noexcept
     {
         return p;
     }
@@ -93,7 +93,7 @@ class gate_design_exception : public std::exception
     /**
      * The port list associated with the error.
      */
-    const port_list<port_direction> p;
+    const fcn::port_list<fcn::port_direction> p;
 };
 
 /**
@@ -144,12 +144,13 @@ struct sidb_on_the_fly_gate_library_params
  * defects, thus enabling the design of SiDB circuits in the presence of atomic defects. The skeleton (i.e., the
  * pre-defined input and output wires) are hexagonal in shape.
  */
-class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60, 46>  // width and height of a hexagon
+class sidb_on_the_fly_gate_library
+        : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit sidb_on_the_fly_gate_library() = delete;
     /**
-     * Overrides the corresponding function in fcn_gate_library. Given a tile `t`, this function takes all necessary
+     * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
      * information from the stored grid into account to design the correct fcn_gate representation for that tile. In
      * case there is no possible SiDB design, the blacklist is updated and an error fcn gate is returned.
      *
@@ -566,10 +567,10 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         catch (const std::out_of_range&)
         {
-            throw unsupported_gate_orientation_exception(t, p);
+            throw fcn::unsupported_gate_orientation_exception(t, p);
         }
 
-        throw unsupported_gate_type_exception(t);
+        throw fcn::unsupported_gate_type_exception(t);
     }
 
   private:
@@ -611,7 +612,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
         for (const auto& l_cells : logic_cells)
         {
-            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb_technology::cell_type::LOGIC);
+            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb::technology::cell_type::LOGIC);
         }
 
         const auto status =
@@ -699,7 +700,7 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
     template <typename LytSkeleton, typename TT, typename CellLyt, typename GateLyt>
     [[nodiscard]] static fcn_gate design_gate(const LytSkeleton& skeleton, const std::vector<TT>& spec,
                                               const sidb_on_the_fly_gate_library_params<cell<CellLyt>>& parameters,
-                                              const port_list<port_direction>& p, const tile<GateLyt>& tile)
+                                              const fcn::port_list<fcn::port_direction>& p, const tile<GateLyt>& tile)
     {
         static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
@@ -851,28 +852,28 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * @return port directions of the given tile are returned as `port_list`.
      */
     template <typename Lyt>
-    [[nodiscard]] static port_list<port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
+    [[nodiscard]] static fcn::port_list<fcn::port_direction> determine_port_routing(const Lyt& lyt, const tile<Lyt>& t)
     {
-        port_list<port_direction> p{};
+        fcn::port_list<fcn::port_direction> p{};
 
         // determine incoming connector ports
         if (lyt.has_north_eastern_incoming_signal(t))
         {
-            p.inp.emplace(port_direction::cardinal::NORTH_EAST);
+            p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
         }
         if (lyt.has_north_western_incoming_signal(t))
         {
-            p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+            p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
         }
 
         // determine outgoing connector ports
         if (lyt.has_south_eastern_outgoing_signal(t))
         {
-            p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+            p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
         }
         if (lyt.has_south_western_outgoing_signal(t))
         {
-            p.out.emplace(port_direction::cardinal::SOUTH_WEST);
+            p.out.emplace(fcn::port_direction::cardinal::SOUTH_WEST);
         }
 
         // gates without connector ports
@@ -882,23 +883,23 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
         {
             if (lyt.has_no_incoming_signal(t))
             {
-                p.inp.emplace(port_direction::cardinal::NORTH_WEST);
+                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
             }
             if (lyt.has_no_outgoing_signal(t))
             {
-                p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
             }
         }
         else  // 2-input functions
         {
             if (lyt.has_no_incoming_signal(t))
             {
-                p.inp.emplace(port_direction::cardinal::NORTH_WEST);
-                p.inp.emplace(port_direction::cardinal::NORTH_EAST);
+                p.inp.emplace(fcn::port_direction::cardinal::NORTH_WEST);
+                p.inp.emplace(fcn::port_direction::cardinal::NORTH_EAST);
             }
             if (lyt.has_no_outgoing_signal(t))
             {
-                p.out.emplace(port_direction::cardinal::SOUTH_EAST);
+                p.out.emplace(fcn::port_direction::cardinal::SOUTH_EAST);
             }
         }
 
@@ -1449,32 +1450,33 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
 
     // clang-format on
 
-    using port_gate_map = phmap::flat_hash_map<port_list<port_direction>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_direction>, fcn_gate>;
     using double_port_gate_map =
-        phmap::flat_hash_map<std::pair<port_list<port_direction>, port_list<port_direction>>, fcn_gate>;
+        phmap::flat_hash_map<std::pair<fcn::port_list<fcn::port_direction>, fcn::port_list<fcn::port_direction>>,
+                             fcn_gate>;
     /**
      * Lookup table for 1-input/1-output Boolean functions.
      */
     static inline const port_gate_map ONE_IN_ONE_OUT_MAP = {
         // primary inputs
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_WEST)}}, STRAIGHT_WIRE},
-        {{{}, {port_direction(port_direction::cardinal::SOUTH_EAST)}}, DIAGONAL_WIRE},
+        {{{}, {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}, STRAIGHT_WIRE},
+        {{{}, {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}}, DIAGONAL_WIRE},
         // primary outputs
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)}, {}}, DIAGONAL_WIRE},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)}, {}}, MIRRORED_STRAIGHT_WIRE},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)}, {}}, DIAGONAL_WIRE},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)}, {}}, MIRRORED_STRAIGHT_WIRE},
         // straight wire
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
          STRAIGHT_WIRE},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}},
          MIRRORED_STRAIGHT_WIRE},
         // diagonal wire
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}},
          DIAGONAL_WIRE},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
          MIRRORED_DIAGONAL_WIRE},
         // empty gate (for crossing layer)
         {{{}, {}}, EMPTY_GATE},
@@ -1483,46 +1485,50 @@ class sidb_on_the_fly_gate_library : public fcn_gate_library<sidb_technology, 60
      * Lookup table for wire crossings and hourglass wires.
      */
     static inline const double_port_gate_map TWO_IN_TWO_OUT_MAP = {
-        {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-          {{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
+        {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
+          {{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}}},
          DOUBLE_WIRE},
-        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-          {{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
+        {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}},
+          {{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}},
          DOUBLE_WIRE},
-        {{{{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}},
-          {{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}}},
+        {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}},
+          {{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}}},
          CROSSING},
-        {{{{port_direction(port_direction::cardinal::NORTH_EAST)},
-           {port_direction(port_direction::cardinal::SOUTH_WEST)}},
-          {{port_direction(port_direction::cardinal::NORTH_WEST)},
-           {port_direction(port_direction::cardinal::SOUTH_EAST)}}},
+        {{{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
+          {{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+           {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}}},
          CROSSING},
     };
     /**
      * Lookup table for 2-input/1-output Boolean function (e.g., AND, OR, ...).
      */
     static inline const port_gate_map TWO_IN_ONE_OUT_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST),
+           fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST)}},
          TWO_IN_ONE_OUT},
-        {{{port_direction(port_direction::cardinal::NORTH_WEST), port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_WEST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST),
+           fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
          MIRRORED_TWO_IN_ONE_OUT}};
     /**
      * Lookup table for fan-out.
      */
     static inline const port_gate_map ONE_IN_TWO_OUT_MAP = {
-        {{{port_direction(port_direction::cardinal::NORTH_WEST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_WEST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST),
+           fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
          FANOUT_1_2},
-        {{{port_direction(port_direction::cardinal::NORTH_EAST)},
-          {port_direction(port_direction::cardinal::SOUTH_EAST), port_direction(port_direction::cardinal::SOUTH_WEST)}},
+        {{{fcn::port_direction(fcn::port_direction::cardinal::NORTH_EAST)},
+          {fcn::port_direction(fcn::port_direction::cardinal::SOUTH_EAST),
+           fcn::port_direction(fcn::port_direction::cardinal::SOUTH_WEST)}},
          MIRRORED_FANOUT_1_2}};
 };
 

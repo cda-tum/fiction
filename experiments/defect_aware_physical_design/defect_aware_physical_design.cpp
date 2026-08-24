@@ -13,8 +13,8 @@
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/technology/area.hpp>                       // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>          // cell implementations
+#include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
+#include <fiction/technology/fcn/cell_technologies.hpp>      // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/technology/sidb_defect_surface.hpp>        // H-Si(100) 2x1 surface model
 #include <fiction/technology/sidb_defects.hpp>               // SiDB defect classes
@@ -193,9 +193,9 @@ int main()  // NOLINT
             const auto bb = fiction::layouts::bounding_box_2d<cell_lyt>(dot_accurate_layout);
 
             // compute area
-            fiction::area_stats                            area_stats{};
-            fiction::area_params<fiction::sidb_technology> area_ps{};
-            fiction::area(bb, area_ps, &area_stats);
+            fiction::fcn::area_stats                             area_stats{};
+            fiction::fcn::area_params<fiction::sidb::technology> area_ps{};
+            fiction::fcn::area(bb, area_ps, &area_stats);
 
             // write a SiQAD simulation file
             fiction::write_sqd_layout(dot_accurate_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));

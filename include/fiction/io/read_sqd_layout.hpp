@@ -6,7 +6,7 @@
 #define FICTION_READ_SQD_LAYOUT_HPP
 
 #include "fiction/networks/utils/name_utils.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/technology/sidb_lattice_orientations.hpp"
 #include "fiction/traits.hpp"
@@ -272,12 +272,12 @@ class read_sqd_layout_impl
      * @return The cell type specified by the <dbdot> element. If non is specified, the cell type is assumed to be
      * normal.
      */
-    sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElement* dot_type)
+    sidb::technology::cell_type parse_dot_type(const tinyxml2::XMLElement* dot_type)
     {
         // if no dot type is given, assume normal dot
         if (dot_type == nullptr)
         {
-            return sidb_technology::cell_type::NORMAL;
+            return sidb::technology::cell_type::NORMAL;
         }
 
         const auto* const type = dot_type->GetText();
@@ -289,19 +289,19 @@ class read_sqd_layout_impl
 
         if (std::string{type} == "input")
         {
-            return sidb_technology::cell_type::INPUT;
+            return sidb::technology::cell_type::INPUT;
         }
         if (std::string{type} == "output")
         {
-            return sidb_technology::cell_type::OUTPUT;
+            return sidb::technology::cell_type::OUTPUT;
         }
         if (std::string{type} == "normal")
         {
-            return sidb_technology::cell_type::NORMAL;
+            return sidb::technology::cell_type::NORMAL;
         }
         if (std::string{type} == "logic")
         {
-            return sidb_technology::cell_type::LOGIC;
+            return sidb::technology::cell_type::LOGIC;
         }
 
         throw sqd_parsing_error("Error parsing SQD file: invalid dot type");

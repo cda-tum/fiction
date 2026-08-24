@@ -2,12 +2,12 @@
 // Created by marcel on 07.08.19.
 //
 
-#ifndef FICTION_WRITE_QCC_LAYOUT_HPP
-#define FICTION_WRITE_QCC_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_INML_IO_WRITE_QCC_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_INML_IO_WRITE_QCC_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/magcad_magnet_count.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/inml/magcad_magnet_count.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -31,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::inml::io
 {
 
 /**
@@ -85,11 +85,11 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-inline const std::unordered_map<inml_technology::cell_type, uint8_t> COMPONENT_SELECTOR{
-    {inml_technology::cell_type::NORMAL, 0},           {inml_technology::cell_type::INPUT, 0},
-    {inml_technology::cell_type::OUTPUT, 0},           {inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
-    {inml_technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
-    {inml_technology::cell_type::INVERTER_MAGNET, 4},  {inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5},
+inline const std::unordered_map<inml::technology::cell_type, uint8_t> COMPONENT_SELECTOR{
+    {inml::technology::cell_type::NORMAL, 0},           {inml::technology::cell_type::INPUT, 0},
+    {inml::technology::cell_type::OUTPUT, 0},           {inml::technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
+    {inml::technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml::technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
+    {inml::technology::cell_type::INVERTER_MAGNET, 4},  {inml::technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5},
 };
 
 }  // namespace qcc
@@ -221,7 +221,7 @@ class write_qcc_layout_impl
     {
         std::stringstream ss{};
 
-        ss << lyt.get_layout_name() << qcc::LIBRARY_NAME << tech_impl_name<technology<Lyt>> << num_magnets
+        ss << lyt.get_layout_name() << qcc::LIBRARY_NAME << tech_impl_name<fiction::technology<Lyt>> << num_magnets
            << bb.get_x_size() << bb.get_y_size();
 
         const auto pin_data = get_pin_data();
@@ -235,7 +235,7 @@ class write_qcc_layout_impl
     void write_header()
     {
         os << fmt::format(qcc::VERSION_HEADER, FICTION_VERSION, FICTION_REPO);
-        os << fmt::format(qcc::OPEN_QCA_COMPONENT, tech_impl_name<technology<Lyt>>, qcc::LIBRARY_NAME,
+        os << fmt::format(qcc::OPEN_QCA_COMPONENT, tech_impl_name<fiction::technology<Lyt>>, qcc::LIBRARY_NAME,
                           ps.use_filename_as_component_name ? std::filesystem::path{ps.filename}.stem().string() :
                                                               lyt.get_layout_name(),
                           generate_layout_id_hash(), bb.get_x_size(), bb.get_y_size(), num_magnets);
@@ -247,11 +247,13 @@ class write_qcc_layout_impl
 
         for (const auto& pi : sorted_pi_list)
         {
-            os << fmt::format(qcc::PIN, tech_impl_name<technology<Lyt>>, lyt.get_cell_name(pi), 0, bb_x(pi), bb_y(pi));
+            os << fmt::format(qcc::PIN, tech_impl_name<fiction::technology<Lyt>>, lyt.get_cell_name(pi), 0, bb_x(pi),
+                              bb_y(pi));
         }
         for (const auto& po : sorted_po_list)
         {
-            os << fmt::format(qcc::PIN, tech_impl_name<technology<Lyt>>, lyt.get_cell_name(po), 1, bb_x(po), bb_y(po));
+            os << fmt::format(qcc::PIN, tech_impl_name<fiction::technology<Lyt>>, lyt.get_cell_name(po), 1, bb_x(po),
+                              bb_y(po));
         }
         os << qcc::CLOSE_ENTITY;
     }
@@ -261,7 +263,7 @@ class write_qcc_layout_impl
         os << qcc::OPEN_COMPONENTS;
         for (const auto& comp : qcc::COMPONENTS)
         {
-            os << fmt::format(qcc::COMPONENT_ITEM, tech_impl_name<technology<Lyt>>, comp);
+            os << fmt::format(qcc::COMPONENT_ITEM, tech_impl_name<fiction::technology<Lyt>>, comp);
         }
         os << qcc::CLOSE_COMPONENTS;
     }
@@ -287,14 +289,14 @@ class write_qcc_layout_impl
 
                 // if an AND or an OR structure is encountered, the next two magnets in southern direction need to
                 // be skipped
-                if (type == inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
-                    type == inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
+                if (type == inml::technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
+                    type == inml::technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
                 {
                     skip.insert({c.x, c.y + 1});
                     skip.insert({c.x, c.y + 2});
                 }
                 // if a coupler is encountered, skip all magnets relating to the fan-out structure
-                else if (type == inml_technology::cell_type::FANOUT_COUPLER_MAGNET)
+                else if (type == inml::technology::cell_type::FANOUT_COUPLER_MAGNET)
                 {
                     skip.insert({c.x, c.y + 1});
                     skip.insert({c.x, c.y + 2});
@@ -302,7 +304,7 @@ class write_qcc_layout_impl
                     skip.insert({c.x + 1, c.y + 2});
                 }
                 // if a cross wire is encountered, skip all magnets relating to the crossing structure
-                else if (type == inml_technology::cell_type::CROSSWIRE_MAGNET)
+                else if (type == inml::technology::cell_type::CROSSWIRE_MAGNET)
                 {
                     skip.insert({c.x + 2, c.y});
                     skip.insert({c.x, c.y + 2});
@@ -311,7 +313,7 @@ class write_qcc_layout_impl
                 }
                 // inverters are single structures taking up 4 magnets in the library, so skip the next 3 if
                 // encountered one
-                else if (type == inml_technology::cell_type::INVERTER_MAGNET)
+                else if (type == inml::technology::cell_type::INVERTER_MAGNET)
                 {
                     skip.insert({c.x + 1, c.y});
                     skip.insert({c.x + 2, c.y});
@@ -329,7 +331,7 @@ class write_qcc_layout_impl
 
                 os << fmt::format(qcc::LAYOUT_ITEM_PROPERTY, qcc::PROPERTY_PHASE, lyt.get_clock_number(c));
 
-                if (type == inml_technology::cell_type::INVERTER_MAGNET)
+                if (type == inml::technology::cell_type::INVERTER_MAGNET)
                 {
                     os << fmt::format(qcc::LAYOUT_ITEM_PROPERTY, qcc::PROPERTY_LENGTH, 4);
                 }
@@ -391,6 +393,5 @@ void write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qc
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_QCC_LAYOUT_HPP
+}  // namespace fiction::inml::io
+#endif  // FICTION_TECHNOLOGY_INML_IO_WRITE_QCC_LAYOUT_HPP

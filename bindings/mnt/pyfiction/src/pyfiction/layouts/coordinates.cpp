@@ -226,9 +226,9 @@ void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    m.def("offset_area", &fiction::area<py_offset_coordinate>, py::arg("coord"), DOC(fiction_area));
-    m.def("cube_area", &fiction::area<py_cube_coordinate>, py::arg("coord"), DOC(fiction_area));
-    m.def("siqad_area", &fiction::area<py_siqad_coordinate>, py::arg("coord"), DOC(fiction_area));
+    m.def("offset_area", &fiction::fcn::area<py_offset_coordinate>, py::arg("coord"), DOC(fiction_area));
+    m.def("cube_area", &fiction::fcn::area<py_cube_coordinate>, py::arg("coord"), DOC(fiction_area));
+    m.def("siqad_area", &fiction::fcn::area<py_siqad_coordinate>, py::arg("coord"), DOC(fiction_area));
 
     m.def("offset_volume", &fiction::volume<py_offset_coordinate>, py::arg("coord"), DOC(fiction_volume));
     m.def("cube_volume", &fiction::volume<py_cube_coordinate>, py::arg("coord"), DOC(fiction_volume));

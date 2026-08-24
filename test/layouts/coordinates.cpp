@@ -294,14 +294,14 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", layouts::coords::off
 
 TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 {
-    CHECK(area(layouts::coords::offset{1, 1, 1}) == 4);
+    CHECK(layouts::coords::area(layouts::coords::offset{1, 1, 1}) == 4);
     CHECK(volume(layouts::coords::offset{1, 1, 1}) == 8);
 }
 
 TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
 {
-    CHECK(area(layouts::coords::cube{1, 1, 1}) == 4);
-    CHECK(area(layouts::coords::cube{-1, -1, -1}) == 4);
+    CHECK(layouts::coords::area(layouts::coords::cube{1, 1, 1}) == 4);
+    CHECK(layouts::coords::area(layouts::coords::cube{-1, -1, -1}) == 4);
 
     CHECK(volume(layouts::coords::cube{-1, -1, -1}) == 8);
     CHECK(volume(layouts::coords::cube{1, 1, 1}) == 8);
@@ -309,8 +309,8 @@ TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
 
 TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
 {
-    CHECK(area(layouts::coords::siqad{1, 1, 1}) == 8);
-    CHECK(area(layouts::coords::siqad{-1, -1, 1}) == 8);
+    CHECK(layouts::coords::area(layouts::coords::siqad{1, 1, 1}) == 8);
+    CHECK(layouts::coords::area(layouts::coords::siqad{-1, -1, 1}) == 8);
 
     CHECK(volume(layouts::coords::siqad{1, 1, 1}) == 8);
     CHECK(volume(layouts::coords::siqad{-1, -1, 1}) == 8);

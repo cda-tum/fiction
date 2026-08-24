@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_qca_layout.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -58,7 +58,7 @@ void qca_command::execute()
 
         if constexpr (fiction::has_qca_technology_v<Lyt>)
         {
-            fiction::write_qca_layout(*lyt_ptr, filename, ps);
+            fiction::qca::io::write_qca_layout(*lyt_ptr, filename, ps);
         }
         else
         {

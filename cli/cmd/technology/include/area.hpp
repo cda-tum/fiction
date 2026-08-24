@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_AREA_HPP
 #define FICTION_CMD_AREA_HPP
 
-#include <fiction/technology/area.hpp>
+#include <fiction/technology/fcn/area.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -36,7 +36,7 @@ class area_command final : public command
     /**
      * Layout area in nm².
      */
-    fiction::area_stats st{};
+    fiction::fcn::area_stats st{};
     /**
      * Width of each cell.
      */

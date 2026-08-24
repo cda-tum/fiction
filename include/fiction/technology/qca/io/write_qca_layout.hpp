@@ -2,10 +2,10 @@
 // Created by marcel on 05.10.18.
 //
 
-#ifndef FICTION_WRITE_QCA_LAYOUT_HPP
-#define FICTION_WRITE_QCA_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_HPP
 
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -19,7 +19,7 @@
 #include <string_view>
 #include <vector>
 
-namespace fiction
+namespace fiction::qca::io
 {
 
 /**
@@ -239,19 +239,19 @@ class write_qca_layout_impl
 
         // colors for 4 clocks are supported exclusively
         qcad::color color{};
-        if (qca_technology::is_input_cell(cell_type))
+        if (qca::technology::is_input_cell(cell_type))
         {
             color.red   = qcad::COLOR_MIN;
             color.green = qcad::COLOR_MIN;
             color.blue  = qcad::COLOR_MAX;
         }
-        else if (qca_technology::is_output_cell(cell_type))
+        else if (qca::technology::is_output_cell(cell_type))
         {
             color.red   = qcad::COLOR_MAX;
             color.green = qcad::COLOR_MAX;
             color.blue  = qcad::COLOR_MIN;
         }
-        else if (qca_technology::is_constant_cell(cell_type))
+        else if (qca::technology::is_constant_cell(cell_type))
         {
             color.red   = qcad::COLOR_MAX;
             color.green = qcad::COLOR_HALF;
@@ -301,7 +301,7 @@ class write_qca_layout_impl
     {
         // handle cell mode
         os << qcad::CELL_OPTIONS_MODE;
-        if (const auto mode = lyt.get_cell_mode(c); qca_technology::is_vertical_cell_mode(mode))
+        if (const auto mode = lyt.get_cell_mode(c); qca::technology::is_vertical_cell_mode(mode))
         {
             os << qcad::CELL_MODE_VERTICAL;
 
@@ -314,7 +314,7 @@ class write_qca_layout_impl
         {
             os << qcad::CELL_MODE_CROSSOVER;
         }
-        else if (qca_technology::is_rotated_cell_mode(mode))
+        else if (qca::technology::is_rotated_cell_mode(mode))
         {
             os << qcad::CELL_MODE_ROTATED;
         }
@@ -331,19 +331,19 @@ class write_qca_layout_impl
         // handle cell function
         os << qcad::CELL_FUNCTION;
 
-        if (qca_technology::is_normal_cell(cell_type))
+        if (qca::technology::is_normal_cell(cell_type))
         {
             os << qcad::CELL_FUNCTION_NORMAL;
         }
-        else if (qca_technology::is_constant_cell(cell_type))
+        else if (qca::technology::is_constant_cell(cell_type))
         {
             os << qcad::CELL_FUNCTION_FIXED;
         }
-        else if (qca_technology::is_input_cell(cell_type))
+        else if (qca::technology::is_input_cell(cell_type))
         {
             os << qcad::CELL_FUNCTION_INPUT;
         }
-        else if (qca_technology::is_output_cell(cell_type))
+        else if (qca::technology::is_output_cell(cell_type))
         {
             os << qcad::CELL_FUNCTION_OUTPUT;
         }
@@ -371,17 +371,17 @@ class write_qca_layout_impl
 
                 // determine charge
                 os << qcad::CHARGE;
-                if (!qca_technology::is_constant_cell(cell_type))
+                if (!qca::technology::is_constant_cell(cell_type))
                 {
                     os << qcad::CHARGE_8;
                 }
-                else if ((qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 2) ||
-                         (qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 0))
+                else if ((qca::technology::is_const_0_cell(cell_type) && std::abs(i + j) == 2) ||
+                         (qca::technology::is_const_1_cell(cell_type) && std::abs(i + j) == 0))
                 {
                     os << qcad::CHARGE_1;
                 }
-                else if ((qca_technology::is_const_0_cell(cell_type) && std::abs(i + j) == 0) ||
-                         (qca_technology::is_const_1_cell(cell_type) && std::abs(i + j) == 2))
+                else if ((qca::technology::is_const_0_cell(cell_type) && std::abs(i + j) == 0) ||
+                         (qca::technology::is_const_1_cell(cell_type) && std::abs(i + j) == 2))
                 {
                     os << qcad::CHARGE_0;
                 }
@@ -389,7 +389,7 @@ class write_qca_layout_impl
 
                 // determine spin
                 os << qcad::SPIN;
-                if (qca_technology::is_input_cell(cell_type) || qca_technology::is_output_cell(cell_type))
+                if (qca::technology::is_input_cell(cell_type) || qca::technology::is_output_cell(cell_type))
                 {
                     os << qcad::NEGATIVE_SPIN;
                 }
@@ -413,11 +413,11 @@ class write_qca_layout_impl
 
         // override cell_name if cell is constant; if cell has a name
         auto cell_name = lyt.get_cell_name(c);
-        if (qca_technology::is_const_0_cell(cell_type))
+        if (qca::technology::is_const_0_cell(cell_type))
         {
             cell_name = "-1.00";
         }
-        else if (qca_technology::is_const_1_cell(cell_type))
+        else if (qca::technology::is_const_1_cell(cell_type))
         {
             cell_name = "1.00";
         }
@@ -574,6 +574,5 @@ void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qc
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_QCA_LAYOUT_HPP
+}  // namespace fiction::qca::io
+#endif  // FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_HPP

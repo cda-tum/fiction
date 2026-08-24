@@ -125,8 +125,8 @@ Then include what you need:
 ```c++
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/technology/qca_one_library.hpp>
-#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/technology/qca/qca_one_library.hpp>
+#include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/...>
 ```
 

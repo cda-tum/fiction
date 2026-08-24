@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_fqca_layout.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -52,7 +52,7 @@ void fqca_command::execute()
 
         if constexpr (fiction::has_qca_technology_v<Lyt>)
         {
-            fiction::write_fqca_layout(*lyt_ptr, filename, ps);
+            fiction::qca::io::write_fqca_layout(*lyt_ptr, filename, ps);
         }
         else
         {
@@ -86,7 +86,7 @@ void fqca_command::execute()
     {
         std::visit(write_fqca, lyt);
     }
-    catch (const fiction::out_of_cell_names_exception&)
+    catch (const fiction::qca::io::out_of_cell_names_exception&)
     {
         env->out() << "[e] layout contains more named cells than QCA-STACK's file format supports\n";
     }

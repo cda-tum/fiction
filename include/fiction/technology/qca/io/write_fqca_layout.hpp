@@ -2,10 +2,10 @@
 // Created by marcel on 23.09.21.
 //
 
-#ifndef FICTION_WRITE_FQCA_LAYOUT_HPP
-#define FICTION_WRITE_FQCA_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_QCA_IO_WRITE_FQCA_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_QCA_IO_WRITE_FQCA_LAYOUT_HPP
 
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -19,7 +19,7 @@
 #include <string_view>
 #include <vector>
 
-namespace fiction
+namespace fiction::qca::io
 {
 
 /**
@@ -163,12 +163,12 @@ class write_fqca_layout_impl
             os << cell_designator;
         }
         // const-0 cell
-        else if (const auto cell_type = lyt.get_cell_type(c); qca_technology::is_const_0_cell(cell_type))
+        else if (const auto cell_type = lyt.get_cell_type(c); qca::technology::is_const_0_cell(cell_type))
         {
             os << qca_stack::CONST_0_CELL;
         }
         // const-1 cell
-        else if (qca_technology::is_const_1_cell(cell_type))
+        else if (qca::technology::is_const_1_cell(cell_type))
         {
             os << qca_stack::CONST_1_CELL;
         }
@@ -185,7 +185,7 @@ class write_fqca_layout_impl
     void write_via_cell(const cell<Lyt>& c, std::stringstream& via_stream) const
     {
         // if cell is marked as a vertical cell
-        if (const auto cell_mode = lyt.get_cell_mode(c); qca_technology::is_vertical_cell_mode(cell_mode))
+        if (const auto cell_mode = lyt.get_cell_mode(c); qca::technology::is_vertical_cell_mode(cell_mode))
         {
             via_stream << std::to_string(lyt.get_clock_number(c));
         }
@@ -333,6 +333,5 @@ void write_fqca_layout(const Lyt& lyt, const std::string_view& filename, write_f
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_FQCA_LAYOUT_HPP
+}  // namespace fiction::qca::io
+#endif  // FICTION_TECHNOLOGY_QCA_IO_WRITE_FQCA_LAYOUT_HPP

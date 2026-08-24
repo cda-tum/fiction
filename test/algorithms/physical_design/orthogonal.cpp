@@ -15,7 +15,7 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
-#include <fiction/technology/qca_one_library.hpp>
+#include <fiction/technology/qca/qca_one_library.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -138,7 +138,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     using cell_layout =
-        layouts::cell_level_layout<qca_technology,
+        layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const auto check = [](const auto& ntk)
@@ -147,7 +147,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
         auto layout = physical_design::orthogonal<gate_layout>(ntk, {}, &stats);
 
-        CHECK_NOTHROW(physical_design::apply_gate_library<cell_layout, qca_one_library>(layout));
+        CHECK_NOTHROW(physical_design::apply_gate_library<cell_layout, qca::qca_one_library>(layout));
     };
 
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());

@@ -16,7 +16,7 @@
 #include "fiction/physical_design/utils/aspect_ratio_iterator.hpp"
 #include "fiction/physical_design/utils/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
-#include "fiction/technology/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb_surface_analysis.hpp"
 #include "fiction/traits.hpp"
 
@@ -179,7 +179,7 @@ class exact_impl
 {
   public:
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats& st, const surface_black_list<Lyt, port_direction>& sbl = {}) :
+               exact_physical_design_stats& st, const surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             scheme{*layouts::get_clocking_scheme<Lyt>(ps.scheme)},
@@ -235,7 +235,7 @@ class exact_impl
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
-    const surface_black_list<Lyt, port_direction> black_list;
+    const surface_black_list<Lyt, fcn::port_direction> black_list;
     /**
      * Lower bound for the number of layout tiles.
      */
@@ -273,7 +273,7 @@ class exact_impl
          * @param ps The parameters to respect in the SMT instance generation process.
          */
         smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
-                    const surface_black_list<Lyt, port_direction>& sbl) noexcept :
+                    const surface_black_list<Lyt, fcn::port_direction>& sbl) noexcept :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
@@ -498,7 +498,7 @@ class exact_impl
         /**
          * Maps tiles to blacklisted gate types via their truth tables and port information.
          */
-        const surface_black_list<Lyt, port_direction>& black_list;
+        const surface_black_list<Lyt, fcn::port_direction>& black_list;
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
@@ -2932,7 +2932,7 @@ class exact_impl
                 if (result_aspect_ratio)
                 {
                     // stop working if its area is smaller or equal to the one currently at hand
-                    if (area(*result_aspect_ratio) <= area(ar))
+                    if (layouts::coords::area(*result_aspect_ratio) <= layouts::coords::area(ar))
                     {
                         return std::nullopt;
                     }
@@ -2960,7 +2960,7 @@ class exact_impl
                         }
                         else  // or if the own one is smaller
                         {
-                            if (area(*result_aspect_ratio) > area(ar))
+                            if (layouts::coords::area(*result_aspect_ratio) > layouts::coords::area(ar))
                             {
                                 result_aspect_ratio = ar;
                             }
@@ -2974,7 +2974,7 @@ class exact_impl
                     // interrupt other threads that are working on higher aspect ratios
                     for (const auto& ti : *ti_list)
                     {
-                        if (area(ar) <= area(ti.worker_aspect_ratio))
+                        if (layouts::coords::area(ar) <= layouts::coords::area(ti.worker_aspect_ratio))
                         {
                             ti.ctx->interrupt();
                         }
@@ -3279,7 +3279,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  * parameters; `std::nullopt`, otherwise.
  */
 template <typename Lyt, typename Ntk>
-std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list,
+std::optional<Lyt> exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, fcn::port_direction>& black_list,
                                         exact_physical_design_params ps  = {},
                                         exact_physical_design_stats* pst = nullptr)
 {

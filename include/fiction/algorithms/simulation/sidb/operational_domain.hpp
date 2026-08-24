@@ -16,8 +16,8 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/cell_technologies.hpp"
-#include "fiction/technology/constants.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fiction/utils/stl/hash.hpp"
@@ -97,7 +97,7 @@ struct parameter_point
      */
     [[nodiscard]] static int64_t quantize(const double value) noexcept
     {
-        return static_cast<int64_t>(std::llround(value / constants::ERROR_MARGIN));
+        return static_cast<int64_t>(std::llround(value / fcn::constants::ERROR_MARGIN));
     }
     /**
      * Support for structured bindings.
@@ -479,7 +479,7 @@ class operational_domain_impl
             params{ps},
             stats{st},
             output_bdl_pairs{detect_bdl_pairs<Lyt>(
-                layout, sidb_technology::cell_type::OUTPUT,
+                layout, sidb::technology::cell_type::OUTPUT,
                 ps.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)},
             num_dimensions{params.sweep_dimensions.size()},
             input_bdl_wires{detect_bdl_wires(lyt, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
@@ -522,7 +522,7 @@ class operational_domain_impl
             if ((params.sweep_dimensions.at(d).min +
                  (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
                     params.sweep_dimensions.at(d).max >
-                constants::ERROR_MARGIN)
+                fcn::constants::ERROR_MARGIN)
             {
                 indices.at(d).pop_back();
             }
@@ -570,7 +570,7 @@ class operational_domain_impl
             if ((params.sweep_dimensions.at(d).min +
                  (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
                     params.sweep_dimensions.at(d).max >
-                constants::ERROR_MARGIN)
+                fcn::constants::ERROR_MARGIN)
             {
                 indices.at(d).pop_back();
             }

@@ -16,8 +16,8 @@
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
-#include <fiction/technology/cell_technologies.hpp>
-#include <fiction/technology/constants.hpp>
+#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -55,8 +55,8 @@ static void check_op_domain_params_and_operational_status(const OpDomain&       
                 const auto& sweep_param = params.sweep_dimensions[d];
                 const auto& coord_value = coord.get_parameters()[d];
 
-                CHECK(sweep_param.min <= (coord_value + constants::ERROR_MARGIN));
-                CHECK(sweep_param.max >= (coord_value - constants::ERROR_MARGIN));
+                CHECK(sweep_param.min <= (coord_value + fcn::constants::ERROR_MARGIN));
+                CHECK(sweep_param.max >= (coord_value - fcn::constants::ERROR_MARGIN));
                 CHECK(sweep_param.step > 0.0);
             }
 
@@ -232,7 +232,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
         const sidb_100_cell_clk_lyt_siqad and_lat{and_gate};
 
-        REQUIRE(and_lat.num_cells_of_given_type(sidb_technology::cell_type::LOGIC) > 0);
+        REQUIRE(and_lat.num_cells_of_given_type(sidb::technology::cell_type::LOGIC) > 0);
 
         operational_domain_params sketch_params{};
         sketch_params.operational_params.strategy_to_analyze_operational_status =
@@ -659,20 +659,20 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb::technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb::technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -1413,20 +1413,20 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb::technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb::technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -1497,20 +1497,20 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb::technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb::technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -1605,22 +1605,22 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     layout lyt{{20, 10}, "AND gate"};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 1}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 1}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 2, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 6, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, sidb::technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 9, 1}, sidb::technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -1713,32 +1713,32 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     layout lyt{{20, 10}, "AND gate"};
 
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{0, 0, 1}),
-                         sidb_technology::cell_type::INPUT);
+                         sidb::technology::cell_type::INPUT);
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 1}),
-                         sidb_technology::cell_type::INPUT);
+                         sidb::technology::cell_type::INPUT);
 
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{20, 0, 1}),
-                         sidb_technology::cell_type::INPUT);
+                         sidb::technology::cell_type::INPUT);
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{18, 1, 1}),
-                         sidb_technology::cell_type::INPUT);
+                         sidb::technology::cell_type::INPUT);
 
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 2, 1}),
-                         sidb_technology::cell_type::NORMAL);
+                         sidb::technology::cell_type::NORMAL);
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 3, 1}),
-                         sidb_technology::cell_type::NORMAL);
+                         sidb::technology::cell_type::NORMAL);
 
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 3, 1}),
-                         sidb_technology::cell_type::NORMAL);
+                         sidb::technology::cell_type::NORMAL);
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{16, 2, 1}),
-                         sidb_technology::cell_type::NORMAL);
+                         sidb::technology::cell_type::NORMAL);
 
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 6, 0}),
-                         sidb_technology::cell_type::OUTPUT);
+                         sidb::technology::cell_type::OUTPUT);
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 7, 0}),
-                         sidb_technology::cell_type::OUTPUT);
+                         sidb::technology::cell_type::OUTPUT);
 
     lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 9, 1}),
-                         sidb_technology::cell_type::NORMAL);
+                         sidb::technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_cube lat{lyt};
 
@@ -2129,14 +2129,14 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
 {
     auto lyt = sidb_cell_clk_lyt_siqad{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::NORMAL);
 
     sidb_simulation_parameters sim_params{};
     sim_params.base     = 2;

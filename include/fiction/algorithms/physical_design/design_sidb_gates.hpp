@@ -11,8 +11,8 @@
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/technology/sidb_defects.hpp"
 #include "fiction/traits.hpp"
@@ -722,7 +722,7 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
+            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb::technology::cell_type::EMPTY)
             {
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
@@ -731,7 +731,7 @@ class design_sidb_gates_impl
                         continue;
                     }
                 }
-                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
+                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb::technology::cell_type::LOGIC);
             }
         }
 
@@ -752,7 +752,7 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            if (skeleton_layout.get_cell_type(all_sidbs_in_canvas[i]) == sidb_technology::cell_type::EMPTY)
+            if (skeleton_layout.get_cell_type(all_sidbs_in_canvas[i]) == sidb::technology::cell_type::EMPTY)
             {
                 // SiDBs cannot be placed on positions which are already occupied by atomic defects.
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
@@ -762,7 +762,7 @@ class design_sidb_gates_impl
                         return std::nullopt;
                     }
                 }
-                lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb_technology::cell_type::LOGIC);
+                lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb::technology::cell_type::LOGIC);
             }
         }
 
@@ -770,7 +770,7 @@ class design_sidb_gates_impl
         skeleton_layout.foreach_cell(
             [this, &lyt](const auto& c)
             {
-                if (skeleton_layout.get_cell_type(c) == sidb_technology::cell_type::LOGIC)
+                if (skeleton_layout.get_cell_type(c) == sidb::technology::cell_type::LOGIC)
                 {
                     lyt.assign_cell_type(c, Lyt::technology::cell_type::LOGIC);
                 }

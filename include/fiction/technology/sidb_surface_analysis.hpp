@@ -6,8 +6,8 @@
 #define FICTION_SIDB_SURFACE_ANALYSIS_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
@@ -35,7 +35,7 @@ namespace fiction
  */
 template <typename Lyt, typename PortType>
 using surface_black_list =
-    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<port_list<PortType>>,
+    std::unordered_map<tile<Lyt>, std::unordered_map<kitty::dynamic_truth_table, std::vector<fcn::port_list<PortType>>,
                                                      kitty::hash<kitty::dynamic_truth_table>>>;
 /**
  * Analyzes a given defective SiDB surface and matches it against gate tiles provided by a library. Any gate type that
@@ -57,7 +57,7 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-    requires std::same_as<technology<CellLyt>, sidb_technology> &&
+    requires std::same_as<technology<CellLyt>, sidb::technology> &&
              std::same_as<technology<CellLyt>, technology<GateLibrary>>
 [[nodiscard]] auto sidb_surface_analysis(
     const GateLyt& gate_lyt, const CellLyt& surface,

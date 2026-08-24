@@ -6,8 +6,8 @@
 #define FICTION_LAYOUTS_UTILS_LAYOUT_UTILS_HPP
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/cell_ports.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb_defect_surface.hpp"
 // cell_layout_digest names no symbol from this header, but relies on the std::hash<sidb_defect>
 // specialization it provides
@@ -198,41 +198,41 @@ template <uint16_t GateSizeX, uint16_t GateSizeY, typename GateLyt, typename Cel
  */
 template <typename Lyt>
 [[nodiscard]] coordinate<Lyt> port_direction_to_coordinate(const Lyt& lyt, const coordinate<Lyt>& c,
-                                                           const port_direction& port) noexcept
+                                                           const fcn::port_direction& port) noexcept
 {
     static_assert(is_coordinate_layout_v<Lyt>, "Lyt is not a coordinate layout");
 
     switch (port.dir)
     {
-        case port_direction::cardinal::NORTH:
+        case fcn::port_direction::cardinal::NORTH:
         {
             return lyt.north(c);
         }
-        case port_direction::cardinal::NORTH_EAST:
+        case fcn::port_direction::cardinal::NORTH_EAST:
         {
             return lyt.north_east(c);
         }
-        case port_direction::cardinal::EAST:
+        case fcn::port_direction::cardinal::EAST:
         {
             return lyt.east(c);
         }
-        case port_direction::cardinal::SOUTH_EAST:
+        case fcn::port_direction::cardinal::SOUTH_EAST:
         {
             return lyt.south_east(c);
         }
-        case port_direction::cardinal::SOUTH:
+        case fcn::port_direction::cardinal::SOUTH:
         {
             return lyt.south(c);
         }
-        case port_direction::cardinal::SOUTH_WEST:
+        case fcn::port_direction::cardinal::SOUTH_WEST:
         {
             return lyt.south_west(c);
         }
-        case port_direction::cardinal::WEST:
+        case fcn::port_direction::cardinal::WEST:
         {
             return lyt.west(c);
         }
-        case port_direction::cardinal::NORTH_WEST:
+        case fcn::port_direction::cardinal::NORTH_WEST:
         {
             return lyt.north_west(c);
         }

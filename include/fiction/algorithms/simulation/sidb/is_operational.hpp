@@ -17,10 +17,10 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
-#include "fiction/technology/cell_ports.hpp"
-#include "fiction/technology/cell_technologies.hpp"
 #include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/constants.hpp"
+#include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb_charge_state.hpp"
 #include "fiction/traits.hpp"
 
@@ -212,7 +212,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
             input_bdl_wires{
@@ -239,7 +239,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(layout, sidb::technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii{initialize_bii ? bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires} :
                                  bdl_input_iterator<Lyt>{Lyt{}}},
@@ -265,7 +265,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
             input_bdl_wires{input_wires},
@@ -287,7 +287,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
             input_bdl_wires{
@@ -318,7 +318,7 @@ class is_operational_impl
                         const std::vector<bdl_wire<Lyt>>& output_wires, const Lyt& c_lyt) :
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(input_pattern_lyts.front(), sidb_technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(input_pattern_lyts.front(), sidb::technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             // the input pattern layouts make the iterator redundant; this is the same no-op instantiation that
             // `verify_logic_match` uses
@@ -652,7 +652,7 @@ class is_operational_impl
             if (cds_layout.is_physically_valid())
             {
                 cds_layout.recompute_electrostatic_potential_energy();
-                if (cds_layout.get_electrostatic_potential_energy() + constants::ERROR_MARGIN < min_energy)
+                if (cds_layout.get_electrostatic_potential_energy() + fcn::constants::ERROR_MARGIN < min_energy)
                 {
                     min_energy = cds_layout.get_electrostatic_potential_energy();
                 }
@@ -689,14 +689,14 @@ class is_operational_impl
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
-            if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::SOUTH ||
-                input_bdl_wires[number_of_input_wires - 1 - i].port.dir == port_direction::EAST)
+            if (input_bdl_wires[number_of_input_wires - 1 - i].port.dir == fcn::port_direction::SOUTH ||
+                input_bdl_wires[number_of_input_wires - 1 - i].port.dir == fcn::port_direction::EAST)
             {
                 if ((current_input_index & (uint64_t{1ull} << i)) != 0ull)
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::cell_type::INPUT)
+                        if (bdl.type == sidb::technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -710,7 +710,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::cell_type::INPUT)
+                        if (bdl.type == sidb::technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -727,7 +727,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::cell_type::INPUT)
+                        if (bdl.type == sidb::technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -741,7 +741,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb_technology::cell_type::INPUT)
+                        if (bdl.type == sidb::technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -767,8 +767,8 @@ class is_operational_impl
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
-            if (output_bdl_wires[i].port.dir == port_direction::SOUTH ||
-                output_bdl_wires[i].port.dir == port_direction::EAST)
+            if (output_bdl_wires[i].port.dir == fcn::port_direction::SOUTH ||
+                output_bdl_wires[i].port.dir == fcn::port_direction::EAST)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
@@ -791,13 +791,13 @@ class is_operational_impl
                     }
                 }
             }
-            else if (output_bdl_wires[i].port.dir == port_direction::NONE)
+            else if (output_bdl_wires[i].port.dir == fcn::port_direction::NONE)
             {
                 if ((output_wire_index & (uint64_t{1ull} << i)) != 0ull)
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        if (bdl.type == sidb_technology::cell_type::INPUT)
+                        if (bdl.type == sidb::technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -824,7 +824,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        if (bdl.type == sidb_technology::cell_type::INPUT)
+                        if (bdl.type == sidb::technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -884,7 +884,8 @@ class is_operational_impl
 
                 if (physical_validity.has_value())
                 {
-                    if (physical_validity.value() + constants::ERROR_MARGIN < minimal_energy_of_physically_valid_layout)
+                    if (physical_validity.value() + fcn::constants::ERROR_MARGIN <
+                        minimal_energy_of_physically_valid_layout)
                     {
                         return true;
                     }
@@ -1084,7 +1085,7 @@ class is_operational_impl
                 return std::ranges::any_of(wire.pairs,
                                            [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
                                            {
-                                               if (bdl.type == sidb_technology::cell_type::INPUT)
+                                               if (bdl.type == sidb::technology::cell_type::INPUT)
                                                {
                                                    return false;  // Skip processing for input type.
                                                }
@@ -1142,9 +1143,10 @@ class is_operational_impl
      * @return `true` if `0` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
-                                        const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
+                                        const bdl_pair<cell<Lyt>>& bdl, const fcn::port_direction port) const noexcept
     {
-        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST || port.dir == port_direction::NONE)
+        if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
+            port.dir == fcn::port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
@@ -1161,9 +1163,10 @@ class is_operational_impl
      * @return `true` if `1` is encoded, `false` otherwise.
      */
     [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
-                                       const bdl_pair<cell<Lyt>>& bdl, const port_direction port) const noexcept
+                                       const bdl_pair<cell<Lyt>>& bdl, const fcn::port_direction port) const noexcept
     {
-        if (port.dir == port_direction::SOUTH || port.dir == port_direction::EAST || port.dir == port_direction::NONE)
+        if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
+            port.dir == fcn::port_direction::NONE)
         {
             return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
                                      (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));

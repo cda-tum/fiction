@@ -4,8 +4,8 @@
 #include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/technology/area.hpp>                       // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>          // cell implementations
+#include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
+#include <fiction/technology/fcn/cell_technologies.hpp>      // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/traits.hpp>                                // traits for type-checking
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
@@ -148,9 +148,9 @@ int main()  // NOLINT
             fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
 
         // compute area
-        fiction::area_stats                            area_stats{};
-        fiction::area_params<fiction::sidb_technology> area_ps{};
-        fiction::area(cell_level_layout, area_ps, &area_stats);
+        fiction::fcn::area_stats                             area_stats{};
+        fiction::fcn::area_params<fiction::sidb::technology> area_ps{};
+        fiction::fcn::area(cell_level_layout, area_ps, &area_stats);
 
         // log results
         hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
