@@ -6,11 +6,11 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/primitives/lattice.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -24,12 +24,14 @@ TEST_CASE("BDL Input Iterator Traits", "[bdl-input-iterator]")
 {
     using layout = sidb_100_cell_clk_lyt_siqad;
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::iterator_category,
+    CHECK(std::is_same_v<std::iterator_traits<sidb::simulation::logic::bdl_input_iterator<layout>>::iterator_category,
                          std::random_access_iterator_tag>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::value_type, layout>);
+    CHECK(
+        std::is_same_v<std::iterator_traits<sidb::simulation::logic::bdl_input_iterator<layout>>::value_type, layout>);
 
-    CHECK(std::is_same_v<std::iterator_traits<bdl_input_iterator<layout>>::difference_type, int64_t>);
+    CHECK(std::is_same_v<std::iterator_traits<sidb::simulation::logic::bdl_input_iterator<layout>>::difference_type,
+                         int64_t>);
 }
 
 TEST_CASE("Operators", "[bdl-input-iterators]")
@@ -38,7 +40,7 @@ TEST_CASE("Operators", "[bdl-input-iterators]")
 
     const layout lyt{};
 
-    bdl_input_iterator<layout> bii{lyt};
+    sidb::simulation::logic::bdl_input_iterator<layout> bii{lyt};
 
     CHECK(bii == 0ull);
     CHECK(bii != 1ull);
@@ -113,7 +115,7 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
 
     const layout lyt{};
 
-    bdl_input_iterator<layout> bii{lyt};
+    sidb::simulation::logic::bdl_input_iterator<layout> bii{lyt};
 
     CHECK(bii.num_input_pairs() == 0);
     CHECK((*bii).num_cells() == 0);
@@ -168,7 +170,7 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+    sidb::simulation::logic::bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
 
     CHECK((*bii).num_cells() == 7);  // 2 inputs (1 already deleted for input pattern 0), 4 normal, 2 outputs
 
@@ -247,7 +249,7 @@ TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
+    sidb::simulation::logic::bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat};
 
     REQUIRE(bii.num_input_pairs() == 1);
 
@@ -272,15 +274,15 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
+    const sidb::simulation::logic::detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
     SECTION("SiQAD coordinates, encode input 0 with the absence of perturbers")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
-            lat,
-            bdl_input_iterator_params{
-                .bdl_wire_params  = params,
-                .input_bdl_config = bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED}};
+        sidb::simulation::logic::bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
+            lat, sidb::simulation::logic::bdl_input_iterator_params{
+                     .bdl_wire_params  = params,
+                     .input_bdl_config = sidb::simulation::logic::bdl_input_iterator_params::input_bdl_configuration::
+                         PERTURBER_ABSENCE_ENCODED}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -344,7 +346,8 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
     SECTION("SiQAD coordinates")
     {
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, bdl_input_iterator_params{.bdl_wire_params = params}};
+        sidb::simulation::logic::bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{
+            lat, sidb::simulation::logic::bdl_input_iterator_params{.bdl_wire_params = params}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -409,7 +412,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
     SECTION("cube coordinates")
     {
         const auto layout_cube = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
-        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}};
+        sidb::simulation::logic::bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_cube}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -474,7 +477,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
     SECTION("offset coordinates")
     {
         const auto layout_offset = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt_cube>(lyt);
-        bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}};
+        sidb::simulation::logic::bdl_input_iterator bii{sidb_100_cell_clk_lyt_cube{layout_offset}};
 
         for (auto i = 0; bii < 4; ++bii, ++i)
         {
@@ -543,16 +546,16 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const bdl_input_iterator_params params{.bdl_wire_params =
-                                               detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};
+    const sidb::simulation::logic::bdl_input_iterator_params params{
+        .bdl_wire_params = sidb::simulation::logic::detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};
 
     SECTION("One layout per input pattern, matching the iterator")
     {
-        const auto layouts = generate_bdl_input_pattern_layouts(lat, params);
+        const auto layouts = sidb::simulation::logic::generate_bdl_input_pattern_layouts(lat, params);
 
         REQUIRE(layouts.size() == 4);
 
-        bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
+        sidb::simulation::logic::bdl_input_iterator<sidb_100_cell_clk_lyt_siqad> bii{lat, params};
 
         for (uint64_t i = 0; i < layouts.size(); ++i, ++bii)
         {
@@ -567,10 +570,12 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 
     SECTION("Pre-detected input wires yield the same layouts")
     {
-        const auto input_wires = detect_bdl_wires(lat, params.bdl_wire_params, bdl_wire_selection::INPUT);
+        const auto input_wires = sidb::simulation::logic::detect_bdl_wires(
+            lat, params.bdl_wire_params, sidb::simulation::logic::bdl_wire_selection::INPUT);
 
-        const auto layouts            = generate_bdl_input_pattern_layouts(lat, params);
-        const auto layouts_with_wires = generate_bdl_input_pattern_layouts(lat, params, input_wires);
+        const auto layouts = sidb::simulation::logic::generate_bdl_input_pattern_layouts(lat, params);
+        const auto layouts_with_wires =
+            sidb::simulation::logic::generate_bdl_input_pattern_layouts(lat, params, input_wires);
 
         REQUIRE(layouts.size() == layouts_with_wires.size());
 
@@ -585,7 +590,7 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
     {
         // a shallow copy would make all entries share cell storage, which passes every other check here but
         // corrupts the layouts as soon as they are read concurrently
-        auto layouts = generate_bdl_input_pattern_layouts(lat, params);
+        auto layouts = sidb::simulation::logic::generate_bdl_input_pattern_layouts(lat, params);
 
         REQUIRE(layouts.size() == 4);
 

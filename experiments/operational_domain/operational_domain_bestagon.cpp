@@ -4,12 +4,12 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>      // operational domain computation algorithms
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // SiDB simulation engines
-#include <fiction/io/read_sqd_layout.hpp>                                 // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>                        // writer for operational domains
-#include <fiction/networks/utils/truth_table_utils.hpp>                   // truth tables helper functions
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>        // SiDB simulation parameters
+#include <fiction/io/read_sqd_layout.hpp>                                   // reader for SiDB layouts
+#include <fiction/io/write_operational_domain.hpp>                          // writer for operational domains
+#include <fiction/networks/utils/truth_table_utils.hpp>                     // truth tables helper functions
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>          // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>                    // SiDB simulation engines
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                    // output formatting
@@ -58,13 +58,15 @@ int main()  // NOLINT
     sim_params.mu_minus = -0.32;
 
     // operational domain parameters
-    operational_domain_params op_domain_params{};
+    sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+    op_domain_params.operational_params.op_condition =
+        sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS;
 
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions         = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
+                                                 {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
     op_domain_params.sweep_dimensions[0].step = 0.05;
@@ -115,20 +117,20 @@ int main()  // NOLINT
         auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
-        operational_domain_stats op_domain_stats_gs{};
-        operational_domain_stats op_domain_stats_rs{};
-        operational_domain_stats op_domain_stats_ff{};
-        operational_domain_stats op_domain_stats_ct{};
+        sidb::simulation::logic::operational_domain_stats op_domain_stats_gs{};
+        sidb::simulation::logic::operational_domain_stats op_domain_stats_rs{};
+        sidb::simulation::logic::operational_domain_stats op_domain_stats_ff{};
+        sidb::simulation::logic::operational_domain_stats op_domain_stats_ct{};
 
         // compute the operational domains
-        const auto op_domain_gs =
-            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
-        const auto op_domain_rs =
-            operational_domain_random_sampling(lyt, truth_table, 2500, op_domain_params, &op_domain_stats_rs);
-        const auto op_domain_ff =
-            operational_domain_flood_fill(lyt, truth_table, 250, op_domain_params, &op_domain_stats_ff);
-        const auto op_domain_ct =
-            operational_domain_contour_tracing(lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
+        const auto op_domain_gs = sidb::simulation::logic::operational_domain_grid_search(
+            lyt, truth_table, op_domain_params, &op_domain_stats_gs);
+        const auto op_domain_rs = sidb::simulation::logic::operational_domain_random_sampling(
+            lyt, truth_table, 2500, op_domain_params, &op_domain_stats_rs);
+        const auto op_domain_ff = sidb::simulation::logic::operational_domain_flood_fill(
+            lyt, truth_table, 250, op_domain_params, &op_domain_stats_ff);
+        const auto op_domain_ct = sidb::simulation::logic::operational_domain_contour_tracing(
+            lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
 
         // write the operational domains to a CSV file
         write_operational_domain(op_domain_gs,

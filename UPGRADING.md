@@ -280,7 +280,7 @@ Their namespace still changed — see the tree above.
 
 ### Renamed symbols
 
-60 public symbols changed name as well as namespace. Everything not listed
+63 public symbols changed name as well as namespace. Everything not listed
 here kept its identifier and only gained a namespace.
 
 | old                                               | new                                                          |
@@ -289,8 +289,11 @@ here kept its identifier and only gained a namespace.
 | `fiction::constants`                              | `fiction::fcn::constants`                                    |
 | `fiction::coord_iterator`                         | `fiction::layouts::coords::iterator`                         |
 | `fiction::cube::coord_t`                          | `fiction::layouts::coords::cube`                             |
+| `fiction::exact_sidb_simulation_engine`           | `fiction::sidb::simulation::exact_engine`                    |
 | `fiction::fcn_gate_library`                       | `fiction::fcn::gate_library`                                 |
+| `fiction::get_sidb_simulation_engine`             | `fiction::sidb::simulation::get_engine`                      |
 | `fiction::has_offset_ucoord_v`                    | `fiction::has_offset_coord_v`                                |
+| `fiction::heuristic_sidb_simulation_engine`       | `fiction::sidb::simulation::heuristic_engine`                |
 | `fiction::inml_technology`                        | `fiction::inml::technology`                                  |
 | `fiction::inml_topolinano_library`                | `fiction::inml::topolinano_library`                          |
 | `fiction::is_offset_ucoord_v`                     | `fiction::is_offset_coord_v`                                 |
@@ -350,6 +353,71 @@ Two rows change only the namespace. They are listed because the prefix looks dro
 and deliberately was not dropped: `qca_one_library` is the published name of the QCA ONE
 gate library, and `sim7_mol_library` names the SIM(7)-MolPDK library.
 
+### The coordinate namespaces
+
+`coordinates.hpp` held three sibling namespaces that each contained exactly one type.
+The namespace now matches the header, and the three coordinate _kinds_ are the type
+names, which is what they always were:
+
+```text
+fiction::offset::ucoord_t  ->  fiction::layouts::coords::offset
+fiction::cube::coord_t     ->  fiction::layouts::coords::cube
+fiction::siqad::coord_t    ->  fiction::layouts::coords::siqad
+```
+
+The helpers that operate on them moved into the same namespace, which also restores
+argument-dependent lookup for `area` and `volume`:
+
+```text
+fiction::siqad::to_fiction_coord -> fiction::layouts::coords::to_fiction_coord
+fiction::siqad::to_siqad_coord   -> fiction::layouts::coords::to_siqad_coord
+fiction::offset_to_cube_coord    -> fiction::layouts::coords::offset_to_cube
+fiction::coord_iterator          -> fiction::layouts::coords::iterator
+fiction::area                    -> fiction::layouts::coords::area
+fiction::volume                  -> fiction::layouts::coords::volume
+```
+
+`is_offset_ucoord_v` and `has_offset_ucoord_v` become `is_offset_coord_v` and
+`has_offset_coord_v`. The cube and siqad traits keep their names.
+
+### Renamed struct members
+
+Ten parameter and result structs declared a member whose name repeated its type:
+
+```cpp
+sidb_simulation_parameters simulation_parameters{};
+```
+
+The member is now `sim_params`, which is what two of these structs and several locals
+already called it, so `params.simulation_parameters` becomes `params.sim_params`.
+The structs affected are `quickexact_params`, `quicksim_params`,
+`clustercomplete_params`, `is_operational_params`, `critical_temperature_params`,
+`physical_population_stability_params`, `generate_random_sidb_layout_params`,
+`ground_state_space_params`, `sidb_simulation_result`, and
+`charge_distribution_surface`'s storage. `is_sidb_gate_design_impossible_params`
+spelled it `simulation_params` and is unified to `sim_params` too.
+
+### Renamed member functions
+
+Three member functions repeated their class's namespace and lose the prefix:
+
+```text
+charge_distribution_surface::set_sidb_simulation_engine -> ::set_simulation_engine
+defect_surface::assign_sidb_defect                      -> ::assign_defect
+defect_surface::get_sidb_defect                         -> ::get_defect
+```
+
+`charge_distribution_surface::get_sidb_order` keeps its name: there "SiDB" names what
+is being ordered, it does not echo the namespace.
+
+### A name collision to know about
+
+`fiction::technology<Lyt>` is a trait alias in `traits.hpp` that yields a layout's
+technology tag. The tags themselves are now called `technology` inside their own
+namespace, so within `fiction::qca`, `fiction::inml`, and `fiction::sidb` the struct
+shadows the trait. Code in those namespaces that wants the trait must name it
+`fiction::technology<Lyt>` explicitly. Outside them, both resolve as before.
+
 ### Deliberately unchanged
 
 - **`fiction/traits.hpp` and `fiction/types.hpp`** keep their paths and stay in plain
@@ -387,37 +455,6 @@ gate library, and `sim7_mol_library` names the SIM(7)-MolPDK library.
 - **`detail` namespaces** are untouched. They keep working nested.
 - **`experiments/`** changed only its include directives. It reproduces published
   papers and is not refactored.
-
-### Renamed struct members
-
-Ten parameter and result structs declared a member whose name repeated its type:
-
-```cpp
-sidb_simulation_parameters simulation_parameters{};
-```
-
-The member is now `sim_params`, which is what two of these structs and several
-locals already called it:
-
-```cpp
-sidb::model::simulation_parameters sim_params{};
-```
-
-So `params.simulation_parameters` becomes `params.sim_params`. The structs affected
-are `quickexact_params`, `quicksim_params`, `clustercomplete_params`,
-`is_operational_params`, `critical_temperature_params`,
-`physical_population_stability_params`, `generate_random_sidb_layout_params`,
-`ground_state_space_params`, `sidb_simulation_result`, and
-`charge_distribution_surface`'s storage. `is_sidb_gate_design_impossible_params`
-spelled it `simulation_params` and is unified to `sim_params` too.
-
-### A name collision to know about
-
-`fiction::technology<Lyt>` is a trait alias in `traits.hpp` that yields a layout's
-technology tag. The tags themselves are now called `technology` inside their own
-namespace, so within `fiction::qca`, `fiction::inml`, and `fiction::sidb` the struct
-shadows the trait. Code in those namespaces that wants the trait must name it
-`fiction::technology<Lyt>` explicitly. Outside them, both resolve as before.
 
 ### Notable splits
 

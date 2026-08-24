@@ -244,7 +244,7 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
     {
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({2, 0, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0, 0}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{lyt};
         const auto                     nw = bb.get_min();
@@ -259,8 +259,8 @@ TEMPLATE_TEST_CASE("2D bounding box for siqad layout with atomic defect", "[boun
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({-2, 0, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({2, 0, 0}, sidb::model::defect{});
-        lyt.assign_sidb_defect({2, 0, 1}, sidb::model::defect{});
+        lyt.assign_defect({2, 0, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0, 1}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{lyt};
         const auto                     nw = bb.get_min();
@@ -289,7 +289,7 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
     {
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({2, 0, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0, 0}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{lyt};
         const auto                     nw = bb.get_min();
@@ -304,8 +304,8 @@ TEMPLATE_TEST_CASE("2D bounding box for layout with atomic defect", "[bounding-b
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({3, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({2, 0}, sidb::model::defect{});
-        lyt.assign_sidb_defect({2, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{lyt};
         const auto                     nw = bb.get_min();
@@ -335,7 +335,7 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
     {
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({2, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{lyt};
         const auto                     nw = bb.get_min();
@@ -350,8 +350,8 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({2, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({-3, 0}, sidb::model::defect{});
-        lyt.assign_sidb_defect({2, 0}, sidb::model::defect{});
+        lyt.assign_defect({-3, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{lyt};
         const auto                     nw = bb.get_min();
@@ -366,8 +366,8 @@ TEMPLATE_TEST_CASE("2D bounding box for cube layout with atomic defect", "[bound
         sidb::primitives::defect_surface<TestType> lyt{TestType{}};
         lyt.assign_cell_type({1, 0}, TestType::technology::cell_type::NORMAL);
         lyt.assign_cell_type({2, 0}, TestType::technology::cell_type::NORMAL);
-        lyt.assign_sidb_defect({-3, 0}, sidb::model::defect{});
-        lyt.assign_sidb_defect({2, 0}, sidb::model::defect{});
+        lyt.assign_defect({-3, 0}, sidb::model::defect{});
+        lyt.assign_defect({2, 0}, sidb::model::defect{});
 
         const layouts::bounding_box_2d bb{static_cast<TestType>(lyt)};  // NOLINT(cppcoreguidelines-slicing)
         const auto                     nw = bb.get_min();

@@ -1,0 +1,242 @@
+//
+// Created by Jan Drewniok on 23.12.22.
+//
+
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_TIME_TO_SOLUTION_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_TIME_TO_SOLUTION_HPP
+
+#include "fiction/technology/sidb/simulation/engine.hpp"
+#include "fiction/technology/sidb/simulation/engines/clustercomplete.hpp"
+#include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
+#include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
+#include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
+#include "fiction/technology/sidb/simulation/generic/is_ground_state.hpp"
+#include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/traits.hpp"
+
+#include <fmt/format.h>
+
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <iostream>
+#include <limits>
+#include <string>
+#include <vector>
+
+namespace fiction::sidb::simulation::utils
+{
+
+struct time_to_solution_params
+{
+    /**
+     * Exhaustive simulation algorithm used to simulate the ground state as reference.
+     */
+    sidb::simulation::exact_engine engine = exact_engine::QUICKEXACT;
+    /**
+     * Number of iterations of the heuristic algorithm used to determine the simulation accuracy (`repetitions = 100`
+     * means that accuracy is precise to 1 %).
+     */
+    uint64_t repetitions = 100;
+    /**
+     * The confidence level represents the probability that the confidence interval calculated from the simulation
+     * contains the true value. For example, a 99.7 % (0.997) confidence level means that if the simulation were
+     * repeated many times, approximately 997 out of 1000 of the calculated confidence intervals would contain the true
+     * value.
+     */
+    double confidence_level = 0.997;
+};
+
+/**
+ * This struct stores the time-to-solution, the simulation accuracy and the average single simulation runtime of
+ * *QuickSim*, the single runtime of the exact simulator used, and the number of valid charge
+ * configurations found by the exact algorithm.
+ */
+struct time_to_solution_stats
+{
+    /**
+     * Time-to-solution in seconds.
+     */
+    double time_to_solution{0};
+    /**
+     * Accuracy of the simulation in %.
+     */
+    double acc{};
+    /**
+     * Average single simulation runtime in seconds.
+     */
+    double mean_single_runtime{};
+    /**
+     * Single simulation runtime of the exact ground state simulation algorithm.
+     */
+    double single_runtime_exact{};
+    /**
+     * Exact simulation algorithm used to simulate the ground state as reference.
+     */
+    std::string algorithm;
+    /**
+     * Print the results to the given output stream.
+     *
+     * @param out Output stream.
+     */
+    void report(std::ostream& out = std::cout) const
+    {
+        out << fmt::format("time_to_solution: {} \n acc: {} \n t[s]: {} \n t_exact[s]: {} \n exact alg.: {}\n",
+                           time_to_solution, acc, mean_single_runtime, single_runtime_exact, algorithm);
+    }
+};
+/**
+ * This function determines the time-to-solution (TTS) and the accuracy (acc) of the *QuickSim* algorithm.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout that is used for the simulation.
+ * @param qs_params Parameters required for the *QuickSim* algorithm.
+ * @param tts_params Parameters used for the time-to-solution calculation.
+ * @param ps Pointer to a struct where the results (time_to_solution, acc, single runtime) are stored.
+ */
+template <typename Lyt>
+void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_params& qs_params,
+                      const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    time_to_solution_stats st{};
+
+    if (lyt.num_cells() == 0)
+    {
+        st.single_runtime_exact = 0.0;
+        st.time_to_solution     = std::numeric_limits<double>::infinity();
+        st.acc                  = 0.0;
+        st.mean_single_runtime  = 0.0;
+        st.algorithm            = sidb::simulation::engine_name(tts_params.engine);
+
+        if (ps)
+        {
+            *ps = st;
+        }
+        return;
+    }
+
+    sidb::simulation::result<Lyt> simulation_result{};
+    if (tts_params.engine == exact_engine::QUICKEXACT)
+    {
+        const sidb::simulation::engines::quickexact_params<cell<Lyt>> params{
+            qs_params.sim_params,
+            sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+        st.algorithm      = sidb::simulation::engine_name(exact_engine::QUICKEXACT);
+        simulation_result = sidb::simulation::engines::quickexact(lyt, params);
+    }
+#if (FICTION_ALGLIB_ENABLED)
+    else if (tts_params.engine == exact_engine::CLUSTERCOMPLETE)
+    {
+        const sidb::simulation::engines::clustercomplete_params<cell<Lyt>> params{qs_params.sim_params};
+        st.algorithm      = sidb::simulation::engine_name(exact_engine::CLUSTERCOMPLETE);
+        simulation_result = sidb::simulation::engines::clustercomplete(lyt, params);
+    }
+#endif  // FICTION_ALGLIB_ENABLED
+    else
+    {
+        st.algorithm      = sidb::simulation::engine_name(exact_engine::EXGS);
+        simulation_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, qs_params.sim_params);
+    }
+
+    std::vector<sidb::simulation::result<Lyt>> simulation_results_quicksim{};
+    simulation_results_quicksim.reserve(tts_params.repetitions);
+
+    for (auto i = 0u; i < tts_params.repetitions; ++i)
+    {
+        if (const auto result = sidb::simulation::engines::quicksim<Lyt>(lyt, qs_params))
+        {
+            if (!result.has_value())
+            {
+                simulation_results_quicksim.push_back(sidb::simulation::result<Lyt>{});
+            }
+            else
+            {
+                simulation_results_quicksim.push_back(*result);
+            }
+        }
+    }
+
+    time_to_solution_for_given_simulation_results(simulation_result, simulation_results_quicksim,
+                                                  tts_params.confidence_level, &st);
+
+    if (ps)
+    {
+        *ps = st;
+    }
+}
+
+/**
+ * This function calculates the Time-to-Solution (TTS) by analyzing the simulation results of a heuristic algorithm
+ * in comparison to those of an exact algorithm. It provides further statistical metrics, including the accuracy of the
+ * heuristic algorithm, and individual runtimes.
+ *
+ * @tparam Lyt SiDB ell-level layout type.
+ * @param results_exact Simulation results of the exact algorithm.
+ * @param results_heuristic Simulation of the heuristic for which the TTS is determined.
+ * @param confidence_level Confidence level for the TTS computation. The confidence level represents the probability
+ * that the confidence interval calculated from the simulation contains the true value. For example, a 95 % (0.95)
+ * confidence level means that if the simulation were repeated many times, approximately 95 out of 100 of the calculated
+ * confidence intervals would contain the true value.
+ * @param ps Pointer to a struct where the statistics of this function call (time_to_solution, acc, single runtime) are
+ * to be stored.
+ */
+template <typename Lyt>
+void time_to_solution_for_given_simulation_results(const sidb::simulation::result<Lyt>&              results_exact,
+                                                   const std::vector<sidb::simulation::result<Lyt>>& results_heuristic,
+                                                   const double            confidence_level = 0.997,
+                                                   time_to_solution_stats* ps               = nullptr) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    time_to_solution_stats st{};
+
+    auto        total_runtime_heuristic = 0.0;
+    std::size_t gs_count                = 0;
+
+    for (const auto& heuristic : results_heuristic)
+    {
+        if (sidb::simulation::generic::is_ground_state(heuristic, results_exact))
+        {
+            ++gs_count;
+        }
+        total_runtime_heuristic += mockturtle::to_seconds(heuristic.simulation_runtime);
+    }
+
+    const auto single_runtime_heuristic_average =
+        total_runtime_heuristic / static_cast<double>(results_heuristic.size());
+
+    const auto acc = static_cast<double>(gs_count) / static_cast<double>(results_heuristic.size());
+
+    double tts = 0.0;
+
+    if (acc == 1)
+    {
+        tts = single_runtime_heuristic_average;
+    }
+    else if (acc == 0)
+    {
+        tts = std::numeric_limits<double>::infinity();
+    }
+    else
+    {
+        tts = (single_runtime_heuristic_average * std::log(1.0 - confidence_level) / std::log(1.0 - acc));
+    }
+
+    st.single_runtime_exact = mockturtle::to_seconds(results_exact.simulation_runtime);
+    st.time_to_solution     = tts;
+    st.acc                  = acc * 100;
+    st.mean_single_runtime  = single_runtime_heuristic_average;
+
+    if (ps)
+    {
+        st.algorithm = (*ps).algorithm;
+        *ps          = st;
+    }
+}
+
+}  // namespace fiction::sidb::simulation::utils
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_TIME_TO_SOLUTION_HPP

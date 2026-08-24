@@ -5,8 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <string_view>
 
@@ -33,7 +33,7 @@ void write_location_and_ground_state(nanobind::module_& m)
 
     m.def(
         "write_location_and_ground_state",
-        [](const fiction::sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+        [](const fiction::sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
         { fiction::write_location_and_ground_state(sim_result, filename); }, py::arg("sim_result"), py::arg("filename"),
         DOC(fiction_write_location_and_ground_state));
 }

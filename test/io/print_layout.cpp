@@ -448,10 +448,10 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
     sidb::primitives::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
                                                      sidb::model::charge_state::NEGATIVE};
 
-    cl.assign_sidb_defect({18, 3, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-    cl.assign_sidb_defect({44, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
-    cl.assign_sidb_defect({40, 5, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 0});
-    cl.assign_sidb_defect({42, 20, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
+    cl.assign_defect({18, 3, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
+    cl.assign_defect({44, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
+    cl.assign_defect({40, 5, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 0});
+    cl.assign_defect({42, 20, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
 
     cl.assign_charge_state({42, 3, 0}, sidb::model::charge_state::NEGATIVE);
 
@@ -556,9 +556,9 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
     cl.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
     cl.assign_cell_type({4, 0, 1}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
 
-    cl.assign_sidb_defect({0, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-    cl.assign_sidb_defect({1, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 0});
-    cl.assign_sidb_defect({4, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
+    cl.assign_defect({0, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
+    cl.assign_defect({1, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 0});
+    cl.assign_defect({4, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
 
     std::stringstream print_stream{};
 

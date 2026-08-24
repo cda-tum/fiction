@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <any>
 #include <cstdint>
@@ -85,22 +85,22 @@ void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattic
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::sidb_simulation_result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
-                                                     DOC(fiction_sidb_simulation_result))
+    py::class_<fiction::sidb::simulation::result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
+                                                       DOC(fiction_sidb_simulation_result))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("algorithm_name", &fiction::sidb_simulation_result<Lyt>::algorithm_name,
+        .def_rw("algorithm_name", &fiction::sidb::simulation::result<Lyt>::algorithm_name,
                 DOC(fiction_sidb_simulation_result_algorithm_name))
-        .def_rw("simulation_runtime", &fiction::sidb_simulation_result<Lyt>::simulation_runtime,
+        .def_rw("simulation_runtime", &fiction::sidb::simulation::result<Lyt>::simulation_runtime,
                 DOC(fiction_sidb_simulation_result_simulation_runtime))
-        .def_rw("charge_distributions", &fiction::sidb_simulation_result<Lyt>::charge_distributions,
+        .def_rw("charge_distributions", &fiction::sidb::simulation::result<Lyt>::charge_distributions,
                 DOC(fiction_sidb_simulation_result_charge_distributions))
-        .def_rw("simulation_parameters", &fiction::sidb_simulation_result<Lyt>::sim_params,
+        .def_rw("simulation_parameters", &fiction::sidb::simulation::result<Lyt>::sim_params,
                 DOC(fiction_sidb_simulation_result_simulation_parameters))
         .def_prop_ro(
-            "additional_simulation_parameters", [](const fiction::sidb_simulation_result<Lyt>& self)
+            "additional_simulation_parameters", [](const fiction::sidb::simulation::result<Lyt>& self)
             { return convert_map_to_py(self.additional_simulation_parameters); },
             DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
-        .def("groundstates", &fiction::sidb_simulation_result<Lyt>::groundstates,
+        .def("groundstates", &fiction::sidb::simulation::result<Lyt>::groundstates,
              DOC(fiction_sidb_simulation_result_groundstates))
 
         ;
@@ -108,7 +108,7 @@ void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattic
 
 }  // namespace detail
 
-void sidb_simulation_result(nanobind::module_& m)
+void sidb::simulation::result(nanobind::module_& m)
 {
     // Define simulation result for specific lattices
     detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");

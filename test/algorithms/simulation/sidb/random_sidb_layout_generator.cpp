@@ -5,13 +5,13 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
+#include <fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -156,7 +156,8 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt.value(), sidb::model::simulation_parameters{}));
+        CHECK(!sidb::simulation::generic::can_positive_charges_occur(result_lyt.value(),
+                                                                     sidb::model::simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
@@ -252,7 +253,7 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
         for (const auto& lyt : result_lyts.value())
         {
-            CHECK(!can_positive_charges_occur(lyt, sidb::model::simulation_parameters{}));
+            CHECK(!sidb::simulation::generic::can_positive_charges_occur(lyt, sidb::model::simulation_parameters{}));
         }
     }
 }
@@ -378,7 +379,8 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!can_positive_charges_occur(result_lyt.value(), sidb::model::simulation_parameters{}));
+        CHECK(!sidb::simulation::generic::can_positive_charges_occur(result_lyt.value(),
+                                                                     sidb::model::simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
@@ -676,7 +678,7 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
             5u};
 
         auto defect_layout = TestType{};
-        defect_layout.assign_sidb_defect({2, 1, 1}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
+        defect_layout.assign_defect({2, 1, 1}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
 
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
         CHECK(!result_lyt.has_value());
@@ -694,9 +696,9 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
             5u};
 
         auto defect_layout = TestType{};
-        defect_layout.assign_sidb_defect({3, 1, 1}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
-        defect_layout.assign_sidb_defect({4, 1, 1},
-                                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+        defect_layout.assign_defect({3, 1, 1}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
+        defect_layout.assign_defect({4, 1, 1},
+                                    sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
 
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
         REQUIRE(result_lyt.has_value());
@@ -705,9 +707,9 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
         CHECK(result_lyt.value().num_defects() == 2);
 
         CHECK(result_lyt.value().get_cell_type({2, 1, 1}) == TestType::technology::cell_type::LOGIC);
-        CHECK(result_lyt.value().get_sidb_defect({3, 1, 1}) ==
+        CHECK(result_lyt.value().get_defect({3, 1, 1}) ==
               sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
-        CHECK(result_lyt.value().get_sidb_defect({4, 1, 1}) ==
+        CHECK(result_lyt.value().get_defect({4, 1, 1}) ==
               sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
     }
 
@@ -722,9 +724,9 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
             .number_of_unique_generated_layouts = 20};
 
         auto defect_layout = TestType{};
-        defect_layout.assign_sidb_defect({2, 2, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
-        defect_layout.assign_sidb_defect({4, 1, 0},
-                                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+        defect_layout.assign_defect({2, 2, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
+        defect_layout.assign_defect({4, 1, 0},
+                                    sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
 
         const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{defect_layout});
         const auto lyts        = result_lyts.value_or(std::vector<TestType>{});
@@ -752,15 +754,15 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
             sidb::model::simulation_parameters{}};
 
         auto defect_layout = TestType{};
-        defect_layout.assign_sidb_defect({2, 2, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
-        defect_layout.assign_sidb_defect({4, 1, 0},
-                                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
-        defect_layout.assign_sidb_defect({5, 1, 0},
-                                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
-        defect_layout.assign_sidb_defect({7, 1, 0},
-                                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
-        defect_layout.assign_sidb_defect({2, 1, 0},
-                                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
+        defect_layout.assign_defect({2, 2, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
+        defect_layout.assign_defect({4, 1, 0},
+                                    sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+        defect_layout.assign_defect({5, 1, 0},
+                                    sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
+        defect_layout.assign_defect({7, 1, 0},
+                                    sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
+        defect_layout.assign_defect({2, 1, 0},
+                                    sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
 
         const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
         REQUIRE(result_lyt.has_value());
@@ -793,16 +795,16 @@ TEST_CASE("Random coords::cube layout generation with defects", "[random-sidb-la
 
     lyt layout{};
 
-    layout.assign_sidb_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}),
-                              sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
-    layout.assign_sidb_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 1, 0}),
-                              sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
-    layout.assign_sidb_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{5, 1, 0}),
-                              sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
-    layout.assign_sidb_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{7, 1, 0}),
-                              sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
-    layout.assign_sidb_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}),
-                              sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
+    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}),
+                         sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
+    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 1, 0}),
+                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
+    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{5, 1, 0}),
+                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
+    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{7, 1, 0}),
+                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
+    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}),
+                         sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
 
     const auto result_lyt = generate_random_sidb_layout(params, std::optional{layout});
 

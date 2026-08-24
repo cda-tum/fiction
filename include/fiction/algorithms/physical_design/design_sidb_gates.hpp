@@ -5,16 +5,16 @@
 #ifndef FICTION_DESIGN_SIDB_GATES_HPP
 #define FICTION_DESIGN_SIDB_GATES_HPP
 
-#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/simulation/engine.hpp"
+#include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
+#include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
+#include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 
@@ -89,7 +89,7 @@ struct design_sidb_gates_params
     /**
      * Parameters for the `is_operational` function.
      */
-    is_operational_params operational_params{};
+    sidb::simulation::logic::is_operational_params operational_params{};
     /**
      * Gate design mode.
      */
@@ -126,7 +126,7 @@ struct design_sidb_gates_stats
     /**
      * The simulation engine to be used for the operational domain computation.
      */
-    sidb_simulation_engine sim_engine{sidb_simulation_engine::QUICKEXACT};
+    sidb::simulation::engine sim_engine{sidb::simulation::engine::QUICKEXACT};
     /**
      * The number of all possible layouts.
      */
@@ -180,12 +180,12 @@ class design_sidb_gates_impl
             all_sidbs_in_canvas{
                 layouts::utils::all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
-            input_bdl_wires{detect_bdl_wires(skeleton_layout,
-                                             params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-                                             bdl_wire_selection::INPUT)},
-            output_bdl_wires{detect_bdl_wires(skeleton_layout,
-                                              params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-                                              bdl_wire_selection::OUTPUT)},
+            input_bdl_wires{sidb::simulation::logic::detect_bdl_wires(
+                skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                sidb::simulation::logic::bdl_wire_selection::INPUT)},
+            output_bdl_wires{sidb::simulation::logic::detect_bdl_wires(
+                skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                sidb::simulation::logic::bdl_wire_selection::OUTPUT)},
             number_of_input_wires{input_bdl_wires.size()},
             number_of_output_wires{output_bdl_wires.size()},
             all_canvas_layouts{determine_all_possible_canvas_layouts()}
@@ -234,9 +234,9 @@ class design_sidb_gates_impl
             // canvas SiDBs are added to the skeleton
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
-            if (const auto [status, sim_calls] = is_operational(
+            if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
                     layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
-                status == operational_status::OPERATIONAL)
+                status == sidb::simulation::logic::operational_status::OPERATIONAL)
             {
                 {
                     const std::scoped_lock lock_vector{mutex_to_protect_designed_gate_layouts};
@@ -341,16 +341,16 @@ class design_sidb_gates_impl
                                 {
                                     if (sidb::model::is_neutrally_charged_defect(cd.second))
                                     {
-                                        result_lyt.value().assign_sidb_defect(
+                                        result_lyt.value().assign_defect(
                                             cd.first, sidb::model::defect{sidb::model::defect_type::NONE});
                                     }
                                 });
                         }
 
-                        if (const auto [status, sim_calls] =
-                                is_operational(result_lyt.value(), truth_table, params.operational_params,
-                                               input_bdl_wires, output_bdl_wires);
-                            status == operational_status::OPERATIONAL)
+                        if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
+                                result_lyt.value(), truth_table, params.operational_params, input_bdl_wires,
+                                output_bdl_wires);
+                            status == sidb::simulation::logic::operational_status::OPERATIONAL)
                         {
                             const std::scoped_lock lock{mutex_to_protect_designed_gate_layouts};
 
@@ -361,7 +361,7 @@ class design_sidb_gates_impl
                                     {
                                         if (sidb::model::is_neutrally_charged_defect(cd.second))
                                         {
-                                            result_lyt.value().assign_sidb_defect(cd.first, cd.second);
+                                            result_lyt.value().assign_defect(cd.first, cd.second);
                                         }
                                     });
                             }
@@ -449,11 +449,11 @@ class design_sidb_gates_impl
 
             // pruning was already conducted above. Hence, SIMULATION_ONLY is chosen.
             params.operational_params.strategy_to_analyze_operational_status =
-                is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+                sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
-            if (const auto [status, sim_calls] = is_operational(candidate, truth_table, params.operational_params,
-                                                                input_bdl_wires, output_bdl_wires);
-                status == operational_status::OPERATIONAL)
+            if (const auto [status, sim_calls] = sidb::simulation::logic::is_operational(
+                    candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
+                status == sidb::simulation::logic::operational_status::OPERATIONAL)
             {
                 // Lock and update shared resources
                 {
@@ -522,11 +522,11 @@ class design_sidb_gates_impl
     /**
      * Input BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<sidb::simulation::logic::bdl_wire<Lyt>> input_bdl_wires;
     /**
      * Output BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> output_bdl_wires;
+    const std::vector<sidb::simulation::logic::bdl_wire<Lyt>> output_bdl_wires;
     /**
      * Number of input BDL wires.
      */
@@ -599,10 +599,10 @@ class design_sidb_gates_impl
 
             cds_canvas.assign_dependent_cell(dependent_cell);
 
-            auto bii = bdl_input_iterator<Lyt>{current_layout, params.operational_params.input_bdl_iterator_params,
-                                               input_bdl_wires};
+            auto bii = sidb::simulation::logic::bdl_input_iterator<Lyt>{
+                current_layout, params.operational_params.input_bdl_iterator_params, input_bdl_wires};
 
-            detail::is_operational_impl<Lyt, TT> is_operational_impl{
+            fiction::sidb::simulation::logic::detail::is_operational_impl<Lyt, TT> is_operational_impl{
                 current_layout, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires, canvas_lyt};
 
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i, ++bii)
@@ -613,17 +613,18 @@ class design_sidb_gates_impl
                 {
                     switch (reason_for_filtering.value())
                     {
-                        case detail::layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES:
+                        case fiction::sidb::simulation::logic::detail::layout_invalidity_reason::
+                            POTENTIAL_POSITIVE_CHARGES:
                         {
                             number_of_discarded_layouts_at_first_pruning++;
                             break;
                         }
-                        case detail::layout_invalidity_reason::PHYSICAL_INFEASIBILITY:
+                        case fiction::sidb::simulation::logic::detail::layout_invalidity_reason::PHYSICAL_INFEASIBILITY:
                         {
                             number_of_discarded_layouts_at_second_pruning++;
                             break;
                         }
-                        case detail::layout_invalidity_reason::IO_INSTABILITY:
+                        case fiction::sidb::simulation::logic::detail::layout_invalidity_reason::IO_INSTABILITY:
                         {
                             number_of_discarded_layouts_at_third_pruning++;
                             break;
@@ -726,7 +727,7 @@ class design_sidb_gates_impl
             {
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
-                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb::model::defect_type::NONE)
+                    if (skeleton_layout.get_defect(all_sidbs_in_canvas[i]).type != sidb::model::defect_type::NONE)
                     {
                         continue;
                     }
@@ -757,7 +758,7 @@ class design_sidb_gates_impl
                 // SiDBs cannot be placed on positions which are already occupied by atomic defects.
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
-                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb::model::defect_type::NONE)
+                    if (skeleton_layout.get_defect(all_sidbs_in_canvas[i]).type != sidb::model::defect_type::NONE)
                     {
                         return std::nullopt;
                     }

@@ -135,7 +135,7 @@ class defect_surface<Lyt, false> : public Lyt
      * @param c Coordinate to assign defect d to.
      * @param d Defect to assign to coordinate c.
      */
-    void assign_sidb_defect(const typename Lyt::coordinate& c, const sidb::model::defect& d) noexcept
+    void assign_defect(const typename Lyt::coordinate& c, const sidb::model::defect& d) noexcept
     {
         // delete defect at the coordinate
         strg->defective_coordinates.erase(c);
@@ -154,7 +154,7 @@ class defect_surface<Lyt, false> : public Lyt
      */
     void move_sidb_defect(const typename Lyt::coordinate& source, const typename Lyt::coordinate& target) noexcept
     {
-        if (const auto defect = get_sidb_defect(source); defect.type != sidb::model::defect_type::NONE)
+        if (const auto defect = get_defect(source); defect.type != sidb::model::defect_type::NONE)
         {
             strg->defective_coordinates.insert({target, defect});
 
@@ -168,7 +168,7 @@ class defect_surface<Lyt, false> : public Lyt
      * @param c Coordinate to check.
      * @return Defect type previously assigned to c or NONE if no defect was yet assigned.
      */
-    [[nodiscard]] sidb::model::defect get_sidb_defect(const typename Lyt::coordinate& c) const noexcept
+    [[nodiscard]] sidb::model::defect get_defect(const typename Lyt::coordinate& c) const noexcept
     {
         if (auto it = strg->defective_coordinates.find(c); it != strg->defective_coordinates.cend())
         {
@@ -289,7 +289,7 @@ class defect_surface<Lyt, false> : public Lyt
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
-        if (const auto d = get_sidb_defect(c); d.type != sidb::model::defect_type::NONE)
+        if (const auto d = get_defect(c); d.type != sidb::model::defect_type::NONE)
         {
             const auto [horizontal_extent, vertical_extent] =
                 sidb::model::defect_extent(d, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);

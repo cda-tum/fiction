@@ -5,13 +5,13 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_CHARGE_DISTRIBUTION_SURFACE_HPP
 #define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_CHARGE_DISTRIBUTION_SURFACE_HPP
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -221,10 +221,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 sim_params{params}
         {}
         /**
-         * The SiDB simulation engine, used to determine what deviations from the core code are required. The
-         * default simulation engine EXGS is chosen since it causes no deviations from the core code.
+         * The SiDB simulation eng, used to determine what deviations from the core code are required. The
+         * default simulation eng EXGS is chosen since it causes no deviations from the core code.
          */
-        sidb_simulation_engine engine{sidb_simulation_engine::EXGS};
+        sidb::simulation::engine engine{sidb::simulation::engine::EXGS};
         /**
          * Stores all physical parameters used for the simulation.
          */
@@ -438,14 +438,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         return copy;
     }
     /**
-     * Sets the SiDB simulation engine that this charge distribution surface object is used with. Some simulators
-     * require deviations from the base code, thus in particular for those simulators it is important to set the engine.
+     * Sets the SiDB simulation eng that this charge distribution surface object is used with. Some simulators
+     * require deviations from the base code, thus in particular for those simulators it is important to set the eng.
      *
-     * @param engine SiDB simulation engine to set.
+     * @param eng SiDB simulation eng to set.
      */
-    void set_sidb_simulation_engine(const sidb_simulation_engine engine) noexcept
+    void set_simulation_engine(const sidb::simulation::engine eng) noexcept
     {
-        strg->engine = engine;
+        strg->engine = eng;
     }
     /**
      * This function determines the effective charge transition thresholds, incorporating the potential shift by local
@@ -1196,7 +1196,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     {
         double collect = 0.0;
 
-        if (strg->engine == sidb_simulation_engine::QUICKSIM)
+        if (strg->engine == sidb::simulation::engine::QUICKSIM)
         {
             for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
@@ -1515,7 +1515,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         strg->charge_index_and_base.first += 1;
-        if (strg->engine == sidb_simulation_engine::QUICKEXACT)
+        if (strg->engine == sidb::simulation::engine::QUICKEXACT)
         {
             this->index_to_charge_distribution_for_quickexact_simulation();
         }
@@ -2098,7 +2098,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         }
 
         strg->charge_index_sublayout += 1;
-        if (strg->engine == sidb_simulation_engine::QUICKEXACT)
+        if (strg->engine == sidb::simulation::engine::QUICKEXACT)
         {
             this->index_to_charge_distribution_for_quickexact_simulation();
         }
@@ -2139,7 +2139,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void reset_charge_index_sub_layout() noexcept
     {
         strg->charge_index_sublayout = 0;
-        if (strg->engine == sidb_simulation_engine::QUICKEXACT)
+        if (strg->engine == sidb::simulation::engine::QUICKEXACT)
         {
             this->index_to_charge_distribution_for_quickexact_simulation();
         }

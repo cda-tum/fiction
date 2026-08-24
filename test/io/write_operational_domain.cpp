@@ -4,9 +4,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/io/write_operational_domain.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <cstddef>
 #include <set>
@@ -21,10 +21,10 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
     SECTION("default sweep dimensions")
     {
-        operational_domain opdom{};
+        sidb::simulation::logic::operational_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
 
         static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n";
 
@@ -34,9 +34,9 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     }
     SECTION("One sweep dimensions")
     {
-        operational_domain opdom{};
+        sidb::simulation::logic::operational_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
 
         static constexpr const char* expected = "lambda_tf,operational status\n";
 
@@ -46,10 +46,10 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     }
     SECTION("Two sweep dimensions")
     {
-        operational_domain opdom{};
+        sidb::simulation::logic::operational_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
-        opdom.add_dimension(sweep_parameter::MU_MINUS);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::MU_MINUS);
 
         static constexpr const char* expected = "lambda_tf,mu_minus,operational status\n";
 
@@ -59,11 +59,11 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
     }
     SECTION("Three sweep dimensions")
     {
-        operational_domain opdom{};
+        sidb::simulation::logic::operational_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
-        opdom.add_dimension(sweep_parameter::MU_MINUS);
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::MU_MINUS);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
 
         static constexpr const char* expected = "lambda_tf,mu_minus,epsilon_r,operational status\n";
 
@@ -75,13 +75,15 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
 TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 {
-    operational_domain opdom{};
+    sidb::simulation::logic::operational_domain opdom{};
 
-    opdom.add_dimension(sweep_parameter::EPSILON_R);
-    opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+    opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+    opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
 
-    opdom.add_value(parameter_point{{0, 0}}, {operational_status::OPERATIONAL});
-    opdom.add_value(parameter_point{{0, 1}}, {operational_status::NON_OPERATIONAL});
+    opdom.add_value(sidb::simulation::logic::parameter_point{{0, 0}},
+                    {sidb::simulation::logic::operational_status::OPERATIONAL});
+    opdom.add_value(sidb::simulation::logic::parameter_point{{0, 1}},
+                    {sidb::simulation::logic::operational_status::NON_OPERATIONAL});
 
     std::ostringstream os{};
 
@@ -140,12 +142,14 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 {
     SECTION("one sweep dimension")
     {
-        operational_domain opdom{};
+        sidb::simulation::logic::operational_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
 
-        opdom.add_value(parameter_point{{0.1}}, {operational_status::OPERATIONAL});
-        opdom.add_value(parameter_point{{0.3}}, {operational_status::NON_OPERATIONAL});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.1}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.3}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL});
 
         const std::set<std::string> expected{"epsilon_r,operational status", "0.1,1", "0.3,0"};
 
@@ -171,14 +175,16 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 
     SECTION("three sweep dimensions")
     {
-        operational_domain opdom{};
+        sidb::simulation::logic::operational_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
-        opdom.add_dimension(sweep_parameter::MU_MINUS);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::MU_MINUS);
 
-        opdom.add_value(parameter_point{{0.1, 0.2, -0.3}}, {operational_status::OPERATIONAL});
-        opdom.add_value(parameter_point{{0.4, 0.5, -0.6}}, {operational_status::NON_OPERATIONAL});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.1, 0.2, -0.3}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.4, 0.5, -0.6}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL});
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status", "0.1,0.2,-0.3,1",
                                              "0.4,0.5,-0.6,0"};
@@ -205,14 +211,16 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 
     SECTION("three sweep dimensions with critical temperature")
     {
-        critical_temperature_domain opdom{};
+        sidb::simulation::logic::critical_temperature_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
-        opdom.add_dimension(sweep_parameter::MU_MINUS);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::MU_MINUS);
 
-        opdom.add_value(parameter_point{{0.1, 0.2, -0.3}}, {operational_status::OPERATIONAL, 50.3});
-        opdom.add_value(parameter_point{{0.4, 0.5, -0.6}}, {operational_status::NON_OPERATIONAL, 0.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.1, 0.2, -0.3}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL, 50.3});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.4, 0.5, -0.6}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL, 0.0});
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,mu_minus,operational status,critical temperature",
                                              "0.1,0.2,-0.3,1,50.3", "0.4,0.5,-0.6,0,0"};
@@ -240,15 +248,19 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
 
 TEST_CASE("Write operational domain with floating-point parameter values", "[write-operational-domain]")
 {
-    operational_domain opdom{};
+    sidb::simulation::logic::operational_domain opdom{};
 
-    opdom.add_dimension(sweep_parameter::EPSILON_R);
-    opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+    opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+    opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
 
-    opdom.add_value(parameter_point{{0.1, 0.2}}, {operational_status::OPERATIONAL});
-    opdom.add_value(parameter_point{{0.3, 0.4}}, {operational_status::NON_OPERATIONAL});
-    opdom.add_value(parameter_point{{1.2, 1.4}}, {operational_status::OPERATIONAL});
-    opdom.add_value(parameter_point{{2.4, 5.75}}, {operational_status::NON_OPERATIONAL});
+    opdom.add_value(sidb::simulation::logic::parameter_point{{0.1, 0.2}},
+                    {sidb::simulation::logic::operational_status::OPERATIONAL});
+    opdom.add_value(sidb::simulation::logic::parameter_point{{0.3, 0.4}},
+                    {sidb::simulation::logic::operational_status::NON_OPERATIONAL});
+    opdom.add_value(sidb::simulation::logic::parameter_point{{1.2, 1.4}},
+                    {sidb::simulation::logic::operational_status::OPERATIONAL});
+    opdom.add_value(sidb::simulation::logic::parameter_point{{2.4, 5.75}},
+                    {sidb::simulation::logic::operational_status::NON_OPERATIONAL});
 
     std::ostringstream os{};
 
@@ -310,14 +322,18 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 {
     SECTION("One sweep parameters")
     {
-        critical_temperature_domain opdom{};
+        sidb::simulation::logic::critical_temperature_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
 
-        opdom.add_value(parameter_point{{0.1}}, {operational_status::OPERATIONAL, 50.3});
-        opdom.add_value(parameter_point{{0.3}}, {operational_status::NON_OPERATIONAL, 0.0});
-        opdom.add_value(parameter_point{{1.2}}, {operational_status::OPERATIONAL, 400.0});
-        opdom.add_value(parameter_point{{2.4}}, {operational_status::NON_OPERATIONAL, 0.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.1}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL, 50.3});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.3}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL, 0.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{1.2}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL, 400.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{2.4}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL, 0.0});
 
         std::ostringstream os{};
 
@@ -377,15 +393,19 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
     }
     SECTION("Two sweep parameters")
     {
-        critical_temperature_domain opdom{};
+        sidb::simulation::logic::critical_temperature_domain opdom{};
 
-        opdom.add_dimension(sweep_parameter::EPSILON_R);
-        opdom.add_dimension(sweep_parameter::LAMBDA_TF);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+        opdom.add_dimension(sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
 
-        opdom.add_value(parameter_point{{0.1, 0.2}}, {operational_status::OPERATIONAL, 50.3});
-        opdom.add_value(parameter_point{{0.3, 0.4}}, {operational_status::NON_OPERATIONAL, 0.0});
-        opdom.add_value(parameter_point{{1.2, 1.4}}, {operational_status::OPERATIONAL, 400.0});
-        opdom.add_value(parameter_point{{2.4, 5.75}}, {operational_status::NON_OPERATIONAL, 0.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.1, 0.2}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL, 50.3});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{0.3, 0.4}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL, 0.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{1.2, 1.4}},
+                        {sidb::simulation::logic::operational_status::OPERATIONAL, 400.0});
+        opdom.add_value(sidb::simulation::logic::parameter_point{{2.4, 5.75}},
+                        {sidb::simulation::logic::operational_status::NON_OPERATIONAL, 0.0});
 
         std::ostringstream os{};
 

@@ -2,14 +2,14 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
@@ -84,23 +84,27 @@ int main()  // NOLINT
                         lyt.assign_cell_type(all_cells_in_region[idx], sidb::technology::cell_type::NORMAL);
                     }
 
-                    auto result_exgs = exhaustive_ground_state_simulation(lyt, params);
-                    auto result_quickexact =
-                        quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{.sim_params = params});
+                    auto result_exgs       = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params);
+                    auto result_quickexact = sidb::simulation::engines::quickexact(
+                        lyt, sidb::simulation::engines::quickexact_params<cell<sidb_100_cell_clk_lyt>>{.sim_params =
+                                                                                                           params});
 
-                    if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
+                    if (!sidb::simulation::utils::check_simulation_results_for_equivalence(result_exgs,
+                                                                                           result_quickexact))
                     {
                         const std::scoped_lock lock{mutex_qe};
                         quickexact_non_equivalence_counter++;
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{.sim_params = params};
+                    sidb::simulation::engines::clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{
+                        .sim_params = params};
                     cc_params.available_threads = 1;
 
-                    auto result_clustercomplete = clustercomplete(lyt, cc_params);
+                    auto result_clustercomplete = sidb::simulation::engines::clustercomplete(lyt, cc_params);
 
-                    if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))
+                    if (!sidb::simulation::utils::check_simulation_results_for_equivalence(result_exgs,
+                                                                                           result_clustercomplete))
                     {
                         const std::scoped_lock lock{mutex_cc};
                         clustercomplete_non_equivalence_counter++;

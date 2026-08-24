@@ -4,10 +4,10 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -46,17 +46,17 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{networks::utils::create_id_tt()})};
 
-    const sidb::model::simulation_parameters sim_params{2, -0.32};
-    const critical_temperature_params        ct_params{sim_params};
+    const sidb::model::simulation_parameters                      sim_params{2, -0.32};
+    const sidb::simulation::analysis::critical_temperature_params ct_params{sim_params};
 
     for (const auto& [gate, truth_table] : gates)
     {
         const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate));
 
-        critical_temperature_stats ct_stats{};
+        sidb::simulation::analysis::critical_temperature_stats ct_stats{};
 
-        const auto ct =
-            critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(layout, truth_table, ct_params, &ct_stats);
+        const auto ct = sidb::simulation::analysis::critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(
+            layout, truth_table, ct_params, &ct_stats);
 
         simulation_exp(gate, ct, ct_stats.energy_between_ground_state_and_first_erroneous);
         simulation_exp.save();

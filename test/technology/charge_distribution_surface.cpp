@@ -5,7 +5,6 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
@@ -15,6 +14,7 @@
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/primitives/lattice.hpp>
 #include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -153,7 +153,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         sidb::primitives::charge_distribution_surface charge_layout_quickexact{
             lyt, sidb::model::simulation_parameters{2}, sidb::model::charge_state::NEGATIVE};
-        charge_layout_quickexact.set_sidb_simulation_engine(sidb_simulation_engine::QUICKEXACT);
+        charge_layout_quickexact.set_simulation_engine(sidb::simulation::engine::QUICKEXACT);
         charge_layout_quickexact.assign_dependent_cell({5, 4});
         charge_layout_quickexact.is_three_state_simulation_required();
         CHECK(charge_layout_quickexact.get_charge_index_and_base().first == 0);
@@ -256,7 +256,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         CHECK(charge_layout.get_electrostatic_potential_energy() < system_energy_maximum);
 
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 8);
-        charge_layout.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
+        charge_layout.set_simulation_engine(sidb::simulation::engine::EXGS);
         charge_layout.reset_charge_index_sub_layout();
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 0);
         CHECK(charge_layout.get_charge_state({6, 5}) == sidb::model::charge_state::NEGATIVE);
@@ -322,7 +322,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
 
         sidb::primitives::charge_distribution_surface charge_layout{lyt, sidb::model::simulation_parameters{},
                                                                     sidb::model::charge_state::NEGATIVE};
-        charge_layout.set_sidb_simulation_engine(sidb_simulation_engine::QUICKEXACT);
+        charge_layout.set_simulation_engine(sidb::simulation::engine::QUICKEXACT);
 
         charge_layout.is_three_state_simulation_required();
         CHECK(charge_layout.get_max_charge_index_sub_layout() == 26);
@@ -357,7 +357,7 @@ TEMPLATE_TEST_CASE("Assign and delete charge states without defects", "[charge-d
         charge_layout.increase_charge_index_of_sub_layout_by_one();
         CHECK(charge_layout.get_charge_index_of_sub_layout() == 2);
 
-        charge_layout.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
+        charge_layout.set_simulation_engine(sidb::simulation::engine::EXGS);
         charge_layout.increase_charge_index_of_sub_layout_by_one(
             sidb::primitives::dependent_cell_mode::FIXED, sidb::primitives::energy_calculation::UPDATE_ENERGY,
             sidb::primitives::charge_distribution_history::NEGLECT);
@@ -2315,7 +2315,7 @@ TEMPLATE_TEST_CASE("Charge distribution surface defect vs SiDB equivalence", "[c
 
     sidb::primitives::defect_surface<decltype(lyt)> defect_lyt{lyt};
     defect_lyt.assign_cell_type({5, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
-    defect_lyt.assign_sidb_defect(
+    defect_lyt.assign_defect(
         {5, 1, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1, sim_params.epsilon_r, sim_params.lambda_tf});
 
     sidb::primitives::charge_distribution_surface<decltype(defect_lyt)> charge_lyt_defect{defect_lyt, sim_params};

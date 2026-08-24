@@ -6,9 +6,9 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -123,7 +123,7 @@ void temp_command::execute()
             return;
         }
 
-        const auto sim_engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+        const auto sim_engine = fiction::sidb::simulation::get_engine(sim_engine_str);
 
         if (!sim_engine.has_value())
         {
@@ -150,11 +150,12 @@ void temp_command::execute()
 
                 const auto tt_ptr = ts.current();
 
-                ct = fiction::critical_temperature_gate_based(*lyt_ptr, std::vector{*tt_ptr}, params, &stats);
+                ct = fiction::sidb::simulation::analysis::critical_temperature_gate_based(
+                    *lyt_ptr, std::vector{*tt_ptr}, params, &stats);
             }
             else
             {
-                ct = fiction::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
+                ct = fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
             }
 
             if (stats.num_valid_lyt == 0)

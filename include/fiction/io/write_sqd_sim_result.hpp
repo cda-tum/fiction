@@ -5,10 +5,10 @@
 #ifndef FICTION_WRITE_SQD_SIM_RESULT_HPP
 #define FICTION_WRITE_SQD_SIM_RESULT_HPP
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -111,8 +111,8 @@ template <typename Lyt>
 class write_sqd_sim_result_impl
 {
   public:
-    write_sqd_sim_result_impl(const sidb_simulation_result<Lyt>& result, std::ostream& s) :
-            sim_result{result},
+    write_sqd_sim_result_impl(const sidb::simulation::result<Lyt>& sim_result, std::ostream& s) :
+            sim_result{sim_result},
             os{s},
             ordered_cells{obtain_ordered_cells()}
     {}
@@ -134,9 +134,9 @@ class write_sqd_sim_result_impl
 
   private:
     /**
-     * The simulation result to write.
+     * The simulation sim_result to write.
      */
-    const sidb_simulation_result<Lyt>& sim_result;
+    const sidb::simulation::result<Lyt>& sim_result;
     /**
      * The output stream to write to.
      */
@@ -279,17 +279,17 @@ class write_sqd_sim_result_impl
 }  // namespace detail
 
 /**
- * Writes an SiDB simulation result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a physical
- * simulator for the SiDB technology platform.
+ * Writes an SiDB simulation sim_result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a
+ * physical simulator for the SiDB technology platform.
  *
  * This overload uses an output stream to write into.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
- * @param sim_result The simulation result to write.
+ * @param sim_result The simulation sim_result to write.
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
+void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -300,17 +300,17 @@ void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::os
 }
 
 /**
- * Writes an SiDB simulation result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a physical
- * simulator for the SiDB technology platform.
+ * Writes an SiDB simulation sim_result to an XML file that is used by SiQAD (https://github.com/siqad/siqad), a
+ * physical simulator for the SiDB technology platform.
  *
  * This overload uses a file name to create and write into.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
- * @param sim_result The simulation result to write.
+ * @param sim_result The simulation sim_result to write.
  * @param filename The file name to create and write into. Should preferably use the `.xml` extension.
  */
 template <typename Lyt>
-void write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");

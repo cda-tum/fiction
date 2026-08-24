@@ -4,10 +4,10 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -39,23 +39,23 @@ int main()  // NOLINT
         std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
         std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()})};
 
-    const sidb::model::simulation_parameters sim_params{2, -0.28};
-    critical_temperature_params              ct_params{sim_params};
+    const sidb::model::simulation_parameters                sim_params{2, -0.28};
+    sidb::simulation::analysis::critical_temperature_params ct_params{sim_params};
 
     // this is how the gates are presented and simulated in "SiQAD: A Design and Simulation Tool for Atomic Silicon
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,
     // Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
     // TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020. (https://ieeexplore.ieee.org/abstract/document/8963859)
     ct_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+        sidb::simulation::logic::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
 
     for (const auto& [gate, truth_table] : gates)
     {
         const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate));
 
-        critical_temperature_stats ct_stats{};
-        const auto                 ct =
-            critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(layout, truth_table, ct_params, &ct_stats);
+        sidb::simulation::analysis::critical_temperature_stats ct_stats{};
+        const auto ct = sidb::simulation::analysis::critical_temperature_gate_based<sidb_100_cell_clk_lyt_siqad>(
+            layout, truth_table, ct_params, &ct_stats);
 
         simulation_exp(gate, ct, ct_stats.energy_between_ground_state_and_first_erroneous);
         simulation_exp.save();

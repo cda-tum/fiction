@@ -5,7 +5,7 @@
 #ifndef FICTION_WRITE_DEFECT_INFLUENCE_DOMAIN_HPP
 #define FICTION_WRITE_DEFECT_INFLUENCE_DOMAIN_HPP
 
-#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
+#include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/utils/stl/csv_writer.hpp"
 
 #include <fstream>
@@ -45,8 +45,8 @@ struct write_defect_influence_domain_params
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, std::ostream& os,
-                                   const write_defect_influence_domain_params& params = {})
+void write_defect_influence_domain(const sidb::simulation::defects::defect_influence_domain<Lyt>& defect_infdom,
+                                   std::ostream& os, const write_defect_influence_domain_params& params = {})
 {
     fiction::utils::stl::csv_writer writer{os};
 
@@ -56,8 +56,9 @@ void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_in
         [&params, &writer](const auto& sim_param, const auto& op_val)
         {
             writer.write_line(sim_param.x, sim_param.y,
-                              std::get<0>(op_val) == defect_influence_status::INFLUENTIAL ? params.influential_tag :
-                                                                                            params.non_influential_tag);
+                              std::get<0>(op_val) == sidb::simulation::defects::defect_influence_status::INFLUENTIAL ?
+                                  params.influential_tag :
+                                  params.non_influential_tag);
         });
 }
 /**
@@ -75,8 +76,9 @@ void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_in
  * empty `write_defect_influence_domain_params` object, which provides standard tags.
  */
 template <typename Lyt>
-void write_defect_influence_domain(const defect_influence_domain<Lyt>& defect_infdom, const std::string_view& filename,
-                                   const write_defect_influence_domain_params& params = {})
+void write_defect_influence_domain(const sidb::simulation::defects::defect_influence_domain<Lyt>& defect_infdom,
+                                   const std::string_view&                                        filename,
+                                   const write_defect_influence_domain_params&                    params = {})
 {
     std::ofstream os{filename.data(), std::ofstream::out};
 

@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
+#include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
 
 #include <vector>
 
@@ -22,13 +22,13 @@ void minimum_energy_impl(nanobind::module_& m)
 
     m.def(
         "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
-        { return fiction::minimum_energy(layouts.cbegin(), layouts.cend()); }, py::arg("layouts"),
-        DOC(fiction_minimum_energy));
+        { return fiction::sidb::simulation::generic::minimum_energy(layouts.cbegin(), layouts.cend()); },
+        py::arg("layouts"), DOC(fiction_minimum_energy));
 }
 
 }  // namespace detail
 
-void minimum_energy(nanobind::module_& m)
+void sidb::simulation::generic::minimum_energy(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::minimum_energy_impl<py_charge_distribution_surface_100>(m);

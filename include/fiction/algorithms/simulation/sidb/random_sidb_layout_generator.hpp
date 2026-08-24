@@ -5,10 +5,10 @@
 #ifndef FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
 #define FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
 
-#include "fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -140,7 +140,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
         if constexpr (has_get_sidb_defect_v<Lyt>)
         {
             random_cell_is_identical_with_defect =
-                (lyt.get_sidb_defect(random_coord).type != sidb::model::defect_type::NONE);
+                (lyt.get_defect(random_coord).type != sidb::model::defect_type::NONE);
         }
 
         // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
@@ -158,7 +158,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
 
             if (params.positive_sidbs ==
                     generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
-                can_positive_charges_occur(lyt, params.sim_params))
+                sidb::simulation::generic::can_positive_charges_occur(lyt, params.sim_params))
             {
                 lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::EMPTY);
             }
@@ -167,7 +167,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
     }
 
     if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
-        !can_positive_charges_occur(lyt, params.sim_params))
+        !sidb::simulation::generic::can_positive_charges_occur(lyt, params.sim_params))
     {
         return generate_random_sidb_layout(params, skeleton);
     }

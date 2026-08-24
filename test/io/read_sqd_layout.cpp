@@ -388,7 +388,7 @@ TEST_CASE("Read single defect SQD layout", "[sqd]")
     CHECK(layout.y() == 4);
     CHECK(layout.is_empty());
 
-    const auto defect = layout.get_sidb_defect({5, 4});
+    const auto defect = layout.get_defect({5, 4});
     CHECK(defect.type == sidb::model::defect_type::UNKNOWN);
     CHECK(defect.charge == 2);
     CHECK(defect.epsilon_r == 1.2);
@@ -479,15 +479,15 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
     CHECK(layout.y() == 5);
     CHECK(layout.is_empty());
     {
-        const auto defect = layout.get_sidb_defect({5, 4});
+        const auto defect = layout.get_defect({5, 4});
         CHECK(defect.type == sidb::model::defect_type::SILOXANE);
         CHECK(defect.charge == -1);
         CHECK(defect.epsilon_r == 5.6);
         CHECK(defect.lambda_tf == 5.0);
     }
     {
-        const auto defect1 = layout.get_sidb_defect({3, 4});
-        const auto defect2 = layout.get_sidb_defect({3, 5});
+        const auto defect1 = layout.get_defect({3, 4});
+        const auto defect2 = layout.get_defect({3, 5});
         CHECK(defect1.type == sidb::model::defect_type::MISSING_DIMER);
         CHECK(defect1.charge == -1);
         CHECK(defect1.epsilon_r == 5.6);
@@ -498,10 +498,10 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
         CHECK(defect2.lambda_tf == 5.0);
     }
     {
-        const auto defect1 = layout.get_sidb_defect({0, 4});
-        const auto defect2 = layout.get_sidb_defect({0, 5});
-        const auto defect3 = layout.get_sidb_defect({1, 4});
-        const auto defect4 = layout.get_sidb_defect({1, 5});
+        const auto defect1 = layout.get_defect({0, 4});
+        const auto defect2 = layout.get_defect({0, 5});
+        const auto defect3 = layout.get_defect({1, 4});
+        const auto defect4 = layout.get_defect({1, 5});
         CHECK(defect1.type == sidb::model::defect_type::ETCH_PIT);
         CHECK(defect1.charge == -1);
         CHECK(defect1.epsilon_r == 5.6);
@@ -751,7 +751,7 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
     const auto layout =
         read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
-    const auto defect = layout.get_sidb_defect({0, 0});
+    const auto defect = layout.get_defect({0, 0});
 
     CHECK(defect.type == sidb::model::defect_type::UNKNOWN);
 

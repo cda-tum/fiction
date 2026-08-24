@@ -2,12 +2,12 @@
 // Created by Jan Drewniok on 04.05.23.
 //
 
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/primitives/lattice.hpp"
 #include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
+#include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>
@@ -112,9 +112,11 @@ int main(int argc, const char* argv[])  // NOLINT
                         {
                             auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>> params{phys_params};
+                            const sidb::simulation::engines::quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>>
+                                params{phys_params};
 
-                            const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
+                            const auto simulation_results =
+                                sidb::simulation::engines::quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
 
                             // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                             // physically valid charge distribution is found) because the physical model currently works
@@ -128,9 +130,11 @@ int main(int argc, const char* argv[])  // NOLINT
                         {
                             auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{phys_params};
+                            const sidb::simulation::engines::quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>>
+                                params{phys_params};
 
-                            const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
+                            const auto simulation_results =
+                                sidb::simulation::engines::quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
 
                             // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                             // physically valid charge distribution is found) because the physical model currently works

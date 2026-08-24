@@ -5,9 +5,9 @@
 #ifndef FICTION_CMD_QUICKEXACT_HPP
 #define FICTION_CMD_QUICKEXACT_HPP
 
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -46,15 +46,15 @@ class quickexact_command final : public command
     /**
      * QuickExact parameters.
      */
-    fiction::quickexact_params<> qe_params{};
+    fiction::sidb::simulation::engines::quickexact_params<> qe_params{};
     /**
      * Type alias for H-Si(100)-2x1 simulation result.
      */
-    using sim_result_100 = fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt>;
+    using sim_result_100 = fiction::sidb::simulation::result<fiction::sidb_100_cell_clk_lyt>;
     /**
      * Type alias for H-Si(111)-1x1 simulation result.
      */
-    using sim_result_111 = fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt>;
+    using sim_result_111 = fiction::sidb::simulation::result<fiction::sidb_111_cell_clk_lyt>;
     /**
      * Simulation result for either the H-Si(100)-2x1 or the H-Si(111)-1x1 surface.
      */

@@ -5,7 +5,6 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/io/write_location_and_ground_state.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -14,6 +13,7 @@
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/types.hpp>
 
 #include <cctype>
@@ -57,7 +57,8 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({8, 0}, lattice::cell_type::NORMAL);
 
         const sidb::model::simulation_parameters params{2, -0.32};
-        const auto simulation_results = exhaustive_ground_state_simulation<lattice>(lyt, params);
+        const auto                               simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<lattice>(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);
@@ -84,7 +85,8 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const sidb::model::simulation_parameters params{2, -0.32};
-        const auto simulation_results = exhaustive_ground_state_simulation<lattice>(lyt, params);
+        const auto                               simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<lattice>(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);

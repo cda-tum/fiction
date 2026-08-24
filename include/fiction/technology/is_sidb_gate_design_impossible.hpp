@@ -5,13 +5,13 @@
 #ifndef FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
 #define FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
 
-#include "fiction/algorithms/iter/bdl_input_iterator.hpp"
-#include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
+#include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
@@ -33,7 +33,7 @@ struct is_sidb_gate_design_impossible_params
     /**
      * Parameters used for the BDL input iterator.
      */
-    bdl_input_iterator_params bdl_iterator_params{};
+    sidb::simulation::logic::bdl_input_iterator_params bdl_iterator_params{};
 };
 /**
  * This function evaluates whether it is impossible to design an SiDB gate for a given truth table and a given skeleton
@@ -60,12 +60,13 @@ template <typename Lyt, typename TT>
     assert(skeleton_with_defects.num_pis() > 0 && "lyt needs input cells");
     assert(skeleton_with_defects.num_pos() > 0 && "lyt needs output cells");
 
-    const auto output_pairs = detect_bdl_pairs(skeleton_with_defects, sidb::technology::cell_type::OUTPUT,
-                                               params.bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
+    const auto output_pairs =
+        sidb::simulation::logic::detect_bdl_pairs(skeleton_with_defects, sidb::technology::cell_type::OUTPUT,
+                                                  params.bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
     assert(output_pairs.empty() == false && "lyt needs output BDL pairs");
 
-    auto bdl_iter = bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
+    auto bdl_iter = sidb::simulation::logic::bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {

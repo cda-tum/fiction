@@ -754,11 +754,11 @@ template <class Lyt>
 struct is_sidb_defect_surface<
     Lyt,
     std::void_t<typename Lyt::storage,  // Check if Lyt has a nested type 'storage'
-                decltype(std::declval<Lyt>().assign_sidb_defect(
+                decltype(std::declval<Lyt>().assign_defect(
                     std::declval<cell<Lyt>>(), std::declval<sidb::model::defect>())),  // Check if calling
-                                                                                       // 'assign_sidb_defect' is valid
-                decltype(std::declval<Lyt>().get_sidb_defect(std::declval<cell<Lyt>>()))>>
-        : std::true_type  // Check if calling 'get_sidb_defect' is valid
+                                                                                       // 'assign_defect' is valid
+                decltype(std::declval<Lyt>().get_defect(std::declval<cell<Lyt>>()))>>
+        : std::true_type  // Check if calling 'get_defect' is valid
 {};
 
 // Helper variable template for easy access to the trait value
@@ -773,7 +773,7 @@ struct has_assign_sidb_defect : std::false_type
 
 template <class Lyt>
 struct has_assign_sidb_defect<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb::model::defect()))>>
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_defect(coordinate<Lyt>(), sidb::model::defect()))>>
         : std::true_type
 {};
 
@@ -787,7 +787,7 @@ struct has_get_sidb_defect : std::false_type
 {};
 
 template <class Lyt>
-struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_sidb_defect(coordinate<Lyt>()))>>
+struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_defect(coordinate<Lyt>()))>>
         : std::true_type
 {};
 

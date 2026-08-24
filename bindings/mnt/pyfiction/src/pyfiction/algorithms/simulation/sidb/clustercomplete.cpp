@@ -3,7 +3,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
+#include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -27,46 +27,50 @@ void clustercomplete_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("clustercomplete", &fiction::clustercomplete<Lyt>, py::arg("lyt"),
-          py::arg("params") = fiction::clustercomplete_params<>{}, DOC(fiction_clustercomplete));
+    m.def("clustercomplete", &fiction::sidb::simulation::engines::clustercomplete<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::sidb::simulation::engines::clustercomplete_params<>{},
+          DOC(fiction_clustercomplete));
 }
 
 }  // namespace detail
 
-void clustercomplete(nanobind::module_& m)
+void sidb::simulation::engines::clustercomplete(nanobind::module_& m)
 {
     namespace py = nanobind;
 
     /**
      * Report *Ground State Space* stats.
      */
-    py::enum_<fiction::clustercomplete_params<>::ground_state_space_reporting>(
+    py::enum_<fiction::sidb::simulation::engines::clustercomplete_params<>::ground_state_space_reporting>(
         m, "ground_state_space_reporting", DOC(fiction_clustercomplete_params_ground_state_space_reporting))
-        .value("ON", fiction::clustercomplete_params<>::ground_state_space_reporting::ON,
+        .value("ON", fiction::sidb::simulation::engines::clustercomplete_params<>::ground_state_space_reporting::ON,
                DOC(fiction_clustercomplete_params_ground_state_space_reporting_ON))
-        .value("OFF", fiction::clustercomplete_params<>::ground_state_space_reporting::OFF,
+        .value("OFF", fiction::sidb::simulation::engines::clustercomplete_params<>::ground_state_space_reporting::OFF,
                DOC(fiction_clustercomplete_params_ground_state_space_reporting_OFF));
 
     /**
      * ClusterComplete parameters.
      */
-    py::class_<fiction::clustercomplete_params<>>(m, "clustercomplete_params", DOC(fiction_clustercomplete_params))
+    py::class_<fiction::sidb::simulation::engines::clustercomplete_params<>>(m, "clustercomplete_params",
+                                                                             DOC(fiction_clustercomplete_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::clustercomplete_params<>::sim_params,
+        .def_rw("simulation_parameters", &fiction::sidb::simulation::engines::clustercomplete_params<>::sim_params,
                 DOC(fiction_clustercomplete_params_simulation_parameters))
-        .def_rw("local_external_potential", &fiction::clustercomplete_params<>::local_external_potential,
+        .def_rw("local_external_potential",
+                &fiction::sidb::simulation::engines::clustercomplete_params<>::local_external_potential,
                 DOC(fiction_clustercomplete_params_local_external_potential))
-        .def_rw("global_potential", &fiction::clustercomplete_params<>::global_potential,
+        .def_rw("global_potential", &fiction::sidb::simulation::engines::clustercomplete_params<>::global_potential,
                 DOC(fiction_clustercomplete_params_global_potential))
         .def_rw("validity_witness_partitioning_max_cluster_size_gss",
-                &fiction::clustercomplete_params<>::validity_witness_partitioning_max_cluster_size_gss,
+                &fiction::sidb::simulation::engines::clustercomplete_params<>::
+                    validity_witness_partitioning_max_cluster_size_gss,
                 DOC(fiction_clustercomplete_params_validity_witness_partitioning_max_cluster_size_gss))
         .def_rw("num_overlapping_witnesses_limit_gss",
-                &fiction::clustercomplete_params<>::num_overlapping_witnesses_limit_gss,
+                &fiction::sidb::simulation::engines::clustercomplete_params<>::num_overlapping_witnesses_limit_gss,
                 DOC(fiction_clustercomplete_params_num_overlapping_witnesses_limit_gss))
-        .def_rw("available_threads", &fiction::clustercomplete_params<>::available_threads,
+        .def_rw("available_threads", &fiction::sidb::simulation::engines::clustercomplete_params<>::available_threads,
                 DOC(fiction_clustercomplete_params_available_threads))
-        .def_rw("report_gss_stats", &fiction::clustercomplete_params<>::report_gss_stats,
+        .def_rw("report_gss_stats", &fiction::sidb::simulation::engines::clustercomplete_params<>::report_gss_stats,
                 DOC(fiction_clustercomplete_params_report_gss_stats));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
@@ -85,7 +89,7 @@ namespace pyfiction
 /**
  * Disable ClusterComplete.
  */
-void clustercomplete([[maybe_unused]] nanobind::module_& m) {}
+void sidb::simulation::engines::clustercomplete([[maybe_unused]] nanobind::module_& m) {}
 
 }  // namespace pyfiction
 

@@ -5,10 +5,10 @@
 #ifndef FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 #define FICTION_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
-#include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/simulation/generic/minimum_energy.hpp"
+#include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
 
@@ -32,8 +32,8 @@ template <typename Lyt>
 class write_location_and_ground_state_impl
 {
   public:
-    write_location_and_ground_state_impl(const sidb_simulation_result<Lyt>& result, std::ostream& s) :
-            sim_result{result},
+    write_location_and_ground_state_impl(const sidb::simulation::result<Lyt>& sim_result, std::ostream& s) :
+            sim_result{sim_result},
             os{s}
     {}
 
@@ -41,7 +41,9 @@ class write_location_and_ground_state_impl
     {
         // this part searches for the ground state(s) among all physically valid charge distributions
         const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
-            minimum_energy(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend()), 6);
+            sidb::simulation::generic::minimum_energy(sim_result.charge_distributions.cbegin(),
+                                                      sim_result.charge_distributions.cend()),
+            6);
 
         std::vector<sidb::primitives::charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
@@ -87,9 +89,9 @@ class write_location_and_ground_state_impl
     /**
      * Simulation results.
      */
-    const sidb_simulation_result<Lyt>& sim_result;
+    const sidb::simulation::result<Lyt>& sim_result;
     /**
-     * Output stream used for writing the simulation result.
+     * Output stream used for writing the simulation sim_result.
      */
     std::ostream& os;
 };
@@ -103,11 +105,11 @@ class write_location_and_ground_state_impl
  * This overload uses an output stream to write into.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
- * @param sim_result The simulation result to write.
+ * @param sim_result The simulation sim_result to write.
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
+void write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -124,11 +126,11 @@ void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_resu
  * This overload uses a file name to create and write into.
  *
  * @tparam Lyt SiDB cell-level SiDB layout type.
- * @tparam sim_result The simulation result to write.
+ * @tparam sim_result The simulation sim_result to write.
  * @param filename The file name to create and write into.
  */
 template <typename Lyt>
-void write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+void write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

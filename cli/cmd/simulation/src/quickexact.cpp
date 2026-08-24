@@ -6,10 +6,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -90,7 +90,7 @@ void quickexact_command::execute()
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
         {
-            sim_result = fiction::quickexact(*lyt_ptr, qe_params);
+            sim_result = fiction::sidb::simulation::engines::quickexact(*lyt_ptr, qe_params);
 
             if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
             {
@@ -100,7 +100,7 @@ void quickexact_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                const auto min_energy_distr = fiction::sidb::simulation::generic::minimum_energy_distribution(
                     std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
                     std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
@@ -116,7 +116,7 @@ void quickexact_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                const auto min_energy_distr = fiction::sidb::simulation::generic::minimum_energy_distribution(
                     std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
                     std::get<sim_result_111>(sim_result).charge_distributions.cend());
 

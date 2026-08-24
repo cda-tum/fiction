@@ -117,13 +117,13 @@ class apply_gate_library_impl
             if (defect_surface.has_value())
             {
                 // due to issue with windows-2019 Visual Studio 16 2019 and v142. It doesn't compile without using
-                // "copy_lyt". When using "cell_lyt.assign_sidb_defect(...)" inside the lambda function, it results in
+                // "copy_lyt". When using "cell_lyt.assign_defect(...)" inside the lambda function, it results in
                 // the error: "error C2059: syntax error: '.'".
                 auto copy_lyt = cell_lyt.clone();
                 // copy the original defects over to the circuit since they are gone when converting the gate-level
                 // layout to the cell-level layout.
                 defect_surface.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
-                                                           { copy_lyt.assign_sidb_defect(def.first, def.second); });
+                                                           { copy_lyt.assign_defect(def.first, def.second); });
                 return copy_lyt;
             }
         }
@@ -188,13 +188,13 @@ class apply_gate_library_impl
             if (defect_surface.has_value())
             {
                 // due to issue with windows-2019 Visual Studio 16 2019 and v142. It doesn't compile without using
-                // "copy_lyt". When using "cell_lyt.assign_sidb_defect(...)" inside the lambda function, it results in
+                // "copy_lyt". When using "cell_lyt.assign_defect(...)" inside the lambda function, it results in
                 // the error: "error C2059: syntax error: '.'".
                 auto copy_lyt = cell_lyt.clone();
                 // copy the original defects over to the circuit since they are gone when converting the gate-level
                 // layout to the cell-level layout.
                 defect_surface.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
-                                                           { copy_lyt.assign_sidb_defect(def.first, def.second); });
+                                                           { copy_lyt.assign_defect(def.first, def.second); });
                 return copy_lyt;
             }
         }

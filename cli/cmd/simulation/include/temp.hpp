@@ -5,8 +5,8 @@
 #ifndef FICTION_CMD_TEMP_HPP
 #define FICTION_CMD_TEMP_HPP
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -43,11 +43,11 @@ class temp_command final : public command
     /**
      * Critical temperature parameters.
      */
-    fiction::critical_temperature_params params{};
+    fiction::sidb::simulation::analysis::critical_temperature_params params{};
     /**
      * Critical temperature statistics.
      */
-    fiction::critical_temperature_stats stats{};
+    fiction::sidb::simulation::analysis::critical_temperature_stats stats{};
     /**
      * Critical temperature.
      */

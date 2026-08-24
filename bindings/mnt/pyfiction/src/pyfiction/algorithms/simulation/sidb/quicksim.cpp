@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -23,29 +23,31 @@ void quicksim_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("quicksim", &fiction::quicksim<Lyt>, py::arg("lyt"), py::arg("params") = fiction::quicksim_params{},
-          DOC(fiction_quicksim));
+    m.def("quicksim", &fiction::sidb::simulation::engines::quicksim<Lyt>, py::arg("lyt"),
+          py::arg("params") = fiction::sidb::simulation::engines::quicksim_params{}, DOC(fiction_quicksim));
 }
 
 }  // namespace detail
 
-void quicksim(nanobind::module_& m)
+void sidb::simulation::engines::quicksim(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     /**
      * QuickSim parameters.
      */
-    py::class_<fiction::quicksim_params>(m, "quicksim_params", DOC(fiction_quicksim_params))
+    py::class_<fiction::sidb::simulation::engines::quicksim_params>(m, "quicksim_params", DOC(fiction_quicksim_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::quicksim_params::sim_params,
+        .def_rw("simulation_parameters", &fiction::sidb::simulation::engines::quicksim_params::sim_params,
                 DOC(fiction_quicksim_params_simulation_parameters))
-        .def_rw("iteration_steps", &fiction::quicksim_params::iteration_steps,
+        .def_rw("iteration_steps", &fiction::sidb::simulation::engines::quicksim_params::iteration_steps,
                 DOC(fiction_quicksim_params_iteration_steps))
-        .def_rw("alpha", &fiction::quicksim_params::alpha, DOC(fiction_quicksim_params_alpha))
-        .def_rw("number_threads", &fiction::quicksim_params::number_threads,
+        .def_rw("alpha", &fiction::sidb::simulation::engines::quicksim_params::alpha,
+                DOC(fiction_quicksim_params_alpha))
+        .def_rw("number_threads", &fiction::sidb::simulation::engines::quicksim_params::number_threads,
                 DOC(fiction_quicksim_params_number_threads))
-        .def_rw("timeout", &fiction::quicksim_params::timeout, DOC(fiction_quicksim_params_timeout))
+        .def_rw("timeout", &fiction::sidb::simulation::engines::quicksim_params::timeout,
+                DOC(fiction_quicksim_params_timeout))
 
         ;
 

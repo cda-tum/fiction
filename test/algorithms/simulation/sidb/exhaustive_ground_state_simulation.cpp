@@ -5,13 +5,13 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
+#include "fiction/technology/sidb/simulation/result.hpp"
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -23,7 +23,8 @@ TEMPLATE_TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-sim
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     CHECK(simulation_results.charge_distributions.empty());
     CHECK(simulation_results.additional_simulation_parameters.empty());
@@ -39,7 +40,8 @@ TEMPLATE_TEST_CASE("Single SiDB ExGS simulation", "[exhaustive-ground-state-simu
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
     CHECK(simulation_results.charge_distributions.front().get_charge_state_by_index(0) ==
@@ -57,7 +59,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a one BDL pair with one perturber", "[exh
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
     CHECK(simulation_results.charge_distributions.size() == 1);
 }
 
@@ -79,12 +82,14 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     const auto size_before = simulation_results.charge_distributions.size();
 
-    const auto simulation_results_after = exhaustive_ground_state_simulation<TestType>(lyt, params);
-    auto       size_after               = simulation_results_after.charge_distributions.size();
+    const auto simulation_results_after =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
+    auto size_after = simulation_results_after.charge_distributions.size();
 
     CHECK(size_before == 1);
     CHECK(size_after == 1);
@@ -129,12 +134,14 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     const auto size_before = simulation_results.charge_distributions.size();
 
-    const auto simulation_results_after = exhaustive_ground_state_simulation<TestType>(lyt, params);
-    auto       size_after               = simulation_results_after.charge_distributions.size();
+    const auto simulation_results_after =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
+    auto size_after = simulation_results_after.charge_distributions.size();
 
     CHECK(size_before == 1);
     CHECK(size_after == 1);
@@ -187,12 +194,14 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     const auto size_before = simulation_results.charge_distributions.size();
 
-    const auto simulation_results_after = exhaustive_ground_state_simulation<TestType>(lyt, params);
-    auto       size_after               = simulation_results_after.charge_distributions.size();
+    const auto simulation_results_after =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
+    auto size_after = simulation_results_after.charge_distributions.size();
 
     CHECK(size_before == 1);
     CHECK(size_after == 1);
@@ -237,7 +246,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB arrangement", "[exhaustiv
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -275,7 +285,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
 
     SECTION("Standard Physical Parameters")
     {
-        const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+        const auto simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         REQUIRE(!simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
@@ -297,7 +308,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
     {
         params.mu_minus = -0.1;
 
-        const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+        const auto simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         REQUIRE(!simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
@@ -319,7 +331,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
     {
         params.mu_minus = -0.7;
 
-        const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+        const auto simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         REQUIRE(!simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
@@ -341,7 +354,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
     {
         params.lambda_tf = 1;
 
-        const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+        const auto simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         REQUIRE(!simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
@@ -363,7 +377,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
     {
         params.lambda_tf = 10;
 
-        const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+        const auto simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         REQUIRE(!simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
@@ -385,7 +400,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
     {
         params.epsilon_r = 10;
 
-        const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+        const auto simulation_results =
+            sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
         REQUIRE(!simulation_results.charge_distributions.empty());
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
@@ -422,7 +438,8 @@ TEMPLATE_TEST_CASE("ExGS simulation of positively charged SiDBs", "[exhaustive-g
 
     const sidb::model::simulation_parameters params{3, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 4);
 }
@@ -446,7 +463,8 @@ TEMPLATE_TEST_CASE("ExGS gate simulation of Si-111 surface", "[exhaustive-ground
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     const auto ground_state = simulation_results.groundstates();
     REQUIRE(ground_state.size() == 1);
@@ -478,7 +496,8 @@ TEMPLATE_TEST_CASE("7 SiDB layout", "[exhaustive-ground-state-simulation]", (sid
 
     const sidb::model::simulation_parameters params{2, -0.25};
 
-    const auto simulation_results = exhaustive_ground_state_simulation<TestType>(lyt, params);
+    const auto simulation_results =
+        sidb::simulation::engines::exhaustive_ground_state_simulation<TestType>(lyt, params);
 
     CHECK(simulation_results.charge_distributions.size() == 1);
 }

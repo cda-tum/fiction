@@ -7,18 +7,18 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/simulation/sidb/band_bending_resilience.hpp>
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/defect_clearance.hpp>
-#include <fiction/algorithms/simulation/sidb/defect_influence.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
+#include <fiction/technology/sidb/simulation/defects/defect_clearance.hpp>
+#include <fiction/technology/sidb/simulation/defects/defect_influence.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -57,7 +57,7 @@ int main()  // NOLINT
     experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
-    const auto op_params     = is_operational_params{sidb::model::simulation_parameters{2, -0.32}};
+    const auto op_params = sidb::simulation::logic::is_operational_params{sidb::model::simulation_parameters{2, -0.32}};
     auto       design_params = design_sidb_gates_params<cell<Lyt>>{};
 
     design_params.operational_params = op_params;
@@ -69,7 +69,7 @@ int main()  // NOLINT
         design_sidb_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
-    design_params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+    design_params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
     const std::size_t minimum_number_of_canvas_sidbs = 2;
     const std::size_t maximum_number_of_canvas_sidbs = 6;
@@ -86,12 +86,13 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
         std::make_pair("inv_diag", std::vector<tt>{networks::utils::create_not_tt()})};
 
-    const critical_temperature_params ct_params{op_params};
+    const sidb::simulation::analysis::critical_temperature_params ct_params{op_params};
 
     // defining the operational domain parameters
-    operational_domain_params op_domain_params{op_params};
+    sidb::simulation::logic::operational_domain_params op_domain_params{op_params};
 
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
+                                         {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
 
     op_domain_params.sweep_dimensions[0].min  = 4.0;
     op_domain_params.sweep_dimensions[0].max  = 6.0;
@@ -100,7 +101,8 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.2;
 
-    const band_bending_resilience_params bbr_params{physical_population_stability_params{op_params.sim_params}};
+    const sidb::simulation::analysis::band_bending_resilience_params bbr_params{
+        sidb::simulation::analysis::physical_population_stability_params{op_params.sim_params}};
 
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
     // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon
@@ -110,7 +112,7 @@ int main()  // NOLINT
 
     const std::vector<sidb::model::defect> defects = {si_vacancy, arsenic};
 
-    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    sidb::simulation::defects::defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {20, 20};
     params.operational_params       = op_params;
 
@@ -155,18 +157,21 @@ int main()  // NOLINT
 
             for (const auto& gate : all_gates)
             {
-                operational_domain_stats op_stats{};
-                const auto op_domain = operational_domain_grid_search(gate, truth_table, op_domain_params, &op_stats);
+                sidb::simulation::logic::operational_domain_stats op_stats{};
+                const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
+                    gate, truth_table, op_domain_params, &op_stats);
                 const auto percentual_op_area = static_cast<double>(op_stats.num_operational_parameter_combinations) /
                                                 static_cast<double>(op_stats.num_total_parameter_points);
                 percentual_operational_domain.push_back(percentual_op_area);
 
                 max_relative_op_domain = std::max(percentual_op_area, max_relative_op_domain);
 
-                const auto ct = critical_temperature_gate_based(gate, truth_table, ct_params);
+                const auto ct =
+                    sidb::simulation::analysis::critical_temperature_gate_based(gate, truth_table, ct_params);
                 temps.push_back(ct);
-                max_temp                    = std::max(ct, max_temp);
-                const auto bbr_in_volt      = band_bending_resilience(gate, truth_table, bbr_params);
+                max_temp = std::max(ct, max_temp);
+                const auto bbr_in_volt =
+                    sidb::simulation::analysis::band_bending_resilience(gate, truth_table, bbr_params);
                 const auto bbr_in_millivolt = bbr_in_volt * 1000;  // convert to mV
                 bbr_all.push_back(bbr_in_millivolt);
                 max_bbr = std::max(bbr_in_millivolt, max_bbr);
@@ -174,10 +179,11 @@ int main()  // NOLINT
                 for (const auto& defect : defects)
                 {
                     params.defect = defect;
-                    defect_influence_stats defect_inf_stats{};
-                    const auto             defect_inf_grid =
-                        defect_influence_grid_search(gate, truth_table, params, 4, &defect_inf_stats);
-                    const auto defect_clearance = calculate_defect_clearance(gate, defect_inf_grid);
+                    sidb::simulation::defects::defect_influence_stats defect_inf_stats{};
+                    const auto defect_inf_grid = sidb::simulation::defects::defect_influence_grid_search(
+                        gate, truth_table, params, 4, &defect_inf_stats);
+                    const auto defect_clearance =
+                        sidb::simulation::defects::calculate_defect_clearance(gate, defect_inf_grid);
 
                     if (defect.type == sidb::model::defect_type::SI_VACANCY)
                     {

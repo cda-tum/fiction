@@ -8,13 +8,13 @@
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
 #include <fiction/algorithms/physical_design/on_the_fly_sidb_circuit_design.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sidb_surface_defects.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -53,7 +53,7 @@ int main()  // NOLINT
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
     design_gate_params.number_of_canvas_sidbs        = 3;
-    design_gate_params.operational_params.sim_engine = fiction::sidb_simulation_engine::QUICKEXACT;
+    design_gate_params.operational_params.sim_engine = fiction::sidb::simulation::engine::QUICKEXACT;
     design_gate_params.termination_cond =
         fiction::design_sidb_gates_params<fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
@@ -79,15 +79,15 @@ int main()  // NOLINT
         {
             if (cd.second.type == fiction::sidb::model::defect_type::DB)
             {
-                surface_lattice.assign_sidb_defect(cd.first, stray_db);
+                surface_lattice.assign_defect(cd.first, stray_db);
             }
             else if (cd.second.type == fiction::sidb::model::defect_type::SI_VACANCY)
             {
-                surface_lattice.assign_sidb_defect(cd.first, si_vacancy);
+                surface_lattice.assign_defect(cd.first, si_vacancy);
             }
             else
             {
-                surface_lattice.assign_sidb_defect(cd.first, cd.second);
+                surface_lattice.assign_defect(cd.first, cd.second);
             }
         });
 

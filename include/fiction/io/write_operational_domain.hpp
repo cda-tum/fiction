@@ -5,8 +5,8 @@
 #ifndef FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
 #define FICTION_WRITE_OPERATIONAL_DOMAIN_HPP
 
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/algorithms/simulation/sidb/operational_domain.hpp"
+#include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
 #include "fiction/utils/stl/csv_writer.hpp"
 
 #include <cstdint>
@@ -63,19 +63,20 @@ namespace detail
  * @param param The sweep parameter to be converted.
  * @return The string representation of the sweep parameter.
  */
-[[nodiscard]] static inline std::string sweep_parameter_to_string(const sweep_parameter& param) noexcept
+[[nodiscard]] static inline std::string
+sweep_parameter_to_string(const sidb::simulation::logic::sweep_parameter& param) noexcept
 {
     switch (param)
     {
-        case sweep_parameter::EPSILON_R:
+        case sidb::simulation::logic::sweep_parameter::EPSILON_R:
         {
             return "epsilon_r";
         }
-        case sweep_parameter::LAMBDA_TF:
+        case sidb::simulation::logic::sweep_parameter::LAMBDA_TF:
         {
             return "lambda_tf";
         }
-        case sweep_parameter::MU_MINUS:
+        case sidb::simulation::logic::sweep_parameter::MU_MINUS:
         {
             return "mu_minus";
         }
@@ -131,7 +132,7 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
         throw std::invalid_argument("unsupported number of dimensions in the given operational domain");
     }
 
-    if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
+    if constexpr (std::is_same_v<OpDomain, sidb::simulation::logic::critical_temperature_domain>)
     {
         if (num_dimensions == 1)
         {
@@ -157,13 +158,14 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
             {
                 // skip non-operational samples if the respective flag is set
                 if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-                    std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
+                    std::get<0>(op_val) == sidb::simulation::logic::operational_status::NON_OPERATIONAL)
                 {
                     return;
                 }
 
-                const auto  tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                                           params.non_operational_tag;
+                const auto  tag = std::get<0>(op_val) == sidb::simulation::logic::operational_status::OPERATIONAL ?
+                                      params.operational_tag :
+                                      params.non_operational_tag;
                 const auto& pp  = sim_param.get_parameters();
 
                 if (num_dimensions == 1)
@@ -180,7 +182,7 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                 }
             });
     }
-    else if constexpr (std::is_same_v<OpDomain, operational_domain>)
+    else if constexpr (std::is_same_v<OpDomain, sidb::simulation::logic::operational_domain>)
     {
         if (num_dimensions == 1)
         {
@@ -203,13 +205,14 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
             {
                 // skip non-operational samples if the respective flag is set
                 if (params.writing_mode == write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY &&
-                    std::get<0>(op_val) == operational_status::NON_OPERATIONAL)
+                    std::get<0>(op_val) == sidb::simulation::logic::operational_status::NON_OPERATIONAL)
                 {
                     return;
                 }
 
-                const auto tag = std::get<0>(op_val) == operational_status::OPERATIONAL ? params.operational_tag :
-                                                                                          params.non_operational_tag;
+                const auto tag = std::get<0>(op_val) == sidb::simulation::logic::operational_status::OPERATIONAL ?
+                                     params.operational_tag :
+                                     params.non_operational_tag;
 
                 const auto& pp = sim_param.get_parameters();
 

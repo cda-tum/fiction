@@ -5,8 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -41,7 +41,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         cds2.assign_charge_index(1, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
         cds3.assign_charge_index(2, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
 
-        sidb_simulation_result<lattice> results{};
+        sidb::simulation::result<lattice> results{};
         results.charge_distributions = {cds1, cds2, cds3};
         results.algorithm_name       = "test";
 
@@ -80,7 +80,7 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         CHECK_THAT(cds2.get_electrostatic_potential_energy() - cds1.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));
 
-        sidb_simulation_result<lattice> results{};
+        sidb::simulation::result<lattice> results{};
         results.charge_distributions = {cds1, cds2, cds3, cds4};
         results.algorithm_name       = "test";
 
@@ -109,7 +109,7 @@ TEST_CASE("Determine the groundstate from simulation results for Si-111 lattice 
         lyt.assign_cell_type({4, 3}, lattice::cell_type::NORMAL);
 
         const sidb::model::simulation_parameters params{2, -0.30};
-        const auto                               results = exhaustive_ground_state_simulation(lyt, params);
+        const auto results = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params);
 
         const auto ground_state = results.groundstates();
         REQUIRE(ground_state.size() == 2);
@@ -136,7 +136,7 @@ TEMPLATE_TEST_CASE("Determine the groundstate of a two BDL pair wire with input 
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    const auto results = exhaustive_ground_state_simulation(lyt, params);
+    const auto results = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params);
 
     const auto ground_state = results.groundstates();
     REQUIRE(ground_state.size() == 2);

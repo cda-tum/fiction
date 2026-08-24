@@ -4,11 +4,11 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -38,8 +38,8 @@ int main()  // NOLINT
 
     const sidb::model::simulation_parameters sim_params{3, -0.32};
 
-    const quickexact_params<cell<Lyt>> qe_params{sim_params,
-                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+    const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
+        sim_params, sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
     auto random_layouts_params = generate_random_sidb_layout_params<cell<Lyt>>{
         {{0, 0}, {10, 10}},
@@ -68,9 +68,10 @@ int main()  // NOLINT
 
         for (const auto& layout : random_layouts.value())
         {
-            const auto exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
+            const auto exhaustive_results_layout =
+                sidb::simulation::engines::exhaustive_ground_state_simulation(layout, sim_params);
 
-            const auto quickexact_results_layout = quickexact(layout, qe_params);
+            const auto quickexact_results_layout = sidb::simulation::engines::quickexact(layout, qe_params);
 
             const auto gs = exhaustive_results_layout.groundstates();
 

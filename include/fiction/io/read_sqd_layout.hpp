@@ -417,7 +417,7 @@ class read_sqd_layout_impl
 
             std::ranges::for_each(
                 incl_cells, [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
-                { lyt.assign_sidb_defect(cell, sidb::model::defect{defect_type, charge, eps_r, lambda_tf}); });
+                { lyt.assign_defect(cell, sidb::model::defect{defect_type, charge, eps_r, lambda_tf}); });
         }
     }
 };

@@ -6,7 +6,6 @@
 #define FICTION_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
 
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
@@ -15,6 +14,7 @@
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/is_sidb_gate_design_impossible.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
+#include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -616,12 +616,13 @@ class sidb_on_the_fly_gate_library
         }
 
         const auto status =
-            is_operational(skeleton_with_defects_copy, truth_table,
-                           is_operational_params{parameters.design_gate_params.operational_params.sim_params,
-                                                 parameters.design_gate_params.operational_params.sim_engine})
+            sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
+                                                    sidb::simulation::logic::is_operational_params{
+                                                        parameters.design_gate_params.operational_params.sim_params,
+                                                        parameters.design_gate_params.operational_params.sim_engine})
                 .first;
 
-        return static_cast<bool>(status == operational_status::OPERATIONAL);
+        return static_cast<bool>(status == sidb::simulation::logic::operational_status::OPERATIONAL);
     }
     /**
      * Generates a cell-level layout as a 2D array of characters based on the provided cell layout information.
@@ -835,7 +836,7 @@ class sidb_on_the_fly_gate_library
                 if (sidb::model::nm_distance(CellLyt{}, center_cell, cd.first) < influence_distance)
                 {
                     const auto relative_defect_position = cd.first - absolute_cell;
-                    skeleton_with_defect.assign_sidb_defect(relative_defect_position, cd.second);
+                    skeleton_with_defect.assign_defect(relative_defect_position, cd.second);
                 }
             });
 

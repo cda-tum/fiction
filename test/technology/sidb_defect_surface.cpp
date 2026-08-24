@@ -140,9 +140,8 @@ TEMPLATE_TEST_CASE(
 {
     TestType defect_layout{{4, 4}};
 
-    defect_layout.foreach_coordinate(
-        [&defect_layout](const auto& c)
-        { CHECK(defect_layout.get_sidb_defect(c).type == sidb::model::defect_type::NONE); });
+    defect_layout.foreach_coordinate([&defect_layout](const auto& c)
+                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
     static const std::map<cell<TestType>, sidb::model::defect> defect_map{
@@ -164,13 +163,13 @@ TEMPLATE_TEST_CASE(
     // assign defects
     for (const auto& [c, d] : defect_map)
     {
-        defect_layout.assign_sidb_defect(c, d);
+        defect_layout.assign_defect(c, d);
     }
 
     // read defects
     for (const auto& [c, d] : defect_map)
     {
-        CHECK(defect_layout.get_sidb_defect(c).type == d.type);
+        CHECK(defect_layout.get_defect(c).type == d.type);
     }
 
     CHECK(defect_layout.num_defects() == defect_map.size() - 1);  // NONE is not a defect
@@ -178,13 +177,12 @@ TEMPLATE_TEST_CASE(
     // erase defects
     defect_layout.foreach_sidb_defect(
         [&defect_layout](const auto& cd)
-        { defect_layout.assign_sidb_defect(cd.first, sidb::model::defect{sidb::model::defect_type::NONE}); });
+        { defect_layout.assign_defect(cd.first, sidb::model::defect{sidb::model::defect_type::NONE}); });
 
     // read defects
     defect_layout.foreach_sidb_defect([](const auto&) { CHECK(false); });
-    defect_layout.foreach_coordinate(
-        [&defect_layout](const auto& c)
-        { CHECK(defect_layout.get_sidb_defect(c).type == sidb::model::defect_type::NONE); });
+    defect_layout.foreach_coordinate([&defect_layout](const auto& c)
+                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
 }
@@ -210,13 +208,13 @@ TEMPLATE_TEST_CASE(
 
     sidb::primitives::defect_surface<TestType> defect_layout{lyt};
 
-    defect_layout.assign_sidb_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-    CHECK(defect_layout.get_sidb_defect({0, 0}).type == sidb::model::defect_type::UNKNOWN);
-    CHECK(defect_layout.get_sidb_defect({0, 0}).charge == 1);
+    defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
+    CHECK(defect_layout.get_defect({0, 0}).type == sidb::model::defect_type::UNKNOWN);
+    CHECK(defect_layout.get_defect({0, 0}).charge == 1);
     CHECK(defect_layout.num_defects() == 1);
 
-    defect_layout.assign_sidb_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1});
-    CHECK(defect_layout.get_sidb_defect({0, 0}).charge == -1);
+    defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1});
+    CHECK(defect_layout.get_defect({0, 0}).charge == -1);
     CHECK(defect_layout.num_defects() == 1);
 }
 
@@ -241,9 +239,8 @@ TEMPLATE_TEST_CASE(
 
     sidb::primitives::defect_surface<TestType> defect_layout{lyt};
 
-    defect_layout.foreach_coordinate(
-        [&defect_layout](const auto& c)
-        { CHECK(defect_layout.get_sidb_defect(c).type == sidb::model::defect_type::NONE); });
+    defect_layout.foreach_coordinate([&defect_layout](const auto& c)
+                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
 }
@@ -288,13 +285,13 @@ TEMPLATE_TEST_CASE(
     // assign defects
     for (const auto& [c, d] : defect_map)
     {
-        defect_layout.assign_sidb_defect(c, d);
+        defect_layout.assign_defect(c, d);
     }
 
     // read defects
     for (const auto& [c, d] : defect_map)
     {
-        CHECK(defect_layout.get_sidb_defect(c).type == d.type);
+        CHECK(defect_layout.get_defect(c).type == d.type);
     }
 
     CHECK(defect_layout.num_defects() == defect_map.size() - 1);  // NONE is not a defect
@@ -302,13 +299,12 @@ TEMPLATE_TEST_CASE(
     // erase defects
     defect_layout.foreach_sidb_defect(
         [&defect_layout](const auto& cd)
-        { defect_layout.assign_sidb_defect(cd.first, sidb::model::defect{sidb::model::defect_type::NONE}); });
+        { defect_layout.assign_defect(cd.first, sidb::model::defect{sidb::model::defect_type::NONE}); });
 
     // read defects
     defect_layout.foreach_sidb_defect([](const auto&) { CHECK(false); });
-    defect_layout.foreach_coordinate(
-        [&defect_layout](const auto& c)
-        { CHECK(defect_layout.get_sidb_defect(c).type == sidb::model::defect_type::NONE); });
+    defect_layout.foreach_coordinate([&defect_layout](const auto& c)
+                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
 }
@@ -337,8 +333,8 @@ TEMPLATE_TEST_CASE(
     SECTION("charged defects")
     {
         // assign defects
-        defect_layout.assign_sidb_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_sidb_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -385,8 +381,8 @@ TEMPLATE_TEST_CASE(
     SECTION("charged defects, user_defined_spacing_charged_defects is true, (26,13) as charged_defect_spacing")
     {
         // assign defects
-        defect_layout.assign_sidb_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_sidb_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -433,8 +429,8 @@ TEMPLATE_TEST_CASE(
     SECTION("charged defects, user_defined_spacing_charged_defects is true, (0,0) as charged_defect_spacing")
     {
         // assign defects
-        defect_layout.assign_sidb_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_sidb_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -461,8 +457,8 @@ TEMPLATE_TEST_CASE(
     SECTION("neutral defects")
     {
         // assign defects
-        defect_layout.assign_sidb_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
-        defect_layout.assign_sidb_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -501,8 +497,8 @@ TEMPLATE_TEST_CASE(
     SECTION("charged defects")
     {
         // assign defects
-        defect_layout.assign_sidb_defect({5, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_sidb_defect({0, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({0, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -548,8 +544,8 @@ TEMPLATE_TEST_CASE(
     SECTION("neutral defects")
     {
         // assign defects
-        defect_layout.assign_sidb_defect({5, 0}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
-        defect_layout.assign_sidb_defect({0, 5}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({5, 0}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({0, 5}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -588,7 +584,7 @@ TEMPLATE_TEST_CASE(
             std::unordered_set<sidb::model::defect_type>{sidb::model::defect_type::DB}};
         sidb::primitives::defect_surface<TestType> defect_layout{lyt, params};
 
-        defect_layout.assign_sidb_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::DB});
+        defect_layout.assign_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::DB});
 
         // number of defects should not count the ignored defect
         CHECK(defect_layout.num_defects() == 0);
@@ -599,15 +595,15 @@ TEMPLATE_TEST_CASE(
             {sidb::model::defect_type::SILOXANE, sidb::model::defect_type::SI_VACANCY}}};
         sidb::primitives::defect_surface<TestType>    defect_layout{lyt, params};
 
-        defect_layout.assign_sidb_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
-        defect_layout.assign_sidb_defect({2, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({2, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         // number of defects should not count the ignored defect
         CHECK(defect_layout.num_defects() == 0);
 
-        defect_layout.assign_sidb_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
-        defect_layout.assign_sidb_defect({3, 3}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-        defect_layout.assign_sidb_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::STEP_EDGE});
+        defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
+        defect_layout.assign_defect({3, 3}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
+        defect_layout.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::STEP_EDGE});
 
         CHECK(defect_layout.num_charged_defects() == 2);
         CHECK(defect_layout.num_neutral_defects() == 1);

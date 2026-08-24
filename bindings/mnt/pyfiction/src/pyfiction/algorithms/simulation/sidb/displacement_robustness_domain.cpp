@@ -1,7 +1,7 @@
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
 
 #include <fmt/format.h>
 
@@ -25,67 +25,69 @@ void determine_displacement_robustness_domain_impl(nanobind::module_& m, const s
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::displacement_robustness_domain<Lyt>>(
+    py::class_<fiction::sidb::simulation::defects::displacement_robustness_domain<Lyt>>(
         m, fmt::format("displacement_robustness_domain_{}", lattice).c_str())
         .def(py::init<>(), "Default constructor.")
-        .def_rw("influence_information", &fiction::displacement_robustness_domain<Lyt>::operational_values);
+        .def_rw("influence_information",
+                &fiction::sidb::simulation::defects::displacement_robustness_domain<Lyt>::operational_values);
 
     m.def(fmt::format("determine_displacement_robustness_domain_{}", lattice).c_str(),
-          &fiction::determine_displacement_robustness_domain<Lyt, py_tt>, py::arg("layout"), py::arg("spec"),
-          py::arg("params"), py::arg("stats") = nullptr);
+          &fiction::sidb::simulation::defects::determine_displacement_robustness_domain<Lyt, py_tt>, py::arg("layout"),
+          py::arg("spec"), py::arg("params"), py::arg("stats") = nullptr);
 }
 
 }  // namespace detail
 
-void determine_displacement_robustness_domain(nanobind::module_& m)
+void sidb::simulation::defects::determine_displacement_robustness_domain(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::enum_<
-        fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::dimer_displacement_policy>(
-        m, "dimer_displacement_policy")
+    py::enum_<fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+        fiction::layouts::coords::offset>::dimer_displacement_policy>(m, "dimer_displacement_policy")
         .value("STAY_ON_ORIGINAL_DIMER",
-               fiction::displacement_robustness_domain_params<
+               fiction::sidb::simulation::defects::displacement_robustness_domain_params<
                    fiction::layouts::coords::offset>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER)
         .value("ALLOW_OTHER_DIMER",
-               fiction::displacement_robustness_domain_params<
+               fiction::sidb::simulation::defects::displacement_robustness_domain_params<
                    fiction::layouts::coords::offset>::dimer_displacement_policy::ALLOW_OTHER_DIMER);
 
-    py::enum_<
-        fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::displacement_analysis_mode>(
-        m, "displacement_analysis_mode")
-        .value("EXHAUSTIVE", fiction::displacement_robustness_domain_params<
+    py::enum_<fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+        fiction::layouts::coords::offset>::displacement_analysis_mode>(m, "displacement_analysis_mode")
+        .value("EXHAUSTIVE", fiction::sidb::simulation::defects::displacement_robustness_domain_params<
                                  fiction::layouts::coords::offset>::displacement_analysis_mode::EXHAUSTIVE)
-        .value("RANDOM", fiction::displacement_robustness_domain_params<
+        .value("RANDOM", fiction::sidb::simulation::defects::displacement_robustness_domain_params<
                              fiction::layouts::coords::offset>::displacement_analysis_mode::RANDOM);
 
-    py::class_<fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>>(
+    py::class_<
+        fiction::sidb::simulation::defects::displacement_robustness_domain_params<fiction::layouts::coords::offset>>(
         m, "displacement_robustness_domain_params")
         .def(py::init<>(), "Default constructor.")
-        .def_rw("analysis_mode",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::analysis_mode)
+        .def_rw("analysis_mode", &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+                                     fiction::layouts::coords::offset>::analysis_mode)
         .def_rw("percentage_of_analyzed_displaced_layouts",
-                &fiction::displacement_robustness_domain_params<
+                &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
                     fiction::layouts::coords::offset>::percentage_of_analyzed_displaced_layouts)
-        .def_rw(
-            "displacement_variations",
-            &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::displacement_variations)
-        .def_rw("operational_params",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::operational_params)
-        .def_rw("fixed_sidbs",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::fixed_sidbs)
-        .def_rw("dimer_policy",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::dimer_policy)
-        .def_rw("number_of_threads",
-                &fiction::displacement_robustness_domain_params<fiction::layouts::coords::offset>::number_of_threads);
+        .def_rw("displacement_variations", &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+                                               fiction::layouts::coords::offset>::displacement_variations)
+        .def_rw("operational_params", &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+                                          fiction::layouts::coords::offset>::operational_params)
+        .def_rw("fixed_sidbs", &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+                                   fiction::layouts::coords::offset>::fixed_sidbs)
+        .def_rw("dimer_policy", &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+                                    fiction::layouts::coords::offset>::dimer_policy)
+        .def_rw("number_of_threads", &fiction::sidb::simulation::defects::displacement_robustness_domain_params<
+                                         fiction::layouts::coords::offset>::number_of_threads);
 
-    py::class_<fiction::displacement_robustness_domain_stats>(m, "displacement_robustness_domain_stats")
+    py::class_<fiction::sidb::simulation::defects::displacement_robustness_domain_stats>(
+        m, "displacement_robustness_domain_stats")
         .def(py::init<>(), "Default constructor.")
-        .def_rw("time_total", &fiction::displacement_robustness_domain_stats::time_total)
+        .def_rw("time_total", &fiction::sidb::simulation::defects::displacement_robustness_domain_stats::time_total)
         .def_rw("num_operational_sidb_displacements",
-                &fiction::displacement_robustness_domain_stats::num_operational_sidb_displacements)
+                &fiction::sidb::simulation::defects::displacement_robustness_domain_stats::
+                    num_operational_sidb_displacements)
         .def_rw("num_non_operational_sidb_displacements",
-                &fiction::displacement_robustness_domain_stats::num_non_operational_sidb_displacements);
+                &fiction::sidb::simulation::defects::displacement_robustness_domain_stats::
+                    num_non_operational_sidb_displacements);
 
     // NOTE: be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::determine_displacement_robustness_domain_impl<py_sidb_100_lattice>(m, "100");

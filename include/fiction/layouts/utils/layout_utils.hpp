@@ -333,9 +333,8 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
         {
             auto lyt_defect = sidb::primitives::defect_surface{lyt_new};
 
-            lyt_orig.foreach_sidb_defect(
-                [&lyt_defect](const auto& cd)
-                { lyt_defect.assign_sidb_defect(coords::to_siqad_coord(cd.first), cd.second); });
+            lyt_orig.foreach_sidb_defect([&lyt_defect](const auto& cd)
+                                         { lyt_defect.assign_defect(coords::to_siqad_coord(cd.first), cd.second); });
 
             auto lyt_cds_defect = sidb::primitives::charge_distribution_surface{lyt_defect};
 
@@ -355,10 +354,7 @@ auto convert_layout_to_siqad_coordinates(const Lyt& lyt) noexcept
             sidb::primitives::defect_surface<decltype(lyt_new)> lyt_surface{lyt_new};
             lyt_orig.foreach_sidb_defect(
                 [&lyt_surface, &lyt_orig](const auto& cd)
-                {
-                    lyt_surface.assign_sidb_defect(coords::to_siqad_coord(cd.first),
-                                                   lyt_orig.get_sidb_defect(cd.first));
-                });
+                { lyt_surface.assign_defect(coords::to_siqad_coord(cd.first), lyt_orig.get_defect(cd.first)); });
             return lyt_surface;
         }
         else if constexpr (is_charge_distribution_surface_v<Lyt> && !is_sidb_defect_surface_v<Lyt>)
@@ -465,10 +461,7 @@ template <typename LytDest, typename LytSrc>
 
                 lyt.foreach_sidb_defect(
                     [&lyt_defect](const auto& cd)
-                    {
-                        lyt_defect.assign_sidb_defect(coords::to_fiction_coord<coordinate<LytDest>>(cd.first),
-                                                      cd.second);
-                    });
+                    { lyt_defect.assign_defect(coords::to_fiction_coord<coordinate<LytDest>>(cd.first), cd.second); });
 
                 auto lyt_cds_defect = sidb::primitives::charge_distribution_surface{lyt_defect};
 
@@ -490,8 +483,8 @@ template <typename LytDest, typename LytSrc>
                 lyt.foreach_sidb_defect(
                     [&lyt_surface, &lyt](const auto& cd)
                     {
-                        lyt_surface.assign_sidb_defect(coords::to_fiction_coord<coordinate<LytDest>>(cd.first),
-                                                       lyt.get_sidb_defect(cd.first));
+                        lyt_surface.assign_defect(coords::to_fiction_coord<coordinate<LytDest>>(cd.first),
+                                                  lyt.get_defect(cd.first));
                     });
 
                 return lyt_surface;
@@ -530,7 +523,7 @@ template <typename LytDest, typename LytSrc>
 
             lyt_100.assign_physical_parameters(lyt.get_simulation_params());
 
-            lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_sidb_defect(cd.first, cd.second); });
+            lyt.foreach_sidb_defect([&lyt_100](const auto& cd) { lyt_100.assign_defect(cd.first, cd.second); });
             return convert_layout_to_fiction_coordinates<LytDest, cds_sidb_defect_100_cell_clk_lyt_siqad>(lyt_100);
         }
         else if constexpr (is_charge_distribution_surface_v<LytSrc> && !is_sidb_defect_surface_v<LytSrc>)
@@ -553,7 +546,7 @@ template <typename LytDest, typename LytSrc>
             const sidb_100_cell_clk_lyt_siqad                             lyt_100{lyt};
             sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad> lyt_100_defect{lyt_100};
             lyt.foreach_sidb_defect([&lyt_100_defect, &lyt](const auto& cd)
-                                    { lyt_100_defect.assign_sidb_defect(cd.first, lyt.get_sidb_defect(cd.first)); });
+                                    { lyt_100_defect.assign_defect(cd.first, lyt.get_defect(cd.first)); });
             return convert_layout_to_fiction_coordinates<LytDest>(lyt_100_defect);
         }
         else
@@ -763,7 +756,7 @@ template <typename Lyt>
         first_lyt.foreach_sidb_defect(
             [&first_lyt, &second_lyt, &different_defects](const auto& defect_old)
             {
-                if (first_lyt.get_sidb_defect(defect_old.first) != second_lyt.get_sidb_defect(defect_old.first))
+                if (first_lyt.get_defect(defect_old.first) != second_lyt.get_defect(defect_old.first))
                 {
                     different_defects = true;
                     return false;  // abort

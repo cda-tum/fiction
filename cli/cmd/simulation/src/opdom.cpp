@@ -6,11 +6,11 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/write_operational_domain.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -207,29 +207,29 @@ void opdom_command::execute()
     // assign x sweep parameters
     if (x_sweep == "epsilon_r")
     {
-        sweep_dimensions[0].dimension = fiction::sweep_parameter::EPSILON_R;
+        sweep_dimensions[0].dimension = fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R;
     }
     else if (x_sweep == "lambda_tf")
     {
-        sweep_dimensions[0].dimension = fiction::sweep_parameter::LAMBDA_TF;
+        sweep_dimensions[0].dimension = fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF;
     }
     else if (x_sweep == "mu_minus")
     {
-        sweep_dimensions[0].dimension = fiction::sweep_parameter::MU_MINUS;
+        sweep_dimensions[0].dimension = fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS;
     }
 
     // assign y sweep parameters
     if (y_sweep == "epsilon_r")
     {
-        sweep_dimensions[1].dimension = fiction::sweep_parameter::EPSILON_R;
+        sweep_dimensions[1].dimension = fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R;
     }
     else if (y_sweep == "lambda_tf")
     {
-        sweep_dimensions[1].dimension = fiction::sweep_parameter::LAMBDA_TF;
+        sweep_dimensions[1].dimension = fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF;
     }
     else if (y_sweep == "mu_minus")
     {
-        sweep_dimensions[1].dimension = fiction::sweep_parameter::MU_MINUS;
+        sweep_dimensions[1].dimension = fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS;
     }
 
     if (is_set("z_sweep"))
@@ -237,15 +237,15 @@ void opdom_command::execute()
         // assign z sweep parameters
         if (z_sweep == "epsilon_r")
         {
-            sweep_dimensions[2].dimension = fiction::sweep_parameter::EPSILON_R;
+            sweep_dimensions[2].dimension = fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R;
         }
         else if (z_sweep == "lambda_tf")
         {
-            sweep_dimensions[2].dimension = fiction::sweep_parameter::LAMBDA_TF;
+            sweep_dimensions[2].dimension = fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF;
         }
         else if (z_sweep == "mu_minus")
         {
-            sweep_dimensions[2].dimension = fiction::sweep_parameter::MU_MINUS;
+            sweep_dimensions[2].dimension = fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS;
         }
     }
     else
@@ -276,7 +276,7 @@ void opdom_command::execute()
             return;
         }
 
-        const auto engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+        const auto engine = fiction::sidb::simulation::get_engine(sim_engine_str);
 
         if (!engine.has_value())
         {
@@ -292,16 +292,16 @@ void opdom_command::execute()
         if (sketch)
         {
             params.operational_params.strategy_to_analyze_operational_status =
-                fiction::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+                fiction::sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
             // the filtering steps are only defined when kinks are rejected, so the sketch implies the condition rather
             // than rejecting the request for not having set it by hand
             params.operational_params.op_condition =
-                fiction::is_operational_params::operational_condition::REJECT_KINKS;
+                fiction::sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
         }
 
         // Cache the engine name and the sketch setting for logging before any potential reset
-        last_engine_name = fiction::sidb_simulation_engine_name(params.operational_params.sim_engine);
+        last_engine_name = fiction::sidb::simulation::engine_name(params.operational_params.sim_engine);
         last_sketch      = sketch;
 
         // To aid the compiler
@@ -311,22 +311,23 @@ void opdom_command::execute()
             {
                 if (is_set("random_sampling"))
                 {
-                    op_domain = fiction::operational_domain_random_sampling(*lyt_ptr, std::vector{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
+                    op_domain = fiction::sidb::simulation::logic::operational_domain_random_sampling(
+                        *lyt_ptr, std::vector{*tt_ptr}, num_random_samples, params, &stats);
                 }
                 else if (is_set("flood_fill"))
                 {
-                    op_domain = fiction::operational_domain_flood_fill(*lyt_ptr, std::vector{*tt_ptr},
-                                                                       num_random_samples, params, &stats);
+                    op_domain = fiction::sidb::simulation::logic::operational_domain_flood_fill(
+                        *lyt_ptr, std::vector{*tt_ptr}, num_random_samples, params, &stats);
                 }
                 else if (is_set("contour_tracing"))
                 {
-                    op_domain = fiction::operational_domain_contour_tracing(*lyt_ptr, std::vector{*tt_ptr},
-                                                                            num_random_samples, params, &stats);
+                    op_domain = fiction::sidb::simulation::logic::operational_domain_contour_tracing(
+                        *lyt_ptr, std::vector{*tt_ptr}, num_random_samples, params, &stats);
                 }
                 else
                 {
-                    op_domain = fiction::operational_domain_grid_search(*lyt_ptr, std::vector{*tt_ptr}, params, &stats);
+                    op_domain = fiction::sidb::simulation::logic::operational_domain_grid_search(
+                        *lyt_ptr, std::vector{*tt_ptr}, params, &stats);
                 }
             }
             catch (std::invalid_argument& e)
@@ -394,11 +395,11 @@ nlohmann::json opdom_command::log() const
 
 void opdom_command::reset_params()
 {
-    sim_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
-    sweep_dimensions =
-        std::vector<fiction::operational_domain_value_range>{{fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
-                                                             {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
-                                                             {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+    sim_params       = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
+    sweep_dimensions = std::vector<fiction::sidb::simulation::logic::operational_domain_value_range>{
+        {fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+        {fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+        {fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
     params = {};
 
     x_sweep  = "epsilon_r";

@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
+#include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 
 #include <cstdint>
 
@@ -26,35 +26,41 @@ void energy_distribution_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("calculate_energy_distribution", &fiction::calculate_energy_distribution<Lyt>,
+    m.def("calculate_energy_distribution", &fiction::sidb::simulation::analysis::calculate_energy_distribution<Lyt>,
           py::arg("charge_distributions"), DOC(fiction_energy_distribution));
 }
 
 }  // namespace detail
 
-void energy_distribution(nanobind::module_& m)
+void sidb::simulation::analysis::energy_distribution(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::energy_state>(m, "energy_state")
+    py::class_<fiction::sidb::simulation::analysis::energy_state>(m, "energy_state")
         .def(py::init<double, uint64_t>(), py::arg("electrostatic_potential_energy"), py::arg("degeneracy"),
              DOC(fiction_energy_state))
-        .def_rw("electrostatic_potential_energy", &fiction::energy_state::electrostatic_potential_energy,
+        .def_rw("electrostatic_potential_energy",
+                &fiction::sidb::simulation::analysis::energy_state::electrostatic_potential_energy,
                 DOC(fiction_energy_state_electrostatic_potential_energy))
-        .def_rw("degeneracy", &fiction::energy_state::degeneracy, DOC(fiction_energy_state_degeneracy));
+        .def_rw("degeneracy", &fiction::sidb::simulation::analysis::energy_state::degeneracy,
+                DOC(fiction_energy_state_degeneracy));
 
-    py::class_<fiction::energy_distribution>(m, "energy_distribution")
+    py::class_<fiction::sidb::simulation::analysis::energy_distribution>(m, "energy_distribution")
         .def(py::init<>(), "Default constructor.")
-        .def("get_nth_state", &fiction::energy_distribution::get_nth_state, py::arg("state_index"),
-             DOC(fiction_energy_distribution_get_nth_state))
-        .def("degeneracy", &fiction::energy_distribution::degeneracy, py::arg("energy"),
+        .def("get_nth_state", &fiction::sidb::simulation::analysis::energy_distribution::get_nth_state,
+             py::arg("state_index"), DOC(fiction_energy_distribution_get_nth_state))
+        .def("degeneracy", &fiction::sidb::simulation::analysis::energy_distribution::degeneracy, py::arg("energy"),
              DOC(fiction_energy_distribution_degeneracy))
-        .def("add_energy_state", &fiction::energy_distribution::add_energy_state, py::arg("state"),
-             DOC(fiction_energy_distribution_add_energy_state))
-        .def("size", &fiction::energy_distribution::size, DOC(fiction_energy_distribution_size))
-        .def("empty", &fiction::energy_distribution::empty, DOC(fiction_energy_distribution_empty))
-        .def("max_energy", &fiction::energy_distribution::max_energy, DOC(fiction_energy_distribution_max_energy))
-        .def("min_energy", &fiction::energy_distribution::min_energy, DOC(fiction_energy_distribution_min_energy))
+        .def("add_energy_state", &fiction::sidb::simulation::analysis::energy_distribution::add_energy_state,
+             py::arg("state"), DOC(fiction_energy_distribution_add_energy_state))
+        .def("size", &fiction::sidb::simulation::analysis::energy_distribution::size,
+             DOC(fiction_energy_distribution_size))
+        .def("empty", &fiction::sidb::simulation::analysis::energy_distribution::empty,
+             DOC(fiction_energy_distribution_empty))
+        .def("max_energy", &fiction::sidb::simulation::analysis::energy_distribution::max_energy,
+             DOC(fiction_energy_distribution_max_energy))
+        .def("min_energy", &fiction::sidb::simulation::analysis::energy_distribution::min_energy,
+             DOC(fiction_energy_distribution_min_energy))
 
         ;
 

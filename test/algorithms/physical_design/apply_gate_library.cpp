@@ -7,7 +7,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -21,6 +20,7 @@
 #include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/technology/sidb_on_the_fly_gate_library.hpp>
 #include <fiction/traits.hpp>
@@ -99,9 +99,10 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                 bestagon_and,
                 fmt::format("{}/resources/sidb_on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
-            CHECK(is_operational(bestagon_and, std::vector<tt>{networks::utils::create_and_tt()},
-                                 design_gate_params.operational_params)
-                      .first == operational_status::OPERATIONAL);
+            CHECK(sidb::simulation::logic::is_operational(bestagon_and,
+                                                          std::vector<tt>{networks::utils::create_and_tt()},
+                                                          design_gate_params.operational_params)
+                      .first == sidb::simulation::logic::operational_status::OPERATIONAL);
 
             CHECK(bestagon_and.num_cells() == 19);
 
@@ -109,9 +110,9 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
             {
                 sidb::primitives::defect_surface<cell_lyt> defect_surface{};
 
-                defect_surface.assign_sidb_defect(
+                defect_surface.assign_defect(
                     {30, 20, 0}, fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8});
-                defect_surface.assign_sidb_defect(
+                defect_surface.assign_defect(
                     {45, 55, 0}, fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8});
 
                 const auto bestagon_and_with_defects =
@@ -120,12 +121,13 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
                         hex_even_row_gate_clk_lyt>(layout, params, defect_surface);
 
                 CHECK(bestagon_and_with_defects.num_defects() == 2);
-                CHECK(bestagon_and_with_defects.get_sidb_defect({30, 20, 0}).type == sidb::model::defect_type::DB);
-                CHECK(bestagon_and_with_defects.get_sidb_defect({45, 55, 0}).type == sidb::model::defect_type::DB);
+                CHECK(bestagon_and_with_defects.get_defect({30, 20, 0}).type == sidb::model::defect_type::DB);
+                CHECK(bestagon_and_with_defects.get_defect({45, 55, 0}).type == sidb::model::defect_type::DB);
 
-                CHECK(is_operational(bestagon_and_with_defects, std::vector<tt>{networks::utils::create_and_tt()},
-                                     design_gate_params.operational_params)
-                          .first == operational_status::OPERATIONAL);
+                CHECK(sidb::simulation::logic::is_operational(bestagon_and_with_defects,
+                                                              std::vector<tt>{networks::utils::create_and_tt()},
+                                                              design_gate_params.operational_params)
+                          .first == sidb::simulation::logic::operational_status::OPERATIONAL);
 
                 CHECK(bestagon_and_with_defects.num_cells() == 19);
             }
@@ -214,9 +216,9 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
             {
                 sidb::primitives::defect_surface<cell_lyt> defect_surface{};
 
-                defect_surface.assign_sidb_defect(
+                defect_surface.assign_defect(
                     {30, 20, 0}, fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8});
-                defect_surface.assign_sidb_defect(
+                defect_surface.assign_defect(
                     {45, 55, 0}, fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8});
 
                 const auto bestagon_double_wire_with_defects =
@@ -225,10 +227,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
                         hex_even_row_gate_clk_lyt>(layout, params, defect_surface);
 
                 CHECK(bestagon_double_wire_with_defects.num_defects() == 2);
-                CHECK(bestagon_double_wire_with_defects.get_sidb_defect({30, 20, 0}).type ==
-                      sidb::model::defect_type::DB);
-                CHECK(bestagon_double_wire_with_defects.get_sidb_defect({45, 55, 0}).type ==
-                      sidb::model::defect_type::DB);
+                CHECK(bestagon_double_wire_with_defects.get_defect({30, 20, 0}).type == sidb::model::defect_type::DB);
+                CHECK(bestagon_double_wire_with_defects.get_defect({45, 55, 0}).type == sidb::model::defect_type::DB);
 
                 check_equivalence(
                     bestagon_double_wire,
@@ -283,7 +283,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
             SECTION("with defects")
             {
                 sidb::primitives::defect_surface<cell_lyt> defect_layout{};
-                defect_layout.assign_sidb_defect(
+                defect_layout.assign_defect(
                     {25, 39, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
                                                      design_gate_params.operational_params.sim_params.epsilon_r,
                                                      design_gate_params.operational_params.sim_params.lambda_tf});
@@ -345,7 +345,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
             SECTION("with defects")
             {
                 sidb::primitives::defect_surface<cell_lyt> defect_layout{};
-                defect_layout.assign_sidb_defect(
+                defect_layout.assign_defect(
                     {50, 19, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1,
                                                      design_gate_params.operational_params.sim_params.epsilon_r,
                                                      design_gate_params.operational_params.sim_params.lambda_tf});
@@ -407,12 +407,12 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
             SECTION("with defects")
             {
                 sidb::primitives::defect_surface<cell_lyt> defect_layout{};
-                defect_layout.assign_sidb_defect(
+                defect_layout.assign_defect(
                     {50, 19, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1,
                                                      design_gate_params.operational_params.sim_params.epsilon_r,
                                                      design_gate_params.operational_params.sim_params.lambda_tf});
 
-                defect_layout.assign_sidb_defect(
+                defect_layout.assign_defect(
                     {50, 70, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1,
                                                      design_gate_params.operational_params.sim_params.epsilon_r,
                                                      design_gate_params.operational_params.sim_params.lambda_tf});
@@ -524,7 +524,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
             design_gate_params.termination_cond =
                 design_sidb_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
             design_gate_params.operational_params.op_condition =
-                is_operational_params::operational_condition::REJECT_KINKS;
+                sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
 
             params.design_gate_params = design_gate_params;
 

@@ -4,8 +4,8 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/io/write_operational_domain.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <sstream>
 #include <string>
@@ -35,9 +35,9 @@ void write_operational_domain(nanobind::module_& m)
 
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_operational_domain_pointer)(const fiction::operational_domain&, const std::string_view&,
-                                                   const fiction::write_operational_domain_params&) =
-        &fiction::write_operational_domain;
+    void (*const write_operational_domain_pointer)(
+        const fiction::sidb::simulation::logic::operational_domain&, const std::string_view&,
+        const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
     // Define function using function pointer
     m.def("write_operational_domain", write_operational_domain_pointer, py::arg("opdom"), py::arg("filename"),
@@ -45,8 +45,8 @@ void write_operational_domain(nanobind::module_& m)
 
     m.def(
         "write_operational_domain_to_string",
-        [](const fiction::operational_domain&              opdom,
-           const fiction::write_operational_domain_params& params = {}) -> std::string
+        [](const fiction::sidb::simulation::logic::operational_domain& opdom,
+           const fiction::write_operational_domain_params&             params = {}) -> std::string
         {
             std::ostringstream oss;
             fiction::write_operational_domain(opdom, oss, params);
@@ -62,7 +62,7 @@ void write_critical_temperature_domain(nanobind::module_& m)
     // Function pointer for writing to a file
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_critical_temperature_domain_pointer)(
-        const fiction::critical_temperature_domain&, const std::string_view&,
+        const fiction::sidb::simulation::logic::critical_temperature_domain&, const std::string_view&,
         const fiction::write_operational_domain_params&) = &fiction::write_operational_domain;
 
     // Define function using function pointer
@@ -71,8 +71,8 @@ void write_critical_temperature_domain(nanobind::module_& m)
 
     m.def(
         "write_critical_temperature_domain_to_string",
-        [](const fiction::critical_temperature_domain&     opdom,
-           const fiction::write_operational_domain_params& params = {}) -> std::string
+        [](const fiction::sidb::simulation::logic::critical_temperature_domain& opdom,
+           const fiction::write_operational_domain_params&                      params = {}) -> std::string
         {
             std::ostringstream oss;
             fiction::write_operational_domain(opdom, oss, params);

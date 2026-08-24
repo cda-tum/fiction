@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -23,14 +23,15 @@ void exhaustive_ground_state_simulation_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("exhaustive_ground_state_simulation", &fiction::exhaustive_ground_state_simulation<Lyt>, py::arg("lyt"),
+    m.def("exhaustive_ground_state_simulation",
+          &fiction::sidb::simulation::engines::exhaustive_ground_state_simulation<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::sidb::model::simulation_parameters{},
           DOC(fiction_exhaustive_ground_state_simulation));
 }
 
 }  // namespace detail
 
-void exhaustive_ground_state_simulation(nanobind::module_& m)
+void sidb::simulation::engines::exhaustive_ground_state_simulation(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

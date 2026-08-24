@@ -1,9 +1,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp>
+#include <fiction/technology/sidb/simulation/domain.hpp>
+#include <fiction/technology/sidb/simulation/generic/physically_valid_parameters.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <cstdint>
 
@@ -30,23 +30,25 @@ void physically_valid_parameters_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("physically_valid_parameters", &fiction::physically_valid_parameters<Lyt>, py::arg("cds"),
-          py::arg("params") = fiction::operational_domain_params{}, DOC(fiction_physically_valid_parameters));
+    m.def("physically_valid_parameters", &fiction::sidb::simulation::generic::physically_valid_parameters<Lyt>,
+          py::arg("cds"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
+          DOC(fiction_physically_valid_parameters));
 }
 
 }  // namespace detail
 
-void physically_valid_parameters(nanobind::module_& m)
+void sidb::simulation::generic::physically_valid_parameters(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>>(
+    py::class_<fiction::sidb::simulation::domain<fiction::sidb::simulation::logic::parameter_point, uint64_t>>(
         m, "physically_valid_parameters_domain")
         .def(py::init<>(), "Default constructor.")
         .def(
             "get_excited_state_number_for_parameter",
-            [](const fiction::sidb_simulation_domain<fiction::parameter_point, uint64_t>& domain,
-               const fiction::parameter_point&                                            pp)
+            [](const fiction::sidb::simulation::domain<fiction::sidb::simulation::logic::parameter_point, uint64_t>&
+                                                                        domain,
+               const fiction::sidb::simulation::logic::parameter_point& pp)
             {
                 if (const auto result = domain.contains(pp); result.has_value())
                 {

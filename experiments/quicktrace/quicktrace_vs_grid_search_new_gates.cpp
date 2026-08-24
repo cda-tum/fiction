@@ -1,10 +1,10 @@
 #include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_clearance.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
+#include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
+#include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
@@ -43,20 +43,20 @@ int main()  // NOLINT
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));
 
     const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_cube>> params_2_in_1_out{
-        is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
+        sidb::simulation::logic::is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
         design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_cube>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         {{14, 12, 0}, {24, 23, 0}},
         3};
 
-    const auto                  sidb_sim = sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
-    const is_operational_params is_op_params{sidb_sim};
+    const auto sidb_sim = sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
+    const sidb::simulation::logic::is_operational_params is_op_params{sidb_sim};
 
     // for this experiment, we use a stray SiDB defect
     const auto stray_db = fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    sidb::simulation::defects::defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {100, 1000};
     params.defect                   = stray_db;
     params.operational_params       = is_op_params;
@@ -74,12 +74,15 @@ int main()  // NOLINT
         for (const auto& gate_lyt : exhaustive_design)
         {
             // using grid search to find the minimum defect clearance
-            const auto op_defect_grid = defect_influence_grid_search(gate_lyt, truth_table, params, 1);
-            const auto avoidance_grid = calculate_defect_clearance(gate_lyt, op_defect_grid);
+            const auto op_defect_grid =
+                sidb::simulation::defects::defect_influence_grid_search(gate_lyt, truth_table, params, 1);
+            const auto avoidance_grid = sidb::simulation::defects::calculate_defect_clearance(gate_lyt, op_defect_grid);
 
             // using QuickTrace to find the minimum clearance
-            const auto op_defect_contour = defect_influence_quicktrace(gate_lyt, truth_table, 100, params);
-            const auto avoidance_contour = calculate_defect_clearance(gate_lyt, op_defect_contour);
+            const auto op_defect_contour =
+                sidb::simulation::defects::defect_influence_quicktrace(gate_lyt, truth_table, 100, params);
+            const auto avoidance_contour =
+                sidb::simulation::defects::calculate_defect_clearance(gate_lyt, op_defect_contour);
 
             // check if QuickTrace and grid search give the same result
             if (std::abs(avoidance_grid.defect_clearance_distance - avoidance_contour.defect_clearance_distance) >

@@ -7,14 +7,14 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/energy_distribution.hpp>
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -27,9 +27,9 @@ TEMPLATE_TEST_CASE("Zero iteration steps", "[quicksim]", (sidb_100_cell_clk_lyt_
 {
     TestType lyt{};
 
-    const quicksim_params quicksim_params{sidb::model::simulation_parameters{2, -0.30}, 0};
+    const sidb::simulation::engines::quicksim_params qs_params{sidb::model::simulation_parameters{2, -0.30}, 0};
 
-    const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+    const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
     CHECK(!simulation_results.has_value());
 }
@@ -39,11 +39,11 @@ TEMPLATE_TEST_CASE("Empty layout QuickSim simulation", "[quicksim]", (sidb_100_c
 {
     TestType lyt{};
 
-    const quicksim_params quicksim_params{sidb::model::simulation_parameters{2, -0.30}};
+    const sidb::simulation::engines::quicksim_params qs_params{sidb::model::simulation_parameters{2, -0.30}};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.30);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.30);
 
-    const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+    const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
     REQUIRE(!simulation_results.has_value());
 }
@@ -55,18 +55,18 @@ TEMPLATE_TEST_CASE("Single SiDB QuickSim simulation", "[quicksim]", (sidb_100_ce
 
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
 
-    const quicksim_params quicksim_params{sidb::model::simulation_parameters{2, -0.30}};
+    const sidb::simulation::engines::quicksim_params qs_params{sidb::model::simulation_parameters{2, -0.30}};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.30);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.30);
 
-    const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+    const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
     REQUIRE(simulation_results.has_value());
     CHECK(simulation_results.value().charge_distributions.size() > 0);
 }
 
 template <typename Lyt>
-void check_for_absence_of_positive_charges(const sidb_simulation_result<Lyt>& simulation_results) noexcept
+void check_for_absence_of_positive_charges(const sidb::simulation::result<Lyt>& simulation_results) noexcept
 {
     REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -77,7 +77,7 @@ void check_for_absence_of_positive_charges(const sidb_simulation_result<Lyt>& si
 }
 
 template <typename Lyt>
-void check_for_runtime_measurement(const sidb_simulation_result<Lyt>& simulation_results) noexcept
+void check_for_runtime_measurement(const sidb::simulation::result<Lyt>& simulation_results) noexcept
 {
     CHECK(simulation_results.simulation_runtime.count() > 0);
 }
@@ -99,13 +99,13 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
 
     const sidb::model::simulation_parameters params{2, -0.30};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.30);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.30);
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -114,9 +114,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -126,9 +126,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
 
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -137,9 +137,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -148,9 +148,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of several SiDBs with varying thread cou
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -183,11 +183,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     ;
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.32);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& simulation_results) noexcept
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -216,7 +216,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -225,9 +225,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -236,9 +236,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -247,9 +247,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -258,9 +258,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB layout comprising of 10 SiDBs
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -286,11 +286,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.32);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& simulation_results) noexcept
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -310,7 +310,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -319,9 +319,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -331,9 +331,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -343,9 +343,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -354,9 +354,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -383,11 +383,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
 
     const sidb::model::simulation_parameters params{2, -0.28};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.28);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.28);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& sim_results) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& sim_results) noexcept
     {
         REQUIRE(!sim_results.charge_distributions.empty());
 
@@ -408,7 +408,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -417,9 +417,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -428,9 +428,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -439,9 +439,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -450,9 +450,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -461,8 +461,8 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
 
         SECTION("timeout with 0 ms")
         {
-            quicksim_params.timeout                 = 0;
-            const auto simulation_results_timeout_0 = quicksim<TestType>(lyt, quicksim_params);
+            qs_params.timeout                       = 0;
+            const auto simulation_results_timeout_0 = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
             CHECK(!simulation_results_timeout_0.has_value());
         }
@@ -479,17 +479,17 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
 
     const sidb::model::simulation_parameters params{2, -0.25};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.25);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.25);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& result) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& sim_result) noexcept
     {
-        REQUIRE(!result.charge_distributions.empty());
+        REQUIRE(!sim_result.charge_distributions.empty());
 
-        REQUIRE(!calculate_energy_distribution(result.charge_distributions).empty());
+        REQUIRE(!sidb::simulation::analysis::calculate_energy_distribution(sim_result.charge_distributions).empty());
 
-        const auto& charge_lyt_first = result.charge_distributions.front();
+        const auto& charge_lyt_first = sim_result.charge_distributions.front();
 
         CHECK((((charge_lyt_first.get_charge_state({6, 2, 0}) == sidb::model::charge_state::NEGATIVE) &&
                 (charge_lyt_first.get_charge_state({8, 2, 0}) == sidb::model::charge_state::NEUTRAL)) ||
@@ -499,7 +499,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -508,9 +508,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -519,9 +519,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -531,9 +531,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
 
         check_for_absence_of_positive_charges(simulation_results.value());
@@ -542,9 +542,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an SiDB BDL pair with varying thread 
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -583,17 +583,17 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
     // check QuickSim parameters
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.32);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
     // lambda function to check charge configurations
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& sim_results) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& sim_results) noexcept
     {
         REQUIRE(!sim_results.charge_distributions.empty());
 
-        REQUIRE(!calculate_energy_distribution(sim_results.charge_distributions).empty());
+        REQUIRE(!sidb::simulation::analysis::calculate_energy_distribution(sim_results.charge_distributions).empty());
 
         const auto& charge_lyt_first = sim_results.charge_distributions.front();
 
@@ -613,7 +613,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -624,9 +624,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
 
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -636,9 +636,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -648,9 +648,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -660,9 +660,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs", "[
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -699,15 +699,16 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.32);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& simulation_results) noexcept
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        REQUIRE(!calculate_energy_distribution(simulation_results.charge_distributions).empty());
+        REQUIRE(!sidb::simulation::analysis::calculate_energy_distribution(simulation_results.charge_distributions)
+                     .empty());
 
         const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
@@ -718,7 +719,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -728,9 +729,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -740,9 +741,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -752,9 +753,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -764,9 +765,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of an layout comprising of 13 SiDBs, all
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -786,18 +787,18 @@ TEMPLATE_TEST_CASE("Edge case with four SiDBs", "[quicksim]", (sidb_100_cell_clk
     lyt.assign_cell_type({3, 0, 1}, TestType::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, TestType::cell_type::NORMAL);
 
-    quicksim_params quicksim_params{};
+    sidb::simulation::engines::quicksim_params qs_params{};
 
     SECTION("alpha = 1.0 does not work")
     {
-        quicksim_params.alpha         = 1.0;
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        qs_params.alpha               = 1.0;
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         CHECK(!simulation_results.has_value());
     }
     SECTION("alpha = 0.7 works")
     {
-        quicksim_params.alpha         = 0.7;
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        qs_params.alpha               = 0.7;
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
         REQUIRE(simulation_results.has_value());
         CHECK(simulation_results.value().charge_distributions.size() > 0);
     }
@@ -824,9 +825,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
 
     SECTION("Standard Physical Parameters")
     {
-        const quicksim_params quicksim_params{params};
+        const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -850,9 +851,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     {
         params.mu_minus = -0.1;
 
-        const quicksim_params quicksim_params{params};
+        const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -876,9 +877,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     {
         params.mu_minus = -0.7;
 
-        const quicksim_params quicksim_params{params};
+        const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -902,9 +903,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     {
         params.lambda_tf = 1;
 
-        const quicksim_params quicksim_params{params};
+        const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -928,9 +929,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     {
         params.lambda_tf = 10;
 
-        const quicksim_params quicksim_params{params};
+        const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -954,9 +955,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01
     {
         params.epsilon_r = 10;
 
-        const quicksim_params quicksim_params{params};
+        const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1001,11 +1002,11 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    quicksim_params quicksim_params{params};
+    sidb::simulation::engines::quicksim_params qs_params{params};
 
-    REQUIRE(quicksim_params.sim_params.mu_minus == -0.32);
+    REQUIRE(qs_params.sim_params.mu_minus == -0.32);
 
-    const auto check_charge_configuration = [](const sidb_simulation_result<TestType>& simulation_results) noexcept
+    const auto check_charge_configuration = [](const sidb::simulation::result<TestType>& simulation_results) noexcept
     {
         REQUIRE(!simulation_results.charge_distributions.empty());
 
@@ -1032,7 +1033,7 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
 
     SECTION("Default settings")
     {
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1042,9 +1043,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("0 threads")
     {
-        quicksim_params.number_threads = 0;
+        qs_params.number_threads = 0;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1054,9 +1055,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("1 thread")
     {
-        quicksim_params.number_threads = 1;
+        qs_params.number_threads = 1;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1066,9 +1067,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("2 threads")
     {
-        quicksim_params.number_threads = 2;
+        qs_params.number_threads = 2;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1078,9 +1079,9 @@ TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB arrangement with vary
     }
     SECTION("100 threads")
     {
-        quicksim_params.number_threads = 100;
+        qs_params.number_threads = 100;
 
-        const auto simulation_results = quicksim<TestType>(lyt, quicksim_params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, qs_params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1107,9 +1108,9 @@ TEMPLATE_TEST_CASE("QuickSim gate simulation on the Si-111 surface", "[quicksim]
 
     lyt.assign_cell_type({4, 14, 0}, TestType::cell_type::NORMAL);
 
-    const quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5}};
+    const sidb::simulation::engines::quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5}};
 
-    const auto simulation_results = quicksim<TestType>(lyt, params);
+    const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, params);
 
     REQUIRE(simulation_results.has_value());
 
@@ -1132,10 +1133,11 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
 {
     SECTION("no input applied")
     {
-        const auto            lyt = blueprints::and_gate_111<TestType>();
-        const quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5}, 3000, 0.5};
+        const auto                                       lyt = blueprints::and_gate_111<TestType>();
+        const sidb::simulation::engines::quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5},
+                                                                3000, 0.5};
 
-        const auto simulation_results = quicksim<TestType>(lyt, params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1175,9 +1177,10 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
         lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::EMPTY);
         lyt.assign_cell_type({23, 1, 1}, TestType::cell_type::EMPTY);
 
-        const quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5}, 3000, 0.5};
+        const sidb::simulation::engines::quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5},
+                                                                3000, 0.5};
 
-        const auto simulation_results = quicksim<TestType>(lyt, params);
+        const auto simulation_results = sidb::simulation::engines::quicksim<TestType>(lyt, params);
 
         REQUIRE(simulation_results.has_value());
 
@@ -1213,9 +1216,10 @@ TEMPLATE_TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quick
 
     SECTION("timeout with 100 ms")
     {
-        auto                  lyt = blueprints::and_gate_111<TestType>();
-        const quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5}, 300000, 0.5, 1, 100};
-        const auto            simulation_results_timeout_100 = quicksim<TestType>(lyt, params);
+        auto                                             lyt = blueprints::and_gate_111<TestType>();
+        const sidb::simulation::engines::quicksim_params params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5},
+                                                                300000, 0.5, 1, 100};
+        const auto simulation_results_timeout_100 = sidb::simulation::engines::quicksim<TestType>(lyt, params);
 
         REQUIRE(!simulation_results_timeout_100.has_value());
     }

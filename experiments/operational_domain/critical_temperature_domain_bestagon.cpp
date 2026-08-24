@@ -4,13 +4,13 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -44,11 +44,12 @@ int main()  // NOLINT
     sim_params.mu_minus = -0.32;
 
     // operational domain parameters
-    operational_domain_params op_domain_params{};
+    sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
 
-    op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions         = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
+                                                 {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
     op_domain_params.sweep_dimensions[0].step = 0.01;
@@ -79,30 +80,32 @@ int main()  // NOLINT
         auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // Loop over operational conditions
-        for (const auto cond : {is_operational_params::operational_condition::TOLERATE_KINKS,
-                                is_operational_params::operational_condition::REJECT_KINKS})
+        for (const auto cond : {sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS,
+                                sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS})
         {
-            operational_domain_stats op_domain_stats_gs{};
-            std::string              gate_name  = gate;
-            double                   ct_default = 0;
+            sidb::simulation::logic::operational_domain_stats op_domain_stats_gs{};
+            std::string                                       gate_name  = gate;
+            double                                            ct_default = 0;
 
             op_domain_params.operational_params.op_condition = cond;
-            ct_default                                       = critical_temperature_gate_based(
-                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
+            ct_default = sidb::simulation::analysis::critical_temperature_gate_based(
+                lyt, truth_table,
+                sidb::simulation::analysis::critical_temperature_params{op_domain_params.operational_params});
 
             op_domain_params.operational_params.op_condition =
-                is_operational_params::operational_condition::REJECT_KINKS;
-            ct_default = critical_temperature_gate_based(
-                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
+                sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+            ct_default = sidb::simulation::analysis::critical_temperature_gate_based(
+                lyt, truth_table,
+                sidb::simulation::analysis::critical_temperature_params{op_domain_params.operational_params});
 
-            if (cond == is_operational_params::operational_condition::REJECT_KINKS)
+            if (cond == sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS)
             {
                 gate_name +=
                     " (I/O integrity)";  // Add I/O integrity to the gate name to make clear that kinks are rejected
             }
 
-            const auto ct_domain =
-                critical_temperature_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_gs);
+            const auto ct_domain = sidb::simulation::logic::critical_temperature_domain_grid_search(
+                lyt, truth_table, op_domain_params, &op_domain_stats_gs);
 
             const auto min_ct   = ct_domain.minimum_ct();
             const auto max_ct   = ct_domain.maximum_ct();
@@ -115,7 +118,8 @@ int main()  // NOLINT
         }
     }
 
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition =
+        sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
 
     return EXIT_SUCCESS;
 }

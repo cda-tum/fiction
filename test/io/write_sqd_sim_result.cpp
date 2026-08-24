@@ -4,12 +4,12 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/primitives/lattice.hpp>
 #include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
 #include <fiction/utils/version_info.hpp>
@@ -160,7 +160,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     using lattice = sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>;
 
-    sidb_simulation_result<lattice> sim_result{};
+    sidb::simulation::result<lattice> sim_result{};
 
     sim_result.algorithm_name     = "TestSim";
     sim_result.simulation_runtime = 42s;  // NOLINT(misc-include-cleaner)
@@ -294,7 +294,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 
     const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lat{lyt};
 
-    auto sim_result = exhaustive_ground_state_simulation(lat, params);
+    auto sim_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lat, params);
 
     sim_result.algorithm_name = "ExGS";
 
@@ -357,7 +357,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 
     const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lat{lyt};
 
-    auto sim_result = exhaustive_ground_state_simulation(lat, params);
+    auto sim_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lat, params);
 
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};

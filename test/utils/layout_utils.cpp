@@ -213,8 +213,8 @@ TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in coor
     cds.assign_charge_state({1, 0, 0}, sidb::model::charge_state::POSITIVE);
     cds.assign_charge_state({0, 3, 0}, sidb::model::charge_state::NEGATIVE);
 
-    cds.assign_sidb_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    cds.assign_sidb_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    cds.assign_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    cds.assign_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 
     auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(cds);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
@@ -228,8 +228,8 @@ TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in coor
     CHECK(lyt_transformed.get_charge_state({1, 0, 0}) == sidb::model::charge_state::POSITIVE);
     CHECK(lyt_transformed.get_charge_state({0, 1, 1}) == sidb::model::charge_state::NEGATIVE);
 
-    CHECK(lyt_transformed.get_sidb_defect({5, 2, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    CHECK(lyt_transformed.get_sidb_defect({1, 0, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({5, 2, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({1, 0, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 }
 
 TEST_CASE("Convert sidb_defect_surface (without lattice information) in coords::offset layout to SiQAD "
@@ -242,8 +242,8 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in coords::
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_cell_clk_lyt::technology::cell_type::INPUT);
     sidb_surface.assign_cell_type({0, 3, 0}, sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
 
-    sidb_surface.assign_sidb_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    sidb_surface.assign_sidb_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    sidb_surface.assign_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    sidb_surface.assign_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 
     auto lyt_transformed = layouts::utils::convert_layout_to_siqad_coordinates(sidb_surface);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
@@ -252,8 +252,8 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in coords::
     CHECK(lyt_transformed.get_cell_type({1, 0, 0}) == sidb_cell_clk_lyt::technology::cell_type::INPUT);
     CHECK(lyt_transformed.get_cell_type({0, 1, 1}) == sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
 
-    CHECK(lyt_transformed.get_sidb_defect({5, 2, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    CHECK(lyt_transformed.get_sidb_defect({1, 0, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({5, 2, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({1, 0, 1}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 }
 
 TEST_CASE("Convert cds (without lattice information) in coords::offset layout to SiQAD "
@@ -298,8 +298,8 @@ TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to coords:
     cds.assign_charge_state({1, 0, 0}, sidb::model::charge_state::POSITIVE);
     cds.assign_charge_state({0, 3, 0}, sidb::model::charge_state::NEGATIVE);
 
-    cds.assign_sidb_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    cds.assign_sidb_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    cds.assign_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    cds.assign_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 
     auto lyt_transformed = layouts::utils::convert_layout_to_fiction_coordinates<cds_sidb_defect_100_cell_clk_lyt>(cds);
     CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
@@ -317,8 +317,8 @@ TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to coords:
     CHECK(lyt_transformed.get_charge_state({1, 0}) == sidb::model::charge_state::POSITIVE);
     CHECK(lyt_transformed.get_charge_state({0, 6}) == sidb::model::charge_state::NEGATIVE);
 
-    CHECK(lyt_transformed.get_sidb_defect({5, 10}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    CHECK(lyt_transformed.get_sidb_defect({1, 2}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({5, 10}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({1, 2}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 }
 
 TEST_CASE("Convert cds (without lattice information) in SiQAD coordinates to coords::offset coordinates",
@@ -362,8 +362,8 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD co
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::INPUT);
     sidb_surface.assign_cell_type({0, 3, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::OUTPUT);
 
-    sidb_surface.assign_sidb_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    sidb_surface.assign_sidb_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    sidb_surface.assign_defect({5, 5, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    sidb_surface.assign_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 
     auto lyt_transformed =
         layouts::utils::convert_layout_to_fiction_coordinates<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt>>(
@@ -378,8 +378,8 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD co
     CHECK(lyt_transformed.get_cell_type({1, 0}) == sidb_100_cell_clk_lyt::technology::cell_type::INPUT);
     CHECK(lyt_transformed.get_cell_type({0, 6}) == sidb_100_cell_clk_lyt::technology::cell_type::OUTPUT);
 
-    CHECK(lyt_transformed.get_sidb_defect({5, 10}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-    CHECK(lyt_transformed.get_sidb_defect({1, 2}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({5, 10}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+    CHECK(lyt_transformed.get_defect({1, 2}) == sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 }
 
 TEST_CASE("Convert SiQAD layout (100) to coords::offset coordinate layout", "[layout-utils]")
@@ -996,12 +996,12 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
     SECTION("SiDB defect surface on top of the charge distribution surface")
     {
         sidb::primitives::defect_surface defect_first{cds_first};
-        defect_first.assign_sidb_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-        defect_first.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_first.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+        defect_first.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         sidb::primitives::defect_surface defect_second{cds_second};
-        defect_second.assign_sidb_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-        defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_second.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+        defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         SECTION("identical layouts")
         {
@@ -1011,12 +1011,12 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
         {
             SECTION("different number of defects")
             {
-                defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::NONE});
+                defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::NONE});
                 CHECK(!layouts::utils::are_cell_layouts_identical(defect_first, defect_second));
             }
             SECTION("different defect type")
             {
-                defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::DB});
+                defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::DB});
                 CHECK(!layouts::utils::are_cell_layouts_identical(defect_first, defect_second));
             }
         }
@@ -1112,12 +1112,12 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
     SECTION("SiDB defect surface on top of the charge distribution surface")
     {
         sidb::primitives::defect_surface defect_first{cds_first};
-        defect_first.assign_sidb_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
-        defect_first.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_first.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+        defect_first.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         sidb::primitives::defect_surface defect_second{cds_second};
-        defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_second.assign_sidb_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
+        defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_second.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 
         SECTION("identical layouts share a digest")
         {
@@ -1127,33 +1127,32 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
         }
         SECTION("different number of defects")
         {
-            defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::NONE});
+            defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::NONE});
             CHECK(layouts::utils::cell_layout_digest(defect_first) !=
                   layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect type")
         {
-            defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::DB});
+            defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::DB});
             CHECK(layouts::utils::cell_layout_digest(defect_first) !=
                   layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect position")
         {
-            defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::NONE});
-            defect_second.assign_sidb_defect({2, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+            defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::NONE});
+            defect_second.assign_defect({2, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
             CHECK(layouts::utils::cell_layout_digest(defect_first) !=
                   layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect charge")
         {
-            defect_second.assign_sidb_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1});
+            defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1});
             CHECK(layouts::utils::cell_layout_digest(defect_first) !=
                   layouts::utils::cell_layout_digest(defect_second));
         }
         SECTION("different defect screening")
         {
-            defect_second.assign_sidb_defect({1, 2},
-                                             sidb::model::defect{sidb::model::defect_type::SI_VACANCY, 0, 5.6, 5.0});
+            defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, 0, 5.6, 5.0});
             CHECK(layouts::utils::cell_layout_digest(defect_first) !=
                   layouts::utils::cell_layout_digest(defect_second));
         }

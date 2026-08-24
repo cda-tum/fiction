@@ -58,7 +58,7 @@ void compare_written_and_read_layout(const WLyt& wlyt, const RLyt& rlyt) noexcep
             {
                 const auto& [wc, wd]{cd};
 
-                const auto& rd = rlyt.get_sidb_defect(wc);
+                const auto& rd = rlyt.get_defect(wc);
 
                 CHECK(wd.type == rd.type);
                 CHECK(wd.charge == rd.charge);
@@ -218,7 +218,7 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
     // assign defects
     for (const auto& [c, d] : defect_map)
     {
-        defect_layout.assign_sidb_defect(c, d);
+        defect_layout.assign_defect(c, d);
     }
 
     const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb::primitives::defect_surface<sidb_cell_clk_lyt>>
@@ -285,7 +285,7 @@ TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd
     // assign defects
     for (const auto& [c, d] : defect_map)
     {
-        defect_layout.assign_sidb_defect(c, d);
+        defect_layout.assign_defect(c, d);
     }
 
     std::stringstream layout_stream{};

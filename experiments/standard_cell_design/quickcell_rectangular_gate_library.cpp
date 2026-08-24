@@ -4,13 +4,13 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
 #include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -93,9 +93,10 @@ int main()  // NOLINT
     constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
-        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                              bdl_input_iterator_params{{3}},
-                              is_operational_params::operational_condition::REJECT_KINKS},
+        sidb::simulation::logic::is_operational_params{
+            sidb::model::simulation_parameters{2, -0.32}, sidb::simulation::engine::QUICKEXACT,
+            sidb::simulation::logic::bdl_input_iterator_params{{3}},
+            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
         {{18, 9, 0}, {26, 13, 0}},
         num_canvas_sidbs};

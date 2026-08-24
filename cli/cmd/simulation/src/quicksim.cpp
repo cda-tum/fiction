@@ -6,10 +6,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -105,7 +105,8 @@ void quicksim_command::execute()
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
         {
-            if (const auto result = fiction::quicksim(*lyt_ptr, qs_params); result.has_value())
+            if (const auto result = fiction::sidb::simulation::engines::quicksim(*lyt_ptr, qs_params);
+                result.has_value())
             {
                 sim_result = *result;
             }
@@ -125,7 +126,7 @@ void quicksim_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                const auto min_energy_distr = fiction::sidb::simulation::generic::minimum_energy_distribution(
                     std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
                     std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
@@ -142,7 +143,7 @@ void quicksim_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                const auto min_energy_distr = fiction::sidb::simulation::generic::minimum_energy_distribution(
                     std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
                     std::get<sim_result_111>(sim_result).charge_distributions.cend());
 

@@ -6,12 +6,12 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 #include <fiction/types.hpp>
 
 #include <vector>
@@ -44,9 +44,10 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    operational_domain_params op_domain_params{};
+    sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions              = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
+                                                      {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
 
     // set x-dimension
     op_domain_params.sweep_dimensions[0].min  = 5.5;
@@ -60,14 +61,16 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
     SECTION("Operational domain with one parameter point")
     {
-        const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+        const auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
+            sidb::simulation::logic::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
 
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<tt>{networks::utils::create_id_tt()},
-                                                              parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
+            lat, std::vector<tt>{networks::utils::create_id_tt()},
+            sidb::simulation::logic::parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size (1.0)
         CHECK_THAT(op_domain_ratio - 1.0, Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
@@ -85,10 +88,11 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         op_domain_params.sweep_dimensions[1].max  = 4.25;
         op_domain_params.sweep_dimensions[1].step = 0.25;
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lat, std::vector<tt>{networks::utils::create_id_tt()},
-                                                              parameter_point({4.25, 4.25}), op_ratio_params);
+        const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
+            lat, std::vector<tt>{networks::utils::create_id_tt()},
+            sidb::simulation::logic::parameter_point({4.25, 4.25}), op_ratio_params);
 
         CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
@@ -102,14 +106,16 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
-    operational_domain_params op_domain_params{};
+    sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-        bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+        sidb::simulation::logic::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+    op_domain_params.sweep_dimensions = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
+                                         {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
     op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
-    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION;
+    op_domain_params.operational_params.op_condition =
+        sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
     // set x-dimension
@@ -122,18 +128,20 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     op_domain_params.sweep_dimensions[1].max  = 10.0;
     op_domain_params.sweep_dimensions[1].step = 0.1;
 
-    operational_domain_ratio_params op_ratio_params{op_domain_params};
+    sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
     // pruning and simulation to determine the operational status of the layout
-    const auto op_domain_ratio_pruning_and_simulation = operational_domain_ratio(
-        lyt, std::vector<tt>{networks::utils::create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
+    const auto op_domain_ratio_pruning_and_simulation = sidb::simulation::logic::operational_domain_ratio(
+        lyt, std::vector<tt>{networks::utils::create_nand_tt()},
+        sidb::simulation::logic::parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
-        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+        sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-    const auto op_domain_ratio_only_pruning = operational_domain_ratio(
-        lyt, std::vector<tt>{networks::utils::create_nand_tt()}, parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
+    const auto op_domain_ratio_only_pruning = sidb::simulation::logic::operational_domain_ratio(
+        lyt, std::vector<tt>{networks::utils::create_nand_tt()},
+        sidb::simulation::logic::parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
 
     CHECK_THAT(op_domain_ratio_pruning_and_simulation,
                Catch::Matchers::WithinAbs(0.11918914799573235, fcn::constants::ERROR_MARGIN));
@@ -151,9 +159,10 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    operational_domain_params op_domain_params{};
+    sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions              = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
+                                                      {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
 
     // set x-dimension
     op_domain_params.sweep_dimensions[0].min  = 5.0;
@@ -165,16 +174,18 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.1;
 
-    const auto z_dimension = operational_domain_value_range{sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
+    const auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
+        sidb::simulation::logic::sweep_parameter::MU_MINUS, -0.32, -0.32, 0.01};
 
     SECTION("semi-operational domain")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                                                              parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()},
+            sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
@@ -183,12 +194,14 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     SECTION("semi-operational domain, reject kinks")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
-        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition =
+            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                                                              parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()},
+            sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
@@ -198,14 +211,16 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         "semi-operational domain, reject kinks, only pruning is used to determine the operational status of the layout")
     {
         op_domain_params.sweep_dimensions.push_back(z_dimension);
-        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition =
+            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const operational_domain_ratio_params op_ratio_params{op_domain_params};
+        const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
-        const auto op_domain_ratio = operational_domain_ratio(lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                                                              parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
+        const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
+            lyt, std::vector<tt>{networks::utils::create_and_tt()},
+            sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
         CHECK(op_domain_ratio >= (23.0 / 121.0));

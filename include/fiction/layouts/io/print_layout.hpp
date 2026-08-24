@@ -443,19 +443,19 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
             if constexpr (has_get_sidb_defect_v<Lyt>)
             {
-                if (lyt.get_sidb_defect(loop_coordinate) != sidb::model::defect{sidb::model::defect_type::NONE})
+                if (lyt.get_defect(loop_coordinate) != sidb::model::defect{sidb::model::defect_type::NONE})
                 {
-                    if (sidb::model::is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                    if (sidb::model::is_negatively_charged_defect(lyt.get_defect(loop_coordinate)))
                     {
                         os << fmt::format(lat_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
                         already_printed = true;
                     }
-                    else if (sidb::model::is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                    else if (sidb::model::is_positively_charged_defect(lyt.get_defect(loop_coordinate)))
                     {
                         os << fmt::format(lat_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
                         already_printed = true;
                     }
-                    else if (sidb::model::is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                    else if (sidb::model::is_neutrally_charged_defect(lyt.get_defect(loop_coordinate)))
                     {
                         os << fmt::format(lat_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
                         already_printed = true;

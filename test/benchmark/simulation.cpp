@@ -5,12 +5,12 @@
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -69,28 +69,30 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params<cell<lattice_siqad>> sim_params{sidb::model::simulation_parameters{2, -0.32}};
-        return quickexact<lattice_siqad>(lyt, sim_params);
+        const sidb::simulation::engines::quickexact_params<cell<lattice_siqad>> sim_params{
+            sidb::model::simulation_parameters{2, -0.32}};
+        return sidb::simulation::engines::quickexact<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("QuickSim")
     {
-        const quicksim_params quicksim_params{sidb::model::simulation_parameters{2, -0.32}};
-        return quicksim<lattice_siqad>(lyt, quicksim_params);
+        const sidb::simulation::engines::quicksim_params qs_params{sidb::model::simulation_parameters{2, -0.32}};
+        return sidb::simulation::engines::quicksim<lattice_siqad>(lyt, qs_params);
     };
 
 #if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete (multi-threaded)")
     {
-        const clustercomplete_params<cell<lattice_siqad>> sim_params{sidb::model::simulation_parameters{3, -0.32}};
-        return clustercomplete<lattice_siqad>(lyt, sim_params);
+        const sidb::simulation::engines::clustercomplete_params<cell<lattice_siqad>> sim_params{
+            sidb::model::simulation_parameters{3, -0.32}};
+        return sidb::simulation::engines::clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("ClusterComplete (single-threaded)")
     {
-        const clustercomplete_params<cell<lattice_siqad>> sim_params{
+        const sidb::simulation::engines::clustercomplete_params<cell<lattice_siqad>> sim_params{
             sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
-        return clustercomplete<lattice_siqad>(lyt, sim_params);
+        return sidb::simulation::engines::clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
 }
@@ -292,8 +294,9 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
-        const clustercomplete_params<> sim_params{sidb::model::simulation_parameters{3, -0.32}};
-        return clustercomplete<lattice>(cl_4_seg, sim_params);
+        const sidb::simulation::engines::clustercomplete_params<> sim_params{
+            sidb::model::simulation_parameters{3, -0.32}};
+        return sidb::simulation::engines::clustercomplete<lattice>(cl_4_seg, sim_params);
     };
 
     const lattice cl_3_seg{
@@ -302,8 +305,9 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {
-        const clustercomplete_params<> sim_params{sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
-        return clustercomplete<lattice>(cl_3_seg, sim_params);
+        const sidb::simulation::engines::clustercomplete_params<> sim_params{
+            sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        return sidb::simulation::engines::clustercomplete<lattice>(cl_3_seg, sim_params);
     };
 }
 #endif  // FICTION_ALGLIB_ENABLED
