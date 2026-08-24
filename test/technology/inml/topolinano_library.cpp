@@ -4,8 +4,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../utils/blueprints/layout_blueprints.hpp"
 #include "fiction/layouts/io/print_layout.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/traits.hpp>

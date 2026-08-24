@@ -1,7 +1,11 @@
 # AGENTS.md — tests
 
-Catch2 tests. The tree mirrors `include/fiction/`: `algorithms/`, `io/`, `layouts/`,
-`networks/`, `technology/`, `utils/`, plus `benchmark/` and shared `resources/`.
+Catch2 tests. The tree mirrors `include/fiction/` exactly: `layouts/`, `networks/`,
+`synthesis/`, `physical_design/`, `verification/`, `technology/` (with `fcn/`, `qca/`,
+`inml/`, and the `sidb/` subtree), and `utils/`, plus `benchmark/`, shared `resources/`,
+and the blueprints under `utils/blueprints/`. A test lives at the path its header does,
+so `technology/sidb/model/charge_state.hpp` is tested by
+`test/technology/sidb/model/charge_state.cpp`.
 
 ## Wiring
 
@@ -13,6 +17,10 @@ Catch2 tests. The tree mirrors `include/fiction/`: `algorithms/`, `io/`, `layout
 - Do not edit `test/CMakeLists.txt` to register a test. The glob picks it up; re-run
   CMake.
 - Load test data through the `TEST_PATH` compile definition, not a relative path.
+- Include the shared helpers as `"utils/blueprints/..."`, without a `../` prefix:
+  `test/CMakeLists.txt` puts `test/` on the include path. Benchmarks are the exception
+  and do need `../`, because `add_subdirectory(benchmark)` runs before that
+  `include_directories(.)` call.
 - Benchmarks go in `test/benchmark/` and use `BENCHMARK`. They are excluded from the test
   glob and do not run in CI.
 

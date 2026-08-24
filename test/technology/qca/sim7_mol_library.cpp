@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "../utils/blueprints/layout_blueprints.hpp"
+#include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
