@@ -66,7 +66,7 @@ struct clustercomplete_params
     /**
      * Physical simulation parameters.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
@@ -117,10 +117,10 @@ class clustercomplete_impl
     clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
-            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
-                                 -fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
-                                 fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
-                                 -fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_plus()}
+            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus(),
+                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus()}
     {}
     /**
      * This function performs the *ClusterComplete* simulation; first executing the *Ground State Space* construction,
@@ -131,8 +131,8 @@ class clustercomplete_impl
      */
     [[nodiscard]] sidb_simulation_result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
-        result.simulation_parameters = params.simulation_parameters;
-        result.algorithm_name        = "ClusterComplete";
+        result.sim_params     = params.sim_params;
+        result.algorithm_name = "ClusterComplete";
         result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         result.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
                                                         params.validity_witness_partitioning_max_cluster_size_gss);
@@ -141,9 +141,9 @@ class clustercomplete_impl
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
-            charge_layout, ground_state_space_params{params.simulation_parameters,
-                                                     params.validity_witness_partitioning_max_cluster_size_gss,
-                                                     params.num_overlapping_witnesses_limit_gss});
+            charge_layout,
+            ground_state_space_params{params.sim_params, params.validity_witness_partitioning_max_cluster_size_gss,
+                                      params.num_overlapping_witnesses_limit_gss});
 
         if (!gss_stats.top_cluster)
         {
@@ -318,7 +318,7 @@ class clustercomplete_impl
     initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
         sidb::primitives::charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_physical_parameters(params.simulation_parameters);
+        cds.assign_physical_parameters(params.sim_params);
 
         // assign defects if applicable
         if constexpr (has_foreach_sidb_defect_v<Lyt>)

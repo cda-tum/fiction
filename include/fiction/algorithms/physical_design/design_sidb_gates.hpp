@@ -594,7 +594,7 @@ class design_sidb_gates_impl
                 });
 
             sidb::primitives::charge_distribution_surface<Lyt> cds_canvas{
-                canvas_lyt, params.operational_params.simulation_parameters, sidb::model::charge_state::NEGATIVE,
+                canvas_lyt, params.operational_params.sim_params, sidb::model::charge_state::NEGATIVE,
                 sidb::primitives::cds_configuration::CHARGE_LOCATION_ONLY};
 
             cds_canvas.assign_dependent_cell(dependent_cell);

@@ -91,7 +91,7 @@ struct physical_population_stability_params
     /**
      * Parameters for the electrostatic potential.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * The precision level for the conversion from the minimum potential difference to the corresponding
      * distance.
@@ -134,7 +134,7 @@ class physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
-        const quickexact_params<cell<Lyt>> quickexact_parameters{params.simulation_parameters};
+        const quickexact_params<cell<Lyt>> quickexact_parameters{params.sim_params};
         const auto                         simulation_results = quickexact(layout, quickexact_parameters);
         const auto energy_and_unique_charge_index             = collect_energy_and_charge_index(simulation_results);
 
@@ -207,7 +207,7 @@ class physical_population_stability_impl
             for (const auto& transition : population_stability_info.transition_potentials)
             {
                 population_stability_info.distance_corresponding_to_potential[transition.first] =
-                    potential_to_distance_conversion(transition.second.second, params.simulation_parameters,
+                    potential_to_distance_conversion(transition.second.second, params.sim_params,
                                                      params.precision_for_distance_corresponding_to_potential);
                 if (transition.second.second < minimum_potential_difference)
                 {
@@ -263,7 +263,7 @@ class physical_population_stability_impl
         auto updated_pop_stability_information = pop_stability_information;
 
         const auto required_potential_to_conduct_transition_negative_to_neutral =
-            std::abs(-local_potential + params.simulation_parameters.mu_minus);
+            std::abs(-local_potential + params.sim_params.mu_minus);
 
         if (required_potential_to_conduct_transition_negative_to_neutral <
             updated_pop_stability_information.transition_potentials.at(transition_type::NEGATIVE_TO_NEUTRAL).second)
@@ -293,23 +293,23 @@ class physical_population_stability_impl
         auto updated_pop_stability_information = pop_stability_information;
 
         const auto required_potential_to_conduct_transition_neutral_to_negative =
-            std::abs(-local_potential + params.simulation_parameters.mu_minus);
+            std::abs(-local_potential + params.sim_params.mu_minus);
 
         if (required_potential_to_conduct_transition_neutral_to_negative <
-            std::abs(-local_potential + params.simulation_parameters.mu_plus()))
+            std::abs(-local_potential + params.sim_params.mu_plus()))
         {
-            if (std::abs(-local_potential + params.simulation_parameters.mu_minus) <
+            if (std::abs(-local_potential + params.sim_params.mu_minus) <
                 updated_pop_stability_information.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE).second)
             {
                 updated_pop_stability_information.transition_potentials.at(transition_type::NEUTRAL_TO_NEGATIVE) = {
                     c, required_potential_to_conduct_transition_neutral_to_negative};
             }
         }
-        if (std::abs(-local_potential + params.simulation_parameters.mu_plus()) <
+        if (std::abs(-local_potential + params.sim_params.mu_plus()) <
             updated_pop_stability_information.transition_potentials.at(transition_type::NEUTRAL_TO_POSITIVE).second)
         {
             const auto required_potential_to_conduct_transition_neutral_to_positive =
-                std::abs(-local_potential + params.simulation_parameters.mu_plus());
+                std::abs(-local_potential + params.sim_params.mu_plus());
             if (required_potential_to_conduct_transition_neutral_to_positive <
                 updated_pop_stability_information.transition_potentials.at(transition_type::NEUTRAL_TO_POSITIVE).second)
             {
@@ -339,7 +339,7 @@ class physical_population_stability_impl
         auto updated_pop_stability_information = pop_stability_information;
 
         const auto required_potential_to_conduct_transition_from_positive_to_neutral =
-            std::abs(-local_potential + params.simulation_parameters.mu_plus());
+            std::abs(-local_potential + params.sim_params.mu_plus());
 
         if (required_potential_to_conduct_transition_from_positive_to_neutral <
             updated_pop_stability_information.transition_potentials.at(transition_type::POSITIVE_TO_NEUTRAL).second)

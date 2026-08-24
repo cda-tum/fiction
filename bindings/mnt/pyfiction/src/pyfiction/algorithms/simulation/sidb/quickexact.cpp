@@ -45,7 +45,7 @@ void quickexact(nanobind::module_& m)
      */
     py::class_<fiction::quickexact_params<>>(m, "quickexact_params", DOC(fiction_quickexact_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::quickexact_params<>::simulation_parameters,
+        .def_rw("simulation_parameters", &fiction::quickexact_params<>::sim_params,
                 DOC(fiction_quickexact_params_simulation_parameters))
         .def_rw("base_number_detection", &fiction::quickexact_params<>::base_number_detection,
                 DOC(fiction_quickexact_params_base_number_detection))

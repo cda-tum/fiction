@@ -112,7 +112,7 @@ void clustercomplete_command::execute()
             return;
         }
 
-        cc_params.simulation_parameters = physical_params;
+        cc_params.sim_params = physical_params;
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
@@ -181,9 +181,9 @@ nlohmann::json clustercomplete_command::log() const
             return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
                                   {"Simulation runtime", sim_res.simulation_runtime.count()},
                                   {"Physical parameters",
-                                   {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
-                                    {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
-                                    {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
+                                   {{"epsilon_r", sim_res.sim_params.epsilon_r},
+                                    {"lambda_tf", sim_res.sim_params.lambda_tf},
+                                    {"mu_minus", sim_res.sim_params.mu_minus}}},
                                   {"Lowest state energy (eV)", min_energy},
                                   {"Number of stable states", sim_res.charge_distributions.size()},
                                   {"Validity witness partitioning limit",
@@ -200,9 +200,9 @@ nlohmann::json clustercomplete_command::log() const
             {"Algorithm name", sim_res.algorithm_name},
             {"Simulation runtime", sim_res.simulation_runtime.count()},
             {"Physical parameters",
-             {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
-              {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
-              {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
+             {{"epsilon_r", sim_res.sim_params.epsilon_r},
+              {"lambda_tf", sim_res.sim_params.lambda_tf},
+              {"mu_minus", sim_res.sim_params.mu_minus}}},
             {"Lowest state energy (eV)", min_energy},
             {"Number of stable states", sim_res.charge_distributions.size()},
             {"Validity witness partitioning limit", std::any_cast<uint64_t>(sim_res.additional_simulation_parameters.at(

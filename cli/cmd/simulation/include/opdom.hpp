@@ -61,7 +61,7 @@ class opdom_command final : public command
     /**
      * Default physical parameters for the simulation.
      */
-    fiction::sidb::model::simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
     /**
      * Default value ranges for sweeping.
      */

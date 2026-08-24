@@ -57,11 +57,11 @@ opdom_command::opdom_command(const environment::ptr& e) :
              "physical simulation. Much faster, but reports some non-operational points as operational. Implies kink "
              "rejection and requires a layout with 'LOGIC' cells");
 
-    add_option("--epsilon_r,-e", params.operational_params.simulation_parameters.epsilon_r,
+    add_option("--epsilon_r,-e", params.operational_params.sim_params.epsilon_r,
                "Electric permittivity of the substrate (unit-less)", true);
-    add_option("--lambda_tf,-l", params.operational_params.simulation_parameters.lambda_tf,
+    add_option("--lambda_tf,-l", params.operational_params.sim_params.lambda_tf,
                "Thomas-Fermi screening distance (unit: nm)", true);
-    add_option("--mu_minus,-m", params.operational_params.simulation_parameters.mu_minus,
+    add_option("--mu_minus,-m", params.operational_params.sim_params.mu_minus,
                "Energy transition level (0/-) (unit: eV)", true);
 
     add_option("--x_sweep,-x", x_sweep, "Sweep parameter of the x dimension [epsilon_r, lambda_tf, mu_minus]", true);
@@ -79,7 +79,7 @@ opdom_command::opdom_command(const environment::ptr& e) :
     add_option("--z_max", sweep_dimensions[2].max, "Maximum value of the z dimension sweep");
     add_option("--z_step", sweep_dimensions[2].step, "Step size of the z dimension sweep");
 
-    add_option("--base", simulation_params.base,
+    add_option("--base", sim_params.base,
                "The simulation base, can be 2 or 3 (only ClusterComplete supports base-3 simulation)", true);
     add_option("--engine", sim_engine_str,
                "The simulation engine to use {QuickExact [default], ClusterComplete, QuickSim, ExGS}", true);
@@ -111,13 +111,13 @@ void opdom_command::execute()
         return;
     }
 
-    if (params.operational_params.simulation_parameters.epsilon_r <= 0)
+    if (params.operational_params.sim_params.epsilon_r <= 0)
     {
         env->out() << "[e] epsilon_r must be positive\n";
         reset_params();
         return;
     }
-    if (params.operational_params.simulation_parameters.lambda_tf <= 0)
+    if (params.operational_params.sim_params.lambda_tf <= 0)
     {
         env->out() << "[e] lambda_tf must be positive\n";
         reset_params();
@@ -285,9 +285,9 @@ void opdom_command::execute()
         }
 
         // set parameters
-        params.operational_params.simulation_parameters.base = simulation_params.base;
-        params.sweep_dimensions                              = sweep_dimensions;
-        params.operational_params.sim_engine                 = engine.value();
+        params.operational_params.sim_params.base = sim_params.base;
+        params.sweep_dimensions                   = sweep_dimensions;
+        params.operational_params.sim_engine      = engine.value();
 
         if (sketch)
         {
@@ -394,7 +394,7 @@ nlohmann::json opdom_command::log() const
 
 void opdom_command::reset_params()
 {
-    simulation_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
+    sim_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     sweep_dimensions =
         std::vector<fiction::operational_domain_value_range>{{fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
                                                              {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},

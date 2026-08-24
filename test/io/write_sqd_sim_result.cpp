@@ -169,32 +169,31 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     SECTION("without additional parameters")
     {
-        const auto        current_time = std::time(nullptr);
-        const std::string sim_result_str =
-            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        "<sim_out>\n"
-                        "    <eng_info>\n"
-                        "        <engine>TestSim</engine>\n"
-                        "        <version>{}</version>\n"
-                        "        <repo>{}</repo>\n"
-                        "        <return_code>0</return_code>\n"
-                        "        <timestamp>{}</timestamp>\n"
-                        "        <time_elapsed_s>42</time_elapsed_s>\n"
-                        "    </eng_info>\n"
-                        "    <sim_params>\n"
-                        "        <debye_length>{}</debye_length>\n"
-                        "        <eps_r>{}</eps_r>\n"
-                        "        <muzm>{}</muzm>\n"
-                        "    </sim_params>\n"
-                        "    <physloc>\n"
-                        "    </physloc>\n"
-                        "    <elec_dist>\n"
-                        "    </elec_dist>\n"
-                        "</sim_out>\n",
-                        FICTION_VERSION, FICTION_REPO,
-                        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
-                        sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
-                        sim_result.simulation_parameters.mu_minus);
+        const auto        current_time   = std::time(nullptr);
+        const std::string sim_result_str = fmt::format(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<sim_out>\n"
+            "    <eng_info>\n"
+            "        <engine>TestSim</engine>\n"
+            "        <version>{}</version>\n"
+            "        <repo>{}</repo>\n"
+            "        <return_code>0</return_code>\n"
+            "        <timestamp>{}</timestamp>\n"
+            "        <time_elapsed_s>42</time_elapsed_s>\n"
+            "    </eng_info>\n"
+            "    <sim_params>\n"
+            "        <debye_length>{}</debye_length>\n"
+            "        <eps_r>{}</eps_r>\n"
+            "        <muzm>{}</muzm>\n"
+            "    </sim_params>\n"
+            "    <physloc>\n"
+            "    </physloc>\n"
+            "    <elec_dist>\n"
+            "    </elec_dist>\n"
+            "</sim_out>\n",
+            FICTION_VERSION, FICTION_REPO,
+            fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+            sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -202,33 +201,32 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
     }
     SECTION("with additional parameter (string)")
     {
-        const auto        current_time = std::time(nullptr);
-        const std::string sim_result_str =
-            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        "<sim_out>\n"
-                        "    <eng_info>\n"
-                        "        <engine>TestSim</engine>\n"
-                        "        <version>{}</version>\n"
-                        "        <repo>{}</repo>\n"
-                        "        <return_code>0</return_code>\n"
-                        "        <timestamp>{}</timestamp>\n"
-                        "        <time_elapsed_s>42</time_elapsed_s>\n"
-                        "    </eng_info>\n"
-                        "    <sim_params>\n"
-                        "        <debye_length>{}</debye_length>\n"
-                        "        <eps_r>{}</eps_r>\n"
-                        "        <muzm>{}</muzm>\n"
-                        "        <param1>value1</param1>\n"
-                        "    </sim_params>\n"
-                        "    <physloc>\n"
-                        "    </physloc>\n"
-                        "    <elec_dist>\n"
-                        "    </elec_dist>\n"
-                        "</sim_out>\n",
-                        FICTION_VERSION, FICTION_REPO,
-                        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
-                        sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
-                        sim_result.simulation_parameters.mu_minus);
+        const auto        current_time   = std::time(nullptr);
+        const std::string sim_result_str = fmt::format(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<sim_out>\n"
+            "    <eng_info>\n"
+            "        <engine>TestSim</engine>\n"
+            "        <version>{}</version>\n"
+            "        <repo>{}</repo>\n"
+            "        <return_code>0</return_code>\n"
+            "        <timestamp>{}</timestamp>\n"
+            "        <time_elapsed_s>42</time_elapsed_s>\n"
+            "    </eng_info>\n"
+            "    <sim_params>\n"
+            "        <debye_length>{}</debye_length>\n"
+            "        <eps_r>{}</eps_r>\n"
+            "        <muzm>{}</muzm>\n"
+            "        <param1>value1</param1>\n"
+            "    </sim_params>\n"
+            "    <physloc>\n"
+            "    </physloc>\n"
+            "    <elec_dist>\n"
+            "    </elec_dist>\n"
+            "</sim_out>\n",
+            FICTION_VERSION, FICTION_REPO,
+            fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+            sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
 
@@ -239,33 +237,32 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
     SECTION("with additional parameters (double)")
     {
-        const auto        current_time = std::time(nullptr);
-        const std::string sim_result_str =
-            fmt::format("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                        "<sim_out>\n"
-                        "    <eng_info>\n"
-                        "        <engine>TestSim</engine>\n"
-                        "        <version>{}</version>\n"
-                        "        <repo>{}</repo>\n"
-                        "        <return_code>0</return_code>\n"
-                        "        <timestamp>{}</timestamp>\n"
-                        "        <time_elapsed_s>42</time_elapsed_s>\n"
-                        "    </eng_info>\n"
-                        "    <sim_params>\n"
-                        "        <debye_length>{}</debye_length>\n"
-                        "        <eps_r>{}</eps_r>\n"
-                        "        <muzm>{}</muzm>\n"
-                        "        <param3>3.140000</param3>\n"
-                        "    </sim_params>\n"
-                        "    <physloc>\n"
-                        "    </physloc>\n"
-                        "    <elec_dist>\n"
-                        "    </elec_dist>\n"
-                        "</sim_out>\n",
-                        FICTION_VERSION, FICTION_REPO,
-                        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
-                        sim_result.simulation_parameters.lambda_tf, sim_result.simulation_parameters.epsilon_r,
-                        sim_result.simulation_parameters.mu_minus);
+        const auto        current_time   = std::time(nullptr);
+        const std::string sim_result_str = fmt::format(
+            "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+            "<sim_out>\n"
+            "    <eng_info>\n"
+            "        <engine>TestSim</engine>\n"
+            "        <version>{}</version>\n"
+            "        <repo>{}</repo>\n"
+            "        <return_code>0</return_code>\n"
+            "        <timestamp>{}</timestamp>\n"
+            "        <time_elapsed_s>42</time_elapsed_s>\n"
+            "    </eng_info>\n"
+            "    <sim_params>\n"
+            "        <debye_length>{}</debye_length>\n"
+            "        <eps_r>{}</eps_r>\n"
+            "        <muzm>{}</muzm>\n"
+            "        <param3>3.140000</param3>\n"
+            "    </sim_params>\n"
+            "    <physloc>\n"
+            "    </physloc>\n"
+            "    <elec_dist>\n"
+            "    </elec_dist>\n"
+            "</sim_out>\n",
+            FICTION_VERSION, FICTION_REPO,
+            fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+            sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
 
@@ -336,8 +333,8 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     "</sim_out>\n",
                     FICTION_VERSION, FICTION_REPO,
                     fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
-                    sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
-                    sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
+                    sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf,
+                    sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 
@@ -394,8 +391,8 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "</sim_out>\n",
         FICTION_VERSION, FICTION_REPO,
         fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
-        sim_result.simulation_runtime.count(), sim_result.simulation_parameters.lambda_tf,
-        sim_result.simulation_parameters.epsilon_r, sim_result.simulation_parameters.mu_minus);
+        sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r,
+        sim_result.sim_params.mu_minus);
 
     write_sqd_sim_result(sim_result, simulation_stream);
 

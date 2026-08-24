@@ -71,7 +71,7 @@ void random_sidb_layout_generator(nanobind::module_& m)
                 &fiction::generate_random_sidb_layout_params<fiction::layouts::coords::offset>::positive_sidbs,
                 DOC(fiction_generate_random_sidb_layout_params_positive_sidbs))
         .def_rw("simulation_parameters",
-                &fiction::generate_random_sidb_layout_params<fiction::layouts::coords::offset>::simulation_parameters,
+                &fiction::generate_random_sidb_layout_params<fiction::layouts::coords::offset>::sim_params,
                 DOC(fiction_generate_random_sidb_layout_params_simulation_parameters))
         .def_rw("maximal_attempts",
                 &fiction::generate_random_sidb_layout_params<fiction::layouts::coords::offset>::maximal_attempts,

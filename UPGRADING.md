@@ -388,6 +388,29 @@ gate library, and `sim7_mol_library` names the SIM(7)-MolPDK library.
 - **`experiments/`** changed only its include directives. It reproduces published
   papers and is not refactored.
 
+### Renamed struct members
+
+Ten parameter and result structs declared a member whose name repeated its type:
+
+```cpp
+sidb_simulation_parameters simulation_parameters{};
+```
+
+The member is now `sim_params`, which is what two of these structs and several
+locals already called it:
+
+```cpp
+sidb::model::simulation_parameters sim_params{};
+```
+
+So `params.simulation_parameters` becomes `params.sim_params`. The structs affected
+are `quickexact_params`, `quicksim_params`, `clustercomplete_params`,
+`is_operational_params`, `critical_temperature_params`,
+`physical_population_stability_params`, `generate_random_sidb_layout_params`,
+`ground_state_space_params`, `sidb_simulation_result`, and
+`charge_distribution_surface`'s storage. `is_sidb_gate_design_impossible_params`
+spelled it `simulation_params` and is unified to `sim_params` too.
+
 ### A name collision to know about
 
 `fiction::technology<Lyt>` is a trait alias in `traits.hpp` that yields a layout's

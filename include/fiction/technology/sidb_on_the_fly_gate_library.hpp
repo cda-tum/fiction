@@ -617,7 +617,7 @@ class sidb_on_the_fly_gate_library
 
         const auto status =
             is_operational(skeleton_with_defects_copy, truth_table,
-                           is_operational_params{parameters.design_gate_params.operational_params.simulation_parameters,
+                           is_operational_params{parameters.design_gate_params.operational_params.sim_params,
                                                  parameters.design_gate_params.operational_params.sim_engine})
                 .first;
 
@@ -706,8 +706,8 @@ class sidb_on_the_fly_gate_library
         static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
         static_assert(has_cube_coord_v<CellLyt>, "CellLyt is not based on cube coordinates");
 
-        const auto params = is_sidb_gate_design_impossible_params{
-            parameters.design_gate_params.operational_params.simulation_parameters};
+        const auto params =
+            is_sidb_gate_design_impossible_params{parameters.design_gate_params.operational_params.sim_params};
 
         if (spec == networks::utils::create_crossing_wire_tt() || spec == networks::utils::create_double_wire_tt())
         {

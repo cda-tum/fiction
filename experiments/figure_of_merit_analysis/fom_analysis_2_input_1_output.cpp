@@ -100,8 +100,7 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.2;
 
-    const band_bending_resilience_params bbr_params{
-        physical_population_stability_params{op_params.simulation_parameters}};
+    const band_bending_resilience_params bbr_params{physical_population_stability_params{op_params.sim_params}};
 
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
     // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon

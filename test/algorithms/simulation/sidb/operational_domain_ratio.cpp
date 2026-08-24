@@ -45,8 +45,8 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
     // set x-dimension
     op_domain_params.sweep_dimensions[0].min  = 5.5;
@@ -103,7 +103,7 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
         bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
     op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
@@ -152,8 +152,8 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
     // set x-dimension
     op_domain_params.sweep_dimensions[0].min  = 5.0;

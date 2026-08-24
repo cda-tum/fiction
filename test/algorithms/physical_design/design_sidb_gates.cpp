@@ -36,7 +36,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
     design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
-            is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.31},
+            is_operational_params{.sim_params                = sidb::model::simulation_parameters{2, -0.31},
                                   .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                                   .input_bdl_iterator_params = bdl_input_iterator_params{},
                                   .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
@@ -112,10 +112,9 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     SECTION("One cell in canvas")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
+            .design_mode        = design_sidb_gates_params<
                 cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
@@ -132,9 +131,8 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         // using cube coordinates
         const auto lyt_in_cube_coord = layouts::utils::convert_layout_to_fiction_coordinates<cube_layout>(lyt);
         const design_sidb_gates_params<cell<cube_layout>> params_cube{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
             .design_mode =
                 design_sidb_gates_params<cell<cube_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas = {layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 4, 0}),
@@ -152,10 +150,9 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         // using offset coordinates
         const auto lyt_in_offset_coord = layouts::utils::convert_layout_to_fiction_coordinates<offset_layout>(lyt);
         const design_sidb_gates_params<cell<offset_layout>> params_offset{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
+            .design_mode        = design_sidb_gates_params<
                 cell<offset_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas = {layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 4, 0}),
                        layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 4, 0})},
@@ -172,10 +169,9 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
+            .design_mode        = design_sidb_gates_params<
                 cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {13, 4, 0}},
             .number_of_canvas_sidbs = 1,
@@ -190,10 +186,9 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     SECTION("one SiDB in the canvas, terminate after first solution is found, QuickExact")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
+            .design_mode        = design_sidb_gates_params<
                 cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
@@ -214,10 +209,9 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     SECTION("one SiDB in the canvas, terminate after first solution is found, QuickSim")
     {
         const auto params = design_sidb_gates_params<cell<siqad_layout>>{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKSIM},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKSIM},
+            .design_mode        = design_sidb_gates_params<
                 cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
@@ -261,7 +255,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
             is_operational_params{
-                .simulation_parameters     = sidb::model::simulation_parameters{2, -0.28},
+                .sim_params                = sidb::model::simulation_parameters{2, -0.28},
                 .sim_engine                = sidb_simulation_engine::EXGS,
                 .input_bdl_iterator_params = {.bdl_wire_params =
                                                   detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}}},
@@ -310,10 +304,10 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
 
         sidb::primitives::defect_surface defect_layout{lyt};
-        defect_layout.assign_sidb_defect(
-            {10, 6, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
-                                            params.operational_params.simulation_parameters.epsilon_r,
-                                            params.operational_params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({10, 6, 0},
+                                         sidb::model::defect{sidb::model::defect_type::DB, -1,
+                                                             params.operational_params.sim_params.epsilon_r,
+                                                             params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
@@ -365,10 +359,9 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     SECTION("generate original FO2")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
+            .design_mode        = design_sidb_gates_params<
                 cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{17, 11, 0}, {17, 11, 0}},
             .number_of_canvas_sidbs = 1};
@@ -389,10 +382,9 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::CLUSTERCOMPLETE},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE},
+            .design_mode        = design_sidb_gates_params<
                 cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{17, 11, 0}, {17, 11, 0}},
             .number_of_canvas_sidbs = 1};
@@ -403,14 +395,14 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
         CHECK(defect_layout.get_cell_type({36, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
         CHECK(defect_layout.get_cell_type({2, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
 
-        defect_layout.assign_sidb_defect(
-            {36, 19, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
-                                             params.operational_params.simulation_parameters.epsilon_r,
-                                             params.operational_params.simulation_parameters.lambda_tf});
-        defect_layout.assign_sidb_defect(
-            {2, 19, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
-                                            params.operational_params.simulation_parameters.epsilon_r,
-                                            params.operational_params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({36, 19, 0},
+                                         sidb::model::defect{sidb::model::defect_type::DB, -1,
+                                                             params.operational_params.sim_params.epsilon_r,
+                                                             params.operational_params.sim_params.lambda_tf});
+        defect_layout.assign_sidb_defect({2, 19, 0},
+                                         sidb::model::defect{sidb::model::defect_type::DB, -1,
+                                                             params.operational_params.sim_params.epsilon_r,
+                                                             params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
             design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_fan_out_tt()}, params);
@@ -441,7 +433,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
+                is_operational_params{.sim_params                = sidb::model::simulation_parameters{2, -0.32},
                                       .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                                       .input_bdl_iterator_params = bdl_input_iterator_params{},
                                       .op_condition = is_operational_params::operational_condition::TOLERATE_KINKS},
@@ -461,7 +453,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
+                is_operational_params{.sim_params                = sidb::model::simulation_parameters{2, -0.32},
                                       .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                                       .input_bdl_iterator_params = bdl_input_iterator_params{},
                                       .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
@@ -469,10 +461,10 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             .canvas      = {{18, 8, 1}, {22, 12, 0}},
             .number_of_canvas_sidbs = 2};
 
-        defect_layout.assign_sidb_defect(
-            {14, 10, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
-                                             params.operational_params.simulation_parameters.epsilon_r,
-                                             params.operational_params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({14, 10, 0},
+                                         sidb::model::defect{sidb::model::defect_type::DB, -1,
+                                                             params.operational_params.sim_params.epsilon_r,
+                                                             params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts =
             design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
@@ -501,7 +493,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
+                is_operational_params{.sim_params                = sidb::model::simulation_parameters{2, -0.32},
                                       .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                                       .input_bdl_iterator_params = bdl_input_iterator_params{},
                                       .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
@@ -509,10 +501,10 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
             .canvas      = {{14, 10, 0}, {14, 10, 0}},
             .number_of_canvas_sidbs = 1};
 
-        defect_layout.assign_sidb_defect(
-            {14, 10, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
-                                             params.operational_params.simulation_parameters.epsilon_r,
-                                             params.operational_params.simulation_parameters.lambda_tf});
+        defect_layout.assign_sidb_defect({14, 10, 0},
+                                         sidb::model::defect{sidb::model::defect_type::DB, -1,
+                                                             params.operational_params.sim_params.epsilon_r,
+                                                             params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts =
             design_sidb_gates(defect_layout, std::vector<tt>{networks::utils::create_and_tt()}, params);
@@ -537,9 +529,8 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Random Generation")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
             .design_mode = design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
             .canvas      = {{10, 11, 0}, {14, 15, 0}},
             .number_of_canvas_sidbs = 3};
@@ -553,10 +544,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Exhaustive Generation, allowing kinks")
     {
         design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT},
-            .design_mode = design_sidb_gates_params<
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT},
+            .design_mode        = design_sidb_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 13, 0}, {14, 17, 0}},
             .number_of_canvas_sidbs = 3,
@@ -590,7 +580,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
+                is_operational_params{.sim_params                = sidb::model::simulation_parameters{2, -0.32},
                                       .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                                       .input_bdl_iterator_params = bdl_input_iterator_params{},
                                       .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
@@ -611,10 +601,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Exhaustive Generation, QuickCell")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine                = sidb_simulation_engine::QUICKEXACT,
-                                      .input_bdl_iterator_params = bdl_input_iterator_params{}},
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT,
+                                                        .input_bdl_iterator_params = bdl_input_iterator_params{}},
             .design_mode =
                 design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             .canvas                 = {{10, 13, 0}, {15, 17, 0}},
@@ -630,10 +619,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     SECTION("Stop after first gate design is finished, QuickCell")
     {
         const design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine                = sidb_simulation_engine::QUICKEXACT,
-                                      .input_bdl_iterator_params = bdl_input_iterator_params{}},
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT,
+                                                        .input_bdl_iterator_params = bdl_input_iterator_params{}},
             .design_mode =
                 design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             .canvas                 = {{8, 13, 0}, {17, 17, 0}},
@@ -653,10 +641,9 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
     const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
 
     const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-        .operational_params =
-            is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
-                                  .sim_engine                = sidb_simulation_engine::QUICKEXACT,
-                                  .input_bdl_iterator_params = bdl_input_iterator_params{}},
+        .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                    .sim_engine = sidb_simulation_engine::QUICKEXACT,
+                                                    .input_bdl_iterator_params = bdl_input_iterator_params{}},
         .design_mode =
             design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::PRUNING_ONLY,
         .canvas                 = {{16, 8, 0}, {22, 14, 0}},
@@ -677,10 +664,9 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
     SECTION("Exhaustive Generation, QuickCell")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine                = sidb_simulation_engine::QUICKEXACT,
-                                      .input_bdl_iterator_params = bdl_input_iterator_params{}},
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT,
+                                                        .input_bdl_iterator_params = bdl_input_iterator_params{}},
             .design_mode =
                 design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             .canvas                 = {{16, 8, 0}, {22, 14, 0}},
@@ -703,10 +689,9 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
     SECTION("Exhaustive Generation, QuickCell")
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
-            .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
-                                      .sim_engine                = sidb_simulation_engine::QUICKEXACT,
-                                      .input_bdl_iterator_params = bdl_input_iterator_params{}},
+            .operational_params = is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
+                                                        .sim_engine = sidb_simulation_engine::QUICKEXACT,
+                                                        .input_bdl_iterator_params = bdl_input_iterator_params{}},
             .design_mode =
                 design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
             .canvas                 = {{16, 7, 0}, {22, 15, 0}},
@@ -728,7 +713,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
     {
         const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
-                is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
+                is_operational_params{.sim_params                = sidb::model::simulation_parameters{2, -0.32},
                                       .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                                       .input_bdl_iterator_params = bdl_input_iterator_params{},
                                       .op_condition = is_operational_params::operational_condition::REJECT_KINKS},

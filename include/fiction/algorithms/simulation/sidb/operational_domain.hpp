@@ -1095,10 +1095,10 @@ class operational_domain_impl
             }
         }
 
-        sidb::model::simulation_parameters simulation_parameters = params.operational_params.simulation_parameters;
+        sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
         op_domain.for_each(
-            [&simulation_parameters, &lyt, this, &suitable_params_domain](const auto& param_point, const auto& status)
+            [&sim_params, &lyt, this, &suitable_params_domain](const auto& param_point, const auto& status)
             {
                 if constexpr (std::is_same_v<OpDomain, operational_domain>)
                 {
@@ -1109,7 +1109,7 @@ class operational_domain_impl
 
                     for (auto d = 0u; d < num_dimensions; ++d)
                     {
-                        set_dimension_value(simulation_parameters, param_point.get_parameters().at(d), d);
+                        set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
                     }
 
                     auto sim_results = sidb_simulation_result<Lyt>{};
@@ -1117,22 +1117,19 @@ class operational_domain_impl
                     if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
                     {
                         // perform an exact ground state simulation
-                        sim_results =
-                            quickexact(lyt, quickexact_params<cell<Lyt>>{
-                                                simulation_parameters,
-                                                quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
+                        sim_results = quickexact(
+                            lyt, quickexact_params<cell<Lyt>>{
+                                     sim_params, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF});
                     }
                     else if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
                     {
                         // perform an exhaustive ground state simulation
-                        sim_results = exhaustive_ground_state_simulation(lyt, simulation_parameters);
+                        sim_results = exhaustive_ground_state_simulation(lyt, sim_params);
                     }
                     else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
                     {
                         // perform a heuristic simulation
-                        const quicksim_params qs_params{.simulation_parameters = simulation_parameters,
-                                                        .iteration_steps       = 500,
-                                                        .alpha                 = 0.6};
+                        const quicksim_params qs_params{.sim_params = sim_params, .iteration_steps = 500, .alpha = 0.6};
 
                         if (const auto result = quicksim(lyt, qs_params); result.has_value())
                         {
@@ -1150,7 +1147,7 @@ class operational_domain_impl
 
                     const auto energy_dist = calculate_energy_distribution(sim_results.charge_distributions);
 
-                    lyt.assign_physical_parameters(simulation_parameters);
+                    lyt.assign_physical_parameters(sim_params);
                     const auto degeneracy_of_layout_energy =
                         energy_dist.degeneracy(lyt.get_electrostatic_potential_energy());
 
@@ -1438,15 +1435,15 @@ class operational_domain_impl
 
         ++num_evaluated_parameter_combinations;
 
-        sidb::model::simulation_parameters sim_params = params.operational_params.simulation_parameters;
+        sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
             set_dimension_value(sim_params, values.at(d).at(sp.step_values.at(d)), d);
         }
 
-        auto op_params_set_dimension_values                  = params.operational_params;
-        op_params_set_dimension_values.simulation_parameters = sim_params;
+        auto op_params_set_dimension_values       = params.operational_params;
+        op_params_set_dimension_values.sim_params = sim_params;
 
         const auto& [status, sim_calls] =
             is_operational(input_pattern_layouts, truth_table, op_params_set_dimension_values, input_bdl_wires,
@@ -1509,7 +1506,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb::model::simulation_parameters sim_params = params.operational_params.simulation_parameters;
+        sidb::model::simulation_parameters sim_params = params.operational_params.sim_params;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {

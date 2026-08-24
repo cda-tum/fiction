@@ -133,7 +133,7 @@ void temp_command::execute()
 
         params.operational_params.sim_engine = sim_engine.value();
 
-        params.operational_params.simulation_parameters = physical_params;
+        params.operational_params.sim_params = physical_params;
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
@@ -183,10 +183,10 @@ nlohmann::json temp_command::log() const
 {
     return nlohmann::json{{"Algorithm name", stats.algorithm_name},
                           {"Physical parameters",
-                           {{"base", stats.simulation_parameters.base},
-                            {"epsilon_r", stats.simulation_parameters.epsilon_r},
-                            {"lambda_tf", stats.simulation_parameters.lambda_tf},
-                            {"mu_minus", stats.simulation_parameters.mu_minus}}},
+                           {{"base", stats.sim_params.base},
+                            {"epsilon_r", stats.sim_params.epsilon_r},
+                            {"lambda_tf", stats.sim_params.lambda_tf},
+                            {"mu_minus", stats.sim_params.mu_minus}}},
                           {"Critical temperature", ct},
                           {"Number of stable states", stats.num_valid_lyt},
                           {"Energy difference between ground state and first erroneous state",

@@ -400,7 +400,7 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
     op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 7, .max = 8, .step = 0.01},
                                          {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.5, .max = 6, .step = 0.01}};
 
-    op_domain_params.operational_params.simulation_parameters.mu_minus                                        = -0.28;
+    op_domain_params.operational_params.sim_params.mu_minus                                                   = -0.28;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
@@ -419,9 +419,9 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params params{};
-    params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    params.operational_params.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
+    params.operational_params.sim_params   = sidb::model::simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine   = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1},
                                {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
@@ -487,9 +487,9 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
             {
                 auto point_params = sketch_params.operational_params;
 
-                point_params.simulation_parameters.epsilon_r = parameter_point.get_parameters().at(0);
-                point_params.simulation_parameters.lambda_tf = parameter_point.get_parameters().at(1);
-                point_params.simulation_parameters.mu_minus  = parameter_point.get_parameters().at(2);
+                point_params.sim_params.epsilon_r = parameter_point.get_parameters().at(0);
+                point_params.sim_params.lambda_tf = parameter_point.get_parameters().at(1);
+                point_params.sim_params.mu_minus  = parameter_point.get_parameters().at(2);
 
                 const auto [expected, _] = is_operational(lat, std::vector{networks::utils::create_and_tt()},
                                                           point_params, input_wires, output_wires);
@@ -530,8 +530,8 @@ TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params params{};
-    params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
                                {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
@@ -592,9 +592,9 @@ TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]"
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
 
@@ -612,9 +612,9 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
 
@@ -680,9 +680,9 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {{.dimension = sweep_parameter::EPSILON_R},
-                                                                 {.dimension = sweep_parameter::LAMBDA_TF}};
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
+                                                      {.dimension = sweep_parameter::LAMBDA_TF}};
 
     CHECK(op_domain_params.sweep_dimensions[0].dimension == sweep_parameter::EPSILON_R);
     CHECK(op_domain_params.sweep_dimensions[1].dimension == sweep_parameter::LAMBDA_TF);
@@ -1434,7 +1434,7 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.sim_params = sim_params;
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
     op_domain_params.sweep_dimensions = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
@@ -1518,7 +1518,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.sim_params = sim_params;
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
     op_domain_params.sweep_dimensions = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
@@ -1629,8 +1629,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
 
@@ -1747,8 +1747,8 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     sim_params.mu_minus = -0.28;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
 
@@ -1833,8 +1833,8 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.60, .max = 5.61, .step = 0.01},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.01, .step = 0.01}};
 
@@ -1923,8 +1923,8 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 4.0, .max = 6.0, .step = 0.4},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.0, .max = 6.0, .step = 0.4}};
 
@@ -1970,8 +1970,8 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 4.0, .max = 6.0, .step = 0.4},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.0, .max = 6.0, .step = 0.4}};
 
@@ -2055,8 +2055,8 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.sweep_dimensions                         = {
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.sweep_dimensions              = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.8, .step = 0.1},
         {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
 
@@ -2143,7 +2143,7 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
     sim_params.mu_minus = -0.32;
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 1, .max = 10, .step = 0.1},
                                          {.dimension = sweep_parameter::LAMBDA_TF, .min = 1, .max = 10, .step = 0.1}};
 

@@ -94,7 +94,7 @@ void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattic
                 DOC(fiction_sidb_simulation_result_simulation_runtime))
         .def_rw("charge_distributions", &fiction::sidb_simulation_result<Lyt>::charge_distributions,
                 DOC(fiction_sidb_simulation_result_charge_distributions))
-        .def_rw("simulation_parameters", &fiction::sidb_simulation_result<Lyt>::simulation_parameters,
+        .def_rw("simulation_parameters", &fiction::sidb_simulation_result<Lyt>::sim_params,
                 DOC(fiction_sidb_simulation_result_simulation_parameters))
         .def_prop_ro(
             "additional_simulation_parameters", [](const fiction::sidb_simulation_result<Lyt>& self)

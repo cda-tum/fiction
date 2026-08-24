@@ -38,7 +38,7 @@ void quicksim(nanobind::module_& m)
      */
     py::class_<fiction::quicksim_params>(m, "quicksim_params", DOC(fiction_quicksim_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::quicksim_params::simulation_parameters,
+        .def_rw("simulation_parameters", &fiction::quicksim_params::sim_params,
                 DOC(fiction_quicksim_params_simulation_parameters))
         .def_rw("iteration_steps", &fiction::quicksim_params::iteration_steps,
                 DOC(fiction_quicksim_params_iteration_steps))

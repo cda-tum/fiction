@@ -40,8 +40,8 @@ sidb_simulation_result<Lyt> exhaustive_ground_state_simulation(
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     sidb_simulation_result<Lyt> simulation_result{};
-    simulation_result.algorithm_name        = "ExGS";
-    simulation_result.simulation_parameters = params;
+    simulation_result.algorithm_name = "ExGS";
+    simulation_result.sim_params     = params;
 
     if (lyt.num_cells() == 0)
     {

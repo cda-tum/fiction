@@ -121,7 +121,7 @@ void is_operational(nanobind::module_& m)
 
     py::class_<fiction::is_operational_params>(m, "is_operational_params", DOC(fiction_is_operational_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::is_operational_params::simulation_parameters,
+        .def_rw("simulation_parameters", &fiction::is_operational_params::sim_params,
                 DOC(fiction_is_operational_params_simulation_parameters))
         .def_rw("sim_engine", &fiction::is_operational_params::sim_engine,
                 DOC(fiction_is_operational_params_sim_engine))

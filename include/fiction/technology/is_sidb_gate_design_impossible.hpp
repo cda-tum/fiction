@@ -29,7 +29,7 @@ struct is_sidb_gate_design_impossible_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb::model::simulation_parameters simulation_params{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * Parameters used for the BDL input iterator.
      */
@@ -69,7 +69,7 @@ template <typename Lyt, typename TT>
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {
-        auto charge_lyt = sidb::primitives::charge_distribution_surface<Lyt>{*bdl_iter, params.simulation_params};
+        auto charge_lyt = sidb::primitives::charge_distribution_surface<Lyt>{*bdl_iter, params.sim_params};
         charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 

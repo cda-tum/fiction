@@ -64,7 +64,7 @@ struct generate_random_sidb_layout_params
     /**
      * Simulation parameters.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * Maximum number of steps to place the specified number of SiDBs. Example: If the area, where SiDBs can be placed,
      * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
@@ -158,7 +158,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
 
             if (params.positive_sidbs ==
                     generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
-                can_positive_charges_occur(lyt, params.simulation_parameters))
+                can_positive_charges_occur(lyt, params.sim_params))
             {
                 lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::EMPTY);
             }
@@ -167,7 +167,7 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
     }
 
     if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
-        !can_positive_charges_occur(lyt, params.simulation_parameters))
+        !can_positive_charges_occur(lyt, params.sim_params))
     {
         return generate_random_sidb_layout(params, skeleton);
     }

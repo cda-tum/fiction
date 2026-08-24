@@ -60,8 +60,8 @@ int main()  // NOLINT
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
 
     // the sketch's filtering steps are only defined when kinks are rejected
     op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;

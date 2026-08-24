@@ -64,8 +64,7 @@ TEMPLATE_TEST_CASE(
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{2, -0.25}};
     lyt.assign_sidb_defect({1, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -84,8 +83,8 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{2, -0.25}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                          params.simulation_parameters.epsilon_r, 2});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, 2});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -103,8 +102,8 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{2, -0.25}};
 
-    lyt.assign_sidb_defect({1, 6, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, 0.3,
-                                                          params.simulation_parameters.lambda_tf});
+    lyt.assign_sidb_defect(
+        {1, 6, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, 0.3, params.sim_params.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -129,8 +128,7 @@ TEMPLATE_TEST_CASE(
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{2, -0.15}};
 
     lyt.assign_sidb_defect({0, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -157,8 +155,7 @@ TEMPLATE_TEST_CASE(
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{3, -0.1}};
 
     lyt.assign_sidb_defect({1, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -10,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 1);
@@ -177,9 +174,9 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{2, -0.1}};
 
-    lyt.assign_sidb_defect({1, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -10,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf * 10E-5});
+    lyt.assign_sidb_defect({1, 2, 0},
+                           sidb::model::defect{sidb::model::defect_type::UNKNOWN, -10, params.sim_params.epsilon_r,
+                                               params.sim_params.lambda_tf * 10E-5});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -199,11 +196,9 @@ TEMPLATE_TEST_CASE(
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{2, -0.1}};
 
     lyt.assign_sidb_defect({2, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -10,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     lyt.assign_sidb_defect({-2, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 10,
-                                                           params.simulation_parameters.epsilon_r,
-                                                           params.simulation_parameters.lambda_tf});
+                                                           params.sim_params.epsilon_r, params.sim_params.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -833,8 +828,7 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{3, -0.32}};
     lyt.assign_sidb_defect({-1, -1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                            params.simulation_parameters.epsilon_r,
-                                                            params.simulation_parameters.lambda_tf});
+                                                            params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -857,8 +851,7 @@ TEMPLATE_TEST_CASE(
 
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{3, -0.28}};
     lyt.assign_sidb_defect({1, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -885,11 +878,9 @@ TEMPLATE_TEST_CASE(
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     lyt.assign_sidb_defect({31, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                           params.simulation_parameters.epsilon_r,
-                                                           params.simulation_parameters.lambda_tf});
+                                                           params.sim_params.epsilon_r, params.sim_params.lambda_tf});
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -918,11 +909,9 @@ TEMPLATE_TEST_CASE(
     const quickexact_params<cell<TestType>> params{sidb::model::simulation_parameters{3, -0.28}};
 
     lyt.assign_sidb_defect({1, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1,
-                                                          params.simulation_parameters.epsilon_r,
-                                                          params.simulation_parameters.lambda_tf});
+                                                          params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     lyt.assign_sidb_defect({31, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
-                                                           params.simulation_parameters.epsilon_r,
-                                                           params.simulation_parameters.lambda_tf});
+                                                           params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
@@ -954,8 +943,7 @@ TEMPLATE_TEST_CASE("Seven randomly distributed DBs, test if dependent cell calcu
 
     const auto simulation_results = quickexact<TestType>(lyt, params);
 
-    const auto simulation_results_exgs =
-        exhaustive_ground_state_simulation<TestType>(lyt, params.simulation_parameters);
+    const auto simulation_results_exgs = exhaustive_ground_state_simulation<TestType>(lyt, params.sim_params);
 
     REQUIRE(simulation_results.charge_distributions.size() == simulation_results_exgs.charge_distributions.size());
 
@@ -1274,7 +1262,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
     {
         SECTION("epsilon_r = 8")
         {
-            params.simulation_parameters.epsilon_r = 8;
+            params.sim_params.epsilon_r = 8;
             std::set<double>   ground_state{};
             std::set<uint64_t> charge_index{};
             for (auto i = 0; i < 10000; i++)
@@ -1290,7 +1278,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
         }
         SECTION("epsilon_r = 2")
         {
-            params.simulation_parameters.epsilon_r = 2;
+            params.sim_params.epsilon_r = 2;
             std::set<double>   ground_state{};
             std::set<uint64_t> charge_index{};
             for (auto i = 0; i < 10000; i++)
@@ -1308,7 +1296,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Add SiDBs which are positively charged in the ground state, layout does not fulfill the logic anymore.")
     {
-        params.simulation_parameters.base = 3;
+        params.sim_params.base = 3;
         lyt.assign_cell_type({15, 2, 1}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({15, 2, 0}, TestType::cell_type::NORMAL);
 
@@ -1344,7 +1332,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Increased mu_minus")
     {
-        params.simulation_parameters.mu_minus = -0.1;
+        params.sim_params.mu_minus = -0.1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1366,7 +1354,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Decreased mu_minus")
     {
-        params.simulation_parameters.mu_minus = -0.7;
+        params.sim_params.mu_minus = -0.7;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1388,7 +1376,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Decreased lambda_tf")
     {
-        params.simulation_parameters.lambda_tf = 1;
+        params.sim_params.lambda_tf = 1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1410,7 +1398,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Increased lambda_tf")
     {
-        params.simulation_parameters.lambda_tf = 10;
+        params.sim_params.lambda_tf = 10;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1432,7 +1420,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 
     SECTION("Increased epsilon_r")
     {
-        params.simulation_parameters.epsilon_r = 10;
+        params.sim_params.epsilon_r = 10;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1585,7 +1573,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb
     SECTION("Increased mu_minus")
     {
         // set a small absolute value for µ
-        params.simulation_parameters.mu_minus = -0.1;
+        params.sim_params.mu_minus = -0.1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1616,7 +1604,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb
     SECTION("Decreased mu_minus")
     {
         // set a large absolute value for µ
-        params.simulation_parameters.mu_minus = -0.7;
+        params.sim_params.mu_minus = -0.7;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1648,7 +1636,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb
     SECTION("Decreased lambda_tf")
     {
         // set small lambda value, i.e., electrostatic screening is significant.
-        params.simulation_parameters.lambda_tf = 1;
+        params.sim_params.lambda_tf = 1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1679,7 +1667,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb
     SECTION("Increased lambda_tf")
     {
         // set large lambda value, i.e., electrostatic screening is small.
-        params.simulation_parameters.lambda_tf = 10;
+        params.sim_params.lambda_tf = 10;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1710,7 +1698,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb
     SECTION("Increased epsilon_r")
     {
         // set large relative permittivity
-        params.simulation_parameters.epsilon_r = 10;
+        params.sim_params.epsilon_r = 10;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 
@@ -1741,7 +1729,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb
     SECTION("Decrease epsilon_r, positively charged SiDBs can occur")
     {
         // set small relative permittivity
-        params.simulation_parameters.epsilon_r = 1;
+        params.sim_params.epsilon_r = 1;
 
         const auto simulation_results = quickexact<TestType>(lyt, params);
 

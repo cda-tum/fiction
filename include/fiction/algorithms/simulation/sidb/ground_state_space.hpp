@@ -42,7 +42,7 @@ struct ground_state_space_params
     /**
      * The physical parameters that *Ground State Space* will use to prune the simulation search space.
      */
-    const sidb::model::simulation_parameters simulation_parameters{};
+    const sidb::model::simulation_parameters sim_params{};
     /**
      * This specifies the maximum cluster size for which *Ground State Space* will solve an NP-complete sub-problem
      * exhaustively. The sets of SiDBs that witness local population stability for each respective charge state may be
@@ -129,12 +129,11 @@ class ground_state_space_impl
     ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
             params{parameters},
             top_cluster{sidb::model::to_sidb_cluster(sidb::model::cluster_hierarchy(lyt))},
-            clustering{
-                get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.simulation_parameters))},
-            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
-                                 -fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_minus,
-                                 fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_plus(),
-                                 -fcn::constants::ERROR_MARGIN - params.simulation_parameters.mu_plus()}
+            clustering{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.sim_params))},
+            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus(),
+                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus()}
     {}
     /**
      * The main loop in the *Ground State Space* construction. Charge spaces are updated until a fixed point is reached,
@@ -221,16 +220,16 @@ class ground_state_space_impl
      */
     [[nodiscard]] static std::pair<sidb::primitives::charge_distribution_surface<Lyt>,
                                    sidb::primitives::charge_distribution_surface<Lyt>>
-    get_local_potential_bounds(const Lyt& lyt, const sidb::model::simulation_parameters& simulation_parameters) noexcept
+    get_local_potential_bounds(const Lyt& lyt, const sidb::model::simulation_parameters& sim_params) noexcept
     {
         sidb::primitives::charge_distribution_surface<Lyt> cds_min{lyt};
         sidb::primitives::charge_distribution_surface<Lyt> cds_max{lyt};
 
-        cds_min.assign_physical_parameters(simulation_parameters);
-        cds_max.assign_physical_parameters(simulation_parameters);
+        cds_min.assign_physical_parameters(sim_params);
+        cds_max.assign_physical_parameters(sim_params);
 
-        cds_min.assign_all_charge_states(simulation_parameters.base == 3 ? sidb::model::charge_state::POSITIVE :
-                                                                           sidb::model::charge_state::NEUTRAL);
+        cds_min.assign_all_charge_states(sim_params.base == 3 ? sidb::model::charge_state::POSITIVE :
+                                                                sidb::model::charge_state::NEUTRAL);
         cds_max.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
 
         cds_min.update_after_charge_change();
@@ -1199,8 +1198,7 @@ class ground_state_space_impl
     [[nodiscard]] constexpr uint64_t maximum_top_level_multisets(const uint64_t number_of_sidbs) const noexcept
     {
         //
-        return params.simulation_parameters.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 :
-                                                        number_of_sidbs + 1;
+        return params.sim_params.base == 3 ? ((number_of_sidbs + 1) * (number_of_sidbs + 2)) / 2 : number_of_sidbs + 1;
     }
     /**
      * Parameters used during the construction.

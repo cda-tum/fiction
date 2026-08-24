@@ -42,7 +42,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
     {
         CHECK(!is_sidb_gate_design_impossible(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.28}}));
+            is_sidb_gate_design_impossible_params{.sim_params = sidb::model::simulation_parameters{2, -0.28}}));
     }
 
     SECTION("with defect")
@@ -51,7 +51,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
         lyt.assign_sidb_defect({11, 6, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 10, 5});
         CHECK(is_sidb_gate_design_impossible(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.28}}));
+            is_sidb_gate_design_impossible_params{.sim_params = sidb::model::simulation_parameters{2, -0.28}}));
     }
 }
 
@@ -105,7 +105,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
     {
         CHECK(!is_sidb_gate_design_impossible(
             lyt, networks::utils::create_crossing_wire_tt(),
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.32}}));
+            is_sidb_gate_design_impossible_params{.sim_params = sidb::model::simulation_parameters{2, -0.32}}));
     }
 
     SECTION("with defect")
@@ -114,6 +114,6 @@ TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
         lyt.assign_sidb_defect({34, 18, 1}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 5, 5});
         CHECK(is_sidb_gate_design_impossible(
             lyt, networks::utils::create_crossing_wire_tt(),
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.32}}));
+            is_sidb_gate_design_impossible_params{.sim_params = sidb::model::simulation_parameters{2, -0.32}}));
     }
 }

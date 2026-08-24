@@ -213,7 +213,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         }
 
         const auto simulation_results_quickexact =
-            quickexact(lyt, quickexact_params<cell<TestType>>{quicksim_params.simulation_parameters});
+            quickexact(lyt, quickexact_params<cell<TestType>>{quicksim_params.sim_params});
 
         time_to_solution_stats st{};
         time_to_solution_for_given_simulation_results(simulation_results_quickexact, simulation_results_quicksim, 0.997,

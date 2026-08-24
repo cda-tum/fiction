@@ -644,8 +644,7 @@ class defect_influence_impl
         }
 
         const quickexact_params<cell<Lyt>> qe_params{
-            params.operational_params.simulation_parameters,
-            quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+            params.operational_params.sim_params, quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
         mockturtle::stopwatch stop{stats.time_total};
 
@@ -659,7 +658,7 @@ class defect_influence_impl
 
             lyt_defect.assign_sidb_defect(defect_pos, params.defect);
 
-            if (can_positive_charges_occur(lyt_defect, params.operational_params.simulation_parameters))
+            if (can_positive_charges_occur(lyt_defect, params.operational_params.sim_params))
             {
                 return defect_influence_status::INFLUENTIAL;
             }

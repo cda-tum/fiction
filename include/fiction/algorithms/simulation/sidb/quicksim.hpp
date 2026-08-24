@@ -35,7 +35,7 @@ struct quicksim_params
     /**
      * Simulation parameters for the simulation of the physical SiDB system.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * Number of iterations to run the simulation for.
      */
@@ -87,7 +87,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
     st.algorithm_name = "QuickSim";
     st.additional_simulation_parameters.emplace("iteration_steps", ps.iteration_steps);
     st.additional_simulation_parameters.emplace("alpha", ps.alpha);
-    st.simulation_parameters = ps.simulation_parameters;
+    st.sim_params = ps.sim_params;
     st.charge_distributions.reserve(ps.iteration_steps);
 
     if (ps.iteration_steps == 0 || lyt.num_cells() == 0)
@@ -111,7 +111,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::QUICKSIM);
 
         // set the given physical parameters
-        charge_lyt.assign_physical_parameters(ps.simulation_parameters);
+        charge_lyt.assign_physical_parameters(ps.sim_params);
         charge_lyt.assign_base_number(2);
         charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();

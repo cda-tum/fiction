@@ -55,7 +55,7 @@ int main()  // NOLINT
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.sim_params = sim_params;
     // reducing the threshold for the interdistance between two BDL wires makes sure that not both BDL pairs of the
     // SiQAD OR gate are put inside the same detected I/O pin.
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;

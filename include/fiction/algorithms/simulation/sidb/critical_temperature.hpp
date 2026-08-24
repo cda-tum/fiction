@@ -81,7 +81,7 @@ struct critical_temperature_stats
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * Name of the algorithm used to compute the physically valid charge distributions.
      */
@@ -130,8 +130,8 @@ class critical_temperature_impl
             bii(bdl_input_iterator<Lyt>{layout, params.operational_params.input_bdl_iterator_params}),
             critical_temperature{ps.max_temperature}
     {
-        stats.simulation_parameters = params.operational_params.simulation_parameters;
-        stats.algorithm_name        = sidb_simulation_engine_name(params.operational_params.sim_engine);
+        stats.sim_params     = params.operational_params.sim_params;
+        stats.algorithm_name = sidb_simulation_engine_name(params.operational_params.sim_engine);
     }
 
     /**
@@ -167,8 +167,8 @@ class critical_temperature_impl
             pre_detected_input_bdl_wires{&input_wires},
             pre_detected_output_bdl_wires{&output_wires}
     {
-        stats.simulation_parameters = params.operational_params.simulation_parameters;
-        stats.algorithm_name        = sidb_simulation_engine_name(params.operational_params.sim_engine);
+        stats.sim_params     = params.operational_params.sim_params;
+        stats.algorithm_name = sidb_simulation_engine_name(params.operational_params.sim_engine);
     }
 
     /**
@@ -229,7 +229,7 @@ class critical_temperature_impl
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (can_positive_charges_occur(lyt_with_input_pattern, params.operational_params.simulation_parameters))
+                if (can_positive_charges_occur(lyt_with_input_pattern, params.operational_params.sim_params))
                 {
                     critical_temperature = 0.0;
                     return;
@@ -292,7 +292,7 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             const quickexact_params<cell<Lyt>> qe_params{
-                params.operational_params.simulation_parameters,
+                params.operational_params.sim_params,
                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
@@ -302,7 +302,7 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
-            const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.sim_params};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -311,9 +311,9 @@ class critical_temperature_impl
 #endif  // FICTION_ALGLIB_ENABLED
         else if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            const quicksim_params qs_params{.simulation_parameters = params.operational_params.simulation_parameters,
-                                            .iteration_steps       = params.iteration_steps,
-                                            .alpha                 = params.alpha};
+            const quicksim_params qs_params{.sim_params      = params.operational_params.sim_params,
+                                            .iteration_steps = params.iteration_steps,
+                                            .alpha           = params.alpha};
 
             // All physically valid charge configurations are determined for the given layout (probabilistic ground
             // state simulation is used).
@@ -538,14 +538,13 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform exhaustive ground state simulation
-            return exhaustive_ground_state_simulation(lyt_with_input_pattern,
-                                                      params.operational_params.simulation_parameters);
+            return exhaustive_ground_state_simulation(lyt_with_input_pattern, params.operational_params.sim_params);
         }
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform QuickExact exact simulation
             const quickexact_params<cell<Lyt>> qe_params{
-                params.operational_params.simulation_parameters,
+                params.operational_params.sim_params,
                 fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(lyt_with_input_pattern, qe_params);
         }
@@ -553,18 +552,17 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{params.operational_params.sim_params};
             return clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
         if (params.operational_params.sim_engine == sidb_simulation_engine::QUICKSIM)
         {
-            assert(params.operational_params.simulation_parameters.base == 2 &&
-                   "QuickSim does not support base-3 simulation");
+            assert(params.operational_params.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
 
-            const quicksim_params qs_params{.simulation_parameters = params.operational_params.simulation_parameters,
-                                            .iteration_steps       = params.iteration_steps,
-                                            .alpha                 = params.alpha};
+            const quicksim_params qs_params{.sim_params      = params.operational_params.sim_params,
+                                            .iteration_steps = params.iteration_steps,
+                                            .alpha           = params.alpha};
 
             if (const auto result = quicksim<Lyt>(lyt_with_input_pattern, qs_params))
             {

@@ -52,7 +52,7 @@ void clustercomplete(nanobind::module_& m)
      */
     py::class_<fiction::clustercomplete_params<>>(m, "clustercomplete_params", DOC(fiction_clustercomplete_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::clustercomplete_params<>::simulation_parameters,
+        .def_rw("simulation_parameters", &fiction::clustercomplete_params<>::sim_params,
                 DOC(fiction_clustercomplete_params_simulation_parameters))
         .def_rw("local_external_potential", &fiction::clustercomplete_params<>::local_external_potential,
                 DOC(fiction_clustercomplete_params_local_external_potential))

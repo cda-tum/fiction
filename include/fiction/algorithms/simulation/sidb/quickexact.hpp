@@ -51,7 +51,7 @@ struct quickexact_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * If `ON`, *QuickExact* checks which base number is required for the simulation, i.e., whether 3-state is
      * necessary or 2-state simulation is sufficient.
@@ -80,13 +80,13 @@ class quickexact_impl
             params{parameter}
     {
         charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
-        charge_lyt.assign_physical_parameters(parameter.simulation_parameters);
+        charge_lyt.assign_physical_parameters(parameter.sim_params);
     }
 
     sidb_simulation_result<Lyt> run() noexcept
     {
-        result.algorithm_name        = "QuickExact";
-        result.simulation_parameters = params.simulation_parameters;
+        result.algorithm_name = "QuickExact";
+        result.sim_params     = params.sim_params;
         result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
 
         mockturtle::stopwatch<>::duration time_counter{};
@@ -101,7 +101,7 @@ class quickexact_impl
                  charge_lyt.is_three_state_simulation_required()) ||
                         (params.base_number_detection ==
                              quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF &&
-                         params.simulation_parameters.base == 3) ?
+                         params.sim_params.base == 3) ?
                     required_simulation_base_number::THREE :
                     required_simulation_base_number::TWO;
 
@@ -242,7 +242,7 @@ class quickexact_impl
             charge_lyt.assign_base_number(2);
         }
         charge_layout.set_sidb_simulation_engine(sidb_simulation_engine::QUICKEXACT);
-        charge_layout.assign_physical_parameters(params.simulation_parameters);
+        charge_layout.assign_physical_parameters(params.sim_params);
         charge_layout.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
         charge_layout.update_after_charge_change(sidb::primitives::dependent_cell_mode::FIXED);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);

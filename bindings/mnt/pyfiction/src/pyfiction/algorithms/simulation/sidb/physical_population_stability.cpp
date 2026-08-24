@@ -68,7 +68,7 @@ void physical_population_stability(nanobind::module_& m)
     py::class_<fiction::physical_population_stability_params>(m, "physical_population_stability_params",
                                                               DOC(fiction_physical_population_stability_params))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("simulation_parameters", &fiction::physical_population_stability_params::simulation_parameters,
+        .def_rw("simulation_parameters", &fiction::physical_population_stability_params::sim_params,
                 DOC(fiction_physical_population_stability_params))
         .def_rw("precision_for_distance_corresponding_to_potential",
                 &fiction::physical_population_stability_params::precision_for_distance_corresponding_to_potential,

@@ -120,7 +120,7 @@ struct is_operational_params
     /**
      * The simulation parameters for the physical simulation of the ground state.
      */
-    sidb::model::simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters sim_params{};
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -351,10 +351,10 @@ class is_operational_impl
 
         sidb::primitives::charge_distribution_surface<Lyt> cds_layout{lyt_with_input_pattern};
         cds_layout.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
-        cds_layout.assign_physical_parameters(parameters.simulation_parameters);
+        cds_layout.assign_physical_parameters(parameters.sim_params);
 
-        if ((parameters.simulation_parameters.base == 2) &&
-            (can_positive_charges_occur(lyt_with_input_pattern, parameters.simulation_parameters)))
+        if ((parameters.sim_params.base == 2) &&
+            (can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
@@ -422,8 +422,8 @@ class is_operational_impl
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-                if ((parameters.simulation_parameters.base == 2) &&
-                    (can_positive_charges_occur(lyt_with_input_pattern, parameters.simulation_parameters)))
+                if ((parameters.sim_params.base == 2) &&
+                    (can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
                 }
@@ -486,8 +486,7 @@ class is_operational_impl
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
         // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-        if (parameters.simulation_parameters.base == 2 &&
-            can_positive_charges_occur(given_cds, parameters.simulation_parameters))
+        if (parameters.sim_params.base == 2 && can_positive_charges_occur(given_cds, parameters.sim_params))
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
         }
@@ -571,8 +570,8 @@ class is_operational_impl
             const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
             // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-            if ((parameters.simulation_parameters.base == 2) &&
-                (can_positive_charges_occur(lyt_with_input_pattern, parameters.simulation_parameters)))
+            if ((parameters.sim_params.base == 2) &&
+                (can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
             {
                 non_operational_input_pattern_and_non_operationality_reason.emplace_back(
                     i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);
@@ -1027,21 +1026,20 @@ class is_operational_impl
         if (parameters.sim_engine == sidb_simulation_engine::EXGS)
         {
             // perform exhaustive ground state simulation
-            return exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.simulation_parameters);
+            return exhaustive_ground_state_simulation(lyt_with_input_pattern, parameters.sim_params);
         }
         if (parameters.sim_engine == sidb_simulation_engine::QUICKEXACT)
         {
             // perform QuickExact exact simulation
             const quickexact_params<cell<Lyt>> quickexact_params{
-                parameters.simulation_parameters,
-                fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+                parameters.sim_params, fiction::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
             return quickexact(lyt_with_input_pattern, quickexact_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == sidb_simulation_engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const clustercomplete_params<cell<Lyt>> cc_params{parameters.simulation_parameters};
+            const clustercomplete_params<cell<Lyt>> cc_params{parameters.sim_params};
             return clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
@@ -1049,12 +1047,12 @@ class is_operational_impl
         {
             if (parameters.sim_engine == sidb_simulation_engine::QUICKSIM)
             {
-                assert(parameters.simulation_parameters.base == 2 && "QuickSim does not support base-3 simulation");
+                assert(parameters.sim_params.base == 2 && "QuickSim does not support base-3 simulation");
 
                 // perform QuickSim heuristic simulation
-                const quicksim_params qs_params{.simulation_parameters = parameters.simulation_parameters,
-                                                .iteration_steps       = 500,
-                                                .alpha                 = 0.6};
+                const quicksim_params qs_params{.sim_params      = parameters.sim_params,
+                                                .iteration_steps = 500,
+                                                .alpha           = 0.6};
 
                 if (const auto qs_result = quicksim(lyt_with_input_pattern, qs_params); qs_result.has_value())
                 {
