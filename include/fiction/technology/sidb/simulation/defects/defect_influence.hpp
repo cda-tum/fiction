@@ -930,7 +930,7 @@ defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<
 }
 /**
  * This algorithm uses random sampling to find a part of the defect influence domain that might not be
- * complete. It performs a total of `samples uniformly-distributed random samples within the specified area.
+ * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
@@ -967,7 +967,7 @@ defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, st
 
 /**
  * This algorithm uses random sampling to find a part of the defect influence domain that might not be
- * complete. It performs a total of `samples uniformly-distributed random samples within the specified area.
+ * complete. It performs a total of `samples` uniformly-distributed random samples within the specified area.
  *
  * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to compute the defect influence domain for.

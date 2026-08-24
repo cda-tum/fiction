@@ -10,9 +10,9 @@ Quantum-dot Cellular Automata (QCA)
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/cell_technologies.hpp``
+        **Header:** ``fiction/technology/fcn/cell_technologies.hpp``
 
-        .. doxygenstruct:: fiction::qca_technology
+        .. doxygenstruct:: fiction::qca::technology
            :members:
 
     .. tab:: Python
@@ -24,9 +24,9 @@ in-plane Nanomagnet Logic (iNML)
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/cell_technologies.hpp``
+        **Header:** ``fiction/technology/fcn/cell_technologies.hpp``
 
-        .. doxygenstruct:: fiction::inml_technology
+        .. doxygenstruct:: fiction::inml::technology
            :members:
 
     .. tab:: Python
@@ -38,9 +38,9 @@ Silicon Dangling Bonds (SiDB)
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/cell_technologies.hpp``
+        **Header:** ``fiction/technology/fcn/cell_technologies.hpp``
 
-        .. doxygenstruct:: fiction::sidb_technology
+        .. doxygenstruct:: fiction::sidb::technology
            :members:
 
     .. tab:: Python
@@ -52,9 +52,9 @@ Molecular Quantum-dot Cellular Automata (MolQCA)
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/cell_technologies.hpp``
+        **Header:** ``fiction/technology/fcn/cell_technologies.hpp``
 
-        .. doxygenstruct:: fiction::mol_qca_technology
+        .. doxygenstruct:: fiction::qca::mol_technology
            :members:
 
     .. tab:: Python

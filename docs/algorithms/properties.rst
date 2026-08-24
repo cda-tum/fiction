@@ -3,9 +3,9 @@ Critical Path (CP) and Throughput (TP)
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/properties/critical_path_length_and_throughput.hpp``
+        **Header:** ``fiction/verification/critical_path_length_and_throughput.hpp``
 
-        .. doxygenfunction:: fiction::critical_path_length_and_throughput
+        .. doxygenfunction:: fiction::verification::critical_path_length_and_throughput
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.critical_path_length_and_throughput
@@ -13,6 +13,6 @@ Critical Path (CP) and Throughput (TP)
 Number of Gate Types
 --------------------
 
-**Header:** ``fiction/algorithms/properties/count_gate_types.hpp``
+**Header:** ``fiction/verification/count_gate_types.hpp``
 
-.. doxygenfunction:: fiction::count_gate_types
+.. doxygenfunction:: fiction::verification::count_gate_types

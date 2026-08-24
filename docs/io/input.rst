@@ -8,9 +8,9 @@ Logic Networks
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/network_reader.hpp``
+        **Header:** ``fiction/networks/io/network_reader.hpp``
 
-        .. doxygenclass:: fiction::network_reader
+        .. doxygenclass:: fiction::networks::io::network_reader
            :members:
 
     .. tab:: Python
@@ -20,9 +20,9 @@ Logic Networks
 Truth Tables
 ############
 
-**Header:** ``fiction/io/tt_reader.hpp``
+**Header:** ``fiction/networks/io/tt_reader.hpp``
 
-.. doxygenclass:: fiction::tt_reader
+.. doxygenclass:: fiction::networks::io::tt_reader
    :members:
 
 
@@ -34,14 +34,14 @@ Can be used to read gate-level layout files (``.fgl``) as offered by `MNT Bench 
 .. tabs::
     .. tab:: C++
 
-        **Header:** ``fiction/io/read_fgl_layout.hpp``
+        **Header:** ``fiction/layouts/io/read_fgl_layout.hpp``
 
-        .. doxygenfunction:: fiction::read_fgl_layout(std::istream& is, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_fgl_layout(Lyt& lyt, std::istream& is)
-        .. doxygenfunction:: fiction::read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_fgl_layout(Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::layouts::io::read_fgl_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::layouts::io::read_fgl_layout(Lyt& lyt, std::istream& is)
+        .. doxygenfunction:: fiction::layouts::io::read_fgl_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::layouts::io::read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 
-        .. doxygenclass:: fiction::fgl_parsing_error
+        .. doxygenclass:: fiction::layouts::io::fgl_parsing_error
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.read_cartesian_fgl_layout
@@ -58,14 +58,14 @@ Cell-level Layouts
 .. tabs::
     .. tab:: C++
 
-        **Header:** ``fiction/io/read_sqd_layout.hpp``
+        **Header:** ``fiction/technology/sidb/io/read_sqd_layout.hpp``
 
-        .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, std::istream& is)
-        .. doxygenfunction:: fiction::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(Lyt& lyt, std::istream& is)
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 
-        .. doxygenclass:: fiction::sqd_parsing_error
+        .. doxygenclass:: fiction::sidb::io::sqd_parsing_error
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.read_sqd_layout_100
@@ -76,14 +76,14 @@ Cell-level Layouts
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/read_fqca_layout.hpp``
+        **Header:** ``fiction/technology/qca/io/read_fqca_layout.hpp``
 
-        .. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::qca::io::read_fqca_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::qca::io::read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
 
-        .. doxygenclass:: fiction::unsupported_character_exception
-        .. doxygenclass:: fiction::undefined_cell_label_exception
-        .. doxygenclass:: fiction::unrecognized_cell_definition_exception
+        .. doxygenclass:: fiction::qca::io::unsupported_character_exception
+        .. doxygenclass:: fiction::qca::io::undefined_cell_label_exception
+        .. doxygenclass:: fiction::qca::io::unrecognized_cell_definition_exception
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.read_fqca_layout
@@ -92,10 +92,10 @@ Cell-level Layouts
 SiDB Surface Defects
 ####################
 
-**Header:** ``fiction/io/read_sidb_surface_defects.hpp``
+**Header:** ``fiction/technology/sidb/io/read_surface_defects.hpp``
 
-.. doxygenfunction:: fiction::read_sidb_surface_defects(std::istream& is, const std::string_view& name = "")
-.. doxygenfunction:: fiction::read_sidb_surface_defects(const std::string_view& filename, const std::string_view& name = "")
+.. doxygenfunction:: fiction::sidb::io::read_surface_defects(std::istream& is, const std::string_view& name = "")
+.. doxygenfunction:: fiction::sidb::io::read_surface_defects(const std::string_view& filename, const std::string_view& name = "")
 
-.. doxygenclass:: fiction::unsupported_defect_index_exception
-.. doxygenclass:: fiction::missing_sidb_position_exception
+.. doxygenclass:: fiction::sidb::io::unsupported_defect_index_exception
+.. doxygenclass:: fiction::sidb::io::missing_sidb_position_exception

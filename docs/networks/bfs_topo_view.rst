@@ -21,5 +21,5 @@ Typical use cases include:
     .. tab:: C++
         **Header:** ``fiction/networks/views/bfs_topo_view.hpp``
 
-        .. doxygenclass:: fiction::bfs_topo_view
+        .. doxygenclass:: fiction::networks::views::bfs_topo_view
            :members:

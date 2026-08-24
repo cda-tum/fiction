@@ -1,18 +1,18 @@
 Aspect Ratio Iterator
 ---------------------
 
-**Header:** ``fiction/algorithms/iter/aspect_ratio_iterator.hpp``
+**Header:** ``fiction/physical_design/utils/aspect_ratio_iterator.hpp``
 
-.. doxygenclass:: fiction::aspect_ratio_iterator
+.. doxygenclass:: fiction::physical_design::utils::aspect_ratio_iterator
    :members:
 
 
 Gray Code Iterator
 ------------------
 
-**Header:** ``fiction/algorithms/iter/gray_code_iterator.hpp``
+**Header:** ``fiction/utils/stl/gray_code_iterator.hpp``
 
-.. doxygenclass:: fiction::gray_code_iterator
+.. doxygenclass:: fiction::utils::stl::gray_code_iterator
    :members:
 
 
@@ -21,14 +21,14 @@ BDL Input Iterator
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/iter/bdl_input_iterator.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp``
 
-        .. doxygenstruct:: fiction::bdl_input_iterator_params
+        .. doxygenstruct:: fiction::sidb::simulation::logic::bdl_input_iterator_params
            :members:
-        .. doxygenclass:: fiction::bdl_input_iterator
+        .. doxygenclass:: fiction::sidb::simulation::logic::bdl_input_iterator
            :members:
-        .. doxygenfunction:: fiction::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps = {})
-        .. doxygenfunction:: fiction::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps, const std::vector<bdl_wire<Lyt>>& input_wires)
+        .. doxygenfunction:: fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps = {})
+        .. doxygenfunction:: fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps, const std::vector<bdl_wire<Lyt>>& input_wires)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.input_bdl_configuration

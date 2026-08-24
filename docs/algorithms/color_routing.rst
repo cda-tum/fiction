@@ -12,13 +12,13 @@ to the layout.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/color_routing.hpp``
+        **Header:** ``fiction/physical_design/color_routing.hpp``
 
-        .. doxygenstruct:: fiction::color_routing_params
+        .. doxygenstruct:: fiction::physical_design::color_routing_params
            :members:
-        .. doxygenstruct:: fiction::color_routing_stats
+        .. doxygenstruct:: fiction::physical_design::color_routing_stats
            :members:
-        .. doxygenfunction:: fiction::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::physical_design::color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {}, color_routing_stats* pst = nullptr)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.color_routing_params

@@ -474,7 +474,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
 };
 
 /**
- * Deduction guide for `fiction::static_depth_view'.
+ * Deduction guide for `fiction::networks::views::static_depth_view`.
  *
  * @tparam T Network type deduced from the construction context of `fiction::static_depth_view`.
  */

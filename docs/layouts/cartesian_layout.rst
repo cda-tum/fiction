@@ -7,7 +7,7 @@ Coordinate system that represents a Cartesian grid of compile-time coordinate ty
     .. tab:: C++
         **Header:** ``fiction/layouts/cartesian_layout.hpp``
 
-        .. doxygenclass:: fiction::cartesian_layout
+        .. doxygenclass:: fiction::layouts::cartesian_layout
            :members:
 
     .. tab:: Python

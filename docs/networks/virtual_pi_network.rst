@@ -12,5 +12,5 @@ the ``node_map``.
     .. tab:: C++
         **Header:** ``fiction/networks/virtual_pi_network.hpp``
 
-        .. doxygenclass:: fiction::virtual_pi_network
+        .. doxygenclass:: fiction::networks::virtual_pi_network
            :members:

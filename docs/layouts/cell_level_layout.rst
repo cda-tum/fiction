@@ -17,7 +17,7 @@ A cell-level layout can be obtained from a ``gate_level_layout`` by the :ref:`ap
     .. tab:: C++
         **Header:** ``fiction/layouts/cell_level_layout.hpp``
 
-        .. doxygenclass:: fiction::cell_level_layout
+        .. doxygenclass:: fiction::layouts::cell_level_layout
            :members:
 
     .. tab:: Python

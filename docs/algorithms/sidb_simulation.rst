@@ -9,9 +9,9 @@ Physical Parameters
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp``
+        **Header:** ``fiction/technology/sidb/model/simulation_parameters.hpp``
 
-        .. doxygenstruct:: fiction::sidb_simulation_parameters
+        .. doxygenstruct:: fiction::sidb::model::simulation_parameters
            :members:
 
     .. tab:: Python
@@ -24,9 +24,9 @@ Simulation Result
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/result.hpp``
 
-        .. doxygenstruct:: fiction::sidb_simulation_result
+        .. doxygenstruct:: fiction::sidb::simulation::result
            :members:
 
     .. tab:: Python
@@ -43,12 +43,12 @@ Heuristic Ground State Simulation
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/quicksim.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/engines/quicksim.hpp``
 
-        .. doxygenstruct:: fiction::quicksim_params
+        .. doxygenstruct:: fiction::sidb::simulation::engines::quicksim_params
            :members:
 
-        .. doxygenfunction:: fiction::quicksim
+        .. doxygenfunction:: fiction::sidb::simulation::engines::quicksim
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.quicksim_params
@@ -65,23 +65,23 @@ Exhaustive Ground State Simulation
 
         .. _quickexact:
 
-        **Header:** ``fiction/algorithms/simulation/sidb/quickexact.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/engines/quickexact.hpp``
 
-        .. doxygenstruct:: fiction::quickexact_params
+        .. doxygenstruct:: fiction::sidb::simulation::engines::quickexact_params
            :members:
-        .. doxygenfunction:: fiction::quickexact
+        .. doxygenfunction:: fiction::sidb::simulation::engines::quickexact
 
         .. _clustercomplete:
 
-        **Header:** ``fiction/algorithms/simulation/sidb/clustercomplete.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/engines/clustercomplete.hpp``
 
-        .. doxygenstruct:: fiction::clustercomplete_params
+        .. doxygenstruct:: fiction::sidb::simulation::engines::clustercomplete_params
            :members:
-        .. doxygenfunction:: fiction::clustercomplete
+        .. doxygenfunction:: fiction::sidb::simulation::engines::clustercomplete
 
-        **Header:** ``fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp``
 
-        .. doxygenfunction:: fiction::exhaustive_ground_state_simulation
+        .. doxygenfunction:: fiction::sidb::simulation::engines::exhaustive_ground_state_simulation
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.quickexact_params
@@ -98,12 +98,12 @@ Engine Selectors
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/engine.hpp``
 
-        .. doxygenenum:: fiction::sidb_simulation_engine
-        .. doxygenenum:: fiction::exact_sidb_simulation_engine
-        .. doxygenenum:: fiction::heuristic_sidb_simulation_engine
-        .. doxygenfunction:: fiction::sidb_simulation_engine_name
+        .. doxygenenum:: fiction::sidb::simulation::engine
+        .. doxygenenum:: fiction::sidb::simulation::exact_engine
+        .. doxygenenum:: fiction::sidb::simulation::heuristic_engine
+        .. doxygenfunction:: fiction::sidb::simulation::engine_name
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_simulation_engine
@@ -119,24 +119,24 @@ Energy Calculation
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/energy_distribution.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/energy_distribution.hpp``
 
-        .. doxygenstruct:: fiction::energy_state
+        .. doxygenstruct:: fiction::sidb::simulation::analysis::energy_state
            :members:
-        .. doxygenclass:: fiction::energy_distribution
+        .. doxygenclass:: fiction::sidb::simulation::analysis::energy_distribution
            :members:
-        .. doxygenfunction:: fiction::calculate_energy_distribution
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::calculate_energy_distribution
 
 
-        **Header:** ``fiction/algorithms/simulation/sidb/minimum_energy.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/generic/minimum_energy.hpp``
 
-        .. doxygenfunction:: fiction::minimum_energy
-        .. doxygenfunction:: fiction::minimum_energy_distribution
+        .. doxygenfunction:: fiction::sidb::simulation::generic::minimum_energy
+        .. doxygenfunction:: fiction::sidb::simulation::generic::minimum_energy_distribution
 
 
-        **Header:** ``fiction/algorithms/simulation/sidb/is_ground_state.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/generic/is_ground_state.hpp``
 
-        .. doxygenfunction:: fiction::is_ground_state
+        .. doxygenfunction:: fiction::sidb::simulation::generic::is_ground_state
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.calculate_energy_distribution
@@ -153,26 +153,26 @@ Temperature Behavior
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/critical_temperature.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/critical_temperature.hpp``
 
-        .. doxygenstruct:: fiction::critical_temperature_params
+        .. doxygenstruct:: fiction::sidb::simulation::analysis::critical_temperature_params
            :members:
-        .. doxygenfunction:: fiction::critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
-        .. doxygenfunction:: fiction::critical_temperature_gate_based(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const critical_temperature_params& params, const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<bdl_wire<Lyt>>& input_bdl_wires, const std::vector<bdl_wire<Lyt>>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
-        .. doxygenfunction:: fiction::critical_temperature_non_gate_based
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::critical_temperature_gate_based(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const critical_temperature_params& params, const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<bdl_wire<Lyt>>& input_bdl_wires, const std::vector<bdl_wire<Lyt>>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::critical_temperature_non_gate_based
 
-        **Header:** ``fiction/algorithms/simulation/sidb/occupation_probability_of_excited_states.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/occupation_probability_of_excited_states.hpp``
 
-        .. doxygenfunction:: fiction::calculate_boltzmann_factor
-        .. doxygenfunction:: fiction::occupation_probability_gate_based
-        .. doxygenfunction:: fiction::occupation_probability_non_gate_based
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::calculate_boltzmann_factor
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::occupation_probability_gate_based
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::occupation_probability_non_gate_based
 
-        **Header:** ``fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp``
 
-        .. doxygenenum:: fiction::state_type
-        .. doxygentypedef:: fiction::sidb_energy_and_state_type
-        .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_accepted
-        .. doxygenfunction:: fiction::calculate_energy_and_state_type_with_kinks_rejected
+        .. doxygenenum:: fiction::sidb::simulation::analysis::state_type
+        .. doxygentypedef:: fiction::sidb::simulation::analysis::energy_and_state_type
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_accepted
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_rejected
 
     .. tab:: Python
 
@@ -196,11 +196,11 @@ Ground State Space Construction
 
 .. _ground_state_space:
 
-**Header:** ``fiction/algorithms/simulation/sidb/ground_state_space.hpp``
+**Header:** ``fiction/technology/sidb/simulation/engines/ground_state_space.hpp``
 
-.. doxygenstruct:: fiction::ground_state_space_results
+.. doxygenstruct:: fiction::sidb::simulation::engines::ground_state_space_results
    :members:
-.. doxygenfunction:: fiction::ground_state_space
+.. doxygenfunction:: fiction::sidb::simulation::engines::ground_state_space
 
 
 Time-to-Solution (TTS) Statistics
@@ -208,14 +208,14 @@ Time-to-Solution (TTS) Statistics
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/time_to_solution.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/utils/time_to_solution.hpp``
 
-        .. doxygenstruct:: fiction::time_to_solution_params
+        .. doxygenstruct:: fiction::sidb::simulation::utils::time_to_solution_params
            :members:
-        .. doxygenstruct:: fiction::time_to_solution_stats
+        .. doxygenstruct:: fiction::sidb::simulation::utils::time_to_solution_stats
            :members:
-        .. doxygenfunction:: fiction::time_to_solution
-        .. doxygenfunction:: fiction::time_to_solution_for_given_simulation_results
+        .. doxygenfunction:: fiction::sidb::simulation::utils::time_to_solution
+        .. doxygenfunction:: fiction::sidb::simulation::utils::time_to_solution_for_given_simulation_results
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.time_to_solution_params
@@ -231,12 +231,12 @@ Random SiDB Layout Generator
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp``
+        **Header:** ``fiction/technology/sidb/generators/random_layout_generator.hpp``
 
-        .. doxygenstruct:: fiction::generate_random_sidb_layout_params
+        .. doxygenstruct:: fiction::sidb::generators::generate_random_layout_params
            :members:
-        .. doxygenfunction:: fiction::generate_random_sidb_layout
-        .. doxygenfunction:: fiction::generate_multiple_random_sidb_layouts
+        .. doxygenfunction:: fiction::sidb::generators::generate_random_layout
+        .. doxygenfunction:: fiction::sidb::generators::generate_multiple_random_layouts
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.generate_random_sidb_layout_params
@@ -252,35 +252,35 @@ Operational Domain Computation
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/is_operational.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/is_operational.hpp``
 
-        .. doxygenenum:: fiction::operational_status
-        .. doxygenstruct:: fiction::is_operational_params
+        .. doxygenenum:: fiction::sidb::simulation::logic::operational_status
+        .. doxygenstruct:: fiction::sidb::simulation::logic::is_operational_params
            :members:
-        .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
-        .. doxygenfunction:: fiction::is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
-        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
-        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
-        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
-        .. doxygenfunction:: fiction::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::sidb::simulation::logic::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::sidb::simulation::logic::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::sidb::simulation::logic::is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::sidb::simulation::logic::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::sidb::simulation::logic::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+        .. doxygenfunction:: fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+        .. doxygenfunction:: fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
 
-        **Header:** ``fiction/algorithms/simulation/sidb/operational_domain.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/operational_domain.hpp``
 
-        .. doxygenstruct:: fiction::parameter_point
+        .. doxygenstruct:: fiction::sidb::simulation::logic::parameter_point
            :members:
-        .. doxygenenum:: fiction::sweep_parameter
-        .. doxygenclass:: fiction::operational_domain
+        .. doxygenenum:: fiction::sidb::simulation::logic::sweep_parameter
+        .. doxygenclass:: fiction::sidb::simulation::logic::operational_domain
            :members:
-        .. doxygenclass:: fiction::critical_temperature_domain
+        .. doxygenclass:: fiction::sidb::simulation::logic::critical_temperature_domain
            :members:
-        .. doxygenstruct:: fiction::operational_domain_value_range
+        .. doxygenstruct:: fiction::sidb::simulation::logic::operational_domain_value_range
            :members:
-        .. doxygenstruct:: fiction::operational_domain_params
+        .. doxygenstruct:: fiction::sidb::simulation::logic::operational_domain_params
            :members:
-        .. doxygenstruct:: fiction::operational_domain_stats
+        .. doxygenstruct:: fiction::sidb::simulation::logic::operational_domain_stats
            :members:
 
         Four strategies sample the parameter space. Grid search and random sampling place their samples
@@ -307,24 +307,24 @@ Operational Domain Computation
         grid search with the sketch, and raise the sample count substantially before combining the sketch with
         flood fill or contour tracing in three dimensions.
 
-        .. doxygenfunction:: fiction::operational_domain_grid_search
-        .. doxygenfunction:: fiction::operational_domain_random_sampling
-        .. doxygenfunction:: fiction::operational_domain_flood_fill
-        .. doxygenfunction:: fiction::operational_domain_contour_tracing
-        .. doxygenfunction:: fiction::critical_temperature_domain_grid_search
-        .. doxygenfunction:: fiction::critical_temperature_domain_random_sampling
-        .. doxygenfunction:: fiction::critical_temperature_domain_flood_fill
-        .. doxygenfunction:: fiction::critical_temperature_domain_contour_tracing
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_domain_grid_search
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_domain_random_sampling
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_domain_flood_fill
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_domain_contour_tracing
+        .. doxygenfunction:: fiction::sidb::simulation::logic::critical_temperature_domain_grid_search
+        .. doxygenfunction:: fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling
+        .. doxygenfunction:: fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill
+        .. doxygenfunction:: fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing
 
-        **Header:** ``fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp``
 
-        .. doxygenstruct:: fiction::operational_domain_ratio_params
+        .. doxygenstruct:: fiction::sidb::simulation::logic::operational_domain_ratio_params
            :members:
-        .. doxygenfunction:: fiction::operational_domain_ratio
+        .. doxygenfunction:: fiction::sidb::simulation::logic::operational_domain_ratio
 
-        **Header:** ``fiction/algorithms/simulation/sidb/verify_logic_match.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/verify_logic_match.hpp``
 
-        .. doxygenfunction:: fiction::verify_logic_match
+        .. doxygenfunction:: fiction::sidb::simulation::logic::verify_logic_match
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.operational_status
@@ -386,9 +386,9 @@ Physically Valid Parameters
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/generic/physically_valid_parameters.hpp``
 
-        .. doxygenfunction:: fiction::physically_valid_parameters
+        .. doxygenfunction:: fiction::sidb::simulation::generic::physically_valid_parameters
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
@@ -401,16 +401,16 @@ Displacement Robustness Domain
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/displacement_robustness_domain.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp``
 
-        .. doxygenstruct:: fiction::displacement_robustness_domain
+        .. doxygenstruct:: fiction::sidb::simulation::defects::displacement_robustness_domain
            :members:
-        .. doxygenstruct:: fiction::displacement_robustness_domain_params
+        .. doxygenstruct:: fiction::sidb::simulation::defects::displacement_robustness_domain_params
            :members:
-        .. doxygenstruct:: fiction::displacement_robustness_domain_stats
+        .. doxygenstruct:: fiction::sidb::simulation::defects::displacement_robustness_domain_stats
            :members:
-        .. doxygenfunction:: fiction::determine_displacement_robustness_domain
-        .. doxygenfunction:: fiction::determine_probability_of_fabricating_operational_gate
+        .. doxygenfunction:: fiction::sidb::simulation::defects::determine_displacement_robustness_domain
+        .. doxygenfunction:: fiction::sidb::simulation::defects::determine_probability_of_fabricating_operational_gate
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.dimer_displacement_policy
@@ -432,9 +432,9 @@ Simulation Equivalence Checking
 
 .. tabs::
     .. tab:: C++
-       **Header:** ``fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp``
+       **Header:** ``fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp``
 
-        .. doxygenfunction:: fiction::check_simulation_results_for_equivalence
+        .. doxygenfunction:: fiction::sidb::simulation::utils::check_simulation_results_for_equivalence
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
@@ -445,9 +445,9 @@ Charge Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp``
 
-        .. doxygenfunction:: fiction::can_positive_charges_occur
+        .. doxygenfunction:: fiction::sidb::simulation::generic::can_positive_charges_occur
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.can_positive_charges_occur
@@ -458,13 +458,13 @@ Binary-dot Logic (BDL) Pair Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp``
 
-        .. doxygenstruct:: fiction::bdl_pair
+        .. doxygenstruct:: fiction::sidb::simulation::logic::bdl_pair
            :members:
-        .. doxygenstruct:: fiction::detect_bdl_pairs_params
+        .. doxygenstruct:: fiction::sidb::simulation::logic::detect_bdl_pairs_params
            :members:
-        .. doxygenfunction:: fiction::detect_bdl_pairs
+        .. doxygenfunction:: fiction::sidb::simulation::logic::detect_bdl_pairs
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.bdl_pair
@@ -479,14 +479,14 @@ Binary-dot Logic (BDL) Wire Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp``
 
-        .. doxygenenum:: fiction::bdl_wire_selection
-        .. doxygenstruct:: fiction::detect_bdl_wires_params
+        .. doxygenenum:: fiction::sidb::simulation::logic::bdl_wire_selection
+        .. doxygenstruct:: fiction::sidb::simulation::logic::detect_bdl_wires_params
            :members:
-        .. doxygenstruct:: fiction::bdl_wire
+        .. doxygenstruct:: fiction::sidb::simulation::logic::bdl_wire
            :members:
-        .. doxygenfunction:: fiction::detect_bdl_wires
+        .. doxygenfunction:: fiction::sidb::simulation::logic::detect_bdl_wires
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.bdl_wire_selection
@@ -506,14 +506,14 @@ Assess Population Stability
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/physical_population_stability.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp``
 
-        .. doxygenenum:: fiction::transition_type
-        .. doxygenstruct:: fiction::population_stability_information
+        .. doxygenenum:: fiction::sidb::simulation::analysis::transition_type
+        .. doxygenstruct:: fiction::sidb::simulation::analysis::population_stability_information
            :members:
-        .. doxygenstruct:: fiction::physical_population_stability_params
+        .. doxygenstruct:: fiction::sidb::simulation::analysis::physical_population_stability_params
            :members:
-        .. doxygenfunction:: fiction::physical_population_stability
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::physical_population_stability
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.transition_type
@@ -533,11 +533,11 @@ Band-Bending Resilience
 
 .. _band_bending_resilience:
 
-**Header:** ``fiction/algorithms/simulation/sidb/band_bending_resilience.hpp``
+**Header:** ``fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp``
 
-.. doxygenstruct:: fiction::band_bending_resilience_params
+.. doxygenstruct:: fiction::sidb::simulation::analysis::band_bending_resilience_params
    :members:
-.. doxygenfunction:: fiction::band_bending_resilience
+.. doxygenfunction:: fiction::sidb::simulation::analysis::band_bending_resilience
 
 
 Convert Potential to Distance
@@ -545,9 +545,9 @@ Convert Potential to Distance
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/generic/potential_to_distance_conversion.hpp``
 
-        .. doxygenfunction:: fiction::potential_to_distance_conversion
+        .. doxygenfunction:: fiction::sidb::simulation::generic::potential_to_distance_conversion
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.potential_to_distance_conversion
@@ -563,26 +563,26 @@ SiDB Defect Types
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb_defects.hpp``
+        **Header:** ``fiction/technology/sidb/model/defects.hpp``
 
-        .. doxygenenum:: fiction::sidb_defect_type
+        .. doxygenenum:: fiction::sidb::model::defect_type
 
-        .. doxygenstruct:: fiction::sidb_defect
+        .. doxygenstruct:: fiction::sidb::model::defect
            :members:
 
-        .. doxygenfunction:: fiction::is_charged_defect_type
-        .. doxygenfunction:: fiction::is_neutral_defect_type
+        .. doxygenfunction:: fiction::sidb::model::is_charged_defect_type
+        .. doxygenfunction:: fiction::sidb::model::is_neutral_defect_type
 
-        .. doxygenfunction:: fiction::is_positively_charged_defect
-        .. doxygenfunction:: fiction::is_negatively_charged_defect
-        .. doxygenfunction:: fiction::is_neutrally_charged_defect
+        .. doxygenfunction:: fiction::sidb::model::is_positively_charged_defect
+        .. doxygenfunction:: fiction::sidb::model::is_negatively_charged_defect
+        .. doxygenfunction:: fiction::sidb::model::is_neutrally_charged_defect
 
-        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
 
-        .. doxygenfunction:: fiction::defect_extent
+        .. doxygenfunction:: fiction::sidb::model::defect_extent
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_defect_type
@@ -603,16 +603,16 @@ SiDB Defect Types
 SiDB Defect Surface
 ^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/technology/sidb_defect_surface.hpp``
+**Header:** ``fiction/technology/sidb/primitives/defect_surface.hpp``
 
 A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
 fabrication defects on the H-Si(100) 2x1 surface.
 
-.. doxygenclass:: fiction::sidb_defect_surface
+.. doxygenclass:: fiction::sidb::primitives::defect_surface
    :members:
-.. doxygenclass:: fiction::sidb_defect_surface< Lyt, true >
+.. doxygenclass:: fiction::sidb::primitives::defect_surface< Lyt, true >
    :members:
-.. doxygenclass:: fiction::sidb_defect_surface< Lyt, false >
+.. doxygenclass:: fiction::sidb::primitives::defect_surface< Lyt, false >
    :members:
 
 
@@ -621,29 +621,29 @@ SiDB Defect Analysis
 
 .. _defect_influence:
 
-**Header:** ``fiction/technology/sidb_surface_analysis.hpp``
+**Header:** ``fiction/technology/sidb/libraries/surface_analysis.hpp``
 
-.. doxygenfunction:: fiction::sidb_surface_analysis
+.. doxygenfunction:: fiction::sidb::libraries::surface_analysis
 
 
-**Header:** ``fiction/algorithms/simulation/sidb/defect_influence.hpp``
+**Header:** ``fiction/technology/sidb/simulation/defects/defect_influence.hpp``
 
-.. doxygenstruct:: fiction::defect_influence_params
+.. doxygenstruct:: fiction::sidb::simulation::defects::defect_influence_params
    :members:
-.. doxygenenum:: fiction::defect_influence_status
-.. doxygenclass:: fiction::defect_influence_domain
+.. doxygenenum:: fiction::sidb::simulation::defects::defect_influence_status
+.. doxygenclass:: fiction::sidb::simulation::defects::defect_influence_domain
    :members:
 
-.. doxygenstruct:: fiction::defect_influence_stats
-.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
-.. doxygenfunction:: fiction::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
-.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
-.. doxygenfunction:: fiction::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenstruct:: fiction::sidb::simulation::defects::defect_influence_stats
+.. doxygenfunction:: fiction::sidb::simulation::defects::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::sidb::simulation::defects::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+.. doxygenfunction:: fiction::sidb::simulation::defects::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::sidb::simulation::defects::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::sidb::simulation::defects::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+.. doxygenfunction:: fiction::sidb::simulation::defects::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
 
-**Header:** ``fiction/algorithms/simulation/sidb/defect_clearance.hpp``
+**Header:** ``fiction/technology/sidb/simulation/defects/defect_clearance.hpp``
 
-.. doxygenstruct:: fiction::defect_clearance
+.. doxygenstruct:: fiction::sidb::simulation::defects::defect_clearance
    :members:
-.. doxygenfunction:: fiction::calculate_defect_clearance
+.. doxygenfunction:: fiction::sidb::simulation::defects::calculate_defect_clearance

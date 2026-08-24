@@ -8,14 +8,14 @@ network specifications under constraints. This approach finds exact results but 
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/exact.hpp``
+        **Header:** ``fiction/physical_design/exact.hpp``
 
-        .. doxygenstruct:: fiction::exact_physical_design_params
+        .. doxygenstruct:: fiction::physical_design::exact_physical_design_params
            :members:
-        .. doxygenstruct:: fiction::exact_physical_design_stats
+        .. doxygenstruct:: fiction::physical_design::exact_physical_design_stats
            :members:
-        .. doxygenfunction:: fiction::exact(const Ntk& ntk, const exact_physical_design_params& ps = {}, exact_physical_design_stats *pst = nullptr)
-        .. doxygenfunction:: fiction::exact_with_blacklist(const Ntk& ntk, const surface_black_list<Lyt, port_direction>& black_list, exact_physical_design_params ps  = {}, exact_physical_design_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::physical_design::exact(const Ntk& ntk, const exact_physical_design_params& ps = {}, exact_physical_design_stats *pst = nullptr)
+        .. doxygenfunction:: fiction::physical_design::exact_with_blacklist(const Ntk& ntk, const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& black_list, exact_physical_design_params ps  = {}, exact_physical_design_stats* pst = nullptr)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.exact_params

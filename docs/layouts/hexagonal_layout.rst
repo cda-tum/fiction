@@ -9,20 +9,20 @@ orientation of the hexagons that can either be pointy-top up or flat-top up.
     .. tab:: C+
         **Header:** ``fiction/layouts/hexagonal_layout.hpp``
 
-        .. doxygenstruct:: fiction::pointy_top_hex
-        .. doxygenstruct:: fiction::flat_top_hex
+        .. doxygenstruct:: fiction::layouts::pointy_top_hex
+        .. doxygenstruct:: fiction::layouts::flat_top_hex
 
         Furthermore, when assuming rectangular-ish layouts, either odd or even rows or columns can be shifted inwards,
         yielding a total of four different orientations.
 
-        .. doxygenstruct:: fiction::odd_row_hex
-        .. doxygenstruct:: fiction::even_row_hex
-        .. doxygenstruct:: fiction::odd_column_hex
-        .. doxygenstruct:: fiction::even_column_hex
+        .. doxygenstruct:: fiction::layouts::odd_row_hex
+        .. doxygenstruct:: fiction::layouts::even_row_hex
+        .. doxygenstruct:: fiction::layouts::odd_column_hex
+        .. doxygenstruct:: fiction::layouts::even_column_hex
 
         The hexagonal layout supports all of them via template parameters.
 
-        .. doxygenclass:: fiction::hexagonal_layout
+        .. doxygenclass:: fiction::layouts::hexagonal_layout
            :members:
 
     .. tab:: Python

@@ -9,13 +9,13 @@ to a 3-graph. At the same time, the output layout will always be 2DDWave-clocked
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/orthogonal.hpp``
+        **Header:** ``fiction/physical_design/orthogonal.hpp``
 
-        .. doxygenstruct:: fiction::orthogonal_physical_design_params
+        .. doxygenstruct:: fiction::physical_design::orthogonal_physical_design_params
            :members:
-        .. doxygenstruct:: fiction::orthogonal_physical_design_stats
+        .. doxygenstruct:: fiction::physical_design::orthogonal_physical_design_stats
            :members:
-        .. doxygenfunction:: fiction::orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::physical_design::orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {}, orthogonal_physical_design_stats* pst = nullptr)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.orthogonal_params

@@ -5,13 +5,13 @@ SiDB Gate Designer
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/design_sidb_gates.hpp``
+        **Header:** ``fiction/technology/sidb/generators/design_sidb_gates.hpp``
 
-        .. doxygenstruct:: fiction::design_sidb_gates_stats
+        .. doxygenstruct:: fiction::sidb::generators::design_sidb_gates_stats
            :members:
-        .. doxygenstruct:: fiction::design_sidb_gates_params
+        .. doxygenstruct:: fiction::sidb::generators::design_sidb_gates_params
            :members:
-        .. doxygenfunction:: fiction::design_sidb_gates
+        .. doxygenfunction:: fiction::sidb::generators::design_sidb_gates
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.design_sidb_gates_stats

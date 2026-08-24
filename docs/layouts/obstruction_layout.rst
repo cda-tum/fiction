@@ -10,11 +10,11 @@ it.
     .. tab:: C++
         **Header:** ``fiction/layouts/obstruction_layout.hpp``
 
-        .. doxygenclass:: fiction::obstruction_layout
+        .. doxygenclass:: fiction::layouts::obstruction_layout
            :members:
-        .. doxygenclass:: fiction::obstruction_layout< Lyt, true >
+        .. doxygenclass:: fiction::layouts::obstruction_layout< Lyt, true >
            :members:
-        .. doxygenclass:: fiction::obstruction_layout< Lyt, false >
+        .. doxygenclass:: fiction::layouts::obstruction_layout< Lyt, false >
            :members:
 
     .. tab:: Python

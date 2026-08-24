@@ -207,7 +207,11 @@ Then include what you need:
    #include <fiction/technology/qca/io/write_qca_layout.hpp>
    #include <fiction/...>
 
-Everything that can safely be used is directly located inside the ``fiction`` namespace.
+Symbols live in namespaces that mirror the directory tree, so a header under
+``fiction/technology/sidb/simulation/engines/`` declares into
+``fiction::sidb::simulation::engines``. ``fiction/technology/`` itself adds no namespace
+level: its subdirectories map straight to ``fiction::fcn``, ``fiction::qca``,
+``fiction::inml``, and ``fiction::sidb``.
 
 .. _python-bindings:
 

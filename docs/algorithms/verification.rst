@@ -3,13 +3,13 @@ Design Rule Violations (DRVs)
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/verification/design_rule_violations.hpp``
+        **Header:** ``fiction/verification/design_rule_violations.hpp``
 
-        .. doxygenstruct:: fiction::gate_level_drv_params
+        .. doxygenstruct:: fiction::verification::gate_level_drv_params
            :members:
-        .. doxygenstruct:: fiction::gate_level_drv_stats
+        .. doxygenstruct:: fiction::verification::gate_level_drv_stats
            :members:
-        .. doxygenfunction:: fiction::gate_level_drvs
+        .. doxygenfunction:: fiction::verification::gate_level_drvs
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.gate_level_drv_params
@@ -23,12 +23,12 @@ Equivalence Checking
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/verification/equivalence_checking.hpp``
+        **Header:** ``fiction/verification/equivalence_checking.hpp``
 
-        .. doxygenenum:: fiction::eq_type
-        .. doxygenstruct:: fiction::equivalence_checking_stats
+        .. doxygenenum:: fiction::verification::eq_type
+        .. doxygenstruct:: fiction::verification::equivalence_checking_stats
            :members:
-        .. doxygenfunction:: fiction::equivalence_checking
+        .. doxygenfunction:: fiction::verification::equivalence_checking
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.eq_type
@@ -40,6 +40,6 @@ Virtual Miter
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/verification/virtual_miter.hpp``
+        **Header:** ``fiction/verification/virtual_miter.hpp``
 
-        .. doxygenfunction:: fiction::virtual_miter
+        .. doxygenfunction:: fiction::verification::virtual_miter

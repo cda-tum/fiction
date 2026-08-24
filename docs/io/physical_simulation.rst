@@ -8,13 +8,13 @@ QCADesigner
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_qca_layout.hpp``
+        **Header:** ``fiction/technology/qca/io/write_qca_layout.hpp``
 
-        .. doxygenstruct:: fiction::write_qca_layout_params
+        .. doxygenstruct:: fiction::qca::io::write_qca_layout_params
            :members:
 
-        .. doxygenfunction:: fiction::write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
-        .. doxygenfunction:: fiction::write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_qca_layout(const Lyt& lyt, std::ostream& os, write_qca_layout_params ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qca_layout_params ps = {})
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.write_qca_layout_params
@@ -27,15 +27,15 @@ QCA-STACK
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_fqca_layout.hpp``
+        **Header:** ``fiction/technology/qca/io/write_fqca_layout.hpp``
 
-        .. doxygenstruct:: fiction::write_fqca_layout_params
+        .. doxygenstruct:: fiction::qca::io::write_fqca_layout_params
            :members:
 
-        .. doxygenfunction:: fiction::write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_params ps = {})
-        .. doxygenfunction:: fiction::write_fqca_layout(const Lyt& lyt, const std::string_view& filename, write_fqca_layout_params ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_fqca_layout(const Lyt& lyt, std::ostream& os, write_fqca_layout_params ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_fqca_layout(const Lyt& lyt, const std::string_view& filename, write_fqca_layout_params ps = {})
 
-        .. doxygenclass:: fiction::out_of_cell_names_exception
+        .. doxygenclass:: fiction::qca::io::out_of_cell_names_exception
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.write_fqca_layout_params
@@ -47,16 +47,16 @@ QCA-STACK
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/read_fqca_layout.hpp``
+        **Header:** ``fiction/technology/qca/io/read_fqca_layout.hpp``
 
-        .. doxygenfunction:: fiction::read_fqca_layout(std::istream& is, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::qca::io::read_fqca_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::qca::io::read_fqca_layout(const std::string_view& filename, const std::string_view& name = "")
 
-        .. doxygenclass:: fiction::unsupported_character_exception
+        .. doxygenclass:: fiction::qca::io::unsupported_character_exception
            :members:
-        .. doxygenclass:: fiction::undefined_cell_label_exception
+        .. doxygenclass:: fiction::qca::io::undefined_cell_label_exception
            :members:
-        .. doxygenclass:: fiction::unrecognized_cell_definition_exception
+        .. doxygenclass:: fiction::qca::io::unrecognized_cell_definition_exception
            :members:
 
     .. tab:: Python
@@ -75,13 +75,13 @@ ToPoliNano
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_qcc_layout.hpp``
+        **Header:** ``fiction/technology/inml/io/write_qcc_layout.hpp``
 
-        .. doxygenstruct:: fiction::write_qcc_layout_params
+        .. doxygenstruct:: fiction::inml::io::write_qcc_layout_params
            :members:
 
-        .. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
-        .. doxygenfunction:: fiction::write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
+        .. doxygenfunction:: fiction::inml::io::write_qcc_layout(const Lyt& lyt, std::ostream& os, write_qcc_layout_params ps = {})
+        .. doxygenfunction:: fiction::inml::io::write_qcc_layout(const Lyt& lyt, const std::string_view& filename, write_qcc_layout_params ps = {})
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.write_qcc_layout
@@ -92,10 +92,10 @@ MagCAD & SCERPA
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_qll_layout.hpp``
+        **Header:** ``fiction/technology/inml/io/write_qll_layout.hpp``
 
-        .. doxygenfunction:: fiction::write_qll_layout(const Lyt& lyt, std::ostream& os)
-        .. doxygenfunction:: fiction::write_qll_layout(const Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::inml::io::write_qll_layout(const Lyt& lyt, std::ostream& os)
+        .. doxygenfunction:: fiction::inml::io::write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.write_qll_layout
@@ -106,29 +106,29 @@ SiQAD
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_sqd_layout.hpp``
+        **Header:** ``fiction/technology/sidb/io/write_sqd_layout.hpp``
 
-        .. doxygenfunction:: fiction::write_sqd_layout(const Lyt& lyt, std::ostream& os)
-        .. doxygenfunction:: fiction::write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::io::write_sqd_layout(const Lyt& lyt, std::ostream& os)
+        .. doxygenfunction:: fiction::sidb::io::write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 
-        **Header:** ``fiction/io/write_sqd_sim_result.hpp``
+        **Header:** ``fiction/technology/sidb/io/write_sqd_sim_result.hpp``
 
-        .. doxygenfunction:: fiction::write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
-        .. doxygenfunction:: fiction::write_sqd_sim_result(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+        .. doxygenfunction:: fiction::sidb::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
 
-        **Header:** ``fiction/io/write_location_and_ground_state.hpp``
+        **Header:** ``fiction/technology/sidb/io/write_location_and_ground_state.hpp``
 
-        .. doxygenfunction:: fiction::write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, std::ostream& os)
-        .. doxygenfunction:: fiction::write_location_and_ground_state(const sidb_simulation_result<Lyt>& sim_result, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+        .. doxygenfunction:: fiction::sidb::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
 
-        **Header:** ``fiction/io/read_sqd_layout.hpp``
+        **Header:** ``fiction/technology/sidb/io/read_sqd_layout.hpp``
 
-        .. doxygenfunction:: fiction::read_sqd_layout(std::istream& is, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, std::istream& is)
-        .. doxygenfunction:: fiction::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
-        .. doxygenfunction:: fiction::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(std::istream& is, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(Lyt& lyt, std::istream& is)
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
+        .. doxygenfunction:: fiction::sidb::io::read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 
-        .. doxygenclass:: fiction::sqd_parsing_error
+        .. doxygenclass:: fiction::sidb::io::sqd_parsing_error
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.write_sqd_layout
@@ -145,12 +145,12 @@ SiDB Operational Domain
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_operational_domain.hpp``
+        **Header:** ``fiction/technology/sidb/io/write_operational_domain.hpp``
 
-        .. doxygenstruct:: fiction::write_operational_domain_params
+        .. doxygenstruct:: fiction::sidb::io::write_operational_domain_params
            :members:
-        .. doxygenfunction:: fiction::write_operational_domain(const OpDomain&, std::ostream&, const write_operational_domain_params&)
-        .. doxygenfunction:: fiction::write_operational_domain(const OpDomain&, const std::string_view&, const write_operational_domain_params&)
+        .. doxygenfunction:: fiction::sidb::io::write_operational_domain(const OpDomain&, std::ostream&, const write_operational_domain_params&)
+        .. doxygenfunction:: fiction::sidb::io::write_operational_domain(const OpDomain&, const std::string_view&, const write_operational_domain_params&)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.write_operational_domain_params
@@ -165,12 +165,12 @@ Can be used to generate gate-level layout files (``.fgl``) as offered by `MNT Be
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/io/write_fgl_layout.hpp``
+        **Header:** ``fiction/layouts/io/write_fgl_layout.hpp``
 
-        .. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, std::ostream& os)
-        .. doxygenfunction:: fiction::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::layouts::io::write_fgl_layout(const Lyt& lyt, std::ostream& os)
+        .. doxygenfunction:: fiction::layouts::io::write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
 
-        .. doxygenclass:: fiction::fgl_parsing_error
+        .. doxygenclass:: fiction::layouts::io::fgl_parsing_error
            :members:
 
     .. tab:: Python

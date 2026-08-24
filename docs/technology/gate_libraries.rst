@@ -14,31 +14,31 @@ by extending it.
 Abstract Gate Library
 ---------------------
 
-**Header:** ``fiction/technology/fcn_gate_library.hpp``
+**Header:** ``fiction/technology/fcn/gate_library.hpp``
 
-.. doxygenclass:: fiction::fcn_gate_library
+.. doxygenclass:: fiction::fcn::gate_library
    :members:
 
-.. doxygenclass:: fiction::unsupported_gate_type_exception
+.. doxygenclass:: fiction::fcn::unsupported_gate_type_exception
     :members:
-.. doxygenclass:: fiction::unsupported_gate_orientation_exception
+.. doxygenclass:: fiction::fcn::unsupported_gate_orientation_exception
     :members:
 
-**Header:** ``fiction/technology/cell_ports.hpp``
+**Header:** ``fiction/technology/fcn/cell_ports.hpp``
 
-.. doxygenstruct:: fiction::port_position
+.. doxygenstruct:: fiction::fcn::port_position
    :members:
-.. doxygenstruct:: fiction::port_direction
+.. doxygenstruct:: fiction::fcn::port_direction
    :members:
-.. doxygenstruct:: fiction::port_list
+.. doxygenstruct:: fiction::fcn::port_list
    :members:
 
 QCA ONE Library
 ---------------
 
-**Header:** ``fiction/technology/qca_one_library.hpp``
+**Header:** ``fiction/technology/qca/qca_one_library.hpp``
 
-.. doxygenclass:: fiction::qca_one_library
+.. doxygenclass:: fiction::qca::qca_one_library
    :members:
 
 
@@ -47,18 +47,18 @@ QCA ONE Library
 Molecular QCA Library
 ---------------------
 
-**Header:** ``fiction/technology/sim7_mol_library.hpp``
+**Header:** ``fiction/technology/qca/sim7_mol_library.hpp``
 
-.. doxygenclass:: fiction::sim7_mol_library
+.. doxygenclass:: fiction::qca::sim7_mol_library
    :members:
 
 
 iNML ToPoliNano Library
 -----------------------
 
-**Header:** ``fiction/technology/inml_topolinano_library.hpp``
+**Header:** ``fiction/technology/inml/topolinano_library.hpp``
 
-.. doxygenclass:: fiction::inml_topolinano_library
+.. doxygenclass:: fiction::inml::topolinano_library
    :members:
 
 
@@ -67,20 +67,20 @@ iNML ToPoliNano Library
 SiDB Bestagon Library
 ---------------------
 
-**Header:** ``fiction/technology/sidb_bestagon_library.hpp``
+**Header:** ``fiction/technology/sidb/libraries/bestagon_library.hpp``
 
-.. doxygenclass:: fiction::sidb_bestagon_library
+.. doxygenclass:: fiction::sidb::libraries::bestagon_library
    :members:
 
 Parameterized SiDB Library
 --------------------------
 
-**Header:** ``fiction/technology/sidb_on_the_fly_gate_library.hpp``
+**Header:** ``fiction/technology/sidb/libraries/on_the_fly_gate_library.hpp``
 
-.. doxygenstruct:: fiction::sidb_on_the_fly_gate_library_params
+.. doxygenstruct:: fiction::sidb::libraries::on_the_fly_gate_library_params
    :members:
-.. doxygenclass:: fiction::sidb_on_the_fly_gate_library
+.. doxygenclass:: fiction::sidb::libraries::on_the_fly_gate_library
    :members:
 
-.. doxygenclass:: fiction::gate_design_exception
+.. doxygenclass:: fiction::sidb::libraries::gate_design_exception
    :members:

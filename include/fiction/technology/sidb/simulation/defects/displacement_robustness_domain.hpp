@@ -597,7 +597,7 @@ class displacement_robustness_domain_impl
  * based on the provided truth table specification and displacement robustness computation parameters.
  * The number of displacements grows exponentially with the number of SiDBs. For small layouts, all displacements
  * can be analyzed. For larger layouts, random sampling can be applied, controllable by the `analysis_mode` and
- * `percentage_of_analyzed_displaced_layouts` in `params.
+ * `percentage_of_analyzed_displaced_layouts` in `params`.
  *
  * @tparam Lyt The SiDB cell-level layout type.
  * @tparam TT Truth table type.

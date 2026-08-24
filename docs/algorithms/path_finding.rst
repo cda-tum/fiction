@@ -5,21 +5,21 @@ Distance functions compute (an approximation for) the distance between two coord
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/path_finding/distance.hpp``
+        **Header:** ``fiction/physical_design/path_finding/distance.hpp``
 
-        .. doxygenfunction:: fiction::manhattan_distance
-        .. doxygenfunction:: fiction::euclidean_distance
-        .. doxygenfunction:: fiction::squared_euclidean_distance
-        .. doxygenfunction:: fiction::twoddwave_distance
-        .. doxygenfunction:: fiction::chebyshev_distance
+        .. doxygenfunction:: fiction::physical_design::path_finding::manhattan_distance
+        .. doxygenfunction:: fiction::physical_design::path_finding::euclidean_distance
+        .. doxygenfunction:: fiction::physical_design::path_finding::squared_euclidean_distance
+        .. doxygenfunction:: fiction::physical_design::path_finding::twoddwave_distance
+        .. doxygenfunction:: fiction::physical_design::path_finding::chebyshev_distance
 
-        .. doxygenclass:: fiction::distance_functor
+        .. doxygenclass:: fiction::physical_design::path_finding::distance_functor
            :members:
-        .. doxygenclass:: fiction::manhattan_distance_functor
-        .. doxygenclass:: fiction::euclidean_distance_functor
-        .. doxygenclass:: fiction::squared_euclidean_distance_functor
-        .. doxygenclass:: fiction::twoddwave_distance_functor
-        .. doxygenclass:: fiction::chebyshev_distance_functor
+        .. doxygenclass:: fiction::physical_design::path_finding::manhattan_distance_functor
+        .. doxygenclass:: fiction::physical_design::path_finding::euclidean_distance_functor
+        .. doxygenclass:: fiction::physical_design::path_finding::squared_euclidean_distance_functor
+        .. doxygenclass:: fiction::physical_design::path_finding::twoddwave_distance_functor
+        .. doxygenclass:: fiction::physical_design::path_finding::chebyshev_distance_functor
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.manhattan_distance
@@ -35,19 +35,19 @@ Distance maps can store the distance from a coordinate to all other coordinates.
 repeatedly calling complex distance functions that are expensive to evaluate. The distance maps can serve as a
 lookup-table for these cases.
 
-**Header:** ``fiction/algorithms/path_finding/distance_map.hpp``
+**Header:** ``fiction/physical_design/path_finding/distance_map.hpp``
 
-.. doxygentypedef:: fiction::distance_map
-.. doxygentypedef:: fiction::sparse_distance_map
+.. doxygentypedef:: fiction::physical_design::path_finding::distance_map
+.. doxygentypedef:: fiction::physical_design::path_finding::sparse_distance_map
 
-.. doxygenfunction:: fiction::initialize_distance_map
-.. doxygenfunction:: fiction::initialize_sparse_distance_map
+.. doxygenfunction:: fiction::physical_design::path_finding::initialize_distance_map
+.. doxygenfunction:: fiction::physical_design::path_finding::initialize_sparse_distance_map
 
-.. doxygenclass:: fiction::distance_map_functor
+.. doxygenclass:: fiction::physical_design::path_finding::distance_map_functor
    :members:
-.. doxygenclass:: fiction::sparse_distance_map_functor
+.. doxygenclass:: fiction::physical_design::path_finding::sparse_distance_map_functor
    :members:
-.. doxygenclass:: fiction::smart_distance_cache_functor
+.. doxygenclass:: fiction::physical_design::path_finding::smart_distance_cache_functor
    :members:
 
 Cost Functions
@@ -55,28 +55,28 @@ Cost Functions
 
 Cost functions compute the cost to move from one coordinate to another (adjacent) one.
 
-**Header:** ``fiction/algorithms/path_finding/cost.hpp``
+**Header:** ``fiction/physical_design/path_finding/cost.hpp``
 
-.. doxygenfunction:: fiction::unit_cost
-.. doxygenfunction:: fiction::random_cost
+.. doxygenfunction:: fiction::physical_design::path_finding::unit_cost
+.. doxygenfunction:: fiction::physical_design::path_finding::random_cost
 
-.. doxygenclass:: fiction::cost_functor
+.. doxygenclass:: fiction::physical_design::path_finding::cost_functor
    :members:
-.. doxygenclass:: fiction::unit_cost_functor
-.. doxygenclass:: fiction::random_cost_functor
+.. doxygenclass:: fiction::physical_design::path_finding::unit_cost_functor
+.. doxygenclass:: fiction::physical_design::path_finding::random_cost_functor
 
 A* Shortest Path
 ----------------
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/path_finding/a_star.hpp``
+        **Header:** ``fiction/physical_design/path_finding/a_star.hpp``
 
-        .. doxygenstruct:: fiction::a_star_params
+        .. doxygenstruct:: fiction::physical_design::path_finding::a_star_params
            :members:
-        .. doxygenfunction:: fiction::a_star
-        .. doxygenfunction:: fiction::a_star_distance
-        .. doxygenclass:: fiction::a_star_distance_functor
+        .. doxygenfunction:: fiction::physical_design::path_finding::a_star
+        .. doxygenfunction:: fiction::physical_design::path_finding::a_star_distance
+        .. doxygenclass:: fiction::physical_design::path_finding::a_star_distance_functor
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.a_star_params
@@ -89,11 +89,11 @@ k Shortest Paths
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/path_finding/k_shortest_paths.hpp``
+        **Header:** ``fiction/physical_design/path_finding/k_shortest_paths.hpp``
 
-        .. doxygenstruct:: fiction::yen_k_shortest_paths_params
+        .. doxygenstruct:: fiction::physical_design::path_finding::yen_k_shortest_paths_params
            :members:
-        .. doxygenfunction:: fiction::yen_k_shortest_paths
+        .. doxygenfunction:: fiction::physical_design::path_finding::yen_k_shortest_paths
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.yen_k_shortest_paths_params
@@ -105,11 +105,11 @@ Enumerate All Paths
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/path_finding/enumerate_all_paths.hpp``
+        **Header:** ``fiction/physical_design/path_finding/enumerate_all_paths.hpp``
 
-        .. doxygenstruct:: fiction::enumerate_all_paths_params
+        .. doxygenstruct:: fiction::physical_design::path_finding::enumerate_all_paths_params
            :members:
-        .. doxygenfunction:: fiction::enumerate_all_paths
+        .. doxygenfunction:: fiction::physical_design::path_finding::enumerate_all_paths
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.enumerate_all_paths_params

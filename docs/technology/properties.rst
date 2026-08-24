@@ -6,15 +6,15 @@ Area Requirements
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/area.hpp``
+        **Header:** ``fiction/technology/fcn/area.hpp``
 
-        .. doxygenstruct:: fiction::area_params
+        .. doxygenstruct:: fiction::fcn::area_params
             :members:
-        .. doxygenstruct:: fiction::area_stats
+        .. doxygenstruct:: fiction::fcn::area_stats
             :members:
 
-        .. doxygenfunction:: fiction::area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr)
-        .. doxygenfunction:: fiction::area(const bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::fcn::area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::fcn::area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technology<Lyt>>& ps = {}, area_stats* pst = nullptr)
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.area
@@ -22,6 +22,6 @@ Area Requirements
 MagCAD Magnet Count
 ###################
 
-**Header:** ``fiction/technology/magcad_magnet_count.hpp``
+**Header:** ``fiction/technology/inml/magcad_magnet_count.hpp``
 
-.. doxygenfunction:: fiction::magcad_magnet_count
+.. doxygenfunction:: fiction::inml::magcad_magnet_count

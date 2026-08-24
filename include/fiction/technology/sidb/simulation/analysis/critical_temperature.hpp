@@ -41,7 +41,7 @@ namespace fiction::sidb::simulation::analysis
 {
 
 /**
- * This struct stores the parameters for the *Critical Temperature*` algorithm.
+ * This struct stores the parameters for the *Critical Temperature* algorithm.
  */
 struct critical_temperature_params
 {

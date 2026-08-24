@@ -13,13 +13,13 @@ always optimal.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/graph_oriented_layout_design.hpp``
+        **Header:** ``fiction/physical_design/graph_oriented_layout_design.hpp``
 
-        .. doxygenstruct:: fiction::graph_oriented_layout_design_params
+        .. doxygenstruct:: fiction::physical_design::graph_oriented_layout_design_params
            :members:
-        .. doxygenstruct:: fiction::graph_oriented_layout_design_stats
+        .. doxygenstruct:: fiction::physical_design::graph_oriented_layout_design_stats
            :members:
-        .. doxygenfunction:: fiction::graph_oriented_layout_design
+        .. doxygenfunction:: fiction::physical_design::graph_oriented_layout_design
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.graph_oriented_layout_design_params

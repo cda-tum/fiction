@@ -12,7 +12,7 @@ clocking information is assigned to the coordinates of a layout by the means of 
 This header provides the ``clocking_scheme`` class that defines general floor plans of clock numbers for
 :ref:`clocked layouts<clocked layout>` as well as pre-defined schemes from the literature.
 
-.. doxygenclass:: fiction::clocking_scheme
+.. doxygenclass:: fiction::layouts::clocking_scheme
    :members:
 
 Pre-defined schemes
@@ -21,7 +21,7 @@ Pre-defined schemes
 Open
 ####
 
-.. doxygenfunction:: fiction::open_clocking
+.. doxygenfunction:: fiction::layouts::open_clocking
 
 Columnar
 ########
@@ -29,7 +29,7 @@ Columnar
 .. figure:: /_static/columnar.png
    :width: 200
 
-.. doxygenfunction:: fiction::columnar_clocking
+.. doxygenfunction:: fiction::layouts::columnar_clocking
 
 Row
 ###
@@ -37,7 +37,7 @@ Row
 .. figure:: /_static/row.png
    :width: 200
 
-.. doxygenfunction:: fiction::row_clocking
+.. doxygenfunction:: fiction::layouts::row_clocking
 
 2DDWave
 #######
@@ -45,8 +45,8 @@ Row
 .. figure:: /_static/2ddwave.png
    :width: 200
 
-.. doxygenfunction:: fiction::twoddwave_clocking
-.. doxygenfunction:: fiction::twoddwave_hex_clocking
+.. doxygenfunction:: fiction::layouts::twoddwave_clocking
+.. doxygenfunction:: fiction::layouts::twoddwave_hex_clocking
 
 USE
 ###
@@ -54,7 +54,7 @@ USE
 .. figure:: /_static/use.png
    :width: 200
 
-.. doxygenfunction:: fiction::use_clocking
+.. doxygenfunction:: fiction::layouts::use_clocking
 
 RES
 ###
@@ -62,7 +62,7 @@ RES
 .. figure:: /_static/res.png
    :width: 200
 
-.. doxygenfunction:: fiction::res_clocking
+.. doxygenfunction:: fiction::layouts::res_clocking
 
 ESR
 ###
@@ -70,7 +70,7 @@ ESR
 .. figure:: /_static/esr.png
    :width: 200
 
-.. doxygenfunction:: fiction::esr_clocking
+.. doxygenfunction:: fiction::layouts::esr_clocking
 
 CFE
 ###
@@ -78,7 +78,7 @@ CFE
 .. figure:: /_static/cfe.png
    :width: 200
 
-.. doxygenfunction:: fiction::cfe_clocking
+.. doxygenfunction:: fiction::layouts::cfe_clocking
 
 Ripple
 ######
@@ -86,7 +86,7 @@ Ripple
 .. figure:: /_static/ripple.png
    :width: 200
 
-.. doxygenfunction:: fiction::ripple_clocking
+.. doxygenfunction:: fiction::layouts::ripple_clocking
 
 SRS
 ###
@@ -94,7 +94,7 @@ SRS
 .. figure:: /_static/srs.png
    :width: 200
 
-.. doxygenfunction:: fiction::srs_clocking
+.. doxygenfunction:: fiction::layouts::srs_clocking
 
 BANCS
 #####
@@ -102,11 +102,11 @@ BANCS
 .. figure:: /_static/bancs.png
    :width: 150
 
-.. doxygenfunction:: fiction::bancs_clocking
+.. doxygenfunction:: fiction::layouts::bancs_clocking
 
 Utility functions
 -----------------
 
-.. doxygenfunction:: fiction::ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
-.. doxygenfunction:: fiction::is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
-.. doxygenfunction:: fiction::get_clocking_scheme(const std::string_view& name) noexcept
+.. doxygenfunction:: fiction::layouts::ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
+.. doxygenfunction:: fiction::layouts::is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
+.. doxygenfunction:: fiction::layouts::get_clocking_scheme(const std::string_view& name) noexcept

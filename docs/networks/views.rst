@@ -10,7 +10,7 @@ Edge Color View
 
 **Header:** ``fiction/networks/views/edge_color_view.hpp``
 
-.. doxygenclass:: fiction::out_of_place_edge_color_view
+.. doxygenclass:: fiction::networks::views::out_of_place_edge_color_view
    :members:
 
 Static Depth View
@@ -18,7 +18,7 @@ Static Depth View
 
 **Header:** ``fiction/networks/views/static_depth_view.hpp``
 
-.. doxygenclass:: fiction::static_depth_view
+.. doxygenclass:: fiction::networks::views::static_depth_view
   :members:
 
 Mutable Rank View
@@ -26,5 +26,5 @@ Mutable Rank View
 
 **Header:** ``fiction/networks/views/mutable_rank_view.hpp``
 
-.. doxygenclass:: fiction::mutable_rank_view
+.. doxygenclass:: fiction::networks::views::mutable_rank_view
  :members:

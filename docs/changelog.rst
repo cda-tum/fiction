@@ -66,6 +66,33 @@ Added
 
 Changed
 #######
+- **Breaking:** Restructured ``include/fiction/`` so that the directory a header lives in tells
+  you what the header is about, and introduced nested namespaces mirroring that tree
+  (`#1096 <https://github.com/cda-tum/fiction/issues/1096>`_,
+  `#1097 <https://github.com/cda-tum/fiction/issues/1097>`_):
+
+    - ``algorithms/`` is dissolved. The design-flow stages sit directly under ``fiction/`` as
+      ``synthesis/``, ``physical_design/``, and ``verification/``
+    - The flat ``io/`` directory is dissolved. Readers and writers live with the module whose
+      data they serialize, as ``layouts/io/``, ``networks/io/``, and ``technology/<tech>/io/``
+    - ``technology/`` is split by technology into ``fcn/``, ``qca/``, ``inml/``, and ``sidb/``.
+      The SiDB subtree gains ``primitives/``, ``model/``, ``simulation/`` (with ``engines/``,
+      ``analysis/``, ``defects/``, ``logic/``, ``generic/``, ``utils/``), ``libraries/``,
+      ``generators/``, and ``io/``
+    - Namespaces mirror the directories, so ``fiction::quickexact`` becomes
+      ``fiction::sidb::simulation::engines::quickexact``. ``technology/`` itself adds no
+      namespace level
+    - Identifiers shed prefixes the namespace now carries, so ``sidb_simulation_parameters``
+      becomes ``fiction::sidb::model::simulation_parameters``. Published names are kept, so
+      ``qca_one_library`` stays ``fiction::qca::qca_one_library``
+    - The coordinate types are renamed: ``fiction::offset::ucoord_t`` becomes
+      ``fiction::layouts::coords::offset``, and likewise for ``cube`` and ``siqad``
+
+  *fiction* is header-only, so an include path is public API. This is a clean break: no
+  forwarding headers are left behind and no deprecated ``using`` declarations. ``UPGRADING.md``
+  lists every moved header and every renamed symbol.
+- **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
+  ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
@@ -115,7 +142,7 @@ Changed
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
     - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
-      from ``fiction/utils/math_utils.hpp`` to the new ``fiction/utils/combination_utils.hpp``.
+      from ``fiction/utils/math/math_utils.hpp`` to the new ``fiction/utils/math/combination_utils.hpp``.
       Include the latter to keep using it
     - ``orthogonal`` and ``graph_oriented_layout_design`` no longer template their implementation on
       the specification network type, which they convert away before doing any work. Their public

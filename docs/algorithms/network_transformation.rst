@@ -1,20 +1,20 @@
 Network Conversion
 ------------------
 
-**Header:** ``fiction/algorithms/network_transformation/network_conversion.hpp``
+**Header:** ``fiction/synthesis/network_conversion.hpp``
 
-.. doxygenfunction:: fiction::convert_network
+.. doxygenfunction:: fiction::synthesis::convert_network
 
 Network Balancing
 ------------------
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/network_transformation/network_balancing.hpp``
+        **Header:** ``fiction/synthesis/network_balancing.hpp``
 
-        .. doxygenstruct:: fiction::network_balancing_params
+        .. doxygenstruct:: fiction::synthesis::network_balancing_params
            :members:
-        .. doxygenfunction:: fiction::network_balancing
+        .. doxygenfunction:: fiction::synthesis::network_balancing
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.network_balancing_params
@@ -27,11 +27,11 @@ Fanout Substitution
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/network_transformation/fanout_substitution.hpp``
+        **Header:** ``fiction/synthesis/fanout_substitution.hpp``
 
-        .. doxygenstruct:: fiction::fanout_substitution_params
+        .. doxygenstruct:: fiction::synthesis::fanout_substitution_params
             :members:
-        .. doxygenfunction:: fiction::fanout_substitution
+        .. doxygenfunction:: fiction::synthesis::fanout_substitution
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.fanout_substitution_params
@@ -47,20 +47,20 @@ Technology Mapping
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/network_transformation/technology_mapping.hpp``
+        **Header:** ``fiction/synthesis/technology_mapping.hpp``
 
-        .. doxygenclass:: fiction::missing_required_gates_exception
+        .. doxygenclass:: fiction::synthesis::missing_required_gates_exception
            :members:
-        .. doxygenstruct:: fiction::technology_mapping_params
+        .. doxygenstruct:: fiction::synthesis::technology_mapping_params
            :members:
-        .. doxygenfunction:: fiction::and_or_not
-        .. doxygenfunction:: fiction::and_or_not_maj
-        .. doxygenfunction:: fiction::all_standard_2_input_functions
-        .. doxygenfunction:: fiction::all_standard_3_input_functions
-        .. doxygenfunction:: fiction::all_supported_standard_functions
-        .. doxygenstruct:: fiction::technology_mapping_stats
+        .. doxygenfunction:: fiction::synthesis::and_or_not
+        .. doxygenfunction:: fiction::synthesis::and_or_not_maj
+        .. doxygenfunction:: fiction::synthesis::all_standard_2_input_functions
+        .. doxygenfunction:: fiction::synthesis::all_standard_3_input_functions
+        .. doxygenfunction:: fiction::synthesis::all_supported_standard_functions
+        .. doxygenstruct:: fiction::synthesis::technology_mapping_stats
            :members:
-        .. doxygenfunction:: fiction::technology_mapping
+        .. doxygenfunction:: fiction::synthesis::technology_mapping
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.missing_required_gates_exception
@@ -81,6 +81,6 @@ Delete Virtual PIs
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/network_transformation/delete_virtual_pis.hpp``
+        **Header:** ``fiction/synthesis/delete_virtual_pis.hpp``
 
-        .. doxygenfunction:: fiction::delete_virtual_pis
+        .. doxygenfunction:: fiction::synthesis::delete_virtual_pis

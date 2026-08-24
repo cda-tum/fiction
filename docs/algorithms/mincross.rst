@@ -19,12 +19,12 @@ based on the median positions of their fanin and fanout connections.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/graph/mincross.hpp``
+        **Header:** ``fiction/physical_design/utils/mincross.hpp``
 
-        .. doxygenstruct:: fiction::mincross_params
+        .. doxygenstruct:: fiction::physical_design::utils::mincross_params
            :members:
 
-        .. doxygenstruct:: fiction::mincross_stats
+        .. doxygenstruct:: fiction::physical_design::utils::mincross_stats
            :members:
 
-        .. doxygenfunction:: fiction::mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nullptr)
+        .. doxygenfunction:: fiction::physical_design::utils::mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nullptr)

@@ -650,7 +650,7 @@ class mutable_rank_view<Ntk, false> : public fiction::networks::views::static_de
 };
 
 /**
- * Deduction guide for `mutable_rank_view'.
+ * Deduction guide for `mutable_rank_view`.
  *
  * @tparam T Network type deduced from the construction context of `mutable_rank_view`.
  */

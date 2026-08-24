@@ -15,7 +15,7 @@ can be utilized or the clock numbers can be assigned manually.
     .. tab:: C++
         **Header:** ``fiction/layouts/clocked_layout.hpp``
 
-        .. doxygenclass:: fiction::clocked_layout
+        .. doxygenclass:: fiction::layouts::clocked_layout
            :members:
 
     .. tab:: Python

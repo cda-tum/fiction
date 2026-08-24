@@ -324,7 +324,7 @@ class physical_population_stability_impl
 
     /**
      * This function checks if the absolute difference between the given local potential and µ+ is smaller than the
-     * current minimum potential difference. If true`, it updates the
+     * current minimum potential difference. If `true`, it updates the
      * population stability information with the new minimum difference and critical cell.
      *
      * @param local_potential The local potential associated with the cell.

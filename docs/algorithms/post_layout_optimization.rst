@@ -12,13 +12,13 @@ relocating outputs to more favorable positions.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/algorithms/physical_design/post_layout_optimization.hpp``
+        **Header:** ``fiction/physical_design/post_layout_optimization.hpp``
 
-        .. doxygenstruct:: fiction::post_layout_optimization_params
+        .. doxygenstruct:: fiction::physical_design::post_layout_optimization_params
            :members:
-        .. doxygenstruct:: fiction::post_layout_optimization_stats
+        .. doxygenstruct:: fiction::physical_design::post_layout_optimization_stats
            :members:
-        .. doxygenfunction:: fiction::post_layout_optimization
+        .. doxygenfunction:: fiction::physical_design::post_layout_optimization
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.post_layout_optimization_params

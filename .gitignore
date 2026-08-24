@@ -44,6 +44,7 @@
 cmake-build-*
 build*
 docs/_build/
+docs/doxyxml/
 docs/html/
 */_dep/
 

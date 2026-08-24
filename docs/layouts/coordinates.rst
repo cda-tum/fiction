@@ -12,7 +12,7 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 
 .. tabs::
     .. tab:: C++
-        .. doxygenstruct:: fiction::offset::ucoord_t
+        .. doxygenstruct:: fiction::layouts::coords::offset
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.offset_coordinate
 
@@ -24,7 +24,7 @@ At the same time, they can be used to address 3-dimensional grids.
 
 .. tabs::
     .. tab:: C++
-        .. doxygenstruct:: fiction::cube::coord_t
+        .. doxygenstruct:: fiction::layouts::coords::cube
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.cube_coordinate
 
@@ -36,7 +36,7 @@ while the z value (0,1) points to the top or bottom Si atom in the dimer. The co
 
 .. tabs::
     .. tab:: C++
-        .. doxygenstruct:: fiction::siqad::coord_t
+        .. doxygenstruct:: fiction::layouts::coords::siqad
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.siqad_coordinate
 
@@ -45,18 +45,18 @@ Coordinate iterator
 
 An iterator type that allows to enumerate coordinates in order within a boundary.
 
-.. doxygenclass:: fiction::coord_iterator
+.. doxygenclass:: fiction::layouts::coords::iterator
 
 Utility functions
 -----------------
 
 .. tabs::
     .. tab:: C++
-        .. doxygenfunction:: fiction::area(const CoordinateType& coord) noexcept
-        .. doxygenfunction:: fiction::volume(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::layouts::coords::area(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::layouts::coords::volume(const CoordinateType& coord) noexcept
 
-        .. doxygenfunction:: fiction::siqad::to_fiction_coord
-        .. doxygenfunction:: fiction::siqad::to_siqad_coord
+        .. doxygenfunction:: fiction::layouts::coords::to_fiction_coord
+        .. doxygenfunction:: fiction::layouts::coords::to_siqad_coord
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.offset_area

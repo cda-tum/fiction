@@ -8,11 +8,11 @@ H-Si(100)-2x1 and H-Si(111)-1x1.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb_lattice_orientations.hpp``
+        **Header:** ``fiction/technology/sidb/primitives/lattice_orientations.hpp``
 
-        .. doxygenstruct:: fiction::sidb_100_lattice
+        .. doxygenstruct:: fiction::sidb::primitives::lattice_100
            :members:
-        .. doxygenstruct:: fiction::sidb_111_lattice
+        .. doxygenstruct:: fiction::sidb::primitives::lattice_111
            :members:
 
     .. tab:: Python
@@ -30,9 +30,9 @@ H-Si lattice orientation. We currently support H-Si(100)-2x1 and H-Si(111)-1x1.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb_lattice.hpp``
+        **Header:** ``fiction/technology/sidb/primitives/lattice.hpp``
 
-        .. doxygenclass:: fiction::sidb_lattice
+        .. doxygenclass:: fiction::sidb::primitives::lattice
            :members:
 
     .. tab:: Python

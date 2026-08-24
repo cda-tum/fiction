@@ -8,26 +8,26 @@ SiDB Defect Types
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb_defects.hpp``
+        **Header:** ``fiction/technology/sidb/model/defects.hpp``
 
-        .. doxygenenum:: fiction::sidb_defect_type
+        .. doxygenenum:: fiction::sidb::model::defect_type
 
-        .. doxygenstruct:: fiction::sidb_defect
+        .. doxygenstruct:: fiction::sidb::model::defect
            :members:
 
-        .. doxygenfunction:: fiction::is_charged_defect_type
-        .. doxygenfunction:: fiction::is_neutral_defect_type
+        .. doxygenfunction:: fiction::sidb::model::is_charged_defect_type
+        .. doxygenfunction:: fiction::sidb::model::is_neutral_defect_type
 
-        .. doxygenfunction:: fiction::is_positively_charged_defect
-        .. doxygenfunction:: fiction::is_negatively_charged_defect
-        .. doxygenfunction:: fiction::is_neutrally_charged_defect
+        .. doxygenfunction:: fiction::sidb::model::is_positively_charged_defect
+        .. doxygenfunction:: fiction::sidb::model::is_negatively_charged_defect
+        .. doxygenfunction:: fiction::sidb::model::is_neutrally_charged_defect
 
-        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
 
-        .. doxygenfunction:: fiction::defect_extent
+        .. doxygenfunction:: fiction::sidb::model::defect_extent
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_defect_type
@@ -49,22 +49,22 @@ SiDB Defect Types
 SiDB Defect Surface
 -------------------
 
-**Header:** ``fiction/technology/sidb_defect_surface.hpp``
+**Header:** ``fiction/technology/sidb/primitives/defect_surface.hpp``
 
 A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
 fabrication defects on the H-Si(100) 2x1 surface.
 
-.. doxygenclass:: fiction::sidb_defect_surface
+.. doxygenclass:: fiction::sidb::primitives::defect_surface
    :members:
-.. doxygenclass:: fiction::sidb_defect_surface< Lyt, true >
+.. doxygenclass:: fiction::sidb::primitives::defect_surface< Lyt, true >
    :members:
-.. doxygenclass:: fiction::sidb_defect_surface< Lyt, false >
+.. doxygenclass:: fiction::sidb::primitives::defect_surface< Lyt, false >
    :members:
 
 
 SiDB Defect Analysis
 --------------------
 
-**Header:** ``fiction/technology/sidb_surface_analysis.hpp``
+**Header:** ``fiction/technology/sidb/libraries/surface_analysis.hpp``
 
-.. doxygenfunction:: fiction::sidb_surface_analysis
+.. doxygenfunction:: fiction::sidb::libraries::surface_analysis

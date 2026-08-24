@@ -1499,7 +1499,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param dep_cell `dependent_cell_mode::FIXED` if the state of the dependent cell should not change,
      * `dependent_cell_mode::VARIABLE` if it should.
      * @param energy_calculation_mode `energy_calculation::UPDATE_ENERGY` if the electrostatic potential energy should
-     * be updated, `energy_calculation::KEEP_ENERGY otherwise.
+     * be updated, `energy_calculation::KEEP_ENERGY` otherwise.
      * @param history_mode `charge_distribution_history::NEGLECT` if the information (local electrostatic energy) of the
      * previous charge distribution is used to make the update more efficient, `charge_distribution_history::CONSIDER`
      * otherwise.

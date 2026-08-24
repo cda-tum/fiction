@@ -10,15 +10,15 @@ Possible charge states of SiDBs.
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb_charge_state.hpp``
+        **Header:** ``fiction/technology/sidb/model/charge_state.hpp``
 
-        .. doxygenenum:: fiction::sidb_charge_state
-        .. doxygenvariable:: fiction::SIDB_CHARGE_STATES_BASE_2
-        .. doxygenvariable:: fiction::SIDB_CHARGE_STATES_BASE_3
-        .. doxygenfunction:: fiction::sidb_charge_states_for_base_number
-        .. doxygenfunction:: fiction::charge_state_to_sign
-        .. doxygenfunction:: fiction::sign_to_charge_state
-        .. doxygenfunction:: fiction::charge_configuration_to_string
+        .. doxygenenum:: fiction::sidb::model::charge_state
+        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGE_STATES_BASE_2
+        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGE_STATES_BASE_3
+        .. doxygenfunction:: fiction::sidb::model::charge_states_for_base_number
+        .. doxygenfunction:: fiction::sidb::model::charge_state_to_sign
+        .. doxygenfunction:: fiction::sidb::model::sign_to_charge_state
+        .. doxygenfunction:: fiction::sidb::model::charge_configuration_to_string
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_charge_state
@@ -37,20 +37,20 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/charge_distribution_surface.hpp``
+        **Header:** ``fiction/technology/sidb/primitives/charge_distribution_surface.hpp``
 
-        .. doxygenenum:: fiction::dependent_cell_mode
-        .. doxygenenum:: fiction::energy_calculation
-        .. doxygenenum:: fiction::charge_distribution_history
-        .. doxygenenum:: fiction::charge_index_recomputation
-        .. doxygenenum:: fiction::charge_distribution_mode
-        .. doxygenenum:: fiction::charge_index_mode
-        .. doxygenenum:: fiction::charge_transition_threshold_bounds
-        .. doxygenclass:: fiction::charge_distribution_surface
+        .. doxygenenum:: fiction::sidb::primitives::dependent_cell_mode
+        .. doxygenenum:: fiction::sidb::primitives::energy_calculation
+        .. doxygenenum:: fiction::sidb::primitives::charge_distribution_history
+        .. doxygenenum:: fiction::sidb::primitives::charge_index_recomputation
+        .. doxygenenum:: fiction::sidb::primitives::charge_distribution_mode
+        .. doxygenenum:: fiction::sidb::primitives::charge_index_mode
+        .. doxygenenum:: fiction::sidb::primitives::charge_transition_threshold_bounds
+        .. doxygenclass:: fiction::sidb::primitives::charge_distribution_surface
            :members:
-        .. doxygenclass:: fiction::charge_distribution_surface< Lyt, true >
+        .. doxygenclass:: fiction::sidb::primitives::charge_distribution_surface< Lyt, true >
            :members:
-        .. doxygenclass:: fiction::charge_distribution_surface< Lyt, false >
+        .. doxygenclass:: fiction::sidb::primitives::charge_distribution_surface< Lyt, false >
            :members:
 
     .. tab:: Python
@@ -74,25 +74,25 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
 Is SiDB gate design deemed impossible
 -------------------------------------
 
-**Header:** ``fiction/technology/is_sidb_gate_design_impossible.hpp``
+**Header:** ``fiction/technology/sidb/generators/is_gate_design_impossible.hpp``
 
-.. doxygenstruct:: fiction::is_sidb_gate_design_impossible_params
+.. doxygenstruct:: fiction::sidb::generators::is_gate_design_impossible_params
    :members:
-.. doxygenfunction:: fiction::is_sidb_gate_design_impossible
+.. doxygenfunction:: fiction::sidb::generators::is_gate_design_impossible
 
 
 Physical Constants
 ------------------
 
-**Header:** ``fiction/technology/constants.hpp``
+**Header:** ``fiction/technology/fcn/constants.hpp``
 
-.. doxygenvariable:: fiction::constants::physical::BOLTZMANN_CONSTANT
-.. doxygenvariable:: fiction::constants::physical::EV_TO_JOULE
-.. doxygenvariable:: fiction::constants::physical::EPSILON
-.. doxygenvariable:: fiction::constants::physical::ELEMENTARY_CHARGE
-.. doxygenvariable:: fiction::constants::physical::K_E
-.. doxygenvariable:: fiction::constants::ERROR_MARGIN
-.. doxygenvariable:: fiction::constants::PI
+.. doxygenvariable:: fiction::fcn::constants::physical::BOLTZMANN_CONSTANT
+.. doxygenvariable:: fiction::fcn::constants::physical::EV_TO_JOULE
+.. doxygenvariable:: fiction::fcn::constants::physical::EPSILON
+.. doxygenvariable:: fiction::fcn::constants::physical::ELEMENTARY_CHARGE
+.. doxygenvariable:: fiction::fcn::constants::physical::K_E
+.. doxygenvariable:: fiction::fcn::constants::ERROR_MARGIN
+.. doxygenvariable:: fiction::fcn::constants::PI
 
 
 Euclidean distance between two SiDBs in nanometers
@@ -100,9 +100,9 @@ Euclidean distance between two SiDBs in nanometers
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb_nm_distance.hpp``
+        **Header:** ``fiction/technology/sidb/model/nm_distance.hpp``
 
-        .. doxygenfunction:: fiction::sidb_nm_distance
+        .. doxygenfunction:: fiction::sidb::model::nm_distance
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.sidb_nm_distance_100
@@ -112,42 +112,42 @@ Euclidean distance between two SiDBs in nanometers
 SiDB Cluster Hierarchy
 ----------------------
 
-**Header:** ``fiction/technology/sidb_cluster_hierarchy.hpp``
+**Header:** ``fiction/technology/sidb/model/cluster_hierarchy.hpp``
 
 A cluster hierarchy can be computed over any SiDB layout, resulting in a useful structure for simulation of possible
 charge distributions. This header provides the structures used for :ref:`*Ground State Space* <ground_state_space>`
 construction, which enables the :ref:`*ClusterComplete* <clustercomplete>` exact SiDB simulator.
 
-.. doxygenenum:: fiction::sidb_cluster_hierarchy_linkage_method
-.. doxygenstruct:: fiction::sidb_binary_cluster_hierarchy_node
+.. doxygenenum:: fiction::sidb::model::cluster_hierarchy_linkage_method
+.. doxygenstruct:: fiction::sidb::model::binary_cluster_hierarchy_node
    :members:
-.. doxygenfunction:: fiction::sidb_cluster_hierarchy
-.. doxygenstruct:: fiction::sidb_cluster_receptor_state
+.. doxygenfunction:: fiction::sidb::model::cluster_hierarchy
+.. doxygenstruct:: fiction::sidb::model::cluster_receptor_state
    :members:
-.. doxygenstruct:: fiction::sidb_cluster_projector_state
-.. doxygentypedef:: fiction::sidb_cluster_projector_state_ptr
-.. doxygenenum:: fiction::bound_direction
-.. doxygenfunction:: fiction::potential_bound_top
-.. doxygenfunction:: fiction::take_meet_of_potential_bounds
-.. doxygenstruct:: fiction::potential_bounds_store
+.. doxygenstruct:: fiction::sidb::model::cluster_projector_state
+.. doxygentypedef:: fiction::sidb::model::cluster_projector_state_ptr
+.. doxygenenum:: fiction::sidb::model::bound_direction
+.. doxygenfunction:: fiction::sidb::model::potential_bound_top
+.. doxygenfunction:: fiction::sidb::model::take_meet_of_potential_bounds
+.. doxygenstruct:: fiction::sidb::model::potential_bounds_store
    :members:
-.. doxygentypedef:: fiction::partial_potential_bounds_store
-.. doxygentypedef:: fiction::complete_potential_bounds_store
-.. doxygenstruct:: fiction::sidb_charge_space_composition
+.. doxygentypedef:: fiction::sidb::model::partial_potential_bounds_store
+.. doxygentypedef:: fiction::sidb::model::complete_potential_bounds_store
+.. doxygenstruct:: fiction::sidb::model::charge_space_composition
    :members:
-.. doxygenstruct:: fiction::sidb_clustering_state
+.. doxygenstruct:: fiction::sidb::model::clustering_state
    :members:
-.. doxygenstruct:: fiction::sidb_cluster_charge_state
+.. doxygenstruct:: fiction::sidb::model::cluster_charge_state
    :members:
-.. doxygenfunction:: fiction::singleton_multiset_conf_to_charge_state
-.. doxygenstruct:: fiction::potential_projection
+.. doxygenfunction:: fiction::sidb::model::singleton_multiset_conf_to_charge_state
+.. doxygenstruct:: fiction::sidb::model::potential_projection
    :members:
-.. doxygenstruct:: fiction::potential_projection_order
+.. doxygenstruct:: fiction::sidb::model::potential_projection_order
    :members:
-.. doxygentypedef:: fiction::sidb_cluster_charge_state_space
-.. doxygentypedef:: fiction::sidb_clustering
-.. doxygenstruct:: fiction::sidb_cluster
+.. doxygentypedef:: fiction::sidb::model::cluster_charge_state_space
+.. doxygentypedef:: fiction::sidb::model::clustering
+.. doxygenstruct:: fiction::sidb::model::cluster
    :members:
-.. doxygenfunction:: fiction::get_projector_state_compositions
-.. doxygenfunction:: fiction::to_unique_sidb_cluster
-.. doxygenfunction:: fiction::to_sidb_cluster
+.. doxygenfunction:: fiction::sidb::model::get_projector_state_compositions
+.. doxygenfunction:: fiction::sidb::model::to_unique_sidb_cluster
+.. doxygenfunction:: fiction::sidb::model::to_sidb_cluster
