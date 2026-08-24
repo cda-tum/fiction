@@ -2,8 +2,8 @@
 // Created by marcel on 14.07.21.
 //
 
-#ifndef FICTION_WRITE_SQD_LAYOUT_HPP
-#define FICTION_WRITE_SQD_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::io
 {
 
 namespace detail
@@ -450,6 +450,5 @@ void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_SQD_LAYOUT_HPP
+}  // namespace fiction::sidb::io
+#endif  // FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP

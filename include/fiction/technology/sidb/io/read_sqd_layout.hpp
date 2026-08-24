@@ -2,8 +2,8 @@
 // Created by marcel on 23.06.22.
 //
 
-#ifndef FICTION_READ_SQD_LAYOUT_HPP
-#define FICTION_READ_SQD_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
 
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::io
 {
 
 /**
@@ -538,6 +538,5 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
     is.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_READ_SQD_LAYOUT_HPP
+}  // namespace fiction::sidb::io
+#endif  // FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP

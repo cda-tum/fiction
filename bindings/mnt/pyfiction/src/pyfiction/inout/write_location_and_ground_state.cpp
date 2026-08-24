@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/write_location_and_ground_state.hpp>
+#include <fiction/technology/sidb/io/write_location_and_ground_state.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <string_view>
@@ -27,20 +27,20 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_location_and_ground_state(nanobind::module_& m)
+void sidb::io::write_location_and_ground_state(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_location_and_ground_state",
         [](const fiction::sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
-        { fiction::write_location_and_ground_state(sim_result, filename); }, py::arg("sim_result"), py::arg("filename"),
-        DOC(fiction_write_location_and_ground_state));
+        { fiction::sidb::io::write_location_and_ground_state(sim_result, filename); }, py::arg("sim_result"),
+        py::arg("filename"), DOC(fiction_write_location_and_ground_state));
 }
 
 }  // namespace detail
 
-void write_location_and_ground_state(nanobind::module_& m)
+void sidb::io::write_location_and_ground_state(nanobind::module_& m)
 {
     detail::write_location_and_ground_state<py_sidb_layout>(m);
 }

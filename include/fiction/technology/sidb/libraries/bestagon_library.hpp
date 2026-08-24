@@ -2,8 +2,8 @@
 // Created by marcel on 04.11.21.
 //
 
-#ifndef FICTION_SIDB_BESTAGON_LIBRARY_HPP
-#define FICTION_SIDB_BESTAGON_LIBRARY_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_LIBRARIES_BESTAGON_LIBRARY_HPP
+#define FICTION_TECHNOLOGY_SIDB_LIBRARIES_BESTAGON_LIBRARY_HPP
 
 #include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <utility>
 
-namespace fiction
+namespace fiction::sidb::libraries
 {
 
 /**
@@ -31,10 +31,10 @@ namespace fiction
  * The Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
  * i.e., where the information flow direction is north to south.
  */
-class sidb_bestagon_library : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
+class bestagon_library : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
 {
   public:
-    explicit sidb_bestagon_library() = delete;
+    explicit bestagon_library() = delete;
 
     /**
      * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
@@ -1707,6 +1707,5 @@ class sidb_bestagon_library : public fcn::gate_library<sidb::technology, 60, 46>
                                                      MIRRORED_FANOUT_1_2}};
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_SIDB_BESTAGON_LIBRARY_HPP
+}  // namespace fiction::sidb::libraries
+#endif  // FICTION_TECHNOLOGY_SIDB_LIBRARIES_BESTAGON_LIBRARY_HPP

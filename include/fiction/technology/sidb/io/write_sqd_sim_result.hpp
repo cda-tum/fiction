@@ -2,8 +2,8 @@
 // Created by marcel on 04.04.23.
 //
 
-#ifndef FICTION_WRITE_SQD_SIM_RESULT_HPP
-#define FICTION_WRITE_SQD_SIM_RESULT_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_SIM_RESULT_HPP
+#define FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_SIM_RESULT_HPP
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::io
 {
 
 namespace detail
@@ -326,6 +326,5 @@ void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const
     os.close();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_WRITE_SQD_SIM_RESULT_HPP
+}  // namespace fiction::sidb::io
+#endif  // FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_SIM_RESULT_HPP

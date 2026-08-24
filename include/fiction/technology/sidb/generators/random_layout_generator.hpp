@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 05.04.23.
 //
 
-#ifndef FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
-#define FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
+#define FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
@@ -20,14 +20,14 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::generators
 {
 
 /**
- * This struct stores the parameters for the `generate_random_sidb_layout` algorithm.
+ * This struct stores the parameters for the `generate_random_layout` algorithm.
  */
 template <typename CoordinateType>
-struct generate_random_sidb_layout_params
+struct generate_random_layout_params
 {
     /**
      * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
@@ -95,9 +95,8 @@ struct generate_random_sidb_layout_params
  * parameters.
  */
 template <typename Lyt>
-[[nodiscard]] std::optional<Lyt>
-generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<Lyt>>& params,
-                            const std::optional<Lyt>&                                  skeleton = std::nullopt) noexcept
+[[nodiscard]] std::optional<Lyt> generate_random_layout(const generate_random_layout_params<coordinate<Lyt>>& params,
+                                                        const std::optional<Lyt>& skeleton = std::nullopt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -149,27 +148,26 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
         {
             if (skeleton.has_value())
             {
-                lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::LOGIC);
+                lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::LOGIC);
             }
             else
             {
-                lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::NORMAL);
+                lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::NORMAL);
             }
 
-            if (params.positive_sidbs ==
-                    generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
+            if (params.positive_sidbs == generate_random_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
                 sidb::simulation::generic::can_positive_charges_occur(lyt, params.sim_params))
             {
-                lyt.assign_cell_type(random_coord, technology<Lyt>::cell_type::EMPTY);
+                lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::EMPTY);
             }
         }
         attempt_counter += 1;
     }
 
-    if (params.positive_sidbs == generate_random_sidb_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
+    if (params.positive_sidbs == generate_random_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
         !sidb::simulation::generic::can_positive_charges_occur(lyt, params.sim_params))
     {
-        return generate_random_sidb_layout(params, skeleton);
+        return generate_random_layout(params, skeleton);
     }
 
     if (lyt.num_cells() == number_of_sidbs_of_final_layout)
@@ -192,8 +190,8 @@ generate_random_sidb_layout(const generate_random_sidb_layout_params<coordinate<
  */
 template <typename Lyt>
 [[nodiscard]] std::optional<std::vector<Lyt>>
-generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<coordinate<Lyt>>& params,
-                                      const std::optional<Lyt>& skeleton = std::nullopt) noexcept
+generate_multiple_random_layouts(const generate_random_layout_params<coordinate<Lyt>>& params,
+                                 const std::optional<Lyt>&                             skeleton = std::nullopt) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -213,7 +211,7 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     while (unique_lyts.size() < params.number_of_unique_generated_layouts &&
            unsuccessful_generation_attempt_counter < params.maximal_attempts_for_multiple_layouts)
     {
-        if (auto random_lyt = generate_random_sidb_layout(params, skeleton); random_lyt.has_value())
+        if (auto random_lyt = generate_random_layout(params, skeleton); random_lyt.has_value())
         {
             const auto digest = layouts::utils::cell_layout_digest(random_lyt.value());
 
@@ -240,6 +238,5 @@ generate_multiple_random_sidb_layouts(const generate_random_sidb_layout_params<c
     return unique_lyts.empty() ? std::nullopt : std::optional{std::move(unique_lyts)};
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_RANDOM_SIDB_LAYOUT_GENERATOR_HPP
+}  // namespace fiction::sidb::generators
+#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP

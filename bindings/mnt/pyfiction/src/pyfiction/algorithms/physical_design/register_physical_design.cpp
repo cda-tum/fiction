@@ -6,7 +6,7 @@ namespace pyfiction
 // Forward declarations
 void physical_design::apply_gate_library(nanobind::module_& m);
 void physical_design::color_routing(nanobind::module_& m);
-void design_sidb_gates(nanobind::module_& m);
+void sidb::generators::design_sidb_gates(nanobind::module_& m);
 void physical_design::exact(nanobind::module_& m);
 void physical_design::graph_oriented_layout_design(nanobind::module_& m);
 void physical_design::hexagonalization(nanobind::module_& m);
@@ -24,7 +24,7 @@ void register_physical_design(nanobind::module_& m)
     physical_design::hexagonalization(m);
     physical_design::post_layout_optimization(m);
     physical_design::wiring_reduction(m);
-    design_sidb_gates(m);
+    sidb::generators::design_sidb_gates(m);
 }
 
 }  // namespace pyfiction

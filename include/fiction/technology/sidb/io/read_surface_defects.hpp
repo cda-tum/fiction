@@ -2,8 +2,8 @@
 // Created by marcel on 29.03.22.
 //
 
-#ifndef FICTION_READ_SIDB_SURFACE_DEFECTS_HPP
-#define FICTION_READ_SIDB_SURFACE_DEFECTS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
+#define FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
 
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/primitives/defect_surface.hpp"
@@ -22,7 +22,7 @@
 #include <string_view>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::io
 {
 
 /**
@@ -179,7 +179,7 @@ class read_sidb_surface_defects_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-sidb::primitives::defect_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::string_view& name = "")
+sidb::primitives::defect_surface<Lyt> read_surface_defects(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -204,8 +204,8 @@ sidb::primitives::defect_surface<Lyt> read_sidb_surface_defects(std::istream& is
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-sidb::primitives::defect_surface<Lyt> read_sidb_surface_defects(const std::string_view& filename,
-                                                                const std::string_view& name = "")
+sidb::primitives::defect_surface<Lyt> read_surface_defects(const std::string_view& filename,
+                                                           const std::string_view& name = "")
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
 
@@ -214,12 +214,11 @@ sidb::primitives::defect_surface<Lyt> read_sidb_surface_defects(const std::strin
         throw std::ifstream::failure("could not open file");
     }
 
-    const auto lyt = read_sidb_surface_defects<Lyt>(is, name);
+    const auto lyt = read_surface_defects<Lyt>(is, name);
     is.close();
 
     return lyt;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_READ_SIDB_SURFACE_DEFECTS_HPP
+}  // namespace fiction::sidb::io
+#endif  // FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP

@@ -4,12 +4,12 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/io/read_sidb_surface_defects.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/sidb/io/read_surface_defects.hpp>
 
 #include <sstream>
 #include <string>
@@ -51,9 +51,9 @@ TEMPLATE_TEST_CASE(
         CHECK(lyt.get_defect({0, 0}).type == sidb::model::defect_type::NONE);
     };
 
-    check(read_sidb_surface_defects<TestType>(empty_surface_stream));
-    check(read_sidb_surface_defects<TestType>(empty_row_surface_stream));
-    check(read_sidb_surface_defects<TestType>(three_empty_rows_surface_stream));
+    check(sidb::io::read_surface_defects<TestType>(empty_surface_stream));
+    check(sidb::io::read_surface_defects<TestType>(empty_row_surface_stream));
+    check(sidb::io::read_surface_defects<TestType>(three_empty_rows_surface_stream));
 }
 
 TEMPLATE_TEST_CASE(
@@ -77,7 +77,7 @@ TEMPLATE_TEST_CASE(
 
     std::istringstream surface_stream{sidb_surface};
 
-    const auto lyt = read_sidb_surface_defects<TestType>(surface_stream);
+    const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
 
     CHECK(lyt.x() == 3);
     CHECK(lyt.y() == 2);
@@ -113,7 +113,7 @@ TEMPLATE_TEST_CASE(
 
     std::istringstream surface_stream{sidb_surface};
 
-    const auto lyt = read_sidb_surface_defects<TestType>(surface_stream);
+    const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
 
     CHECK(lyt.x() == 3);
     CHECK(lyt.y() == 2);
@@ -157,7 +157,8 @@ TEMPLATE_TEST_CASE(
 
         std::istringstream surface_stream{sidb_surface};
 
-        CHECK_THROWS_AS(read_sidb_surface_defects<TestType>(surface_stream), unsupported_defect_index_exception);
+        CHECK_THROWS_AS(sidb::io::read_surface_defects<TestType>(surface_stream),
+                        sidb::io::unsupported_defect_index_exception);
     }
     SECTION("missing_sidb_position_exception")
     {
@@ -167,7 +168,8 @@ TEMPLATE_TEST_CASE(
 
         std::istringstream surface_stream{sidb_surface};
 
-        CHECK_THROWS_AS(read_sidb_surface_defects<TestType>(surface_stream), missing_sidb_position_exception);
+        CHECK_THROWS_AS(sidb::io::read_surface_defects<TestType>(surface_stream),
+                        sidb::io::missing_sidb_position_exception);
     }
 }
 
@@ -198,7 +200,7 @@ TEMPLATE_TEST_CASE(
 
             std::istringstream surface_stream{sidb_surface};
 
-            const auto lyt = read_sidb_surface_defects<TestType>(surface_stream);
+            const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
 
             CHECK(lyt.x() == 3);
             CHECK(lyt.y() == 1);  // only 2 rows are being parsed
@@ -211,7 +213,7 @@ TEMPLATE_TEST_CASE(
 
             std::istringstream surface_stream{sidb_surface};
 
-            const auto lyt = read_sidb_surface_defects<TestType>(surface_stream);
+            const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
 
             CHECK(lyt.x() == 3);
             CHECK(lyt.y() == 1);  // only two rows are being parsed

@@ -2,8 +2,8 @@
 // Created by marcel on 01.04.22.
 //
 
-#ifndef FICTION_SIDB_SURFACE_ANALYSIS_HPP
-#define FICTION_SIDB_SURFACE_ANALYSIS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_LIBRARIES_SURFACE_ANALYSIS_HPP
+#define FICTION_TECHNOLOGY_SIDB_LIBRARIES_SURFACE_ANALYSIS_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::libraries
 {
 
 /**
@@ -57,9 +57,9 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-    requires std::same_as<technology<CellLyt>, sidb::technology> &&
-             std::same_as<technology<CellLyt>, technology<GateLibrary>>
-[[nodiscard]] auto sidb_surface_analysis(
+    requires std::same_as<fiction::technology<CellLyt>, sidb::technology> &&
+             std::same_as<fiction::technology<CellLyt>, fiction::technology<GateLibrary>>
+[[nodiscard]] auto surface_analysis(
     const GateLyt& gate_lyt, const CellLyt& surface,
     const std::optional<std::pair<uint64_t, uint64_t>>& charged_defect_spacing_overwrite = std::nullopt,
     const std::optional<std::pair<uint64_t, uint64_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
@@ -103,7 +103,7 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
                 for (uint16_t x = 0u; x < GateLibrary::gate_x_size(); ++x)
                 {
                     // if the cell type at position (x, y) in the gate is non-empty
-                    if (const auto cell_type = gate[y][x]; cell_type != technology<CellLyt>::cell_type::EMPTY)
+                    if (const auto cell_type = gate[y][x]; cell_type != fiction::technology<CellLyt>::cell_type::EMPTY)
                     {
                         // cell position within the gate
                         const cell<CellLyt> relative_cell_pos{x, y, t.z};
@@ -152,6 +152,5 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
     return black_list;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_SIDB_SURFACE_ANALYSIS_HPP
+}  // namespace fiction::sidb::libraries
+#endif  // FICTION_TECHNOLOGY_SIDB_LIBRARIES_SURFACE_ANALYSIS_HPP

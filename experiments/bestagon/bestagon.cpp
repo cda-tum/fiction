@@ -6,15 +6,15 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
-#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
-#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
-#include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
-#include <fiction/technology/fcn/cell_technologies.hpp>      // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>      // a pre-defined SiDB gate library
-#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/networks/technology_network.hpp>                 // technology-mapped network type
+#include <fiction/physical_design/apply_gate_library.hpp>          // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                       // SMT-based physical design of FCN layouts
+#include <fiction/synthesis/technology_mapping_library.hpp>        // pre-defined gate types for technology mapping
+#include <fiction/technology/fcn/area.hpp>                         // area requirement calculations
+#include <fiction/technology/fcn/cell_technologies.hpp>            // cell implementations
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>         // writer for SiQAD files (physical simulation)
+#include <fiction/technology/sidb/libraries/bestagon_library.hpp>  // a pre-defined SiDB gate library
+#include <fiction/types.hpp>                                       // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
@@ -149,7 +149,7 @@ int main()  // NOLINT
 
             // apply gate library
             const auto cell_level_layout =
-                fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(
+                fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb::libraries::bestagon_library>(
                     *gate_level_layout);
 
             // compute area
@@ -158,7 +158,7 @@ int main()  // NOLINT
             fiction::fcn::area(cell_level_layout, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            fiction::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            fiction::sidb::io::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),

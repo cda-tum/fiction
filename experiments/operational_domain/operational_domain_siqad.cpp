@@ -4,9 +4,9 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/io/read_sqd_layout.hpp>                                   // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>                          // writer for operational domains
 #include <fiction/networks/utils/truth_table_utils.hpp>                     // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                   // reader for SiDB layouts
+#include <fiction/technology/sidb/io/write_operational_domain.hpp>          // writer for operational domains
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>          // SiDB simulation parameters
 #include <fiction/technology/sidb/simulation/engine.hpp>                    // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
@@ -72,10 +72,10 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].step      = 0.05;
 
     // write operational domain parameters
-    write_operational_domain_params write_op_domain_params{};
+    sidb::io::write_operational_domain_params write_op_domain_params{};
     write_op_domain_params.non_operational_tag = "0";
     write_op_domain_params.operational_tag     = "1";
-    write_op_domain_params.writing_mode        = write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
+    write_op_domain_params.writing_mode = sidb::io::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
@@ -106,7 +106,8 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        const auto lyt =
+            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
         sidb::simulation::logic::operational_domain_stats op_domain_stats_gs{};
@@ -125,18 +126,18 @@ int main()  // NOLINT
             lyt, truth_table, 100, op_domain_params, &op_domain_stats_ct);
 
         // write the operational domains to a CSV file
-        write_operational_domain(op_domain_gs,
-                                 fmt::format("{}operational_domain_grid_search_siqad_{}.csv", folder, gate),
-                                 write_op_domain_params);
-        write_operational_domain(op_domain_rs,
-                                 fmt::format("{}operational_domain_random_sampling_siqad_{}.csv", folder, gate),
-                                 write_op_domain_params);
-        write_operational_domain(op_domain_ff,
-                                 fmt::format("{}operational_domain_flood_fill_siqad_{}.csv", folder, gate),
-                                 write_op_domain_params);
-        write_operational_domain(op_domain_ct,
-                                 fmt::format("{}operational_domain_contour_tracing_siqad_{}.csv", folder, gate),
-                                 write_op_domain_params);
+        sidb::io::write_operational_domain(op_domain_gs,
+                                           fmt::format("{}operational_domain_grid_search_siqad_{}.csv", folder, gate),
+                                           write_op_domain_params);
+        sidb::io::write_operational_domain(
+            op_domain_rs, fmt::format("{}operational_domain_random_sampling_siqad_{}.csv", folder, gate),
+            write_op_domain_params);
+        sidb::io::write_operational_domain(op_domain_ff,
+                                           fmt::format("{}operational_domain_flood_fill_siqad_{}.csv", folder, gate),
+                                           write_op_domain_params);
+        sidb::io::write_operational_domain(
+            op_domain_ct, fmt::format("{}operational_domain_contour_tracing_siqad_{}.csv", folder, gate),
+            write_op_domain_params);
 
         // update the total number of samples
         total_samples_gs += op_domain_stats_gs.num_evaluated_parameter_combinations;

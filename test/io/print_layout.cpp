@@ -20,10 +20,10 @@
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
+#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
 #include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/primitives/lattice.hpp>
 #include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
-#include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -283,7 +283,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
     layout.create_or({}, {}, {0, 0});
 
     const auto lyt = layouts::utils::convert_layout_to_siqad_coordinates(
-        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout));
+        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::libraries::bestagon_library>(layout));
 
     sidb::primitives::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
                                                      sidb::model::charge_state::NEGATIVE};
@@ -443,7 +443,7 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
     layout.create_or({}, {}, {0, 0});
 
     const auto lyt = sidb::primitives::defect_surface{layouts::utils::convert_layout_to_siqad_coordinates(
-        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout))};
+        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::libraries::bestagon_library>(layout))};
 
     sidb::primitives::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
                                                      sidb::model::charge_state::NEGATIVE};
@@ -666,7 +666,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         layout.create_or({}, {}, {0, 0});
 
         const auto cell_layout_or =
-            physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(layout);
+            physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb::libraries::bestagon_library>(layout);
         const auto cell_layout_or_siqad = layouts::utils::convert_layout_to_siqad_coordinates(cell_layout_or);
 
         std::stringstream print_stream{};
@@ -680,7 +680,7 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
         layout.create_or({}, {}, {0, 0});
 
         const auto cell_layout_or =
-            physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb_bestagon_library>(layout);
+            physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::libraries::bestagon_library>(layout);
         const auto cell_layout_or_siqad = layouts::utils::convert_layout_to_siqad_coordinates(cell_layout_or);
 
         std::stringstream print_stream{};

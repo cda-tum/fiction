@@ -4,8 +4,8 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -77,7 +77,7 @@ int main()  // NOLINT
 
     for (const auto& [truth_table, gate] : gates)
     {
-        auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        auto lyt = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // Loop over operational conditions
         for (const auto cond : {sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS,

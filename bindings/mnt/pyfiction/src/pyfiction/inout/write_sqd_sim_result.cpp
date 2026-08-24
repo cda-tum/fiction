@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/write_sqd_sim_result.hpp>
+#include <fiction/technology/sidb/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <string_view>
@@ -28,19 +28,19 @@ namespace detail
 {
 
 template <typename Lyt>
-void write_sqd_sim_result(nanobind::module_& m)
+void sidb::io::write_sqd_sim_result(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(
         "write_sqd_sim_result", [](const fiction::sidb::simulation::result<Lyt>& lyt, const std::string_view& filename)
-        { fiction::write_sqd_sim_result(lyt, filename); }, py::arg("layout"), py::arg("filename"),
+        { fiction::sidb::io::write_sqd_sim_result(lyt, filename); }, py::arg("layout"), py::arg("filename"),
         DOC(fiction_write_sqd_sim_result));
 }
 
 }  // namespace detail
 
-void write_sqd_sim_result(nanobind::module_& m)
+void sidb::io::write_sqd_sim_result(nanobind::module_& m)
 {
     detail::write_sqd_sim_result<py_sidb_layout>(m);
 }

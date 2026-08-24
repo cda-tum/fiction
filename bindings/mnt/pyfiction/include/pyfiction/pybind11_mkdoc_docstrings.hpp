@@ -311,7 +311,7 @@ creates and returns a cell-level layout. The gate library type should
 provide all functions specified in fcn::gate_library. It is, thus,
 easiest to extend fcn::gate_library to implement a new gate library.
 Examples are `qca::qca_one_library`, `inml::topolinano_library`, and
-`sidb_bestagon_library`.
+`sidb::libraries::bestagon_library`.
 
 May pass through, and thereby throw, an
 `fcn::unsupported_gate_type_exception` or an
@@ -337,7 +337,7 @@ and defect locations onto a defect surface. The gate library type
 should provide all functions specified in fcn::gate_library. It is,
 thus, easiest to extend fcn::gate_library to implement a new gate
 library. Examples are `qca::qca_one_library`, `inml::topolinano_library`,
-and `sidb_bestagon_library`.
+and `sidb::libraries::bestagon_library`.
 
 May pass through, and thereby throw, an
 `fcn::unsupported_gate_type_exception` or an
@@ -14046,7 +14046,7 @@ static gate_ports<PortType> get_gate_ports()
 
  can optionally be provided to allow reverse access to the gate ports
  given a gate implementation. This interface is for example used in
- `sidb_surface_analysis` to determine which ports to blacklist.
+ `sidb::libraries::surface_analysis` to determine which ports to blacklist.
 
 Template Args:
     Technology: FCN technology type of the implementing gate library.
@@ -14317,7 +14317,7 @@ Template Args:
 static const char* mkd_doc_fiction_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
 
 static const char* mkd_doc_fiction_gate_design_exception_gate_design_exception =
-    R"doc(Constructor for the gate_design_exception class.
+    R"doc(Constructor for the sidb::libraries::gate_design_exception class.
 
 Args:
     ti: The tile associated with the error.
@@ -15808,7 +15808,7 @@ Returns:
 
 static const char* mkd_doc_fiction_generate_random_sidb_layout_params =
     R"doc(This struct stores the parameters for the
-`generate_random_sidb_layout` algorithm.)doc";
+`sidb::generators::generate_random_layout` algorithm.)doc";
 
 static const char* mkd_doc_fiction_generate_random_sidb_layout_params_coordinate_pair =
     R"doc(Two coordinates that span the region where SiDBs may be placed (order
@@ -19638,7 +19638,7 @@ Args:
     gate_lyt: Gate-level layout.
     lattice_tiling: The lattice tiling used for the circuit design.
     params: The parameters used for designing the circuit,
-            encapsulated in an `on_the_fly_sidb_circuit_design_params`
+            encapsulated in an `sidb::generators::on_the_fly_circuit_design_params`
             object.
     stats: Pointer to a structure for collecting statistics. If
            `nullptr`, statistics are discarded.
@@ -19679,7 +19679,7 @@ Args:
     defective_surface: The defective surface on which the SiDB circuit
                        is designed.
     params: The parameters used for designing the circuit,
-            encapsulated in an `on_the_fly_sidb_circuit_design_params`
+            encapsulated in an `sidb::generators::on_the_fly_circuit_design_params`
             object.
     stats: Pointer to a structure for collecting statistics. If
            `nullptr`, statistics are discarded.
@@ -21824,8 +21824,8 @@ static const char* mkd_doc_fiction_read_sidb_surface_defects =
 stream. The format is rudimentary and consists of a simple 2D array of
 integers representing defect indices printed by Python.
 
-May throw a `missing_sidb_position_exception` or an
-`unsupported_defect_index_exception`.
+May throw a `sidb::io::missing_sidb_position_exception` or an
+`sidb::io::unsupported_defect_index_exception`.
 
 Args:
     is: The input stream to read from.
@@ -21847,8 +21847,8 @@ static const char* mkd_doc_fiction_read_sidb_surface_defects_2 =
 name. The format is rudimentary and consists of a simple 2D array of
 integers representing defect indices printed by Python.
 
-May throw a `missing_sidb_position_exception` or an
-`unsupported_defect_index_exception`.
+May throw a `sidb::io::missing_sidb_position_exception` or an
+`sidb::io::unsupported_defect_index_exception`.
 
 Args:
     filename: The file name to open and read from.
@@ -21896,7 +21896,7 @@ they will be parsed from the sqd file as well.
 
 May throw an `sqd_parsing_exception` if the sqd file is malformed.
 
-This is an in-place version of read_sqd_layout that utilizes the given
+This is an in-place version of sidb::io::read_sqd_layout that utilizes the given
 layout as a target to write to.
 
 Args:
@@ -21937,7 +21937,7 @@ they will be parsed from the sqd file as well.
 
 May throw an `sqd_parsing_exception` if the sqd file is malformed.
 
-This is an in-place version of `read_sqd_layout` that utilizes the
+This is an in-place version of `sidb::io::read_sqd_layout` that utilizes the
 given layout as a target to write to.
 
 Args:
@@ -24080,7 +24080,7 @@ static const char* mkd_doc_fiction_sqd_parsing_error =
     R"doc(Exception thrown when an error occurs during parsing of an SQD file.)doc";
 
 static const char* mkd_doc_fiction_sqd_parsing_error_sqd_parsing_error =
-    R"doc(Constructs a `sqd_parsing_error` with the given error message.
+    R"doc(Constructs a `sidb::io::sqd_parsing_error` with the given error message.
 
 Args:
     msg: Error message.
@@ -25652,7 +25652,7 @@ Args:
         influence domain is written to.
     params: The parameters used for writing, including the influential
             and non-influential tags. Defaults to an empty
-            `write_defect_influence_domain_params` object, which
+            `sidb::io::write_defect_influence_domain_params` object, which
             provides standard tags.
 
 )doc";
@@ -25675,7 +25675,7 @@ Args:
               influence domain is written to.
     params: The parameters used for writing, including the influential
             and non-influential tags. Defaults to an empty
-            `write_defect_influence_domain_params` object, which
+            `sidb::io::write_defect_influence_domain_params` object, which
             provides standard tags.
 
 )doc";
@@ -25895,7 +25895,7 @@ Args:
         operational domain is written to.
     params: The parameters used for writing, including the operational
             and non-operational tags. Defaults to an empty
-            `write_operational_domain_params` object, which provides
+            `sidb::io::write_operational_domain_params` object, which provides
             standard tags.
 
 Template Args:
@@ -25943,7 +25943,7 @@ Args:
               operational domain is written to.
     params: The parameters used for writing, including the operational
             and non-operational tags. Defaults to an empty
-            `write_operational_domain_params` object, which provides
+            `sidb::io::write_operational_domain_params` object, which provides
             standard tags.
 
 Template Args:

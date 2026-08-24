@@ -6,9 +6,9 @@
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
 #include <fiction/technology/fcn/cell_technologies.hpp>      // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>      // a pre-defined SiDB gate library
-#include <fiction/traits.hpp>                                // traits for type-checking
-#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/technology/sidb/libraries/bestagon_library.hpp>  // a pre-defined SiDB gate library
+#include <fiction/traits.hpp>                                      // traits for type-checking
+#include <fiction/types.hpp>                                       // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
@@ -145,7 +145,8 @@ int main()  // NOLINT
 
         // apply gate library
         const auto cell_level_layout =
-            fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
+            fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb::libraries::bestagon_library>(
+                hex_layout);
 
         // compute area
         fiction::fcn::area_stats                             area_stats{};

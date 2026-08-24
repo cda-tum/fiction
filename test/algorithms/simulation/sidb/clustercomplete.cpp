@@ -15,6 +15,7 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
+#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
@@ -25,7 +26,6 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb_bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -180,7 +180,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     gate_lyt.create_nand({}, {}, {2, 2});
 
     const sidb_cell_clk_lyt& cell_lyt{
-        physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library>(gate_lyt)};
+        physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb::libraries::bestagon_library>(gate_lyt)};
 
     sidb::simulation::engines::clustercomplete_params<> params{sidb::model::simulation_parameters{2}};
 

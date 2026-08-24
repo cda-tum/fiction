@@ -4,9 +4,9 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -68,7 +68,8 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
+        const auto layout =
+            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
 
         double      runtime_exhaustive      = 0;
         double      runtime_quickexact      = 0;

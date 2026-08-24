@@ -2,10 +2,10 @@
 // Created by Jan Drewniok on 30.11.24.
 //
 
-#include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_defect_influence_domain.hpp"
-#include "fiction/io/write_sqd_layout.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
+#include "fiction/technology/sidb/io/read_sqd_layout.hpp"
+#include "fiction/technology/sidb/io/write_defect_influence_domain.hpp"
+#include "fiction/technology/sidb/io/write_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
@@ -77,10 +77,11 @@ int main()  // NOLINT
         std::filesystem::create_directories(plot_folder_for_given_gate);
 
         // read the Bestagon SiDB layout
-        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(fmt::format("{}{}.sqd", bestagon_folder, gate));
+        const auto layout =
+            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_cube>(fmt::format("{}{}.sqd", bestagon_folder, gate));
 
         // Write the SQD layout
-        write_sqd_layout(layout, fmt::format("{}/{}.sqd", plot_folder_for_given_gate, gate));
+        sidb::io::write_sqd_layout(layout, fmt::format("{}/{}.sqd", plot_folder_for_given_gate, gate));
 
         // grid search
         sidb::simulation::defects::defect_influence_stats grid_stats{};
@@ -89,7 +90,7 @@ int main()  // NOLINT
         total_number_of_samples_grid += grid_stats.num_evaluated_defect_positions;
 
         // Write the defect influence domain to a CSV file
-        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        sidb::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_grid, fmt::format("{}{}_grid.csv", plot_folder_for_given_gate, gate));
         const auto clearance_grid_search =
             sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_grid);
@@ -99,7 +100,7 @@ int main()  // NOLINT
         const auto defect_inf_random = sidb::simulation::defects::defect_influence_random_sampling(
             layout, truth_table, 100, params, &random_stats);
         const auto clearance_random = sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_random);
-        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        sidb::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_random, fmt::format("{}{}_random.csv", plot_folder_for_given_gate, gate));
 
         // quicktrace
@@ -109,7 +110,7 @@ int main()  // NOLINT
         total_number_of_samples_quicktrace += quicktrace_stats.num_evaluated_defect_positions;
         const auto clearance_quicktrace =
             sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_quicktrace);
-        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        sidb::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_quicktrace, fmt::format("{}{}_quicktrace.csv", plot_folder_for_given_gate, gate));
 
         // Log the simulation results

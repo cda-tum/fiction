@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 
 #include <string_view>
 
@@ -22,20 +22,20 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-void write_sqd_layout(nanobind::module_& m)
+void sidb::io::write_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_sqd_layout_function_pointer)(const Lyt&, const std::string_view&) =
-        &fiction::write_sqd_layout<Lyt>;
+        &fiction::sidb::io::write_sqd_layout<Lyt>;
 
     m.def("write_sqd_layout", write_sqd_layout_function_pointer, py::arg("layout"), py::arg("filename"),
           DOC(fiction_write_sqd_layout));
 }
 }  // namespace detail
 
-void write_sqd_layout(nanobind::module_& m)
+void sidb::io::write_sqd_layout(nanobind::module_& m)
 {
     detail::write_sqd_layout<py_sidb_111_lattice>(m);
     detail::write_sqd_layout<py_sidb_100_lattice>(m);

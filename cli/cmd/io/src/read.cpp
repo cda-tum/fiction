@@ -6,10 +6,10 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/io/read_fgl_layout.hpp>
 #include <fiction/networks/io/network_reader.hpp>
 #include <fiction/technology/qca/io/read_fqca_layout.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -212,14 +212,16 @@ void read_command::execute()
                                 if (orientation == "100")
                                 {
                                     const auto layout =
-                                        fiction::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(filename, layout_name);
+                                        fiction::sidb::io::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(filename,
+                                                                                                           layout_name);
                                     store<fiction::cell_layout_t>().extend() =
                                         std::make_shared<fiction::sidb_100_cell_clk_lyt>(layout);
                                 }
                                 else if (orientation == "111")
                                 {
                                     const auto layout =
-                                        fiction::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(filename, layout_name);
+                                        fiction::sidb::io::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(filename,
+                                                                                                           layout_name);
                                     store<fiction::cell_layout_t>().extend() =
                                         std::make_shared<fiction::sidb_111_cell_clk_lyt>(layout);
                                 }
@@ -229,7 +231,7 @@ void read_command::execute()
                                     env->out() << "[e] 'lattice_orientation' must be either '100' or '111'\n";
                                 }
                             }
-                            catch (const fiction::sqd_parsing_error& e)
+                            catch (const fiction::sidb::io::sqd_parsing_error& e)
                             {
                                 env->out() << fmt::format("[e] {}\n", e.what());
                             }

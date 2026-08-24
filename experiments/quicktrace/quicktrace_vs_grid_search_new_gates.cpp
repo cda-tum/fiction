@@ -1,6 +1,6 @@
-#include "fiction/algorithms/physical_design/design_sidb_gates.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
+#include "fiction/technology/sidb/generators/design_sidb_gates.hpp"
+#include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
@@ -39,12 +39,12 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{networks::utils::create_id_tt()})};
 
-    auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(
+    auto lyt = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_cube>(
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));
 
-    const design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_cube>> params_2_in_1_out{
+    const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_cube>> params_2_in_1_out{
         sidb::simulation::logic::is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
-        design_sidb_gates_params<
+        sidb::generators::design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_cube>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         {{14, 12, 0}, {24, 23, 0}},
         3};
@@ -63,7 +63,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto exhaustive_design = design_sidb_gates(lyt, truth_table, params_2_in_1_out);
+        const auto exhaustive_design = sidb::generators::design_sidb_gates(lyt, truth_table, params_2_in_1_out);
 
         // Create gate directory for plots
         const std::string gate_folder = fmt::format("{}{}/", output_folder, gate);

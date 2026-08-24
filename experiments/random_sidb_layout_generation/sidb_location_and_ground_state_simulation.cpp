@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 04.05.23.
 //
 
-#include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_location_and_ground_state.hpp"
+#include "fiction/technology/sidb/io/read_sqd_layout.hpp"
+#include "fiction/technology/sidb/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/primitives/lattice.hpp"
 #include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
@@ -110,7 +110,7 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         if (orientation == "100")
                         {
-                            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
+                            auto lyt = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
 
                             const sidb::simulation::engines::quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>>
                                 params{phys_params};
@@ -123,12 +123,12 @@ int main(int argc, const char* argv[])  // NOLINT
                             // reliably only for layouts with neutrally and negatively charged SiDBs.
                             if (!simulation_results.charge_distributions.empty())
                             {
-                                write_location_and_ground_state(simulation_results, file_path);
+                                sidb::io::write_location_and_ground_state(simulation_results, file_path);
                             }
                         }
                         else if (orientation == "111")
                         {
-                            auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
+                            auto lyt = sidb::io::read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
 
                             const sidb::simulation::engines::quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>>
                                 params{phys_params};
@@ -141,7 +141,7 @@ int main(int argc, const char* argv[])  // NOLINT
                             // reliably only for layouts with neutrally and negatively charged SiDBs.
                             if (!simulation_results.charge_distributions.empty())
                             {
-                                write_location_and_ground_state(simulation_results, file_path);
+                                sidb::io::write_location_and_ground_state(simulation_results, file_path);
                             }
                         }
                         else

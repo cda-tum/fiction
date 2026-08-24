@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -49,7 +49,7 @@ void sqd_command::execute()
 
         if constexpr (fiction::has_qca_technology_v<Lyt> || fiction::has_sidb_technology_v<Lyt>)
         {
-            fiction::write_sqd_layout(*lyt_ptr, filename);
+            fiction::sidb::io::write_sqd_layout(*lyt_ptr, filename);
         }
         else
         {

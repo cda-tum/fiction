@@ -17,8 +17,8 @@
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/sidb_bestagon_library.hpp>
-#include <fiction/technology/sidb_surface_analysis.hpp>
+#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
+#include <fiction/technology/sidb/libraries/surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
@@ -152,15 +152,15 @@ physical_design::exact_physical_design_params&& topolinano(physical_design::exac
 }
 
 template <typename Lyt>
-surface_black_list<Lyt, fcn::port_direction> blacklist() noexcept
+sidb::libraries::surface_black_list<Lyt, fcn::port_direction> blacklist() noexcept
 {
     return {};
 }
 
 template <typename Lyt>
-surface_black_list<Lyt, fcn::port_direction>&&
+sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&&
 blacklist_wire(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_direction>>& ports,
-               surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
+               sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
 {
     sbl[t].insert({networks::utils::create_id_tt(), ports});
 
@@ -168,9 +168,9 @@ blacklist_wire(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_di
 }
 
 template <typename Lyt>
-surface_black_list<Lyt, fcn::port_direction>&&
+sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&&
 blacklist_and(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_direction>>& ports,
-              surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
+              sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
 {
     sbl[t].insert({networks::utils::create_and_tt(), ports});
 
@@ -178,9 +178,9 @@ blacklist_and(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_dir
 }
 
 template <typename Lyt>
-surface_black_list<Lyt, fcn::port_direction>&&
+sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&&
 blacklist_or(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_direction>>& ports,
-             surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
+             sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
 {
     sbl[t].insert({networks::utils::create_or_tt(), ports});
 
@@ -247,8 +247,9 @@ Lyt generate_layout(const Ntk& ntk, const physical_design::exact_physical_design
     return layout.value();  // NOLINT(bugprone-unchecked-optional-access)
 }
 template <typename Lyt, typename Ntk>
-Lyt generate_layout_with_black_list(const Ntk& ntk, const surface_black_list<Lyt, fcn::port_direction>& black_list,
-                                    const physical_design::exact_physical_design_params& ps)
+Lyt generate_layout_with_black_list(const Ntk&                                                           ntk,
+                                    const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& black_list,
+                                    const physical_design::exact_physical_design_params&                 ps)
 {
     physical_design::exact_physical_design_stats stats{};
 
@@ -522,10 +523,10 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Row clocking")
         {
-            check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library, hex_lyt>(
+            check_with_gate_library<sidb_cell_clk_lyt, sidb::libraries::bestagon_library, hex_lyt>(
                 blueprints::and_or_network<mockturtle::mig_network>(), row(crossings(border_io(configuration()))));
 
-            check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library, hex_lyt>(
+            check_with_gate_library<sidb_cell_clk_lyt, sidb::libraries::bestagon_library, hex_lyt>(
                 blueprints::nand_xnor_network<fiction::networks::technology_network>(),
                 row(crossings(border_io(configuration()))));
         }
@@ -566,7 +567,7 @@ TEST_CASE("Exact hexagonal physical design", "[exact]")
         }
         SECTION("Row clocking")
         {
-            check_with_gate_library<sidb_cell_clk_lyt, sidb_bestagon_library, hex_lyt>(
+            check_with_gate_library<sidb_cell_clk_lyt, sidb::libraries::bestagon_library, hex_lyt>(
                 blueprints::unbalanced_and_inv_network<mockturtle::mig_network>(),
                 row(crossings(border_io(configuration()))));
         }

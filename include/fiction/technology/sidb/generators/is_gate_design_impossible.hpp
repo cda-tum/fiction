@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#ifndef FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
-#define FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#define FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
@@ -19,12 +19,12 @@
 #include <cstdint>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::generators
 {
 /**
  * This struct contains parameters to determine if SiDB gate design is impossible.
  */
-struct is_sidb_gate_design_impossible_params
+struct is_gate_design_impossible_params
 {
     /**
      * All parameters for physical SiDB simulations.
@@ -49,8 +49,8 @@ struct is_sidb_gate_design_impossible_params
  * @return `true` if gate design is impossible, `false` otherwise.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] bool is_sidb_gate_design_impossible(const Lyt& skeleton_with_defects, const std::vector<TT>& spec,
-                                                  const is_sidb_gate_design_impossible_params& params = {}) noexcept
+[[nodiscard]] bool is_gate_design_impossible(const Lyt& skeleton_with_defects, const std::vector<TT>& spec,
+                                             const is_gate_design_impossible_params& params = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -108,6 +108,5 @@ template <typename Lyt, typename TT>
     return false;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_IS_SIDB_GATE_DESIGN_IMPOSSIBLE_HPP
+}  // namespace fiction::sidb::generators
+#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP

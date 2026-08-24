@@ -10,7 +10,7 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
-#include <fiction/technology/sidb_bestagon_library.hpp>
+#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -130,7 +130,8 @@ void cell_command::execute()
                 {
                     return std::make_shared<fiction::sidb_100_cell_clk_lyt>(
                         fiction::physical_design::apply_gate_library<fiction::sidb_100_cell_clk_lyt,
-                                                                     fiction::sidb_bestagon_library>(*lyt_ptr));
+                                                                     fiction::sidb::libraries::bestagon_library>(
+                            *lyt_ptr));
                 }
                 else
                 {

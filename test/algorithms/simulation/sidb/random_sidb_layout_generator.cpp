@@ -5,10 +5,10 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp>
@@ -31,9 +31,9 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 {
     SECTION("empty parameters")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{};
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
 
         REQUIRE(lyt.has_value());
         CHECK(lyt.value().num_cells() == 0);
@@ -43,10 +43,10 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given corner coordinates, wrong order")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
             .coordinate_pair = {{5, 7, 2}, {-10, -10, 0}}};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
 
         REQUIRE(result_lyt.has_value());
 
@@ -62,10 +62,10 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given corner coordinates")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
             .coordinate_pair = {{-10, -10, 0}, {5, 7, 2}}};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 0);
@@ -80,11 +80,11 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
             .coordinate_pair = {{-10, -10, 1}, {-10, -10, 1}},
             .number_of_sidbs = 1};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 1);
@@ -99,11 +99,11 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given corner coordinates and number of placed SiDBs")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
             .coordinate_pair = {{-10, -10, 0}, {5, 7, 1}},
             .number_of_sidbs = 10};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);
@@ -121,12 +121,13 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
             .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
             .number_of_sidbs = 100,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::ALLOWED};
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::ALLOWED};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 100);
@@ -140,12 +141,13 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
             .coordinate_pair = {{0, 0, 0}, {200, 200, 0}},
             .number_of_sidbs = 50,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN};
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 50);
@@ -162,15 +164,16 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("given previous layouts")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
-            .coordinate_pair  = {{-5, -2}, {20, 20}},
-            .number_of_sidbs  = 6,
-            .positive_sidbs   = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = static_cast<uint64_t>(10E6),
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
+            .coordinate_pair = {{-5, -2}, {20, 20}},
+            .number_of_sidbs = 6,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN,
+            .sim_params                         = sidb::model::simulation_parameters{},
+            .maximal_attempts                   = static_cast<uint64_t>(10E6),
             .number_of_unique_generated_layouts = 3};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
 
         CHECK(result_lyts.value().size() == 3);
@@ -193,16 +196,17 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
         // a 21x21 region this densely packed lets greedy placement corner itself, after which the generator
         // spends its whole attempt budget rejecting every remaining position. These budgets bound that worst
         // case at tens of milliseconds; the defaults let it run for tens of seconds
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
-            .coordinate_pair  = {{0, 0}, {20, 20}},
-            .number_of_sidbs  = 8,
-            .positive_sidbs   = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = 10'000,
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
+            .coordinate_pair = {{0, 0}, {20, 20}},
+            .number_of_sidbs = 8,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN,
+            .sim_params                            = sidb::model::simulation_parameters{},
+            .maximal_attempts                      = 10'000,
             .number_of_unique_generated_layouts    = 2,
             .maximal_attempts_for_multiple_layouts = 1'000};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
 
         REQUIRE(result_lyts.value().size() == 2);
@@ -215,15 +219,16 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("Check uniqueness of many layouts")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
-            .coordinate_pair  = {{0, 0}, {20, 20}},
-            .number_of_sidbs  = 8,
-            .positive_sidbs   = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::ALLOWED,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = 10'000,
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
+            .coordinate_pair = {{0, 0}, {20, 20}},
+            .number_of_sidbs = 8,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::ALLOWED,
+            .sim_params                         = sidb::model::simulation_parameters{},
+            .maximal_attempts                   = 10'000,
             .number_of_unique_generated_layouts = 50};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt_cube>(params);
         const auto lyts        = result_lyts.value_or(std::vector<sidb_cell_clk_lyt_cube>{});
 
         REQUIRE(lyts.size() == 50);
@@ -239,15 +244,16 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
     SECTION("Check all pairwise distances")
     {
-        const generate_random_sidb_layout_params<layouts::coords::cube> params{
-            .coordinate_pair  = {{0, 0}, {40, 40}},
-            .number_of_sidbs  = 10,
-            .positive_sidbs   = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = static_cast<uint64_t>(10E6),
+        const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
+            .coordinate_pair = {{0, 0}, {40, 40}},
+            .number_of_sidbs = 10,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::FORBIDDEN,
+            .sim_params                         = sidb::model::simulation_parameters{},
+            .maximal_attempts                   = static_cast<uint64_t>(10E6),
             .number_of_unique_generated_layouts = 10};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_cube>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt_cube>(params);
         REQUIRE(result_lyts.has_value());
         REQUIRE(result_lyts.value().size() == 10);
 
@@ -261,9 +267,9 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 {
     SECTION("empty parameters")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{};
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(lyt.has_value());
 
         CHECK(lyt.value().num_cells() == 0);
@@ -275,20 +281,20 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
     {
         // the default region spans a single cell, so no attempt budget can place two SiDBs; a small budget keeps
         // the section from burning the default 10^7 attempts
-        generate_random_sidb_layout_params<layouts::coords::offset> params{};
+        sidb::generators::generate_random_layout_params<layouts::coords::offset> params{};
         params.number_of_sidbs  = 2;
         params.maximal_attempts = 100;
 
-        const auto lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         CHECK(!lyt.has_value());
     }
 
     SECTION("given corner coordinates")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{1, 1, 0}, {5, 7, 2}}};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 0);
@@ -303,11 +309,11 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{5, 5, 1}, {5, 5, 1}},
             .number_of_sidbs = 1};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 1);
@@ -322,11 +328,11 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("given corner coordinates and number of placed SiDBs")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{1, 1, 0}, {50, 7, 1}},
             .number_of_sidbs = 10};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);
@@ -344,12 +350,13 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
             .number_of_sidbs = 100,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::offset>::positive_charges::ALLOWED};
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::ALLOWED};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 100);
@@ -363,12 +370,13 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{0, 0, 0}, {200, 200, 0}},
             .number_of_sidbs = 100,
-            .positive_sidbs = generate_random_sidb_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN};
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 100);
@@ -385,15 +393,16 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("given previous layouts")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{0, 0}, {40, 40}},
             .number_of_sidbs = 10,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN,
-            .sim_params      = sidb::model::simulation_parameters{},
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN,
+            .sim_params                         = sidb::model::simulation_parameters{},
             .maximal_attempts                   = static_cast<uint64_t>(10E6),
             .number_of_unique_generated_layouts = 3};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
         CHECK(result_lyts.value().size() == 3);
 
@@ -413,16 +422,17 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
         // a 21x21 region this densely packed lets greedy placement corner itself, after which the generator
         // spends its whole attempt budget rejecting every remaining position. These budgets bound that worst
         // case at tens of milliseconds; the defaults let it run for tens of seconds
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{0, 0}, {20, 20}},
             .number_of_sidbs = 10,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN,
-            .sim_params      = sidb::model::simulation_parameters{},
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN,
+            .sim_params                            = sidb::model::simulation_parameters{},
             .maximal_attempts                      = 10'000,
             .number_of_unique_generated_layouts    = 2,
             .maximal_attempts_for_multiple_layouts = 1'000};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_100_cell_clk_lyt>(params);
         REQUIRE(result_lyts.has_value());
         REQUIRE(result_lyts.value().size() == 2);
 
@@ -436,16 +446,17 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
     {
         // the region holds two cells and each layout carries a single SiDB, so only two layouts exist; every
         // further candidate repeats one of them and has to be rejected by the exact comparison behind the digest
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
-            .coordinate_pair  = {{0, 0}, {1, 0}},
-            .number_of_sidbs  = 1,
-            .positive_sidbs   = generate_random_sidb_layout_params<layouts::coords::offset>::positive_charges::ALLOWED,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = 10'000,
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
+            .coordinate_pair = {{0, 0}, {1, 0}},
+            .number_of_sidbs = 1,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::ALLOWED,
+            .sim_params                            = sidb::model::simulation_parameters{},
+            .maximal_attempts                      = 10'000,
             .number_of_unique_generated_layouts    = 5,
             .maximal_attempts_for_multiple_layouts = 500};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt>(params);
         const auto lyts        = result_lyts.value_or(std::vector<sidb_cell_clk_lyt>{});
 
         REQUIRE(lyts.size() == 2);
@@ -455,15 +466,16 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("Check correct use of skeleton layout when generating only one random layout")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{.coordinate_pair = {{0, 0}, {9, 9}},
-                                                                                 .number_of_sidbs = 10};
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
+            .coordinate_pair = {{0, 0}, {9, 9}},
+            .number_of_sidbs = 10};
 
         sidb_100_cell_clk_lyt skeleton_layout{};
         skeleton_layout.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
         skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
         skeleton_layout.assign_cell_type({5, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
 
-        const auto result_lyt = generate_random_sidb_layout(params, std::optional{skeleton_layout});
+        const auto result_lyt = sidb::generators::generate_random_layout(params, std::optional{skeleton_layout});
 
         REQUIRE(result_lyt.has_value());
         CHECK(result_lyt.value().num_cells() == 13);
@@ -471,11 +483,12 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
     SECTION("Check correct use of skeleton layout when generating multiple random layouts")
     {
-        const generate_random_sidb_layout_params<layouts::coords::offset> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
             .coordinate_pair = {{0, 0}, {40, 40}},
             .number_of_sidbs = 10,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN,
-            .sim_params      = sidb::model::simulation_parameters{},
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN,
+            .sim_params                         = sidb::model::simulation_parameters{},
             .maximal_attempts                   = static_cast<uint64_t>(10E6),
             .number_of_unique_generated_layouts = 2};
 
@@ -485,7 +498,8 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
         skeleton_layout.assign_cell_type({3, 0}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
         skeleton_layout.assign_cell_type({9, 1}, sidb_100_cell_clk_lyt::technology::cell_type::NORMAL);
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{skeleton_layout});
+        const auto result_lyts =
+            sidb::generators::generate_multiple_random_layouts(params, std::optional{skeleton_layout});
         REQUIRE(result_lyts.has_value());
         REQUIRE(result_lyts.value().size() == 2);
 
@@ -497,12 +511,12 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
     {
         // the default region spans a single cell, so no attempt budget can place two SiDBs; a small budget keeps
         // the section from burning the default 10^7 attempts five times over
-        generate_random_sidb_layout_params<layouts::coords::offset> params{};
+        sidb::generators::generate_random_layout_params<layouts::coords::offset> params{};
         params.maximal_attempts                      = 100;
         params.maximal_attempts_for_multiple_layouts = 5;
         params.number_of_sidbs                       = 2;
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt>(params);
         CHECK(!result_lyts.has_value());
     }
 }
@@ -510,9 +524,9 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 {
     SECTION("empty parameters")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{};
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{};
 
-        const auto lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        const auto lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(lyt.has_value());
 
         CHECK(lyt.value().num_cells() == 0);
@@ -522,11 +536,11 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{
             .coordinate_pair = {{5, 5, 1}, {5, 5, 1}},
             .number_of_sidbs = 1};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 1);
@@ -541,10 +555,10 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 
     SECTION("given corner coordinates")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{
             .coordinate_pair = {{1, 1, 0}, {5, 7, 1}}};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 0);
@@ -559,11 +573,11 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 
     SECTION("given corner coordinates and number of placed SiDBs")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{
             .coordinate_pair = {{1, 1, 0}, {50, 7, 1}},
             .number_of_sidbs = 10};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);
@@ -580,12 +594,13 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{
             .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
             .number_of_sidbs = 100,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::siqad>::positive_charges::ALLOWED};
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::siqad>::positive_charges::ALLOWED};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 100);
@@ -599,12 +614,13 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 
     SECTION("given corner coordinates and number of placed SiDBs, and forbid positive charges")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{
             .coordinate_pair = {{0, 0, 0}, {90, 90, 0}},
             .number_of_sidbs = 10,
-            .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::siqad>::positive_charges::FORBIDDEN};
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::siqad>::positive_charges::FORBIDDEN};
 
-        const auto result_lyt = generate_random_sidb_layout<sidb_cell_clk_lyt_siqad>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);
@@ -619,15 +635,16 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 
     SECTION("given previous layouts")
     {
-        const generate_random_sidb_layout_params<layouts::coords::siqad> params{
-            .coordinate_pair  = {{0, 0, 1}, {20, 20, 1}},
-            .number_of_sidbs  = 10,
-            .positive_sidbs   = generate_random_sidb_layout_params<layouts::coords::siqad>::positive_charges::FORBIDDEN,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = static_cast<uint64_t>(10E6),
+        const sidb::generators::generate_random_layout_params<layouts::coords::siqad> params{
+            .coordinate_pair = {{0, 0, 1}, {20, 20, 1}},
+            .number_of_sidbs = 10,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<layouts::coords::siqad>::positive_charges::FORBIDDEN,
+            .sim_params                         = sidb::model::simulation_parameters{},
+            .maximal_attempts                   = static_cast<uint64_t>(10E6),
             .number_of_unique_generated_layouts = 3};
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts<sidb_cell_clk_lyt_siqad>(params);
+        const auto result_lyts = sidb::generators::generate_multiple_random_layouts<sidb_cell_clk_lyt_siqad>(params);
         REQUIRE(result_lyts.has_value());
         CHECK(result_lyts.value().size() == 3);
 
@@ -651,9 +668,9 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
 {
     SECTION("given two identical coordinates")
     {
-        const generate_random_sidb_layout_params<cell<TestType>> params{{{5, 5, 1}, {5, 5, 1}}, 1};
+        const sidb::generators::generate_random_layout_params<cell<TestType>> params{{{5, 5, 1}, {5, 5, 1}}, 1};
 
-        const auto result_lyt = generate_random_sidb_layout<TestType>(params);
+        const auto result_lyt = sidb::generators::generate_random_layout<TestType>(params);
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 1);
@@ -670,17 +687,17 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
     {
         // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
         // a defect.
-        const generate_random_sidb_layout_params<cell<TestType>> params{
+        const sidb::generators::generate_random_layout_params<cell<TestType>> params{
             {{2, 1, 1}, {2, 1, 1}},
             1,
-            generate_random_sidb_layout_params<cell<TestType>>::positive_charges::FORBIDDEN,
+            sidb::generators::generate_random_layout_params<cell<TestType>>::positive_charges::FORBIDDEN,
             sidb::model::simulation_parameters{},
             5u};
 
         auto defect_layout = TestType{};
         defect_layout.assign_defect({2, 1, 1}, sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
 
-        const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
+        const auto result_lyt = sidb::generators::generate_random_layout(params, std::optional{defect_layout});
         CHECK(!result_lyt.has_value());
     }
 
@@ -688,10 +705,10 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
     {
         // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
         // a defect.
-        const generate_random_sidb_layout_params<cell<TestType>> params{
+        const sidb::generators::generate_random_layout_params<cell<TestType>> params{
             {{2, 1, 1}, {2, 1, 1}},
             1,
-            generate_random_sidb_layout_params<cell<TestType>>::positive_charges::FORBIDDEN,
+            sidb::generators::generate_random_layout_params<cell<TestType>>::positive_charges::FORBIDDEN,
             sidb::model::simulation_parameters{},
             5u};
 
@@ -700,7 +717,7 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
         defect_layout.assign_defect({4, 1, 1},
                                     sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
 
-        const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
+        const auto result_lyt = sidb::generators::generate_random_layout(params, std::optional{defect_layout});
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 1);
@@ -715,12 +732,13 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
 
     SECTION("Check uniqueness of many layouts sharing a defective skeleton")
     {
-        const generate_random_sidb_layout_params<cell<TestType>> params{
-            .coordinate_pair  = {{0, 0, 0}, {10, 2, 0}},
-            .number_of_sidbs  = 5,
-            .positive_sidbs   = generate_random_sidb_layout_params<cell<TestType>>::positive_charges::ALLOWED,
-            .sim_params       = sidb::model::simulation_parameters{},
-            .maximal_attempts = 10'000,
+        const sidb::generators::generate_random_layout_params<cell<TestType>> params{
+            .coordinate_pair = {{0, 0, 0}, {10, 2, 0}},
+            .number_of_sidbs = 5,
+            .positive_sidbs =
+                sidb::generators::generate_random_layout_params<cell<TestType>>::positive_charges::ALLOWED,
+            .sim_params                         = sidb::model::simulation_parameters{},
+            .maximal_attempts                   = 10'000,
             .number_of_unique_generated_layouts = 20};
 
         auto defect_layout = TestType{};
@@ -728,8 +746,9 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
         defect_layout.assign_defect({4, 1, 0},
                                     sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
 
-        const auto result_lyts = generate_multiple_random_sidb_layouts(params, std::optional{defect_layout});
-        const auto lyts        = result_lyts.value_or(std::vector<TestType>{});
+        const auto result_lyts =
+            sidb::generators::generate_multiple_random_layouts(params, std::optional{defect_layout});
+        const auto lyts = result_lyts.value_or(std::vector<TestType>{});
 
         REQUIRE(lyts.size() == 20);
 
@@ -747,10 +766,10 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
-        const generate_random_sidb_layout_params<cell<TestType>> params{
+        const sidb::generators::generate_random_layout_params<cell<TestType>> params{
             {{0, 0, 0}, {10, 2, 0}},
             10,
-            generate_random_sidb_layout_params<cell<TestType>>::positive_charges::ALLOWED,
+            sidb::generators::generate_random_layout_params<cell<TestType>>::positive_charges::ALLOWED,
             sidb::model::simulation_parameters{}};
 
         auto defect_layout = TestType{};
@@ -764,7 +783,7 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
         defect_layout.assign_defect({2, 1, 0},
                                     sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
 
-        const auto result_lyt = generate_random_sidb_layout(params, std::optional{defect_layout});
+        const auto result_lyt = sidb::generators::generate_random_layout(params, std::optional{defect_layout});
         REQUIRE(result_lyt.has_value());
 
         CHECK(result_lyt.value().num_cells() == 10);
@@ -786,12 +805,13 @@ TEST_CASE("Random coords::cube layout generation with defects", "[random-sidb-la
 {
     using lyt = sidb_defect_cell_clk_lyt_cube;
 
-    const generate_random_sidb_layout_params<layouts::coords::cube> params{
+    const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
         .coordinate_pair = {layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{0, 0, 0}),
                             layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 2, 0})},
         .number_of_sidbs = 10,
-        .positive_sidbs  = generate_random_sidb_layout_params<layouts::coords::cube>::positive_charges::ALLOWED,
-        .sim_params      = sidb::model::simulation_parameters{}};
+        .positive_sidbs =
+            sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::ALLOWED,
+        .sim_params = sidb::model::simulation_parameters{}};
 
     lyt layout{};
 
@@ -806,7 +826,7 @@ TEST_CASE("Random coords::cube layout generation with defects", "[random-sidb-la
     layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}),
                          sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
 
-    const auto result_lyt = generate_random_sidb_layout(params, std::optional{layout});
+    const auto result_lyt = sidb::generators::generate_random_layout(params, std::optional{layout});
 
     REQUIRE(result_lyt.has_value());
     CHECK(result_lyt.value().num_cells() == 10);

@@ -2,16 +2,16 @@
 // Created by Jan Drewniok on 26.06.24.
 //
 
-#ifndef FICTION_ON_THE_FLY_SIDB_CIRCUIT_DESIGN_HPP
-#define FICTION_ON_THE_FLY_SIDB_CIRCUIT_DESIGN_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_ON_THE_FLY_CIRCUIT_DESIGN_HPP
+#define FICTION_TECHNOLOGY_SIDB_GENERATORS_ON_THE_FLY_CIRCUIT_DESIGN_HPP
 
 #include "fiction/physical_design/apply_gate_library.hpp"
 #include "fiction/physical_design/exact.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb_on_the_fly_gate_library.hpp"
-#include "fiction/technology/sidb_skeleton_bestagon_library.hpp"
-#include "fiction/technology/sidb_surface_analysis.hpp"
+#include "fiction/technology/sidb/libraries/on_the_fly_gate_library.hpp"
+#include "fiction/technology/sidb/libraries/skeleton_bestagon_library.hpp"
+#include "fiction/technology/sidb/libraries/surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -23,7 +23,7 @@
 #include <string_view>
 #include <utility>
 
-namespace fiction
+namespace fiction::sidb::generators
 {
 
 /**
@@ -63,12 +63,12 @@ class unsuccessful_gate_design_error : public std::runtime_error
  * @tparam CellLyt SiDB cell-level layout type.
  */
 template <typename CellLyt>
-struct on_the_fly_sidb_circuit_design_on_defective_surface_params
+struct on_the_fly_circuit_design_on_defective_surface_params
 {
     /**
      * Parameters for the SiDB on-the-fly gate library.
      */
-    sidb_on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
+    sidb::libraries::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
     /**
      * Parameters for the *exact* placement and routing algorithm.
      */
@@ -81,12 +81,12 @@ struct on_the_fly_sidb_circuit_design_on_defective_surface_params
  * @tparam CellLyt SiDB cell-level layout type.
  */
 template <typename CellLyt>
-struct on_the_fly_sidb_circuit_design_params
+struct on_the_fly_circuit_design_params
 {
     /**
      * Parameters for the SiDB on-the-fly gate library.
      */
-    sidb_on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
+    sidb::libraries::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
 };
 
 /**
@@ -133,15 +133,15 @@ struct on_the_fly_circuit_design_on_defective_surface_stats
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param defective_surface The defective surface on which the SiDB circuit is designed.
  * @param params The parameters used for designing the circuit, encapsulated in an
- * `on_the_fly_sidb_circuit_design_params` object.
+ * `on_the_fly_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed circuit on the defective surface.
  */
 template <typename Ntk, typename CellLyt, typename GateLyt>
-[[nodiscard]] CellLyt on_the_fly_sidb_circuit_design_on_defective_surface(
+[[nodiscard]] CellLyt on_the_fly_circuit_design_on_defective_surface(
     const Ntk& ntk, const GateLyt& lattice_tiling, const CellLyt& defective_surface,
-    const on_the_fly_sidb_circuit_design_on_defective_surface_params<cell<CellLyt>>& params = {},
-    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>*                   stats  = nullptr)
+    const on_the_fly_circuit_design_on_defective_surface_params<cell<CellLyt>>& params = {},
+    on_the_fly_circuit_design_on_defective_surface_stats<GateLyt>*              stats  = nullptr)
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
@@ -165,8 +165,9 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
-        auto black_list = sidb_surface_analysis<sidb_skeleton_bestagon_library, GateLyt, CellLyt>(
-            lattice_tiling, defective_surface, std::make_pair(0, 0));
+        auto black_list =
+            sidb::libraries::surface_analysis<sidb::libraries::skeleton_bestagon_library, GateLyt, CellLyt>(
+                lattice_tiling, defective_surface, std::make_pair(0, 0));
 
         while (!gate_level_layout.has_value())
         {
@@ -182,14 +183,14 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                 try
                 {
                     lyt = physical_design::apply_parameterized_gate_library_to_defective_surface<
-                        CellLyt, sidb_on_the_fly_gate_library, GateLyt,
-                        sidb_on_the_fly_gate_library_params<cell<CellLyt>>>(
+                        CellLyt, sidb::libraries::on_the_fly_gate_library, GateLyt,
+                        sidb::libraries::on_the_fly_gate_library_params<cell<CellLyt>>>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
                 // blacklist and the process is rerun.
-                catch (const gate_design_exception<tt, GateLyt>& e)
+                catch (const sidb::libraries::gate_design_exception<tt, GateLyt>& e)
                 {
                     gate_level_layout = std::nullopt;
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
@@ -237,13 +238,13 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
  * @param gate_lyt Gate-level layout.
  * @param lattice_tiling The lattice tiling used for the circuit design.
  * @param params The parameters used for designing the circuit, encapsulated in an
- * `on_the_fly_sidb_circuit_design_params` object.
+ * `on_the_fly_circuit_design_params` object.
  * @param stats Pointer to a structure for collecting statistics. If `nullptr`, statistics are discarded.
  * @return Layout representing the designed SiDB circuit.
  */
 template <typename CellLyt, typename GateLyt>
-[[nodiscard]] CellLyt on_the_fly_sidb_circuit_design(const GateLyt&                                        gate_lyt,
-                                                     const on_the_fly_sidb_circuit_design_params<CellLyt>& params = {})
+[[nodiscard]] CellLyt on_the_fly_circuit_design(const GateLyt&                                   gate_lyt,
+                                                const on_the_fly_circuit_design_params<CellLyt>& params = {})
 {
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(is_hexagonal_layout_v<GateLyt>, "GateLyt is not a hexagonal");
@@ -255,19 +256,19 @@ template <typename CellLyt, typename GateLyt>
 
     try
     {
-        return physical_design::apply_parameterized_gate_library<CellLyt, sidb_on_the_fly_gate_library, GateLyt,
-                                                                 sidb_on_the_fly_gate_library_params<CellLyt>>(
-            *gate_lyt, params.sidb_on_the_fly_gate_library_parameters);
+        return physical_design::apply_parameterized_gate_library<
+            CellLyt, sidb::libraries::on_the_fly_gate_library, GateLyt,
+            sidb::libraries::on_the_fly_gate_library_params<CellLyt>>(*gate_lyt,
+                                                                      params.sidb_on_the_fly_gate_library_parameters);
     }
 
     // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
     // blacklist and the process is rerun.
-    catch (const gate_design_exception<tt, GateLyt>& e)
+    catch (const sidb::libraries::gate_design_exception<tt, GateLyt>& e)
     {
         throw unsuccessful_gate_design_error("Gate design was unsuccessful");
     }
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_ON_THE_FLY_SIDB_CIRCUIT_DESIGN_HPP
+}  // namespace fiction::sidb::generators
+#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_ON_THE_FLY_CIRCUIT_DESIGN_HPP

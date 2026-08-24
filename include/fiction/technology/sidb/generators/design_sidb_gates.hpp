@@ -2,12 +2,12 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_DESIGN_SIDB_GATES_HPP
-#define FICTION_DESIGN_SIDB_GATES_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
+#define FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
 
-#include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/sidb/generators/random_layout_generator.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
@@ -35,7 +35,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::generators
 {
 
 /**
@@ -306,9 +306,9 @@ class design_sidb_gates_impl
 
         // Allow positive charges here, as a layout that displays positive charges without inputs may not exhibit them
         // once inputs are applied.
-        const generate_random_sidb_layout_params<cell<Lyt>> parameter{
+        const generate_random_layout_params<cell<Lyt>> parameter{
             params.canvas, params.number_of_canvas_sidbs,
-            generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
+            generate_random_layout_params<cell<Lyt>>::positive_charges::ALLOWED};
 
         const auto num_threads = std::min(number_of_threads, all_canvas_layouts.size());
 
@@ -327,7 +327,7 @@ class design_sidb_gates_impl
                 {
                     while (!gate_layout_is_found)
                     {
-                        auto result_lyt = generate_random_sidb_layout<Lyt>(parameter, skeleton_layout);
+                        auto result_lyt = generate_random_layout<Lyt>(parameter, skeleton_layout);
 
                         if (!result_lyt.has_value())
                         {
@@ -875,6 +875,5 @@ template <typename Lyt, typename TT>
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_DESIGN_SIDB_GATES_HPP
+}  // namespace fiction::sidb::generators
+#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP

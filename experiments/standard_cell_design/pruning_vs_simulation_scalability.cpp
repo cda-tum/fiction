@@ -4,9 +4,9 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
@@ -103,20 +103,20 @@ int main()  // NOLINT
     static const std::string folder_2i =
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/", EXPERIMENTS_PATH);
 
-    const auto skeleton_2i1o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+    const auto skeleton_2i1o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
-    const auto skeleton_2i2o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+    const auto skeleton_2i2o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
-    const auto skeleton_3i1o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
+    const auto skeleton_3i1o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+        fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
 
-    const auto skeleton_3i2o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
+    const auto skeleton_3i2o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+        fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
 
-    const auto skeleton_3i3o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
+    const auto skeleton_3i3o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+        fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
 
     auto two_one = skeleton_2i1o;
     two_one.assign_cell_type({22, 10}, sidb::technology::cell_type::LOGIC);

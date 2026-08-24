@@ -4,9 +4,9 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/io/read_sqd_layout.hpp>                                   // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>                          // writer for operational domains
 #include <fiction/networks/utils/truth_table_utils.hpp>                     // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                   // reader for SiDB layouts
+#include <fiction/technology/sidb/io/write_operational_domain.hpp>          // writer for operational domains
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>          // SiDB simulation parameters
 #include <fiction/technology/sidb/simulation/engine.hpp>                    // SiDB simulation engines
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
@@ -88,7 +88,8 @@ int main()  // NOLINT
 
     for (const auto& [truth_table, gate] : truth_tables_and_names)
     {
-        const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        const auto lyt =
+            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
         sidb::simulation::logic::operational_domain_stats op_domain_stats_grid_search{};
@@ -110,8 +111,8 @@ int main()  // NOLINT
 
         total_runtime_sketch += mockturtle::to_seconds(op_domain_stats_sketch.time_total);
 
-        write_operational_domain(op_domain_grid_search, fmt::format("{}/grid_search{}.csv", folder, gate));
-        write_operational_domain(op_domain_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
+        sidb::io::write_operational_domain(op_domain_grid_search, fmt::format("{}/grid_search{}.csv", folder, gate));
+        sidb::io::write_operational_domain(op_domain_sketch, fmt::format("{}/sketch_{}.csv", folder, gate));
 
         mean_ratio_num_op_sketch_to_num_op_grid_search +=
             static_cast<double>(op_domain_stats_sketch.num_operational_parameter_combinations) /
