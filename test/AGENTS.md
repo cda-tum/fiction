@@ -9,11 +9,15 @@ so `technology/sidb/model/charge_state.hpp` is tested by
 
 ## Wiring
 
+- **Test files are named `test_<header>.cpp`** and mirror their header's path, so
+  `technology/sidb/model/charge_state.hpp` is tested by
+  `test/technology/sidb/model/test_charge_state.cpp`. The `test_` prefix is part of the
+  file name; CMake no longer synthesizes it.
 - **Test file base names must be unique across the whole tree.** `test/CMakeLists.txt`
-  globs `*/*.cpp` and builds `add_executable(test_${NAME})` from the base name alone, so
-  two files called `foo.cpp` in different subdirectories collide and CMake fails. The
-  existing duplicates (`distance_map.cpp`, `determine_clocking.cpp`, …) are safe only
-  because `benchmark/` is filtered out of that glob.
+  globs `*/*.cpp` and builds `add_executable()` from the base name alone, so two files
+  with the same name in different subdirectories collide and CMake fails. The `test_`
+  prefix also keeps them clear of `benchmark/`, which is filtered out of that glob and
+  whose files are unprefixed.
 - Do not edit `test/CMakeLists.txt` to register a test. The glob picks it up; re-run
   CMake.
 - Load test data through the `TEST_PATH` compile definition, not a relative path.

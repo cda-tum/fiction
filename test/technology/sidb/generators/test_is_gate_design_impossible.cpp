@@ -2,9 +2,8 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
-
 #include "catch2/catch_test_macros.hpp"
+#include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
