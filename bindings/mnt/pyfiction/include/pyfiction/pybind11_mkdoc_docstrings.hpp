@@ -17545,27 +17545,119 @@ static const char *mkd_doc_fiction_inml_technology_cell_type_SLANTED_EDGE_UP_MAG
 
 static const char *mkd_doc_fiction_inml_technology_inml_technology = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_technology_is_crosswire_magnet = R"doc()doc";
+static const char *mkd_doc_fiction_inml_technology_is_crosswire_magnet =
+R"doc(Checks whether the given cell type is a crosswire magnet.
 
-static const char *mkd_doc_fiction_inml_technology_is_empty_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char *mkd_doc_fiction_inml_technology_is_fanout_coupler_magnet = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::CROSSWIRE_MAGNET`.
 
-static const char *mkd_doc_fiction_inml_technology_is_input_cell = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_inml_technology_is_inverter_magnet = R"doc()doc";
+static const char *mkd_doc_fiction_inml_technology_is_empty_cell =
+R"doc(Checks whether the given cell type is empty.
 
-static const char *mkd_doc_fiction_inml_technology_is_normal_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_fanout_coupler_magnet =
+R"doc(Checks whether the given cell type is a fanout coupler magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::FANOUT_COUPLER_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_input_cell =
+R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_inverter_magnet =
+R"doc(Checks whether the given cell type is an inverter magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INVERTER_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_normal_cell =
+R"doc(Checks whether the given cell type is a normal cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL`.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_technology_is_normal_cell_mode = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_technology_is_output_cell = R"doc()doc";
+static const char *mkd_doc_fiction_inml_technology_is_output_cell =
+R"doc(Checks whether the given cell type is an output cell.
 
-static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_down_magnet = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_magnet = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
 
-static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_up_magnet = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_down_magnet =
+R"doc(Checks whether the given cell type is a down-slanted edge magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_magnet =
+R"doc(Checks whether the given cell type is a slanted edge magnet, i.e.,
+either up- or down-slanted.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET` or
+    `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_up_magnet =
+R"doc(Checks whether the given cell type is an up-slanted edge magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET`.
+
+)doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library =
 R"doc(A concrete FCN gate library as used in \"ToPoliNano\"
@@ -20960,23 +21052,96 @@ static const char *mkd_doc_fiction_qca_technology_cell_type_NORMAL = R"doc(Symbo
 
 static const char *mkd_doc_fiction_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output QCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_const_0_cell = R"doc()doc";
+static const char *mkd_doc_fiction_qca_technology_is_const_0_cell =
+R"doc(Checks whether the given cell type is a constant-0 input cell.
 
-static const char *mkd_doc_fiction_qca_technology_is_const_1_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char *mkd_doc_fiction_qca_technology_is_constant_cell = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::CONST_0`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_technology_is_const_1_cell =
+R"doc(Checks whether the given cell type is a constant-1 input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::CONST_1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_technology_is_constant_cell =
+R"doc(Checks whether the given cell type is a constant input cell, i.e.,
+either `CONST_0` or `CONST_1`.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_technology_is_crossover_cell_mode = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_empty_cell = R"doc()doc";
+static const char *mkd_doc_fiction_qca_technology_is_empty_cell =
+R"doc(Checks whether the given cell type is empty.
 
-static const char *mkd_doc_fiction_qca_technology_is_input_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char *mkd_doc_fiction_qca_technology_is_normal_cell = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
 
-static const char *mkd_doc_fiction_qca_technology_is_normal_cell_mode = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_output_cell = R"doc()doc";
+static const char *mkd_doc_fiction_qca_technology_is_input_cell =
+R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_technology_is_normal_cell =
+R"doc(Checks whether the given cell type is a normal cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_technology_is_normal_cell_mode =
+R"doc(Checks whether the given cell mode is the normal mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::NORMAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_technology_is_output_cell =
+R"doc(Checks whether the given cell type is an output cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
+
+)doc";
 
 static const char *mkd_doc_fiction_qca_technology_is_rotated_cell_mode = R"doc()doc";
 
@@ -22952,17 +23117,63 @@ static const char *mkd_doc_fiction_sidb_technology_cell_type_NORMAL = R"doc(Symb
 
 static const char *mkd_doc_fiction_sidb_technology_cell_type_OUTPUT = R"doc(Symbol used for output SiDB cells.)doc";
 
-static const char *mkd_doc_fiction_sidb_technology_is_empty_cell = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_technology_is_empty_cell =
+R"doc(Checks whether the given cell type is empty.
 
-static const char *mkd_doc_fiction_sidb_technology_is_input_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char *mkd_doc_fiction_sidb_technology_is_logic_cell = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
 
-static const char *mkd_doc_fiction_sidb_technology_is_normal_cell = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_sidb_technology_is_input_cell =
+R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_technology_is_logic_cell =
+R"doc(Checks whether the given cell type is a logic cell (e.g., a canvas
+SiDB).
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::LOGIC`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_technology_is_normal_cell =
+R"doc(Checks whether the given cell type is a normal cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL`.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_technology_is_normal_cell_mode = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_technology_is_output_cell = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_technology_is_output_cell =
+R"doc(Checks whether the given cell type is an output cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_technology_sidb_technology = R"doc()doc";
 

@@ -106,6 +106,12 @@ Changed
       ``setuptools`` from the build. Building from source now requires ``scikit-build-core`` 1.0
     - The CMake policy range now ends at 4.4
 - Code quality:
+    - **Breaking:** ``qca_technology::cell_type``, ``inml_technology::cell_type``, and
+      ``sidb_technology::cell_type`` are now scoped ``enum class``, consistent with
+      ``mol_qca_technology::cell_type``. Replace references to the leaked enumerators, e.g.,
+      ``sidb_technology::INPUT``, with ``sidb_technology::cell_type::INPUT``, and add an
+      explicit ``static_cast`` wherever a cell type was implicitly converted to an integer
+      or ``char``. ``pyfiction`` is unaffected
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
     - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
@@ -190,6 +196,9 @@ Changed
       directly must be renamed
     - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
       and physics as a topic on PyPI
+    - Adopted nanobind's split mode, so one ``abi3`` wheel per platform now covers Python 3.10 and
+      up instead of four. ``mnt.pyfiction`` gains ``nanobind-backend`` as a runtime dependency,
+      which ``pip`` installs along with it
 
 Removed
 #######
@@ -210,6 +219,12 @@ Removed
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
+- Python bindings:
+    - Removed the free-threaded (``cp314t``) wheel. Free-threaded interpreters are unsupported,
+      source builds included, until Python 3.15 gives them the ``abi3t`` stable ABI
+      (`PEP 803 <https://peps.python.org/pep-0803/>`_)
+    - Removed the ``DISABLE_GIL`` scikit-build-core override for free-threaded Windows builds. No
+      CMake code ever read the define, and split mode rejects free-threaded interpreters outright
 
 Fixed
 #####

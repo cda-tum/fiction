@@ -49,15 +49,17 @@ jobs:
         with:
           key: "ubuntu-24.04-g++-13-coverage"
           variant: ccache
-          save: true
-          max-size: 10G
+          # Only `main` writes; pull requests restore its cache. Caches are
+          # branch-scoped and the repository shares a 10 GB budget.
+          save: ${{ github.ref == 'refs/heads/main' }}
+          max-size: 500M
 
       - name: Setup mold
-        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+        uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
 
       - name: Setup Z3 Solver
         id: z3
-        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
         with:
           version: ${{ env.Z3_VERSION }}
           platform: linux

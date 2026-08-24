@@ -84,17 +84,19 @@ jobs:
         with:
           key: "codeql-ubuntu-24.04-clang++-17"
           variant: ccache
-          save: true
-          max-size: 10G
+          # Only `main` writes; pull requests restore its cache. Caches are
+          # branch-scoped and the repository shares a 10 GB budget.
+          save: ${{ github.ref == 'refs/heads/main' }}
+          max-size: 500M
 
       - name: Setup mold
         if: matrix.language == 'cpp'
-        uses: rui314/setup-mold@9c9c13bf4c3f1adef0cc596abc155580bcb04444 # v1
+        uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
 
       - name: Setup Z3 Solver
         if: matrix.language == 'cpp'
         id: z3
-        uses: cda-tum/setup-z3@7bfe87519f27304460db44284cb8cc59f50f5fc9 # v1.7.2
+        uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
         with:
           version: ${{ env.Z3_VERSION }}
           platform: linux
@@ -103,7 +105,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        uses: github/codeql-action/init@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
@@ -118,7 +120,7 @@ jobs:
         run: cmake --build --preset ci-codeql
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        uses: github/codeql-action/analyze@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
         with:
           upload: false
           output: sarif-results
@@ -135,6 +137,6 @@ jobs:
           output: sarif-results/${{ matrix.language }}.sarif
 
       - name: Upload SARIF to GitHub
-        uses: github/codeql-action/upload-sarif@ff2f1c621b7f889edc0d3c761ac2e6a3f8cdb0dd # v4.37.7
+        uses: github/codeql-action/upload-sarif@db488ddef3bf6cb639b32c2e9a7c0a7ea8271d28 # v4.37.8
         with:
           sarif_file: sarif-results/${{ matrix.language }}.sarif

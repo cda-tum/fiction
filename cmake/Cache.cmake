@@ -14,8 +14,28 @@ function(fiction_enable_cache)
     )
   endif()
 
-  find_program(CACHE_BINARY NAMES ${CACHE_OPTION_VALUES})
+  # Search for the requested cache, then the other. find_program keeps a cached
+  # result, so clear it or a reconfigure ignores CACHE_OPTION.
+  unset(CACHE_BINARY CACHE)
+  find_program(CACHE_BINARY NAMES ${CACHE_OPTION})
+  if(NOT CACHE_BINARY)
+    list(REMOVE_ITEM CACHE_OPTION_VALUES ${CACHE_OPTION})
+    find_program(CACHE_BINARY NAMES ${CACHE_OPTION_VALUES})
+    if(CACHE_BINARY)
+      message(STATUS "${CACHE_OPTION} was not found, falling back to "
+                     "${CACHE_BINARY}")
+    endif()
+  endif()
+
   if(CACHE_BINARY)
+    # The Visual Studio generator ignores compiler launchers.
+    if(CMAKE_GENERATOR MATCHES "Visual Studio")
+      message(
+        WARNING
+          "${CACHE_BINARY} was found, but the '${CMAKE_GENERATOR}' generator ignores "
+          "compiler launchers, so nothing will be cached. Configure with -G Ninja "
+          "to make the cache effective.")
+    endif()
     message(STATUS "${CACHE_BINARY} found and enabled")
 
     set(CACHE_LAUNCHER ${CACHE_BINARY})

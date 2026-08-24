@@ -2,7 +2,7 @@
 requires = [
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.3.0",
-    "nanobind~=2.15.0"
+    "nanobind~=3.0.0"
 ]
 build-backend = "scikit_build_core.build"
 
@@ -46,7 +46,11 @@ classifiers = [
 
 requires-python = ">=3.10"
 dependencies = [
-    "z3-solver>=4.8.5"
+    "z3-solver>=4.8.5",
+    # the split-mode extension carries no copy of the nanobind library and resolves it at import
+    # time from this wheel. Never pin or upper-bound it: two projects pinning different versions
+    # could not be installed together
+    "nanobind-backend>=1.0"
 ]
 
 [project.urls]
@@ -69,8 +73,9 @@ cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}/{build_type}"
 # Explicitly set the package directory
 wheel.packages = ["bindings/mnt"]
-# Enable Stable ABI builds for CPython 3.12+
-wheel.py-api = "cp312"
+# One Stable ABI wheel per platform serves every supported CPython. The 3.10 floor is what
+# nanobind's split mode buys: a linked stable-ABI build cannot go below 3.12
+wheel.py-api = "cp310"
 # Only build the Python bindings target
 build.targets = ["pyfiction"]
 # Only install the Python package component
@@ -121,13 +126,6 @@ cmake.args = [
     "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold"
 ]
 
-[[tool.scikit-build.overrides]]
-if.python-version = ">=3.13"
-if.abi-flags = "t"
-if.platform-system = "win32"
-inherit.cmake.define = "append"
-cmake.define.DISABLE_GIL = "1"
-
 
 [[tool.dynamic-metadata]]
 provider = "vcs_versioning"
@@ -169,9 +167,16 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 
 [tool.cibuildwheel]
+# cp310 builds the one abi3 wheel that serves every supported CPython; the later interpreters find
+# it already built, skip the build step, and go straight to `test-command`. Narrowing this to
+# `cp310-*` would produce the same single wheel but shrink the Python test suite to one interpreter
 build = "cp3*"
 archs = "auto64"
-skip = ["*-musllinux*"]
+# nanobind-backend publishes no musllinux wheels.
+# The free-threaded identifiers are not gated behind `enable` from 3.14 on, so they are skipped
+# here: split mode needs the `abi3t` stable ABI of Python 3.15 (PEP 803) and stops the CMake
+# configure below it
+skip = ["*-musllinux*", "cp3*t-*"]
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
@@ -202,8 +207,8 @@ select = "*-macosx_arm64"
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [[tool.cibuildwheel.overrides]]
-# cp312-* wheels carry the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
-select = "cp312-*"
+# the cp310-* wheel carries the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
+select = "cp310-*"
 inherit.repair-wheel-command = "append"
 repair-wheel-command = "uvx abi3audit --strict --report {wheel}"
 
@@ -317,7 +322,7 @@ docstring-code-format = true
 build = [
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.3.0",
-    "nanobind~=2.15.0",
+    "nanobind~=3.0.0",
 ]
 docs = [
     "sphinx==8.1.3; python_version < '3.11'",
