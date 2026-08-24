@@ -2,10 +2,10 @@
 // Created by marcel on 07.03.22.
 //
 
-#ifndef FICTION_SIDB_DEFECT_SURFACE_HPP
-#define FICTION_SIDB_DEFECT_SURFACE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP
+#define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP
 
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>
@@ -19,19 +19,19 @@
 #include <unordered_set>
 #include <utility>
 
-namespace fiction
+namespace fiction::sidb::primitives
 {
 /**
- * This struct stores parameters for the `sidb_defect_surface`
+ * This struct stores parameters for the `defect_surface`
  */
-struct sidb_defect_surface_params
+struct defect_surface_params
 {
     /**
      * Specifies which defects are to be ignored, e.g., when they are not relevant for the current analysis.
      *
      * @note Ignored defects are not stored in the surface instance!
      */
-    std::unordered_set<sidb_defect_type> ignore{};
+    std::unordered_set<sidb::model::defect_type> ignore{};
 };
 
 /**
@@ -43,28 +43,27 @@ struct sidb_defect_surface_params
  */
 template <typename Lyt,
           bool has_sidb_defect_surface = std::conjunction_v<has_assign_sidb_defect<Lyt>, has_get_sidb_defect<Lyt>>>
-class sidb_defect_surface : public Lyt
+class defect_surface : public Lyt
 {};
 
 template <typename Lyt>
-class sidb_defect_surface<Lyt, true> : public Lyt
+class defect_surface<Lyt, true> : public Lyt
 {
   public:
-    explicit sidb_defect_surface(const Lyt& lyt, [[maybe_unused]] const sidb_defect_surface_params& ps = {}) : Lyt(lyt)
-    {}
+    explicit defect_surface(const Lyt& lyt, [[maybe_unused]] const defect_surface_params& ps = {}) : Lyt(lyt) {}
 };
 
 template <typename Lyt>
-class sidb_defect_surface<Lyt, false> : public Lyt
+class defect_surface<Lyt, false> : public Lyt
 {
   public:
     struct sidb_surface_storage
     {
-        explicit sidb_surface_storage(sidb_defect_surface_params ps = {}) : params(std::move(ps)) {}
+        explicit sidb_surface_storage(defect_surface_params ps = {}) : params(std::move(ps)) {}
 
-        sidb_defect_surface_params params{};
+        defect_surface_params params{};
 
-        phmap::parallel_flat_hash_map<typename Lyt::coordinate, sidb_defect> defective_coordinates{};
+        phmap::parallel_flat_hash_map<typename Lyt::coordinate, sidb::model::defect> defective_coordinates{};
     };
 
     using storage = std::shared_ptr<sidb_surface_storage>;
@@ -74,14 +73,15 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      *
      * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const sidb_defect_surface_params& ps = {}) :
+    explicit defect_surface(const defect_surface_params& ps = {}) :
             Lyt(),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-        assert(strg->params.ignore.count(sidb_defect_type::NONE) == 0 && "The defect type 'NONE' cannot be ignored");
+        assert(strg->params.ignore.count(sidb::model::defect_type::NONE) == 0 &&
+               "The defect type 'NONE' cannot be ignored");
     }
 
     /**
@@ -90,14 +90,15 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * @param ar aspect ratio of the layout.
      * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const typename Lyt::aspect_ratio& ar, const sidb_defect_surface_params& ps = {}) :
+    explicit defect_surface(const typename Lyt::aspect_ratio& ar, const defect_surface_params& ps = {}) :
             Lyt(ar),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-        assert(strg->params.ignore.count(sidb_defect_type::NONE) == 0 && "The defect type 'NONE' cannot be ignored");
+        assert(strg->params.ignore.count(sidb::model::defect_type::NONE) == 0 &&
+               "The defect type 'NONE' cannot be ignored");
     }
 
     /**
@@ -106,23 +107,24 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * @param lyt Existing layout that is to be extended by an SiDB defect interface.
      * @param ps SiDB defect surface parameters.
      */
-    explicit sidb_defect_surface(const Lyt& lyt, const sidb_defect_surface_params& ps = {}) :
+    explicit defect_surface(const Lyt& lyt, const defect_surface_params& ps = {}) :
             Lyt(lyt),
             strg{std::make_shared<sidb_surface_storage>(ps)}
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-        assert(strg->params.ignore.count(sidb_defect_type::NONE) == 0 && "The defect type 'NONE' cannot be ignored");
+        assert(strg->params.ignore.count(sidb::model::defect_type::NONE) == 0 &&
+               "The defect type 'NONE' cannot be ignored");
     }
     /**
      * Clones the layout returning a deep copy.
      *
      * @return Deep copy of the layout.
      */
-    [[nodiscard]] sidb_defect_surface clone() const noexcept
+    [[nodiscard]] defect_surface clone() const noexcept
     {
-        sidb_defect_surface copy{Lyt::clone()};
+        defect_surface copy{Lyt::clone()};
         copy.strg = std::make_shared<sidb_surface_storage>(*strg);
 
         return copy;
@@ -133,12 +135,12 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * @param c Coordinate to assign defect d to.
      * @param d Defect to assign to coordinate c.
      */
-    void assign_sidb_defect(const typename Lyt::coordinate& c, const sidb_defect& d) noexcept
+    void assign_sidb_defect(const typename Lyt::coordinate& c, const sidb::model::defect& d) noexcept
     {
         // delete defect at the coordinate
         strg->defective_coordinates.erase(c);
 
-        if (d.type != sidb_defect_type::NONE &&
+        if (d.type != sidb::model::defect_type::NONE &&
             strg->params.ignore.count(d.type) == 0)  // add defect if this type is not ignored and is not NONE
         {
             strg->defective_coordinates.insert({c, d});
@@ -152,7 +154,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      */
     void move_sidb_defect(const typename Lyt::coordinate& source, const typename Lyt::coordinate& target) noexcept
     {
-        if (const auto defect = get_sidb_defect(source); defect.type != sidb_defect_type::NONE)
+        if (const auto defect = get_sidb_defect(source); defect.type != sidb::model::defect_type::NONE)
         {
             strg->defective_coordinates.insert({target, defect});
 
@@ -166,14 +168,14 @@ class sidb_defect_surface<Lyt, false> : public Lyt
      * @param c Coordinate to check.
      * @return Defect type previously assigned to c or NONE if no defect was yet assigned.
      */
-    [[nodiscard]] sidb_defect get_sidb_defect(const typename Lyt::coordinate& c) const noexcept
+    [[nodiscard]] sidb::model::defect get_sidb_defect(const typename Lyt::coordinate& c) const noexcept
     {
         if (auto it = strg->defective_coordinates.find(c); it != strg->defective_coordinates.cend())
         {
             return it->second;
         }
 
-        return sidb_defect{sidb_defect_type::NONE};  // TODO what are default values for NONE sidb_defects?
+        return sidb::model::defect{sidb::model::defect_type::NONE};  // TODO what are default values for NONE defects?
     }
     /**
      * Returns the number of defective coordinates on the surface.
@@ -196,7 +198,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         this->foreach_sidb_defect(
             [&number_of_positively_charged_defects](const auto& defect)
             {
-                if (is_positively_charged_defect(defect.second))
+                if (sidb::model::is_positively_charged_defect(defect.second))
                 {
                     number_of_positively_charged_defects++;
                 }
@@ -216,7 +218,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         this->foreach_sidb_defect(
             [&number_of_negatively_charged_defects](const auto& defect)
             {
-                if (is_negatively_charged_defect(defect.second))
+                if (sidb::model::is_negatively_charged_defect(defect.second))
                 {
                     number_of_negatively_charged_defects++;
                 }
@@ -245,7 +247,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
         this->foreach_sidb_defect(
             [&number_of_neutral_defects](const auto& defect)
             {
-                if (is_neutral_defect_type(defect.second))
+                if (sidb::model::is_neutral_defect_type(defect.second))
                 {
                     number_of_neutral_defects++;
                 }
@@ -268,7 +270,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
     }
     /**
      * Returns all SiDB positions affected by the defect at the given coordinate. This function relies on the
-     * defect_extent function defined in sidb_defects.hpp that computes the extent of charged and neutral defect types.
+     * defect_extent function defined in defects.hpp that computes the extent of charged and neutral defect types.
      *
      * If the given coordinate is defect-free, the empty set is returned.
      *
@@ -287,10 +289,10 @@ class sidb_defect_surface<Lyt, false> : public Lyt
     {
         std::unordered_set<typename Lyt::coordinate> influenced_sidbs{};
 
-        if (const auto d = get_sidb_defect(c); d.type != sidb_defect_type::NONE)
+        if (const auto d = get_sidb_defect(c); d.type != sidb::model::defect_type::NONE)
         {
             const auto [horizontal_extent, vertical_extent] =
-                defect_extent(d, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
+                sidb::model::defect_extent(d, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
 
             for (auto y = static_cast<int64_t>(c.y - vertical_extent); y <= static_cast<int64_t>(c.y + vertical_extent);
                  ++y)
@@ -310,7 +312,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
     }
     /**
      * Returns all SiDB positions affected by any defect on the surface. This function relies on the defect_extent
-     * function defined in sidb_defects.hpp that computes the extent of charged and neutral defect types.
+     * function defined in defects.hpp that computes the extent of charged and neutral defect types.
      *
      * If the given surface is defect-free, the empty set is returned.
      *
@@ -343,8 +345,7 @@ class sidb_defect_surface<Lyt, false> : public Lyt
 };
 
 template <class T>
-sidb_defect_surface(const T&) -> sidb_defect_surface<T>;
+defect_surface(const T&) -> defect_surface<T>;
 
-}  // namespace fiction
-
-#endif  // FICTION_SIDB_DEFECT_SURFACE_HPP
+}  // namespace fiction::sidb::primitives
+#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP

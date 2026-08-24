@@ -7,11 +7,11 @@
 
 #include "fiction/algorithms/iter/bdl_input_iterator.hpp"
 #include "fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
@@ -29,7 +29,7 @@ struct is_sidb_gate_design_impossible_params
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters simulation_params{};
+    sidb::model::simulation_parameters simulation_params{};
     /**
      * Parameters used for the BDL input iterator.
      */
@@ -69,8 +69,8 @@ template <typename Lyt, typename TT>
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {
-        auto charge_lyt = charge_distribution_surface<Lyt>{*bdl_iter, params.simulation_params};
-        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+        auto charge_lyt = sidb::primitives::charge_distribution_surface<Lyt>{*bdl_iter, params.simulation_params};
+        charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
         // checks if parts of the bdl pairs are already neutrally charged due to nearby charged atomic defects.
@@ -81,8 +81,9 @@ template <typename Lyt, typename TT>
             assert(ix_lower >= 0 && "Lower cell of BDL pair is not part of the layout.");
 
             if (-*charge_lyt.get_local_internal_potential_by_index(static_cast<uint64_t>(ix_lower)) >
-                charge_lyt.get_effective_charge_transition_thresholds(static_cast<uint64_t>(
-                    ix_lower))[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
+                charge_lyt.get_effective_charge_transition_thresholds(
+                    static_cast<uint64_t>(ix_lower))[static_cast<std::size_t>(
+                    sidb::primitives::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
             {
                 return true;  // the lower part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore
@@ -93,8 +94,9 @@ template <typename Lyt, typename TT>
             assert(ix_upper >= 0 && "Upper cell of BDL pair is not part of the layout.");
 
             if (-*charge_lyt.get_local_internal_potential_by_index(static_cast<uint64_t>(ix_upper)) >
-                charge_lyt.get_effective_charge_transition_thresholds(static_cast<uint64_t>(
-                    ix_upper))[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
+                charge_lyt.get_effective_charge_transition_thresholds(
+                    static_cast<uint64_t>(ix_upper))[static_cast<std::size_t>(
+                    sidb::primitives::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
             {
                 return true;  // the upper part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore

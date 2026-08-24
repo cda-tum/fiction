@@ -67,7 +67,7 @@ int main()  // NOLINT
         fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i1o_straight.sqd"));
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_1i1o_straight{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -82,7 +82,7 @@ int main()  // NOLINT
         fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i1o_diagonal.sqd"));
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_1i1o_diagonal{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -97,7 +97,7 @@ int main()  // NOLINT
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_2i1o{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -111,7 +111,7 @@ int main()  // NOLINT
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i2o.sqd"));
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_1i2o{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
@@ -126,7 +126,7 @@ int main()  // NOLINT
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params_2i2o{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{}, is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,

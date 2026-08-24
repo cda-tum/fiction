@@ -7,8 +7,8 @@
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
+#include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb_bestagon_library.hpp>
-#include <fiction/technology/sidb_defect_surface.hpp>
 #include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -77,7 +77,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     static const fcn::port_list<fcn::port_position> y_ports{{fcn::port_position(0, 0), fcn::port_position(0, 2)},
                                                             {fcn::port_position(2, 1)}};
 
-    sidb_defect_surface defect_layout{cell_lyt};
+    sidb::primitives::defect_surface defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {
@@ -87,7 +87,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     }
     SECTION("single charged defect")
     {
-        defect_layout.assign_sidb_defect({6, 3}, sidb_defect{sidb_defect_type::SI_VACANCY});
+        defect_layout.assign_sidb_defect({6, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         static const auto black_list = sidb_surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
@@ -123,7 +123,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     }
     SECTION("single uncharged defect")
     {
-        defect_layout.assign_sidb_defect({1, 1}, sidb_defect{sidb_defect_type::SILOXANE});
+        defect_layout.assign_sidb_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
 
         static const auto black_list = sidb_surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
@@ -137,11 +137,11 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     }
     SECTION("multi-defect")
     {
-        defect_layout.assign_sidb_defect({6, 2}, sidb_defect{sidb_defect_type::DB});
-        defect_layout.assign_sidb_defect({6, 3}, sidb_defect{sidb_defect_type::DB});
-        defect_layout.assign_sidb_defect({3, 6}, sidb_defect{sidb_defect_type::ETCH_PIT});
-        defect_layout.assign_sidb_defect({7, 5}, sidb_defect{sidb_defect_type::RAISED_SI});
-        defect_layout.assign_sidb_defect({7, 6}, sidb_defect{sidb_defect_type::RAISED_SI});
+        defect_layout.assign_sidb_defect({6, 2}, sidb::model::defect{sidb::model::defect_type::DB});
+        defect_layout.assign_sidb_defect({6, 3}, sidb::model::defect{sidb::model::defect_type::DB});
+        defect_layout.assign_sidb_defect({3, 6}, sidb::model::defect{sidb::model::defect_type::ETCH_PIT});
+        defect_layout.assign_sidb_defect({7, 5}, sidb::model::defect{sidb::model::defect_type::RAISED_SI});
+        defect_layout.assign_sidb_defect({7, 6}, sidb::model::defect{sidb::model::defect_type::RAISED_SI});
 
         static const auto black_list = sidb_surface_analysis<dummy_gate_library>(gate_lyt, defect_layout);
 
@@ -203,7 +203,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         aspect_ratio<hex_even_col_gate_clk_lyt>{0, 0}};     // 1 x 1 tiles of size 60 x 46 cells each
     static const sidb_100_cell_clk_lyt cell_lyt{{59, 45}};  // makes for exactly one gate of the Bestagon library
 
-    sidb_defect_surface defect_layout{cell_lyt};
+    sidb::primitives::defect_surface defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {
@@ -213,7 +213,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
     }
     SECTION("single charged defect")
     {
-        defect_layout.assign_sidb_defect({30, 45}, sidb_defect{sidb_defect_type::SI_VACANCY});
+        defect_layout.assign_sidb_defect({30, 45}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
         static const auto black_list = sidb_surface_analysis<sidb_bestagon_library>(gate_lyt, defect_layout);
 
@@ -231,7 +231,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
     }
     SECTION("single uncharged defect")
     {
-        defect_layout.assign_sidb_defect({30, 45}, sidb_defect{sidb_defect_type::SILOXANE});
+        defect_layout.assign_sidb_defect({30, 45}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
 
         static const auto black_list = sidb_surface_analysis<sidb_bestagon_library>(gate_lyt, defect_layout);
 
@@ -243,11 +243,11 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
     }
     SECTION("multi-defect")
     {
-        defect_layout.assign_sidb_defect({16, 43}, sidb_defect{sidb_defect_type::DB});
-        defect_layout.assign_sidb_defect({30, 40}, sidb_defect{sidb_defect_type::DB});
-        defect_layout.assign_sidb_defect({41, 32}, sidb_defect{sidb_defect_type::ETCH_PIT});
-        defect_layout.assign_sidb_defect({45, 33}, sidb_defect{sidb_defect_type::RAISED_SI});
-        defect_layout.assign_sidb_defect({45, 34}, sidb_defect{sidb_defect_type::RAISED_SI});
+        defect_layout.assign_sidb_defect({16, 43}, sidb::model::defect{sidb::model::defect_type::DB});
+        defect_layout.assign_sidb_defect({30, 40}, sidb::model::defect{sidb::model::defect_type::DB});
+        defect_layout.assign_sidb_defect({41, 32}, sidb::model::defect{sidb::model::defect_type::ETCH_PIT});
+        defect_layout.assign_sidb_defect({45, 33}, sidb::model::defect{sidb::model::defect_type::RAISED_SI});
+        defect_layout.assign_sidb_defect({45, 34}, sidb::model::defect{sidb::model::defect_type::RAISED_SI});
 
         static const auto black_list = sidb_surface_analysis<sidb_bestagon_library>(gate_lyt, defect_layout);
 

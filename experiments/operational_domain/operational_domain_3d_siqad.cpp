@@ -6,10 +6,10 @@
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>      // operational domain computation algorithms
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // SiDB simulation engines
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>  // SiDB simulation parameters
-#include <fiction/io/read_sqd_layout.hpp>                                     // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>                            // writer for operational domains
-#include <fiction/networks/utils/truth_table_utils.hpp>                       // truth tables helper functions
+#include <fiction/io/read_sqd_layout.hpp>                                 // reader for SiDB layouts
+#include <fiction/io/write_operational_domain.hpp>                        // writer for operational domains
+#include <fiction/networks/utils/truth_table_utils.hpp>                   // truth tables helper functions
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>        // SiDB simulation parameters
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                    // string formatting
@@ -49,7 +49,7 @@ int main()  // NOLINT
         };
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 

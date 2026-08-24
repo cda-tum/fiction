@@ -14,7 +14,7 @@
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/is_sidb_gate_design_impossible.hpp"
-#include "fiction/technology/sidb_nm_distance.hpp"
+#include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -832,7 +832,7 @@ class sidb_on_the_fly_gate_library
             {
                 // all defects (charged) in a distance of influence_radius_charged_defects from the center are taken
                 // into account.
-                if (sidb_nm_distance(CellLyt{}, center_cell, cd.first) < influence_distance)
+                if (sidb::model::nm_distance(CellLyt{}, center_cell, cd.first) < influence_distance)
                 {
                     const auto relative_defect_position = cd.first - absolute_cell;
                     skeleton_with_defect.assign_sidb_defect(relative_defect_position, cd.second);

@@ -6,10 +6,10 @@
 #define FICTION_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -33,9 +33,8 @@ namespace fiction
  * @return sidb_simulation_result is returned with all results.
  */
 template <typename Lyt>
-sidb_simulation_result<Lyt>
-exhaustive_ground_state_simulation(const Lyt&                        lyt,
-                                   const sidb_simulation_parameters& params = sidb_simulation_parameters{}) noexcept
+sidb_simulation_result<Lyt> exhaustive_ground_state_simulation(
+    const Lyt& lyt, const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -53,18 +52,19 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
     {
         const mockturtle::stopwatch stop{time_counter};
 
-        charge_distribution_surface<Lyt> charge_lyt{lyt};
+        sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::EXGS);
         charge_lyt.assign_physical_parameters(params);
-        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
 
         while (charge_lyt.get_charge_index_and_base().first < charge_lyt.get_max_charge_index())
         {
             if (charge_lyt.is_physically_valid())
             {
-                simulation_result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+                simulation_result.charge_distributions.push_back(
+                    sidb::primitives::charge_distribution_surface<Lyt>{charge_lyt});
             }
 
             charge_lyt.increase_charge_index_by_one();
@@ -72,7 +72,8 @@ exhaustive_ground_state_simulation(const Lyt&                        lyt,
 
         if (charge_lyt.is_physically_valid())
         {
-            simulation_result.charge_distributions.push_back(charge_distribution_surface<Lyt>{charge_lyt});
+            simulation_result.charge_distributions.push_back(
+                sidb::primitives::charge_distribution_surface<Lyt>{charge_lyt});
         }
     }
     simulation_result.simulation_runtime = time_counter;

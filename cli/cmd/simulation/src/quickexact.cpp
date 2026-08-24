@@ -100,9 +100,9 @@ void quickexact_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr =
-                    minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
-                                                std::get<sim_result_100>(sim_result).charge_distributions.cend());
+                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                    std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
+                    std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
                 min_energy = min_energy_distr->get_electrostatic_potential_energy();
                 store<fiction::cell_layout_t>().extend() =
@@ -116,9 +116,9 @@ void quickexact_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr =
-                    minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
-                                                std::get<sim_result_111>(sim_result).charge_distributions.cend());
+                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                    std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
+                    std::get<sim_result_111>(sim_result).charge_distributions.cend());
 
                 min_energy = min_energy_distr->get_electrostatic_potential_energy();
                 store<fiction::cell_layout_t>().extend() =
@@ -173,7 +173,7 @@ nlohmann::json quickexact_command::log() const
 
 void quickexact_command::reset_params()
 {
-    physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+    physical_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     qe_params       = {};
     sim_result      = {};
 }

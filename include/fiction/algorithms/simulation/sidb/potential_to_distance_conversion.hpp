@@ -5,8 +5,8 @@
 #ifndef FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 #define FICTION_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
 
 #include <cmath>
 #include <cstdint>
@@ -27,10 +27,9 @@ namespace fiction
  * @param precision The precision level for the conversion, specifying the number of decimal places.
  * @return The distance (unit: nm) corresponding to the given electrostatic potential.
  */
-[[nodiscard]] inline double
-potential_to_distance_conversion(const double                      potential,
-                                 const sidb_simulation_parameters& params    = sidb_simulation_parameters{},
-                                 const uint64_t                    precision = 2) noexcept
+[[nodiscard]] inline double potential_to_distance_conversion(
+    const double potential, const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{},
+    const uint64_t precision = 2) noexcept
 {
     // function to calculate the electrostatic potential for a given distance and given physical parameters on the H-Si
     // surface

@@ -3,11 +3,11 @@
 //
 
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/io/read_sqd_layout.hpp"
 #include "fiction/io/write_location_and_ground_state.hpp"
-#include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/lattice.hpp"
+#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>
@@ -103,7 +103,7 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         std::cout << benchmark << '\n';
 
-                        const sidb_simulation_parameters phys_params{2, mu};
+                        const sidb::model::simulation_parameters phys_params{2, mu};
 
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
                                                                   folder.path().string(), name, -phys_params.mu_minus);

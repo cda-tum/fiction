@@ -10,7 +10,7 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
+#include <fiction/technology/sidb/primitives/lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 

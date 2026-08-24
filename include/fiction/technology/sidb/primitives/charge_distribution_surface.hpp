@@ -2,16 +2,16 @@
 // Created by Jan Drewniok on 23.11.22.
 //
 
-#ifndef FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
-#define FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_CHARGE_DISTRIBUTION_SURFACE_HPP
+#define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_CHARGE_DISTRIBUTION_SURFACE_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/technology/fcn/constants.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_nm_distance.hpp"
-#include "fiction/technology/sidb_nm_position.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/nm_distance.hpp"
+#include "fiction/technology/sidb/model/nm_position.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -32,7 +32,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::sidb::primitives
 {
 
 /**
@@ -216,7 +216,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
          *
          * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
          */
-        explicit charge_distribution_storage(const sidb_simulation_parameters& params = sidb_simulation_parameters{}) :
+        explicit charge_distribution_storage(
+            const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{}) :
                 simulation_parameters{params}
         {}
         /**
@@ -227,7 +228,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * Stores all physical parameters used for the simulation.
          */
-        sidb_simulation_parameters simulation_parameters{};
+        sidb::model::simulation_parameters simulation_parameters{};
         /**
          * Stores the effective charge transition thresholds, incorporating the potential shift by local external
          * potential sources. For each SiDB, an array is stored with the 4 bounds to test against:
@@ -248,7 +249,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * The SiDBs' charge states are stored. Corresponding cells are stored in `sidb_order`.
          */
-        std::vector<sidb_charge_state> cell_charge;
+        std::vector<sidb::model::charge_state> cell_charge;
         /**
          * Distance between SiDBs are stored as matrix (unit: nm).
          */
@@ -323,7 +324,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         /**
          * This unordered map stores the cells and the placed defect.
          */
-        std::unordered_map<typename Lyt::cell, const sidb_defect> defects{};
+        std::unordered_map<typename Lyt::cell, const sidb::model::defect> defects{};
         /**
          * Dependent cell is the cell which charge state is determined by all other SiDBs in the layout.
          */
@@ -351,8 +352,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param params Physical parameters used for the simulation (µ_minus, base number, ...).
      * @param cs The charge state used for the initialization of all SiDBs, default is a negative charge.
      */
-    explicit charge_distribution_surface(const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-                                         const sidb_charge_state           cs     = sidb_charge_state::NEGATIVE) :
+    explicit charge_distribution_surface(
+        const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{},
+        const sidb::model::charge_state           cs     = sidb::model::charge_state::NEGATIVE) :
             Lyt(),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
@@ -373,9 +375,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *                      both charge locations and electrostatic interactions are included.
      */
     explicit charge_distribution_surface(
-        const Lyt& lyt, const sidb_simulation_parameters& params = sidb_simulation_parameters{},
-        const sidb_charge_state cs            = sidb_charge_state::NEGATIVE,
-        const cds_configuration configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) :
+        const Lyt& lyt, const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{},
+        const sidb::model::charge_state cs            = sidb::model::charge_state::NEGATIVE,
+        const cds_configuration         configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) :
             Lyt(lyt),
             strg{std::make_shared<charge_distribution_storage>(params)}
     {
@@ -498,7 +500,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& c : strg->sidb_order)
         {
-            auto pos = sidb_nm_position<Lyt>(*this, c);
+            auto pos = sidb::model::nm_position<Lyt>(*this, c);
             positions.emplace_back(pos.first, pos.second);
         }
 
@@ -513,14 +515,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     void assign_cell_type(const typename Lyt::cell& c, const typename Lyt::cell_type& ct) noexcept
     {
         Lyt::assign_cell_type(c, ct);
-        initialize(sidb_charge_state::NEGATIVE);
+        initialize(sidb::model::charge_state::NEGATIVE);
     }
     /**
      * This function assigns the physical parameters for the simulation.
      *
      * @param params Physical parameters to be assigned.
      */
-    void assign_physical_parameters(const sidb_simulation_parameters& params) noexcept
+    void assign_physical_parameters(const sidb::model::simulation_parameters& params) noexcept
     {
         strg->simulation_parameters        = params;
         strg->charge_index_and_base.second = params.base;
@@ -535,9 +537,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     /**
      * This function retrieves the physical parameters of the simulation.
      *
-     * @return sidb_simulation_parameters struct containing the physical parameters of the simulation.
+     * @return simulation_parameters struct containing the physical parameters of the simulation.
      */
-    [[nodiscard]] sidb_simulation_parameters get_simulation_params() const noexcept
+    [[nodiscard]] sidb::model::simulation_parameters get_simulation_params() const noexcept
     {
         return strg->simulation_parameters;
     }
@@ -547,9 +549,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @param cs Charge state.
      */
-    [[nodiscard]] bool charge_exists(const sidb_charge_state cs) const noexcept
+    [[nodiscard]] bool charge_exists(const sidb::model::charge_state cs) const noexcept
     {
-        return std::ranges::any_of(strg->cell_charge, [&cs](const sidb_charge_state c) { return c == cs; });
+        return std::ranges::any_of(strg->cell_charge, [&cs](const sidb::model::charge_state c) { return c == cs; });
     }
     /**
      * This function searches the index of an SiDB.
@@ -573,7 +575,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cs The charge state to be assigned to the cell.
      * @param index_mode Mode to determine whether the charge index should be updated.
      */
-    void assign_charge_state(const typename Lyt::cell& c, const sidb_charge_state cs,
+    void assign_charge_state(const typename Lyt::cell& c, const sidb::model::charge_state cs,
                              const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         if (auto index = cell_to_index(c); index != -1)
@@ -593,7 +595,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index_mode Mode to determine whether the charge index should be updated.
      */
     void
-    assign_charge_state_by_index(const uint64_t index, const sidb_charge_state cs,
+    assign_charge_state_by_index(const uint64_t index, const sidb::model::charge_state cs,
                                  const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         strg->cell_charge[index] = cs;
@@ -609,7 +611,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param cs The charge state to be assigned to all the SiDBs.
      * @param index_mode Mode to determine whether the charge index should be updated.
      */
-    void assign_all_charge_states(const sidb_charge_state cs,
+    void assign_all_charge_states(const sidb::model::charge_state cs,
                                   const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
         for (uint64_t i = 0u; i < strg->cell_charge.size(); ++i)
@@ -662,10 +664,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c The cell to which a defect is added.
      * @param defect Defect which is added to the layout.
      */
-    void add_sidb_defect_to_potential_landscape(const typename Lyt::cell& c, const sidb_defect& defect) noexcept
+    void add_sidb_defect_to_potential_landscape(const typename Lyt::cell& c, const sidb::model::defect& defect) noexcept
     {
         // check if defect is not placed on SiDB position
-        if (!is_charged_defect_type(defect) || std::ranges::find(strg->sidb_order, c) != strg->sidb_order.cend())
+        if (!sidb::model::is_charged_defect_type(defect) ||
+            std::ranges::find(strg->sidb_order, c) != strg->sidb_order.cend())
         {
             return;
         }
@@ -678,7 +681,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             this->foreach_cell(
                 [this, &c, &defect](const auto& c1)
                 {
-                    const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
+                    const auto dist = sidb::model::nm_distance<Lyt>(*this, c1, c);
                     const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
                                       static_cast<double>(defect.charge);
                     const auto ix   = static_cast<uint64_t>(cell_to_index(c1));
@@ -692,7 +695,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             Lyt::foreach_cell(
                 [this, &c, &defect](const auto& c1)
                 {
-                    const auto dist = sidb_nm_distance<Lyt>(*this, c1, c);
+                    const auto dist = sidb::model::nm_distance<Lyt>(*this, c1, c);
                     const auto pot_diff =
                         (chargeless_potential_generated_by_defect_at_given_distance(dist, defect) *
                          static_cast<double>(defect.charge)) -
@@ -724,7 +727,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             [this, &c](const auto& c1)
             {
                 const double defect_pot = chargeless_potential_generated_by_defect_at_given_distance(
-                                              sidb_nm_distance<Lyt>(*this, c1, c), strg->defects[c]) *
+                                              sidb::model::nm_distance<Lyt>(*this, c1, c), strg->defects[c]) *
                                           static_cast<double>(strg->defects[c].charge);
 
                 strg->local_pot_caused_by_defects[static_cast<uint64_t>(cell_to_index(c1))] -= defect_pot;
@@ -741,14 +744,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c The cell.
      * @return The charge state of the given cell.
      */
-    [[nodiscard]] sidb_charge_state get_charge_state(const typename Lyt::cell& c) const noexcept
+    [[nodiscard]] sidb::model::charge_state get_charge_state(const typename Lyt::cell& c) const noexcept
     {
         if (const auto index = cell_to_index(c); index != -1)
         {
             return strg->cell_charge[static_cast<uint64_t>(index)];
         }
 
-        return sidb_charge_state::NONE;
+        return sidb::model::charge_state::NONE;
     }
     /**
      * This function returns the charge state of a cell of the layout at a given index.
@@ -756,21 +759,21 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param index The index of the cell.
      * @return The charge state of the cell at the given index.
      */
-    [[nodiscard]] sidb_charge_state get_charge_state_by_index(const uint64_t index) const noexcept
+    [[nodiscard]] sidb::model::charge_state get_charge_state_by_index(const uint64_t index) const noexcept
     {
         if (index < (strg->cell_charge.size()))
         {
             return strg->cell_charge[index];
         }
 
-        return sidb_charge_state::NONE;
+        return sidb::model::charge_state::NONE;
     }
     /**
      * This function returns all SiDB charges of the placed SiDBs as a vector.
      *
      * @return Vector of SiDB charge states.
      */
-    [[maybe_unused]] [[nodiscard]] std::vector<sidb_charge_state> get_all_sidb_charges() const noexcept
+    [[maybe_unused]] [[nodiscard]] std::vector<sidb::model::charge_state> get_all_sidb_charges() const noexcept
     {
         return strg->cell_charge;
     }
@@ -915,7 +918,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         if (const auto index1 = cell_to_index(c1), index2 = cell_to_index(c2); (index1 != -1) && (index2 != -1))
         {
             return strg->pot_mat[static_cast<uint64_t>(index1)][static_cast<uint64_t>(index2)] *
-                   charge_state_to_sign(get_charge_state(c2));
+                   sidb::model::charge_state_to_sign(get_charge_state(c2));
         }
 
         return 0.0;
@@ -940,7 +943,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 double collect = 0.0;
                 for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
                 {
-                    collect += strg->pot_mat[i][j] * static_cast<double>(charge_state_to_sign(strg->cell_charge[j]));
+                    collect += strg->pot_mat[i][j] *
+                               static_cast<double>(sidb::model::charge_state_to_sign(strg->cell_charge[j]));
                 }
 
                 strg->local_int_pot[i] += collect;
@@ -952,7 +956,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 if (strg->cell_history_gray_code.first != -1)
                 {
-                    const auto cell_charge = charge_state_to_sign(
+                    const auto cell_charge = sidb::model::charge_state_to_sign(
                         strg->cell_charge[static_cast<uint64_t>(strg->cell_history_gray_code.first)]);
                     const auto charge_diff = static_cast<double>(cell_charge - strg->cell_history_gray_code.second);
                     for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
@@ -971,7 +975,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     {
                         const double pot_diff =
                             strg->pot_mat[changed_cell][j] *
-                            (static_cast<double>(charge_state_to_sign(strg->cell_charge[changed_cell])) - charge);
+                            (static_cast<double>(sidb::model::charge_state_to_sign(strg->cell_charge[changed_cell])) -
+                             charge);
                         strg->local_int_pot[j] += pot_diff;
                     }
                 }
@@ -1013,7 +1018,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& [c2, defect2] : strg->defects)
             {
-                const auto dist = sidb_nm_distance<Lyt>(*this, c1, c2);
+                const auto dist = sidb::model::nm_distance<Lyt>(*this, c1, c2);
                 const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(dist, defect2);
 
                 strg->local_int_pot_at_defect[c1] += pot * static_cast<double>(defect2.charge);
@@ -1021,13 +1026,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
             for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
-                const auto dist = sidb_nm_distance<Lyt>(*this, c1, strg->sidb_order[i]);
+                const auto dist = sidb::model::nm_distance<Lyt>(*this, c1, strg->sidb_order[i]);
                 const auto pot  = chargeless_potential_generated_by_defect_at_given_distance(
-                    dist, sidb_defect{sidb_defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
-                                      strg->simulation_parameters.lambda_tf});
+                    dist, sidb::model::defect{sidb::model::defect_type::DB, 0, strg->simulation_parameters.epsilon_r,
+                                              strg->simulation_parameters.lambda_tf});
 
                 strg->local_int_pot_at_defect[c1] +=
-                    pot * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+                    pot * static_cast<double>(sidb::model::charge_state_to_sign(strg->cell_charge[i]));
             }
         }
     }
@@ -1200,7 +1205,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
             {
-                collect += strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+                collect += strg->local_int_pot[i] *
+                           static_cast<double>(sidb::model::charge_state_to_sign(strg->cell_charge[i]));
             }
 
             strg->system_energy = 0.5 * collect;
@@ -1215,9 +1221,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
-            collect_ext += strg->local_ext_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+            collect_ext +=
+                strg->local_ext_pot[i] * static_cast<double>(sidb::model::charge_state_to_sign(strg->cell_charge[i]));
 
-            collect += strg->local_int_pot[i] * static_cast<double>(charge_state_to_sign(strg->cell_charge[i]));
+            collect +=
+                strg->local_int_pot[i] * static_cast<double>(sidb::model::charge_state_to_sign(strg->cell_charge[i]));
         }
 
         for (const auto& [c, defect] : strg->defects)
@@ -1282,14 +1290,15 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
         {
-            if (strg->cell_charge[i] == sidb_charge_state::POSITIVE)  // we do nothing with SiDB+
+            if (strg->cell_charge[i] == sidb::model::charge_state::POSITIVE)  // we do nothing with SiDB+
             {
                 continue;
             }
 
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
-                if (charge_state_to_sign(strg->cell_charge[j]) <= charge_state_to_sign(strg->cell_charge[i]))
+                if (sidb::model::charge_state_to_sign(strg->cell_charge[j]) <=
+                    sidb::model::charge_state_to_sign(strg->cell_charge[i]))
                 {
                     continue;
                 }
@@ -1316,13 +1325,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         for (uint64_t i = 0; i < strg->sidb_order.size(); ++i)
         {
             const bool valid =
-                (((strg->cell_charge[i] == sidb_charge_state::NEGATIVE) &&
+                (((strg->cell_charge[i] == sidb::model::charge_state::NEGATIVE) &&
                   (-strg->local_int_pot[i] < strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
                                                  charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])) ||
-                 ((strg->cell_charge[i] == sidb_charge_state::POSITIVE) &&
+                 ((strg->cell_charge[i] == sidb::model::charge_state::POSITIVE) &&
                   (-strg->local_int_pot[i] > strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
                                                  charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])) ||
-                 ((strg->cell_charge[i] == sidb_charge_state::NEUTRAL) &&
+                 ((strg->cell_charge[i] == sidb::model::charge_state::NEUTRAL) &&
                   (-strg->local_int_pot[i] > strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
                                                  charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)]) &&
                   (-strg->local_int_pot[i] < strg->charge_transition_threshold_bounds[i][static_cast<std::size_t>(
@@ -1371,10 +1380,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (const auto& c : strg->sidb_order)
         {
-            chargeindex +=
-                static_cast<uint64_t>(charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
-                                      int8_t{1}) *
-                static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
+            chargeindex += static_cast<uint64_t>(sidb::model::charge_state_to_sign(
+                                                     strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
+                                                 int8_t{1}) *
+                           static_cast<uint64_t>(std::pow(base, this->num_cells() - 1u - counter));
             counter += 1;
         }
 
@@ -1401,9 +1410,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 for (const auto& c : strg->three_state_cells)
                 {
                     chargeindex_sub_layout +=
-                        static_cast<uint64_t>(
-                            charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
-                            int8_t{1}) *
+                        static_cast<uint64_t>(sidb::model::charge_state_to_sign(
+                                                  strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
+                                              int8_t{1}) *
                         static_cast<uint64_t>(std::pow(3, strg->three_state_cells.size() - counter_sub_layout - 1));
                     counter_sub_layout += 1;
                 }
@@ -1412,9 +1421,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                     if (c != strg->dependent_cell)
                     {
                         chargeindex +=
-                            static_cast<uint64_t>(
-                                (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
-                                 int8_t{1})) *
+                            static_cast<uint64_t>((sidb::model::charge_state_to_sign(
+                                                       strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
+                                                   int8_t{1})) *
                             static_cast<uint64_t>(std::pow(2, this->num_cells() - 1 - counter - 1));
                         counter += 1;
                     }
@@ -1427,8 +1436,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
                     if (c != static_cast<uint64_t>(cell_to_index(strg->dependent_cell)))
                     {
-                        chargeindex += static_cast<uint64_t>((charge_state_to_sign(strg->cell_charge[c]) + 1) *
-                                                             std::pow(base, this->num_cells() - 1 - counter - 1));
+                        chargeindex +=
+                            static_cast<uint64_t>((sidb::model::charge_state_to_sign(strg->cell_charge[c]) + 1) *
+                                                  std::pow(base, this->num_cells() - 1 - counter - 1));
                         counter += 1;
                     }
                 }
@@ -1445,7 +1455,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 {
 
                     chargeindex_sub_layout += static_cast<uint64_t>(
-                        (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) + 1) *
+                        (sidb::model::charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
+                         1) *
                         std::pow(3, strg->three_state_cells.size() - 1 - counter_sub_layout));
                     counter_sub_layout += 1;
                 }
@@ -1453,7 +1464,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 for (const auto& c : strg->sidb_order_without_three_state_cells)
                 {
                     chargeindex += static_cast<uint64_t>(
-                        (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) + 1) *
+                        (sidb::model::charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
+                         1) *
                         std::pow(2, this->num_cells() - 1 - counter));
                     counter += 1;
                 }
@@ -1464,7 +1476,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 for (const auto& c : strg->sidb_order)
                 {
                     chargeindex += static_cast<uint64_t>(
-                        (charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) + 1) *
+                        (sidb::model::charge_state_to_sign(strg->cell_charge[static_cast<uint64_t>(cell_to_index(c))]) +
+                         1) *
                         std::pow(base, this->num_cells() - 1 - counter));
                     counter += 1;
                 }
@@ -1566,7 +1579,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         for (uint64_t unocc = 0u; unocc < strg->cell_charge.size(); unocc++)
         {
-            if (strg->cell_charge[unocc] != sidb_charge_state::NEUTRAL)
+            if (strg->cell_charge[unocc] != sidb::model::charge_state::NEUTRAL)
             {
                 continue;
             }
@@ -1604,7 +1617,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         static std::mt19937_64                  generator(std::random_device{}());
         std::uniform_int_distribution<uint64_t> dist(0, candidates.size() - 1);
         const auto                              random_element = index_vector[candidates[dist(generator)]];
-        strg->cell_charge[random_element]                      = sidb_charge_state::NEGATIVE;
+        strg->cell_charge[random_element]                      = sidb::model::charge_state::NEGATIVE;
         negative_indices.push_back(random_element);
 
         strg->system_energy += -strg->local_int_pot[random_element];
@@ -1689,8 +1702,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] std::size_t num_negative_sidbs() const noexcept
     {
         uint64_t count_negative_sidbs = 0u;
-        this->foreach_cell([this, &count_negative_sidbs](const auto& c)
-                           { count_negative_sidbs += (get_charge_state(c) == sidb_charge_state::NEGATIVE) ? 1u : 0u; });
+        this->foreach_cell(
+            [this, &count_negative_sidbs](const auto& c)
+            { count_negative_sidbs += (get_charge_state(c) == sidb::model::charge_state::NEGATIVE) ? 1u : 0u; });
 
         return count_negative_sidbs;
     }
@@ -1702,8 +1716,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] std::size_t num_neutral_sidbs() const noexcept
     {
         std::size_t count_neutral_sidbs = 0;
-        this->foreach_cell([this, &count_neutral_sidbs](const auto& c)
-                           { count_neutral_sidbs += (get_charge_state(c) == sidb_charge_state::NEUTRAL) ? 1u : 0u; });
+        this->foreach_cell(
+            [this, &count_neutral_sidbs](const auto& c)
+            { count_neutral_sidbs += (get_charge_state(c) == sidb::model::charge_state::NEUTRAL) ? 1u : 0u; });
 
         return count_neutral_sidbs;
     }
@@ -1715,8 +1730,9 @@ class charge_distribution_surface<Lyt, false> : public Lyt
     [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
     {
         std::size_t count_positive_sidbs = 0u;
-        this->foreach_cell([this, &count_positive_sidbs](const auto& c)
-                           { count_positive_sidbs += (get_charge_state(c) == sidb_charge_state::POSITIVE) ? 1u : 0u; });
+        this->foreach_cell(
+            [this, &count_positive_sidbs](const auto& c)
+            { count_positive_sidbs += (get_charge_state(c) == sidb::model::charge_state::POSITIVE) ? 1u : 0u; });
 
         return count_positive_sidbs;
     }
@@ -1838,9 +1854,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param defect Defect (including defect specific parameters).
      * @return The chargeless electrostatic potential in Volt generated by the defect at a given distance (unit: V).
      */
-    [[nodiscard]] double
-    chargeless_potential_generated_by_defect_at_given_distance(const double       distance,
-                                                               const sidb_defect& defect = sidb_defect{}) const noexcept
+    [[nodiscard]] double chargeless_potential_generated_by_defect_at_given_distance(
+        const double distance, const sidb::model::defect& defect = sidb::model::defect{}) const noexcept
     {
         if (distance == 0.0)
         {
@@ -1927,7 +1942,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *
      * @return Placed defects with cell position and type.
      */
-    [[nodiscard]] std::unordered_map<typename Lyt::cell, const sidb_defect> get_defects() const noexcept
+    [[nodiscard]] std::unordered_map<typename Lyt::cell, const sidb::model::defect> get_defects() const noexcept
     {
         return strg->defects;
     }
@@ -1945,9 +1960,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 strg->charge_transition_threshold_bounds[strg->dependent_cell_index][static_cast<std::size_t>(
                     charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])
             {
-                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEGATIVE)
+                if (strg->cell_charge[strg->dependent_cell_index] != sidb::model::charge_state::NEGATIVE)
                 {
-                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) - 1);
+                    const auto charge_diff =
+                        (-sidb::model::charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) - 1);
                     for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
                     {
                         if (i != strg->dependent_cell_index)
@@ -1957,7 +1973,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                 charge_diff;
                         }
                     }
-                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEGATIVE;
+                    strg->cell_charge[strg->dependent_cell_index] = sidb::model::charge_state::NEGATIVE;
                 }
             }
             else if (loc_pot_cell >
@@ -1968,11 +1984,11 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                 // simulation.
                 if (strg->charge_index_and_base.second == 3 || strg->three_state_cells.size() != 0)
                 {
-                    if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::POSITIVE)
+                    if (strg->cell_charge[strg->dependent_cell_index] != sidb::model::charge_state::POSITIVE)
                     {
                         const auto charge_diff =
-                            (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
-                        strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::POSITIVE;
+                            (-sidb::model::charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]) + 1);
+                        strg->cell_charge[strg->dependent_cell_index] = sidb::model::charge_state::POSITIVE;
                         for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
                         {
                             if (i != strg->dependent_cell_index)
@@ -1987,9 +2003,10 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             }
             else
             {
-                if (strg->cell_charge[strg->dependent_cell_index] != sidb_charge_state::NEUTRAL)
+                if (strg->cell_charge[strg->dependent_cell_index] != sidb::model::charge_state::NEUTRAL)
                 {
-                    const auto charge_diff = (-charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]));
+                    const auto charge_diff =
+                        (-sidb::model::charge_state_to_sign(strg->cell_charge[strg->dependent_cell_index]));
                     for (uint64_t i = 0u; i < strg->sidb_order.size(); ++i)
                     {
                         if (i != strg->dependent_cell_index)
@@ -1999,7 +2016,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
                                 charge_diff;
                         }
                     }
-                    strg->cell_charge[strg->dependent_cell_index] = sidb_charge_state::NEUTRAL;
+                    strg->cell_charge[strg->dependent_cell_index] = sidb::model::charge_state::NEUTRAL;
                 }
             }
         }
@@ -2048,14 +2065,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 strg->cell_history_gray_code.first  = static_cast<int64_t>(index_changed);
                 strg->cell_history_gray_code.second = sign_old;
-                this->assign_charge_state_by_index(index_changed, sign_to_charge_state(sign_new),
+                this->assign_charge_state_by_index(index_changed, sidb::model::sign_to_charge_state(sign_new),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
             }
             else
             {
                 strg->cell_history_gray_code.first  = static_cast<int64_t>(index_changed) + 1;
                 strg->cell_history_gray_code.second = sign_old;
-                this->assign_charge_state_by_index(index_changed + 1, sign_to_charge_state(sign_new),
+                this->assign_charge_state_by_index(index_changed + 1, sidb::model::sign_to_charge_state(sign_new),
                                                    charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
@@ -2176,13 +2193,13 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      * @param c Cell which is added to the layout.
      * @param charge Charge state of the added cell.
      */
-    void add_sidb(const typename Lyt::cell& c, const sidb_charge_state charge) noexcept
+    void add_sidb(const typename Lyt::cell& c, const sidb::model::charge_state charge) noexcept
     {
         strg->cell_charge.push_back(charge);
         strg->sidb_order.push_back(c);
 
         // sort sidbs by the relation given by the coordinates and sort charge vector accordingly
-        std::vector<std::pair<typename Lyt::cell, sidb_charge_state>> combined_vector{};
+        std::vector<std::pair<typename Lyt::cell, sidb::model::charge_state>> combined_vector{};
         combined_vector.reserve(strg->cell_charge.size());
 
         for (size_t i = 0; i < strg->sidb_order.size(); i++)
@@ -2211,7 +2228,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
      *                      both charge locations and electrostatic interactions are included.
      */
     void
-    initialize(const sidb_charge_state cs            = sidb_charge_state::NEGATIVE,
+    initialize(const sidb::model::charge_state cs    = sidb::model::charge_state::NEGATIVE,
                const cds_configuration configuration = cds_configuration::CHARGE_LOCATION_AND_ELECTROSTATIC) noexcept
     {
         const auto param_copy       = strg->simulation_parameters;
@@ -2292,7 +2309,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (uint64_t j = 0u; j < strg->sidb_order.size(); j++)
             {
-                strg->nm_dist_mat[i][j] = sidb_nm_distance<Lyt>(*this, strg->sidb_order[i], strg->sidb_order[j]);
+                strg->nm_dist_mat[i][j] =
+                    sidb::model::nm_distance<Lyt>(*this, strg->sidb_order[i], strg->sidb_order[j]);
             }
         }
     }
@@ -2331,7 +2349,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& c : strg->three_state_cells)
             {
-                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state(c, sidb::model::charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
 
@@ -2339,7 +2357,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         {
             for (const auto& c : strg->sidb_order_without_three_state_cells)
             {
-                this->assign_charge_state(c, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
+                this->assign_charge_state(c, sidb::model::charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
             }
         }
 
@@ -2355,14 +2373,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             const int64_t  remainder_int   = charge_quot_int % base_int;
             charge_quot_positive           = static_cast<uint64_t>(quotient_int);
 
-            const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+            const auto sign = sidb::model::sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
             if (const auto new_chargesign = this->get_charge_state_by_index(
                     static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))));
                 new_chargesign != sign)
             {
                 strg->cell_history.emplace_back(
                     static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))),
-                    charge_state_to_sign(new_chargesign));
+                    sidb::model::charge_state_to_sign(new_chargesign));
                 this->assign_charge_state_by_index(
                     static_cast<uint64_t>(cell_to_index(index_to_three_state_cell(counter))), sign,
                     charge_index_mode::KEEP_CHARGE_INDEX);
@@ -2389,14 +2407,14 @@ class charge_distribution_surface<Lyt, false> : public Lyt
             {
                 counter_negative -= 1;
             }
-            const auto sign = sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
+            const auto sign = sidb::model::sign_to_charge_state(static_cast<int8_t>(remainder_int - 1));
             if (const auto new_chargesign = this->get_charge_state_by_index(static_cast<uint64_t>(
                     cell_to_index(index_to_two_state_cell(static_cast<uint64_t>(counter_negative)))));
                 new_chargesign != sign)
             {
                 strg->cell_history.emplace_back(static_cast<uint64_t>(cell_to_index(
                                                     index_to_two_state_cell(static_cast<uint64_t>(counter_negative)))),
-                                                charge_state_to_sign(new_chargesign));
+                                                sidb::model::charge_state_to_sign(new_chargesign));
                 this->assign_charge_state_by_index(static_cast<uint64_t>(cell_to_index(index_to_two_state_cell(
                                                        static_cast<uint64_t>(counter_negative)))),
                                                    sign, charge_index_mode::KEEP_CHARGE_INDEX);
@@ -2419,7 +2437,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // A charge index of zero corresponds to a layout with all SiDBs set to negative.
         if (strg->charge_index_and_base.first == 0)
         {
-            this->assign_all_charge_states(sidb_charge_state::NEGATIVE);
+            this->assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
             return;
         }
 
@@ -2433,7 +2451,7 @@ class charge_distribution_surface<Lyt, false> : public Lyt
 
         while (charge_quot > 0)
         {
-            const auto charge_state = sign_to_charge_state(static_cast<int8_t>(charge_quot % base) - 1);
+            const auto charge_state = sidb::model::sign_to_charge_state(static_cast<int8_t>(charge_quot % base) - 1);
 
             // Dependent-SiDB is skipped since its charge state is not changed based on the charge index.
 
@@ -2462,7 +2480,8 @@ class charge_distribution_surface<Lyt, false> : public Lyt
         // If the counter is >= 0, then the first <counter> cells should be assigned a negative charge state.
         for (uint64_t i = 0; std::cmp_less_equal(i, counter); ++i)
         {
-            this->assign_charge_state_by_index(i, sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
+            this->assign_charge_state_by_index(i, sidb::model::charge_state::NEGATIVE,
+                                               charge_index_mode::KEEP_CHARGE_INDEX);
         }
     }
 };
@@ -2471,16 +2490,15 @@ template <class T>
 charge_distribution_surface(const T&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&) -> charge_distribution_surface<T>;
+charge_distribution_surface(const T&, const sidb::model::simulation_parameters&) -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs)
+charge_distribution_surface(const T&, const sidb::model::simulation_parameters&, sidb::model::charge_state cs)
     -> charge_distribution_surface<T>;
 
 template <class T>
-charge_distribution_surface(const T&, const sidb_simulation_parameters&, sidb_charge_state cs,
+charge_distribution_surface(const T&, const sidb::model::simulation_parameters&, sidb::model::charge_state cs,
                             cds_configuration cds_configuration) -> charge_distribution_surface<T>;
 
-}  // namespace fiction
-
-#endif  // FICTION_CHARGE_DISTRIBUTION_SURFACE_HPP
+}  // namespace fiction::sidb::primitives
+#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_CHARGE_DISTRIBUTION_SURFACE_HPP

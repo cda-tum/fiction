@@ -11,8 +11,8 @@
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp"
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/sidb_defect_surface.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/primitives/defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -57,7 +57,7 @@ struct defect_influence_params
     /**
      * The defect to calculate the defect influence for.
      */
-    sidb_defect defect{};
+    sidb::model::defect defect{};
     /**
      * Parameters for the `is_operational` algorithm.
      */
@@ -422,7 +422,7 @@ class defect_influence_impl
     /**
      * The SiDB cell-level layout to investigate.
      */
-    sidb_defect_surface<Lyt> layout{};
+    sidb::primitives::defect_surface<Lyt> layout{};
     /**
      * The parameters for the defect influence domain computation.
      */
@@ -525,7 +525,7 @@ class defect_influence_impl
         layout.assign_sidb_defect(starting_point, params.defect);
 
         const auto influence_status = is_defect_influential(spec, starting_point);
-        layout.assign_sidb_defect(starting_point, sidb_defect{sidb_defect_type::NONE});
+        layout.assign_sidb_defect(starting_point, sidb::model::defect{sidb::model::defect_type::NONE});
 
         if (influence_status == defect_influence_status::NON_INFLUENTIAL)
         {
@@ -584,10 +584,10 @@ class defect_influence_impl
                 const auto [status, result] = is_operational(lyt_copy, spec.value(), params.operational_params);
                 if (status == operational_status::OPERATIONAL)
                 {
-                    lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
+                    lyt_copy.assign_sidb_defect(defect_cell, sidb::model::defect{sidb::model::defect_type::NONE});
                     return non_influential();
                 }
-                lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
+                lyt_copy.assign_sidb_defect(defect_cell, sidb::model::defect{sidb::model::defect_type::NONE});
                 return influential();
             }
 
@@ -614,7 +614,7 @@ class defect_influence_impl
             {
                 if (does_defect_influence_groundstate(lyt_copy, defect_cell) == defect_influence_status::INFLUENTIAL)
                 {
-                    lyt_copy.assign_sidb_defect(defect_cell, sidb_defect{sidb_defect_type::NONE});
+                    lyt_copy.assign_sidb_defect(defect_cell, sidb::model::defect{sidb::model::defect_type::NONE});
                     return influential();
                 }
                 return non_influential();
@@ -655,7 +655,7 @@ class defect_influence_impl
 
         if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
         {
-            sidb_defect_surface<Lyt> lyt_defect{lyt_without_defect};
+            sidb::primitives::defect_surface<Lyt> lyt_defect{lyt_without_defect};
 
             lyt_defect.assign_sidb_defect(defect_pos, params.defect);
 
@@ -721,7 +721,7 @@ class defect_influence_impl
 
             const auto influence_status = is_defect_influential(spec, current_defect_position);
 
-            layout.assign_sidb_defect(current_defect_position, sidb_defect{sidb_defect_type::NONE});
+            layout.assign_sidb_defect(current_defect_position, sidb::model::defect{sidb::model::defect_type::NONE});
 
             if (influence_status == defect_influence_status::NON_INFLUENTIAL)
             {

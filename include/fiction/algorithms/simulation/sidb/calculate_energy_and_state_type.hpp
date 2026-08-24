@@ -10,8 +10,8 @@
 #include "fiction/algorithms/simulation/sidb/energy_distribution.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
 #include "fiction/algorithms/simulation/sidb/verify_logic_match.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/bit_operations.hpp>
@@ -63,8 +63,8 @@ using sidb_energy_and_state_type = std::vector<std::pair<double, state_type>>;
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
-    const energy_distribution&                           energy_distribution,
-    const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions,
+    const energy_distribution&                                             energy_distribution,
+    const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& valid_charge_distributions,
     const std::vector<bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
     const uint64_t input_index) noexcept
 
@@ -89,7 +89,7 @@ template <typename Lyt, typename TT>
 
                     for (auto i = 0u; i < output_bdl_pairs.size(); i++)
                     {
-                        if (static_cast<bool>(-charge_state_to_sign(valid_layout.get_charge_state(
+                        if (static_cast<bool>(-sidb::model::charge_state_to_sign(valid_layout.get_charge_state(
                                 output_bdl_pairs[i].lower))) != kitty::get_bit(spec[i], input_index))
                         {
                             // The output SiDB matches the truth table entry. Hence, the state is called transparent.
@@ -123,9 +123,9 @@ template <typename Lyt, typename TT>
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] sidb_energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
-    const energy_distribution&                           energy_distribution,
-    const std::vector<charge_distribution_surface<Lyt>>& valid_charge_distributions, const std::vector<TT>& spec,
-    const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires,
+    const energy_distribution&                                             energy_distribution,
+    const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& valid_charge_distributions,
+    const std::vector<TT>& spec, const uint64_t input_index, const std::vector<bdl_wire<Lyt>>& input_bdl_wires,
     const std::vector<bdl_wire<Lyt>>& output_bdl_wires) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");

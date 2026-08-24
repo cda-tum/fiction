@@ -10,12 +10,12 @@
 #include <fiction/algorithms/simulation/sidb/defect_clearance.hpp>
 #include <fiction/algorithms/simulation/sidb/defect_influence.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/constants.hpp>
-#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -30,10 +30,10 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
 
     const auto cube_lyt = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
-    const sidb_defect sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const sidb::model::defect defect{sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    auto params = defect_influence_params<cell<TestType>>{sidb_defect,
-                                                          is_operational_params{sidb_simulation_parameters{2, -0.32}}};
+    auto params = defect_influence_params<cell<TestType>>{
+        defect, is_operational_params{sidb::model::simulation_parameters{2, -0.32}}};
 
     // to save runtime in the CI, this test is only run in RELEASE mode
 #ifdef NDEBUG
@@ -73,8 +73,8 @@ TEMPLATE_TEST_CASE(
     SECTION("Si Vacancy")
     {
         auto params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {20, 0},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
@@ -161,8 +161,8 @@ TEMPLATE_TEST_CASE(
     SECTION("Arsenic Defect")
     {
         const auto defect_operational_arsenic_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, 1, 9.7, 2.1},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1, 9.7, 2.1},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {10, 0},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
@@ -183,9 +183,9 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
     SECTION("layout with one SiDB")
     {
         const auto defect_operational_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
-                        sidb_simulation_parameters{}.lambda_tf},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}}, cell<TestType>{2, 2},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, sidb::model::simulation_parameters{}.epsilon_r,
+                                sidb::model::simulation_parameters{}.lambda_tf},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}}, cell<TestType>{2, 2},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
         TestType lyt{};
@@ -208,9 +208,9 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
     SECTION("layout with one SiDB, negative defect, smaller lambda_tf")
     {
         const auto defect_operational_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
-                        sidb_simulation_parameters{}.lambda_tf},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, sidb::model::simulation_parameters{}.epsilon_r,
+                                sidb::model::simulation_parameters{}.lambda_tf},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {2, 2},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
@@ -220,16 +220,18 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_operational_domain = defect_influence_grid_search(lyt, defect_operational_params);
         const auto defect_clearance          = calculate_defect_clearance(lyt, defect_operational_domain);
 
-        CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lyt, {0, 0}, {1, -1}), 4),
-                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(
+            fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                fiction::utils::math::round_to_n_decimal_places(sidb::model::nm_distance(lyt, {0, 0}, {1, -1}), 4),
+            Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
     {
         const auto defect_operational_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 20},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, sidb::model::simulation_parameters{}.epsilon_r,
+                                20},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {30, 30},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
@@ -241,17 +243,18 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
         const auto defect_clearance = calculate_defect_clearance(lat, defect_operational_domain);
 
-        CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
-                   Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(
+            fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
+                fiction::utils::math::round_to_n_decimal_places(sidb::model::nm_distance(lat, {0, 0, 0}, {0, 2, 0}), 4),
+            Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("layout with one pertuber and one DB pair, negative defect")
     {
         const auto defect_operational_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
-                        sidb_simulation_parameters{}.lambda_tf},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, sidb::model::simulation_parameters{}.epsilon_r,
+                                sidb::model::simulation_parameters{}.lambda_tf},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {20, 0},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
@@ -267,16 +270,17 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
         const auto defect_clearance          = calculate_defect_clearance(lat, defect_operational_domain);
 
         CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(defect_clearance.defect_clearance_distance, 4) -
-                       fiction::utils::math::round_to_n_decimal_places(sidb_nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
+                       fiction::utils::math::round_to_n_decimal_places(
+                           sidb::model::nm_distance(lat, {6, 0, 0}, {10, 0, 0}), 4),
                    Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01")
     {
         auto defect_operational_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
-                        sidb_simulation_parameters{}.lambda_tf},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, sidb::model::simulation_parameters{}.epsilon_r,
+                                sidb::model::simulation_parameters{}.lambda_tf},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {20, 20},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 
@@ -304,8 +308,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
                    Catch::Matchers::WithinAbs(2.8999201713, fcn::constants::ERROR_MARGIN));
 
         // high screening
-        defect_operational_params.defect =
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r, 1};
+        defect_operational_params.defect = sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1,
+                                                               sidb::model::simulation_parameters{}.epsilon_r, 1};
 
         const auto defect_operational_domain_high_screening =
             defect_influence_grid_search(lat, defect_operational_params);
@@ -318,9 +322,9 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01, using cube coordinate")
     {
         const auto defect_operational_params = defect_influence_params<cell<TestType>>{
-            sidb_defect{sidb_defect_type::UNKNOWN, -1, sidb_simulation_parameters{}.epsilon_r,
-                        sidb_simulation_parameters{}.lambda_tf},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}},
+            sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, sidb::model::simulation_parameters{}.epsilon_r,
+                                sidb::model::simulation_parameters{}.lambda_tf},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
             {30, 30},
             defect_influence_params<cell<TestType>>::influence_definition::GROUND_STATE_CHANGE};
 

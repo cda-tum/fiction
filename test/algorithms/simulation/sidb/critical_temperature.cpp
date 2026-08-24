@@ -15,9 +15,9 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
@@ -31,8 +31,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
 {
     TestType lyt{};
 
-    critical_temperature_params params{};
-    sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params        params{};
+    sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -668,8 +668,8 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
 {
     TestType lyt{};
 
-    critical_temperature_params params{};
-    sidb_simulation_parameters  sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params        params{};
+    sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -857,7 +857,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
                                  is_operational_params::operational_condition::REJECT_KINKS})
     {
         critical_temperature_params params{};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
         params.operational_params.op_condition          = condition;
 
@@ -981,8 +981,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
     lyt.assign_cell_type({2, 19, 0}, sidb::technology::cell_type::NORMAL);
     lyt.assign_cell_type({36, 19, 0}, sidb::technology::cell_type::NORMAL);
 
-    critical_temperature_params      params{};
-    const sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params              params{};
+    const sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -1018,8 +1018,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
 {
     const auto lyt_double_wire_gate = blueprints::bestagon_double_wire<TestType>();
 
-    critical_temperature_params      params{};
-    const sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params              params{};
+    const sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 
@@ -1080,8 +1080,8 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
 {
     const auto lyt_half_adder_gate = blueprints::bestagon_ha<TestType>();
 
-    critical_temperature_params      params{};
-    const sidb_simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
+    critical_temperature_params              params{};
+    const sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
 
     critical_temperature_stats critical_stats{};
 

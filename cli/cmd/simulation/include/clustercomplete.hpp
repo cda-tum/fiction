@@ -4,8 +4,8 @@
 #define FICTION_CMD_CLUSTERCOMPLETE_HPP
 
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -40,7 +40,7 @@ class clustercomplete_command final : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{3, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters physical_params{3, -0.32, 5.6, 5.0};
     /**
      * ClusterComplete parameters.
      */

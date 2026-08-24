@@ -2,8 +2,8 @@
 // Created by marcel on 07.03.22.
 //
 
-#ifndef FICTION_SIDB_DEFECTS_HPP
-#define FICTION_SIDB_DEFECTS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_DEFECTS_HPP
+#define FICTION_TECHNOLOGY_SIDB_MODEL_DEFECTS_HPP
 
 #include "fiction/utils/stl/hash.hpp"
 
@@ -14,7 +14,7 @@
 #include <optional>
 #include <utility>
 
-namespace fiction
+namespace fiction::sidb::model
 {
 
 /**
@@ -22,7 +22,7 @@ namespace fiction
  * classification of the H–Si(100) surface through multi-mode scanning probe microscopy\" by Jeremiah Croshaw, Thomas
  * Dienel, Taleana Huff, and Robert Wolkow in Journal of Nanotechnology in 2020.
  */
-enum class sidb_defect_type : uint8_t
+enum class defect_type : uint8_t
 {
     /**
      * Defect-free H-Si.
@@ -88,7 +88,7 @@ enum class sidb_defect_type : uint8_t
     UNKNOWN
 };
 /**
- * In accordance with the paper mentioned above, the `sidb_defect` struct is used to represent a specific defect on the
+ * In accordance with the paper mentioned above, the `defect` struct is used to represent a specific defect on the
  * H-Si(100) 2x1 surface that has a charge as well as relative permittivity (`epsilon_r`) and Thomas-Fermi screening
  * distance (`lambda_tf`) values associated to it.
  *
@@ -96,14 +96,14 @@ enum class sidb_defect_type : uint8_t
  * N. Chiu, R. Lupoiu, L. Livadaru, T. Huff, M. Rashidi, W. Vine, T. Dienel, R. A. Wolkow, and K. Walus in IEEE
  * Transactions on Nanotechnology for more details on these values.
  */
-struct sidb_defect
+struct defect
 {
     /**
      * Standard constructor.
      */
-    constexpr explicit sidb_defect(const sidb_defect_type defect_type = sidb_defect_type::UNKNOWN,
-                                   const int64_t electric_charge = 0.0, const double relative_permittivity = 0.0,
-                                   const double screening_distance = 0.0) noexcept :
+    constexpr explicit defect(const defect_type defect_type = defect_type::UNKNOWN, const int64_t electric_charge = 0.0,
+                              const double relative_permittivity = 0.0, const double screening_distance = 0.0) noexcept
+            :
             type{defect_type},
             charge{electric_charge},
             epsilon_r{relative_permittivity},
@@ -115,7 +115,7 @@ struct sidb_defect
     /**
      * Type of defect.
      */
-    sidb_defect_type type;
+    defect_type type;
     /**
      * Electrical charge in units of the elementary charge e (e.g., 1 ^= 1*e, -2 ^= -2*e).
      */
@@ -129,12 +129,12 @@ struct sidb_defect
      */
     double lambda_tf;
     /**
-     * This operator compares two `sidb_defect` instances for equality. It checks if the `type`, `charge`,
+     * This operator compares two `defect` instances for equality. It checks if the `type`, `charge`,
      * `epsilon_r`, and `lambda_tf` members of the two instances are equal.
      *
-     * @param rhs `sidb_defect` instance to compare against.
+     * @param rhs `defect` instance to compare against.
      */
-    constexpr bool operator==(const sidb_defect& rhs) const noexcept = default;
+    constexpr bool operator==(const defect& rhs) const noexcept = default;
 };
 
 /**
@@ -144,10 +144,10 @@ struct sidb_defect
  * @param defect Defect to check.
  * @return `true` iff `defect` is of a charged type.
  */
-[[nodiscard]] static constexpr bool is_charged_defect_type(const sidb_defect& defect) noexcept
+[[nodiscard]] static constexpr bool is_charged_defect_type(const defect& defect) noexcept
 {
-    return defect.charge != 0 || defect.type == sidb_defect_type::DB || defect.type == sidb_defect_type::SI_VACANCY ||
-           defect.type == sidb_defect_type::ARSENIC;
+    return defect.charge != 0 || defect.type == defect_type::DB || defect.type == defect_type::SI_VACANCY ||
+           defect.type == defect_type::ARSENIC;
 }
 /**
  * Checks whether the given defect type is not a charged one. Neutral defects are to be avoided as well, but not by such
@@ -157,9 +157,9 @@ struct sidb_defect
  * @param defect Defect to check.
  * @return `true` iff `defect` is not of a charged type.
  */
-[[nodiscard]] static constexpr bool is_neutral_defect_type(const sidb_defect& defect) noexcept
+[[nodiscard]] static constexpr bool is_neutral_defect_type(const defect& defect) noexcept
 {
-    return defect.type != sidb_defect_type::NONE && !is_charged_defect_type(defect);
+    return defect.type != defect_type::NONE && !is_charged_defect_type(defect);
 }
 /**
  * Checks whether the given defect has a positive charge value assigned to it. This function is irrespective of the
@@ -168,7 +168,7 @@ struct sidb_defect
  * @param defect Defect to check.
  * @return `true` iff `defect` has a positive charge value.
  */
-[[nodiscard]] static constexpr bool is_positively_charged_defect(const sidb_defect& defect) noexcept
+[[nodiscard]] static constexpr bool is_positively_charged_defect(const defect& defect) noexcept
 {
     return defect.charge > 0;
 }
@@ -179,7 +179,7 @@ struct sidb_defect
  * @param defect Defect to check.
  * @return `true` iff `defect` has a negative charge value.
  */
-[[nodiscard]] static constexpr bool is_negatively_charged_defect(const sidb_defect& defect) noexcept
+[[nodiscard]] static constexpr bool is_negatively_charged_defect(const defect& defect) noexcept
 {
     return defect.charge < 0;
 }
@@ -190,7 +190,7 @@ struct sidb_defect
  * @param defect Defect to check.
  * @return `true` iff `defect` has a neutral charge value.
  */
-[[nodiscard]] static constexpr bool is_neutrally_charged_defect(const sidb_defect& defect) noexcept
+[[nodiscard]] static constexpr bool is_neutrally_charged_defect(const defect& defect) noexcept
 {
     return defect.charge == 0;
 }
@@ -227,7 +227,7 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
  * defect type.
  */
 [[nodiscard]] static constexpr std::pair<uint16_t, uint16_t> defect_extent(
-    const sidb_defect&                                  defect,
+    const defect&                                       defect,
     const std::optional<std::pair<uint16_t, uint16_t>>& charged_defect_spacing_overwrite = std::nullopt,
     const std::optional<std::pair<uint16_t, uint16_t>>& neutral_defect_spacing_overwrite = std::nullopt) noexcept
 {
@@ -251,26 +251,25 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
     return {};
 }
 
-}  // namespace fiction
-
+}  // namespace fiction::sidb::model
 namespace std
 {
 
 /**
- * @brief Provides a hash implementation for `fiction::sidb_defect`.
+ * @brief Provides a hash implementation for `fiction::defect`.
  */
 template <>
-struct hash<fiction::sidb_defect>
+struct hash<fiction::sidb::model::defect>
 {
     /**
      * @brief Computes the hash value of a given SiDB defect.
      *
-     * Every member that `fiction::sidb_defect`'s equality operator compares contributes to the hash value.
+     * Every member that `fiction::defect`'s equality operator compares contributes to the hash value.
      *
      * @param defect Defect to hash.
      * @return Hash value of `defect`.
      */
-    std::size_t operator()(const fiction::sidb_defect& defect) const noexcept
+    std::size_t operator()(const fiction::sidb::model::defect& defect) const noexcept
     {
         std::size_t h{0};
         fiction::utils::stl::hash_combine(h, defect.type, defect.charge, defect.epsilon_r, defect.lambda_tf);
@@ -281,4 +280,4 @@ struct hash<fiction::sidb_defect>
 
 }  // namespace std
 
-#endif  // FICTION_SIDB_DEFECTS_HPP
+#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_DEFECTS_HPP

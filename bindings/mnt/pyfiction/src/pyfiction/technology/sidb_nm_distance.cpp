@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb_nm_distance.hpp>
+#include <fiction/technology/sidb/model/nm_distance.hpp>
 
 #include <fmt/format.h>
 
@@ -26,13 +26,13 @@ void nanometer_distance(nanobind::module_& m, const std::string& lattice = "")
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def(fmt::format("sidb_nm_distance{}", lattice).c_str(), &fiction::sidb_nm_distance<Lyt>, py::arg("lyt"),
+    m.def(fmt::format("sidb_nm_distance{}", lattice).c_str(), &fiction::sidb::model::nm_distance<Lyt>, py::arg("lyt"),
           py::arg("source"), py::arg("target"), DOC(fiction_sidb_nm_distance));
 }
 
 }  // namespace detail
 
-void sidb_nm_distance(nanobind::module_& m)
+void sidb::model::nm_distance(nanobind::module_& m)
 {
     detail::nanometer_distance<py_sidb_100_lattice>(m, "_100");
     detail::nanometer_distance<py_sidb_111_lattice>(m, "_111");

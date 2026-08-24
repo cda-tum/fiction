@@ -8,10 +8,10 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/primitives/lattice.hpp"
+#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/color.h>
@@ -361,8 +361,9 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
     if constexpr (!is_sidb_lattice_v<Lyt>)
     {
-        return print_sidb_layout<sidb_lattice<sidb_100_lattice, Lyt>>(os, sidb_lattice<sidb_100_lattice, Lyt>{lyt},
-                                                                      lat_color, crop_layout, draw_lattice);
+        return print_sidb_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>>(
+            os, sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>{lyt}, lat_color, crop_layout,
+            draw_lattice);
     }
 
     if constexpr (has_siqad_coord_v<Lyt> && is_sidb_lattice_v<Lyt>)
@@ -415,25 +416,25 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
                 switch (lyt.get_charge_state(
                     loop_coordinate))  // switch over the charge state of the SiDB at the current coordinate
                 {
-                    case sidb_charge_state::NEGATIVE:
+                    case sidb::model::charge_state::NEGATIVE:
                     {
                         os << fmt::format(lat_color ? detail::SIDB_NEG_COLOR : detail::NO_COLOR, " ● ");
                         already_printed = true;
                         break;
                     }
-                    case sidb_charge_state::POSITIVE:
+                    case sidb::model::charge_state::POSITIVE:
                     {
                         os << fmt::format(lat_color ? detail::SIDB_POS_COLOR : detail::NO_COLOR, " ● ");
                         already_printed = true;
                         break;
                     }
-                    case sidb_charge_state::NEUTRAL:
+                    case sidb::model::charge_state::NEUTRAL:
                     {
                         os << fmt::format(lat_color ? detail::SIDB_NEUT_COLOR : detail::NO_COLOR, " ◯ ");
                         already_printed = true;
                         break;
                     }
-                    case sidb_charge_state::NONE:
+                    case sidb::model::charge_state::NONE:
                     {
                         break;
                     }
@@ -442,19 +443,19 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
             if constexpr (has_get_sidb_defect_v<Lyt>)
             {
-                if (lyt.get_sidb_defect(loop_coordinate) != sidb_defect{sidb_defect_type::NONE})
+                if (lyt.get_sidb_defect(loop_coordinate) != sidb::model::defect{sidb::model::defect_type::NONE})
                 {
-                    if (is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                    if (sidb::model::is_negatively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                     {
                         os << fmt::format(lat_color ? detail::SIDB_DEF_NEG_COLOR : detail::NO_COLOR, " ⊟ ");
                         already_printed = true;
                     }
-                    else if (is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                    else if (sidb::model::is_positively_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                     {
                         os << fmt::format(lat_color ? detail::SIDB_DEF_POS_COLOR : detail::NO_COLOR, " ⊞ ");
                         already_printed = true;
                     }
-                    else if (is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
+                    else if (sidb::model::is_neutrally_charged_defect(lyt.get_sidb_defect(loop_coordinate)))
                     {
                         os << fmt::format(lat_color ? detail::SIDB_DEF_NEU_COLOR : detail::NO_COLOR, " ⊡ ");
                         already_printed = true;

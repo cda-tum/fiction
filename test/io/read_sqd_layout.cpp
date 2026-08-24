@@ -10,10 +10,10 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_defect_surface.hpp>
-#include <fiction/technology/sidb_defects.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/primitives/defect_surface.hpp>
+#include <fiction/technology/sidb/primitives/lattice.hpp>
+#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -58,7 +58,7 @@ TEST_CASE("Read empty SQD layout", "[sqd]")
     using sidb_layout =
         layouts::cell_level_layout<sidb::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    check(read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream));
+    check(read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream));
 }
 
 TEST_CASE("Read single-dot SQD layout", "[sqd]")
@@ -112,7 +112,7 @@ TEST_CASE("Read single-dot SQD layout", "[sqd]")
     using sidb_layout =
         layouts::cell_level_layout<sidb::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    check(read_sqd_layout<sidb_lattice<sidb_111_lattice, sidb_layout>>(layout_stream));
+    check(read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_111, sidb_layout>>(layout_stream));
 }
 
 TEST_CASE("Read multi-dot SQD layout", "[sqd]")
@@ -169,7 +169,8 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
         using sidb_layout =
             layouts::cell_level_layout<sidb::technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-        const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+        const auto layout =
+            read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
         CHECK(layout.y() == 5);
@@ -185,7 +186,8 @@ TEST_CASE("Read multi-dot SQD layout", "[sqd]")
         using siqad_layout =
             layouts::cell_level_layout<sidb::technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>;
-        const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, siqad_layout>>(layout_stream);
+        const auto layout =
+            read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, siqad_layout>>(layout_stream);
 
         CHECK(layout.x() == 2);
         CHECK(layout.y() == 2);
@@ -258,7 +260,8 @@ TEST_CASE("Read multi-dot SQD layout with cell type definitions", "[sqd]")
     using sidb_layout =
         layouts::cell_level_layout<sidb::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+    const auto layout =
+        read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 2);
     CHECK(layout.y() == 5);
@@ -376,16 +379,17 @@ TEST_CASE("Read single defect SQD layout", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::defect_surface<layouts::cell_level_layout<
         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+    const auto layout =
+        read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 4);
     CHECK(layout.is_empty());
 
     const auto defect = layout.get_sidb_defect({5, 4});
-    CHECK(defect.type == sidb_defect_type::UNKNOWN);
+    CHECK(defect.type == sidb::model::defect_type::UNKNOWN);
     CHECK(defect.charge == 2);
     CHECK(defect.epsilon_r == 1.2);
     CHECK(defect.lambda_tf == 3.4);
@@ -466,16 +470,17 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::defect_surface<layouts::cell_level_layout<
         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+    const auto layout =
+        read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 5);
     CHECK(layout.is_empty());
     {
         const auto defect = layout.get_sidb_defect({5, 4});
-        CHECK(defect.type == sidb_defect_type::SILOXANE);
+        CHECK(defect.type == sidb::model::defect_type::SILOXANE);
         CHECK(defect.charge == -1);
         CHECK(defect.epsilon_r == 5.6);
         CHECK(defect.lambda_tf == 5.0);
@@ -483,11 +488,11 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
     {
         const auto defect1 = layout.get_sidb_defect({3, 4});
         const auto defect2 = layout.get_sidb_defect({3, 5});
-        CHECK(defect1.type == sidb_defect_type::MISSING_DIMER);
+        CHECK(defect1.type == sidb::model::defect_type::MISSING_DIMER);
         CHECK(defect1.charge == -1);
         CHECK(defect1.epsilon_r == 5.6);
         CHECK(defect1.lambda_tf == 5.0);
-        CHECK(defect2.type == sidb_defect_type::MISSING_DIMER);
+        CHECK(defect2.type == sidb::model::defect_type::MISSING_DIMER);
         CHECK(defect2.charge == -1);
         CHECK(defect2.epsilon_r == 5.6);
         CHECK(defect2.lambda_tf == 5.0);
@@ -497,19 +502,19 @@ TEST_CASE("Read multiple defects SQD layout", "[sqd]")
         const auto defect2 = layout.get_sidb_defect({0, 5});
         const auto defect3 = layout.get_sidb_defect({1, 4});
         const auto defect4 = layout.get_sidb_defect({1, 5});
-        CHECK(defect1.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect1.type == sidb::model::defect_type::ETCH_PIT);
         CHECK(defect1.charge == -1);
         CHECK(defect1.epsilon_r == 5.6);
         CHECK(defect1.lambda_tf == 5.0);
-        CHECK(defect2.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect2.type == sidb::model::defect_type::ETCH_PIT);
         CHECK(defect2.charge == -1);
         CHECK(defect2.epsilon_r == 5.6);
         CHECK(defect2.lambda_tf == 5.0);
-        CHECK(defect3.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect3.type == sidb::model::defect_type::ETCH_PIT);
         CHECK(defect3.charge == -1);
         CHECK(defect3.epsilon_r == 5.6);
         CHECK(defect3.lambda_tf == 5.0);
-        CHECK(defect4.type == sidb_defect_type::ETCH_PIT);
+        CHECK(defect4.type == sidb::model::defect_type::ETCH_PIT);
         CHECK(defect4.charge == -1);
         CHECK(defect4.epsilon_r == 5.6);
         CHECK(defect4.lambda_tf == 5.0);
@@ -582,9 +587,10 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::defect_surface<layouts::cell_level_layout<
         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+    const auto layout =
+        read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
     CHECK(layout.x() == 5);
     CHECK(layout.y() == 5);
@@ -603,7 +609,7 @@ TEST_CASE("Read multi-dot SQD layout with multi-cell defect", "[sqd]")
 
             CHECK(defect_positions.count(cell) > 0);
 
-            CHECK(defect.type == sidb_defect_type::DB);
+            CHECK(defect.type == sidb::model::defect_type::DB);
 
             CHECK(defect.charge == -1);
             CHECK(defect.epsilon_r == 5.6);
@@ -678,12 +684,13 @@ TEST_CASE("In-place SQD reader with ignored defects", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::defect_surface<layouts::cell_level_layout<
         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
-    const sidb_defect_surface_params            params{std::unordered_set<sidb_defect_type>{sidb_defect_type::DB}};
-    const sidb_layout                           layout{params};
-    sidb_lattice<sidb_111_lattice, sidb_layout> lattice_layout{layout};
+    const sidb::primitives::defect_surface_params params{
+        std::unordered_set<sidb::model::defect_type>{sidb::model::defect_type::DB}};
+    const sidb_layout                                                     layout{params};
+    sidb::primitives::lattice<sidb::primitives::lattice_111, sidb_layout> lattice_layout{layout};
 
     read_sqd_layout(lattice_layout, layout_stream);
 
@@ -738,14 +745,15 @@ TEST_CASE("Read SQD defect despite missing <coulomb> element", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::defect_surface<layouts::cell_level_layout<
         sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 
-    const auto layout = read_sqd_layout<sidb_lattice<sidb_100_lattice, sidb_layout>>(layout_stream);
+    const auto layout =
+        read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
 
     const auto defect = layout.get_sidb_defect({0, 0});
 
-    CHECK(defect.type == sidb_defect_type::UNKNOWN);
+    CHECK(defect.type == sidb::model::defect_type::UNKNOWN);
 
     CHECK(defect.charge == 0);
     CHECK(defect.epsilon_r == 0.0);
@@ -758,9 +766,9 @@ TEST_CASE("SQD parsing error: missing <siqad> element", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -773,9 +781,9 @@ TEST_CASE("SQD parsing error: missing <design> element", "[sqd]")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -793,9 +801,9 @@ TEST_CASE("SQD parsing error: missing 'type' attribute in <layer> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -819,9 +827,9 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <dbdot> element", "[
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -845,9 +853,9 @@ TEST_CASE("SQD parsing error: missing 'n' attribute in <latcoord> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -871,9 +879,9 @@ TEST_CASE("SQD parsing error: missing 'm' attribute in <latcoord> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -897,9 +905,9 @@ TEST_CASE("SQD parsing error: missing 'l' attribute in <latcoord> element", "[sq
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
     ;
@@ -924,9 +932,9 @@ TEST_CASE("SQD parsing error: negative 'n' attribute in <latcoord> element", "[s
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -950,9 +958,9 @@ TEST_CASE("SQD parsing error: negative 'm' attribute in <latcoord> element", "[s
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -976,9 +984,9 @@ TEST_CASE("SQD parsing error: negative 'l' attribute in <latcoord> element", "[s
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1002,9 +1010,9 @@ TEST_CASE("SQD parsing error: out-of-bounds 'l' attribute in <latcoord> element"
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1030,9 +1038,9 @@ TEST_CASE("SQD parsing error: missing <latcoord> element in <incl_coords> elemen
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1057,9 +1065,9 @@ TEST_CASE("SQD parsing error: missing <type> element in <dbdot> element")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1084,9 +1092,9 @@ TEST_CASE("SQD parsing error: invalid <type> element in <dbdot> element")
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1113,9 +1121,9 @@ TEST_CASE("SQD parsing error: missing 'charge' attribute in <coulomb> element", 
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1142,9 +1150,9 @@ TEST_CASE("SQD parsing error: missing 'eps_r' attribute in <coulomb> element", "
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }
@@ -1171,9 +1179,9 @@ TEST_CASE("SQD parsing error: missing 'lambda_tf' attribute in <coulomb> element
 
     std::istringstream layout_stream{sqd_layout};
 
-    using sidb_layout = sidb_lattice<
-        sidb_100_lattice,
-        sidb_defect_surface<layouts::cell_level_layout<
+    using sidb_layout = sidb::primitives::lattice<
+        sidb::primitives::lattice_100,
+        sidb::primitives::defect_surface<layouts::cell_level_layout<
             sidb::technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
     CHECK_THROWS_AS(read_sqd_layout<sidb_layout>(layout_stream), sqd_parsing_error);
 }

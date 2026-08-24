@@ -222,8 +222,8 @@ struct bdl_wire
     /**
      * Find the first Binary-dot Logic (BDL) pair of a specified type in the wire.
      *
-     * @param t Type of BDL pair to search for (`sidb_technology::cell_type::INPUT`,
-     * `sidb_technology::cell_type::OUTPUT`, etc.).
+     * @param t Type of BDL pair to search for (`sidb::technology::cell_type::INPUT`,
+     * `sidb::technology::cell_type::OUTPUT`, etc.).
      * @return Optional containing the first BDL pair with the specified type `t`,
      *         or `std::nullopt` if no such BDL pair is found.
      */
@@ -540,8 +540,8 @@ class detect_bdl_wires_impl
             bdl_pairs,
             [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
             {
-                return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
-                       (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
+                return sidb::model::nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
+                       (sidb::model::nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
                         !given_bdl.equal_ignore_type(bdl) && given_bdl > bdl);
             });
 
@@ -577,8 +577,8 @@ class detect_bdl_wires_impl
             bdl_pairs,
             [&given_bdl, inter_bdl_distance](const bdl_pair<cell<Lyt>>& bdl)
             {
-                return sidb_nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
-                       (sidb_nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
+                return sidb::model::nm_distance<Lyt>(Lyt{}, given_bdl.lower, bdl.upper) < inter_bdl_distance ||
+                       (sidb::model::nm_distance<Lyt>(Lyt{}, given_bdl.upper, bdl.lower) < inter_bdl_distance &&
                         given_bdl.not_equal_ignore_type(bdl) && given_bdl < bdl);
             });
 

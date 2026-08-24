@@ -14,14 +14,14 @@
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/constants.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -120,7 +120,7 @@ struct is_operational_params
     /**
      * The simulation parameters for the physical simulation of the ground state.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters simulation_parameters{};
     /**
      * The simulation engine to be used for the operational domain computation.
      */
@@ -349,8 +349,8 @@ class is_operational_impl
     {
         const auto& lyt_with_input_pattern = layout_with_input_pattern(input_pattern);
 
-        charge_distribution_surface<Lyt> cds_layout{lyt_with_input_pattern};
-        cds_layout.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        sidb::primitives::charge_distribution_surface<Lyt> cds_layout{lyt_with_input_pattern};
+        cds_layout.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
         cds_layout.assign_physical_parameters(parameters.simulation_parameters);
 
         if ((parameters.simulation_parameters.base == 2) &&
@@ -480,7 +480,8 @@ class is_operational_impl
      * and the second element indicating the reason if it is non-operational.
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason>
-    verify_logic_match_of_cds(const charge_distribution_surface<Lyt>& given_cds, const uint64_t input_pattern) noexcept
+    verify_logic_match_of_cds(const sidb::primitives::charge_distribution_surface<Lyt>& given_cds,
+                              const uint64_t                                            input_pattern) noexcept
     {
         auto non_operational_reason = non_operationality_reason::LOGIC_MISMATCH;
 
@@ -621,7 +622,7 @@ class is_operational_impl
      * otherwise.
      */
     [[nodiscard]] std::optional<double>
-    is_physical_validity_feasible(charge_distribution_surface<Lyt>& cds_layout) noexcept
+    is_physical_validity_feasible(sidb::primitives::charge_distribution_surface<Lyt>& cds_layout) noexcept
     {
         assert(!canvas_lyt.is_empty() && "The canvas layout must not be empty.");
 
@@ -644,10 +645,10 @@ class is_operational_impl
                 [&cds_layout, &cds_canvas](const auto& c)
                 {
                     cds_layout.assign_charge_state(c, cds_canvas.get_charge_state(c),
-                                                   charge_index_mode::KEEP_CHARGE_INDEX);
+                                                   sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                 });
-            cds_layout.update_after_charge_change(dependent_cell_mode::VARIABLE,
-                                                  energy_calculation::KEEP_OLD_ENERGY_VALUE);
+            cds_layout.update_after_charge_change(sidb::primitives::dependent_cell_mode::VARIABLE,
+                                                  sidb::primitives::energy_calculation::KEEP_OLD_ENERGY_VALUE);
 
             if (cds_layout.is_physically_valid())
             {
@@ -664,7 +665,8 @@ class is_operational_impl
             }
 
             canvas_charge_index++;
-            cds_canvas.assign_charge_index(canvas_charge_index, charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
+            cds_canvas.assign_charge_index(canvas_charge_index,
+                                           sidb::primitives::charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION);
         }
 
         if (std::isinf(min_energy))
@@ -682,10 +684,11 @@ class is_operational_impl
      * @param cds The charge distribution surface layout to be modified.
      * @param current_input_index The index representing the current input pattern.
      */
-    void set_charge_distribution_of_input_pins(charge_distribution_surface<Lyt>& cds,
-                                               const uint64_t                    current_input_index) const noexcept
+    void set_charge_distribution_of_input_pins(sidb::primitives::charge_distribution_surface<Lyt>& cds,
+                                               const uint64_t current_input_index) const noexcept
     {
-        cds.assign_all_charge_states(sidb_charge_state::NEGATIVE, charge_index_mode::KEEP_CHARGE_INDEX);
+        cds.assign_all_charge_states(sidb::model::charge_state::NEGATIVE,
+                                     sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
 
         for (auto i = 0u; i < number_of_input_wires; i++)
         {
@@ -700,10 +703,10 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -714,10 +717,10 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -731,10 +734,10 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
@@ -745,10 +748,10 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -762,8 +765,8 @@ class is_operational_impl
      * @param cds The charge distribution surface layout to be modified.
      * @param output_wire_index The index representing the current input pattern of the output wire.
      */
-    void set_charge_distribution_of_output_pins(charge_distribution_surface<Lyt>& cds,
-                                                const uint64_t                    output_wire_index) const noexcept
+    void set_charge_distribution_of_output_pins(sidb::primitives::charge_distribution_surface<Lyt>& cds,
+                                                const uint64_t output_wire_index) const noexcept
     {
         for (auto i = 0u; i < number_of_output_wires; i++)
         {
@@ -774,20 +777,20 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -801,20 +804,20 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -828,20 +831,20 @@ class is_operational_impl
                         {
                             continue;
                         }
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
                 else
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        cds.assign_charge_state(bdl.upper, sidb_charge_state::NEUTRAL,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
-                        cds.assign_charge_state(bdl.lower, sidb_charge_state::NEGATIVE,
-                                                charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.upper, sidb::model::charge_state::NEUTRAL,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                        cds.assign_charge_state(bdl.lower, sidb::model::charge_state::NEGATIVE,
+                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                     }
                 }
             }
@@ -859,7 +862,7 @@ class is_operational_impl
      * considered unstable.
      * @return `true` if the I/O signal is unstable, `false` otherwise.
      */
-    [[nodiscard]] bool is_io_signal_unstable(charge_distribution_surface<Lyt>& cds_layout,
+    [[nodiscard]] bool is_io_signal_unstable(sidb::primitives::charge_distribution_surface<Lyt>& cds_layout,
                                              const uint64_t max_input_pattern_index, const uint64_t input_pattern,
                                              const uint64_t logical_correct_output_pattern,
                                              const double   minimal_energy_of_physically_valid_layout) noexcept
@@ -965,7 +968,7 @@ class is_operational_impl
      * on first use and reused afterwards, since the canvas does not change over this object's lifetime. Empty until
      * then, so that the strategies that never inspect the canvas do not pay for it.
      */
-    std::optional<charge_distribution_surface<Lyt>> canvas_cds{};
+    std::optional<sidb::primitives::charge_distribution_surface<Lyt>> canvas_cds{};
 
     /**
      * Returns the charge distribution surface of the canvas layout, constructing it on first use.
@@ -977,7 +980,7 @@ class is_operational_impl
      *
      * @return The canvas charge distribution surface.
      */
-    [[nodiscard]] charge_distribution_surface<Lyt>& canvas_charge_distribution() noexcept
+    [[nodiscard]] sidb::primitives::charge_distribution_surface<Lyt>& canvas_charge_distribution() noexcept
     {
         if (!canvas_cds.has_value())
         {
@@ -1074,8 +1077,9 @@ class is_operational_impl
      * @param current_input_index The current input index used to retrieve the expected output from the truth table.
      * @return `true` if any input wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
      */
-    [[nodiscard]] bool check_existence_of_kinks_in_input_wires(const charge_distribution_surface<Lyt>& ground_state,
-                                                               const uint64_t current_input_index) const noexcept
+    [[nodiscard]] bool
+    check_existence_of_kinks_in_input_wires(const sidb::primitives::charge_distribution_surface<Lyt>& ground_state,
+                                            const uint64_t current_input_index) const noexcept
     {
         return std::ranges::any_of(
             input_bdl_wires | std::views::reverse,
@@ -1109,8 +1113,9 @@ class is_operational_impl
      * @param current_input_index The current input index used to retrieve the expected output from the truth table.
      * @return `true` if any output wire contains a kink (i.e., an unexpected charge state), `false` otherwise.
      */
-    [[nodiscard]] bool check_existence_of_kinks_in_output_wires(const charge_distribution_surface<Lyt>& ground_state,
-                                                                const uint64_t current_input_index) const noexcept
+    [[nodiscard]] bool
+    check_existence_of_kinks_in_output_wires(const sidb::primitives::charge_distribution_surface<Lyt>& ground_state,
+                                             const uint64_t current_input_index) const noexcept
     {
         for (auto i = 0u; i < output_bdl_wires.size(); i++)
         {
@@ -1142,17 +1147,18 @@ class is_operational_impl
      * @param bdl BDL pair to be evaluated.
      * @return `true` if `0` is encoded, `false` otherwise.
      */
-    [[nodiscard]] bool encodes_bit_zero(const charge_distribution_surface<Lyt>& ground_state,
+    [[nodiscard]] bool encodes_bit_zero(const sidb::primitives::charge_distribution_surface<Lyt>& ground_state,
                                         const bdl_pair<cell<Lyt>>& bdl, const fcn::port_direction port) const noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
             port.dir == fcn::port_direction::NONE)
         {
-            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
-                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+            return static_cast<bool>(
+                (ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEGATIVE) &&
+                (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEUTRAL));
         }
-        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
-                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEUTRAL) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEGATIVE));
     }
 
     /**
@@ -1162,18 +1168,18 @@ class is_operational_impl
      * @param bdl BDL pair to be evaluated.
      * @return `true` if `1` is encoded, `false` otherwise.
      */
-    [[nodiscard]] bool encodes_bit_one(const charge_distribution_surface<Lyt>& ground_state,
+    [[nodiscard]] bool encodes_bit_one(const sidb::primitives::charge_distribution_surface<Lyt>& ground_state,
                                        const bdl_pair<cell<Lyt>>& bdl, const fcn::port_direction port) const noexcept
     {
         if (port.dir == fcn::port_direction::SOUTH || port.dir == fcn::port_direction::EAST ||
             port.dir == fcn::port_direction::NONE)
         {
-            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEUTRAL) &&
-                                     (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEGATIVE));
+            return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEUTRAL) &&
+                                     (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEGATIVE));
         }
 
-        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb_charge_state::NEGATIVE) &&
-                                 (ground_state.get_charge_state(bdl.lower) == sidb_charge_state::NEUTRAL));
+        return static_cast<bool>((ground_state.get_charge_state(bdl.upper) == sidb::model::charge_state::NEGATIVE) &&
+                                 (ground_state.get_charge_state(bdl.lower) == sidb::model::charge_state::NEUTRAL));
     }
 };
 

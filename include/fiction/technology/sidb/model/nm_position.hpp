@@ -2,18 +2,18 @@
 // Created by Jan Drewniok on 28.01.23.
 //
 
-#ifndef FICTION_NM_POSITION_HPP
-#define FICTION_NM_POSITION_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP
+#define FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/primitives/lattice.hpp"
+#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
 #include <utility>
 
-namespace fiction
+namespace fiction::sidb::model
 {
 
 /**
@@ -24,15 +24,16 @@ namespace fiction
  * @return A pair representing the `(x,y)` position of `c` in nanometers from the layout origin.
  */
 template <typename Lyt>
-[[nodiscard]] constexpr std::pair<double, double> sidb_nm_position(const Lyt& lyt, const cell<Lyt>& c) noexcept
+[[nodiscard]] constexpr std::pair<double, double> nm_position(const Lyt& lyt, const cell<Lyt>& c) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     if constexpr (!is_sidb_lattice_v<Lyt>)
     {
-        return sidb_nm_position<sidb_lattice<sidb_100_lattice, Lyt>>(sidb_lattice<sidb_100_lattice, Lyt>(lyt),
-                                                                     cell<sidb_lattice<sidb_100_lattice, Lyt>>(c));
+        return nm_position<sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>>(
+            sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>(lyt),
+            cell<sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>>(c));
     }
     else
     {
@@ -58,6 +59,5 @@ template <typename Lyt>
     }
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_NM_POSITION_HPP
+}  // namespace fiction::sidb::model
+#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP

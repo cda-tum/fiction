@@ -7,8 +7,8 @@
 
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
 
@@ -43,14 +43,14 @@ class write_location_and_ground_state_impl
         const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
             minimum_energy(sim_result.charge_distributions.cbegin(), sim_result.charge_distributions.cend()), 6);
 
-        std::vector<charge_distribution_surface<Lyt>> ground_state_layouts{};
+        std::vector<sidb::primitives::charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
             if (std::fabs(fiction::utils::math::round_to_n_decimal_places(
                               valid_layout.get_electrostatic_potential_energy(), 6) -
                           min_energy) < fcn::constants::ERROR_MARGIN)
             {
-                ground_state_layouts.emplace_back(charge_distribution_surface<Lyt>{valid_layout});
+                ground_state_layouts.emplace_back(sidb::primitives::charge_distribution_surface<Lyt>{valid_layout});
             }
         }
 
@@ -72,11 +72,11 @@ class write_location_and_ground_state_impl
 
             for (const auto& sidb : sidbs)
             {
-                const auto pos = sidb_nm_position<Lyt>(Lyt{}, sidb);
+                const auto pos = sidb::model::nm_position<Lyt>(Lyt{}, sidb);
                 os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
                 for (const auto& valid_layout : ground_state_layouts)
                 {
-                    os << fmt::format("{};", charge_state_to_sign(valid_layout.get_charge_state(sidb)));
+                    os << fmt::format("{};", sidb::model::charge_state_to_sign(valid_layout.get_charge_state(sidb)));
                 }
                 os << "\n";
             }

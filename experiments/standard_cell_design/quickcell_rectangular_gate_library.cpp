@@ -93,7 +93,7 @@ int main()  // NOLINT
     constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
     design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
-        is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+        is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                               bdl_input_iterator_params{{3}},
                               is_operational_params::operational_condition::REJECT_KINKS},
         design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,

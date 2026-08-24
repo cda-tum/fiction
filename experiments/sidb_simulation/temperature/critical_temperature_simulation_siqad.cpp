@@ -5,9 +5,9 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -39,8 +39,8 @@ int main()  // NOLINT
         std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
         std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()})};
 
-    const sidb_simulation_parameters sim_params{2, -0.28};
-    critical_temperature_params      ct_params{sim_params};
+    const sidb::model::simulation_parameters sim_params{2, -0.28};
+    critical_temperature_params              ct_params{sim_params};
 
     // this is how the gates are presented and simulated in "SiQAD: A Design and Simulation Tool for Atomic Silicon
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,

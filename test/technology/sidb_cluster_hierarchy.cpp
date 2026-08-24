@@ -6,9 +6,9 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_cluster_hierarchy.hpp>
+#include <fiction/technology/sidb/model/cluster_hierarchy.hpp>
+#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
@@ -28,7 +28,7 @@ using set_container = phmap::flat_hash_set<uint64_t>;
 #endif
 
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]",
-                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_cell_clk_lyt_siqad, sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -46,7 +46,7 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
     // check for spooky non-determinism in alglib
     for (int8_t i = 0; i < 100; ++i)
     {
-        const sidb_binary_cluster_hierarchy_node& h = sidb_cluster_hierarchy(lyt);
+        const sidb::model::binary_cluster_hierarchy_node& h = sidb::model::cluster_hierarchy(lyt);
 
         REQUIRE(h.c.size() == 8);
         REQUIRE(h.sub.at(0) != nullptr);
@@ -72,7 +72,7 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
 
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiDBs",
                    "[sidb-cluster-hierarchy]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -88,7 +88,7 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
     lyt.assign_cell_type({53, 10, 1}, sidb::technology::cell_type::NORMAL);
     lyt.assign_cell_type({48, 13, 1}, sidb::technology::cell_type::NORMAL);
 
-    const sidb_binary_cluster_hierarchy_node& h = sidb_cluster_hierarchy(lyt);
+    const sidb::model::binary_cluster_hierarchy_node& h = sidb::model::cluster_hierarchy(lyt);
 
     REQUIRE(h.c.size() == 8);
     REQUIRE(h.sub.at(0) != nullptr);

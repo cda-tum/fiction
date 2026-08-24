@@ -6,7 +6,7 @@
 #define FICTION_DETECT_BDL_PAIRS_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_nm_distance.hpp"
+#include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -255,7 +255,8 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename technology<Lyt>::c
             {
                 for (auto j = i + 1; j < dots.size(); ++j)
                 {
-                    pairwise_distances.emplace_back(dots[i], dots[j], sidb_nm_distance<Lyt>(lyt, dots[i], dots[j]));
+                    pairwise_distances.emplace_back(dots[i], dots[j],
+                                                    sidb::model::nm_distance<Lyt>(lyt, dots[i], dots[j]));
                 }
             }
 

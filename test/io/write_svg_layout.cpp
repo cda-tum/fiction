@@ -9,9 +9,9 @@
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/write_svg_layout.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
+#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -691,11 +691,11 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
     }
     SECTION("charge distribution")
     {
-        charge_distribution_surface cds{layout};
-        cds.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
-        cds.assign_charge_state({1, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({1, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({3, 3}, sidb_charge_state::NEUTRAL);
+        sidb::primitives::charge_distribution_surface cds{layout};
+        cds.assign_charge_state({0, 0}, sidb::model::charge_state::POSITIVE);
+        cds.assign_charge_state({1, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({1, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({3, 3}, sidb::model::charge_state::NEUTRAL);
 
         SECTION("light mode")
         {
@@ -792,11 +792,11 @@ TEMPLATE_TEST_CASE(
     }
     SECTION("charge distribution")
     {
-        charge_distribution_surface cds{layout};
-        cds.assign_charge_state({0, 0}, sidb_charge_state::POSITIVE);
-        cds.assign_charge_state({1, 0, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({1, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({3, 1, 1}, sidb_charge_state::NEUTRAL);
+        sidb::primitives::charge_distribution_surface cds{layout};
+        cds.assign_charge_state({0, 0}, sidb::model::charge_state::POSITIVE);
+        cds.assign_charge_state({1, 0, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({1, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({3, 1, 1}, sidb::model::charge_state::NEUTRAL);
 
         SECTION("light mode")
         {

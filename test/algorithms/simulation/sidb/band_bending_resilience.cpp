@@ -10,9 +10,9 @@
 
 #include <fiction/algorithms/simulation/sidb/band_bending_resilience.hpp>
 #include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/constants.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <vector>
@@ -25,8 +25,8 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
     const auto lyt = blueprints::bestagon_and_gate<test_layout>();
 
-    constexpr auto params =
-        band_bending_resilience_params{physical_population_stability_params{sidb_simulation_parameters{2, -0.32}, 2}};
+    constexpr auto params = band_bending_resilience_params{
+        physical_population_stability_params{sidb::model::simulation_parameters{2, -0.32}, 2}};
 
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {

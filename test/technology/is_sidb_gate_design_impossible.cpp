@@ -8,7 +8,7 @@
 
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb/model/defects.hpp>
 #include <fiction/types.hpp>
 
 #include <vector>
@@ -42,16 +42,16 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
     {
         CHECK(!is_sidb_gate_design_impossible(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.28}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.28}}));
     }
 
     SECTION("with defect")
     {
-        lyt.assign_sidb_defect({12, 6, 0}, sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10, 5});
-        lyt.assign_sidb_defect({11, 6, 0}, sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10, 5});
+        lyt.assign_sidb_defect({12, 6, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 10, 5});
+        lyt.assign_sidb_defect({11, 6, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 10, 5});
         CHECK(is_sidb_gate_design_impossible(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.28}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.28}}));
     }
 }
 
@@ -105,15 +105,15 @@ TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
     {
         CHECK(!is_sidb_gate_design_impossible(
             lyt, networks::utils::create_crossing_wire_tt(),
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.32}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.32}}));
     }
 
     SECTION("with defect")
     {
-        lyt.assign_sidb_defect({34, 18, 0}, sidb_defect{sidb_defect_type::SI_VACANCY, -1, 5, 5});
-        lyt.assign_sidb_defect({34, 18, 1}, sidb_defect{sidb_defect_type::SI_VACANCY, -1, 5, 5});
+        lyt.assign_sidb_defect({34, 18, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 5, 5});
+        lyt.assign_sidb_defect({34, 18, 1}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY, -1, 5, 5});
         CHECK(is_sidb_gate_design_impossible(
             lyt, networks::utils::create_crossing_wire_tt(),
-            is_sidb_gate_design_impossible_params{.simulation_params = sidb_simulation_parameters{2, -0.32}}));
+            is_sidb_gate_design_impossible_params{.simulation_params = sidb::model::simulation_parameters{2, -0.32}}));
     }
 }

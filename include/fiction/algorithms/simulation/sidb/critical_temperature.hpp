@@ -17,10 +17,10 @@
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -81,7 +81,7 @@ struct critical_temperature_stats
     /**
      * All parameters for physical SiDB simulations.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters simulation_parameters{};
     /**
      * Name of the algorithm used to compute the physically valid charge distributions.
      */

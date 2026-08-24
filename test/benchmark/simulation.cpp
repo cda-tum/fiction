@@ -69,27 +69,27 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{2, -0.32}};
+        const quickexact_params<cell<lattice_siqad>> sim_params{sidb::model::simulation_parameters{2, -0.32}};
         return quickexact<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("QuickSim")
     {
-        const quicksim_params quicksim_params{sidb_simulation_parameters{2, -0.32}};
+        const quicksim_params quicksim_params{sidb::model::simulation_parameters{2, -0.32}};
         return quicksim<lattice_siqad>(lyt, quicksim_params);
     };
 
 #if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete (multi-threaded)")
     {
-        const clustercomplete_params<cell<lattice_siqad>> sim_params{sidb_simulation_parameters{3, -0.32}};
+        const clustercomplete_params<cell<lattice_siqad>> sim_params{sidb::model::simulation_parameters{3, -0.32}};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("ClusterComplete (single-threaded)")
     {
         const clustercomplete_params<cell<lattice_siqad>> sim_params{
-            sidb_simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+            sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
@@ -292,7 +292,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
-        const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}};
+        const clustercomplete_params<> sim_params{sidb::model::simulation_parameters{3, -0.32}};
         return clustercomplete<lattice>(cl_4_seg, sim_params);
     };
 
@@ -302,7 +302,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {
-        const clustercomplete_params<> sim_params{sidb_simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        const clustercomplete_params<> sim_params{sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
         return clustercomplete<lattice>(cl_3_seg, sim_params);
     };
 }

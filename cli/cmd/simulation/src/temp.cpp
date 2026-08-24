@@ -195,7 +195,7 @@ nlohmann::json temp_command::log() const
 
 void temp_command::reset_params()
 {
-    physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+    physical_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     params          = {};
 }
 

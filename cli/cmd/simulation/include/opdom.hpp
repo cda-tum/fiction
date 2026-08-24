@@ -6,7 +6,7 @@
 #define FICTION_CMD_OPDOM_HPP
 
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -61,7 +61,7 @@ class opdom_command final : public command
     /**
      * Default physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
     /**
      * Default value ranges for sweeping.
      */

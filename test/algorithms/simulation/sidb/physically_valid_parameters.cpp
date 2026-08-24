@@ -9,10 +9,10 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_charge_state.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -33,10 +33,10 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     lyt.assign_cell_type({6, 5, 0}, sidb::technology::cell_type::NORMAL);
     lyt.assign_cell_type({6, 7, 1}, sidb::technology::cell_type::NORMAL);
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    charge_distribution_surface cds{lyt, sim_params};
+    sidb::primitives::charge_distribution_surface cds{lyt, sim_params};
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
@@ -49,14 +49,14 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         op_domain_params.sweep_dimensions[0].step = 0.3;
         op_domain_params.sweep_dimensions[1].step = 0.3;
 
-        cds.assign_charge_state({-2, -1, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({0, 0, 1}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({12, 0, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({2, 1, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({10, 1, 1}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({6, 4, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({6, 5, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({6, 7, 1}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({-2, -1, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({0, 0, 1}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({12, 0, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({2, 1, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({10, 1, 1}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({6, 4, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({6, 5, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({6, 7, 1}, sidb::model::charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
@@ -73,14 +73,14 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
     SECTION("Using the 2nd excited charge distribution for default physical parameters as given CDS")
     {
-        cds.assign_charge_state({-2, -1, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({0, 0, 1}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({12, 0, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({2, 1, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({10, 1, 1}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({6, 4, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({6, 5, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({6, 7, 1}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({-2, -1, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({0, 0, 1}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({12, 0, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({2, 1, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({10, 1, 1}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({6, 4, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({6, 5, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({6, 7, 1}, sidb::model::charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
         const auto valid_parameters = physically_valid_parameters(cds, op_domain_params);
@@ -113,10 +113,10 @@ TEST_CASE(
     bestagon_and.assign_cell_type({36, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
     bestagon_and.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    charge_distribution_surface cds{bestagon_and, sim_params};
+    sidb::primitives::charge_distribution_surface cds{bestagon_and, sim_params};
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.simulation_parameters = sim_params;
@@ -126,34 +126,34 @@ TEST_CASE(
         op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 5.0, 5.9, 0.1},
                                              operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.9, 0.1}};
 
-        cds.assign_charge_state({38, 0, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({2, 1, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({38, 0, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({2, 1, 0}, sidb::model::charge_state::NEGATIVE);
 
-        cds.assign_charge_state({6, 2, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({32, 2, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({8, 3, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({30, 3, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({6, 2, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({32, 2, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({8, 3, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({30, 3, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({12, 4, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({26, 4, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({14, 5, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({24, 5, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({12, 4, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({26, 4, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({14, 5, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({24, 5, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({19, 8, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({18, 9, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({23, 9, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({18, 11, 1}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({19, 8, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({18, 9, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({23, 9, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({18, 11, 1}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({19, 13, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({20, 14, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({19, 13, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({20, 14, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({24, 15, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({26, 16, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({24, 15, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({26, 16, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({30, 17, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({32, 18, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({30, 17, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({32, 18, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({36, 19, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({36, 19, 0}, sidb::model::charge_state::NEGATIVE);
 
         cds.update_after_charge_change();
 
@@ -184,34 +184,34 @@ TEST_CASE(
             operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.2, 0.1},
             operational_domain_value_range{sweep_parameter::MU_MINUS, -0.33, -0.31, 0.01}};
 
-        cds.assign_charge_state({38, 0, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({2, 1, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({38, 0, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({2, 1, 0}, sidb::model::charge_state::NEGATIVE);
 
-        cds.assign_charge_state({6, 2, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({32, 2, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({8, 3, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({30, 3, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({6, 2, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({32, 2, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({8, 3, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({30, 3, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({12, 4, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({26, 4, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({14, 5, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({24, 5, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({12, 4, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({26, 4, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({14, 5, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({24, 5, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({19, 8, 0}, sidb_charge_state::NEUTRAL);
-        cds.assign_charge_state({18, 9, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({23, 9, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({18, 11, 1}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({19, 8, 0}, sidb::model::charge_state::NEUTRAL);
+        cds.assign_charge_state({18, 9, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({23, 9, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({18, 11, 1}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({19, 13, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({20, 14, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({19, 13, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({20, 14, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({24, 15, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({26, 16, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({24, 15, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({26, 16, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({30, 17, 0}, sidb_charge_state::NEGATIVE);
-        cds.assign_charge_state({32, 18, 0}, sidb_charge_state::NEUTRAL);
+        cds.assign_charge_state({30, 17, 0}, sidb::model::charge_state::NEGATIVE);
+        cds.assign_charge_state({32, 18, 0}, sidb::model::charge_state::NEUTRAL);
 
-        cds.assign_charge_state({36, 19, 0}, sidb_charge_state::NEGATIVE);
+        cds.assign_charge_state({36, 19, 0}, sidb::model::charge_state::NEGATIVE);
 
         cds.update_after_charge_change();
 

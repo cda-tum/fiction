@@ -6,7 +6,7 @@
 #define FICTION_WRITE_SQD_LAYOUT_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -163,21 +163,21 @@ inline constexpr const char* OUTPUT_COLOR = "#ffe28686";
 inline constexpr const char* CONST_COLOR  = "#ff000000";
 
 // maps defect types to their respective string representation
-inline const std::unordered_map<sidb_defect_type, const char*> defect_type_to_name{
-    {{sidb_defect_type::NONE, "H-Si"},
-     {sidb_defect_type::DB, "DB"},
-     {sidb_defect_type::SI_VACANCY, "Vacancy"},
-     {sidb_defect_type::SINGLE_DIHYDRIDE, "Single_Dihydride"},
-     {sidb_defect_type::DIHYDRIDE_PAIR, "Dihydride"},
-     {sidb_defect_type::ONE_BY_ONE, "1By1"},
-     {sidb_defect_type::THREE_BY_ONE, "3By1"},
-     {sidb_defect_type::SILOXANE, "Siloxane"},
-     {sidb_defect_type::RAISED_SI, "Raised_Silicon"},
-     {sidb_defect_type::MISSING_DIMER, "Missing_Dimer"},
-     {sidb_defect_type::ETCH_PIT, "Etch_Pit"},
-     {sidb_defect_type::STEP_EDGE, "Step_Edge"},
-     {sidb_defect_type::GUNK, "Gunk"},
-     {sidb_defect_type::UNKNOWN, "Unknown"}}};
+inline const std::unordered_map<sidb::model::defect_type, const char*> defect_type_to_name{
+    {{sidb::model::defect_type::NONE, "H-Si"},
+     {sidb::model::defect_type::DB, "DB"},
+     {sidb::model::defect_type::SI_VACANCY, "Vacancy"},
+     {sidb::model::defect_type::SINGLE_DIHYDRIDE, "Single_Dihydride"},
+     {sidb::model::defect_type::DIHYDRIDE_PAIR, "Dihydride"},
+     {sidb::model::defect_type::ONE_BY_ONE, "1By1"},
+     {sidb::model::defect_type::THREE_BY_ONE, "3By1"},
+     {sidb::model::defect_type::SILOXANE, "Siloxane"},
+     {sidb::model::defect_type::RAISED_SI, "Raised_Silicon"},
+     {sidb::model::defect_type::MISSING_DIMER, "Missing_Dimer"},
+     {sidb::model::defect_type::ETCH_PIT, "Etch_Pit"},
+     {sidb::model::defect_type::STEP_EDGE, "Step_Edge"},
+     {sidb::model::defect_type::GUNK, "Gunk"},
+     {sidb::model::defect_type::UNKNOWN, "Unknown"}}};
 
 }  // namespace siqad
 
@@ -357,7 +357,7 @@ class write_sqd_layout_impl
             });
     }
 
-    [[nodiscard]] static const char* get_defect_type_name(const sidb_defect_type& type) noexcept
+    [[nodiscard]] static const char* get_defect_type_name(const sidb::model::defect_type& type) noexcept
     {
         const auto it = siqad::defect_type_to_name.find(type);
         return it == siqad::defect_type_to_name.cend() ? "Unknown" : it->second;
@@ -379,7 +379,7 @@ class write_sqd_layout_impl
 
                         design << fmt::format(
                             siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
-                            is_charged_defect_type(defect) ?
+                            sidb::model::is_charged_defect_type(defect) ?
                                 fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
                                 "",
                             get_defect_type_name(defect.type));
@@ -390,7 +390,7 @@ class write_sqd_layout_impl
 
                         design << fmt::format(
                             siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
-                            is_charged_defect_type(defect) ?
+                            sidb::model::is_charged_defect_type(defect) ?
                                 fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
                                 "",
                             get_defect_type_name(defect.type));

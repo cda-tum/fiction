@@ -394,7 +394,7 @@ nlohmann::json opdom_command::log() const
 
 void opdom_command::reset_params()
 {
-    simulation_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+    simulation_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     sweep_dimensions =
         std::vector<fiction::operational_domain_value_range>{{fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
                                                              {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},

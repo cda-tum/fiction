@@ -13,8 +13,8 @@
 #include <fiction/io/write_sqd_layout.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
-#include <fiction/technology/sidb_defect_surface.hpp>
-#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -48,7 +48,7 @@ int main()  // NOLINT
     using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
     fiction::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
-    design_gate_params.operational_params.simulation_parameters = fiction::sidb_simulation_parameters{2, -0.32};
+    design_gate_params.operational_params.simulation_parameters = fiction::sidb::model::simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
@@ -60,8 +60,8 @@ int main()  // NOLINT
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
     // Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot."
-    const auto stray_db   = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
-    const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto stray_db   = fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8};
+    const auto si_vacancy = fiction::sidb::model::defect{fiction::sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
     static const std::string layouts_folder =
         fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
@@ -71,17 +71,17 @@ int main()  // NOLINT
         "../../experiments/physical_design_with_on_the_fly_gate_design/0.5_percent_with_charged_surface.txt");
 
     // create an empty surface.
-    fiction::sidb_defect_surface<cell_lyt> surface_lattice{};
+    fiction::sidb::primitives::defect_surface<cell_lyt> surface_lattice{};
 
     // add physical parameters of the defects to the surface_lattice.
     surface_lattice_initial.foreach_sidb_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
         {
-            if (cd.second.type == fiction::sidb_defect_type::DB)
+            if (cd.second.type == fiction::sidb::model::defect_type::DB)
             {
                 surface_lattice.assign_sidb_defect(cd.first, stray_db);
             }
-            else if (cd.second.type == fiction::sidb_defect_type::SI_VACANCY)
+            else if (cd.second.type == fiction::sidb::model::defect_type::SI_VACANCY)
             {
                 surface_lattice.assign_sidb_defect(cd.first, si_vacancy);
             }
@@ -158,7 +158,7 @@ int main()  // NOLINT
                                                                              decltype(surface_lattice), gate_lyt>(
                     mapped_network, lattice_tiling, surface_lattice, params, &st);
 
-            write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            fiction::write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
             const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());

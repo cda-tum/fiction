@@ -1,14 +1,14 @@
-#ifndef FICTION_SIDB_LATTICE_ORIENTATIONS_HPP
-#define FICTION_SIDB_LATTICE_ORIENTATIONS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP
+#define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP
 
 #include <utility>
 
-namespace fiction
+namespace fiction::sidb::primitives
 {
 /**
  * H-Si(100)-2x1 surface.
  */
-struct sidb_100_lattice
+struct lattice_100
 {
     /**
      * The lattice vector length in x-direction (unit: Å).
@@ -24,12 +24,12 @@ struct sidb_100_lattice
     static constexpr std::pair<double, double> LAT_C = {0, 2.25};
 
     // Deleted constructors to prevent instantiation
-    sidb_100_lattice() = delete;
+    lattice_100() = delete;
 };
 /**
  * H-Si(111)-1x1 surface.
  */
-struct sidb_111_lattice
+struct lattice_111
 {
     /**
      * The lattice vector length in x-direction (unit: Å).
@@ -45,9 +45,8 @@ struct sidb_111_lattice
     static constexpr std::pair<double, double> LAT_C = {3.3255, 1.92};
 
     // Deleted constructors to prevent instantiation
-    sidb_111_lattice() = delete;
+    lattice_111() = delete;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_SIDB_LATTICE_ORIENTATIONS_HPP
+}  // namespace fiction::sidb::primitives
+#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP

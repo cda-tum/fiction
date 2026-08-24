@@ -5,8 +5,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb_lattice_orientations.hpp>
-#include <fiction/technology/sidb_nm_position.hpp>
+#include <fiction/technology/sidb/model/nm_position.hpp>
+#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/pair.h>  // NOLINT(misc-include-cleaner)
@@ -18,22 +18,22 @@ namespace detail
 {
 
 template <typename Lyt>
-void sidb_nm_position(nanobind::module_& m)
+void sidb::model::nm_position(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("sidb_nm_position", &fiction::sidb_nm_position<Lyt>, py::arg("lyt"), py::arg("c"),
+    m.def("sidb_nm_position", &fiction::sidb::model::nm_position<Lyt>, py::arg("lyt"), py::arg("c"),
           DOC(fiction_sidb_nm_position));
 }
 
 }  // namespace detail
 
-void sidb_nm_position(nanobind::module_& m)
+void sidb::model::nm_position(nanobind::module_& m)
 {
     detail::sidb_nm_position<py_charge_distribution_surface>(m);
     detail::sidb_nm_position<py_sidb_layout>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb_100_lattice>>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb_111_lattice>>(m);
+    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::primitives::lattice_100>>(m);
+    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::primitives::lattice_111>>(m);
 }
 
 }  // namespace pyfiction

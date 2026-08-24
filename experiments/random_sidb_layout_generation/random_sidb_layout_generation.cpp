@@ -179,8 +179,12 @@ int main(int argc, const char* argv[])  // NOLINT
                 }
 
                 const generate_random_sidb_layout_params<layouts::coords::offset> params{
-                    {{nw_x, nw_y}, {se_x, se_y}},         number_of_placed_sidbs,      charges,
-                    sidb_simulation_parameters{3, -0.32}, static_cast<uint64_t>(10E6), number_of_layouts};
+                    {{nw_x, nw_y}, {se_x, se_y}},
+                    number_of_placed_sidbs,
+                    charges,
+                    sidb::model::simulation_parameters{3, -0.32},
+                    static_cast<uint64_t>(10E6),
+                    number_of_layouts};
                 const auto unique_lyts = generate_multiple_random_sidb_layouts<sidb_100_cell_clk_lyt>(params);
 
                 if (unique_lyts.has_value())

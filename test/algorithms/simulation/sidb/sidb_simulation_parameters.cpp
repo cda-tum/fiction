@@ -5,8 +5,8 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/technology/fcn/constants.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
 using namespace fiction;
 
@@ -14,7 +14,7 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
 {
     SECTION("Test constructor, parameter values and overwrite values")
     {
-        const sidb_simulation_parameters params{};
+        const sidb::model::simulation_parameters params{};
 
         // Default values
         REQUIRE(params.base == 3);
@@ -24,7 +24,7 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
         REQUIRE(params.base == 3);
 
         // Constructor
-        sidb_simulation_parameters custom_params(2, -0.25, 4.2, 6.0);
+        sidb::model::simulation_parameters custom_params(2, -0.25, 4.2, 6.0);
         REQUIRE(custom_params.base == 2);
         REQUIRE(custom_params.mu_minus == -0.25);
         REQUIRE(custom_params.epsilon_r == 4.2);
@@ -45,7 +45,7 @@ TEST_CASE("Test sidb_simulation_parameters", "[sidb-simulation-parameters]")
 
     SECTION("Test calculated values")
     {
-        const sidb_simulation_parameters params{};
+        const sidb::model::simulation_parameters params{};
 
         const double epsilon_r  = 5.6;
         const double k_expected = fcn::constants::physical::K_E / epsilon_r;

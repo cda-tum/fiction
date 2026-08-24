@@ -13,11 +13,11 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -419,7 +419,7 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params params{};
-    params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
     params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     params.operational_params.op_condition          = is_operational_params::operational_condition::REJECT_KINKS;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
@@ -530,7 +530,7 @@ TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params params{};
-    params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
     params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
                                {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
@@ -592,7 +592,7 @@ TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]"
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
     op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     op_domain_params.sweep_dimensions                         = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
@@ -612,7 +612,7 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
     op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
     op_domain_params.sweep_dimensions                         = {
         {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
@@ -676,7 +676,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
@@ -1430,7 +1430,7 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
@@ -1514,7 +1514,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
     operational_domain_params op_domain_params{};
@@ -1624,7 +1624,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
@@ -1742,7 +1742,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     const sidb_100_cell_clk_lyt_cube lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
@@ -1828,7 +1828,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 {
     const auto layout = blueprints::and_gate_111<TestType>();
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
@@ -1918,7 +1918,7 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 {
     const auto layout = blueprints::and_gate_with_kink_states<TestType>();
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
@@ -1965,7 +1965,7 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
 {
     const auto layout = blueprints::bestagon_and<TestType>();
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
@@ -2050,7 +2050,7 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
@@ -2138,7 +2138,7 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
 
     lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::NORMAL);
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 

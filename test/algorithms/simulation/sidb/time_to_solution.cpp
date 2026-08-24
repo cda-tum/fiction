@@ -10,10 +10,10 @@
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 #include <fiction/technology/fcn/constants.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -32,10 +32,10 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 
     SECTION("layout with no SiDB placed")
     {
-        constexpr sidb_simulation_parameters params{2, -0.30};
-        const quicksim_params                quicksim_params{params};
-        time_to_solution_stats               tts_stat_quickexact{};
-        constexpr time_to_solution_params    tts_params_quickexact{exact_sidb_simulation_engine::QUICKEXACT};
+        constexpr sidb::model::simulation_parameters params{2, -0.30};
+        const quicksim_params                        quicksim_params{params};
+        time_to_solution_stats                       tts_stat_quickexact{};
+        constexpr time_to_solution_params            tts_params_quickexact{exact_sidb_simulation_engine::QUICKEXACT};
         time_to_solution<TestType>(lyt, quicksim_params, tts_params_quickexact, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
@@ -75,8 +75,8 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         lyt.assign_cell_type({10, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({12, 3, 0}, TestType::cell_type::NORMAL);
 
-        constexpr sidb_simulation_parameters params{2, -0.30};
-        const quicksim_params                quicksim_params{params};
+        constexpr sidb::model::simulation_parameters params{2, -0.30};
+        const quicksim_params                        quicksim_params{params};
 
         constexpr time_to_solution_params tts_params_exgs{exact_sidb_simulation_engine::EXGS};
         time_to_solution_stats            tts_stat_exgs{};
@@ -146,7 +146,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         lyt.assign_cell_type({20, 9, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
 
-        constexpr sidb_simulation_parameters params{2, -0.32};
+        constexpr sidb::model::simulation_parameters params{2, -0.32};
 
         quicksim_params quicksim_params{params};
         quicksim_params.iteration_steps = 10;
@@ -197,8 +197,8 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         lyt.assign_cell_type({10, 6, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({12, 6, 0}, TestType::cell_type::NORMAL);
 
-        constexpr sidb_simulation_parameters params{3, -0.32};
-        const quicksim_params                quicksim_params{params};
+        constexpr sidb::model::simulation_parameters params{3, -0.32};
+        const quicksim_params                        quicksim_params{params};
 
         constexpr std::size_t                         number_of_repetitions = 100;
         std::vector<sidb_simulation_result<TestType>> simulation_results_quicksim{};
@@ -245,8 +245,8 @@ TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in
         lyt.assign_cell_type({3, 3, 0}, TestType::cell_type::NORMAL);
         lyt.assign_cell_type({6, 3, 0}, TestType::cell_type::NORMAL);
 
-        constexpr sidb_simulation_parameters params{2, -0.05};
-        const quicksim_params                quicksim_params{params};
+        constexpr sidb::model::simulation_parameters params{2, -0.05};
+        const quicksim_params                        quicksim_params{params};
 
         auto tts_stats_quicksim = time_to_solution_stats{};
 

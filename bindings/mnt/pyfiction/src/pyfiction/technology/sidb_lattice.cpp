@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -60,8 +60,8 @@ void sidb_lattice_cell_level_layout(nanobind::module_& m)
 
 void sidb_lattices(nanobind::module_& m)
 {
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_100_lattice>(m);
-    detail::sidb_lattice_cell_level_layout<fiction::sidb_111_lattice>(m);
+    detail::sidb_lattice_cell_level_layout<fiction::sidb::primitives::lattice_100>(m);
+    detail::sidb_lattice_cell_level_layout<fiction::sidb::primitives::lattice_111>(m);
 }
 
 }  // namespace pyfiction

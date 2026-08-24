@@ -7,7 +7,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -671,8 +671,9 @@ class write_sidb_layout_svg_impl
      *
      * @return The SVG string representing the SiDB.
      */
-    [[nodiscard]] std::string generate_sidb(const double x, const double y,
-                                            const std::optional<sidb_charge_state>& charge_state = std::nullopt) const
+    [[nodiscard]] std::string
+    generate_sidb(const double x, const double y,
+                  const std::optional<sidb::model::charge_state>& charge_state = std::nullopt) const
     {
         std::string fill_color   = sidb_color;
         std::string border_color = sidb_edge_color;
@@ -683,19 +684,19 @@ class write_sidb_layout_svg_impl
         {
             switch (charge_state.value())
             {
-                case sidb_charge_state::POSITIVE:
+                case sidb::model::charge_state::POSITIVE:
                 {
                     fill_color   = fiction::layouts::io::detail::svg::POSITIVE_COLOR;
                     border_color = fiction::layouts::io::detail::svg::POSITIVE_COLOR;
                     break;
                 }
-                case sidb_charge_state::NEGATIVE:
+                case sidb::model::charge_state::NEGATIVE:
                 {
                     fill_color   = fiction::layouts::io::detail::svg::NEGATIVE_COLOR;
                     border_color = fiction::layouts::io::detail::svg::NEGATIVE_COLOR;
                     break;
                 }
-                case sidb_charge_state::NEUTRAL:
+                case sidb::model::charge_state::NEUTRAL:
                 {
                     fill_opacity = 0.0;
                     break;
@@ -751,7 +752,7 @@ class write_sidb_layout_svg_impl
                     shifted_coord.y += static_cast<decltype(shifted_coord.y)>(2);
                 }
 
-                const auto nm_pos = sidb_nm_position(lyt, shifted_coord);
+                const auto nm_pos = sidb::model::nm_position(lyt, shifted_coord);
 
                 svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10,
                                                       fiction::layouts::io::detail::svg::SI_LATTICE);
@@ -781,7 +782,7 @@ class write_sidb_layout_svg_impl
                 shifted_cell.y += static_cast<decltype(shifted_cell.y)>(2);
             }
 
-            const auto nm_pos = sidb_nm_position(lyt, shifted_cell);
+            const auto nm_pos = sidb::model::nm_position(lyt, shifted_cell);
 
             if constexpr (is_charge_distribution_surface_v<Lyt>)
             {
@@ -822,8 +823,8 @@ class write_sidb_layout_svg_impl
         }
 
         // Compute viewBox dimensions
-        const auto view_box_nm_min = sidb_nm_position(lyt, min_coord);
-        const auto view_box_nm_max = sidb_nm_position(lyt, shifted_max);
+        const auto view_box_nm_min = sidb::model::nm_position(lyt, min_coord);
+        const auto view_box_nm_max = sidb::model::nm_position(lyt, shifted_max);
 
         const auto viewbox_x      = view_box_nm_min.first * 10;
         const auto viewbox_y      = view_box_nm_min.second * 10;

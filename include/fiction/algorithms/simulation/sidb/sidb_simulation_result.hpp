@@ -6,9 +6,9 @@
 #define FICTION_SIDB_SIMULATION_RESULT_HPP
 
 #include "fiction/algorithms/simulation/sidb/minimum_energy.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 
 #include <algorithm>
 #include <any>
@@ -53,11 +53,11 @@ struct sidb_simulation_result
     /**
      * Charge distributions determined by the algorithm.
      */
-    std::vector<charge_distribution_surface<Lyt>> charge_distributions{};
+    std::vector<sidb::primitives::charge_distribution_surface<Lyt>> charge_distributions{};
     /**
      * Physical parameters used in the simulation.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters simulation_parameters{};
     /**
      * Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not part of
      * the `sidb_simulation_parameters` struct.
@@ -73,10 +73,10 @@ struct sidb_simulation_result
      *
      * @return A vector of charge distributions with the minimal energy.
      */
-    [[nodiscard]] std::vector<charge_distribution_surface<Lyt>> groundstates() const noexcept
+    [[nodiscard]] std::vector<sidb::primitives::charge_distribution_surface<Lyt>> groundstates() const noexcept
     {
-        std::vector<charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
-        std::set<uint64_t>                            charge_indices{};
+        std::vector<sidb::primitives::charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
+        std::set<uint64_t>                                              charge_indices{};
 
         // Find all unique charge indices. This is done because simulation results can have multiple identical charge
         // distributions.

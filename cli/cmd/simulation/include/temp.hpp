@@ -6,7 +6,7 @@
 #define FICTION_CMD_TEMP_HPP
 
 #include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -39,7 +39,7 @@ class temp_command final : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
     /**
      * Critical temperature parameters.
      */

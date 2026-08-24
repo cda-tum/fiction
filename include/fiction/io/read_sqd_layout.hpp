@@ -7,8 +7,8 @@
 
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 
 #include <tinyxml2.h>
@@ -222,14 +222,14 @@ class read_sqd_layout_impl
     {
         if (name == "Si(111) 1x1")
         {
-            if (!has_given_lattice_orientation_v<Lyt, sidb_111_lattice>)
+            if (!has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_111>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }
         }
         else if (name == "Si(100) 2x1")
         {
-            if (!has_given_lattice_orientation_v<Lyt, sidb_100_lattice>)
+            if (!has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_100>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }
@@ -331,31 +331,31 @@ class read_sqd_layout_impl
      * @param label The <type_label> element's <val> attribute.
      * @return The SiDB defect type corresponding to the given label.
      */
-    [[nodiscard]] static sidb_defect_type parse_defect_label(const char* label) noexcept
+    [[nodiscard]] static sidb::model::defect_type parse_defect_label(const char* label) noexcept
     {
         // maps defect names to their respective types
-        static const std::unordered_map<std::string, sidb_defect_type> defect_name_to_type{
-            {{"h-si", sidb_defect_type::NONE},
-             {"db", sidb_defect_type::DB},
-             {"vacancy", sidb_defect_type::SI_VACANCY},
-             {"single_dihydride", sidb_defect_type::SINGLE_DIHYDRIDE},
-             {"dihydride", sidb_defect_type::DIHYDRIDE_PAIR},
-             {"1by1", sidb_defect_type::ONE_BY_ONE},
-             {"3by1", sidb_defect_type::THREE_BY_ONE},
-             {"siloxane", sidb_defect_type::SILOXANE},
-             {"raised_silicon", sidb_defect_type::RAISED_SI},
-             {"missing_dimer", sidb_defect_type::MISSING_DIMER},
-             {"etch_pit", sidb_defect_type::ETCH_PIT},
-             {"step_edge", sidb_defect_type::STEP_EDGE},
-             {"gunk", sidb_defect_type::GUNK},
-             {"unknown", sidb_defect_type::UNKNOWN}}};
+        static const std::unordered_map<std::string, sidb::model::defect_type> defect_name_to_type{
+            {{"h-si", sidb::model::defect_type::NONE},
+             {"db", sidb::model::defect_type::DB},
+             {"vacancy", sidb::model::defect_type::SI_VACANCY},
+             {"single_dihydride", sidb::model::defect_type::SINGLE_DIHYDRIDE},
+             {"dihydride", sidb::model::defect_type::DIHYDRIDE_PAIR},
+             {"1by1", sidb::model::defect_type::ONE_BY_ONE},
+             {"3by1", sidb::model::defect_type::THREE_BY_ONE},
+             {"siloxane", sidb::model::defect_type::SILOXANE},
+             {"raised_silicon", sidb::model::defect_type::RAISED_SI},
+             {"missing_dimer", sidb::model::defect_type::MISSING_DIMER},
+             {"etch_pit", sidb::model::defect_type::ETCH_PIT},
+             {"step_edge", sidb::model::defect_type::STEP_EDGE},
+             {"gunk", sidb::model::defect_type::GUNK},
+             {"unknown", sidb::model::defect_type::UNKNOWN}}};
 
         std::string name{label};
         std::ranges::transform(name, name.begin(),
                                [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
 
         const auto it = defect_name_to_type.find(name);
-        return it == defect_name_to_type.cend() ? sidb_defect_type::UNKNOWN : it->second;
+        return it == defect_name_to_type.cend() ? sidb::model::defect_type::UNKNOWN : it->second;
     }
     /**
      * Parses a <defect> element from the SQD file and adds the respective defect to the layout if it implements the
@@ -367,11 +367,11 @@ class read_sqd_layout_impl
     {
         if constexpr (has_assign_sidb_defect_v<Lyt>)
         {
-            std::vector<cell<Lyt>> incl_cells{};
-            sidb_defect_type       defect_type{sidb_defect_type::UNKNOWN};
-            int64_t                charge{0};
-            double                 eps_r{0.0};
-            double                 lambda_tf{0.0};
+            std::vector<cell<Lyt>>   incl_cells{};
+            sidb::model::defect_type defect_type{sidb::model::defect_type::UNKNOWN};
+            int64_t                  charge{0};
+            double                   eps_r{0.0};
+            double                   lambda_tf{0.0};
 
             if (const auto* const incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
             {
@@ -417,7 +417,7 @@ class read_sqd_layout_impl
 
             std::ranges::for_each(
                 incl_cells, [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
-                { lyt.assign_sidb_defect(cell, sidb_defect{defect_type, charge, eps_r, lambda_tf}); });
+                { lyt.assign_sidb_defect(cell, sidb::model::defect{defect_type, charge, eps_r, lambda_tf}); });
         }
     }
 };

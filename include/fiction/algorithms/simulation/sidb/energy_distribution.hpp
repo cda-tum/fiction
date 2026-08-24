@@ -5,8 +5,8 @@
 #ifndef FICTION_ENERGY_DISTRIBUTION_HPP
 #define FICTION_ENERGY_DISTRIBUTION_HPP
 
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -179,15 +179,15 @@ class energy_distribution
  * @return Energy distribution.
  */
 template <typename Lyt>
-[[nodiscard]] energy_distribution
-calculate_energy_distribution(const std::vector<charge_distribution_surface<Lyt>>& charge_distributions)
+[[nodiscard]] energy_distribution calculate_energy_distribution(
+    const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& charge_distributions)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
     energy_distribution distribution{};
 
-    std::vector<charge_distribution_surface<Lyt>> cds_updated_charge_index{};
+    std::vector<sidb::primitives::charge_distribution_surface<Lyt>> cds_updated_charge_index{};
     cds_updated_charge_index.reserve(charge_distributions.size());
 
     // collect all unique charge indices
@@ -200,7 +200,7 @@ calculate_energy_distribution(const std::vector<charge_distribution_surface<Lyt>
         cds_updated_charge_index.push_back(lyt);
     }
 
-    std::vector<charge_distribution_surface<Lyt>> unique_cds{};
+    std::vector<sidb::primitives::charge_distribution_surface<Lyt>> unique_cds{};
     unique_cds.reserve(unique_charge_index.size());
 
     std::set<double> unique_energies{};

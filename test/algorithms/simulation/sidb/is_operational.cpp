@@ -11,11 +11,11 @@
 #include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <cstdint>
@@ -33,7 +33,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
     const sidb_100_cell_clk_lyt_siqad lat{or_gate};
 
     auto op_params = is_operational_params{
-        .simulation_parameters = sidb_simulation_parameters{2, -0.32},
+        .simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
         .sim_engine            = sidb_simulation_engine::QUICKEXACT,
         .input_bdl_iterator_params =
             bdl_input_iterator_params{
@@ -106,7 +106,7 @@ TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operationa
     const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>();
 
     const auto op_params =
-        is_operational_params{.simulation_parameters     = sidb_simulation_parameters{2, -0.32},
+        is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
                               .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                               .input_bdl_iterator_params = bdl_input_iterator_params{},
                               .op_condition              = is_operational_params::operational_condition::REJECT_KINKS,
@@ -124,7 +124,7 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
     const sidb_100_cell_clk_lyt_siqad lat{nand_gate};
 
     auto op_params = is_operational_params{
-        .simulation_parameters = sidb_simulation_parameters{2, -0.28},
+        .simulation_parameters = sidb::model::simulation_parameters{2, -0.28},
         .sim_engine            = sidb_simulation_engine::QUICKEXACT,
         .input_bdl_iterator_params =
             bdl_input_iterator_params{
@@ -190,10 +190,10 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
     CHECK(is_operational(lat, std::vector<tt>{networks::utils::create_and_tt()},
-                         is_operational_params{sidb_simulation_parameters{2, -0.28}})
+                         is_operational_params{sidb::model::simulation_parameters{2, -0.28}})
               .first == operational_status::OPERATIONAL);
     CHECK(is_operational(lat, std::vector<tt>{networks::utils::create_and_tt()},
-                         is_operational_params{sidb_simulation_parameters{2, -0.1}})
+                         is_operational_params{sidb::model::simulation_parameters{2, -0.1}})
               .first == operational_status::NON_OPERATIONAL);
 }
 
@@ -203,13 +203,13 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 
     SECTION("using QuickExact")
     {
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.30},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
 
@@ -217,11 +217,11 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
     {
         CHECK(is_operational(
                   lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKSIM})
+                  is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKSIM})
                   .first == operational_status::OPERATIONAL);
         CHECK(is_operational(
                   lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKSIM})
+                  is_operational_params{sidb::model::simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKSIM})
                   .first == operational_status::NON_OPERATIONAL);
     }
 
@@ -229,13 +229,13 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 
     SECTION("using ClusterComplete")
     {
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{3, -0.32}, sidb_simulation_engine::CLUSTERCOMPLETE})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{3, -0.32},
+                                                   sidb_simulation_engine::CLUSTERCOMPLETE})
                   .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
-                  is_operational_params{sidb_simulation_parameters{3, -0.30}, sidb_simulation_engine::CLUSTERCOMPLETE})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_fan_out_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{3, -0.30},
+                                                   sidb_simulation_engine::CLUSTERCOMPLETE})
                   .first == operational_status::NON_OPERATIONAL);
     }
 
@@ -250,39 +250,39 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    CHECK(
-        is_operational(lat, networks::utils::create_crossing_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lat, networks::utils::create_crossing_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
+    CHECK(is_operational(
+              lat, networks::utils::create_crossing_wire_tt(),
+              is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::OPERATIONAL);
+    CHECK(is_operational(
+              lat, networks::utils::create_crossing_wire_tt(),
+              is_operational_params{sidb::model::simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
     auto lyt = blueprints::bestagon_and<sidb_defect_cell_clk_lyt_siqad>();
 
-    const sidb_simulation_parameters params{2, -0.32};
+    const sidb::model::simulation_parameters params{2, -0.32};
 
     SECTION("Without defects")
     {
         CHECK(lyt.num_cells() == 23);
 
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.30},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
     SECTION("With defects")
     {
-        lyt.assign_sidb_defect({3, 16, 1},
-                               sidb_defect{sidb_defect_type::UNKNOWN, -1, params.epsilon_r, params.lambda_tf});
+        lyt.assign_sidb_defect(
+            {3, 16, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1, params.epsilon_r, params.lambda_tf});
         CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
                              is_operational_params{params, sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
@@ -301,20 +301,20 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
     }
     SECTION("Check operation for different values of mu")
     {
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.30},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
     SECTION("Count the number of non-operational input combinations, accepting kinks")
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_operational_params{.simulation_parameters = sidb_simulation_parameters{2, -0.30},
+            is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.30},
                                   .sim_engine            = sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 1);
         CHECK(op_inputs == std::set<uint64_t>{3});
@@ -325,7 +325,7 @@ TEST_CASE("SiQAD AND gate", "[is-operational]")
 {
     auto lyt = blueprints::siqad_and_gate<sidb_defect_cell_clk_lyt_siqad>();
 
-    sidb_simulation_parameters params{2, -0.28};
+    sidb::model::simulation_parameters params{2, -0.28};
 
     SECTION("check in regime with positive charges")
     {
@@ -397,10 +397,10 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    CHECK(
-        is_operational(lat, std::vector<tt>{networks::utils::create_id_tt()},
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
+    CHECK(is_operational(
+              lat, std::vector<tt>{networks::utils::create_id_tt()},
+              is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::NON_OPERATIONAL);
 }
 
 TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", sidb_111_cell_clk_lyt_siqad,
@@ -412,7 +412,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_operational_params{.simulation_parameters = sidb_simulation_parameters{2, -0.32},
+            is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
                                   .sim_engine            = sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 4);
         CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
@@ -421,7 +421,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
     {
         const auto op_inputs = operational_input_patterns(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_operational_params{.simulation_parameters = sidb_simulation_parameters{2, -0.30},
+            is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.30},
                                   .sim_engine            = sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 2);
         CHECK(op_inputs == std::set<uint64_t>{0, 3});
@@ -433,7 +433,7 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
         const auto lyt_mirrored_x = blueprints::and_gate_111_mirrored_on_the_x_axis<TestType>();
         const auto op_inputs      = operational_input_patterns(
             lyt_mirrored_x, std::vector<tt>{networks::utils::create_and_tt()},
-            is_operational_params{.simulation_parameters = sidb_simulation_parameters{2, -0.32},
+            is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
                                   .sim_engine            = sidb_simulation_engine::QUICKEXACT});
         CHECK(op_inputs.size() == 4);
         CHECK(op_inputs == std::set<uint64_t>{0, 1, 2, 3});
@@ -449,13 +449,13 @@ TEST_CASE(
     SECTION("allow kink states")
     {
         CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                             is_operational_params{sidb_simulation_parameters{2, -0.32}})
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32}})
                   .first == operational_status::OPERATIONAL);
     }
     SECTION("reject kink states")
     {
         CHECK(is_operational(lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                             is_operational_params{sidb_simulation_parameters{2, -0.32},
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32},
                                                    sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
                                                    is_operational_params::operational_condition::REJECT_KINKS})
                   .first == operational_status::NON_OPERATIONAL);
@@ -465,7 +465,7 @@ TEST_CASE(
         // check if the function works correctly even if the parameter is wrong (kinks are accepted).
         CHECK(is_kink_induced_non_operational(
             lyt, std::vector<tt>{networks::utils::create_and_tt()},
-            is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+            is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
                                   bdl_input_iterator_params{},
                                   is_operational_params::operational_condition::TOLERATE_KINKS}));
     }
@@ -474,8 +474,8 @@ TEST_CASE(
     {
         CHECK(kink_induced_non_operational_input_patterns(
                   lyt, std::vector<tt>{networks::utils::create_and_tt()},
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                        bdl_input_iterator_params{},
+                  is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                        sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
                                         is_operational_params::operational_condition::TOLERATE_KINKS}) ==
               std::set<uint64_t>{1, 2});
     }
@@ -504,7 +504,7 @@ TEST_CASE("BDL wire", "[is-operational]")
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
 
     sim_params.base = 2;
 
@@ -541,7 +541,7 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
 
     lyt.assign_cell_type({2, 19, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
 
     sim_params.base = 2;
 
@@ -575,14 +575,14 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
     const auto lyt = blueprints::crossing_bestagon_shape_input_down_output_up<sidb_cell_clk_lyt_siqad>();
 
     CHECK(is_operational(lyt, networks::utils::create_crossing_wire_tt(),
-                         is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
-                                               bdl_input_iterator_params{},
+                         is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                               sidb_simulation_engine::QUICKEXACT, bdl_input_iterator_params{},
                                                is_operational_params::operational_condition::REJECT_KINKS})
               .first == operational_status::OPERATIONAL);
 
     const auto kink_induced_non_operational_input_pattern = kink_induced_non_operational_input_patterns(
         lyt, networks::utils::create_crossing_wire_tt(),
-        is_operational_params{.simulation_parameters     = sidb_simulation_parameters{2, -0.32},
+        is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
                               .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                               .input_bdl_iterator_params = bdl_input_iterator_params{},
                               .op_condition              = is_operational_params::operational_condition::REJECT_KINKS});
@@ -591,7 +591,7 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 
     const auto kink_induced_non_operational = is_kink_induced_non_operational(
         lyt, networks::utils::create_crossing_wire_tt(),
-        is_operational_params{.simulation_parameters     = sidb_simulation_parameters{2, -0.32},
+        is_operational_params{.simulation_parameters     = sidb::model::simulation_parameters{2, -0.32},
                               .sim_engine                = sidb_simulation_engine::QUICKEXACT,
                               .input_bdl_iterator_params = bdl_input_iterator_params{},
                               .op_condition              = is_operational_params::operational_condition::REJECT_KINKS});
@@ -609,13 +609,13 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
     SECTION("without predetermined wires")
     {
-        CHECK(is_operational(
-                  lat, networks::utils::create_crossing_wire_tt(),
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lat, networks::utils::create_crossing_wire_tt(),
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lat, networks::utils::create_crossing_wire_tt(),
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+        CHECK(is_operational(lat, networks::utils::create_crossing_wire_tt(),
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.30},
+                                                   sidb_simulation_engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
 
@@ -624,19 +624,19 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
         const auto input_bdl_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         const auto output_bdl_wires = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
 
-        CHECK(is_operational(
-                  lat, networks::utils::create_crossing_wire_tt(),
-                  is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT},
-                  input_bdl_wires, output_bdl_wires)
+        CHECK(is_operational(lat, networks::utils::create_crossing_wire_tt(),
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.32},
+                                                   sidb_simulation_engine::QUICKEXACT},
+                             input_bdl_wires, output_bdl_wires)
                   .first == operational_status::OPERATIONAL);
-        CHECK(is_operational(
-                  lat, networks::utils::create_crossing_wire_tt(),
-                  is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
-                  input_bdl_wires, output_bdl_wires)
+        CHECK(is_operational(lat, networks::utils::create_crossing_wire_tt(),
+                             is_operational_params{sidb::model::simulation_parameters{2, -0.30},
+                                                   sidb_simulation_engine::QUICKEXACT},
+                             input_bdl_wires, output_bdl_wires)
                   .first == operational_status::NON_OPERATIONAL);
         CHECK(!is_kink_induced_non_operational(
             lat, networks::utils::create_crossing_wire_tt(),
-            is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
+            is_operational_params{sidb::model::simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT},
             input_bdl_wires, output_bdl_wires));
     }
 
@@ -645,7 +645,7 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
         const auto input_bdl_wires  = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
         const auto output_bdl_wires = detect_bdl_wires(lat, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
 
-        auto op_params = is_operational_params{.simulation_parameters = sidb_simulation_parameters{2, -0.32}};
+        auto op_params = is_operational_params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32}};
         op_params.strategy_to_analyze_operational_status =
             is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
@@ -663,14 +663,14 @@ TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [q
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    CHECK(
-        is_operational(lat, networks::utils::create_double_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lat, networks::utils::create_double_wire_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
+    CHECK(is_operational(
+              lat, networks::utils::create_double_wire_tt(),
+              is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::OPERATIONAL);
+    CHECK(is_operational(
+              lat, networks::utils::create_double_wire_tt(),
+              is_operational_params{sidb::model::simulation_parameters{2, -0.30}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::NON_OPERATIONAL);
 }
 
 TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [quality]")
@@ -681,14 +681,14 @@ TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [qu
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    CHECK(
-        is_operational(lat, networks::utils::create_half_adder_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::OPERATIONAL);
-    CHECK(
-        is_operational(lat, networks::utils::create_half_adder_tt(),
-                       is_operational_params{sidb_simulation_parameters{2, -0.25}, sidb_simulation_engine::QUICKEXACT})
-            .first == operational_status::NON_OPERATIONAL);
+    CHECK(is_operational(
+              lat, networks::utils::create_half_adder_tt(),
+              is_operational_params{sidb::model::simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::OPERATIONAL);
+    CHECK(is_operational(
+              lat, networks::utils::create_half_adder_tt(),
+              is_operational_params{sidb::model::simulation_parameters{2, -0.25}, sidb_simulation_engine::QUICKEXACT})
+              .first == operational_status::NON_OPERATIONAL);
 }
 #endif
 
@@ -723,7 +723,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
             // all-patterns-simulated paths are covered
             for (const auto mu_minus : {-0.32, -0.15})
             {
-                is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, mu_minus},
+                is_operational_params params{.simulation_parameters = sidb::model::simulation_parameters{2, mu_minus},
                                              .sim_engine            = sidb_simulation_engine::QUICKEXACT};
                 params.op_condition = condition;
 
@@ -736,7 +736,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
     {
         const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>()};
 
-        is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, -0.28},
+        is_operational_params params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.28},
                                      .sim_engine            = sidb_simulation_engine::QUICKEXACT};
         params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
@@ -747,7 +747,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
     {
         const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-        const is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, -0.32},
+        const is_operational_params params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
                                            .sim_engine            = sidb_simulation_engine::QUICKEXACT};
 
         check_agreement(lat, std::vector<tt>{networks::utils::create_and_tt()}, params);
@@ -758,7 +758,7 @@ TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]
 {
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-    const is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2, -0.32},
+    const is_operational_params params{.simulation_parameters = sidb::model::simulation_parameters{2, -0.32},
                                        .sim_engine            = sidb_simulation_engine::QUICKEXACT};
 
     const auto input_wires =
@@ -825,7 +825,7 @@ TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-op
                                     is_operational_params::operational_analysis_strategy::FILTER_ONLY,
                                     is_operational_params::operational_analysis_strategy::FILTER_THEN_SIMULATION})
         {
-            is_operational_params params{.simulation_parameters = sidb_simulation_parameters{2}};
+            is_operational_params params{.simulation_parameters = sidb::model::simulation_parameters{2}};
             params.op_condition                           = condition;
             params.strategy_to_analyze_operational_status = strategy;
 

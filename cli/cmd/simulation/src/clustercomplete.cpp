@@ -10,9 +10,9 @@
 
 #include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
 #include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -133,9 +133,9 @@ void clustercomplete_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr =
-                    minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
-                                                std::get<sim_result_100>(sim_result).charge_distributions.cend());
+                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                    std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
+                    std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
                 min_energy = min_energy_distr->get_electrostatic_potential_energy();
                 store<fiction::cell_layout_t>().extend() =
@@ -150,9 +150,9 @@ void clustercomplete_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr =
-                    minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
-                                                std::get<sim_result_111>(sim_result).charge_distributions.cend());
+                const auto min_energy_distr = fiction::minimum_energy_distribution(
+                    std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
+                    std::get<sim_result_111>(sim_result).charge_distributions.cend());
 
                 min_energy = min_energy_distr->get_electrostatic_potential_energy();
                 store<fiction::cell_layout_t>().extend() =
@@ -218,7 +218,7 @@ nlohmann::json clustercomplete_command::log() const
 
 void clustercomplete_command::reset_params()
 {
-    physical_params = fiction::sidb_simulation_parameters{3, -0.32, 5.6, 5.0};
+    physical_params = fiction::sidb::model::simulation_parameters{3, -0.32, 5.6, 5.0};
     cc_params       = {};
     sim_result      = {};
 }

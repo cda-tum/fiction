@@ -424,8 +424,8 @@ class bdl_input_iterator
                 wire.pairs,
                 [&](const bdl_pair<cell<Lyt>>& a, const bdl_pair<cell<Lyt>>& b) -> bool
                 {
-                    const double distance_a{sidb_nm_distance(Lyt{}, start_bdl_pair.upper, a.upper)};
-                    const double distance_b{sidb_nm_distance(Lyt{}, start_bdl_pair.upper, b.upper)};
+                    const double distance_a{sidb::model::nm_distance(Lyt{}, start_bdl_pair.upper, a.upper)};
+                    const double distance_b{sidb::model::nm_distance(Lyt{}, start_bdl_pair.upper, b.upper)};
                     return distance_a < distance_b;
                 })};
 
@@ -460,9 +460,9 @@ class bdl_input_iterator
 
             // both distances are measured against the upper dot of the wire's last BDL pair
             const auto distance_between_end_bdl_and_upper_input =
-                sidb_nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
+                sidb::model::nm_distance(Lyt{}, input_i.upper, last_bdl_for_each_wire[i].upper);
             const auto distance_between_end_bdl_and_lower_input =
-                sidb_nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
+                sidb::model::nm_distance(Lyt{}, input_i.lower, last_bdl_for_each_wire[i].upper);
 
             upper_is_closer.push_back(distance_between_end_bdl_and_upper_input <
                                       distance_between_end_bdl_and_lower_input);

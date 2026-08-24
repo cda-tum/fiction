@@ -11,10 +11,10 @@
 #include "fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 
@@ -339,10 +339,10 @@ class design_sidb_gates_impl
                             result_lyt.value().foreach_sidb_defect(
                                 [&result_lyt](const auto& cd)
                                 {
-                                    if (is_neutrally_charged_defect(cd.second))
+                                    if (sidb::model::is_neutrally_charged_defect(cd.second))
                                     {
-                                        result_lyt.value().assign_sidb_defect(cd.first,
-                                                                              sidb_defect{sidb_defect_type::NONE});
+                                        result_lyt.value().assign_sidb_defect(
+                                            cd.first, sidb::model::defect{sidb::model::defect_type::NONE});
                                     }
                                 });
                         }
@@ -359,7 +359,7 @@ class design_sidb_gates_impl
                                 skeleton_layout.foreach_sidb_defect(
                                     [&result_lyt](const auto& cd)
                                     {
-                                        if (is_neutrally_charged_defect(cd.second))
+                                        if (sidb::model::is_neutrally_charged_defect(cd.second))
                                         {
                                             result_lyt.value().assign_sidb_defect(cd.first, cd.second);
                                         }
@@ -593,9 +593,9 @@ class design_sidb_gates_impl
                     dependent_cell = c;
                 });
 
-            charge_distribution_surface<Lyt> cds_canvas{canvas_lyt, params.operational_params.simulation_parameters,
-                                                        sidb_charge_state::NEGATIVE,
-                                                        cds_configuration::CHARGE_LOCATION_ONLY};
+            sidb::primitives::charge_distribution_surface<Lyt> cds_canvas{
+                canvas_lyt, params.operational_params.simulation_parameters, sidb::model::charge_state::NEGATIVE,
+                sidb::primitives::cds_configuration::CHARGE_LOCATION_ONLY};
 
             cds_canvas.assign_dependent_cell(dependent_cell);
 
@@ -726,7 +726,7 @@ class design_sidb_gates_impl
             {
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
-                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb::model::defect_type::NONE)
                     {
                         continue;
                     }
@@ -757,7 +757,7 @@ class design_sidb_gates_impl
                 // SiDBs cannot be placed on positions which are already occupied by atomic defects.
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
-                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb_defect_type::NONE)
+                    if (skeleton_layout.get_sidb_defect(all_sidbs_in_canvas[i]).type != sidb::model::defect_type::NONE)
                     {
                         return std::nullopt;
                     }

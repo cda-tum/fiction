@@ -731,7 +731,7 @@ to the end of its wire than its lower dot.
 
 `set_all_inputs` needs only this comparison, not the distances
 themselves, and both operands are fixed for this object's lifetime.
-Evaluating it once here keeps the two `sidb_nm_distance` calls per
+Evaluating it once here keeps the two `sidb::model::nm_distance` calls per
 input pair out of every increment.
 
 Returns:
@@ -1576,14 +1576,14 @@ Returns:
 )doc";
 
 static const char* mkd_doc_fiction_calculate_energy_distribution =
-    R"doc(This function takes in a vector of `charge_distribution_surface`
+    R"doc(This function takes in a vector of `sidb::primitives::charge_distribution_surface`
 objects and returns a map containing the system energy and the number
 of occurrences of that energy in the input vector. To compare two
 energy values for equality, the comparison uses a tolerance specified
 by `fcn::constants::ERROR_MARGIN`.
 
 Args:
-    charge_distributions: A vector of `charge_distribution_surface`
+    charge_distributions: A vector of `sidb::primitives::charge_distribution_surface`
                           objects for which the energy distribution is
                           computed.
 
@@ -12686,7 +12686,7 @@ first collecting all dots of the given type and then uniquely pairing
 them up based on their distance. Lower and upper distance thresholds
 can be defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow
 down the range in which SiDBs could be considered a BDL pair. The
-distance between two dots is computed using the `sidb_nm_distance`
+distance between two dots is computed using the `sidb::model::nm_distance`
 function. The algorithm returns a vector of BDL pairs.
 
 Args:
@@ -18917,7 +18917,7 @@ static const char* mkd_doc_fiction_mincross_stats_num_crossings =
 
 static const char* mkd_doc_fiction_minimum_energy =
     R"doc(Computes the minimum energy of a range of
-`charge_distribution_surface` objects. If the range is empty, infinity
+`sidb::primitives::charge_distribution_surface` objects. If the range is empty, infinity
 is returned to indicate no valid energy value exists.
 
 Args:
@@ -18936,7 +18936,7 @@ Returns:
 
 static const char* mkd_doc_fiction_minimum_energy_distribution =
     R"doc(Returns an iterator to the charge distribution of minimum energy
-contained in a range of `charge_distribution_surface` objects. If the
+contained in a range of `sidb::primitives::charge_distribution_surface` objects. If the
 range is empty, `last` is returned.
 
 Args:
@@ -21199,7 +21199,7 @@ Args:
     inter_sidb_pot: The chargeless potential between the SiDB in the
                     singleton cluster and the one projected onto, as
                     found in the potential matrix in an associated
-                    `charge_distribution_surface` object.
+                    `sidb::primitives::charge_distribution_surface` object.
     base: The simulation base. This defines whether positive charges
           are considered.
 
@@ -21240,7 +21240,7 @@ projection.
 Args:
     inter_sidb_pot: Potential value of which the absolute value may be
                     found in the potential matrix in an associated
-                    `charge_distribution_surface` object.
+                    `sidb::primitives::charge_distribution_surface` object.
     cs: Charge state associated with the singleton cluster projector
         for this potential projection.
 
@@ -21338,7 +21338,7 @@ Args:
 Template Args:
     Lyt: SiDB cell-level layout with charge-information based on SiQAD
          coordinates or defect-information, e.g., a
-         `charge_distribution_surface` or `sidb_defect_surface`.
+         `sidb::primitives::charge_distribution_surface` or `sidb::primitives::defect_surface`.
 
 )doc";
 
@@ -22841,15 +22841,15 @@ the complete layout.)doc";
 static const char* mkd_doc_fiction_sidb_clustering_state_operator_assign =
     R"doc(Copy assignment operator.
 
-Assigns the contents of another `sidb_clustering_state` instance to
+Assigns the contents of another `sidb::model::clustering_state` instance to
 this instance. Performs a deep copy of `proj_states` and a complete
 copy of `pot_bounds`.
 
 Args:
-    other: The `sidb_clustering_state` instance to copy from.
+    other: The `sidb::model::clustering_state` instance to copy from.
 
 Returns:
-    A reference to this `sidb_clustering_state` instance after
+    A reference to this `sidb::model::clustering_state` instance after
     assignment.
 
 )doc";
@@ -22896,7 +22896,7 @@ Args:
 )doc";
 
 static const char* mkd_doc_fiction_sidb_defect =
-    R"doc(In accordance with the paper mentioned above, the `sidb_defect` struct
+    R"doc(In accordance with the paper mentioned above, the `sidb::model::defect` struct
 is used to represent a specific defect on the H-Si(100) 2x1 surface
 that has a charge as well as relative permittivity (`epsilon_r`) and
 Thomas-Fermi screening distance (`lambda_tf`) values associated to it.
@@ -22916,12 +22916,12 @@ static const char* mkd_doc_fiction_sidb_defect_epsilon_r = R"doc(Electric permit
 static const char* mkd_doc_fiction_sidb_defect_lambda_tf = R"doc(Thomas-Fermi screening distance in nm.)doc";
 
 static const char* mkd_doc_fiction_sidb_defect_operator_eq =
-    R"doc(This operator compares two `sidb_defect` instances for equality. It
+    R"doc(This operator compares two `sidb::model::defect` instances for equality. It
 checks if the `type`, `charge`, `epsilon_r`, and `lambda_tf` members
 of the two instances are equal.
 
 Args:
-    rhs: `sidb_defect` instance to compare against.
+    rhs: `sidb::model::defect` instance to compare against.
 
 )doc";
 
@@ -23386,7 +23386,7 @@ Template Args:
 static const char* mkd_doc_fiction_sidb_simulation_result_additional_simulation_parameters =
     R"doc(Additional named simulation parameters. This is used to store
 algorithm-dependent parameters that are not part of the
-`sidb_simulation_parameters` struct.
+`sidb::model::simulation_parameters` struct.
 
 The key of the map is the name of the parameter, the element is the
 value of the parameter.)doc";
@@ -23605,7 +23605,7 @@ Args:
     sg: Integer (`-1`, `0`, `1`) representing a charge state.
 
 Returns:
-    sidb_charge_state representation of `sg`.
+    sidb::model::charge_state representation of `sg`.
 
 )doc";
 
@@ -24923,7 +24923,7 @@ Returns:
 
 static const char* mkd_doc_fiction_to_unique_sidb_cluster =
     R"doc(This recursive function is used to convert a binary cluster hierarchy,
-as for instance returned by `sidb_cluster_hierarchy` function that
+as for instance returned by `sidb::model::cluster_hierarchy` function that
 uses ALGLIB's `clusterizer`. The returned structure includes parent
 pointers.
 

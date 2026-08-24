@@ -10,9 +10,9 @@
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_defects.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -618,11 +618,11 @@ struct is_charge_distribution_surface : std::false_type
 
 template <class Lyt>
 struct is_charge_distribution_surface<
-    Lyt,
-    std::enable_if_t<is_cell_level_layout_v<Lyt>,
-                     std::void_t<typename Lyt::storage,
-                                 decltype(std::declval<Lyt>().assign_charge_state(cell<Lyt>(), sidb_charge_state())),
-                                 decltype(std::declval<Lyt>().get_charge_state(cell<Lyt>()))>>> : std::true_type
+    Lyt, std::enable_if_t<
+             is_cell_level_layout_v<Lyt>,
+             std::void_t<typename Lyt::storage,
+                         decltype(std::declval<Lyt>().assign_charge_state(cell<Lyt>(), sidb::model::charge_state())),
+                         decltype(std::declval<Lyt>().get_charge_state(cell<Lyt>()))>>> : std::true_type
 {};
 
 template <class Lyt>
@@ -717,7 +717,8 @@ struct is_sidb_lattice_100 : std::false_type
 
 template <typename Lyt>
 struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb_100_lattice>, std::true_type, std::false_type>
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_100>, std::true_type,
+                             std::false_type>
 {};
 
 template <typename Lyt>
@@ -731,7 +732,8 @@ struct is_sidb_lattice_111 : std::false_type
 
 template <typename Lyt>
 struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb_111_lattice>, std::true_type, std::false_type>
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_111>, std::true_type,
+                             std::false_type>
 {};
 
 template <typename Lyt>
@@ -750,11 +752,12 @@ struct is_sidb_defect_surface : std::false_type
 // SFINAE-enabled specialization for Lyt satisfying certain conditions
 template <class Lyt>
 struct is_sidb_defect_surface<
-    Lyt, std::void_t<typename Lyt::storage,  // Check if Lyt has a nested type 'storage'
-                     decltype(std::declval<Lyt>().assign_sidb_defect(
-                         std::declval<cell<Lyt>>(), std::declval<sidb_defect>())),  // Check if calling
-                                                                                    // 'assign_sidb_defect' is valid
-                     decltype(std::declval<Lyt>().get_sidb_defect(std::declval<cell<Lyt>>()))>>
+    Lyt,
+    std::void_t<typename Lyt::storage,  // Check if Lyt has a nested type 'storage'
+                decltype(std::declval<Lyt>().assign_sidb_defect(
+                    std::declval<cell<Lyt>>(), std::declval<sidb::model::defect>())),  // Check if calling
+                                                                                       // 'assign_sidb_defect' is valid
+                decltype(std::declval<Lyt>().get_sidb_defect(std::declval<cell<Lyt>>()))>>
         : std::true_type  // Check if calling 'get_sidb_defect' is valid
 {};
 
@@ -770,7 +773,7 @@ struct has_assign_sidb_defect : std::false_type
 
 template <class Lyt>
 struct has_assign_sidb_defect<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb_defect()))>>
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_sidb_defect(coordinate<Lyt>(), sidb::model::defect()))>>
         : std::true_type
 {};
 
@@ -798,8 +801,9 @@ struct has_foreach_sidb_defect : std::false_type
 {};
 
 template <class Lyt>
-struct has_foreach_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
-                                        std::declval<void(std::pair<coordinate<Lyt>, sidb_defect>, uint32_t)>()))>>
+struct has_foreach_sidb_defect<Lyt,
+                               std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
+                                   std::declval<void(std::pair<coordinate<Lyt>, sidb::model::defect>, uint32_t)>()))>>
         : std::true_type
 {};
 
@@ -836,7 +840,7 @@ struct has_assign_charge_state : std::false_type
 
 template <class Lyt>
 struct has_assign_charge_state<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_charge_state(coordinate<Lyt>(), sidb_charge_state()))>>
+    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_charge_state(coordinate<Lyt>(), sidb::model::charge_state()))>>
         : std::true_type
 {};
 

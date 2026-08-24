@@ -5,11 +5,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
 #include <fiction/io/write_sqd_sim_result.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/primitives/lattice.hpp>
+#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
 #include <fiction/utils/version_info.hpp>
@@ -158,7 +158,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using lattice = sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_siqad>;
+    using lattice = sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>;
 
     sidb_simulation_result<lattice> sim_result{};
 
@@ -293,9 +293,9 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     lyt.assign_cell_type({17, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{2, -0.32};
+    const sidb::model::simulation_parameters params{2, -0.32};
 
-    const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
+    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lat{lyt};
 
     auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
@@ -356,9 +356,9 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb_simulation_parameters params{3, -0.32};
+    const sidb::model::simulation_parameters params{3, -0.32};
 
-    const sidb_lattice<sidb_100_lattice, sidb_layout> lat{lyt};
+    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lat{lyt};
 
     auto sim_result = exhaustive_ground_state_simulation(lat, params);
 

@@ -8,9 +8,9 @@
 #include <fiction/algorithms/simulation/sidb/is_operational.hpp>
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -39,7 +39,7 @@ int main()  // NOLINT
         "ΔCT"};
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{};
+    sidb::model::simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 

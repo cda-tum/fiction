@@ -8,11 +8,11 @@
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/quicksim.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -54,7 +54,7 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{networks::utils::create_id_tt()})};
 
-    const sidb_simulation_parameters                sim_params{2, -0.32};
+    const sidb::model::simulation_parameters        sim_params{2, -0.32};
     const quicksim_params                           qs_params{sim_params};
     const quickexact_params<layouts::coords::siqad> qe_params{sim_params};
     const time_to_solution_params                   tts_params{};

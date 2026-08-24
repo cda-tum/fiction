@@ -14,10 +14,10 @@
 #include "fiction/algorithms/simulation/sidb/quicksim.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_domain.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fiction/utils/stl/hash.hpp"
@@ -1095,7 +1095,7 @@ class operational_domain_impl
             }
         }
 
-        sidb_simulation_parameters simulation_parameters = params.operational_params.simulation_parameters;
+        sidb::model::simulation_parameters simulation_parameters = params.operational_params.simulation_parameters;
 
         op_domain.for_each(
             [&simulation_parameters, &lyt, this, &suitable_params_domain](const auto& param_point, const auto& status)
@@ -1357,7 +1357,7 @@ class operational_domain_impl
      * @param val Value to set the dimension `dim` to.
      * @param dim Sweep dimension to set the value `val` to.
      */
-    void set_dimension_value(sidb_simulation_parameters& sim_parameters, const double val,
+    void set_dimension_value(sidb::model::simulation_parameters& sim_parameters, const double val,
                              const std::size_t dim) const noexcept
     {
         switch (params.sweep_dimensions.at(dim).dimension)
@@ -1438,7 +1438,7 @@ class operational_domain_impl
 
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
+        sidb::model::simulation_parameters sim_params = params.operational_params.simulation_parameters;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {
@@ -1509,7 +1509,7 @@ class operational_domain_impl
         // increment the number of evaluated parameter combinations
         ++num_evaluated_parameter_combinations;
 
-        sidb_simulation_parameters sim_params = params.operational_params.simulation_parameters;
+        sidb::model::simulation_parameters sim_params = params.operational_params.simulation_parameters;
 
         for (auto d = 0u; d < num_dimensions; ++d)
         {

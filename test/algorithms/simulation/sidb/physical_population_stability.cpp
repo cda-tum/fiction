@@ -8,11 +8,11 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/sidb_lattice.hpp>
-#include <fiction/technology/sidb_lattice_orientations.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/primitives/lattice.hpp>
+#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
@@ -26,7 +26,7 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 
     SECTION("Precision of distance_corresponding_to_potential is two")
     {
-        constexpr auto params = physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 2};
+        constexpr auto params = physical_population_stability_params{sidb::model::simulation_parameters{2, -0.29}, 2};
         const auto     result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
@@ -48,7 +48,7 @@ TEST_CASE("Single SiDB", "[assess-physical-population-stability]")
 
     SECTION("Precision of distance_corresponding_to_potential is three")
     {
-        constexpr auto params = physical_population_stability_params{sidb_simulation_parameters{2, -0.29}, 3};
+        constexpr auto params = physical_population_stability_params{sidb::model::simulation_parameters{2, -0.29}, 3};
         const auto     result = physical_population_stability(lyt, params);
         REQUIRE(result.size() == 1);
         const auto& population_stability_detail = result[0];
@@ -309,7 +309,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const sidb_lattice<sidb_100_lattice, sidb_cell_clk_lyt_cube> lat{lyt};
+        const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_cube> lat{lyt};
 
         const auto result = physical_population_stability(lat, population_stability_params);
         REQUIRE(result.size() == 20);
@@ -419,7 +419,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const sidb_lattice<sidb_100_lattice, sidb_100_cell_clk_lyt> lat{lyt};
+        const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_100_cell_clk_lyt> lat{lyt};
 
         const auto result = physical_population_stability(lat, params);
         REQUIRE(result.size() == 20);

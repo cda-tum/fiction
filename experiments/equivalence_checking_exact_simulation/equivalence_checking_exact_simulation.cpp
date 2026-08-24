@@ -6,10 +6,10 @@
 #include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
@@ -41,7 +41,7 @@ int main()  // NOLINT
         fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
             4, all_cells_in_region.size());
 
-    const auto params = sidb_simulation_parameters{3, -0.32};
+    const auto params = sidb::model::simulation_parameters{3, -0.32};
 
     uint64_t quickexact_non_equivalence_counter      = 0;
     uint64_t clustercomplete_non_equivalence_counter = 0;

@@ -9,7 +9,7 @@
 #include "fiction/io/write_defect_influence_domain.hpp"
 #include "fiction/io/write_sqd_layout.hpp"
 #include "fiction/networks/utils/truth_table_utils.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
@@ -52,10 +52,10 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
         std::make_pair("inv_diag", std::vector<tt>{networks::utils::create_not_tt()})};
 
-    const is_operational_params is_op_params{sidb_simulation_parameters{2, -0.32, 5.6, 5.0}};
+    const is_operational_params is_op_params{sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0}};
 
     // for this experiment we use a stray SiDB defect
-    const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
+    const auto stray_db = fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8};
     // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
     defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};

@@ -6,10 +6,10 @@
 #define FICTION_QUICKSIM_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -35,7 +35,7 @@ struct quicksim_params
     /**
      * Simulation parameters for the simulation of the physical SiDB system.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters simulation_parameters{};
     /**
      * Number of iterations to run the simulation for.
      */
@@ -107,13 +107,13 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
     {
         const mockturtle::stopwatch stop{time_counter};
 
-        charge_distribution_surface<Lyt> charge_lyt{lyt};
+        sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{lyt};
         charge_lyt.set_sidb_simulation_engine(sidb_simulation_engine::QUICKSIM);
 
         // set the given physical parameters
         charge_lyt.assign_physical_parameters(ps.simulation_parameters);
         charge_lyt.assign_base_number(2);
-        charge_lyt.assign_all_charge_states(sidb_charge_state::NEGATIVE);
+        charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
         charge_lyt.update_after_charge_change();
         const auto predefined_negative_sidb_indices = charge_lyt.negative_sidb_detection();
 
@@ -124,7 +124,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
         }
 
         // Check that the layout with all SiDBs neutrally charged is physically valid.
-        charge_lyt.assign_all_charge_states(sidb_charge_state::NEUTRAL);
+        charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
         if (!predefined_negative_sidb_indices.empty())
@@ -154,7 +154,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
         for (const auto& negative_sidb_index : predefined_negative_sidb_indices)
         {
-            charge_lyt.assign_charge_state_by_index(negative_sidb_index, sidb_charge_state::NEGATIVE);
+            charge_lyt.assign_charge_state_by_index(negative_sidb_index, sidb::model::charge_state::NEGATIVE);
         }
 
         charge_lyt.update_after_charge_change();
@@ -187,7 +187,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                         return;
                     }
 
-                    auto charge_lyt_copy = charge_distribution_surface{charge_lyt};
+                    auto charge_lyt_copy = sidb::primitives::charge_distribution_surface{charge_lyt};
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
@@ -207,17 +207,18 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                                 return;  // Exit the thread if the timeout has been reached
                             }
 
-                            charge_lyt_copy.assign_all_charge_states(sidb_charge_state::NEUTRAL,
-                                                                     charge_index_mode::KEEP_CHARGE_INDEX);
+                            charge_lyt_copy.assign_all_charge_states(
+                                sidb::model::charge_state::NEUTRAL,
+                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
 
                             auto negative_sidbs_indices = predefined_negative_sidb_indices;
                             negative_sidbs_indices.push_back(sidb_index_with_unknown_charge_state);
 
                             for (const auto& negative_sidb_index : negative_sidbs_indices)
                             {
-                                charge_lyt_copy.assign_charge_state_by_index(negative_sidb_index,
-                                                                             sidb_charge_state::NEGATIVE,
-                                                                             charge_index_mode::KEEP_CHARGE_INDEX);
+                                charge_lyt_copy.assign_charge_state_by_index(
+                                    negative_sidb_index, sidb::model::charge_state::NEGATIVE,
+                                    sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
                             }
 
                             charge_lyt_copy.update_after_charge_change();

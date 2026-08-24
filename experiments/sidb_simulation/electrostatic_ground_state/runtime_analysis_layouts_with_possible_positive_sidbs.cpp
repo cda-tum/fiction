@@ -7,8 +7,8 @@
 #include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -36,7 +36,7 @@ int main()  // NOLINT
         "QuickExact Runtime [s]",
         "Average #positive SiDBs of ground state"};
 
-    const sidb_simulation_parameters sim_params{3, -0.32};
+    const sidb::model::simulation_parameters sim_params{3, -0.32};
 
     const quickexact_params<cell<Lyt>> qe_params{sim_params,
                                                  quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};

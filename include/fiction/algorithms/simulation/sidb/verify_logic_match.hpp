@@ -7,7 +7,7 @@
 
 #include "fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp"
 #include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/traits.hpp>
@@ -43,7 +43,7 @@ namespace fiction
  * @return The operational status indicating if the charge distribution matches the logic for the given input pattern.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] operational_status verify_logic_match(const charge_distribution_surface<Lyt>& cds,
+[[nodiscard]] operational_status verify_logic_match(const sidb::primitives::charge_distribution_surface<Lyt>& cds,
                                                     const is_operational_params& params, const std::vector<TT>& spec,
                                                     const uint64_t                    input_pattern,
                                                     const std::vector<bdl_wire<Lyt>>& input_wires,

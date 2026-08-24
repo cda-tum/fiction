@@ -26,7 +26,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
     auto bii = bdl_input_iterator<sidb_cell_clk_lyt_siqad>{lyt};
 
-    const quickexact_params<cell<sidb_cell_clk_lyt_siqad>> params{sidb_simulation_parameters{2, -0.32}};
+    const quickexact_params<cell<sidb_cell_clk_lyt_siqad>> params{sidb::model::simulation_parameters{2, -0.32}};
 
     SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
     {
@@ -81,7 +81,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
     auto bii = bdl_input_iterator<sidb_111_cell_clk_lyt_siqad>{lyt};
 
-    const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{sidb_simulation_parameters{2, -0.32}};
+    const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{sidb::model::simulation_parameters{2, -0.32}};
 
     SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
     {

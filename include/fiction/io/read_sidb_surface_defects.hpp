@@ -5,8 +5,8 @@
 #ifndef FICTION_READ_SIDB_SURFACE_DEFECTS_HPP
 #define FICTION_READ_SIDB_SURFACE_DEFECTS_HPP
 
-#include "fiction/technology/sidb_defect_surface.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/primitives/defect_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <array>
@@ -72,11 +72,11 @@ inline const std::regex RE_ROW_INDICES{R"((\d+))"};                 // each matc
 /**
  * Maps indices in the data format to defect types.
  */
-inline constexpr std::array<sidb_defect_type, 11> INDEX_TO_DEFECT{
-    {sidb_defect_type::NONE, sidb_defect_type::DB, sidb_defect_type::SI_VACANCY, sidb_defect_type::DIHYDRIDE_PAIR,
-     sidb_defect_type::SINGLE_DIHYDRIDE, sidb_defect_type::ONE_BY_ONE, sidb_defect_type::THREE_BY_ONE,
-     sidb_defect_type::SILOXANE, sidb_defect_type::RAISED_SI, sidb_defect_type::ETCH_PIT,
-     sidb_defect_type::MISSING_DIMER}};
+inline constexpr std::array<sidb::model::defect_type, 11> INDEX_TO_DEFECT{
+    {sidb::model::defect_type::NONE, sidb::model::defect_type::DB, sidb::model::defect_type::SI_VACANCY,
+     sidb::model::defect_type::DIHYDRIDE_PAIR, sidb::model::defect_type::SINGLE_DIHYDRIDE,
+     sidb::model::defect_type::ONE_BY_ONE, sidb::model::defect_type::THREE_BY_ONE, sidb::model::defect_type::SILOXANE,
+     sidb::model::defect_type::RAISED_SI, sidb::model::defect_type::ETCH_PIT, sidb::model::defect_type::MISSING_DIMER}};
 
 }  // namespace sidb_defects
 
@@ -92,11 +92,11 @@ class read_sidb_surface_defects_impl
 {
   public:
     explicit read_sidb_surface_defects_impl(std::istream& s, const std::string_view& name) :
-            lyt{sidb_defect_surface{Lyt{{}, name.data()}}},
+            lyt{sidb::primitives::defect_surface{Lyt{{}, name.data()}}},
             defect_matrix{std::istreambuf_iterator<char>(s), {}}  // read the stream into a string to perform regex
     {}
 
-    sidb_defect_surface<Lyt> run()
+    sidb::primitives::defect_surface<Lyt> run()
     {
         // each match is one row
         const std::vector<std::smatch> matrix_matches{
@@ -133,8 +133,8 @@ class read_sidb_surface_defects_impl
                 try
                 {
                     // assign the defect
-                    lyt.assign_sidb_defect(
-                        {x, y}, sidb_defect{sidb_defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});
+                    lyt.assign_sidb_defect({x, y}, sidb::model::defect{sidb_defects::INDEX_TO_DEFECT.at(
+                                                       static_cast<std::size_t>(defect_index))});
                 }
                 catch (const std::out_of_range&)
                 {
@@ -154,7 +154,7 @@ class read_sidb_surface_defects_impl
     }
 
   private:
-    sidb_defect_surface<Lyt> lyt;
+    sidb::primitives::defect_surface<Lyt> lyt;
 
     const std::string defect_matrix;
 
@@ -179,7 +179,7 @@ class read_sidb_surface_defects_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-sidb_defect_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::string_view& name = "")
+sidb::primitives::defect_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -204,7 +204,8 @@ sidb_defect_surface<Lyt> read_sidb_surface_defects(std::istream& is, const std::
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-sidb_defect_surface<Lyt> read_sidb_surface_defects(const std::string_view& filename, const std::string_view& name = "")
+sidb::primitives::defect_surface<Lyt> read_sidb_surface_defects(const std::string_view& filename,
+                                                                const std::string_view& name = "")
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
 

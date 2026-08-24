@@ -2,22 +2,22 @@
 // Created by Jan Drewniok on 24.11.22.
 //
 
-#ifndef FICTION_SIDB_SIMULATION_PARAMETERS_HPP
-#define FICTION_SIDB_SIMULATION_PARAMETERS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP
+#define FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP
 
 #include "fiction/technology/fcn/constants.hpp"
 
 #include <cassert>
 #include <cstdint>
 
-namespace fiction
+namespace fiction::sidb::model
 {
 
 /**
  * This struct collects all physical parameters for physical SiDB simulations. It can be useful to adjust them,
  * especially when experiments create new insights. However, the default values are commonly used.
  */
-struct sidb_simulation_parameters
+struct simulation_parameters
 {
     /**
      * Default constructor.
@@ -29,9 +29,9 @@ struct sidb_simulation_parameters
      * @param screening_distance also known as "Thomas-Fermi screening" and it describes the electric field screening
      * due to free charges in nm.
      */
-    constexpr explicit sidb_simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
-                                                  const double relative_permittivity = 5.6,
-                                                  const double screening_distance    = 5.0) :
+    constexpr explicit simulation_parameters(const uint8_t base_number = 3, const double mu = -0.32,
+                                             const double relative_permittivity = 5.6,
+                                             const double screening_distance    = 5.0) :
             epsilon_r{relative_permittivity},
             lambda_tf{screening_distance},
             mu_minus{mu},
@@ -74,6 +74,5 @@ struct sidb_simulation_parameters
     };
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_SIDB_SIMULATION_PARAMETERS_HPP
+}  // namespace fiction::sidb::model
+#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP

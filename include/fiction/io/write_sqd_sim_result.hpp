@@ -6,9 +6,9 @@
 #define FICTION_WRITE_SQD_SIM_RESULT_HPP
 
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
-#include "fiction/technology/sidb_nm_position.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/nm_position.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -222,7 +222,7 @@ class write_sqd_sim_result_impl
         std::ranges::for_each(ordered_cells,
                               [this](const auto& c)
                               {
-                                  const auto [nm_x, nm_y] = sidb_nm_position<Lyt>(Lyt{}, c);
+                                  const auto [nm_x, nm_y] = sidb::model::nm_position<Lyt>(Lyt{}, c);
                                   os << fmt::format(siqad::DBDOT, nm_x * 10,
                                                     nm_y * 10);  // convert nm to Angstrom
                               });
@@ -238,7 +238,7 @@ class write_sqd_sim_result_impl
         os << siqad::OPEN_ELEC_DIST;
 
         // a vector of pointers to avoid copying the surfaces (use raw pointers at your own risk, kids!)
-        std::vector<const charge_distribution_surface<Lyt>*> ordered_surface_pointers{};
+        std::vector<const sidb::primitives::charge_distribution_surface<Lyt>*> ordered_surface_pointers{};
         ordered_surface_pointers.reserve(sim_result.charge_distributions.size());
 
         // obtain pointers to all the surfaces
@@ -256,7 +256,7 @@ class write_sqd_sim_result_impl
             [this](const auto& surface)
             {
                 // obtain the charges in the same order as the cells
-                std::vector<sidb_charge_state> ordered_charges{};
+                std::vector<sidb::model::charge_state> ordered_charges{};
                 ordered_charges.reserve(ordered_cells.size());
 
                 std::ranges::for_each(ordered_cells, [&ordered_charges, &surface](const auto& c)
@@ -268,7 +268,7 @@ class write_sqd_sim_result_impl
                     1,                                              // occurrence count
                     surface->is_physically_valid() ? 1 : 0,         // physical validity
                     3,  // simulation state count (fixed to 3 since state count = 2 is not supported by SiQAD yet).
-                    charge_configuration_to_string(ordered_charges)  // charge distribution as a string
+                    sidb::model::charge_configuration_to_string(ordered_charges)  // charge distribution as a string
                 );
             });
 

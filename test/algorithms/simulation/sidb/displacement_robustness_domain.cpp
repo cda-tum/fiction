@@ -50,7 +50,7 @@ TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB 
 
     displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
     params.displacement_variations                  = {1, 1};
-    params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
+    params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.28};
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance       = 1.5;
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
     params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
@@ -106,7 +106,7 @@ TEST_CASE("Determine the probability of fabricating an operational SiQAD Y-shape
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.28};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.28};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -126,7 +126,7 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance       = 2.5;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.1;
@@ -149,7 +149,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {0, 1};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance       = 3.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
@@ -182,7 +182,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
         params.dimer_policy = displacement_robustness_domain_params<
@@ -199,7 +199,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {1, 0};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -212,7 +212,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt_siqad>> params{};
         params.displacement_variations                  = {0, 1};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -233,7 +233,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {0, 1};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
         params.dimer_policy = displacement_robustness_domain_params<
@@ -265,7 +265,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {1, 0};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
         ;
@@ -283,7 +283,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {1, 0};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 
@@ -296,7 +296,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
     {
         displacement_robustness_domain_params<cell<sidb_cell_clk_lyt>> params{};
         params.displacement_variations                  = {0, 1};
-        params.operational_params.simulation_parameters = sidb_simulation_parameters{2, -0.32};
+        params.operational_params.simulation_parameters = sidb::model::simulation_parameters{2, -0.32};
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.maximum_distance = 2.0;
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params.minimum_distance = 0.2;
 

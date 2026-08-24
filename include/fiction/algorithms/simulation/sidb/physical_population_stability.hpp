@@ -7,10 +7,10 @@
 
 #include "fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp"
 #include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
 #include "fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp"
-#include "fiction/technology/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb_charge_state.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -91,7 +91,7 @@ struct physical_population_stability_params
     /**
      * Parameters for the electrostatic potential.
      */
-    sidb_simulation_parameters simulation_parameters{};
+    sidb::model::simulation_parameters simulation_parameters{};
     /**
      * The precision level for the conversion from the minimum potential difference to the corresponding
      * distance.
@@ -144,14 +144,14 @@ class physical_population_stability_impl
         // Access the unique indices
         for (const auto& energy_and_index : energy_and_unique_charge_index)
         {
-            const auto it = std::ranges::find_if(simulation_results.charge_distributions,
-                                                 [&](const charge_distribution_surface<Lyt>& charge_lyt)
-                                                 {
-                                                     // Compare with the first element of the pair returned by
-                                                     // get_charge_index_and_base()
-                                                     return charge_lyt.get_charge_index_and_base().first ==
-                                                            energy_and_index.charge_index;
-                                                 });
+            const auto it = std::ranges::find_if(
+                simulation_results.charge_distributions,
+                [&](const sidb::primitives::charge_distribution_surface<Lyt>& charge_lyt)
+                {
+                    // Compare with the first element of the pair returned by
+                    // get_charge_index_and_base()
+                    return charge_lyt.get_charge_index_and_base().first == energy_and_index.charge_index;
+                });
 
             if (it == simulation_results.charge_distributions.end())
             {
@@ -176,25 +176,25 @@ class physical_population_stability_impl
                 {
                     switch (charge_lyt.get_charge_state(c))
                     {
-                        case sidb_charge_state::NEGATIVE:
+                        case sidb::model::charge_state::NEGATIVE:
                         {
                             population_stability_info = handle_negative_charges(*charge_lyt.get_local_potential(c), c,
                                                                                 population_stability_info);
                             break;
                         }
-                        case sidb_charge_state::NEUTRAL:
+                        case sidb::model::charge_state::NEUTRAL:
                         {
                             population_stability_info = handle_neutral_charges(*charge_lyt.get_local_potential(c), c,
                                                                                population_stability_info);
                             break;
                         }
-                        case sidb_charge_state::POSITIVE:
+                        case sidb::model::charge_state::POSITIVE:
                         {
                             population_stability_info = handle_positive_charges(*charge_lyt.get_local_potential(c), c,
                                                                                 population_stability_info);
                             break;
                         }
-                        case sidb_charge_state::NONE:
+                        case sidb::model::charge_state::NONE:
                         {
                             break;
                         }

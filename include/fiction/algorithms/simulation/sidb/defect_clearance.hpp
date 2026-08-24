@@ -6,7 +6,7 @@
 #define FICTION_DEFECT_CLEARANCE_HPP
 
 #include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "fiction/technology/sidb_nm_distance.hpp"
+#include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/traits.hpp"
 
 #include <limits>
@@ -63,9 +63,9 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
             lyt.foreach_cell(
                 [&defect_pos, &min_distance, &min_distance_position, &lyt](const auto& c)
                 {
-                    if (sidb_nm_distance<Lyt>(lyt, c, defect_pos) < min_distance)
+                    if (sidb::model::nm_distance<Lyt>(lyt, c, defect_pos) < min_distance)
                     {
-                        min_distance          = sidb_nm_distance<Lyt>(lyt, c, defect_pos);
+                        min_distance          = sidb::model::nm_distance<Lyt>(lyt, c, defect_pos);
                         min_distance_position = defect_pos;
                     }
                 });

@@ -15,10 +15,10 @@
 #include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
 #include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
 #include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
-#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -57,7 +57,7 @@ int main()  // NOLINT
     experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
-    const auto op_params     = is_operational_params{sidb_simulation_parameters{2, -0.32}};
+    const auto op_params     = is_operational_params{sidb::model::simulation_parameters{2, -0.32}};
     auto       design_params = design_sidb_gates_params<cell<Lyt>>{};
 
     design_params.operational_params = op_params;
@@ -106,10 +106,10 @@ int main()  // NOLINT
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
     // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon
     // Surface Probed by a Moveable Quantum Dot" by T. R. Huff et al.
-    const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
-    const auto arsenic    = fiction::sidb_defect{fiction::sidb_defect_type::ARSENIC, 1, 9.7, 2.1};
+    const auto si_vacancy = fiction::sidb::model::defect{fiction::sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto arsenic    = fiction::sidb::model::defect{fiction::sidb::model::defect_type::ARSENIC, 1, 9.7, 2.1};
 
-    const std::vector<sidb_defect> defects = {si_vacancy, arsenic};
+    const std::vector<sidb::model::defect> defects = {si_vacancy, arsenic};
 
     defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {20, 20};
@@ -180,7 +180,7 @@ int main()  // NOLINT
                         defect_influence_grid_search(gate, truth_table, params, 4, &defect_inf_stats);
                     const auto defect_clearance = calculate_defect_clearance(gate, defect_inf_grid);
 
-                    if (defect.type == sidb_defect_type::SI_VACANCY)
+                    if (defect.type == sidb::model::defect_type::SI_VACANCY)
                     {
                         min_defect_clearance_vacancy =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_vacancy);
@@ -188,7 +188,7 @@ int main()  // NOLINT
                             std::max(defect_clearance.defect_clearance_distance, max_defect_clearance_vacancy);
                         defect_influence_vacancy.push_back(defect_clearance.defect_clearance_distance);
                     }
-                    else if (defect.type == sidb_defect_type::ARSENIC)
+                    else if (defect.type == sidb::model::defect_type::ARSENIC)
                     {
                         min_defect_clearance_arsenic =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_arsenic);

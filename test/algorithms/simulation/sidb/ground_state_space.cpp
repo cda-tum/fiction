@@ -13,10 +13,10 @@
 #include <fiction/algorithms/simulation/sidb/ground_state_space.hpp>
 #include <fiction/algorithms/simulation/sidb/quickexact.hpp>
 #include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
-#include <fiction/technology/charge_distribution_surface.hpp>
 #include <fiction/technology/fcn/constants.hpp>
-#include <fiction/technology/sidb_charge_state.hpp>
-#include <fiction/technology/sidb_cluster_hierarchy.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
+#include <fiction/technology/sidb/model/cluster_hierarchy.hpp>
+#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -35,7 +35,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -49,7 +49,7 @@ TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-stat
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -64,19 +64,22 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
     CHECK((*res.top_cluster->children.cbegin())->uid == 0);  // <<< same with here
     CHECK(res.top_cluster->charge_space.size() == 1);
     CHECK(res.maximum_top_level_multisets == 3);
-    CHECK(*res.top_cluster->charge_space.cbegin() == sidb_cluster_charge_state{sidb_charge_state::NEGATIVE});
+    CHECK(*res.top_cluster->charge_space.cbegin() ==
+          sidb::model::cluster_charge_state{sidb::model::charge_state::NEGATIVE});
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.size() == 1);
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().proj_states.size() == 1);
     REQUIRE(res.top_cluster->charge_space.cbegin()->compositions.front().proj_states.front().cluster ==
             *res.top_cluster->children.cbegin());
-    CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.get<bound_direction::LOWER>(0) ==
-          0.0);
-    CHECK(res.top_cluster->charge_space.cbegin()->compositions.front().pot_bounds.get<bound_direction::UPPER>(0) ==
-          0.0);
+    CHECK(res.top_cluster->charge_space.cbegin()
+              ->compositions.front()
+              .pot_bounds.get<sidb::model::bound_direction::LOWER>(0) == 0.0);
+    CHECK(res.top_cluster->charge_space.cbegin()
+              ->compositions.front()
+              .pot_bounds.get<sidb::model::bound_direction::UPPER>(0) == 0.0);
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]",
-                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_cell_clk_lyt_siqad, sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -86,20 +89,20 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
     SECTION("Base 2")
     {
         const ground_state_space_results& res =
-            ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
+            ground_state_space(lyt, ground_state_space_params{sidb::model::simulation_parameters{2}});
         CHECK(res.top_cluster->charge_space.empty());
     }
 
     SECTION("Base 3")
     {
         const ground_state_space_results& res =
-            ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{3}});
+            ground_state_space(lyt, ground_state_space_params{sidb::model::simulation_parameters{3}});
         CHECK(!res.top_cluster->charge_space.empty());
     }
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -113,7 +116,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
 
     const ground_state_space_results& gss_res =
-        ground_state_space(lyt, ground_state_space_params{sidb_simulation_parameters{2}});
+        ground_state_space(lyt, ground_state_space_params{sidb::model::simulation_parameters{2}});
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
@@ -123,9 +126,9 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 
     for (uint64_t i = 0; i < 7; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::LOWER>(i),
                    Catch::Matchers::WithinAbs(0, fcn::constants::ERROR_MARGIN));
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::UPPER>(i),
                    Catch::Matchers::WithinAbs(0, fcn::constants::ERROR_MARGIN));
     }
 
@@ -165,20 +168,21 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
-                        ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                        ->pot_bounds.get<sidb::model::bound_direction::LOWER>(sidb_ix) -
                     gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(gss_res.top_cluster->charge_space.cbegin()
-                                                                             ->compositions.cbegin()
-                                                                             ->proj_states.cbegin()
-                                                                             ->multiset_conf)
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::LOWER>(
+                            gss_res.top_cluster->charge_space.cbegin()
+                                ->compositions.cbegin()
+                                ->proj_states.cbegin()
+                                ->multiset_conf)
                         .pot_val -
                     std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                               1)
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::LOWER>(
                             std::next(
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
@@ -188,20 +192,21 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
-                        ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) -
+                        ->pot_bounds.get<sidb::model::bound_direction::UPPER>(sidb_ix) -
                     gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(gss_res.top_cluster->charge_space.cbegin()
-                                                                             ->compositions.cbegin()
-                                                                             ->proj_states.cbegin()
-                                                                             ->multiset_conf)
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::UPPER>(
+                            gss_res.top_cluster->charge_space.cbegin()
+                                ->compositions.cbegin()
+                                ->proj_states.cbegin()
+                                ->multiset_conf)
                         .pot_val -
                     std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                               1)
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::UPPER>(
                             std::next(
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
@@ -235,20 +240,21 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
-                        ->pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
+                        ->pot_bounds.get<sidb::model::bound_direction::LOWER>(sidb_ix) -
                     gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(gss_res.top_cluster->charge_space.cbegin()
-                                                                             ->compositions.cbegin()
-                                                                             ->proj_states.cbegin()
-                                                                             ->multiset_conf)
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::LOWER>(
+                            gss_res.top_cluster->charge_space.cbegin()
+                                ->compositions.cbegin()
+                                ->proj_states.cbegin()
+                                ->multiset_conf)
                         .pot_val -
                     std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                               1)
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::LOWER>(
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::LOWER>(
                             std::next(
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
@@ -258,20 +264,21 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
             CHECK_THAT(
                 gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
-                        ->pot_bounds.get<bound_direction::UPPER>(sidb_ix) -
+                        ->pot_bounds.get<sidb::model::bound_direction::UPPER>(sidb_ix) -
                     gss_res.top_cluster->charge_space.cbegin()
                         ->compositions.cbegin()
                         ->proj_states.cbegin()
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(gss_res.top_cluster->charge_space.cbegin()
-                                                                             ->compositions.cbegin()
-                                                                             ->proj_states.cbegin()
-                                                                             ->multiset_conf)
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::UPPER>(
+                            gss_res.top_cluster->charge_space.cbegin()
+                                ->compositions.cbegin()
+                                ->proj_states.cbegin()
+                                ->multiset_conf)
                         .pot_val -
                     std::next(gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                               1)
                         ->cluster->pot_projs.at(sidb_ix)
-                        .get_pot_proj_for_m_conf<bound_direction::UPPER>(
+                        .get_pot_proj_for_m_conf<sidb::model::bound_direction::UPPER>(
                             std::next(
                                 gss_res.top_cluster->charge_space.cbegin()->compositions.cbegin()->proj_states.cbegin(),
                                 1)
@@ -283,7 +290,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 }
 
 TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -312,15 +319,15 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
 
     for (uint64_t i = 0; i < 14; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::LOWER>(i),
                    Catch::Matchers::WithinAbs(0, fcn::constants::ERROR_MARGIN));
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::UPPER>(i),
                    Catch::Matchers::WithinAbs(0, fcn::constants::ERROR_MARGIN));
     }
 }
 
 TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -371,25 +378,25 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground
 
     for (uint64_t i = 0; i < 28; ++i)
     {
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(i),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::LOWER>(i),
                    Catch::Matchers::WithinAbs(0, fcn::constants::ERROR_MARGIN));
-        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(i),
+        CHECK_THAT(gss_res.top_cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::UPPER>(i),
                    Catch::Matchers::WithinAbs(0, fcn::constants::ERROR_MARGIN));
     }
 }
 
 template <typename Lyt>
-static bool verify_ground_state_space_stats(const charge_distribution_surface<Lyt>& valid_cl,
-                                            const sidb_cluster_ptr&                 gss_node) noexcept
+static bool verify_ground_state_space_stats(const sidb::primitives::charge_distribution_surface<Lyt>& valid_cl,
+                                            const sidb::model::cluster_ptr&                           gss_node) noexcept
 {
-    sidb_cluster_charge_state cl_m_conf{};
+    sidb::model::cluster_charge_state cl_m_conf{};
 
     for (const uint64_t i : gss_node->sidbs)
     {
         cl_m_conf.add_charge(valid_cl.get_charge_state_by_index(i));
     }
 
-    const sidb_cluster_charge_state_space::const_iterator found_m_conf = gss_node->charge_space.find(cl_m_conf);
+    const sidb::model::cluster_charge_state_space::const_iterator found_m_conf = gss_node->charge_space.find(cl_m_conf);
 
     if (found_m_conf == gss_node->charge_space.cend())
     {
@@ -403,11 +410,11 @@ static bool verify_ground_state_space_stats(const charge_distribution_surface<Ly
 
     bool found_charge_conf = false;
 
-    for (const sidb_charge_space_composition& composition : found_m_conf->compositions)
+    for (const sidb::model::charge_space_composition& composition : found_m_conf->compositions)
     {
         bool composition_has_correct_charge_conf = true;
 
-        for (const sidb_cluster_projector_state& pst : composition.proj_states)
+        for (const sidb::model::cluster_projector_state& pst : composition.proj_states)
         {
             composition_has_correct_charge_conf &= verify_ground_state_space_stats(valid_cl, pst.cluster);
         }
@@ -427,13 +434,13 @@ TEMPLATE_TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[gro
         const sidb_simulation_result<TestType>& exgs_res = exhaustive_ground_state_simulation(lyt);
         const ground_state_space_results&       gss_res  = ground_state_space(lyt);
 
-        for (const charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
+        for (const sidb::primitives::charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
         {
             const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
             CHECK(verification);
         }
 
-        for (const charge_distribution_surface<TestType>& cl : exgs_res.charge_distributions)
+        for (const sidb::primitives::charge_distribution_surface<TestType>& cl : exgs_res.charge_distributions)
         {
             const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
             CHECK(verification);
