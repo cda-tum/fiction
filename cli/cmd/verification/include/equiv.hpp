@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_EQUIV_HPP
 #define FICTION_CMD_EQUIV_HPP
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -41,7 +41,7 @@ class equiv_command final : public command
     nlohmann::json log() const override;
 
   private:
-    fiction::equivalence_checking_stats result{};
+    fiction::verification::equivalence_checking_stats result{};
 
     template <typename NtkOrLytVariant1, typename NtkOrLytVariant2>
     void equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_variant1,

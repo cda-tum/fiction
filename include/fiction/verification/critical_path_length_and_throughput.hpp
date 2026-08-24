@@ -2,8 +2,8 @@
 // Created by marcel on 05.11.21.
 //
 
-#ifndef FICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
-#define FICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
+#ifndef FICTION_VERIFICATION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
+#define FICTION_VERIFICATION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
 
 #include "fiction/traits.hpp"
 
@@ -14,7 +14,7 @@
 #include <cstdlib>
 #include <vector>
 
-namespace fiction
+namespace fiction::verification
 {
 
 /**
@@ -185,6 +185,5 @@ cp_and_tp critical_path_length_and_throughput(const Lyt& lyt)
     return p.run();
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
+}  // namespace fiction::verification
+#endif  // FICTION_VERIFICATION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP

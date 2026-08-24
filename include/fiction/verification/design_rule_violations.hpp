@@ -2,8 +2,8 @@
 // Created by marcel on 26.04.19.
 //
 
-#ifndef FICTION_DESIGN_RULE_VIOLATIONS_HPP
-#define FICTION_DESIGN_RULE_VIOLATIONS_HPP
+#ifndef FICTION_VERIFICATION_DESIGN_RULE_VIOLATIONS_HPP
+#define FICTION_VERIFICATION_DESIGN_RULE_VIOLATIONS_HPP
 
 #include "fiction/traits.hpp"
 
@@ -22,7 +22,7 @@
 #include <string>
 #include <utility>
 
-namespace fiction
+namespace fiction::verification
 {
 
 /**
@@ -711,6 +711,5 @@ void gate_level_drvs(const Lyt& lyt, const gate_level_drv_params& ps = {}, gate_
     }
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_DESIGN_RULE_VIOLATIONS_HPP
+}  // namespace fiction::verification
+#endif  // FICTION_VERIFICATION_DESIGN_RULE_VIOLATIONS_HPP

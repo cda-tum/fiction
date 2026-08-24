@@ -1,6 +1,5 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -11,6 +10,7 @@
 #include <fiction/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
 #include <fiction/physical_design/post_layout_optimization.hpp>  // post-layout optimization
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
 
 #include <fmt/core.h>
 #include <fmt/format.h>  // output formatting
@@ -96,11 +96,12 @@ int main()  // NOLINT
                 gate_level_layout, post_layout_optimization_params, &post_layout_optimization_stats);
 
             // check equivalence
-            const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+            const auto eq_stats =
+                fiction::verification::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
-            const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
-                                          eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                 "NO";
+            const std::string eq_result = eq_stats == fiction::verification::eq_type::STRONG ? "STRONG" :
+                                          eq_stats == fiction::verification::eq_type::WEAK   ? "WEAK" :
+                                                                                               "NO";
 
             // calculate bounding box
             const auto bounding_box_after_optimization = fiction::layouts::bounding_box_2d(gate_level_layout);

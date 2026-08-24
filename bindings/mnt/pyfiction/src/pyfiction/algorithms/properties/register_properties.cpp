@@ -3,11 +3,11 @@
 namespace pyfiction
 {
 
-void critical_path_length_and_throughput(nanobind::module_& m);
+void verification::critical_path_length_and_throughput(nanobind::module_& m);
 
 void register_properties(nanobind::module_& m)
 {
-    critical_path_length_and_throughput(m);
+    verification::critical_path_length_and_throughput(m);
 }
 
 }  // namespace pyfiction

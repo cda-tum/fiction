@@ -6,9 +6,9 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -87,11 +87,11 @@ nlohmann::json equiv_command::log() const
 {
     const auto get_eq_type_string = [this]() -> std::string
     {
-        if (result.eq == fiction::eq_type::NO)
+        if (result.eq == fiction::verification::eq_type::NO)
         {
             return "NOT EQ";
         }
-        if (result.eq == fiction::eq_type::WEAK)
+        if (result.eq == fiction::verification::eq_type::WEAK)
         {
             return "WEAK";
         }
@@ -110,7 +110,7 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
                                          const NtkOrLytVariant2& ntk_or_lyt_variant_2)
 {
     const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2)
-    { fiction::equivalence_checking(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2, &result); };
+    { fiction::verification::equivalence_checking(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2, &result); };
 
     const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
     { return fiction::networks::utils::get_name(*ntk_or_lyt_ptr); };
@@ -129,11 +129,11 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
     {
         const auto get_eq_type_adverb = [this]() -> std::string
         {
-            if (result.eq == fiction::eq_type::NO)
+            if (result.eq == fiction::verification::eq_type::NO)
             {
                 return "NOT";
             }
-            if (result.eq == fiction::eq_type::WEAK)
+            if (result.eq == fiction::verification::eq_type::WEAK)
             {
                 return "WEAKLY";
             }
@@ -143,7 +143,7 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
 
         env->out() << fmt::format("[i] {} and {} are {} equivalent{}\n", std::visit(get_name, ntk_or_lyt_variant1),
                                   std::visit(get_name, ntk_or_lyt_variant_2), get_eq_type_adverb(),
-                                  result.eq == fiction::eq_type::WEAK ?
+                                  result.eq == fiction::verification::eq_type::WEAK ?
                                       fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
                                       "");
     }

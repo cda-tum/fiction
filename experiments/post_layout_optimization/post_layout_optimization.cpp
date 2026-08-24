@@ -1,12 +1,12 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
-#include <fiction/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
-#include <fiction/physical_design/post_layout_optimization.hpp>  // post-layout optimization
-#include <fiction/types.hpp>                                     // types suitable for the FCN domain
+#include <fiction/networks/io/network_reader.hpp>                        // read networks from files
+#include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
+#include <fiction/physical_design/post_layout_optimization.hpp>          // post-layout optimization
+#include <fiction/types.hpp>                                             // types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // runtime measurements
@@ -75,7 +75,7 @@ int main()  // NOLINT
         const auto layout_copy = gate_level_layout.clone();
 
         //  compute critical path and throughput
-        const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
         const auto bounding_box_before_optimization = fiction::layouts::bounding_box_2d(gate_level_layout);
@@ -89,11 +89,12 @@ int main()  // NOLINT
                                                                      &post_layout_optimization_stats);
 
         // check equivalence
-        const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+        const auto eq_stats =
+            fiction::verification::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
-        const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                             "NO";
+        const std::string eq_result = eq_stats == fiction::verification::eq_type::STRONG ? "STRONG" :
+                                      eq_stats == fiction::verification::eq_type::WEAK   ? "WEAK" :
+                                                                                           "NO";
 
         // calculate bounding box
         const auto bounding_box_after_optimization = fiction::layouts::bounding_box_2d(gate_level_layout);

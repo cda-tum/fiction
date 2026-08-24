@@ -3,7 +3,6 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
@@ -13,6 +12,7 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -83,15 +83,16 @@ int main()  // NOLINT
             if (gate_level_layout.has_value())
             {
                 // check equivalence
-                const auto eq_stats = fiction::equivalence_checking<fiction::networks::technology_network, gate_lyt>(
-                    network, *gate_level_layout);
+                const auto eq_stats =
+                    fiction::verification::equivalence_checking<fiction::networks::technology_network, gate_lyt>(
+                        network, *gate_level_layout);
 
                 std::string eq_result = "NO";
-                if (eq_stats == fiction::eq_type::STRONG)
+                if (eq_stats == fiction::verification::eq_type::STRONG)
                 {
                     eq_result = "STRONG";
                 }
-                else if (eq_stats == fiction::eq_type::WEAK)
+                else if (eq_stats == fiction::verification::eq_type::WEAK)
                 {
                     eq_result = "WEAK";
                 };

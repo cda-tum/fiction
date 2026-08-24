@@ -6,7 +6,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
@@ -14,6 +13,7 @@
 #include <fiction/layouts/io/print_layout.hpp>
 #include <fiction/layouts/synchronization_element_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <mockturtle/views/depth_view.hpp>
 
@@ -22,7 +22,7 @@
 using namespace fiction;
 
 template <typename Lyt>
-void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
+void check_critical_path_length(const Lyt& lyt, const verification::cp_and_tp& cp_tp) noexcept
 {
     mockturtle::depth_view depth_lyt{lyt};
 
@@ -32,7 +32,7 @@ void check_critical_path_length(const Lyt& lyt, const cp_and_tp& cp_tp) noexcept
 template <typename Lyt>
 void check(const Lyt& lyt, const uint64_t throughput) noexcept
 {
-    const auto cp_tp = critical_path_length_and_throughput(lyt);
+    const auto cp_tp = verification::critical_path_length_and_throughput(lyt);
 
     check_critical_path_length(lyt, cp_tp);
     CHECK(cp_tp.throughput == throughput);

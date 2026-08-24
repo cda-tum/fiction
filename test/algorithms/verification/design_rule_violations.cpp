@@ -6,24 +6,24 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <sstream>
 
 using namespace fiction;
 
 template <typename Lyt>
-gate_level_drv_stats get_drvs(const Lyt& lyt)
+verification::gate_level_drv_stats get_drvs(const Lyt& lyt)
 {
-    gate_level_drv_params ps{};
-    gate_level_drv_stats  st{};
+    verification::gate_level_drv_params ps{};
+    verification::gate_level_drv_stats  st{};
 
     // suppress standard output
     std::stringstream ss{};
     ps.out = &ss;
 
-    gate_level_drvs(lyt, ps, &st);
+    verification::gate_level_drvs(lyt, ps, &st);
 
     return st;
 }

@@ -6,7 +6,6 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 #include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
 #include <fiction/networks/technology_network.hpp>           // technology-mapped network type
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
@@ -16,6 +15,7 @@
 #include <fiction/technology/cell_technologies.hpp>          // cell implementations
 #include <fiction/technology/sidb_bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -145,7 +145,7 @@ int main()  // NOLINT
             assert(eq.has_value());
 
             // compute critical path and throughput
-            const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
             const auto cell_level_layout =

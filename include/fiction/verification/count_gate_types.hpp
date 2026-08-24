@@ -2,8 +2,8 @@
 // Created by marcel on 08.07.21.
 //
 
-#ifndef FICTION_COUNT_GATE_TYPES_HPP
-#define FICTION_COUNT_GATE_TYPES_HPP
+#ifndef FICTION_VERIFICATION_COUNT_GATE_TYPES_HPP
+#define FICTION_VERIFICATION_COUNT_GATE_TYPES_HPP
 
 #include "fiction/traits.hpp"
 
@@ -15,7 +15,7 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-namespace fiction
+namespace fiction::verification
 {
 
 struct count_gate_types_stats
@@ -321,6 +321,5 @@ void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
     }
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_COUNT_GATE_TYPES_HPP
+}  // namespace fiction::verification
+#endif  // FICTION_VERIFICATION_COUNT_GATE_TYPES_HPP

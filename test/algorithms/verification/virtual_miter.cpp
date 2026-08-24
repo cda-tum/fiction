@@ -5,9 +5,9 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/verification/virtual_miter.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/virtual_pi_network.hpp>
+#include <fiction/verification/virtual_miter.hpp>
 
 #include <mockturtle/algorithms/equivalence_checking.hpp>
 #include <mockturtle/networks/aig.hpp>
@@ -38,7 +38,7 @@ TEST_CASE("Virtual miter different num_pis", "[virtual-miter]")
     vpi_ntk_2.create_po(a1_v2);
     vpi_ntk_2.create_po(o1_v2);
 
-    auto miter_network = fiction::virtual_miter<networks::technology_network>(vpi_ntk_1, vpi_ntk_2);
+    auto miter_network = fiction::verification::virtual_miter<networks::technology_network>(vpi_ntk_1, vpi_ntk_2);
     CHECK(!miter_network.has_value());
 }
 
@@ -74,16 +74,16 @@ TEST_CASE("Virtual miter with technology networks", "[virtual-miter]")
 
     // check for the exodc path 1
     mockturtle::equivalence_checking_stats st;
-    auto                                   maybe_cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<networks::technology_network>(tec, tec_dc), {}, &st);
+    auto                                   maybe_cec_m = mockturtle::equivalence_checking(
+        *fiction::verification::virtual_miter<networks::technology_network>(tec, tec_dc), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
         CHECK(*maybe_cec_m == 1);
     }
     // check for the exodc path 2
-    maybe_cec_m =
-        mockturtle::equivalence_checking(*fiction::virtual_miter<networks::technology_network>(tec_dc, tec), {}, &st);
+    maybe_cec_m = mockturtle::equivalence_checking(
+        *fiction::verification::virtual_miter<networks::technology_network>(tec_dc, tec), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -91,7 +91,7 @@ TEST_CASE("Virtual miter with technology networks", "[virtual-miter]")
     }
     // check for the handle virtual pi path 1
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(vpi_ntk_1, tec), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(vpi_ntk_1, tec), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -99,7 +99,7 @@ TEST_CASE("Virtual miter with technology networks", "[virtual-miter]")
     }
     // check for the handle virtual pi path 2
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(tec, vpi_ntk_2), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(tec, vpi_ntk_2), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -107,7 +107,7 @@ TEST_CASE("Virtual miter with technology networks", "[virtual-miter]")
     }
     // check for the handle virtual pi path 3
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(vpi_ntk_1, vpi_ntk_2), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(vpi_ntk_1, vpi_ntk_2), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -149,7 +149,7 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     // check for the exodc path 1
     mockturtle::equivalence_checking_stats st;
     auto                                   maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(test_ntk, test_dc), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(test_ntk, test_dc), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -157,7 +157,7 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     }
     // check for the exodc path 2
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(test_dc, test_ntk), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(test_dc, test_ntk), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -165,7 +165,7 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     }
     // check for the handle virtual pi path 1
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(vpi_ntk_1, test_ntk), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(vpi_ntk_1, test_ntk), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -173,7 +173,7 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     }
     // check for the handle virtual pi path 2
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(test_ntk, vpi_ntk_2), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(test_ntk, vpi_ntk_2), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {
@@ -181,7 +181,7 @@ TEMPLATE_TEST_CASE("Virtual miter with mockturtle networks", "[virtual-miter]", 
     }
     // check for the handle virtual pi path 3
     maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::virtual_miter<networks::technology_network>(vpi_ntk_1, vpi_ntk_2), {}, &st);
+        *fiction::verification::virtual_miter<networks::technology_network>(vpi_ntk_1, vpi_ntk_2), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     if (maybe_cec_m.has_value())
     {

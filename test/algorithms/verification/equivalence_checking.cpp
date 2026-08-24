@@ -7,10 +7,10 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 #include "utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
 #include <fiction/layouts/obstruction_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/klut.hpp>
@@ -22,12 +22,12 @@ using namespace fiction;
 template <typename Spec, typename Impl>
 void check_for_strong_equiv(const Spec& spec, const Impl& impl)
 {
-    equivalence_checking_stats st{};
+    verification::equivalence_checking_stats st{};
 
-    const auto equiv = equivalence_checking(spec, impl, &st);
+    const auto equiv = verification::equivalence_checking(spec, impl, &st);
 
-    CHECK(equiv == eq_type::STRONG);
-    CHECK(st.eq == eq_type::STRONG);
+    CHECK(equiv == verification::eq_type::STRONG);
+    CHECK(st.eq == verification::eq_type::STRONG);
     CHECK(st.counter_example.empty());
     CHECK(st.spec_drv_stats.drvs == 0);
     CHECK(st.impl_drv_stats.drvs == 0);
@@ -37,12 +37,12 @@ void check_for_strong_equiv(const Spec& spec, const Impl& impl)
 template <typename Spec, typename Impl>
 void check_for_weak_equiv(const Spec& spec, const Impl& impl)
 {
-    equivalence_checking_stats st{};
+    verification::equivalence_checking_stats st{};
 
-    const auto equiv = equivalence_checking(spec, impl, &st);
+    const auto equiv = verification::equivalence_checking(spec, impl, &st);
 
-    CHECK(equiv == eq_type::WEAK);
-    CHECK(st.eq == eq_type::WEAK);
+    CHECK(equiv == verification::eq_type::WEAK);
+    CHECK(st.eq == verification::eq_type::WEAK);
     CHECK(st.counter_example.empty());
     CHECK(st.spec_drv_stats.drvs == 0);
     CHECK(st.impl_drv_stats.drvs == 0);
@@ -52,11 +52,11 @@ void check_for_weak_equiv(const Spec& spec, const Impl& impl)
 template <typename Spec, typename Impl>
 void check_for_no_equiv(const Spec& spec, const Impl& impl)
 {
-    equivalence_checking_stats st{};
+    verification::equivalence_checking_stats st{};
 
-    const auto equiv = equivalence_checking(spec, impl, &st);
+    const auto equiv = verification::equivalence_checking(spec, impl, &st);
 
-    CHECK(equiv == eq_type::NO);
+    CHECK(equiv == verification::eq_type::NO);
     CHECK(((!st.counter_example.empty()) || (st.spec_drv_stats.drvs != 0) || (st.impl_drv_stats.drvs != 0)));
 }
 

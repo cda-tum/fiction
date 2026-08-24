@@ -2,8 +2,8 @@
 // Created by benjamin on 31.07.24.
 //
 
-#ifndef FICTION_VIRTUAL_MITER_HPP
-#define FICTION_VIRTUAL_MITER_HPP
+#ifndef FICTION_VERIFICATION_VIRTUAL_MITER_HPP
+#define FICTION_VERIFICATION_VIRTUAL_MITER_HPP
 
 #include "fiction/traits.hpp"
 
@@ -15,7 +15,7 @@
 #include <optional>
 #include <vector>
 
-namespace fiction
+namespace fiction::verification
 {
 
 namespace detail
@@ -135,6 +135,5 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
     return dest;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_VIRTUAL_MITER_HPP
+}  // namespace fiction::verification
+#endif  // FICTION_VERIFICATION_VIRTUAL_MITER_HPP

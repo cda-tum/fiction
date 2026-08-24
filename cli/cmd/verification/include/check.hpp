@@ -5,7 +5,7 @@
 #ifndef FICTION_CMD_CHECK_HPP
 #define FICTION_CMD_CHECK_HPP
 
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -43,8 +43,8 @@ class check_command final : public command
     nlohmann::json log() const override;
 
   private:
-    fiction::gate_level_drv_params ps{};
-    fiction::gate_level_drv_stats  pst{};
+    fiction::verification::gate_level_drv_params ps{};
+    fiction::verification::gate_level_drv_stats  pst{};
 };
 
 }  // namespace alice

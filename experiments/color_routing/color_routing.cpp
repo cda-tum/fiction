@@ -6,12 +6,12 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
-#include <fiction/physical_design/color_routing.hpp>                 // routing based on graph coloring
-#include <fiction/physical_design/exact.hpp>                         // SMT-based physical design of FCN layouts
-#include <fiction/physical_design/orthogonal.hpp>                    // OGD-based physical design of FCN layouts
-#include <fiction/physical_design/utils/routing_utils.hpp>           // routing utility functions
-#include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
+#include <fiction/physical_design/color_routing.hpp>        // routing based on graph coloring
+#include <fiction/physical_design/exact.hpp>                // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/orthogonal.hpp>           // OGD-based physical design of FCN layouts
+#include <fiction/physical_design/utils/routing_utils.hpp>  // routing utility functions
+#include <fiction/types.hpp>                                // pre-defined types suitable for the FCN domain
+#include <fiction/verification/equivalence_checking.hpp>    // equivalence checking of FCN layouts
 
 #include <fmt/format.h>                      // output formatting
 #include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
@@ -35,7 +35,7 @@ using color_routing_experiment =
 static fiction::physical_design::exact_physical_design_stats      exact_stats{};
 static fiction::physical_design::orthogonal_physical_design_stats ortho_stats{};
 static fiction::physical_design::color_routing_stats              routing_stats{};
-static fiction::equivalence_checking_stats                        equiv_stats{};
+static fiction::verification::equivalence_checking_stats          equiv_stats{};
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 template <typename Ntk>
@@ -72,7 +72,7 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     if (success)
     {
         // check equivalence
-        fiction::equivalence_checking(ntk, lyt, &equiv_stats);
+        fiction::verification::equivalence_checking(ntk, lyt, &equiv_stats);
     }
 
     // log results
@@ -81,7 +81,8 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
         routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
         routing_stats.epg_stats.num_edges, mockturtle::to_seconds(stats.time_total),
         mockturtle::to_seconds(routing_stats.time_total), mockturtle::to_seconds(routing_stats.epg_stats.time_total),
-        mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != fiction::eq_type::NO);
+        mockturtle::to_seconds(routing_stats.color_stats.time_total),
+        equiv_stats.eq != fiction::verification::eq_type::NO);
 
     exp.save();
     exp.table();

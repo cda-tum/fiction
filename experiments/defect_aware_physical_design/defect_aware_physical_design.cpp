@@ -6,8 +6,7 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/io/read_sidb_surface_defects.hpp>                               // reader for simulated SiDB surfaces
+#include <fiction/io/read_sidb_surface_defects.hpp>          // reader for simulated SiDB surfaces
 #include <fiction/io/read_sqd_layout.hpp>                    // reader for SiDB layouts including surface scan data
 #include <fiction/io/write_sqd_layout.hpp>                   // writer for SiQAD files (physical simulation)
 #include <fiction/layouts/bounding_box.hpp>                  // bounding box
@@ -21,6 +20,7 @@
 #include <fiction/technology/sidb_defects.hpp>               // SiDB defect classes
 #include <fiction/technology/sidb_surface_analysis.hpp>      // SiDB surface analysis
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -182,7 +182,7 @@ int main()  // NOLINT
             assert(eq.has_value());
 
             // compute critical path and throughput
-            const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
             const auto dot_accurate_layout = fiction::physical_design::apply_gate_library_to_defective_surface<

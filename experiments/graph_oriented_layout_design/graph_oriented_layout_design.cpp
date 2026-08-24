@@ -3,11 +3,11 @@
 //
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/layouts/bounding_box.hpp>                                       // calculate area of generated layouts
-#include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
-#include <fiction/physical_design/graph_oriented_layout_design.hpp>  // graph-oriented layout design algorithm
+#include <fiction/layouts/bounding_box.hpp>                              // calculate area of generated layouts
+#include <fiction/networks/io/network_reader.hpp>                        // read networks from files
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>      // graph-oriented layout design algorithm
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>  // output formatting
 
@@ -69,15 +69,16 @@ int main()  // NOLINT
         if (gate_level_layout.has_value())
         {
             //  compute critical path and throughput
-            const auto cp_tp = fiction::critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*gate_level_layout);
 
             // check equivalence
-            const auto eq_stats = fiction::equivalence_checking<fiction::networks::technology_network, gate_lyt>(
-                network, *gate_level_layout);
+            const auto eq_stats =
+                fiction::verification::equivalence_checking<fiction::networks::technology_network, gate_lyt>(
+                    network, *gate_level_layout);
 
-            const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
-                                          eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                 "NO";
+            const std::string eq_result = eq_stats == fiction::verification::eq_type::STRONG ? "STRONG" :
+                                          eq_stats == fiction::verification::eq_type::WEAK   ? "WEAK" :
+                                                                                               "NO";
 
             // calculate bounding box
             const auto bounding_box = fiction::layouts::bounding_box_2d(*gate_level_layout);

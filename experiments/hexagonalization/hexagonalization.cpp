@@ -1,9 +1,7 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/physical_design/apply_gate_library.hpp>                         // layout conversion to cell-level
-#include <fiction/physical_design/hexagonalization.hpp>                           // layout conversion to hexagonal gird
+#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
+#include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/area.hpp>                       // area requirement calculations
@@ -11,6 +9,8 @@
 #include <fiction/technology/sidb_bestagon_library.hpp>      // a pre-defined SiDB gate library
 #include <fiction/traits.hpp>                                // traits for type-checking
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -130,18 +130,18 @@ int main()  // NOLINT
             fiction::physical_design::orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
 
         // compute critical path and throughput
-        const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(gate_level_layout);
 
         const auto hex_layout = fiction::physical_design::hexagonalization<hex_lyt, gate_lyt>(
             gate_level_layout, hexagonalization_params, &hexagonalization_stats);
 
         // check equivalence
-        fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
+        fiction::verification::equivalence_checking_stats eq_stats{};
+        fiction::verification::equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
 
-        const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                "NO";
+        const std::string eq_result = eq_stats.eq == fiction::verification::eq_type::STRONG ? "STRONG" :
+                                      eq_stats.eq == fiction::verification::eq_type::WEAK   ? "WEAK" :
+                                                                                              "NO";
 
         // apply gate library
         const auto cell_level_layout =

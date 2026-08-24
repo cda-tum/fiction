@@ -1,11 +1,11 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>  // SAT-based equivalence checking
-#include <fiction/layouts/io/read_fgl_layout.hpp>                    // custom reader for layouts
-#include <fiction/networks/utils/name_utils.hpp>                     // name utilities
-#include <fiction/physical_design/determine_clocking.hpp>            // SAT-based clock number assignment
-#include <fiction/synthesis/network_conversion.hpp>                  // conversion of networks
-#include <fiction/types.hpp>                                         // pre-defined types
+#include <fiction/layouts/io/read_fgl_layout.hpp>          // custom reader for layouts
+#include <fiction/networks/utils/name_utils.hpp>           // name utilities
+#include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
+#include <fiction/synthesis/network_conversion.hpp>        // conversion of networks
+#include <fiction/types.hpp>                               // pre-defined types
+#include <fiction/verification/equivalence_checking.hpp>   // SAT-based equivalence checking
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
@@ -81,8 +81,8 @@ int main()  // NOLINT
                 fiction::physical_design::determine_clocking(newly_clocked_layout, params, &stats);
 
                 // check equivalence of the original and the newly clocked layout
-                const auto eq_result =
-                    fiction::equivalence_checking(original_layout, newly_clocked_layout) != fiction::eq_type::NO;
+                const auto eq_result = fiction::verification::equivalence_checking(
+                                           original_layout, newly_clocked_layout) != fiction::verification::eq_type::NO;
 
                 // log results
                 clock_number_assignment_exp(original_layout.get_clocking_scheme().name.data(), benchmark,

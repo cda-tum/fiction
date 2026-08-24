@@ -6,8 +6,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -36,7 +36,8 @@ void check_command::execute()
     ps.out = &env->out();
     pst    = {};
 
-    const auto design_rule_check = [this](auto&& lyt_ptr) { fiction::gate_level_drvs(*lyt_ptr, ps, &pst); };
+    const auto design_rule_check = [this](auto&& lyt_ptr)
+    { fiction::verification::gate_level_drvs(*lyt_ptr, ps, &pst); };
 
     std::visit(design_rule_check, s.current());
 }

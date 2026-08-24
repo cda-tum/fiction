@@ -28,17 +28,17 @@
 #include <utility>
 #include <vector>
 
-namespace fiction::detail
+namespace fiction::verification::detail
 {
 /**
  * Forward declaration for the friend declaration in `gate_level_layout`. Including
- * `algorithms/verification/design_rule_violations.hpp` here instead would pull `nlohmann/json.hpp` and three `fmt`
+ * `verification/design_rule_violations.hpp` here instead would pull `nlohmann/json.hpp` and three `fmt`
  * headers into every translation unit that touches a gate-level layout.
  */
 template <typename Lyt>
 class gate_level_drvs_impl;
 
-}  // namespace fiction::detail
+}  // namespace fiction::verification::detail
 
 namespace fiction::layouts
 {
@@ -1710,7 +1710,7 @@ class gate_level_layout : public ClockedLayout
     event_storage evnts;
 
     template <typename>
-    friend class fiction::detail::gate_level_drvs_impl;
+    friend class fiction::verification::detail::gate_level_drvs_impl;
 
     /**
      * Populates the truth table cache with the constant and elementary functions used by the fundamental gate

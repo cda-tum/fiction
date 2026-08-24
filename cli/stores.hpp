@@ -5,7 +5,6 @@
 #ifndef FICTION_STORES_HPP
 #define FICTION_STORES_HPP
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
@@ -13,6 +12,7 @@
 #include <fiction/networks/io/dot_drawers.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -186,7 +186,7 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*lyt_ptr);
 
         return fmt::format(
             "{} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, crossings: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
@@ -211,7 +211,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*lyt_ptr);
 
         os << fmt::format("[i] {} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, crossings: {}, CP: {}, TP: 1/{}, "
                           "sync. elems.: {}\n",
@@ -237,7 +237,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*lyt_ptr);
 
         return nlohmann::json{
             {"name", lyt_ptr->get_layout_name()},

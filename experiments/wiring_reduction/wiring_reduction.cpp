@@ -1,16 +1,16 @@
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/layouts/bounding_box.hpp>                                       // bounding box
-#include <fiction/layouts/cartesian_layout.hpp>                                   // Cartesian layout
-#include <fiction/layouts/clocked_layout.hpp>                                     // clocked layout
-#include <fiction/layouts/gate_level_layout.hpp>                                  // gate-level layout
-#include <fiction/layouts/tile_based_layout.hpp>                                  // tile-based layout
-#include <fiction/networks/io/network_reader.hpp>                                 // read networks from files
-#include <fiction/physical_design/orthogonal.hpp>        // scalable heuristic for physical design
-#include <fiction/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
-#include <fiction/types.hpp>                             // tec_nt, tec_ptr
+#include <fiction/layouts/bounding_box.hpp>                              // bounding box
+#include <fiction/layouts/cartesian_layout.hpp>                          // Cartesian layout
+#include <fiction/layouts/clocked_layout.hpp>                            // clocked layout
+#include <fiction/layouts/gate_level_layout.hpp>                         // gate-level layout
+#include <fiction/layouts/tile_based_layout.hpp>                         // tile-based layout
+#include <fiction/networks/io/network_reader.hpp>                        // read networks from files
+#include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
+#include <fiction/physical_design/wiring_reduction.hpp>                  // wiring reduction algorithm
+#include <fiction/types.hpp>                                             // tec_nt, tec_ptr
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>  // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
@@ -85,7 +85,7 @@ int main()  // NOLINT
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
-        const auto cp_tp_stats = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp_stats = fiction::verification::critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
         const auto bounding_box_before_wiring_reduction = fiction::layouts::bounding_box_2d(gate_level_layout);
@@ -98,21 +98,22 @@ int main()  // NOLINT
         fiction::physical_design::wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
-        const auto cp_tp_stats_after = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp_stats_after = fiction::verification::critical_path_length_and_throughput(gate_level_layout);
 
         auto num_wires_after =
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
 
         // check equivalence
-        const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+        const auto eq_stats =
+            fiction::verification::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
         std::string eq_result;
 
-        if (eq_stats == fiction::eq_type::STRONG)
+        if (eq_stats == fiction::verification::eq_type::STRONG)
         {
             eq_result = "STRONG";
         }
-        else if (eq_stats == fiction::eq_type::WEAK)
+        else if (eq_stats == fiction::verification::eq_type::WEAK)
         {
             eq_result = "WEAK";
         }

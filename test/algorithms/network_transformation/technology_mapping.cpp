@@ -8,8 +8,8 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/properties/count_gate_types.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
+#include <fiction/verification/count_gate_types.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -33,8 +33,8 @@ void map_and_check_aoi(const Ntk& ntk)
 
     check_eq(ntk, mapped_ntk);
 
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
+    verification::count_gate_types_stats gt_stats{};
+    verification::count_gate_types(mapped_ntk, &gt_stats);
 
     CHECK(gt_stats.num_nand2 == 0);
     CHECK(gt_stats.num_nor2 == 0);
@@ -63,8 +63,8 @@ void map_and_check_aoim(const Ntk& ntk)
 
     check_eq(ntk, mapped_ntk);
 
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
+    verification::count_gate_types_stats gt_stats{};
+    verification::count_gate_types(mapped_ntk, &gt_stats);
 
     CHECK(gt_stats.num_nand2 == 0);
     CHECK(gt_stats.num_nor2 == 0);
@@ -92,8 +92,8 @@ void map_and_check_all_2_inp(const Ntk& ntk)
 
     check_eq(ntk, mapped_ntk);
 
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
+    verification::count_gate_types_stats gt_stats{};
+    verification::count_gate_types(mapped_ntk, &gt_stats);
 
     CHECK(gt_stats.num_and3 == 0);
     CHECK(gt_stats.num_xor_and == 0);
@@ -117,8 +117,8 @@ void map_and_check_all_standard_2_inp(const Ntk& ntk)
 
     check_eq(ntk, mapped_ntk);
 
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
+    verification::count_gate_types_stats gt_stats{};
+    verification::count_gate_types(mapped_ntk, &gt_stats);
 
     CHECK(gt_stats.num_lt2 == 0);
     CHECK(gt_stats.num_gt2 == 0);
@@ -147,8 +147,8 @@ void map_and_check_all_standard_3_inp(const Ntk& ntk)
 
     check_eq(ntk, mapped_ntk);
 
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
+    verification::count_gate_types_stats gt_stats{};
+    verification::count_gate_types(mapped_ntk, &gt_stats);
 
     CHECK(gt_stats.num_and2 == 0);
     CHECK(gt_stats.num_or2 == 0);
@@ -169,8 +169,8 @@ void map_and_check_all_3_inp(const Ntk& ntk)
 
     check_eq(ntk, mapped_ntk);
 
-    count_gate_types_stats gt_stats{};
-    count_gate_types(mapped_ntk, &gt_stats);
+    verification::count_gate_types_stats gt_stats{};
+    verification::count_gate_types(mapped_ntk, &gt_stats);
 
     CHECK(gt_stats.num_and2 == 0);
     CHECK(gt_stats.num_or2 == 0);

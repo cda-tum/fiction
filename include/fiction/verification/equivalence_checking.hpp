@@ -2,13 +2,13 @@
 // Created by marcel on 04.03.20.
 //
 
-#ifndef FICTION_EQUIVALENCE_CHECKING_HPP
-#define FICTION_EQUIVALENCE_CHECKING_HPP
+#ifndef FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP
+#define FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP
 
-#include "fiction/algorithms/properties/critical_path_length_and_throughput.hpp"
-#include "fiction/algorithms/verification/design_rule_violations.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/verification/critical_path_length_and_throughput.hpp"
+#include "fiction/verification/design_rule_violations.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/algorithms/equivalence_checking.hpp>
@@ -21,7 +21,7 @@
 #include <sstream>
 #include <vector>
 
-namespace fiction
+namespace fiction::verification
 {
 /**
  * The different equivalence types possible.
@@ -63,7 +63,7 @@ struct equivalence_checking_stats
     /**
      * Stores DRVs.
      */
-    fiction::gate_level_drv_stats spec_drv_stats{}, impl_drv_stats{};
+    fiction::verification::gate_level_drv_stats spec_drv_stats{}, impl_drv_stats{};
 };
 
 namespace detail
@@ -124,14 +124,14 @@ class equivalence_checking_impl
                     // compute TP of specification
                     if constexpr (fiction::is_gate_level_layout_v<Spec>)
                     {
-                        const auto cp_tp = fiction::critical_path_length_and_throughput(spec);
+                        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(spec);
 
                         pst.tp_spec = static_cast<int64_t>(cp_tp.throughput);
                     }
                     // compute TP of implementation
                     if constexpr (fiction::is_gate_level_layout_v<Impl>)
                     {
-                        const auto cp_tp = fiction::critical_path_length_and_throughput(impl);
+                        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(impl);
 
                         pst.tp_impl = static_cast<int64_t>(cp_tp.throughput);
                     }
@@ -182,7 +182,7 @@ class equivalence_checking_impl
     template <typename NtkOrLyt>
     bool has_drvs(const NtkOrLyt& ntk_or_lyt, gate_level_drv_stats* stats) const noexcept
     {
-        fiction::gate_level_drv_params drv_ps{};
+        fiction::verification::gate_level_drv_params drv_ps{};
 
         // suppress DRV output
         std::ostringstream null_stream{};
@@ -243,6 +243,5 @@ eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_che
     return result;
 }
 
-}  // namespace fiction
-
-#endif  // FICTION_EQUIVALENCE_CHECKING_HPP
+}  // namespace fiction::verification
+#endif  // FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP

@@ -9,8 +9,6 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/networks/utils/truth_table_utils.hpp>
@@ -23,6 +21,8 @@
 #include <fiction/technology/sidb_surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/critical_path_length_and_throughput.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 #include <mockturtle/networks/mig.hpp>
@@ -215,7 +215,7 @@ void check_stats(const physical_design::exact_physical_design_stats& st)
 template <typename Lyt>
 void check_tp(const Lyt& lyt, const uint64_t tp)
 {
-    const auto cp_tp = critical_path_length_and_throughput(lyt);
+    const auto cp_tp = verification::critical_path_length_and_throughput(lyt);
 
     CHECK(cp_tp.throughput >= tp);  // >= because Z3 might behave differently on different operating systems
 }
@@ -223,11 +223,11 @@ void check_tp(const Lyt& lyt, const uint64_t tp)
 template <typename Lyt>
 void check_drvs(const Lyt& lyt)
 {
-    gate_level_drv_params ps{};
-    std::stringstream     ss{};
+    verification::gate_level_drv_params ps{};
+    std::stringstream                   ss{};
     ps.out = &ss;
-    gate_level_drv_stats st{};
-    gate_level_drvs(lyt, ps, &st);
+    verification::gate_level_drv_stats st{};
+    verification::gate_level_drvs(lyt, ps, &st);
 
     REQUIRE(st.drvs == 0);
 }
