@@ -25,7 +25,10 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.4
+  # 4.14.1 is the newest Z3 whose Linux x64 build still runs on `ubuntu-22.04`: from
+  # 4.15.0 on, the release binaries require GLIBC_2.38/GLIBCXX_3.4.32, and 22.04 ships
+  # glibc 2.35. Raise this once `ubuntu-22.04` leaves the matrix in `ci.yml`
+  Z3_VERSION: 4.14.1
   CMAKE_BUILD_PARALLEL_LEVEL: 4
   CTEST_PARALLEL_LEVEL: 4
   # Z3 has no ARM build in `cda-tum/setup-z3`

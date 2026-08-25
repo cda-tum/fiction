@@ -22,7 +22,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.4
+  Z3_VERSION: 4.14.1
   # pybind11_mkdoc parses with libclang, so the generated docstrings depend on which libclang is
   # loaded. Pin it explicitly: mkdoc_lib.py otherwise globs /usr/lib/llvm-* and takes the highest
   # version the runner image happens to ship, which can change the output with no commit here.

@@ -14,7 +14,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.4
+  Z3_VERSION: 4.14.1
   CMAKE_BUILD_PARALLEL_LEVEL: 4
 
 jobs:
