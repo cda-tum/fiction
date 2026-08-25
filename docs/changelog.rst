@@ -181,9 +181,9 @@ Changed
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
 - Dependencies:
-    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.8.5, which is the
-      version ``find_package(Z3 4.8.5)`` has required all along. A pin between 4.8.0 and 4.8.4 no
-      longer resolves
+    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.10.2, the first
+      release publishing a wheel for every supported platform. Below it, macOS and Linux aarch64
+      fall back to a source build of a 2019 Z3 that modern toolchains reject
 - Documentation:
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain

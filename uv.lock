@@ -482,7 +482,7 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "nanobind-backend", specifier = ">=1.0" },
-    { name = "z3-solver", specifier = ">=4.8.5" },
+    { name = "z3-solver", specifier = ">=4.10.2" },
 ]
 
 [package.metadata.requires-dev]

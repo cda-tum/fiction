@@ -46,7 +46,10 @@ classifiers = [
 
 requires-python = ">=3.10"
 dependencies = [
-    "z3-solver>=4.8.5",
+    # 4.10.2 is the first release publishing a wheel for every platform the project supports. The
+    # earlier bound was only ever exercised on x86-64 Linux, where 4.8.5 happens to have one; on
+    # macOS and Linux aarch64 it forced a source build of a 2019 Z3 that modern toolchains reject
+    "z3-solver>=4.10.2",
     # the split-mode extension carries no copy of the nanobind library and resolves it at import
     # time from this wheel. Never pin or upper-bound it: two projects pinning different versions
     # could not be installed together
