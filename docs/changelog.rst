@@ -36,8 +36,9 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
-    - Added a 🐍 Minimums job that runs ``nox -s minimums``, so a lower bound that is too low fails
-      CI instead of a downstream install
+    - Added a 🐍 Test job that runs ``nox -s tests`` and ``nox -s minimums`` on Linux, macOS, and
+      Windows, so every supported interpreter and every declared dependency floor is exercised
+      against a source build
 - Data structures:
     - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
     - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits

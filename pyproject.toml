@@ -168,8 +168,9 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 # cp310 builds the one abi3 wheel that serves every supported CPython; the later interpreters find
-# it already built, skip the build step, and go straight to `test-command`. Narrowing this to
-# `cp310-*` would produce the same single wheel but shrink the Python test suite to one interpreter
+# it already built, skip the build step, and go straight to `test-command`. That is the only place
+# the shipped wheel meets an interpreter newer than the headers it compiled against -- `🐍 Test`
+# builds from source, so on 3.14 it compiles against 3.14 headers and cannot catch the same thing
 build = "cp3*"
 archs = "auto64"
 # nanobind-backend publishes no musllinux wheels.

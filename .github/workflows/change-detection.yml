@@ -27,9 +27,9 @@ on:
       run-docstrings:
         description: Whether to check the generated pyfiction docstring header
         value: ${{ jobs.change-detection.outputs.run-docstrings || false }}
-      run-python-minimums:
-        description: Whether to test against the lowest declared dependency versions
-        value: ${{ jobs.change-detection.outputs.run-python-minimums || false }}
+      run-python-tests:
+        description: Whether to build the extension from source and run the Python test suite
+        value: ${{ jobs.change-detection.outputs.run-python-tests || false }}
       run-packaging:
         description: Whether to build the source distribution and the wheels
         value: ${{ jobs.change-detection.outputs.run-packaging || false }}
@@ -63,7 +63,7 @@ jobs:
       run-codeql: ${{ steps.codeql-changes.outputs.run-codeql || false }}
       run-python-linter: ${{ steps.python-linter-changes.outputs.run-python-linter || false }}
       run-docstrings: ${{ steps.docstrings-changes.outputs.run-docstrings || false }}
-      run-python-minimums: ${{ steps.python-minimums-changes.outputs.run-python-minimums || false }}
+      run-python-tests: ${{ steps.python-tests-changes.outputs.run-python-tests || false }}
       run-packaging: ${{ steps.packaging-changes.outputs.run-packaging || false }}
       run-docker: ${{ steps.docker-changes.outputs.run-docker || false }}
       run-workflows: ${{ steps.workflows-changes.outputs.run-workflows || false }}
@@ -214,36 +214,37 @@ jobs:
         id: docstrings-changes
         run: echo "run-docstrings=true" >> "${GITHUB_OUTPUT}"
 
-      # Deliberately narrow. The job checks the declared dependency floors, and those live in
-      # `pyproject.toml`, `uv.lock`, and the session itself. The wheel jobs already build the
-      # extension on Python 3.10, so a C++ change cannot break this job without breaking those
-      # too. The test suite is in the filter because a test that reaches for a newer pytest API
-      # is exactly the kind of floor violation this job exists to catch.
-      - name: Get the changed files relevant for the lowest-dependency test run
+      # The job builds the extension from source, so the filter covers everything it is compiled
+      # from, not just what shapes the package.
+      - name: Get the changed files relevant for the Python tests
         if: github.event_name == 'pull_request'
-        id: changed-python-minimums-files
+        id: changed-python-tests-files
         uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
         with:
           filter: |
+            bindings/**
+            include/fiction/**
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            noxfile.py
             pyproject.toml
             uv.lock
-            noxfile.py
-            bindings/mnt/pyfiction/test/**
             .github/workflows/ci.yml
             .github/workflows/change-detection.yml
-            .github/workflows/python-minimums.yml
-      - name: Set a flag for running the lowest-dependency test run
+            .github/workflows/python-tests.yml
+            !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+      - name: Set a flag for running the Python tests
         if: >-
           github.event_name != 'pull_request'
-          || steps.changed-python-minimums-files.outputs.all != ''
-        id: python-minimums-changes
-        run: echo "run-python-minimums=true" >> "${GITHUB_OUTPUT}"
+          || steps.changed-python-tests-files.outputs.all != ''
+        id: python-tests-changes
+        run: echo "run-python-tests=true" >> "${GITHUB_OUTPUT}"
 
-      # `[tool.cibuildwheel] test-command` runs pytest against every wheel it builds, so
-      # this is also what gates the Python test suite — there is no separate test job. The
-      # filter therefore has to cover everything the extension is compiled from, not just
-      # what shapes the distribution.
-      - name: Get the changed files relevant for packaging and the Python tests
+      # `[tool.cibuildwheel] test-command` runs pytest against every wheel it builds, so this
+      # filter has the same reach as `run-python-tests` above.
+      - name: Get the changed files relevant for packaging
         if: github.event_name == 'pull_request'
         id: changed-packaging-files
         uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0

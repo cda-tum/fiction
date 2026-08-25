@@ -1,0 +1,122 @@
+name: 🐍 • Tests
+
+on:
+  workflow_call:
+    inputs:
+      runs-on:
+        description: The runner to execute on
+        required: true
+        type: string
+
+concurrency:
+  group: >-
+    ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-python-tests-${{ inputs.runs-on }}
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_VERSION: 4.13.4
+
+jobs:
+  python-tests:
+    name: 🐍 ${{ inputs.runs-on }}
+    runs-on: ${{ inputs.runs-on }}
+    timeout-minutes: 90
+    permissions:
+      contents: read # required to check out the repository
+
+    # The source build no other job covers: the wheel jobs exercise the installed artifact inside
+    # `cibuildwheel`'s own CPythons.
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # `vcs-versioning` derives the version from the tag history
+          persist-credentials: false
+
+      # Windows is on sccache instead, see below.
+      - if: runner.os != 'Windows'
+        name: Setup ccache
+        uses: hendrikmuhs/ccache-action@5ebbd400eff9e74630f759d94ddd7b6c26299639 # v1.2
+        with:
+          # A key of this job's own: two workflows sharing one while producing disjoint objects
+          # overwrite caches neither can use.
+          key: "${{ inputs.runs-on }}-python-tests"
+          save: true
+          max-size: 10G
+
+      # MSBuild ignores CMAKE_<LANG>_COMPILER_LAUNCHER, so scikit-build-core's default Visual
+      # Studio generator never invokes the cache. Ninja honours it, but needs MSVC on PATH.
+      - if: runner.os == 'Windows'
+        name: Set up the MSVC development environment
+        uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
+
+      - if: runner.os == 'Windows'
+        name: Build with Ninja so that the compiler cache is used
+        run: |
+          {
+            echo "CMAKE_GENERATOR=Ninja"
+            echo "SCCACHE_DIR=$GITHUB_WORKSPACE/.sccache"
+            # Six builds per job: `minimums` plus one per interpreter. GitHub evicts caches
+            # repo-wide at 10 GB, so size this to what the statistics step actually reports
+            echo "SCCACHE_CACHE_SIZE=2G"
+            # One server for the whole job; a restart would reset the counters
+            echo "SCCACHE_IDLE_TIMEOUT=0"
+            # `cmake/Cache.cmake` defaults to ccache, and the runner image ships one at
+            # C:/Strawberry/c/bin/ccache.exe. Unnamed, that one wins and MSVC goes uncached
+            echo "CMAKE_ARGS=-DCACHE_OPTION=sccache"
+          } >> "$GITHUB_ENV"
+
+      # Fresh key per run with a prefix restore, since cache entries are immutable.
+      - if: runner.os == 'Windows'
+        name: Cache sccache objects
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: .sccache
+          key: sccache-${{ inputs.runs-on }}-python-tests-${{ github.run_id }}
+          restore-keys: sccache-${{ inputs.runs-on }}-python-tests-
+
+      - if: runner.os == 'Linux'
+        name: Setup mold
+        uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
+
+      # `[tool.scikit-build.cmake.define]` sets `FICTION_Z3 = "ON"`, so every platform needs it.
+      # On Windows `Z3_ROOT` is also what `bindings/mnt/__init__.py` reads to register the DLL
+      # search path.
+      - name: Install Z3
+        uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
+        with:
+          version: ${{ env.Z3_VERSION }}
+
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "latest"
+          enable-cache: true
+          save-cache: ${{ github.ref == 'refs/heads/main' }}
+
+      - if: runner.os == 'Windows'
+        name: Install sccache
+        run: uv tool install sccache
+
+      # A declared floor is only a claim until something installs it. Pinned to Python 3.10, so
+      # it runs first and fails fastest.
+      - name: ⬇️ Test the lowest supported dependency versions
+        run: uvx nox -s minimums --verbose
+
+      - name: 🐍 Test
+        run: uvx nox -s tests --verbose
+
+      # A hit rate is a fact; a step duration is a guess about one. `--show-stats` gates the job,
+      # since it fails only when sccache is broken, which is what this step exists to catch;
+      # `--stop-server` exits non-zero with no server running, which is fine.
+      - if: always() && runner.os == 'Windows'
+        name: sccache statistics
+        run: |
+          sccache --show-stats
+          sccache --stop-server || true
