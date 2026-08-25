@@ -157,15 +157,19 @@ to adjust certain docstrings for Python bindings, this can be done here.
 > ⚠️ **Do not directly include the auto-generated file!** Due to the lack of header guards, it leads to compilation
 > errors. Instead, only include `documentation.hpp`.
 
-The docstrings are extended and updated automatically by the GitHub
-Action [pyfiction-docstring-generator](https://github.com/cda-tum/fiction/actions/workflows/pyfiction-docstring-generator.yml),
-which regenerates `pybind11_mkdoc_docstrings.hpp` and overrides the existing one every time changes to
-any `*.hpp` file, to the workflow, or to `mkdoc_compile_flags.py` reach `main`. It does not run on pull
-request branches, so regenerate locally if you need the docstrings before your pull request merges.
+`pybind11_mkdoc_docstrings.hpp` is committed, and a Doxygen comment you add in `include/fiction/` only reaches
+Python once the regenerated file is committed with it. CI's `🐍 Docstrings` job regenerates the header on every
+pull request that can affect it and fails when the committed file differs. The job cannot commit the regeneration
+for you: it would have to push to your pull request head with a token that starts no workflow run, leaving that
+commit without the `🚦 Check` its merge waits for.
 
-Alternatively, you can run `pybind11_mkdoc` locally (not recommended). It parses with libclang, so it needs the same
-include paths, defines, and language standard as the real build. Without them it parses this C++20 code base as C++11
-and silently drops the docstrings that follow anything it cannot parse, such as a `requires` clause.
+So when the check fails, download the `pyfiction-docstrings` artifact from that run, put it in place of
+`bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp`, and commit it. The job summary repeats
+these instructions and shows what changed.
+
+You can also regenerate the file locally, which is what CI does. `pybind11_mkdoc` parses with libclang, so it needs
+the same include paths, defines, and language standard as the real build. Without them it parses this C++20 code
+base as C++11 and silently drops the docstrings that follow anything it cannot parse, such as a `requires` clause.
 
 Install the tool and the libclang bindings, which must match the `libclang-18` shared library that does the parsing:
 
@@ -177,13 +181,26 @@ Configure a build to produce the compile database the flags are read from, then 
 _fiction_'s base directory:
 
 ```bash
-cmake --preset pyfiction
-python3 -m pybind11_mkdoc \
-  -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
-  -std=c++20 \
-  "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
-  $(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction) \
-  $(find include/fiction -name "*.hpp" -print)
+(
+  set -euo pipefail
+  cmake --preset pyfiction
+  mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
+  mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
+  python3 -m pybind11_mkdoc \
+    -o bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp \
+    -std=c++20 \
+    "-resource-dir=$(llvm-config-18 --libdir)/clang/18" \
+    ${mkdoc_flags} \
+    ${mkdoc_headers}
+)
 ```
 
+Resolve the flags and the header list before the generator runs, as the subshell above does and as CI does. Passing
+them inline as `$(...)` hides a failure of either: the generator still runs, just without include paths or without
+inputs, and writes a header that is truncated rather than absent. The subshell keeps `set -euo pipefail` from
+reaching your interactive shell.
+
 Expect zero parse errors. A drop in the number of generated symbols means the flags did not take effect.
+
+Keep the `sort`. The generator numbers repeated symbol names in the order it meets them, so an unsorted header list
+produces a file that disagrees with CI's for no reason other than the order your filesystem reports.

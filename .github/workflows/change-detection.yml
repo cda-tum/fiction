@@ -24,6 +24,9 @@ on:
       run-python-linter:
         description: Whether to type check the Python sources
         value: ${{ jobs.change-detection.outputs.run-python-linter || false }}
+      run-docstrings:
+        description: Whether to check the generated pyfiction docstring header
+        value: ${{ jobs.change-detection.outputs.run-docstrings || false }}
       run-python-minimums:
         description: Whether to test against the lowest declared dependency versions
         value: ${{ jobs.change-detection.outputs.run-python-minimums || false }}
@@ -59,6 +62,7 @@ jobs:
       run-cpp-linter: ${{ steps.cpp-linter-changes.outputs.run-cpp-linter || false }}
       run-codeql: ${{ steps.codeql-changes.outputs.run-codeql || false }}
       run-python-linter: ${{ steps.python-linter-changes.outputs.run-python-linter || false }}
+      run-docstrings: ${{ steps.docstrings-changes.outputs.run-docstrings || false }}
       run-python-minimums: ${{ steps.python-minimums-changes.outputs.run-python-minimums || false }}
       run-packaging: ${{ steps.packaging-changes.outputs.run-packaging || false }}
       run-docker: ${{ steps.docker-changes.outputs.run-docker || false }}
@@ -70,9 +74,9 @@ jobs:
         with:
           persist-credentials: false
 
-      # The generated docstring header is excluded everywhere it could appear. The
-      # docstring generator rewrites its 25k lines on every `.hpp` push, and that commit
-      # must not drag the whole fleet along behind it.
+      # The generated docstring header is excluded everywhere it could appear. A
+      # regeneration rewrites its 25k lines, and a pull request that carries one must not
+      # drag the whole fleet along behind it. `run-docstrings` below watches it instead.
 
       - name: Get the changed files relevant for the C++ tests
         if: github.event_name == 'pull_request'
@@ -182,6 +186,33 @@ jobs:
           || steps.changed-python-linter-files.outputs.all != ''
         id: python-linter-changes
         run: echo "run-python-linter=true" >> "${GITHUB_OUTPUT}"
+
+      # The header is generated from `include/fiction/**` alone, but *how* it is parsed
+      # decides what comes out: the flag script, the preset the compile database comes from,
+      # and the dependencies whose headers have to resolve. The generated header is in the
+      # filter too, so a hand-edit of it is caught by the job it tries to bypass.
+      - name: Get the changed files relevant for the docstring header
+        if: github.event_name == 'pull_request'
+        id: changed-docstrings-files
+        uses: Ana06/get-changed-files@25f79e676e7ea1868813e21465014798211fad8c # v2.3.0
+        with:
+          filter: |
+            include/fiction/**
+            bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+            libs/**
+            cmake/**
+            CMakeLists.txt
+            CMakePresets.json
+            .github/scripts/mkdoc_compile_flags.py
+            .github/workflows/ci.yml
+            .github/workflows/change-detection.yml
+            .github/workflows/docstrings.yml
+      - name: Set a flag for checking the docstring header
+        if: >-
+          github.event_name != 'pull_request'
+          || steps.changed-docstrings-files.outputs.all != ''
+        id: docstrings-changes
+        run: echo "run-docstrings=true" >> "${GITHUB_OUTPUT}"
 
       # Deliberately narrow. The job checks the declared dependency floors, and those live in
       # `pyproject.toml`, `uv.lock`, and the session itself. The wheel jobs already build the
