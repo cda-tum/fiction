@@ -204,6 +204,101 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-workflows)
     uses: ./.github/workflows/zizmor.yml
 
+  # The next five jobs exist so the README can show one badge per platform again. Each
+  # collapses a group into a single check run with a fixed name, which is what
+  # `img.shields.io/github/check-runs/…?nameFilter=` needs: it matches the check run's name
+  # exactly, and the jobs above carry their matrix entry in theirs
+  # (`🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 g++-13`), leaving nothing fixed to
+  # point at. They are `🚦 Check` in miniature and follow it for the same reasons: without
+  # `if: always()` a failed dependency skips the job, and a group that change detection
+  # skips has to conclude here anyway — a check run that never appears reads as a grey
+  # "no check runs" on the badge, not as success.
+  #
+  # None of them belong in `required-checks-pass`. They restate jobs the guard already
+  # covers, and branch protection has exactly one required context by design.
+  cpp-tests-ubuntu-badge:
+    name: 🐧 Ubuntu
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-ubuntu
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the Ubuntu tests succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-ubuntu' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  cpp-tests-macos-badge:
+    name: 🍎 macOS
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-macos
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the macOS tests succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-macos' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  cpp-tests-windows-badge:
+    name: 🪟 Windows
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-windows
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the Windows tests succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-windows' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  # `🐳 Docker` produces a single check run today, so its name could be filtered directly.
+  # It gets a badge job anyway: that name embeds the called workflow's job name, and a
+  # change-detection skip would leave the badge grey.
+  docker-badge:
+    name: 🐳 Docker Image
+    if: always()
+    needs:
+      - change-detection
+      - docker
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the Docker image build succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-docker)
+            && 'docker' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  codeql-badge:
+    name: 📝 CodeQL Analysis
+    if: always()
+    needs:
+      - change-detection
+      - codeql
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the CodeQL analysis succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
+            && 'codeql' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the
   # guard, and a skipped required context leaves a pull request waiting forever.
