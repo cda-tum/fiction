@@ -2357,6 +2357,33 @@ static const char* mkd_doc_fiction_cds_configuration_CHARGE_LOCATION_ONLY =
     R"doc(The charge distribution is exclusively used to store the charge
 states.)doc";
 
+static const char* mkd_doc_fiction_cell_layout_digest =
+    R"doc(Computes a digest of the given cell-level layout that respects the
+equality `are_cell_layouts_identical` implements.
+
+Identical layouts always share a digest, so layouts with different
+digests are never identical. That makes the digest a cheap filter in
+front of `are_cell_layouts_identical`. Different layouts may share a
+digest, so a digest match still has to be confirmed with
+`are_cell_layouts_identical`.
+
+The digest covers the cells and their types, the defects of an
+`sidb_defect_surface`, and the charge states of a
+`charge_distribution_surface`. Following `are_cell_layouts_identical`,
+it ignores the layout's aspect ratio.
+
+Args:
+    lyt: The layout to digest.
+
+Template Args:
+    Lyt: The layout type. Must be a cell-level layout.
+
+Returns:
+    Hash value that identifies `lyt` up to
+    `are_cell_layouts_identical`.
+
+)doc";
+
 static const char* mkd_doc_fiction_cell_level_layout =
     R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of individual cells to clock zones in accordance with an
@@ -16872,6 +16899,34 @@ Template Args:
 
 )doc";
 
+static const char* mkd_doc_fiction_hash_combine_unordered =
+    R"doc(Combines a hash value into a seed independently of the order in which
+the values arrive.
+
+`hash_combine` is order-dependent by construction, which rules it out
+for folding over a container whose iteration order is not canonical,
+such as a hash map. This function adds instead, which is commutative,
+so the seed depends only on which values were combined and how often,
+not on their order.
+
+The scrambling step is not optional. `std::hash` of the cube and SiQAD
+coordinate types weighs the coordinate components linearly, so a plain
+sum over their hash values makes the cell sets `{(0, 0), (3, 0)}` and
+`{(1, 0), (2, 0)}` collide. The splitmix64 finalizer applied here
+spreads every input bit across the whole word before the sum sees it.
+
+Overrides the passed seed.
+
+Args:
+    seed: Hashing seed. This value is overridden with the combined
+          hash value.
+    v: Value to hash next.
+
+Template Args:
+    T: Type to hash.
+
+)doc";
+
 static const char* mkd_doc_fiction_heuristic_sidb_simulation_engine =
     R"doc(Selector exclusively for heuristic SiDB simulation engines.)doc";
 
@@ -17939,7 +17994,14 @@ Returns:
 
 )doc";
 
-static const char* mkd_doc_fiction_inml_technology_is_normal_cell_mode = R"doc()doc";
+static const char* mkd_doc_fiction_inml_technology_is_normal_cell_mode =
+    R"doc(Checks whether the given cell mode is the normal mode. iNML cells do
+not have modes, so this always holds.
+
+Returns:
+    `true`.
+
+)doc";
 
 static const char* mkd_doc_fiction_inml_technology_is_output_cell =
     R"doc(Checks whether the given cell type is an output cell.
@@ -19037,35 +19099,173 @@ static const char* mkd_doc_fiction_mol_qca_technology_cell_type_NORMAL4 =
 static const char* mkd_doc_fiction_mol_qca_technology_cell_type_OUTPUT =
     R"doc(Symbol used for output molQCA cells.)doc";
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_const_0_cell = R"doc()doc";
+static const char* mkd_doc_fiction_mol_qca_technology_is_const_0_cell =
+    R"doc(Checks whether the given cell type is a constant-0 input cell.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_const_1_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_constant_cell = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::CONST_0`.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_crossover_cell_mode = R"doc()doc";
+)doc";
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_empty_cell = R"doc()doc";
+static const char* mkd_doc_fiction_mol_qca_technology_is_const_1_cell =
+    R"doc(Checks whether the given cell type is a constant-1 input cell.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_input_cell = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::CONST_1`.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell1 = R"doc()doc";
+)doc";
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell2 = R"doc()doc";
+static const char* mkd_doc_fiction_mol_qca_technology_is_constant_cell =
+    R"doc(Checks whether the given cell type is a constant input cell, i.e.,
+either `CONST_0` or `CONST_1`.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell3 = R"doc()doc";
+Args:
+    c: Cell type to check.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell4 = R"doc()doc";
+Returns:
+    `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell_mode = R"doc()doc";
+)doc";
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_output_cell = R"doc()doc";
+static const char* mkd_doc_fiction_mol_qca_technology_is_crossover_cell_mode =
+    R"doc(Checks whether the given cell mode is the crossover mode.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_rotated_cell_mode = R"doc()doc";
+Args:
+    m: Cell mode to check.
 
-static const char* mkd_doc_fiction_mol_qca_technology_is_vertical_cell_mode = R"doc()doc";
+Returns:
+    `true` iff `m` is `cell_mode::CROSSOVER`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_empty_cell =
+    R"doc(Checks whether the given cell type is empty.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_input_cell =
+    R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell =
+    R"doc(Checks whether the given cell type is a normal cell, i.e., any of the
+four clocking phases.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL1`, `cell_type::NORMAL2`,
+    `cell_type::NORMAL3`, or `cell_type::NORMAL4`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell1 =
+    R"doc(Checks whether the given cell type is a normal cell with clocking 0.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL1`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell2 =
+    R"doc(Checks whether the given cell type is a normal cell with clocking 1.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL2`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell3 =
+    R"doc(Checks whether the given cell type is a normal cell with clocking 2.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL3`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell4 =
+    R"doc(Checks whether the given cell type is a normal cell with clocking 3.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL4`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_normal_cell_mode =
+    R"doc(Checks whether the given cell mode is the normal mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::NORMAL`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_output_cell =
+    R"doc(Checks whether the given cell type is an output cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_rotated_cell_mode =
+    R"doc(Checks whether the given cell mode is the rotated mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::ROTATED`.
+
+)doc";
+
+static const char* mkd_doc_fiction_mol_qca_technology_is_vertical_cell_mode =
+    R"doc(Checks whether the given cell mode is the vertical mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::VERTICAL`.
+
+)doc";
 
 static const char* mkd_doc_fiction_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
@@ -21476,7 +21676,16 @@ Returns:
 
 )doc";
 
-static const char* mkd_doc_fiction_qca_technology_is_crossover_cell_mode = R"doc()doc";
+static const char* mkd_doc_fiction_qca_technology_is_crossover_cell_mode =
+    R"doc(Checks whether the given cell mode is the crossover mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::CROSSOVER`.
+
+)doc";
 
 static const char* mkd_doc_fiction_qca_technology_is_empty_cell =
     R"doc(Checks whether the given cell type is empty.
@@ -21533,9 +21742,27 @@ Returns:
 
 )doc";
 
-static const char* mkd_doc_fiction_qca_technology_is_rotated_cell_mode = R"doc()doc";
+static const char* mkd_doc_fiction_qca_technology_is_rotated_cell_mode =
+    R"doc(Checks whether the given cell mode is the rotated mode.
 
-static const char* mkd_doc_fiction_qca_technology_is_vertical_cell_mode = R"doc()doc";
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::ROTATED`.
+
+)doc";
+
+static const char* mkd_doc_fiction_qca_technology_is_vertical_cell_mode =
+    R"doc(Checks whether the given cell mode is the vertical mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::VERTICAL`.
+
+)doc";
 
 static const char* mkd_doc_fiction_qca_technology_qca_technology = R"doc()doc";
 
@@ -23583,7 +23810,14 @@ Returns:
 
 )doc";
 
-static const char* mkd_doc_fiction_sidb_technology_is_normal_cell_mode = R"doc()doc";
+static const char* mkd_doc_fiction_sidb_technology_is_normal_cell_mode =
+    R"doc(Checks whether the given cell mode is the normal mode. SiDB cells do
+not have modes, so this always holds.
+
+Returns:
+    `true`.
+
+)doc";
 
 static const char* mkd_doc_fiction_sidb_technology_is_output_cell =
     R"doc(Checks whether the given cell type is an output cell.
@@ -26433,6 +26667,8 @@ static const char* mkd_doc_std_hash_5 = R"doc()doc";
 
 static const char* mkd_doc_std_hash_6 = R"doc()doc";
 
+static const char* mkd_doc_std_hash_7 = R"doc(Provides a hash implementation for `fiction::sidb_defect`.)doc";
+
 static const char* mkd_doc_std_hash_operator_call = R"doc()doc";
 
 static const char* mkd_doc_std_hash_operator_call_2 = R"doc()doc";
@@ -26444,6 +26680,20 @@ static const char* mkd_doc_std_hash_operator_call_4 = R"doc()doc";
 static const char* mkd_doc_std_hash_operator_call_5 = R"doc()doc";
 
 static const char* mkd_doc_std_hash_operator_call_6 = R"doc()doc";
+
+static const char* mkd_doc_std_hash_operator_call_7 =
+    R"doc(Computes the hash value of a given SiDB defect.
+
+Every member that `fiction::sidb_defect`'s equality operator compares
+contributes to the hash value.
+
+Args:
+    defect: Defect to hash.
+
+Returns:
+    Hash value of `defect`.
+
+)doc";
 
 static const char* mkd_doc_std_iterator_traits = R"doc()doc";
 

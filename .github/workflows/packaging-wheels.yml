@@ -16,7 +16,7 @@ concurrency:
 permissions: {}
 
 env:
-  Z3_VERSION: 4.13.4
+  Z3_VERSION: 4.14.1
 
 jobs:
   build_wheels:

@@ -14,7 +14,7 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.4
+  Z3_VERSION: 4.14.1
 
 jobs:
   clangtidy:
@@ -45,7 +45,7 @@ jobs:
         # config discoverable via `python -m nanobind --cmake_dir` (see
         # bindings/mnt/pyfiction/CMakeLists.txt); unlike the previous pybind11-based bindings,
         # this isn't fetched by CMake and must be pip-installed ahead of time
-        run: python3 -m pip install --break-system-packages --disable-pip-version-check "nanobind~=2.13.0"
+        run: python3 -m pip install --break-system-packages --disable-pip-version-check "nanobind~=3.0.0"
 
       - name: Setup Z3 Solver
         id: z3

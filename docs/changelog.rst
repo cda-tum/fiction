@@ -36,8 +36,9 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
-    - Added a 🐍 Minimums job that runs ``nox -s minimums``, so a lower bound that is too low fails
-      CI instead of a downstream install
+    - Added a 🐍 Test job that runs ``nox -s tests`` and ``nox -s minimums`` on Linux, macOS, and
+      Windows, so every supported interpreter and every declared dependency floor is exercised
+      against a source build
 - Data structures:
     - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
     - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits
@@ -197,14 +198,26 @@ Changed
     - The ``prek`` hooks now carry explicit priorities, which run the read-only checks
       concurrently and cut a warm ``prek run -a`` by about 18%. Hooks that rewrite the same file
       keep exclusive priorities, since ``prek`` runs hooks that share one concurrently
-    - The docstring generator runs on ``main`` only. It pushes with a token that starts no workflow
-      run, so its commit on a pull request head would carry no ``🚦 Check``
+    - The docstring generator is a ``🐍 Docstrings`` check instead of a job that commits the
+      regenerated header, which it could no longer push to a protected ``main``. It uploads the
+      header as an artifact and fails when the committed one differs; download that artifact and
+      commit it
+    - The docstring generator parses the headers in sorted order. It numbers repeated symbol
+      names in the order it meets them, so the numbering used to depend on the order the
+      filesystem reported the files in
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
+    - The 🐧 Test jobs build with Z3 on ``ubuntu-24.04-arm`` as well. ``cda-tum/setup-z3`` does
+      serve an ``arm64`` archive, so the ``-DFICTION_Z3=OFF`` override those jobs carried is gone
 - Dependencies:
-    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.8.5, which is the
-      version ``find_package(Z3 4.8.5)`` has required all along. A pin between 4.8.0 and 4.8.4 no
-      longer resolves
+    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.10.2, the first
+      release publishing a wheel for every supported platform. Below it, macOS and Linux aarch64
+      fall back to a source build of a 2019 Z3 that modern toolchains reject
+    - Bumped the Z3 version pinned in CI and in the Docker image from 4.13.4 to 4.14.1. Newer
+      releases require glibc 2.38, which the ``ubuntu-22.04`` job does not provide
+    - The Linux wheels pin ``z3-solver`` to the same version instead of flooring it at 4.10.2,
+      and the ``aarch64`` image moves to ``manylinux_2_34``. The published ``aarch64`` wheel
+      therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
 - Documentation:
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain
@@ -223,6 +236,9 @@ Changed
       directly must be renamed
     - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
       and physics as a topic on PyPI
+    - Adopted nanobind's split mode, so one ``abi3`` wheel per platform now covers Python 3.10 and
+      up instead of four. ``mnt.pyfiction`` gains ``nanobind-backend`` as a runtime dependency,
+      which ``pip`` installs along with it
 
 Removed
 #######
@@ -243,6 +259,12 @@ Removed
     - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
       ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
       change in usage
+- Python bindings:
+    - Removed the free-threaded (``cp314t``) wheel. Free-threaded interpreters are unsupported,
+      source builds included, until Python 3.15 gives them the ``abi3t`` stable ABI
+      (`PEP 803 <https://peps.python.org/pep-0803/>`_)
+    - Removed the ``DISABLE_GIL`` scikit-build-core override for free-threaded Windows builds. No
+      CMake code ever read the define, and split mode rejects free-threaded interpreters outright
 
 Fixed
 #####

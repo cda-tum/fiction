@@ -103,7 +103,7 @@ them automatically. Should the repository have been cloned before, the commands:
   git submodule update --init --recursive
 
 will fetch the latest version of all external modules used. Additionally, only ``CMake`` and a C++20 compiler are
-required for the C++ part. If you want to work with the Python bindings, you need a Python 3.9+ installation.
+required for the C++ part. If you want to work with the Python bindings, you need a Python 3.10+ installation.
 
 At the time of writing, for parallel STL algorithms to work when using GCC, the TBB library (``libtbb-dev`` on Ubuntu) is
 needed. It is an optional dependency that can be installed for a performance boost in certain scenarios. For your
@@ -312,6 +312,15 @@ there.
    ``uv``-managed virtual environment already does, so pass
    ``-DPython_EXECUTABLE=<path_to_repo>/.venv/bin/python3`` (or the equivalent ``.venv\Scripts\python.exe`` on
    Windows) if CMake would otherwise pick up a different interpreter.
+
+.. note::
+
+   nanobind is used in *split mode*: the extension contains no nanobind library code and resolves it at import time
+   from the separate ``nanobind-backend`` package, which is therefore a runtime dependency of ``mnt.pyfiction``.
+   That is what lets a single ``abi3`` wheel per platform serve every supported interpreter. Free-threaded
+   interpreters are not supported until Python 3.15 gives them a stable ABI
+   (`PEP 803 <https://peps.python.org/pep-0803/>`_); building on an earlier one stops the CMake configure with a
+   message naming that version.
 
 ---
 

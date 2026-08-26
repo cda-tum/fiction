@@ -2,7 +2,7 @@
 requires = [
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.3.0",
-    "nanobind~=2.15.0"
+    "nanobind~=3.0.0"
 ]
 build-backend = "scikit_build_core.build"
 
@@ -46,7 +46,14 @@ classifiers = [
 
 requires-python = ">=3.10"
 dependencies = [
-    "z3-solver>=4.8.5"
+    # 4.10.2 is the first release publishing a wheel for every platform the project supports. The
+    # earlier bound was only ever exercised on x86-64 Linux, where 4.8.5 happens to have one; on
+    # macOS and Linux aarch64 it forced a source build of a 2019 Z3 that modern toolchains reject
+    "z3-solver>=4.10.2",
+    # the split-mode extension carries no copy of the nanobind library and resolves it at import
+    # time from this wheel. Never pin or upper-bound it: two projects pinning different versions
+    # could not be installed together
+    "nanobind-backend>=1.0"
 ]
 
 [project.urls]
@@ -69,8 +76,9 @@ cmake.build-type = "Release"
 build-dir = "build/{wheel_tag}/{build_type}"
 # Explicitly set the package directory
 wheel.packages = ["bindings/mnt"]
-# Enable Stable ABI builds for CPython 3.12+
-wheel.py-api = "cp312"
+# One Stable ABI wheel per platform serves every supported CPython. The 3.10 floor is what
+# nanobind's split mode buys: a linked stable-ABI build cannot go below 3.12
+wheel.py-api = "cp310"
 # Only build the Python bindings target
 build.targets = ["pyfiction"]
 # Only install the Python package component
@@ -121,13 +129,6 @@ cmake.args = [
     "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold"
 ]
 
-[[tool.scikit-build.overrides]]
-if.python-version = ">=3.13"
-if.abi-flags = "t"
-if.platform-system = "win32"
-inherit.cmake.define = "append"
-cmake.define.DISABLE_GIL = "1"
-
 
 [[tool.dynamic-metadata]]
 provider = "vcs_versioning"
@@ -169,11 +170,23 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 
 [tool.cibuildwheel]
+# cp310 builds the one abi3 wheel that serves every supported CPython; the later interpreters find
+# it already built, skip the build step, and go straight to `test-command`. That is the only place
+# the shipped wheel meets an interpreter newer than the headers it compiled against -- `🐍 Test`
+# builds from source, so on 3.14 it compiles against 3.14 headers and cannot catch the same thing
 build = "cp3*"
 archs = "auto64"
-skip = ["*-musllinux*"]
+# nanobind-backend publishes no musllinux wheels.
+# The free-threaded identifiers are not gated behind `enable` from 3.14 on, so they are skipped
+# here: split mode needs the `abi3t` stable ABI of Python 3.15 (PEP 803) and stops the CMake
+# configure below it
+skip = ["*-musllinux*", "cp3*t-*"]
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
+# every `z3-solver` aarch64 wheel on PyPI is tagged `manylinux_2_34` or newer, so the default
+# `manylinux_2_28` image finds none of them, falls back to the sdist, and spends ~19 minutes
+# compiling Z3 from source. `manylinux_2_34` is the oldest image that can install one
+manylinux-aarch64-image = "manylinux_2_34"
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
 # wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
 # gives pytest its configuration file, so the wheel runs the same suite under the same
@@ -184,7 +197,10 @@ test-command = "pytest"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
-before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.5"
+# pinned rather than floored: pip ranks by version before it ranks wheel over sdist, so a bare
+# `>=` floor picks the newest `z3-solver`'s sdist over an installable older wheel and builds Z3
+# from source anyway. Keep this in step with `Z3_VERSION` in the workflows and the `Dockerfile`
+before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver==4.14.1"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
     "auditwheel repair -w {dest_dir} {wheel}",
@@ -202,8 +218,8 @@ select = "*-macosx_arm64"
 environment = { MACOSX_DEPLOYMENT_TARGET = "13.0" }
 
 [[tool.cibuildwheel.overrides]]
-# cp312-* wheels carry the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
-select = "cp312-*"
+# the cp310-* wheel carries the abi3 tag (Stable ABI); verify no non-limited-API symbols leaked in
+select = "cp310-*"
 inherit.repair-wheel-command = "append"
 repair-wheel-command = "uvx abi3audit --strict --report {wheel}"
 
@@ -317,7 +333,7 @@ docstring-code-format = true
 build = [
     "scikit-build-core~=1.0.3",
     "vcs-versioning~=2.3.0",
-    "nanobind~=2.15.0",
+    "nanobind~=3.0.0",
 ]
 docs = [
     "sphinx==8.1.3; python_version < '3.11'",

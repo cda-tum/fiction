@@ -150,15 +150,33 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-python-linter)
     uses: ./.github/workflows/python-linter.yml
 
-  # Builds the extension from source outside the wheel jobs' `cibuildwheel` path, so it stays a
-  # single runner on a single interpreter. See `python-minimums.yml` for why.
-  python-minimums:
-    name: 🐍 Minimums
+  # Regenerates the docstring header and fails if the committed one differs. It cannot commit
+  # the regeneration itself; `docstrings.yml` explains why.
+  docstrings:
+    name: 🐍 Docstrings
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
-    if: fromJSON(needs.change-detection.outputs.run-python-minimums)
-    uses: ./.github/workflows/python-minimums.yml
+    if: fromJSON(needs.change-detection.outputs.run-docstrings)
+    uses: ./.github/workflows/docstrings.yml
+
+  # `nox -s tests` across every supported interpreter and `nox -s minimums` on Python 3.10, both
+  # building the extension from source outside the wheel jobs' `cibuildwheel` path. The caller
+  # job's name is the group its checks appear under, so it stays a short label: GitHub appends
+  # the matrix entry itself, and the called job spells it out as `🐍 ubuntu-24.04`.
+  python-tests:
+    name: 🐍 Test
+    permissions:
+      contents: read # required to check out the repository
+    needs: change-detection
+    if: fromJSON(needs.change-detection.outputs.run-python-tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
+    uses: ./.github/workflows/python-tests.yml
+    with:
+      runs-on: ${{ matrix.runs-on }}
 
   packaging-sdist:
     name: 🐍 Packaging
@@ -168,8 +186,8 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-packaging)
     uses: ./.github/workflows/packaging-sdist.yml
 
-  # `[tool.cibuildwheel] test-command` runs pytest against every wheel, so these jobs are
-  # also what runs the Python test suite
+  # `[tool.cibuildwheel] test-command` runs the suite against the built wheel on every
+  # interpreter, which is where the abi3 wheel meets one newer than it compiled against.
   packaging-wheels:
     name: 🐍 Packaging
     permissions:
@@ -204,6 +222,101 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-workflows)
     uses: ./.github/workflows/zizmor.yml
 
+  # The next five jobs exist so the README can show one badge per platform again. Each
+  # collapses a group into a single check run with a fixed name, which is what
+  # `img.shields.io/github/check-runs/…?nameFilter=` needs: it matches the check run's name
+  # exactly, and the jobs above carry their matrix entry in theirs
+  # (`🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 g++-13`), leaving nothing fixed to
+  # point at. They are `🚦 Check` in miniature and follow it for the same reasons: without
+  # `if: always()` a failed dependency skips the job, and a group that change detection
+  # skips has to conclude here anyway — a check run that never appears reads as a grey
+  # "no check runs" on the badge, not as success.
+  #
+  # None of them belong in `required-checks-pass`. They restate jobs the guard already
+  # covers, and branch protection has exactly one required context by design.
+  cpp-tests-ubuntu-badge:
+    name: 🐧 Ubuntu
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-ubuntu
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the Ubuntu tests succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-ubuntu' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  cpp-tests-macos-badge:
+    name: 🍎 macOS
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-macos
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the macOS tests succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-macos' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  cpp-tests-windows-badge:
+    name: 🪟 Windows
+    if: always()
+    needs:
+      - change-detection
+      - cpp-tests-windows
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the Windows tests succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
+            && 'cpp-tests-windows' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  # `🐳 Docker` produces a single check run today, so its name could be filtered directly.
+  # It gets a badge job anyway: that name embeds the called workflow's job name, and a
+  # change-detection skip would leave the badge grey.
+  docker-badge:
+    name: 🐳 Docker Image
+    if: always()
+    needs:
+      - change-detection
+      - docker
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the Docker image build succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-docker)
+            && 'docker' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
+  codeql-badge:
+    name: 📝 CodeQL Analysis
+    if: always()
+    needs:
+      - change-detection
+      - codeql
+    runs-on: ubuntu-slim
+    steps:
+      - name: Decide whether the CodeQL analysis succeeded or failed
+        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        with:
+          allowed-skips: >-
+            ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
+            && 'codeql' || '' }}
+          jobs: ${{ toJSON(needs) }}
+
   # This job does nothing and is only used for branch protection. `if: always()` is what
   # makes it usable as a required check: without it a failed dependency would *skip* the
   # guard, and a skipped required context leaves a pull request waiting forever.
@@ -220,7 +333,8 @@ jobs:
       - cpp-coverage
       - codeql
       - python-linter
-      - python-minimums
+      - docstrings
+      - python-tests
       - packaging-sdist
       - packaging-wheels
       - docker
@@ -231,7 +345,7 @@ jobs:
         # `alls-green` fails on any skip that `allowed-skips` did not predict — a job
         # skipped because an upstream job died still fails the guard. A hand-rolled
         # `contains(needs.*.result, 'failure')` would silently pass on lost coverage.
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
@@ -242,8 +356,10 @@ jobs:
             && 'codeql,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-linter)
             && 'python-linter,' || '' }}
-            ${{ !fromJSON(needs.change-detection.outputs.run-python-minimums)
-            && 'python-minimums,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-docstrings)
+            && 'docstrings,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-python-tests)
+            && 'python-tests,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-packaging)
             && 'packaging-sdist,packaging-wheels,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-docker)

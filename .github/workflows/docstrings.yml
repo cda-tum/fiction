@@ -1,0 +1,129 @@
+name: 🐍 • Docstrings
+
+# Regenerates `pyfiction`'s docstring header and fails if the committed one differs.
+#
+# The job used to commit the regenerated header itself, which no longer works anywhere it
+# could run. `main` rejects a direct push, and on a pull request head the push would land
+# with the default token, which by design starts no workflow run -- so the commit would
+# carry no `🚦 Check` and block the merge behind a context that never arrives. Checking
+# the committed file instead needs no write access at all.
+
+on:
+  workflow_call:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}-docstrings
+  cancel-in-progress: true
+
+permissions: {}
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  Z3_VERSION: 4.14.1
+  # pybind11_mkdoc parses with libclang, so the generated docstrings depend on which libclang is
+  # loaded. Pin it explicitly: mkdoc_lib.py otherwise globs /usr/lib/llvm-* and takes the highest
+  # version the runner image happens to ship, which can change the output with no commit here.
+  # LLVM_VERSION and the clang PyPI pin below must move together -- the PyPI package only supplies
+  # the cindex bindings, and they have to match the shared library that does the parsing.
+  LLVM_VERSION: "18"
+  DOCSTRINGS: bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
+
+jobs:
+  docstrings:
+    name: 🐍 pybind11_mkdoc
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read # required to check out the repository
+
+    steps:
+      - name: Clone Repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.14.x"
+          cache: "pip"
+
+      - name: Install build dependencies
+        run: >
+          sudo apt-get update && sudo apt-get install -y
+          cmake ninja-build libreadline-dev libtbb-dev python3-dev
+          "libclang-${LLVM_VERSION}-dev"
+
+      - name: Setup Z3 Solver
+        uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
+        with:
+          version: ${{env.Z3_VERSION}}
+
+      - name: Install pybind11_mkdoc and its libclang bindings
+        # nanobind is a configure-time dependency of the pyfiction target; the build is only
+        # configured here, never compiled
+        run: pip install "pybind11_mkdoc==3.0.0" "clang==${LLVM_VERSION}.1.8" nanobind
+
+      - name: Configure the build
+        # The generator needs the same include paths and defines as the real build: the
+        # CMake-generated headers, the FetchContent'd dependencies, Z3, and ALGLIB. Configuring
+        # the pyfiction preset produces a compile database that carries all of them.
+        run: cmake --preset pyfiction
+
+      - name: Run pybind11_mkdoc
+        env:
+          LIBCLANG_PATH: /usr/lib/llvm-${{env.LLVM_VERSION}}/lib/libclang.so.1
+        # Resolve the flags and the header list into variables first. Inline command
+        # substitution would swallow a failure of either: the generator would still run, just
+        # without include paths or without inputs, and write a truncated header.
+        #
+        # The header list is sorted because the generator numbers repeated symbol names in the
+        # order it meets them -- `mkd_doc_std_hash_7` is the seventh `std::hash` it parsed --
+        # while `find` reports whatever order the filesystem hands back. Unsorted, the same
+        # tree can renumber symbols on a different machine, which is a diff this job would
+        # report as a stale header and a `DOC(std, hash, 7)` that silently moves to another
+        # specialization.
+        run: |
+          set -euo pipefail
+          mkdoc_flags="$(python3 .github/scripts/mkdoc_compile_flags.py build-pyfiction)"
+          mkdoc_headers="$(find include/fiction -name "*.hpp" -print | LC_ALL=C sort)"
+          python3 -m pybind11_mkdoc \
+            -o "${DOCSTRINGS}" \
+            -std=c++20 \
+            "-resource-dir=/usr/lib/llvm-${LLVM_VERSION}/lib/clang/${LLVM_VERSION}" \
+            ${mkdoc_flags} \
+            ${mkdoc_headers}
+
+      # Deliberately ahead of the comparison below: this artifact is what a contributor whose
+      # check just failed downloads and commits, so it has to be uploaded before the step that
+      # fails the job.
+      - name: Upload the regenerated docstrings as an artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: pyfiction-docstrings
+          path: ${{ github.workspace }}/${{ env.DOCSTRINGS }}
+          overwrite: true
+
+      - name: Compare the regenerated header against the committed one
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- "${DOCSTRINGS}"; then
+            echo "The committed pyfiction docstrings are up to date." >> "${GITHUB_STEP_SUMMARY}"
+            exit 0
+          fi
+          {
+            echo "### The committed \`pyfiction\` docstrings are out of date"
+            echo
+            echo "Download the \`pyfiction-docstrings\` artifact from this run, replace"
+            echo "\`${DOCSTRINGS}\` with it, and commit the result. The file is generated;"
+            echo "never edit it by hand."
+            echo
+            echo '```'
+            git diff --stat -- "${DOCSTRINGS}"
+            echo '```'
+          } >> "${GITHUB_STEP_SUMMARY}"
+          git diff -- "${DOCSTRINGS}"
+          exit 1
