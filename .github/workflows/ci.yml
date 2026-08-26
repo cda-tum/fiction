@@ -160,15 +160,23 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-docstrings)
     uses: ./.github/workflows/docstrings.yml
 
-  # Builds the extension from source outside the wheel jobs' `cibuildwheel` path, so it stays a
-  # single runner on a single interpreter. See `python-minimums.yml` for why.
-  python-minimums:
-    name: 🐍 Minimums
+  # `nox -s tests` across every supported interpreter and `nox -s minimums` on Python 3.10, both
+  # building the extension from source outside the wheel jobs' `cibuildwheel` path. The caller
+  # job's name is the group its checks appear under, so it stays a short label: GitHub appends
+  # the matrix entry itself, and the called job spells it out as `🐍 ubuntu-24.04`.
+  python-tests:
+    name: 🐍 Test
     permissions:
       contents: read # required to check out the repository
     needs: change-detection
-    if: fromJSON(needs.change-detection.outputs.run-python-minimums)
-    uses: ./.github/workflows/python-minimums.yml
+    if: fromJSON(needs.change-detection.outputs.run-python-tests)
+    strategy:
+      fail-fast: false
+      matrix:
+        runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
+    uses: ./.github/workflows/python-tests.yml
+    with:
+      runs-on: ${{ matrix.runs-on }}
 
   packaging-sdist:
     name: 🐍 Packaging
@@ -178,8 +186,8 @@ jobs:
     if: fromJSON(needs.change-detection.outputs.run-packaging)
     uses: ./.github/workflows/packaging-sdist.yml
 
-  # `[tool.cibuildwheel] test-command` runs pytest against every wheel, so these jobs are
-  # also what runs the Python test suite
+  # `[tool.cibuildwheel] test-command` runs the suite against the built wheel on every
+  # interpreter, which is where the abi3 wheel meets one newer than it compiled against.
   packaging-wheels:
     name: 🐍 Packaging
     permissions:
@@ -326,7 +334,7 @@ jobs:
       - codeql
       - python-linter
       - docstrings
-      - python-minimums
+      - python-tests
       - packaging-sdist
       - packaging-wheels
       - docker
@@ -350,8 +358,8 @@ jobs:
             && 'python-linter,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-docstrings)
             && 'docstrings,' || '' }}
-            ${{ !fromJSON(needs.change-detection.outputs.run-python-minimums)
-            && 'python-minimums,' || '' }}
+            ${{ !fromJSON(needs.change-detection.outputs.run-python-tests)
+            && 'python-tests,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-packaging)
             && 'packaging-sdist,packaging-wheels,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-docker)
