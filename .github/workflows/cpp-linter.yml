@@ -39,7 +39,8 @@ jobs:
         # bound the wait instead, and retry the transient failures that bounding surfaces
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
-          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libreadline-dev libtbb-dev python3-dev
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 \
+            cmake libreadline-dev libtbb-dev python3-dev libclang-common-18-dev
 
       - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
@@ -63,6 +64,15 @@ jobs:
         # translation unit, and a unity build collapses them
         run: cmake -S . --preset ci-tidy
 
+      # The diff is restricted to `include/fiction` for the same window. Line-scoping does not
+      # bound the work here the way it usually does: the restructure rewrites every include
+      # line in the repository, so "the changed lines" is very nearly "every include", and a
+      # run over all 464 changed C++ files takes three to five hours against GitHub's six-hour
+      # ceiling -- `--line-filter` trims which diagnostics are reported, not how much gets
+      # parsed. The library is where a bad include or a mistranslated namespace would actually
+      # matter; the call-site updates under `test/`, `cli/`, `experiments/`, and `bindings/`
+      # are mechanical and already covered by compiling them and running their suites.
+      #
       # TEMPORARY, for the include/ restructure (#1096, #1097). `cpp-linter-action` scopes
       # itself by asking the REST API for the pull request's diff, and the API refuses to
       # produce one for more than 300 files:
@@ -75,8 +85,13 @@ jobs:
       # Computing the diff locally satisfies both and has no such ceiling. Revert to the
       # action, linting whole files, once the restructure has landed.
       - name: Install Clang-Tidy
-        # the same binaries `cpp-linter-action` fetches, from the same package, so the
-        # version stays pinned to what the check reported before
+        # `clang-tools` fetches the same binaries `cpp-linter-action` did, so the version
+        # stays pinned to what the check reported before. They are standalone builds that
+        # ship no builtin headers, though, so clang-tidy cannot find `stddef.h` and every
+        # translation unit that reaches libc fails to parse -- which turns the whole run
+        # into `clang-diagnostic-error` noise. `libclang-common-18-dev`, installed above,
+        # supplies a resource directory to point it at; `docstrings.yml` pins libclang the
+        # same way.
         run: |
           python3 -m pip install --break-system-packages --disable-pip-version-check clang-tools
           clang-tools install clang-tidy --version 21 --directory "${HOME}/.clang-tools" --no-progress-bar
@@ -87,7 +102,9 @@ jobs:
         # `fetch-depth: 0` above is what makes the base commit available to diff against
         run: |
           set -euo pipefail
-          git diff -U0 "${BASE_SHA}...HEAD" | python3 .github/scripts/clang_tidy_changed_lines.py \
+          test -f /usr/lib/llvm-18/lib/clang/18/include/stddef.h
+          git diff -U0 "${BASE_SHA}...HEAD" -- include/fiction | python3 .github/scripts/clang_tidy_changed_lines.py \
             --build-dir build-ci-tidy \
             --clang-tidy "${HOME}/.clang-tools/clang-tidy-21" \
+            --resource-dir /usr/lib/llvm-18/lib/clang/18 \
             --jobs "$(nproc)"

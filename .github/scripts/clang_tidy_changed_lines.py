@@ -89,15 +89,20 @@ def is_linted(path: str) -> bool:
     return Path(path).suffix in SOURCE_SUFFIXES and not any(fnmatch.fnmatch(path, p) for p in IGNORE)
 
 
-def run_one(clang_tidy: str, build_dir: str, path: str, ranges: list[tuple[int, int]]) -> tuple[str, str]:
+def run_one(
+    clang_tidy: str, build_dir: str, resource_dir: str | None, path: str, ranges: list[tuple[int, int]]
+) -> tuple[str, str]:
     """Lint one file, reporting only what falls inside the ranges the diff added.
 
     Returns:
         The path and whatever Clang-Tidy wrote to stdout for it.
     """
     line_filter = json.dumps([{"name": Path(path).name, "lines": [[a, b] for a, b in ranges]}])
+    argv = [clang_tidy, "-p", build_dir, f"--line-filter={line_filter}", "--quiet"]
+    if resource_dir:
+        argv.append(f"--extra-arg=-resource-dir={resource_dir}")
     completed = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
-        [clang_tidy, "-p", build_dir, f"--line-filter={line_filter}", "--quiet", path],
+        [*argv, path],
         capture_output=True,
         text=True,
         check=False,
@@ -114,6 +119,10 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build-dir", required=True, help="directory holding compile_commands.json")
     parser.add_argument("--clang-tidy", default="clang-tidy", help="the clang-tidy executable to run")
+    parser.add_argument(
+        "--resource-dir",
+        help="clang resource directory holding the builtin headers; the standalone clang-tidy has none",
+    )
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     args = parser.parse_args()
 
@@ -123,7 +132,10 @@ def main() -> int:
 
     findings: dict[str, str] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        futures = [pool.submit(run_one, args.clang_tidy, args.build_dir, path, added[path]) for path in files]
+        futures = [
+            pool.submit(run_one, args.clang_tidy, args.build_dir, args.resource_dir, path, added[path])
+            for path in files
+        ]
         for future in concurrent.futures.as_completed(futures):
             path, output = future.result()
             if "warning:" in output or "error:" in output:
