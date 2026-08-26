@@ -49,7 +49,7 @@ static inline const std::vector<charge_state> SIDB_CHARGE_STATES_BASE_3{charge_s
  * @param cs SiDB charge state.
  * @return Integer representing the SiDB's charge state.
  */
-[[nodiscard]] inline constexpr int8_t charge_state_to_sign(const charge_state& cs) noexcept
+[[nodiscard]] constexpr int8_t charge_state_to_sign(const charge_state& cs) noexcept
 {
     switch (cs)
     {
@@ -73,7 +73,7 @@ static inline const std::vector<charge_state> SIDB_CHARGE_STATES_BASE_3{charge_s
  * @param sg Integer (`-1`, `0`, `1`) representing a charge state.
  * @return charge_state representation of `sg`.
  */
-[[nodiscard]] inline constexpr charge_state sign_to_charge_state(const int8_t sg) noexcept
+[[nodiscard]] constexpr charge_state sign_to_charge_state(const int8_t sg) noexcept
 {
     switch (sg)
     {

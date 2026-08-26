@@ -556,7 +556,7 @@ class orthogonal_impl
                             assert(false);
                         }
                     }
-                    else  // if node has two networks::utils::fanins (or three networks::utils::fanins with one of them
+                    else  // if node has two fanins (or three fanins with one of them
                           // being constant)
                     {
                         const auto &pre1 = fc.fanin_nodes[0], pre2 = fc.fanin_nodes[1];

@@ -73,6 +73,16 @@ jobs:
       # matter; the call-site updates under `test/`, `cli/`, `experiments/`, and `bindings/`
       # are mechanical and already covered by compiling them and running their suites.
       #
+      # `misc-include-cleaner` is switched off for the same window, and only here -- `.clang-tidy`
+      # still applies it to every other pull request. Line-scoping makes it meaningless on this
+      # branch rather than merely noisy: the restructure rewrites every include line, so the check
+      # re-flags include hygiene that predates the branch, and *fixing* a finding shifts the lines
+      # below it and re-flags those in turn (one header went from one finding to four that way).
+      # Removals also cascade -- dropping an unused include from a header makes its consumers stop
+      # compiling, since they had been reaching declarations through it. That sweep is worth doing;
+      # it is not this pull request, where it would be driven by line-number churn rather than by
+      # anything the change actually did.
+      #
       # TEMPORARY, for the include/ restructure (#1096, #1097). `cpp-linter-action` scopes
       # itself by asking the REST API for the pull request's diff, and the API refuses to
       # produce one for more than 300 files:
@@ -107,4 +117,5 @@ jobs:
             --build-dir build-ci-tidy \
             --clang-tidy "${HOME}/.clang-tools/clang-tidy-21" \
             --resource-dir /usr/lib/llvm-18/lib/clang/18 \
+            --disable-check misc-include-cleaner \
             --jobs "$(nproc)"

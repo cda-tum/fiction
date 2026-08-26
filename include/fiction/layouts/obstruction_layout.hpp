@@ -6,7 +6,7 @@
 #define FICTION_OBSTRUCTION_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/stl/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"  // IWYU pragma: keep, specializes std::hash for the std::pair the phmap set below instantiates
 
 #include <phmap.h>
 

@@ -7,7 +7,9 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 

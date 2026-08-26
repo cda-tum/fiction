@@ -6,6 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/generic/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"

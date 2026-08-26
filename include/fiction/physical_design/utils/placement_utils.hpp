@@ -359,7 +359,7 @@ template <typename Lyt, typename Ntk>
 
     // NOLINTEND(*-else-after-return)
 
-    assert(false);  // unsupported number of networks::utils::fanins
+    assert(false);  // unsupported number of fanins
     return {};      // fix -Wreturn-type warning
 }
 /**
@@ -511,7 +511,7 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
 
     // NOLINTEND(*-else-after-return)
 
-    assert(false);  // unsupported number of networks::utils::fanins
+    assert(false);  // unsupported number of fanins
     return {};      // fix -Wreturn-type warning
 }
 

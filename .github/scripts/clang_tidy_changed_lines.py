@@ -90,7 +90,12 @@ def is_linted(path: str) -> bool:
 
 
 def run_one(
-    clang_tidy: str, build_dir: str, resource_dir: str | None, path: str, ranges: list[tuple[int, int]]
+    clang_tidy: str,
+    build_dir: str,
+    resource_dir: str | None,
+    disabled: list[str],
+    path: str,
+    ranges: list[tuple[int, int]],
 ) -> tuple[str, str]:
     """Lint one file, reporting only what falls inside the ranges the diff added.
 
@@ -99,6 +104,9 @@ def run_one(
     """
     line_filter = json.dumps([{"name": Path(path).name, "lines": [[a, b] for a, b in ranges]}])
     argv = [clang_tidy, "-p", build_dir, f"--line-filter={line_filter}", "--quiet"]
+    if disabled:
+        # `--checks` layers on top of the config file rather than replacing it
+        argv.append("--checks=" + ",".join(f"-{check}" for check in disabled))
     if resource_dir:
         argv.append(f"--extra-arg=-resource-dir={resource_dir}")
     completed = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true]
@@ -123,6 +131,12 @@ def main() -> int:
         "--resource-dir",
         help="clang resource directory holding the builtin headers; the standalone clang-tidy has none",
     )
+    parser.add_argument(
+        "--disable-check",
+        action="append",
+        default=[],
+        help="a check to switch off on top of .clang-tidy, for a run whose diff makes it meaningless",
+    )
     parser.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     args = parser.parse_args()
 
@@ -133,7 +147,9 @@ def main() -> int:
     findings: dict[str, str] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
         futures = [
-            pool.submit(run_one, args.clang_tidy, args.build_dir, args.resource_dir, path, added[path])
+            pool.submit(
+                run_one, args.clang_tidy, args.build_dir, args.resource_dir, args.disable_check, path, added[path]
+            )
             for path in files
         ]
         for future in concurrent.futures.as_completed(futures):

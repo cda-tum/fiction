@@ -6,6 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
 #include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
