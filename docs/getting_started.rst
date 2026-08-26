@@ -274,27 +274,31 @@ bindings grows:
 
     bindings/mnt/pyfiction/
     ├── CMakeLists.txt
-    ├── pyfiction.cpp                              # top-level NB_MODULE entry point
+    ├── pyfiction.cpp                                  # top-level NB_MODULE entry point
     └── src/pyfiction/
-        ├── algorithms/
-        │   ├── register_algorithms.cpp             # calls register_path_finding(m), etc.
-        │   ├── path_finding/
-        │   │   ├── a_star.cpp                      # defines a_star(nanobind::module_&)
-        │   │   └── register_path_finding.cpp        # calls a_star(m), distance(m), ...
-        │   └── ...
-        ├── layouts/
+        ├── physical_design/
+        │   ├── register_physical_design.cpp           # calls exact(m), orthogonal(m), ...
+        │   └── path_finding/
+        │       ├── a_star.cpp                         # defines a_star(nanobind::module_&)
+        │       └── register_path_finding.cpp          # calls a_star(m), distance(m), ...
+        ├── technology/sidb/simulation/engines/
+        │   ├── quickexact.cpp
         │   └── ...
         └── ...
 
-Each leaf ``.cpp`` file under ``src/pyfiction/<module>/<submodule>/`` defines exactly one binding function (e.g.
-``void a_star(nanobind::module_& m)``) that binds a single class, function, or closely related group thereof. Each
-directory has a ``register_<name>.cpp`` that forward-declares and calls the binding functions of its leaf files (and
-the ``register_<name>`` functions of any nested submodule directories); the top-level ``pyfiction.cpp`` calls each
-top-level module's ``register_<module>(m)`` from its ``NB_MODULE`` block. New source files do not need to be
-added anywhere manually: ``CMakeLists.txt`` collects them automatically via ``file(GLOB_RECURSE
-FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so re-running ``cmake`` picks up new files on its own —
-you only need to wire the new function into the relevant ``register_<name>.cpp`` and, if needed, forward-declare it
-there.
+The tree mirrors ``include/fiction/``: a binding sits in the directory of the header it wraps, so
+``a_star.cpp`` is under ``physical_design/path_finding/`` because ``a_star.hpp`` is. Each leaf ``.cpp`` file defines
+exactly one binding function (e.g. ``void a_star(nanobind::module_& m)``) that binds a single class, function, or
+closely related group thereof, and each module has a ``register_<name>.cpp`` that forward-declares and calls the
+binding functions beside it.
+
+The registries are flat: ``pyfiction.cpp`` calls every one of them from its ``NB_MODULE`` block, and none is nested
+inside another. That order is load-bearing — a type has to be registered before anything names it in a signature or
+a default argument — so the block runs the types first, then the readers and writers, then the utilities, then the
+algorithms built on all of them. New source files do not need to be added anywhere manually: ``CMakeLists.txt``
+collects them automatically via ``file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so
+re-running ``cmake`` picks up new files on its own — you only need to wire the new function into the relevant
+``register_<name>.cpp`` and, if needed, forward-declare it there.
 
 .. note::
 
