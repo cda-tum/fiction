@@ -25,11 +25,12 @@ defaults:
     shell: bash
 
 env:
-  Z3_VERSION: 4.13.4
+  # 4.14.1 is the newest Z3 whose Linux x64 build still runs on `ubuntu-22.04`: from
+  # 4.15.0 on, the release binaries require GLIBC_2.38/GLIBCXX_3.4.32, and 22.04 ships
+  # glibc 2.35. Raise this once `ubuntu-22.04` leaves the matrix in `ci.yml`
+  Z3_VERSION: 4.14.1
   CMAKE_BUILD_PARALLEL_LEVEL: 4
   CTEST_PARALLEL_LEVEL: 4
-  # Z3 has no ARM build in `cda-tum/setup-z3`
-  EXTRA_CMAKE_ARGS: ${{ inputs.runs-on == 'ubuntu-24.04-arm' && '-DFICTION_Z3=OFF' || '' }}
 
 jobs:
   build_and_test:
@@ -72,14 +73,13 @@ jobs:
       - name: Setup mold
         uses: rui314/setup-mold@7e4f20ad28a2e8ca6fd0892ccf72e2abb706b9c3 # v1
 
+      # `platform` and `architecture` are left at their `host` default so that the
+      # `ubuntu-24.04-arm` runners pick up the `arm64-glibc` archive
       - name: Setup Z3 Solver
-        if: inputs.runs-on != 'ubuntu-24.04-arm'
         id: z3
         uses: cda-tum/setup-z3@0401375ea1e34d77ef35bbeb634f6203f3bcde60 # v1.7.3
         with:
           version: ${{ env.Z3_VERSION }}
-          platform: linux
-          architecture: x64
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -91,7 +91,6 @@ jobs:
         run: >
           cmake -S . --preset ci-debug
           -DCMAKE_CXX_COMPILER="$COMPILER"
-          $EXTRA_CMAKE_ARGS
 
       - name: Build (Debug)
         run: cmake --build --preset ci-debug
@@ -108,7 +107,6 @@ jobs:
           cmake -S . --preset ci-release
           -DCMAKE_CXX_COMPILER="$COMPILER"
           -DFICTION_ENABLE_JEMALLOC=ON
-          $EXTRA_CMAKE_ARGS
 
       - name: Build (Release)
         run: cmake --build --preset ci-release
