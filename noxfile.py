@@ -17,6 +17,7 @@
 from __future__ import annotations
 
 import contextlib
+import os
 import shutil
 import tempfile
 from typing import TYPE_CHECKING
@@ -28,6 +29,10 @@ if TYPE_CHECKING:
 
 nox.needs_version = ">=2025.10.16"
 nox.options.default_venv_backend = "uv"
+
+if os.environ.get("CI", None):
+    # Without this a runner missing an interpreter skips that session and reports success.
+    nox.options.error_on_missing_interpreters = True
 
 nox.options.sessions = ["lint", "tests"]
 
@@ -135,8 +140,8 @@ def minimums(session: nox.Session) -> None:
 
     The session pins Python 3.10, the `requires-python` floor, because the oldest interpreter
     combined with the oldest dependencies is the one combination nothing else in the project
-    covers. CI passes `--error-on-missing-interpreters`, without which a runner that lacks Python
-    3.10 skips the session and reports success.
+    covers. Under `CI` the module sets `error_on_missing_interpreters`, without which a runner
+    that lacks Python 3.10 skips the session and reports success.
 
     `preserve_lockfile` keeps the lockfile out of the resolution; read its caveat before running
     this session next to anything else in the same worktree.

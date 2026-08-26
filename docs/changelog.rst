@@ -36,8 +36,9 @@ Added
     - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
-    - Added a 🐍 Minimums job that runs ``nox -s minimums``, so a lower bound that is too low fails
-      CI instead of a downstream install
+    - Added a 🐍 Test job that runs ``nox -s tests`` and ``nox -s minimums`` on Linux, macOS, and
+      Windows, so every supported interpreter and every declared dependency floor is exercised
+      against a source build
 - Data structures:
     - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
     - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits
@@ -182,12 +183,12 @@ Changed
     - The 🐧 Test jobs build with Z3 on ``ubuntu-24.04-arm`` as well. ``cda-tum/setup-z3`` does
       serve an ``arm64`` archive, so the ``-DFICTION_Z3=OFF`` override those jobs carried is gone
 - Dependencies:
-    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.8.5, which is the
-      version ``find_package(Z3 4.8.5)`` has required all along. A pin between 4.8.0 and 4.8.4 no
-      longer resolves
+    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.10.2, the first
+      release publishing a wheel for every supported platform. Below it, macOS and Linux aarch64
+      fall back to a source build of a 2019 Z3 that modern toolchains reject
     - Bumped the Z3 version pinned in CI and in the Docker image from 4.13.4 to 4.14.1. Newer
       releases require glibc 2.38, which the ``ubuntu-22.04`` job does not provide
-    - The Linux wheels pin ``z3-solver`` to the same version instead of flooring it at 4.8.5,
+    - The Linux wheels pin ``z3-solver`` to the same version instead of flooring it at 4.10.2,
       and the ``aarch64`` image moves to ``manylinux_2_34``. The published ``aarch64`` wheel
       therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
 - Documentation:

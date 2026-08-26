@@ -23,3 +23,21 @@ Never:
   Doxygen comments in `include/fiction/`, and keeps its historical name. CI's
   `🐍 Docstrings` job regenerates it and fails when the committed file differs; take the
   replacement from that job's `pyfiction-docstrings` artifact.
+
+## The test suite belongs outside the package
+
+`test/` sits inside `mnt.pyfiction`, and `test/__init__.py` makes it a subpackage of the
+package it tests. pytest therefore prepends `bindings/` to `sys.path`, and the source
+directory shadows any non-editable install of `mnt.pyfiction`: the tests only run because
+`nox -s tests` installs the project editable. A wheel install fails with
+`ModuleNotFoundError: No module named 'mnt.pyfiction.pyfiction'`.
+
+`[tool.cibuildwheel] test-sources` already works around it by copying the suite alone,
+without the two `__init__.py` files above it.
+
+Move the suite to `test/python/` when the project structure is next reworked. That is what
+`mqt-core` does, and it removes the workaround rather than reproducing it. The move is
+mechanical — `git mv` of 92 tracked files plus eight references in `pyproject.toml` and
+`.github/workflows/change-detection.yml` — and `test/CMakeLists.txt` globs `*/*.cpp`, so a
+Python subdirectory there is inert. `sdist.exclude` and `check-sdist`'s `git-only` both
+already list `/test`, so their `/bindings/mnt/pyfiction/test` entries go away with it.

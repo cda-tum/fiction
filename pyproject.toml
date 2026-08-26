@@ -46,7 +46,10 @@ classifiers = [
 
 requires-python = ">=3.10"
 dependencies = [
-    "z3-solver>=4.8.5",
+    # 4.10.2 is the first release publishing a wheel for every platform the project supports. The
+    # earlier bound was only ever exercised on x86-64 Linux, where 4.8.5 happens to have one; on
+    # macOS and Linux aarch64 it forced a source build of a 2019 Z3 that modern toolchains reject
+    "z3-solver>=4.10.2",
     # the split-mode extension carries no copy of the nanobind library and resolves it at import
     # time from this wheel. Never pin or upper-bound it: two projects pinning different versions
     # could not be installed together
@@ -168,8 +171,9 @@ testpaths = ["bindings/mnt/pyfiction/test"]
 
 [tool.cibuildwheel]
 # cp310 builds the one abi3 wheel that serves every supported CPython; the later interpreters find
-# it already built, skip the build step, and go straight to `test-command`. Narrowing this to
-# `cp310-*` would produce the same single wheel but shrink the Python test suite to one interpreter
+# it already built, skip the build step, and go straight to `test-command`. That is the only place
+# the shipped wheel meets an interpreter newer than the headers it compiled against -- `🐍 Test`
+# builds from source, so on 3.14 it compiles against 3.14 headers and cannot catch the same thing
 build = "cp3*"
 archs = "auto64"
 # nanobind-backend publishes no musllinux wheels.
