@@ -40,7 +40,7 @@ jobs:
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
           timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 \
-            cmake libreadline-dev libtbb-dev python3-dev libclang-common-18-dev
+            cmake libreadline-dev libtbb-dev python3-dev clang-tidy-18
 
       - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
@@ -94,28 +94,23 @@ jobs:
       # the changed lines rather than surface the whole pre-existing backlog at once.
       # Computing the diff locally satisfies both and has no such ceiling. Revert to the
       # action, linting whole files, once the restructure has landed.
-      - name: Install Clang-Tidy
-        # `clang-tools` fetches the same binaries `cpp-linter-action` did, so the version
-        # stays pinned to what the check reported before. They are standalone builds that
-        # ship no builtin headers, though, so clang-tidy cannot find `stddef.h` and every
-        # translation unit that reaches libc fails to parse -- which turns the whole run
-        # into `clang-diagnostic-error` noise. `libclang-common-18-dev`, installed above,
-        # supplies a resource directory to point it at; `docstrings.yml` pins libclang the
-        # same way.
-        run: |
-          python3 -m pip install --break-system-packages --disable-pip-version-check clang-tools
-          clang-tools install clang-tidy --version 21 --directory "${HOME}/.clang-tools" --no-progress-bar
-
+      # Clang-Tidy comes from the distribution, matched with its own resource directory. The
+      # standalone binaries `cpp-linter-action` fetched ship no builtin headers at all, so
+      # clang-tidy cannot find `stddef.h` and every translation unit that reaches libc fails to
+      # parse. Pointing those binaries at another version's resource directory does not fix
+      # that, it only moves it: clang-18's `mmintrin.h` uses MMX builtins that clang 21 has
+      # since removed, so a 21 binary reading 18's headers produced 1720 `clang-diagnostic-error`s
+      # of its own. An apt-installed `clang-tidy-18` finds the headers it was built against and
+      # needs no `--resource-dir`. It carries a slightly smaller check set than the 21 the action
+      # used, which is the safe direction for a temporary, deliberately narrowed run.
       - name: Run clang-tidy over the changed lines
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
         # `fetch-depth: 0` above is what makes the base commit available to diff against
         run: |
           set -euo pipefail
-          test -f /usr/lib/llvm-18/lib/clang/18/include/stddef.h
           git diff -U0 "${BASE_SHA}...HEAD" -- include/fiction | python3 .github/scripts/clang_tidy_changed_lines.py \
             --build-dir build-ci-tidy \
-            --clang-tidy "${HOME}/.clang-tools/clang-tidy-21" \
-            --resource-dir /usr/lib/llvm-18/lib/clang/18 \
+            --clang-tidy clang-tidy-18 \
             --disable-check misc-include-cleaner \
             --jobs "$(nproc)"

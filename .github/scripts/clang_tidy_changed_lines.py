@@ -157,6 +157,19 @@ def main() -> int:
             if "warning:" in output or "error:" in output:
                 findings[path] = output
 
+    # A clang-tidy that cannot find its builtin headers still runs and still reports, it just
+    # reports against libc and the intrinsics headers instead of against the code. That has
+    # happened twice here -- once from a standalone binary with no resource directory at all,
+    # once from pairing a 21 binary with clang-18's headers, whose MMX builtins 21 has dropped --
+    # and both times the log looked like findings. Say so plainly instead.
+    broken = [path for path, text in findings.items() if "clang-diagnostic-error" in text]
+    if files and len(broken) > len(files) // 2:
+        sys.stderr.write(
+            f"\nclang-tidy failed to parse {len(broken)} of {len(files)} files. That is a broken\n"
+            f"toolchain, not {len(findings)} findings: check that the clang-tidy binary and the\n"
+            "resource directory holding its builtin headers come from the same release.\n"
+        )
+
     summary = os.environ.get("GITHUB_STEP_SUMMARY")
     if summary:
         with Path(summary).open("a", encoding="utf-8") as handle:
