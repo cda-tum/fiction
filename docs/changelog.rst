@@ -179,12 +179,18 @@ Changed
       filesystem reported the files in
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
+    - The 🐧 Test jobs build with Z3 on ``ubuntu-24.04-arm`` as well. ``cda-tum/setup-z3`` does
+      serve an ``arm64`` archive, so the ``-DFICTION_Z3=OFF`` override those jobs carried is gone
 - Dependencies:
     - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.8.5, which is the
       version ``find_package(Z3 4.8.5)`` has required all along. A pin between 4.8.0 and 4.8.4 no
       longer resolves
     - Bumped the Z3 version pinned in CI and in the Docker image from 4.13.4 to 4.14.1. Newer
       releases require glibc 2.38, which the ``ubuntu-22.04`` job does not provide
+    - The Linux wheels pin ``z3-solver`` to that same version instead of flooring it at 4.8.5.
+      The ``aarch64`` build image moves to ``manylinux_2_34``, without which no ``z3-solver``
+      wheel is installable and the build compiles Z3 from source. The published ``aarch64``
+      wheel therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
 - Documentation:
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain

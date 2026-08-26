@@ -179,6 +179,10 @@ archs = "auto64"
 skip = ["*-musllinux*", "cp3*t-*"]
 build-frontend = "build[uv]"
 manylinux-x86_64-image = "manylinux_2_28"
+# every `z3-solver` aarch64 wheel on PyPI is tagged `manylinux_2_34` or newer, so the default
+# `manylinux_2_28` image finds none of them, falls back to the sdist, and spends ~19 minutes
+# compiling Z3 from source. `manylinux_2_34` is the oldest image that can install one
+manylinux-aarch64-image = "manylinux_2_34"
 # The wheel does not ship its own tests, so the suite is copied in next to the installed
 # wheel. `test-sources` keeps the relative path, and copying `pyproject.toml` along with it
 # gives pytest its configuration file, so the wheel runs the same suite under the same
@@ -189,7 +193,10 @@ test-command = "pytest"
 
 [tool.cibuildwheel.linux]
 environment = { Z3_ROOT = "/opt/python/cp311-cp311/lib/python3.11/site-packages/z3" }
-before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver>=4.8.5"
+# pinned rather than floored: pip ranks by version before it ranks wheel over sdist, so a bare
+# `>=` floor picks the newest `z3-solver`'s sdist over an installable older wheel and builds Z3
+# from source anyway. Keep this in step with `Z3_VERSION` in the workflows and the `Dockerfile`
+before-all = "/opt/python/cp311-cp311/bin/pip install z3-solver==4.14.1"
 repair-wheel-command = [
     "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/python/cp311-cp311/lib/python3.11/site-packages/z3/lib",
     "auditwheel repair -w {dest_dir} {wheel}",
