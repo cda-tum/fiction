@@ -49,6 +49,8 @@ SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hh", ".hpp", ".hxx"}
 
 FILE_HEADER = re.compile(r"^\+\+\+ b/(.+)$")
 HUNK_HEADER = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
+LOCATED = re.compile(r"^\S.*?:\d+:\d+: (?:warning|error|note):")
+UNLOCATED = re.compile(r"^(?:warning|error): ")
 
 
 def parse_diff(diff: str) -> dict[str, list[tuple[int, int]]]:
@@ -89,6 +91,30 @@ def is_linted(path: str) -> bool:
     return Path(path).suffix in SOURCE_SUFFIXES and not any(fnmatch.fnmatch(path, p) for p in IGNORE)
 
 
+def located_only(output: str) -> str:
+    """Drop diagnostics that carry no source location.
+
+    Clang-Tidy also reports on the macros the compile database defines on the command line --
+    `-DABC_NAMESPACE=pabc` draws a `bugprone-macro-parentheses` -- and those diagnostics carry
+    no file or line, so `--line-filter` cannot act on them and 66 of them survived into a run
+    that is supposed to be about changed lines only. A diagnostic with no location is, by
+    definition, not on a changed line.
+
+    Returns:
+        The output with every unlocated diagnostic block removed.
+    """
+    kept: list[str] = []
+    keeping = False
+    for line in output.splitlines(keepends=True):
+        if LOCATED.match(line):
+            keeping = True
+        elif UNLOCATED.match(line):
+            keeping = False
+        if keeping:
+            kept.append(line)
+    return "".join(kept)
+
+
 def run_one(
     clang_tidy: str,
     build_dir: str,
@@ -115,7 +141,7 @@ def run_one(
         text=True,
         check=False,
     )
-    return path, completed.stdout
+    return path, located_only(completed.stdout)
 
 
 def main() -> int:
