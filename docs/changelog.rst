@@ -187,10 +187,9 @@ Changed
       longer resolves
     - Bumped the Z3 version pinned in CI and in the Docker image from 4.13.4 to 4.14.1. Newer
       releases require glibc 2.38, which the ``ubuntu-22.04`` job does not provide
-    - The Linux wheels pin ``z3-solver`` to that same version instead of flooring it at 4.8.5.
-      The ``aarch64`` build image moves to ``manylinux_2_34``, without which no ``z3-solver``
-      wheel is installable and the build compiles Z3 from source. The published ``aarch64``
-      wheel therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
+    - The Linux wheels pin ``z3-solver`` to the same version instead of flooring it at 4.8.5,
+      and the ``aarch64`` image moves to ``manylinux_2_34``. The published ``aarch64`` wheel
+      therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
 - Documentation:
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain
