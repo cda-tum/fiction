@@ -54,7 +54,7 @@ void detect_bdl_wires_impl(nanobind::module_& m, const std::string& lattice)
  *
  * @param m The nanobind module.
  */
-void sidb::simulation::logic::detect_bdl_wires(nanobind::module_& m)
+void detect_bdl_wires(nanobind::module_& m)
 {
     namespace py = nanobind;
 

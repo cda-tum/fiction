@@ -31,7 +31,7 @@ void exhaustive_ground_state_simulation_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::engines::exhaustive_ground_state_simulation(nanobind::module_& m)
+void exhaustive_ground_state_simulation(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

@@ -32,7 +32,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void layouts::io::write_dot_layout(nanobind::module_& m)
+void write_dot_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -67,7 +67,7 @@ void write_dot_network(nanobind::module_& m)
 
 }  // namespace detail
 
-void layouts::io::write_dot_layout(nanobind::module_& m)
+void write_dot_layout(nanobind::module_& m)
 {
     detail::write_dot_layout<py_cartesian_gate_layout>(m);
     detail::write_dot_layout<py_shifted_cartesian_gate_layout>(m);

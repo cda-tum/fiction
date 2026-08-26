@@ -28,7 +28,7 @@ void fanout_substitution_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void synthesis::fanout_substitution(nanobind::module_& m)
+void fanout_substitution(nanobind::module_& m)
 {
     namespace py = nanobind;
 

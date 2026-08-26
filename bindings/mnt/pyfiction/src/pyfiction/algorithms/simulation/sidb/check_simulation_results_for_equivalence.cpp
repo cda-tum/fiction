@@ -26,7 +26,7 @@ void check_for_equivalence_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::utils::check_simulation_results_for_equivalence(nanobind::module_& m)
+void check_simulation_results_for_equivalence(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

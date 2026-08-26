@@ -29,7 +29,7 @@ namespace pyfiction
 
 namespace detail
 {
-void sidb::io::write_operational_domain(nanobind::module_& m)
+void write_operational_domain(nanobind::module_& m)
 {
     namespace py = nanobind;
 
@@ -83,7 +83,7 @@ void write_critical_temperature_domain(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::io::write_operational_domain(nanobind::module_& m)
+void write_operational_domain(nanobind::module_& m)
 {
     namespace py = nanobind;
 

@@ -21,7 +21,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void qca::io::read_fqca_layout(nanobind::module_& m)
+void read_fqca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -35,7 +35,7 @@ void qca::io::read_fqca_layout(nanobind::module_& m)
 
 }  // namespace detail
 
-void qca::io::read_fqca_layout(nanobind::module_& m)
+void read_fqca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 

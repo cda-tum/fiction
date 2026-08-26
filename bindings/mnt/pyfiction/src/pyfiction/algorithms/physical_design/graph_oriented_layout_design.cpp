@@ -20,7 +20,7 @@
 namespace pyfiction
 {
 
-void physical_design::graph_oriented_layout_design(nanobind::module_& m)
+void graph_oriented_layout_design(nanobind::module_& m)
 {
     namespace py = nanobind;
 

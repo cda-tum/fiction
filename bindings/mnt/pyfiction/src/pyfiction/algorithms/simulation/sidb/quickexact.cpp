@@ -29,7 +29,7 @@ void quickexact_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::engines::quickexact(nanobind::module_& m)
+void quickexact(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

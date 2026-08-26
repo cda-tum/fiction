@@ -28,7 +28,7 @@ void can_positive_charges_occur_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::generic::can_positive_charges_occur(nanobind::module_& m)
+void can_positive_charges_occur(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

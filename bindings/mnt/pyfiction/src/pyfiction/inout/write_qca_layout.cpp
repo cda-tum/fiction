@@ -17,7 +17,7 @@
 namespace pyfiction
 {
 
-void qca::io::write_qca_layout(nanobind::module_& m)
+void write_qca_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

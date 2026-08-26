@@ -27,7 +27,7 @@ void is_ground_state_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::generic::is_ground_state(nanobind::module_& m)
+void is_ground_state(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

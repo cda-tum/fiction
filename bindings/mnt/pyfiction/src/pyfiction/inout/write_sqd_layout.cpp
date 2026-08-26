@@ -22,7 +22,7 @@ namespace pyfiction
 namespace detail
 {
 template <typename Lyt>
-void sidb::io::write_sqd_layout(nanobind::module_& m)
+void write_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -35,7 +35,7 @@ void sidb::io::write_sqd_layout(nanobind::module_& m)
 }
 }  // namespace detail
 
-void sidb::io::write_sqd_layout(nanobind::module_& m)
+void write_sqd_layout(nanobind::module_& m)
 {
     detail::write_sqd_layout<py_sidb_111_lattice>(m);
     detail::write_sqd_layout<py_sidb_100_lattice>(m);

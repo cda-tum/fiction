@@ -42,7 +42,7 @@ void time_to_solution_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::utils::time_to_solution(nanobind::module_& m)
+void time_to_solution(nanobind::module_& m)
 {
     namespace py = nanobind;
 

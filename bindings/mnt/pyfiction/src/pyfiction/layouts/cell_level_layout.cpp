@@ -209,11 +209,12 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
                 if constexpr (std::is_same_v<Technology, fiction::sidb::technology>)
                 {
-                    layouts::io::print_layout(layouts::utils::convert_layout_to_siqad_coordinates(lyt), stream);
+                    fiction::layouts::io::print_layout(
+                        fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt), stream);
                 }
                 else
                 {
-                    layouts::io::print_layout(lyt, stream);
+                    fiction::layouts::io::print_layout(lyt, stream);
                 }
 
                 return stream.str();

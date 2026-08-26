@@ -34,7 +34,7 @@ void critical_path_length_and_throughput_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void verification::critical_path_length_and_throughput(nanobind::module_& m)
+void critical_path_length_and_throughput(nanobind::module_& m)
 {
     detail::critical_path_length_and_throughput_impl<py_cartesian_gate_layout>(m);
     detail::critical_path_length_and_throughput_impl<py_shifted_cartesian_gate_layout>(m);

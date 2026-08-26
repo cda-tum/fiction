@@ -28,7 +28,7 @@ void minimum_energy_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::generic::minimum_energy(nanobind::module_& m)
+void minimum_energy(nanobind::module_& m)
 {
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
     detail::minimum_energy_impl<py_charge_distribution_surface_100>(m);

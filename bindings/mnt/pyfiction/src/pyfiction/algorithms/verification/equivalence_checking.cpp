@@ -40,7 +40,7 @@ void equivalence_checking_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void verification::equivalence_checking(nanobind::module_& m)
+void equivalence_checking(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

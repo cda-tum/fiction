@@ -52,7 +52,7 @@ void enumerate_all_paths_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void physical_design::path_finding::enumerate_all_paths(nanobind::module_& m)
+void enumerate_all_paths(nanobind::module_& m)
 {
     namespace py = nanobind;
 

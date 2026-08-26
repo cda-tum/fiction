@@ -32,7 +32,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void layouts::clocked_layout(nanobind::module_& m, const std::string& topology)
+void clocked_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;
 
@@ -89,7 +89,7 @@ void layouts::clocked_layout(nanobind::module_& m, const std::string& topology)
             [](const ClockedLyt& lyt) -> std::string
             {
                 std::stringstream stream{};
-                layouts::io::print_layout(lyt, stream);
+                fiction::layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
             "Returns a string representation of the layout.")

@@ -21,7 +21,7 @@
 namespace pyfiction
 {
 
-void physical_design::post_layout_optimization(nanobind::module_& m)
+void post_layout_optimization(nanobind::module_& m)
 {
     namespace py = nanobind;
 

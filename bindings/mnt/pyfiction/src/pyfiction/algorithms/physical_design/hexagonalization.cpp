@@ -19,7 +19,7 @@
 namespace pyfiction
 {
 
-void physical_design::hexagonalization(nanobind::module_& m)
+void hexagonalization(nanobind::module_& m)
 {
     namespace py = nanobind;
 

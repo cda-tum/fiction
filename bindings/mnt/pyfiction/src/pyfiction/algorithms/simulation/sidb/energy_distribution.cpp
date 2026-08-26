@@ -32,7 +32,7 @@ void energy_distribution_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::analysis::energy_distribution(nanobind::module_& m)
+void energy_distribution(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

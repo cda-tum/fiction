@@ -25,7 +25,7 @@ void technology_mapping_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void synthesis::technology_mapping(nanobind::module_& m)
+void technology_mapping(nanobind::module_& m)
 {
     namespace py = nanobind;
 

@@ -43,7 +43,7 @@ void apply_fcn_gate_library(nanobind::module_& m, const std::string& lib_name)
 
 }  // namespace detail
 
-void physical_design::apply_gate_library(nanobind::module_& m)
+void apply_gate_library(nanobind::module_& m)
 {
     detail::apply_fcn_gate_library<fiction::qca::qca_one_library, py_cartesian_gate_layout>(m, "qca_one");
     detail::apply_fcn_gate_library<fiction::qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");

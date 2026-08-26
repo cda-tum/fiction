@@ -27,7 +27,7 @@ namespace detail
 {
 
 template <typename Lyt, typename Ntk>
-void physical_design::utils::reserve_input_nodes(nanobind::module_& m)
+void reserve_input_nodes(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -42,27 +42,29 @@ void place(nanobind::module_& m)
 
     m.def(
         "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
-        { return fiction::place(lyt, t, ntk, n); }, py::arg("lyt"), py::arg("t"), py::arg("ntk"),
+        { return fiction::physical_design::utils::place(lyt, t, ntk, n); }, py::arg("lyt"), py::arg("t"),
+        py::arg("ntk"),
         py::arg("n"));  // TODO, DOC(fiction_place));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
-           const mockturtle::signal<Lyt>& a) { return fiction::place(lyt, t, ntk, n, a); },
+           const mockturtle::signal<Lyt>& a) { return fiction::physical_design::utils::place(lyt, t, ntk, n, a); },
         py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b,
-           const std::optional<bool>& c = std::nullopt) { return fiction::place(lyt, t, ntk, n, a, b, c); },
+           const std::optional<bool>& c = std::nullopt)
+        { return fiction::physical_design::utils::place(lyt, t, ntk, n, a, b, c); },
         py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"), py::arg("c"));
 
     m.def(
         "place",
         [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n,
            const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c)
-        { return fiction::place(lyt, t, ntk, n, a, b, c); },
+        { return fiction::physical_design::utils::place(lyt, t, ntk, n, a, b, c); },
         py::arg("lyt"), py::arg("t"), py::arg("ntk"), py::arg("n"), py::arg("a"), py::arg("b"), py::arg("c"));
 }
 

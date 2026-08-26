@@ -34,7 +34,7 @@ namespace detail
 {
 
 template <typename LytBase, typename GateLyt>
-void layouts::gate_level_layout(nanobind::module_& m, const std::string& topology)
+void gate_level_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

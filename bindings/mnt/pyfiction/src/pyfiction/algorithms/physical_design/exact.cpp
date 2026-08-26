@@ -24,7 +24,7 @@
 namespace pyfiction
 {
 
-void physical_design::exact(nanobind::module_& m)
+void exact(nanobind::module_& m)
 {
     namespace py = nanobind;
 
@@ -117,7 +117,7 @@ namespace pyfiction
 /**
  * Disable SMT-based exact physical design.
  */
-void physical_design::exact([[maybe_unused]] nanobind::module_& m) {}
+void exact([[maybe_unused]] nanobind::module_& m) {}
 
 }  // namespace pyfiction
 

@@ -52,7 +52,7 @@ void color_routing_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void physical_design::color_routing(nanobind::module_& m)
+void color_routing(nanobind::module_& m)
 {
     namespace py = nanobind;
 

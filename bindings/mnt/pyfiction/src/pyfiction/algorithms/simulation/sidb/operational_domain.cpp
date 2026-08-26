@@ -89,7 +89,7 @@ void critical_temperature_domain_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::logic::operational_domain(nanobind::module_& m)
+void operational_domain(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

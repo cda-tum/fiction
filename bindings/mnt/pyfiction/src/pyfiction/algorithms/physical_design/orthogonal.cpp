@@ -18,7 +18,7 @@
 namespace pyfiction
 {
 
-void physical_design::orthogonal(nanobind::module_& m)
+void orthogonal(nanobind::module_& m)
 {
     namespace py = nanobind;
 

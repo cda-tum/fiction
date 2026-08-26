@@ -25,7 +25,7 @@
 namespace pyfiction
 {
 
-void layouts::cartesian_layout(nanobind::module_& m)
+void cartesian_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -140,7 +140,7 @@ void layouts::cartesian_layout(nanobind::module_& m)
             [](const py_cartesian_layout& lyt) -> std::string
             {
                 std::stringstream stream{};
-                layouts::io::print_layout(lyt, stream);
+                fiction::layouts::io::print_layout(lyt, stream);
                 return stream.str();
             },
             "Returns a string representation of the layout.")

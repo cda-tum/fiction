@@ -210,7 +210,8 @@ void charge_distribution_surface_layout(nanobind::module_& m, const std::string&
             [](const py_cds& lyt)
             {
                 std::stringstream ss;
-                layouts::io::print_layout(fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt), ss);
+                fiction::layouts::io::print_layout(fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt),
+                                                   ss);
                 return ss.str();
             },
             "Returns a string representation of the layout.")

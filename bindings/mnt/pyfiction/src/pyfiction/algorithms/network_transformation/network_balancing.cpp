@@ -27,7 +27,7 @@ void network_balancing_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void synthesis::network_balancing(nanobind::module_& m)
+void network_balancing(nanobind::module_& m)
 {
     namespace py = nanobind;
 

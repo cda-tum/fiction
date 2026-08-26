@@ -19,7 +19,7 @@
 namespace pyfiction
 {
 
-void layouts::io::read_fgl_layout(nanobind::module_& m)
+void read_fgl_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 

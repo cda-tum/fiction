@@ -23,7 +23,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void fcn::area(nanobind::module_& m)
+void area(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -45,7 +45,7 @@ void fcn::area(nanobind::module_& m)
 
 }  // namespace detail
 
-void fcn::area(nanobind::module_& m)
+void area(nanobind::module_& m)
 {
     detail::area<py_qca_layout>(m);
     detail::area<py_inml_layout>(m);

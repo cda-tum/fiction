@@ -25,7 +25,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void layouts::io::write_fgl_layout(nanobind::module_& m)
+void write_fgl_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -37,7 +37,7 @@ void layouts::io::write_fgl_layout(nanobind::module_& m)
 
 }  // namespace detail
 
-void layouts::io::write_fgl_layout(nanobind::module_& m)
+void write_fgl_layout(nanobind::module_& m)
 {
     detail::write_fgl_layout<py_cartesian_gate_layout>(m);
     detail::write_fgl_layout<py_shifted_cartesian_gate_layout>(m);

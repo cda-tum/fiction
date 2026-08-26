@@ -18,7 +18,7 @@ namespace detail
 {
 
 template <typename LytBase, typename ObstrLyt>
-void layouts::obstruction_layout(nanobind::module_& m, const std::string& topology)
+void obstruction_layout(nanobind::module_& m, const std::string& topology)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

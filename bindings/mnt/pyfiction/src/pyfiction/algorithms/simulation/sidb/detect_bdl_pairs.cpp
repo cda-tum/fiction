@@ -34,7 +34,7 @@ void detect_bdl_pairs_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::logic::detect_bdl_pairs(nanobind::module_& m)
+void detect_bdl_pairs(nanobind::module_& m)
 {
     namespace py = nanobind;
 

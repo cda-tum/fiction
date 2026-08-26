@@ -37,7 +37,7 @@ void physically_valid_parameters_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::generic::physically_valid_parameters(nanobind::module_& m)
+void physically_valid_parameters(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

@@ -7,7 +7,7 @@
 namespace pyfiction
 {
 
-void sidb::simulation::generic::potential_to_distance_conversion(nanobind::module_& m)
+void potential_to_distance_conversion(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

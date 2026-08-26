@@ -11,7 +11,7 @@
 namespace pyfiction
 {
 
-void sidb::model::simulation_parameters(nanobind::module_& m)
+void sidb_simulation_parameters(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

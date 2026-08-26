@@ -25,7 +25,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void layouts::utils::num_adjacent_coordinates(nanobind::module_& m)
+void num_adjacent_coordinates(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -34,7 +34,7 @@ void layouts::utils::num_adjacent_coordinates(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void layouts::utils::normalize_layout_coordinates(nanobind::module_& m)
+void normalize_layout_coordinates(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -43,7 +43,7 @@ void layouts::utils::normalize_layout_coordinates(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void layouts::utils::convert_layout_to_siqad_coordinates(nanobind::module_& m)
+void convert_layout_to_siqad_coordinates(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -52,7 +52,7 @@ void layouts::utils::convert_layout_to_siqad_coordinates(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void layouts::utils::random_coordinate(nanobind::module_& m)
+void random_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

@@ -52,7 +52,7 @@ void physical_population_stability_impl(nanobind::module_& m, const std::string&
 
 }  // namespace detail
 
-void sidb::simulation::analysis::physical_population_stability(nanobind::module_& m)
+void physical_population_stability(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

@@ -109,7 +109,7 @@ void is_operational_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::logic::is_operational(nanobind::module_& m)
+void is_operational(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

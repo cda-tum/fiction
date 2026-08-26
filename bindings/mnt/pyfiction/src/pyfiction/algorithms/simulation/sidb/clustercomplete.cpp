@@ -34,7 +34,7 @@ void clustercomplete_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::engines::clustercomplete(nanobind::module_& m)
+void clustercomplete(nanobind::module_& m)
 {
     namespace py = nanobind;
 
@@ -89,7 +89,7 @@ namespace pyfiction
 /**
  * Disable ClusterComplete.
  */
-void sidb::simulation::engines::clustercomplete([[maybe_unused]] nanobind::module_& m) {}
+void clustercomplete([[maybe_unused]] nanobind::module_& m) {}
 
 }  // namespace pyfiction
 

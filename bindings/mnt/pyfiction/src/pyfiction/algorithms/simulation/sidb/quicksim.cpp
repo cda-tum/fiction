@@ -29,7 +29,7 @@ void quicksim_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::simulation::engines::quicksim(nanobind::module_& m)
+void quicksim(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

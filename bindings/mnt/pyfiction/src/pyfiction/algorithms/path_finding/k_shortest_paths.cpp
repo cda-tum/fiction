@@ -53,7 +53,7 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void physical_design::path_finding::yen_k_shortest_paths(nanobind::module_& m)
+void yen_k_shortest_paths(nanobind::module_& m)
 {
     namespace py = nanobind;
 

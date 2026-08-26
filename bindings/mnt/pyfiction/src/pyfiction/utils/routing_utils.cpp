@@ -28,7 +28,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void physical_design::utils::is_crossable_wire(nanobind::module_& m)
+void is_crossable_wire(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -37,7 +37,7 @@ void physical_design::utils::is_crossable_wire(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void physical_design::utils::route_path(nanobind::module_& m)
+void route_path(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -55,7 +55,7 @@ void physical_design::utils::route_path(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void physical_design::utils::extract_routing_objectives(nanobind::module_& m)
+void extract_routing_objectives(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -76,7 +76,7 @@ void physical_design::utils::extract_routing_objectives(nanobind::module_& m)
 }
 
 template <typename Lyt>
-void physical_design::utils::clear_routing(nanobind::module_& m)
+void clear_routing(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

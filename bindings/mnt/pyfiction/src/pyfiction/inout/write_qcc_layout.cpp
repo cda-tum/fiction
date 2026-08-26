@@ -21,7 +21,7 @@
 namespace pyfiction
 {
 
-void inml::io::write_qcc_layout(nanobind::module_& m)
+void write_qcc_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 

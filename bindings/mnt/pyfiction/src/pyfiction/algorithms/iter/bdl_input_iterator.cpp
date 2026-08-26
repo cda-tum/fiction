@@ -129,7 +129,7 @@ void bdl_input_iterator_impl(nanobind::module_& m, const std::string& lattice)
 
 }  // namespace detail
 
-void sidb::simulation::logic::bdl_input_iterator(nanobind::module_& m)
+void bdl_input_iterator(nanobind::module_& m)
 {
     namespace py = nanobind;
 

@@ -27,7 +27,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void sidb::io::write_location_and_ground_state(nanobind::module_& m)
+void write_location_and_ground_state(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -40,7 +40,7 @@ void sidb::io::write_location_and_ground_state(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::io::write_location_and_ground_state(nanobind::module_& m)
+void write_location_and_ground_state(nanobind::module_& m)
 {
     detail::write_location_and_ground_state<py_sidb_layout>(m);
 }

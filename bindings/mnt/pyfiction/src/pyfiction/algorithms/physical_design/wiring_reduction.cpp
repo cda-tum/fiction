@@ -19,7 +19,7 @@
 namespace pyfiction
 {
 
-void physical_design::wiring_reduction(nanobind::module_& m)
+void wiring_reduction(nanobind::module_& m)
 {
     namespace py = nanobind;
 

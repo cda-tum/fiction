@@ -3,15 +3,15 @@
 namespace pyfiction
 {
 
-void sidb::simulation::engine(nanobind::module_& m);
-void sidb::model::simulation_parameters(nanobind::module_& m);
-void sidb::simulation::result(nanobind::module_& m);
+void sidb_simulation_engine(nanobind::module_& m);
+void sidb_simulation_parameters(nanobind::module_& m);
+void sidb_simulation_result(nanobind::module_& m);
 
 void register_sidb_support(nanobind::module_& m)
 {
-    sidb::simulation::engine(m);
-    sidb::model::simulation_parameters(m);
-    sidb::simulation::result(m);
+    sidb_simulation_engine(m);
+    sidb_simulation_parameters(m);
+    sidb_simulation_result(m);
 }
 
 }  // namespace pyfiction

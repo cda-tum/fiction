@@ -22,7 +22,7 @@ namespace detail
 {
 
 template <typename Ntk>
-void networks::utils::has_high_degree_fanin_nodes(nanobind::module_& m)
+void has_high_degree_fanin_nodes(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

@@ -37,7 +37,7 @@ void design_sidb_gates_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::generators::design_sidb_gates(nanobind::module_& m)
+void design_sidb_gates(nanobind::module_& m)
 {
     namespace py = nanobind;
 

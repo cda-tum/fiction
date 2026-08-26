@@ -48,7 +48,7 @@ void read_sqd_layout_111(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::io::read_sqd_layout(nanobind::module_& m)
+void read_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 

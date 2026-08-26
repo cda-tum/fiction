@@ -49,7 +49,7 @@ void a_star_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void physical_design::path_finding::a_star(nanobind::module_& m)
+void a_star(nanobind::module_& m)
 {
     namespace py = nanobind;
 

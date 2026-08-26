@@ -24,7 +24,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void inml::io::write_qll_layout(nanobind::module_& m)
+void write_qll_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -38,7 +38,7 @@ void inml::io::write_qll_layout(nanobind::module_& m)
 
 }  // namespace detail
 
-void inml::io::write_qll_layout(nanobind::module_& m)
+void write_qll_layout(nanobind::module_& m)
 {
     detail::write_qll_layout<py_qca_layout>(m);
     detail::write_qll_layout<py_inml_layout>(m);

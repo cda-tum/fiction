@@ -28,7 +28,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void sidb::io::write_sqd_sim_result(nanobind::module_& m)
+void write_sqd_sim_result(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
@@ -40,7 +40,7 @@ void sidb::io::write_sqd_sim_result(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb::io::write_sqd_sim_result(nanobind::module_& m)
+void write_sqd_sim_result(nanobind::module_& m)
 {
     detail::write_sqd_sim_result<py_sidb_layout>(m);
 }
