@@ -27,7 +27,7 @@ void nanometer_distance(nanobind::module_& m, const std::string& lattice = "")
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def(fmt::format("sidb_nm_distance{}", lattice).c_str(), &fiction::sidb::model::nm_distance<Lyt>, py::arg("lyt"),
-          py::arg("source"), py::arg("target"), DOC(fiction_sidb_nm_distance));
+          py::arg("source"), py::arg("target"), DOC(fiction_sidb_model_nm_distance));
 }
 
 }  // namespace detail

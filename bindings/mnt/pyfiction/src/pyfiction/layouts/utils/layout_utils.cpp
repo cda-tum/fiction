@@ -30,7 +30,7 @@ void num_adjacent_coordinates(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("num_adjacent_coordinates", &fiction::layouts::utils::num_adjacent_coordinates<Lyt>, py::arg("lyt"),
-          py::arg("c"), DOC(fiction_num_adjacent_coordinates));
+          py::arg("c"), DOC(fiction_layouts_utils_num_adjacent_coordinates));
 }
 
 template <typename Lyt>
@@ -39,7 +39,7 @@ void normalize_layout_coordinates(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("normalize_layout_coordinates", &fiction::layouts::utils::normalize_layout_coordinates<Lyt>, py::arg("lyt"),
-          DOC(fiction_normalize_layout_coordinates));
+          DOC(fiction_layouts_utils_normalize_layout_coordinates));
 }
 
 template <typename Lyt>
@@ -48,7 +48,7 @@ void convert_layout_to_siqad_coordinates(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("convert_layout_to_siqad_coordinates", &fiction::layouts::utils::convert_layout_to_siqad_coordinates<Lyt>,
-          py::arg("lyt"), DOC(fiction_convert_layout_to_siqad_coordinates));
+          py::arg("lyt"), DOC(fiction_layouts_utils_convert_layout_to_siqad_coordinates));
 }
 
 template <typename Lyt>
@@ -57,7 +57,7 @@ void random_coordinate(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("random_coordinate", &fiction::layouts::utils::random_coordinate<fiction::coordinate<Lyt>>,
-          py::arg("coordinate1"), py::arg("coordinate_2"), DOC(fiction_random_coordinate));
+          py::arg("coordinate1"), py::arg("coordinate_2"), DOC(fiction_layouts_utils_random_coordinate));
 }
 
 }  // namespace detail

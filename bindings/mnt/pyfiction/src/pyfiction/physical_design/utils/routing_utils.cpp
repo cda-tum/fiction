@@ -33,7 +33,7 @@ void is_crossable_wire(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("is_crossable_wire", &fiction::physical_design::utils::is_crossable_wire<Lyt>, py::arg("lyt"), py::arg("src"),
-          py::arg("successor"), DOC(fiction_is_crossable_wire));
+          py::arg("successor"), DOC(fiction_physical_design_utils_is_crossable_wire));
 }
 
 template <typename Lyt>
@@ -51,7 +51,7 @@ void route_path(nanobind::module_& m)
 
             fiction::physical_design::utils::route_path(lyt, converted_path);
         },
-        py::arg("layout"), py::arg("path"), DOC(fiction_route_path));
+        py::arg("layout"), py::arg("path"), DOC(fiction_physical_design_utils_route_path));
 }
 
 template <typename Lyt>
@@ -72,7 +72,7 @@ void extract_routing_objectives(nanobind::module_& m)
 
             return converted_objectives;
         },
-        py::arg("layout"), DOC(fiction_extract_routing_objectives));
+        py::arg("layout"), DOC(fiction_physical_design_utils_extract_routing_objectives));
 }
 
 template <typename Lyt>
@@ -81,7 +81,7 @@ void clear_routing(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("clear_routing", &fiction::physical_design::utils::clear_routing<Lyt>, py::arg("lyt"),
-          DOC(fiction_clear_routing));
+          DOC(fiction_physical_design_utils_clear_routing));
 }
 
 }  // namespace detail

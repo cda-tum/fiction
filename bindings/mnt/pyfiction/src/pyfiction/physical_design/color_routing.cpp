@@ -47,7 +47,7 @@ void color_routing_impl(nanobind::module_& m)
             return fiction::physical_design::color_routing(lyt, objs, params);
         },
         py::arg("layout"), py::arg("objectives"), py::arg("params") = fiction::physical_design::color_routing_params{},
-        DOC(fiction_color_routing));
+        DOC(fiction_physical_design_color_routing));
 }
 
 }  // namespace detail
@@ -59,32 +59,32 @@ void color_routing(nanobind::module_& m)
     /**
      * Graph coloring engine selector type.
      */
-    nanobind::enum_<fiction::physical_design::utils::graph_coloring_engine>(m, "graph_coloring_engine",
-                                                                            DOC(fiction_graph_coloring_engine))
+    nanobind::enum_<fiction::physical_design::utils::graph_coloring_engine>(
+        m, "graph_coloring_engine", DOC(fiction_physical_design_utils_graph_coloring_engine))
         .value("MCS", fiction::physical_design::utils::graph_coloring_engine::MCS,
-               DOC(fiction_graph_coloring_engine_MCS))
+               DOC(fiction_physical_design_utils_graph_coloring_engine_MCS))
         .value("DSATUR", fiction::physical_design::utils::graph_coloring_engine::DSATUR,
-               DOC(fiction_graph_coloring_engine_DSATUR))
+               DOC(fiction_physical_design_utils_graph_coloring_engine_DSATUR))
         .value("LMXRLF", fiction::physical_design::utils::graph_coloring_engine::LMXRLF,
-               DOC(fiction_graph_coloring_engine_LMXRLF))
+               DOC(fiction_physical_design_utils_graph_coloring_engine_LMXRLF))
         .value("TABUCOL", fiction::physical_design::utils::graph_coloring_engine::TABUCOL,
-               DOC(fiction_graph_coloring_engine_TABUCOL))
+               DOC(fiction_physical_design_utils_graph_coloring_engine_TABUCOL))
         .value("SAT", fiction::physical_design::utils::graph_coloring_engine::SAT,
-               DOC(fiction_graph_coloring_engine_SAT));
+               DOC(fiction_physical_design_utils_graph_coloring_engine_SAT));
 
     py::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
-                                                               DOC(fiction_color_routing_params))
+                                                               DOC(fiction_physical_design_color_routing_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("conduct_partial_routing", &fiction::physical_design::color_routing_params::conduct_partial_routing,
-                DOC(fiction_color_routing_params_conduct_partial_routing))
+                DOC(fiction_physical_design_color_routing_params_conduct_partial_routing))
         .def_rw("crossings", &fiction::physical_design::color_routing_params::crossings,
-                DOC(fiction_color_routing_params_crossings))
+                DOC(fiction_physical_design_color_routing_params_crossings))
         .def_rw("path_limit", &fiction::physical_design::color_routing_params::path_limit,
-                DOC(fiction_color_routing_params_path_limit))
+                DOC(fiction_physical_design_color_routing_params_path_limit))
         .def_rw("engine", &fiction::physical_design::color_routing_params::engine,
-                DOC(fiction_color_routing_params_engine))
+                DOC(fiction_physical_design_color_routing_params_engine))
         .def_rw("partial_sat", &fiction::physical_design::color_routing_params::partial_sat,
-                DOC(fiction_color_routing_params_partial_sat));
+                DOC(fiction_physical_design_color_routing_params_partial_sat));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

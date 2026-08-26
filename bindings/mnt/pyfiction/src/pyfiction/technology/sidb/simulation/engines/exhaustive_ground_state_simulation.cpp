@@ -26,7 +26,7 @@ void exhaustive_ground_state_simulation_impl(nanobind::module_& m)
     m.def("exhaustive_ground_state_simulation",
           &fiction::sidb::simulation::engines::exhaustive_ground_state_simulation<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::sidb::model::simulation_parameters{},
-          DOC(fiction_exhaustive_ground_state_simulation));
+          DOC(fiction_sidb_simulation_engines_exhaustive_ground_state_simulation));
 }
 
 }  // namespace detail

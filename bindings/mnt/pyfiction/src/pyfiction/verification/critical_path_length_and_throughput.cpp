@@ -29,7 +29,7 @@ void critical_path_length_and_throughput_impl(nanobind::module_& m)
 
             return {result.critical_path_length, result.throughput};
         },
-        py::arg("layout"), DOC(fiction_critical_path_length_and_throughput));
+        py::arg("layout"), DOC(fiction_verification_critical_path_length_and_throughput));
 }
 
 }  // namespace detail

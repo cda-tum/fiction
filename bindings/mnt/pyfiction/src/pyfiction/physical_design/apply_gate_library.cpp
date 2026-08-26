@@ -38,7 +38,7 @@ void apply_fcn_gate_library(nanobind::module_& m, const std::string& lib_name)
 
     m.def(fmt::format("apply_{}_library", lib_name).c_str(),
           &fiction::physical_design::apply_gate_library<py_cartesian_technology_cell_layout, GateLibrary, GateLyt>,
-          py::arg("layout"), DOC(fiction_apply_gate_library));
+          py::arg("layout"), DOC(fiction_physical_design_apply_gate_library));
 }
 
 }  // namespace detail

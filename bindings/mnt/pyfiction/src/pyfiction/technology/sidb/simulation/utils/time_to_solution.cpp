@@ -33,11 +33,11 @@ void time_to_solution_impl(nanobind::module_& m)
     m.def("time_to_solution", &fiction::sidb::simulation::utils::time_to_solution<Lyt>, py::arg("lyt"),
           py::arg("quicksim_params"),
           py::arg("tts_params") = fiction::sidb::simulation::utils::time_to_solution_params{}, py::arg("ps") = nullptr,
-          DOC(fiction_time_to_solution));
+          DOC(fiction_sidb_simulation_utils_time_to_solution));
     m.def("time_to_solution_for_given_simulation_results",
           &fiction::sidb::simulation::utils::time_to_solution_for_given_simulation_results<Lyt>,
           py::arg("results_exact"), py::arg("results_heuristic"), py::arg("confidence_level") = 0.997,
-          py::arg("ps") = nullptr, DOC(fiction_time_to_solution_for_given_simulation_results));
+          py::arg("ps") = nullptr, DOC(fiction_sidb_simulation_utils_time_to_solution_for_given_simulation_results));
 }
 
 }  // namespace detail
@@ -49,20 +49,20 @@ void time_to_solution(nanobind::module_& m)
     /**
      * Parameters.
      */
-    py::class_<fiction::sidb::simulation::utils::time_to_solution_params>(m, "time_to_solution_params",
-                                                                          DOC(fiction_time_to_solution_params))
+    py::class_<fiction::sidb::simulation::utils::time_to_solution_params>(
+        m, "time_to_solution_params", DOC(fiction_sidb_simulation_utils_time_to_solution_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("engine", &fiction::sidb::simulation::utils::time_to_solution_params::engine,
-                DOC(fiction_time_to_solution_params_engine))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_params_engine))
         .def_rw("repetitions", &fiction::sidb::simulation::utils::time_to_solution_params::repetitions,
-                DOC(fiction_time_to_solution_params_repetitions))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_params_repetitions))
         .def_rw("confidence_level", &fiction::sidb::simulation::utils::time_to_solution_params::confidence_level,
-                DOC(fiction_time_to_solution_params_confidence_level));
+                DOC(fiction_sidb_simulation_utils_time_to_solution_params_confidence_level));
     /**
      * Statistics.
      */
-    py::class_<fiction::sidb::simulation::utils::time_to_solution_stats>(m, "time_to_solution_stats",
-                                                                         DOC(fiction_time_to_solution_stats))
+    py::class_<fiction::sidb::simulation::utils::time_to_solution_stats>(
+        m, "time_to_solution_stats", DOC(fiction_sidb_simulation_utils_time_to_solution_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",
@@ -74,17 +74,17 @@ void time_to_solution(nanobind::module_& m)
             },
             "Returns a string representation of the statistics.")
         .def("report", &fiction::sidb::simulation::utils::time_to_solution_stats::report,
-             DOC(fiction_time_to_solution_stats_report))
+             DOC(fiction_sidb_simulation_utils_time_to_solution_stats_report))
         .def_ro("time_to_solution", &fiction::sidb::simulation::utils::time_to_solution_stats::time_to_solution,
-                DOC(fiction_time_to_solution_stats_time_to_solution))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_stats_time_to_solution))
         .def_ro("acc", &fiction::sidb::simulation::utils::time_to_solution_stats::acc,
-                DOC(fiction_time_to_solution_stats_acc))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_stats_acc))
         .def_ro("mean_single_runtime", &fiction::sidb::simulation::utils::time_to_solution_stats::mean_single_runtime,
-                DOC(fiction_time_to_solution_stats_mean_single_runtime))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_stats_mean_single_runtime))
         .def_ro("single_runtime_exact", &fiction::sidb::simulation::utils::time_to_solution_stats::single_runtime_exact,
-                DOC(fiction_time_to_solution_stats_single_runtime_exact))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_stats_single_runtime_exact))
         .def_ro("algorithm", &fiction::sidb::simulation::utils::time_to_solution_stats::algorithm,
-                DOC(fiction_time_to_solution_stats_algorithm))
+                DOC(fiction_sidb_simulation_utils_time_to_solution_stats_algorithm))
 
         ;
 

@@ -31,7 +31,7 @@ void write_fqca_layout(nanobind::module_& m)
         &fiction::qca::io::write_fqca_layout<Lyt>;
 
     m.def("write_fqca_layout", write_fqca_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("params") = fiction::qca::io::write_fqca_layout_params{}, DOC(fiction_write_fqca_layout));
+          py::arg("params") = fiction::qca::io::write_fqca_layout_params{}, DOC(fiction_qca_io_write_fqca_layout));
 }
 
 }  // namespace detail
@@ -48,11 +48,11 @@ void write_fqca_layout(nanobind::module_& m)
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
     py::class_<fiction::qca::io::write_fqca_layout_params>(m, "write_fqca_layout_params",
-                                                           DOC(fiction_write_fqca_layout_params))
+                                                           DOC(fiction_qca_io_write_fqca_layout_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("create_inter_layer_via_cells",
                 &fiction::qca::io::write_fqca_layout_params::create_inter_layer_via_cells,
-                DOC(fiction_write_fqca_layout_params_create_inter_layer_via_cells))
+                DOC(fiction_qca_io_write_fqca_layout_params_create_inter_layer_via_cells))
 
         ;
 

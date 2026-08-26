@@ -35,7 +35,7 @@ void write_sqd_sim_result(nanobind::module_& m)
     m.def(
         "write_sqd_sim_result", [](const fiction::sidb::simulation::result<Lyt>& lyt, const std::string_view& filename)
         { fiction::sidb::io::write_sqd_sim_result(lyt, filename); }, py::arg("layout"), py::arg("filename"),
-        DOC(fiction_write_sqd_sim_result));
+        DOC(fiction_sidb_io_write_sqd_sim_result));
 }
 
 }  // namespace detail

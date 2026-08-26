@@ -21,7 +21,7 @@ void check_for_equivalence_impl(nanobind::module_& m)
 
     m.def("check_simulation_results_for_equivalence",
           &fiction::sidb::simulation::utils::check_simulation_results_for_equivalence<Lyt>, py::arg("result1"),
-          py::arg("result2"), DOC(fiction_check_simulation_results_for_equivalence));
+          py::arg("result2"), DOC(fiction_sidb_simulation_utils_check_simulation_results_for_equivalence));
 }
 
 }  // namespace detail

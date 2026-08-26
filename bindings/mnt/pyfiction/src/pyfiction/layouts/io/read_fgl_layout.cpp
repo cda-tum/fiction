@@ -44,11 +44,11 @@ void read_fgl_layout(nanobind::module_& m)
         &fiction::layouts::io::read_fgl_layout<py_hexagonal_gate_layout>;
 
     m.def("read_cartesian_fgl_layout", read_cartesian_fgl_layout_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_read_fgl_layout_3));
+          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
     m.def("read_shifted_cartesian_fgl_layout", read_shifted_cartesian_fgl_layout_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_read_fgl_layout_3));
+          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
     m.def("read_hexagonal_fgl_layout", read_hexagonal_fgl_layout_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_read_fgl_layout_3));
+          py::arg("layout_name") = "", DOC(fiction_layouts_io_read_fgl_layout_3));
 }
 
 }  // namespace pyfiction

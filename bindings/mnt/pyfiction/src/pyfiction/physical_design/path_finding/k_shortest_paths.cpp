@@ -48,7 +48,7 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
         },
         py::arg("layout"), py::arg("source"), py::arg("target"), py::arg("k"),
         py::arg("params") = fiction::physical_design::path_finding::yen_k_shortest_paths_params{},
-        DOC(fiction_yen_k_shortest_paths));
+        DOC(fiction_physical_design_path_finding_yen_k_shortest_paths));
 }
 
 }  // namespace detail
@@ -58,10 +58,10 @@ void yen_k_shortest_paths(nanobind::module_& m)
     namespace py = nanobind;
 
     py::class_<fiction::physical_design::path_finding::yen_k_shortest_paths_params>(
-        m, "yen_k_shortest_paths_params", DOC(fiction_yen_k_shortest_paths_params))
+        m, "yen_k_shortest_paths_params", DOC(fiction_physical_design_path_finding_yen_k_shortest_paths_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("a_star_params", &fiction::physical_design::path_finding::yen_k_shortest_paths_params::astar_params,
-                DOC(fiction_yen_k_shortest_paths_params_astar_params))
+                DOC(fiction_physical_design_path_finding_yen_k_shortest_paths_params_astar_params))
 
         ;
 

@@ -33,7 +33,7 @@ void write_qll_layout(nanobind::module_& m)
         &fiction::inml::io::write_qll_layout<Lyt>;
 
     m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          DOC(fiction_write_qll_layout));
+          DOC(fiction_inml_io_write_qll_layout));
 }
 
 }  // namespace detail

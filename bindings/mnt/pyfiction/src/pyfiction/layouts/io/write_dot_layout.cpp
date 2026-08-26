@@ -51,7 +51,7 @@ void write_dot_layout(nanobind::module_& m)
                     lyt, filename);
             }
         },
-        py::arg("layout"), py::arg("filename"), DOC(fiction_write_dot_layout));
+        py::arg("layout"), py::arg("filename"), DOC(fiction_layouts_io_write_dot_layout));
 }
 
 template <typename Ntk>

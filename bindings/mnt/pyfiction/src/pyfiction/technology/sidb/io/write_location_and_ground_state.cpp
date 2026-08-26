@@ -35,7 +35,7 @@ void write_location_and_ground_state(nanobind::module_& m)
         "write_location_and_ground_state",
         [](const fiction::sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
         { fiction::sidb::io::write_location_and_ground_state(sim_result, filename); }, py::arg("sim_result"),
-        py::arg("filename"), DOC(fiction_write_location_and_ground_state));
+        py::arg("filename"), DOC(fiction_sidb_io_write_location_and_ground_state));
 }
 
 }  // namespace detail

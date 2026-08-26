@@ -38,24 +38,24 @@ void operational_domain_impl(nanobind::module_& m)
     m.def("operational_domain_grid_search",
           &fiction::sidb::simulation::logic::operational_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_operational_domain_grid_search));
+          py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_operational_domain_grid_search));
 
     m.def("operational_domain_random_sampling",
           &fiction::sidb::simulation::logic::operational_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("samples"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_random_sampling));
+          DOC(fiction_sidb_simulation_logic_operational_domain_random_sampling));
 
     m.def("operational_domain_flood_fill", &fiction::sidb::simulation::logic::operational_domain_flood_fill<Lyt, py_tt>,
           py::arg("lyt"), py::arg("spec"), py::arg("samples"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_flood_fill));
+          DOC(fiction_sidb_simulation_logic_operational_domain_flood_fill));
 
     m.def("operational_domain_contour_tracing",
           &fiction::sidb::simulation::logic::operational_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("samples"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_operational_domain_contour_tracing));
+          DOC(fiction_sidb_simulation_logic_operational_domain_contour_tracing));
 }
 
 template <typename Lyt>
@@ -66,25 +66,25 @@ void critical_temperature_domain_impl(nanobind::module_& m)
     m.def("critical_temperature_domain_grid_search",
           &fiction::sidb::simulation::logic::critical_temperature_domain_grid_search<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          py::arg("stats") = nullptr, DOC(fiction_critical_temperature_domain_grid_search));
+          py::arg("stats") = nullptr, DOC(fiction_sidb_simulation_logic_critical_temperature_domain_grid_search));
 
     m.def("critical_temperature_domain_random_sampling",
           &fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("samples"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_critical_temperature_domain_random_sampling));
+          DOC(fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling));
 
     m.def("critical_temperature_domain_flood_fill",
           &fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("samples"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_critical_temperature_domain_flood_fill));
+          DOC(fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill));
 
     m.def("critical_temperature_domain_contour_tracing",
           &fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing<Lyt, py_tt>, py::arg("lyt"),
           py::arg("spec"), py::arg("samples"),
           py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{}, py::arg("stats") = nullptr,
-          DOC(fiction_critical_temperature_domain_contour_tracing));
+          DOC(fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing));
 }
 
 }  // namespace detail
@@ -93,14 +93,16 @@ void operational_domain(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point", DOC(fiction_parameter_point))
-        .def(py::init<>(), DOC(fiction_parameter_point_parameter_point))
-        .def(py::init<const std::vector<double>>(), py::arg("values"), DOC(fiction_parameter_point_parameter_point_2))
+    py::class_<fiction::sidb::simulation::logic::parameter_point>(m, "parameter_point",
+                                                                  DOC(fiction_sidb_simulation_logic_parameter_point))
+        .def(py::init<>(), DOC(fiction_sidb_simulation_logic_parameter_point_parameter_point))
+        .def(py::init<const std::vector<double>>(), py::arg("values"),
+             DOC(fiction_sidb_simulation_logic_parameter_point_parameter_point_2))
         .def("get_parameters", &fiction::sidb::simulation::logic::parameter_point::get_parameters,
-             DOC(fiction_parameter_point_get_parameters))
+             DOC(fiction_sidb_simulation_logic_parameter_point_get_parameters))
 
         // NOLINTBEGIN(misc-redundant-expression)
-        .def(py::self == py::self, py::arg("other"), DOC(fiction_parameter_point_operator_eq))
+        .def(py::self == py::self, py::arg("other"), DOC(fiction_sidb_simulation_logic_parameter_point_operator_eq))
         // `parameter_point` no longer declares an `operator!=`; C++20 rewrites `a != b` as `!(a == b)`, so the
         // binding still works, but there is no generated docstring to reference for it anymore
         .def(py::self != py::self, py::arg("other"),
@@ -124,30 +126,31 @@ void operational_domain(nanobind::module_& m)
 
         ;
 
-    py::enum_<fiction::sidb::simulation::logic::sweep_parameter>(m, "sweep_parameter", DOC(fiction_sweep_parameter))
+    py::enum_<fiction::sidb::simulation::logic::sweep_parameter>(m, "sweep_parameter",
+                                                                 DOC(fiction_sidb_simulation_logic_sweep_parameter))
         .value("EPSILON_R", fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R,
-               DOC(fiction_sweep_parameter_EPSILON_R))
+               DOC(fiction_sidb_simulation_logic_sweep_parameter_EPSILON_R))
         .value("LAMBDA_TF", fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF,
-               DOC(fiction_sweep_parameter_LAMBDA_TF))
+               DOC(fiction_sidb_simulation_logic_sweep_parameter_LAMBDA_TF))
         .value("MU_MINUS", fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS,
-               DOC(fiction_sweep_parameter_MU_MINUS))
+               DOC(fiction_sidb_simulation_logic_sweep_parameter_MU_MINUS))
 
         ;
 
-    py::class_<fiction::sidb::simulation::logic::critical_temperature_domain>(m, "critical_temperature_domain",
-                                                                              DOC(fiction_critical_temperature_domain))
+    py::class_<fiction::sidb::simulation::logic::critical_temperature_domain>(
+        m, "critical_temperature_domain", DOC(fiction_sidb_simulation_logic_critical_temperature_domain))
         .def(py::init<>(), "Default constructor.")
         .def(py::init<const std::vector<fiction::sidb::simulation::logic::sweep_parameter>>(), py::arg("dims"),
              "Constructs a critical temperature domain with the given sweep dimensions.")
         .def("get_dimension", &fiction::sidb::simulation::logic::critical_temperature_domain::get_dimension,
-             py::arg("index"), DOC(fiction_critical_temperature_domain_get_dimension))
+             py::arg("index"), DOC(fiction_sidb_simulation_logic_critical_temperature_domain_get_dimension))
         .def("get_number_of_dimensions",
              &fiction::sidb::simulation::logic::critical_temperature_domain::get_number_of_dimensions,
-             DOC(fiction_critical_temperature_domain_get_number_of_dimensions))
+             DOC(fiction_sidb_simulation_logic_critical_temperature_domain_get_number_of_dimensions))
         .def("minimum_ct", &fiction::sidb::simulation::logic::critical_temperature_domain::minimum_ct,
-             DOC(fiction_critical_temperature_domain_minimum_ct))
+             DOC(fiction_sidb_simulation_logic_critical_temperature_domain_minimum_ct))
         .def("maximum_ct", &fiction::sidb::simulation::logic::critical_temperature_domain::maximum_ct,
-             DOC(fiction_critical_temperature_domain_maximum_ct))
+             DOC(fiction_sidb_simulation_logic_critical_temperature_domain_maximum_ct))
 
         // Pythonic interface functions
         .def(
@@ -219,18 +222,18 @@ void operational_domain(nanobind::module_& m)
 
         ;
 
-    py::class_<fiction::sidb::simulation::logic::operational_domain>(m, "operational_domain",
-                                                                     DOC(fiction_operational_domain))
-        .def(py::init<>(), DOC(fiction_operational_domain_operational_domain))
+    py::class_<fiction::sidb::simulation::logic::operational_domain>(
+        m, "operational_domain", DOC(fiction_sidb_simulation_logic_operational_domain))
+        .def(py::init<>(), DOC(fiction_sidb_simulation_logic_operational_domain_operational_domain))
         .def(py::init<const std::vector<fiction::sidb::simulation::logic::sweep_parameter>>(), py::arg("dims"),
-             DOC(fiction_operational_domain_operational_domain_2))
+             DOC(fiction_sidb_simulation_logic_operational_domain_operational_domain_2))
         .def("add_dimension", &fiction::sidb::simulation::logic::operational_domain::add_dimension, py::arg("dim"),
-             DOC(fiction_operational_domain_add_dimension))
+             DOC(fiction_sidb_simulation_logic_operational_domain_add_dimension))
         .def("get_dimension", &fiction::sidb::simulation::logic::operational_domain::get_dimension, py::arg("index"),
-             DOC(fiction_operational_domain_get_dimension))
+             DOC(fiction_sidb_simulation_logic_operational_domain_get_dimension))
         .def("get_number_of_dimensions",
              &fiction::sidb::simulation::logic::operational_domain::get_number_of_dimensions,
-             DOC(fiction_operational_domain_get_number_of_dimensions))
+             DOC(fiction_sidb_simulation_logic_operational_domain_get_number_of_dimensions))
 
         // Pythonic interface functions
         .def(
@@ -305,51 +308,51 @@ void operational_domain(nanobind::module_& m)
         ;
 
     py::class_<fiction::sidb::simulation::logic::operational_domain_value_range>(
-        m, "operational_domain_value_range", DOC(fiction_operational_domain_value_range))
+        m, "operational_domain_value_range", DOC(fiction_sidb_simulation_logic_operational_domain_value_range))
         .def(py::init<fiction::sidb::simulation::logic::sweep_parameter>(), py::arg("dimension"))
         .def(py::init<fiction::sidb::simulation::logic::sweep_parameter, double, double, double>(),
              py::arg("dimension"), py::arg("min"), py::arg("max"), py::arg("step"))
         .def_rw("dimension", &fiction::sidb::simulation::logic::operational_domain_value_range::dimension,
-                DOC(fiction_operational_domain_value_range_dimension))
+                DOC(fiction_sidb_simulation_logic_operational_domain_value_range_dimension))
         .def_rw("min", &fiction::sidb::simulation::logic::operational_domain_value_range::min,
-                DOC(fiction_operational_domain_value_range_min))
+                DOC(fiction_sidb_simulation_logic_operational_domain_value_range_min))
         .def_rw("max", &fiction::sidb::simulation::logic::operational_domain_value_range::max,
-                DOC(fiction_operational_domain_value_range_max))
+                DOC(fiction_sidb_simulation_logic_operational_domain_value_range_max))
         .def_rw("step", &fiction::sidb::simulation::logic::operational_domain_value_range::step,
-                DOC(fiction_operational_domain_value_range_step))
+                DOC(fiction_sidb_simulation_logic_operational_domain_value_range_step))
 
         ;
 
-    py::class_<fiction::sidb::simulation::logic::operational_domain_params>(m, "operational_domain_params",
-                                                                            DOC(fiction_operational_domain_params))
+    py::class_<fiction::sidb::simulation::logic::operational_domain_params>(
+        m, "operational_domain_params", DOC(fiction_sidb_simulation_logic_operational_domain_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params", &fiction::sidb::simulation::logic::operational_domain_params::operational_params,
-                DOC(fiction_operational_domain_params_operational_params))
+                DOC(fiction_sidb_simulation_logic_operational_domain_params_operational_params))
         .def_rw("sweep_dimensions", &fiction::sidb::simulation::logic::operational_domain_params::sweep_dimensions,
-                DOC(fiction_operational_domain_params_sweep_dimensions))
+                DOC(fiction_sidb_simulation_logic_operational_domain_params_sweep_dimensions))
         .def_rw("number_of_threads", &fiction::sidb::simulation::logic::operational_domain_params::number_of_threads,
-                DOC(fiction_operational_domain_params_number_of_threads));
+                DOC(fiction_sidb_simulation_logic_operational_domain_params_number_of_threads));
 
-    py::class_<fiction::sidb::simulation::logic::operational_domain_stats>(m, "operational_domain_stats",
-                                                                           DOC(fiction_operational_domain_stats))
+    py::class_<fiction::sidb::simulation::logic::operational_domain_stats>(
+        m, "operational_domain_stats", DOC(fiction_sidb_simulation_logic_operational_domain_stats))
         .def(py::init<>(), "Default constructor.")
         .def_ro("time_total", &fiction::sidb::simulation::logic::operational_domain_stats::time_total,
-                DOC(fiction_operational_domain_stats_time_total))
+                DOC(fiction_sidb_simulation_logic_operational_domain_stats_time_total))
         .def_ro("num_simulator_invocations",
                 &fiction::sidb::simulation::logic::operational_domain_stats::num_simulator_invocations,
-                DOC(fiction_operational_domain_stats_num_simulator_invocations))
+                DOC(fiction_sidb_simulation_logic_operational_domain_stats_num_simulator_invocations))
         .def_ro("num_evaluated_parameter_combinations",
                 &fiction::sidb::simulation::logic::operational_domain_stats::num_evaluated_parameter_combinations,
-                DOC(fiction_operational_domain_stats_num_evaluated_parameter_combinations))
+                DOC(fiction_sidb_simulation_logic_operational_domain_stats_num_evaluated_parameter_combinations))
         .def_ro("num_operational_parameter_combinations",
                 &fiction::sidb::simulation::logic::operational_domain_stats::num_operational_parameter_combinations,
-                DOC(fiction_operational_domain_stats_num_operational_parameter_combinations))
+                DOC(fiction_sidb_simulation_logic_operational_domain_stats_num_operational_parameter_combinations))
         .def_ro("num_non_operational_parameter_combinations",
                 &fiction::sidb::simulation::logic::operational_domain_stats::num_non_operational_parameter_combinations,
-                DOC(fiction_operational_domain_stats_num_non_operational_parameter_combinations))
+                DOC(fiction_sidb_simulation_logic_operational_domain_stats_num_non_operational_parameter_combinations))
         .def_ro("num_total_parameter_points",
                 &fiction::sidb::simulation::logic::operational_domain_stats::num_total_parameter_points,
-                DOC(fiction_operational_domain_stats_num_total_parameter_points))
+                DOC(fiction_sidb_simulation_logic_operational_domain_stats_num_total_parameter_points))
 
         ;
 

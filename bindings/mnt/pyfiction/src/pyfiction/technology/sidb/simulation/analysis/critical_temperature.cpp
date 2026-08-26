@@ -37,7 +37,7 @@ void critical_temperature_impl(nanobind::module_& m)
               &fiction::sidb::simulation::analysis::critical_temperature_gate_based<Lyt, py_tt>),
           py::arg("lyt"), py::arg("spec"),
           py::arg("params") = fiction::sidb::simulation::analysis::critical_temperature_params{},
-          py::arg("stats")  = nullptr, DOC(fiction_critical_temperature_gate_based));
+          py::arg("stats")  = nullptr, DOC(fiction_sidb_simulation_analysis_critical_temperature_gate_based));
 
     m.def("critical_temperature_gate_based",
           py::overload_cast<const std::vector<Lyt>&, const std::vector<py_tt>&,
@@ -49,12 +49,12 @@ void critical_temperature_impl(nanobind::module_& m)
               &fiction::sidb::simulation::analysis::critical_temperature_gate_based<Lyt, py_tt>),
           py::arg("input_pattern_layouts"), py::arg("spec"), py::arg("params"), py::arg("output_bdl_pairs"),
           py::arg("input_bdl_wires"), py::arg("output_bdl_wires"), py::arg("stats") = nullptr,
-          DOC(fiction_critical_temperature_gate_based_2));
+          DOC(fiction_sidb_simulation_analysis_critical_temperature_gate_based_2));
 
     m.def("critical_temperature_non_gate_based",
           &fiction::sidb::simulation::analysis::critical_temperature_non_gate_based<Lyt>, py::arg("lyt"),
           py::arg("params") = fiction::sidb::simulation::analysis::critical_temperature_params{},
-          py::arg("stats")  = nullptr, DOC(fiction_critical_temperature_non_gate_based));
+          py::arg("stats")  = nullptr, DOC(fiction_sidb_simulation_analysis_critical_temperature_non_gate_based));
 }
 
 }  // namespace detail
@@ -66,8 +66,8 @@ void critical_temperature(nanobind::module_& m)
     /**
      * Critical temperature statistics.
      */
-    py::class_<fiction::sidb::simulation::analysis::critical_temperature_stats>(m, "critical_temperature_stats",
-                                                                                DOC(fiction_critical_temperature_stats))
+    py::class_<fiction::sidb::simulation::analysis::critical_temperature_stats>(
+        m, "critical_temperature_stats", DOC(fiction_sidb_simulation_analysis_critical_temperature_stats))
         .def(py::init<>(), "Default constructor.")
         .def(
             "__repr__",
@@ -79,15 +79,16 @@ void critical_temperature(nanobind::module_& m)
             },
             "Returns a string representation of the statistics.")
         .def("report", &fiction::sidb::simulation::analysis::critical_temperature_stats::report,
-             DOC(fiction_critical_temperature_stats_report))
+             DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_report))
         .def_ro("algorithm_name", &fiction::sidb::simulation::analysis::critical_temperature_stats::algorithm_name,
-                DOC(fiction_critical_temperature_stats_algorithm_name))
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_algorithm_name))
         .def_ro("num_valid_lyt", &fiction::sidb::simulation::analysis::critical_temperature_stats::num_valid_lyt,
-                DOC(fiction_critical_temperature_stats_num_valid_lyt))
-        .def_ro("is_ground_state_transparent",
-                &fiction::sidb::simulation::analysis::critical_temperature_stats::
-                    energy_between_ground_state_and_first_erroneous,
-                DOC(fiction_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_num_valid_lyt))
+        .def_ro(
+            "is_ground_state_transparent",
+            &fiction::sidb::simulation::analysis::critical_temperature_stats::
+                energy_between_ground_state_and_first_erroneous,
+            DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
 
         ;
 
@@ -95,15 +96,15 @@ void critical_temperature(nanobind::module_& m)
      * Critical temperature parameters.
      */
     py::class_<fiction::sidb::simulation::analysis::critical_temperature_params>(
-        m, "critical_temperature_params", DOC(fiction_critical_temperature_params))
+        m, "critical_temperature_params", DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("operational_params",
                 &fiction::sidb::simulation::analysis::critical_temperature_params::operational_params,
-                DOC(fiction_critical_temperature_params))
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_params))
         .def_rw("confidence_level", &fiction::sidb::simulation::analysis::critical_temperature_params::confidence_level,
-                DOC(fiction_critical_temperature_params_confidence_level))
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_params_confidence_level))
         .def_rw("max_temperature", &fiction::sidb::simulation::analysis::critical_temperature_params::max_temperature,
-                DOC(fiction_critical_temperature_params_max_temperature));
+                DOC(fiction_sidb_simulation_analysis_critical_temperature_params_max_temperature));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
 

@@ -32,7 +32,7 @@ void physically_valid_parameters_impl(nanobind::module_& m)
 
     m.def("physically_valid_parameters", &fiction::sidb::simulation::generic::physically_valid_parameters<Lyt>,
           py::arg("cds"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          DOC(fiction_physically_valid_parameters));
+          DOC(fiction_sidb_simulation_generic_physically_valid_parameters));
 }
 
 }  // namespace detail

@@ -30,12 +30,12 @@ void offset_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<py_offset_coordinate>(m, "offset_coordinate", DOC(fiction_offset_ucoord_t))
-        .def(py::init<>(), DOC(fiction_offset_ucoord_t_ucoord_t))
-        .def(py::init<const uint64_t>(), py::arg("int_repr"), DOC(fiction_offset_ucoord_t_ucoord_t_4))
+    py::class_<py_offset_coordinate>(m, "offset_coordinate", DOC(fiction_layouts_coords_offset))
+        .def(py::init<>(), DOC(fiction_layouts_coords_offset_offset))
+        .def(py::init<const uint64_t>(), py::arg("int_repr"), DOC(fiction_layouts_coords_offset_offset_4))
         .def(py::init<const decltype(py_offset_coordinate().x), const decltype(py_offset_coordinate().y),
                       const decltype(py_offset_coordinate().z)>(),
-             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_offset_ucoord_t_ucoord_t_2))
+             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_offset_offset_2))
         .def(py::init<const py_offset_coordinate>(), py::arg("c"))
         .def(
             "__init__",
@@ -62,26 +62,26 @@ void offset_coordinate(nanobind::module_& m)
         .def_prop_rw(
             "x", [](py_offset_coordinate& self) -> decltype(self.x) { return self.x; },
             [](py_offset_coordinate& self, const decltype(self.x) value) { self.x = value; },
-            DOC(fiction_offset_ucoord_t_x))
+            DOC(fiction_layouts_coords_offset_x))
         .def_prop_rw(
             "y", [](py_offset_coordinate& self) -> decltype(self.y) { return self.y; },
             [](py_offset_coordinate& self, const decltype(self.y) value) { self.y = value; },
-            DOC(fiction_offset_ucoord_t_y))
+            DOC(fiction_layouts_coords_offset_y))
         .def_prop_rw(
             "z", [](py_offset_coordinate& self) -> decltype(self.z) { return self.z; },
             [](py_offset_coordinate& self, const decltype(self.z) value) { self.z = value; },
-            DOC(fiction_offset_ucoord_t_z))
+            DOC(fiction_layouts_coords_offset_z))
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(py::self == py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_ne))
-        .def(py::self < py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_lt))
-        .def(py::self > py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_gt))
-        .def(py::self <= py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_le))
-        .def(py::self >= py::self, py::arg("other"), DOC(fiction_offset_ucoord_t_operator_ge))
+        .def(py::self == py::self, py::arg("other"), DOC(fiction_layouts_coords_offset_operator_eq))
+        .def(py::self != py::self, py::arg("other"), DOC(fiction_layouts_coords_offset_operator_ne))
+        .def(py::self < py::self, py::arg("other"), DOC(fiction_layouts_coords_offset_operator_lt))
+        .def(py::self > py::self, py::arg("other"), DOC(fiction_layouts_coords_offset_operator_gt))
+        .def(py::self <= py::self, py::arg("other"), DOC(fiction_layouts_coords_offset_operator_le))
+        .def(py::self >= py::self, py::arg("other"), DOC(fiction_layouts_coords_offset_operator_ge))
         // NOLINTEND(misc-redundant-expression)
 
-        .def("__repr__", &py_offset_coordinate::str, DOC(fiction_offset_ucoord_t_str))
+        .def("__repr__", &py_offset_coordinate::str, DOC(fiction_layouts_coords_offset_str))
         .def(
             "__hash__", [](const py_offset_coordinate& self) { return std::hash<py_offset_coordinate>{}(self); },
             "Returns a hash value of the coordinate.")
@@ -98,11 +98,11 @@ void cube_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<py_cube_coordinate>(m, "cube_coordinate", DOC(fiction_cube_coord_t))
-        .def(py::init<>(), DOC(fiction_cube_coord_t_coord_t))
+    py::class_<py_cube_coordinate>(m, "cube_coordinate", DOC(fiction_layouts_coords_cube))
+        .def(py::init<>(), DOC(fiction_layouts_coords_cube_cube))
         .def(py::init<const decltype(py_cube_coordinate().x), const decltype(py_cube_coordinate().y),
                       const decltype(py_cube_coordinate().z)>(),
-             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_cube_coord_t_coord_t_2))
+             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_cube_cube_2))
         .def(py::init<const py_cube_coordinate>(), py::arg("c"))
         .def(
             "__init__",
@@ -128,24 +128,27 @@ void cube_coordinate(nanobind::module_& m)
 
         .def_prop_rw(
             "x", [](py_cube_coordinate& self) -> decltype(self.x) { return self.x; },
-            [](py_cube_coordinate& self, const decltype(self.x) value) { self.x = value; }, DOC(fiction_cube_coord_t_x))
+            [](py_cube_coordinate& self, const decltype(self.x) value) { self.x = value; },
+            DOC(fiction_layouts_coords_cube_x))
         .def_prop_rw(
             "y", [](py_cube_coordinate& self) -> decltype(self.y) { return self.y; },
-            [](py_cube_coordinate& self, const decltype(self.y) value) { self.y = value; }, DOC(fiction_cube_coord_t_y))
+            [](py_cube_coordinate& self, const decltype(self.y) value) { self.y = value; },
+            DOC(fiction_layouts_coords_cube_y))
         .def_prop_rw(
             "z", [](py_cube_coordinate& self) -> decltype(self.z) { return self.z; },
-            [](py_cube_coordinate& self, const decltype(self.z) value) { self.z = value; }, DOC(fiction_cube_coord_t_z))
+            [](py_cube_coordinate& self, const decltype(self.z) value) { self.z = value; },
+            DOC(fiction_layouts_coords_cube_z))
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(py::self == py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ne))
-        .def(py::self < py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_lt))
-        .def(py::self > py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_gt))
-        .def(py::self <= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_le))
-        .def(py::self >= py::self, py::arg("other"), DOC(fiction_cube_coord_t_operator_ge))
+        .def(py::self == py::self, py::arg("other"), DOC(fiction_layouts_coords_cube_operator_eq))
+        .def(py::self != py::self, py::arg("other"), DOC(fiction_layouts_coords_cube_operator_ne))
+        .def(py::self < py::self, py::arg("other"), DOC(fiction_layouts_coords_cube_operator_lt))
+        .def(py::self > py::self, py::arg("other"), DOC(fiction_layouts_coords_cube_operator_gt))
+        .def(py::self <= py::self, py::arg("other"), DOC(fiction_layouts_coords_cube_operator_le))
+        .def(py::self >= py::self, py::arg("other"), DOC(fiction_layouts_coords_cube_operator_ge))
         // NOLINTEND(misc-redundant-expression)
 
-        .def("__repr__", &py_cube_coordinate::str, DOC(fiction_cube_coord_t_str))
+        .def("__repr__", &py_cube_coordinate::str, DOC(fiction_layouts_coords_cube_str))
         .def(
             "__hash__", [](const py_cube_coordinate& self) { return std::hash<py_cube_coordinate>{}(self); },
             "Returns a hash value of the coordinate.")
@@ -162,11 +165,11 @@ void siqad_coordinate(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    py::class_<py_siqad_coordinate>(m, "siqad_coordinate", DOC(fiction_siqad_coord_t))
-        .def(py::init<>(), DOC(fiction_siqad_coord_t_coord_t))
+    py::class_<py_siqad_coordinate>(m, "siqad_coordinate", DOC(fiction_layouts_coords_siqad))
+        .def(py::init<>(), DOC(fiction_layouts_coords_siqad_siqad))
         .def(py::init<const decltype(py_siqad_coordinate().x), const decltype(py_siqad_coordinate().y),
                       const decltype(py_siqad_coordinate().z)>(),
-             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_siqad_coord_t_coord_t_2))
+             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_siqad_siqad_2))
         .def(py::init<const py_siqad_coordinate>(), py::arg("c"))
         .def(
             "__init__",
@@ -193,26 +196,26 @@ void siqad_coordinate(nanobind::module_& m)
         .def_prop_rw(
             "x", [](py_siqad_coordinate& self) -> decltype(self.x) { return self.x; },
             [](py_siqad_coordinate& self, const decltype(self.x) value) { self.x = value; },
-            DOC(fiction_siqad_coord_t_x))
+            DOC(fiction_layouts_coords_siqad_x))
         .def_prop_rw(
             "y", [](py_siqad_coordinate& self) -> decltype(self.y) { return self.y; },
             [](py_siqad_coordinate& self, const decltype(self.y) value) { self.y = value; },
-            DOC(fiction_siqad_coord_t_y))
+            DOC(fiction_layouts_coords_siqad_y))
         .def_prop_rw(
             "z", [](py_siqad_coordinate& self) -> decltype(self.z) { return self.z; },
             [](py_siqad_coordinate& self, const decltype(self.z) value) { self.z = value; },
-            DOC(fiction_siqad_coord_t_z))
+            DOC(fiction_layouts_coords_siqad_z))
 
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(py::self == py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_ne))
-        .def(py::self < py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_lt))
-        .def(py::self > py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_gt))
-        .def(py::self <= py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_le))
-        .def(py::self >= py::self, py::arg("other"), DOC(fiction_siqad_coord_t_operator_ge))
+        .def(py::self == py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_eq))
+        .def(py::self != py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_ne))
+        .def(py::self < py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_lt))
+        .def(py::self > py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_gt))
+        .def(py::self <= py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_le))
+        .def(py::self >= py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_ge))
         // NOLINTEND(misc-redundant-expression)
 
-        .def("__repr__", &py_siqad_coordinate::str, DOC(fiction_siqad_coord_t_str))
+        .def("__repr__", &py_siqad_coordinate::str, DOC(fiction_layouts_coords_siqad_str))
         .def(
             "__hash__", [](const py_siqad_coordinate& self) { return std::hash<py_siqad_coordinate>{}(self); },
             "Returns a hash value of the coordinate.")
@@ -226,25 +229,29 @@ void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    m.def("offset_area", &fiction::layouts::coords::area<py_offset_coordinate>, py::arg("coord"), DOC(fiction_area));
-    m.def("cube_area", &fiction::layouts::coords::area<py_cube_coordinate>, py::arg("coord"), DOC(fiction_area));
-    m.def("siqad_area", &fiction::layouts::coords::area<py_siqad_coordinate>, py::arg("coord"), DOC(fiction_area));
+    m.def("offset_area", &fiction::layouts::coords::area<py_offset_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_area));
+    m.def("cube_area", &fiction::layouts::coords::area<py_cube_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_area));
+    m.def("siqad_area", &fiction::layouts::coords::area<py_siqad_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_area));
 
     m.def("offset_volume", &fiction::layouts::coords::volume<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_volume));
-    m.def("cube_volume", &fiction::layouts::coords::volume<py_cube_coordinate>, py::arg("coord"), DOC(fiction_volume));
+          DOC(fiction_layouts_coords_volume));
+    m.def("cube_volume", &fiction::layouts::coords::volume<py_cube_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_volume));
     m.def("siqad_volume", &fiction::layouts::coords::volume<py_siqad_coordinate>, py::arg("coord"),
-          DOC(fiction_volume));
+          DOC(fiction_layouts_coords_volume));
 
     m.def("to_offset_coord", &fiction::layouts::coords::to_fiction_coord<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_siqad_to_fiction_coord));
+          DOC(fiction_layouts_coords_to_fiction_coord));
     m.def("to_cube_coord", &fiction::layouts::coords::to_fiction_coord<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_siqad_to_fiction_coord));
+          DOC(fiction_layouts_coords_to_fiction_coord));
 
     m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad_coord<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_siqad_to_siqad_coord));
+          DOC(fiction_layouts_coords_to_siqad_coord));
     m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad_coord<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_siqad_to_siqad_coord));
+          DOC(fiction_layouts_coords_to_siqad_coord));
 }
 
 }  // namespace pyfiction

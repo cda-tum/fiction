@@ -39,10 +39,11 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(), DOC(fiction_clocked_layout))
-        .def(py::init<>(), DOC(fiction_clocked_layout_clocked_layout))
+    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(),
+                                    DOC(fiction_is_clocked_layout))
+        .def(py::init<>(), DOC(fiction_layouts_clocked_layout_clocked_layout))
         .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
-             DOC(fiction_clocked_layout_clocked_layout))
+             DOC(fiction_layouts_clocked_layout_clocked_layout))
         .def(
             "__init__",
             [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension,
@@ -57,32 +58,33 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
 
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             },
-            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", DOC(fiction_clocked_layout_clocked_layout_2))
+            py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave",
+            DOC(fiction_layouts_clocked_layout_clocked_layout_2))
 
         .def("assign_clock_number", &ClockedLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
-             DOC(fiction_clocked_layout_assign_clock_number))
+             DOC(fiction_layouts_clocked_layout_assign_clock_number))
         .def("get_clock_number", &ClockedLyt::get_clock_number, py::arg("cz"),
-             DOC(fiction_clocked_layout_get_clock_number))
-        .def("num_clocks", &ClockedLyt::num_clocks, DOC(fiction_clocked_layout_num_clocks))
+             DOC(fiction_layouts_clocked_layout_get_clock_number))
+        .def("num_clocks", &ClockedLyt::num_clocks, DOC(fiction_layouts_clocked_layout_num_clocks))
         .def("is_regularly_clocked", &ClockedLyt::is_regularly_clocked,
-             DOC(fiction_clocked_layout_is_regularly_clocked))
+             DOC(fiction_layouts_clocked_layout_is_regularly_clocked))
 
         .def("is_clocking_scheme", &ClockedLyt::is_clocking_scheme, py::arg("name"),
-             DOC(fiction_clocked_layout_is_clocking_scheme))
+             DOC(fiction_layouts_clocked_layout_is_clocking_scheme))
 
         .def("is_incoming_clocked", &ClockedLyt::is_incoming_clocked, py::arg("cz1"), py::arg("cz2"),
-             DOC(fiction_clocked_layout_is_incoming_clocked))
+             DOC(fiction_layouts_clocked_layout_is_incoming_clocked))
         .def("is_outgoing_clocked", &ClockedLyt::is_outgoing_clocked, py::arg("cz1"), py::arg("cz2"),
-             DOC(fiction_clocked_layout_is_outgoing_clocked))
+             DOC(fiction_layouts_clocked_layout_is_outgoing_clocked))
 
         .def("incoming_clocked_zones", &ClockedLyt::incoming_clocked_zones, py::arg("cz"),
-             DOC(fiction_clocked_layout_incoming_clocked_zones))
+             DOC(fiction_layouts_clocked_layout_incoming_clocked_zones))
         .def("outgoing_clocked_zones", &ClockedLyt::outgoing_clocked_zones, py::arg("cz"),
-             DOC(fiction_clocked_layout_outgoing_clocked_zones))
+             DOC(fiction_layouts_clocked_layout_outgoing_clocked_zones))
 
-        .def("in_degree", &ClockedLyt::in_degree, py::arg("cz"), DOC(fiction_clocked_layout_in_degree))
-        .def("out_degree", &ClockedLyt::out_degree, py::arg("cz"), DOC(fiction_clocked_layout_out_degree))
-        .def("degree", &ClockedLyt::degree, py::arg("cz"), DOC(fiction_clocked_layout_degree))
+        .def("in_degree", &ClockedLyt::in_degree, py::arg("cz"), DOC(fiction_layouts_clocked_layout_in_degree))
+        .def("out_degree", &ClockedLyt::out_degree, py::arg("cz"), DOC(fiction_layouts_clocked_layout_out_degree))
+        .def("degree", &ClockedLyt::degree, py::arg("cz"), DOC(fiction_layouts_clocked_layout_degree))
 
         .def(
             "__repr__",

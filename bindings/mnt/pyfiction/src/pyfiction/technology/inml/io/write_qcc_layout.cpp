@@ -28,7 +28,7 @@ void write_qcc_layout(nanobind::module_& m)
     m.def(
         "write_qcc_layout", [](const py_inml_layout& lyt, const std::string_view& filename)
         { fiction::inml::io::write_qcc_layout(lyt, filename); }, py::arg("layout"), py::arg("filename"),
-        DOC(fiction_write_qcc_layout));
+        DOC(fiction_inml_io_write_qcc_layout));
 }
 
 }  // namespace pyfiction

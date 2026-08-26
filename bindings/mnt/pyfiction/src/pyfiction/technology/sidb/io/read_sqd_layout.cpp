@@ -31,7 +31,7 @@ void read_sqd_layout_100(nanobind::module_& m)
         &fiction::sidb::io::read_sqd_layout<py_sidb_100_lattice>;
 
     m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-          DOC(fiction_read_sqd_layout_3));
+          DOC(fiction_sidb_io_read_sqd_layout_3));
 }
 
 void read_sqd_layout_111(nanobind::module_& m)
@@ -43,7 +43,7 @@ void read_sqd_layout_111(nanobind::module_& m)
         &fiction::sidb::io::read_sqd_layout<py_sidb_111_lattice>;
 
     m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-          DOC(fiction_read_sqd_layout_3));
+          DOC(fiction_sidb_io_read_sqd_layout_3));
 }
 
 }  // namespace detail

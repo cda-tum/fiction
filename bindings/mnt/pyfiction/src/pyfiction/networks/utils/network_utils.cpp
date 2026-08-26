@@ -27,7 +27,7 @@ void has_high_degree_fanin_nodes(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("has_high_degree_fanin_nodes", &fiction::networks::utils::has_high_degree_fanin_nodes<Ntk>, py::arg("ntk"),
-          py::arg("threshold") = 2, DOC(fiction_has_high_degree_fanin_nodes));
+          py::arg("threshold") = 2, DOC(fiction_networks_utils_has_high_degree_fanin_nodes));
 }
 
 }  // namespace detail

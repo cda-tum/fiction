@@ -41,10 +41,11 @@ void a_star_impl(nanobind::module_& m)
                     fiction::physical_design::path_finding::unit_cost_functor<Lyt>(), params));
         },
         py::arg("layout"), py::arg("source"), py::arg("target"),
-        py::arg("params") = fiction::physical_design::path_finding::a_star_params{}, DOC(fiction_a_star));
+        py::arg("params") = fiction::physical_design::path_finding::a_star_params{},
+        DOC(fiction_physical_design_path_finding_a_star));
 
     m.def("a_star_distance", &fiction::physical_design::path_finding::a_star_distance<Lyt, double>, py::arg("layout"),
-          py::arg("source"), py::arg("target"), DOC(fiction_a_star_distance));
+          py::arg("source"), py::arg("target"), DOC(fiction_physical_design_path_finding_a_star_distance));
 }
 
 }  // namespace detail
@@ -53,10 +54,11 @@ void a_star(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    py::class_<fiction::physical_design::path_finding::a_star_params>(m, "a_star_params", DOC(fiction_a_star_params))
+    py::class_<fiction::physical_design::path_finding::a_star_params>(
+        m, "a_star_params", DOC(fiction_physical_design_path_finding_a_star_params))
         .def(py::init<>(), "Default constructor.")
         .def_rw("crossings", &fiction::physical_design::path_finding::a_star_params::crossings,
-                DOC(fiction_a_star_params_crossings));
+                DOC(fiction_physical_design_path_finding_a_star_params_crossings));
 
     detail::a_star_impl<py_cartesian_obstruction_layout>(m);
     detail::a_star_impl<py_cartesian_gate_layout>(m);

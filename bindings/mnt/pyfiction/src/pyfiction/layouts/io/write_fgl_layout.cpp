@@ -32,7 +32,7 @@ void write_fgl_layout(nanobind::module_& m)
     m.def(
         "write_fgl_layout", [](const Lyt& lyt, const std::string_view& filename)
         { fiction::layouts::io::write_fgl_layout<Lyt>(lyt, filename); }, py::arg("layout"), py::arg("filename"),
-        DOC(fiction_write_fgl_layout_2));
+        DOC(fiction_layouts_io_write_fgl_layout_2));
 }
 
 }  // namespace detail

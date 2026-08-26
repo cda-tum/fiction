@@ -44,21 +44,21 @@ void sidb_simulation_engine(nanobind::module_& m)
         ;
 
     py::enum_<fiction::sidb::simulation::exact_engine>(m, "exact_sidb_simulation_engine",
-                                                       DOC(fiction_exact_sidb_simulation_engine))
-        .value("EXGS", fiction::sidb::simulation::exact_engine::EXGS, DOC(fiction_exact_sidb_simulation_engine_EXGS))
+                                                       DOC(fiction_sidb_simulation_exact_engine))
+        .value("EXGS", fiction::sidb::simulation::exact_engine::EXGS, DOC(fiction_sidb_simulation_exact_engine_EXGS))
         .value("QUICKEXACT", fiction::sidb::simulation::exact_engine::QUICKEXACT,
-               DOC(fiction_exact_sidb_simulation_engine_QUICKEXACT))
+               DOC(fiction_sidb_simulation_exact_engine_QUICKEXACT))
 #if (FICTION_ALGLIB_ENABLED)
         .value("CLUSTERCOMPLETE", fiction::sidb::simulation::exact_engine::CLUSTERCOMPLETE,
-               DOC(fiction_exact_sidb_simulation_engine_CLUSTERCOMPLETE))
+               DOC(fiction_sidb_simulation_exact_engine_CLUSTERCOMPLETE))
 #endif  // FICTION_ALGLIB_ENABLED
 
         ;
 
     py::enum_<fiction::sidb::simulation::heuristic_engine>(m, "heuristic_sidb_simulation_engine",
-                                                           DOC(fiction_heuristic_sidb_simulation_engine))
+                                                           DOC(fiction_sidb_simulation_heuristic_engine))
         .value("QUICKSIM", fiction::sidb::simulation::heuristic_engine::QUICKSIM,
-               DOC(fiction_heuristic_sidb_simulation_engine_QUICKSIM))
+               DOC(fiction_sidb_simulation_heuristic_engine_QUICKSIM))
 
         ;
 

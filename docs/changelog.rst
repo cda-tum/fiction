@@ -94,6 +94,9 @@ Changed
   lists every moved header and every renamed symbol.
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
+- The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each
+  binding sits in the directory of the header it wraps, and the flat ``inout/`` and
+  ``algorithms/`` registries dissolve into one registry per module. The Python API is unchanged
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``

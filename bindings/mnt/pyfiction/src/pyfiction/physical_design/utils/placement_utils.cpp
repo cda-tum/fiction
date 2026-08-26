@@ -44,7 +44,7 @@ void place(nanobind::module_& m)
         "place", [](Lyt& lyt, const fiction::tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n)
         { return fiction::physical_design::utils::place(lyt, t, ntk, n); }, py::arg("lyt"), py::arg("t"),
         py::arg("ntk"),
-        py::arg("n"));  // TODO, DOC(fiction_place));
+        py::arg("n"));  // TODO, DOC(fiction_physical_design_utils_place));
 
     m.def(
         "place",

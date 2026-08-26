@@ -23,7 +23,7 @@ void sidb_nm_position(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("sidb_nm_position", &fiction::sidb::model::nm_position<Lyt>, py::arg("lyt"), py::arg("c"),
-          DOC(fiction_sidb_nm_position));
+          DOC(fiction_sidb_model_nm_position));
 }
 
 }  // namespace detail

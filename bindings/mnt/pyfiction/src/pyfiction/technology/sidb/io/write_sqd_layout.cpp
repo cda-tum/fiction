@@ -31,7 +31,7 @@ void write_sqd_layout(nanobind::module_& m)
         &fiction::sidb::io::write_sqd_layout<Lyt>;
 
     m.def("write_sqd_layout", write_sqd_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          DOC(fiction_write_sqd_layout));
+          DOC(fiction_sidb_io_write_sqd_layout));
 }
 }  // namespace detail
 

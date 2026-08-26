@@ -30,7 +30,7 @@ void read_fqca_layout(nanobind::module_& m)
         &fiction::qca::io::read_fqca_layout<Lyt>;
 
     m.def("read_fqca_layout", read_fqca_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-          DOC(fiction_read_fqca_layout));
+          DOC(fiction_qca_io_read_fqca_layout));
 }
 
 }  // namespace detail
