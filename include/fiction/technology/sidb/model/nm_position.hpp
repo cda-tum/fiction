@@ -53,7 +53,7 @@ template <typename Lyt>
         }
         else
         {
-            const auto cell_in_siqad = layouts::coords::to_siqad_coord(c);
+            const auto cell_in_siqad = layouts::coords::to_siqad(c);
             return calculate_nm_position(cell_in_siqad);
         }
     }

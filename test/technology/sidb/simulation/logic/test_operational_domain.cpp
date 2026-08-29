@@ -1756,32 +1756,32 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     layout lyt{{20, 10}, "AND gate"};
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{0, 0, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{0, 0, 1}),
                          sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 1}),
-                         sidb::technology::cell_type::INPUT);
-
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{20, 0, 1}),
-                         sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{18, 1, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{2, 1, 1}),
                          sidb::technology::cell_type::INPUT);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 2, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{20, 0, 1}),
+                         sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{18, 1, 1}),
+                         sidb::technology::cell_type::INPUT);
+
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{4, 2, 1}),
                          sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 3, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{6, 3, 1}),
                          sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 3, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{14, 3, 1}),
                          sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{16, 2, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{16, 2, 1}),
                          sidb::technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 6, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 6, 0}),
                          sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 7, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 7, 0}),
                          sidb::technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 9, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 9, 1}),
                          sidb::technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_cube lat{lyt};

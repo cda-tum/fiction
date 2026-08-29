@@ -388,8 +388,8 @@ class displacement_robustness_domain_impl
             {
                 if constexpr (has_siqad_coord_v<Lyt>)
                 {
-                    auto new_pos_se = fiction::layouts::coords::to_fiction_coord<fiction::layouts::coords::cube>(c);
-                    auto new_pos_nw = fiction::layouts::coords::to_fiction_coord<fiction::layouts::coords::cube>(c);
+                    auto new_pos_se = fiction::layouts::coords::from_siqad<fiction::layouts::coords::cube>(c);
+                    auto new_pos_nw = fiction::layouts::coords::from_siqad<fiction::layouts::coords::cube>(c);
                     // the cell c is not a fixed cell, i.e., displacement is considered.
 
                     if (params.fixed_sidbs.find(c) == params.fixed_sidbs.cend())
@@ -401,10 +401,10 @@ class displacement_robustness_domain_impl
                                                        cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
-                            new_pos_nw.y = fiction::layouts::coords::to_fiction_coord<fiction::layouts::coords::cube>(
+                            new_pos_nw.y = fiction::layouts::coords::from_siqad<fiction::layouts::coords::cube>(
                                                fiction::layouts::coords::siqad{c.x, c.y, 0})
                                                .y;
-                            new_pos_se.y = fiction::layouts::coords::to_fiction_coord<fiction::layouts::coords::cube>(
+                            new_pos_se.y = fiction::layouts::coords::from_siqad<fiction::layouts::coords::cube>(
                                                fiction::layouts::coords::siqad{c.x, c.y, 1})
                                                .y;
                         }
@@ -416,8 +416,7 @@ class displacement_robustness_domain_impl
                     }
 
                     const auto all_coord = layouts::utils::all_coordinates_in_spanned_area<cell<Lyt>>(
-                        fiction::layouts::coords::to_siqad_coord(new_pos_nw),
-                        fiction::layouts::coords::to_siqad_coord(new_pos_se));
+                        fiction::layouts::coords::to_siqad(new_pos_nw), fiction::layouts::coords::to_siqad(new_pos_se));
                     all_possible_sidb_misplacements.push_back(all_coord);
                 }
 
@@ -458,14 +457,14 @@ class displacement_robustness_domain_impl
                                                        cell<Lyt>>::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                             params.displacement_variations.second > 0)
                         {
-                            auto new_pos_se_siqad = fiction::layouts::coords::to_siqad_coord(c);
-                            auto new_pos_nw_siqad = fiction::layouts::coords::to_siqad_coord(c);
+                            auto new_pos_se_siqad = fiction::layouts::coords::to_siqad(c);
+                            auto new_pos_nw_siqad = fiction::layouts::coords::to_siqad(c);
 
                             new_pos_se_siqad.z = 0;
                             new_pos_nw_siqad.z = 1;
 
-                            new_pos_nw = fiction::layouts::coords::to_fiction_coord<cell<Lyt>>(new_pos_nw_siqad);
-                            new_pos_se = fiction::layouts::coords::to_fiction_coord<cell<Lyt>>(new_pos_se_siqad);
+                            new_pos_nw = fiction::layouts::coords::from_siqad<cell<Lyt>>(new_pos_nw_siqad);
+                            new_pos_se = fiction::layouts::coords::from_siqad<cell<Lyt>>(new_pos_se_siqad);
                         }
 
                         else

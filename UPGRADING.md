@@ -392,16 +392,24 @@ The helpers that operate on them moved into the same namespace, which also resto
 argument-dependent lookup for `area` and `volume`:
 
 ```text
-fiction::siqad::to_fiction_coord -> fiction::layouts::coords::to_fiction_coord
-fiction::siqad::to_siqad_coord   -> fiction::layouts::coords::to_siqad_coord
-fiction::offset_to_cube_coord    -> fiction::layouts::coords::offset_to_cube
-fiction::coord_iterator          -> fiction::layouts::coords::iterator
-fiction::area                    -> fiction::layouts::coords::area
-fiction::volume                  -> fiction::layouts::coords::volume
+fiction::siqad::to_fiction_coord -> fiction::layouts::coords::from_siqad
+fiction::siqad::to_siqad_coord   -> fiction::layouts::coords::to_siqad
+fiction::offset_to_cube_coord    -> fiction::layouts::coords::to_cube
+fiction::coord_iterator          -> fiction::layouts::coords::coordinate_iterator
+fiction::area                    -> fiction::layouts::coords::area_of
+fiction::volume                  -> fiction::layouts::coords::volume_of
 ```
 
 `is_offset_ucoord_v` and `has_offset_ucoord_v` become `is_offset_coord_v` and
 `has_offset_coord_v`. The cube and siqad traits keep their names.
+
+Within `coords`, a bare noun is a coordinate type and everything else is an operation on
+one, so `offset`, `cube` and `siqad` are the three kinds while `to_*`, `from_*` and `*_of`
+are functions. The iterator says what it iterates, matching `bdl_input_iterator` and the
+rest of the code base, and the three conversions -- which spelled themselves
+`to_fiction_coord`, `to_siqad_coord` and `offset_to_cube`, in three different styles --
+now share one. `from_siqad` keeps its target as a template parameter because callers pass
+a dependent type; `to_siqad` and `to_cube` deduce theirs.
 
 ### The clocking namespace
 

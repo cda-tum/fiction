@@ -40,7 +40,8 @@ void area(nanobind::module_& m)
             return fiction::fcn::area<Lyt>(lyt, params, &stats);
         },
         py::arg("layout"), py::arg("width") = tech::CELL_WIDTH, py::arg("height") = tech::CELL_HEIGHT,
-        py::arg("hspace") = tech::CELL_HSPACE, py::arg("vspace") = tech::CELL_VSPACE, DOC(fiction_layouts_coords_area));
+        py::arg("hspace") = tech::CELL_HSPACE, py::arg("vspace") = tech::CELL_VSPACE,
+        DOC(fiction_layouts_coords_area_of));
 }
 
 }  // namespace detail

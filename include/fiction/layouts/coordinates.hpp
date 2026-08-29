@@ -783,7 +783,7 @@ struct siqad
  * @return Coordinate of type `CoordinateType`.
  */
 template <typename CoordinateType>
-constexpr CoordinateType to_fiction_coord(const siqad& coord) noexcept
+constexpr CoordinateType from_siqad(const siqad& coord) noexcept
 {
     if (!coord.is_dead())
     {
@@ -813,7 +813,7 @@ constexpr CoordinateType to_fiction_coord(const siqad& coord) noexcept
  *
  */
 template <typename CoordinateType>
-constexpr siqad to_siqad_coord(const CoordinateType& coord) noexcept
+constexpr siqad to_siqad(const CoordinateType& coord) noexcept
 {
     if (coord.y >= 0)
     {
@@ -833,7 +833,7 @@ constexpr siqad to_siqad_coord(const CoordinateType& coord) noexcept
  * @param coord Offset coordinate to convert to a cube coordinate.
  * @return Cube coordinate equivalent to `coord`.
  */
-constexpr cube offset_to_cube(const offset& coord) noexcept
+constexpr cube to_cube(const offset& coord) noexcept
 {
     assert(coord.x <= std::numeric_limits<int32_t>::max() && coord.y <= std::numeric_limits<int32_t>::max() &&
            coord.z <= std::numeric_limits<int32_t>::max() && "Coordinate is out-of-range and cannot be transformed");
@@ -855,7 +855,7 @@ constexpr cube offset_to_cube(const offset& coord) noexcept
  * @return Area of coord.
  */
 template <typename CoordinateType>
-uint64_t area(const CoordinateType& coord) noexcept
+uint64_t area_of(const CoordinateType& coord) noexcept
 {
     if constexpr (std::is_same_v<CoordinateType, siqad>)
     {
@@ -876,11 +876,11 @@ uint64_t area(const CoordinateType& coord) noexcept
  * @return Volume of coord.
  */
 template <typename CoordinateType>
-uint64_t volume(const CoordinateType& coord) noexcept
+uint64_t volume_of(const CoordinateType& coord) noexcept
 {
     if constexpr (std::is_same_v<CoordinateType, siqad>)
     {
-        return area(coord);
+        return area_of(coord);
     }
 
     return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
@@ -898,7 +898,7 @@ uint64_t volume(const CoordinateType& coord) noexcept
  * @tparam CoordinateType Type of coordinate to enumerate.
  */
 template <typename CoordinateType>
-class iterator
+class coordinate_iterator
 {
   public:
     using value_type = CoordinateType;
@@ -906,7 +906,7 @@ class iterator
      * Default constructor. Required so that iterator satisfies `std::semiregular`, which in turn is required
      * for it to serve as its own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
      */
-    constexpr iterator() noexcept = default;
+    constexpr coordinate_iterator() noexcept = default;
     /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
@@ -946,7 +946,7 @@ class iterator
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
      */
-    constexpr explicit iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
+    constexpr explicit coordinate_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
         requires std::same_as<CoordinateType, offset> || std::same_as<CoordinateType, cube> ||
                      std::same_as<CoordinateType, siqad>
             : aspect_ratio{dimension}, coord{start}
@@ -964,7 +964,7 @@ class iterator
      *
      * @return Reference to the incremented iterator.
      */
-    constexpr iterator& operator++() noexcept
+    constexpr coordinate_iterator& operator++() noexcept
     {
         if (coord != aspect_ratio)
         {
@@ -980,7 +980,7 @@ class iterator
         return *this;
     }
 
-    constexpr iterator operator++(int) noexcept
+    constexpr coordinate_iterator operator++(int) noexcept
     {
         const auto result{*this};
 
@@ -994,22 +994,22 @@ class iterator
         return coord;
     }
 
-    constexpr bool operator==(const iterator& other) const noexcept
+    constexpr bool operator==(const coordinate_iterator& other) const noexcept
     {
         return (coord == other.coord);
     }
 
-    constexpr bool operator!=(const iterator& other) const noexcept
+    constexpr bool operator!=(const coordinate_iterator& other) const noexcept
     {
         return !(*this == other);
     }
 
-    constexpr bool operator<(const iterator& other) const noexcept
+    constexpr bool operator<(const coordinate_iterator& other) const noexcept
     {
         return (coord < other.coord);
     }
 
-    constexpr bool operator<=(const iterator& other) const noexcept
+    constexpr bool operator<=(const coordinate_iterator& other) const noexcept
     {
         return (coord <= other.coord);
     }
@@ -1067,7 +1067,7 @@ struct hash<fiction::layouts::coords::siqad>
  * @tparam Coordinate Coordinate type enumerated by the `iterator`.
  */
 template <typename Coordinate>
-struct iterator_traits<fiction::layouts::coords::iterator<Coordinate>>
+struct iterator_traits<fiction::layouts::coords::coordinate_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;

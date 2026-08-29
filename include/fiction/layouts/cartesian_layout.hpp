@@ -147,7 +147,7 @@ class cartesian_layout
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return fiction::layouts::coords::area(strg->dimension);
+        return fiction::layouts::coords::area_of(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -660,8 +660,8 @@ class cartesian_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return std::ranges::subrange{
-            coords::iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
+            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -677,8 +677,8 @@ class cartesian_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coords::iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
+            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
             std::forward<Fn>(fn));
     }
     /**
@@ -698,8 +698,8 @@ class cartesian_layout
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         return std::ranges::subrange{
-            coords::iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
+            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -719,8 +719,9 @@ class cartesian_layout
         const auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coords::iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
+            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop},
+            std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, only cardinal

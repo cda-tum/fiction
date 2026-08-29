@@ -229,29 +229,29 @@ void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    m.def("offset_area", &fiction::layouts::coords::area<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_area));
-    m.def("cube_area", &fiction::layouts::coords::area<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_area));
-    m.def("siqad_area", &fiction::layouts::coords::area<py_siqad_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_area));
+    m.def("offset_area", &fiction::layouts::coords::area_of<py_offset_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_area_of));
+    m.def("cube_area", &fiction::layouts::coords::area_of<py_cube_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_area_of));
+    m.def("siqad_area", &fiction::layouts::coords::area_of<py_siqad_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_area_of));
 
-    m.def("offset_volume", &fiction::layouts::coords::volume<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_volume));
-    m.def("cube_volume", &fiction::layouts::coords::volume<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_volume));
-    m.def("siqad_volume", &fiction::layouts::coords::volume<py_siqad_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_volume));
+    m.def("offset_volume", &fiction::layouts::coords::volume_of<py_offset_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_volume_of));
+    m.def("cube_volume", &fiction::layouts::coords::volume_of<py_cube_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_volume_of));
+    m.def("siqad_volume", &fiction::layouts::coords::volume_of<py_siqad_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_volume_of));
 
-    m.def("to_offset_coord", &fiction::layouts::coords::to_fiction_coord<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_to_fiction_coord));
-    m.def("to_cube_coord", &fiction::layouts::coords::to_fiction_coord<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_to_fiction_coord));
+    m.def("to_offset_coord", &fiction::layouts::coords::from_siqad<py_offset_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_from_siqad));
+    m.def("to_cube_coord", &fiction::layouts::coords::from_siqad<py_cube_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_from_siqad));
 
-    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad_coord<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_to_siqad_coord));
-    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad_coord<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_to_siqad_coord));
+    m.def("to_siqad", &fiction::layouts::coords::to_siqad<py_offset_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_to_siqad));
+    m.def("to_siqad", &fiction::layouts::coords::to_siqad<py_cube_coordinate>, py::arg("coord"),
+          DOC(fiction_layouts_coords_to_siqad));
 }
 
 }  // namespace pyfiction

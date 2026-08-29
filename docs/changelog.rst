@@ -123,6 +123,12 @@ Changed
   ``_utils`` suffix to match its siblings, so ``fiction/utils/truth_table_utils.hpp`` is now
   ``fiction/synthesis/truth_tables.hpp``. Neither header depends on a network; both include only
   ``kitty`` and the standard library
+- **Breaking:** ``fiction::layouts::coords`` adopts one naming rule: a bare noun is a coordinate
+  type, everything else is an operation on one. ``coord_iterator`` becomes
+  ``coordinate_iterator``, ``area`` and ``volume`` become ``area_of`` and ``volume_of``, and the
+  three conversions unify from ``to_fiction_coord``, ``to_siqad_coord`` and ``offset_to_cube``
+  into ``from_siqad``, ``to_siqad`` and ``to_cube``. The coordinate types ``offset``, ``cube``
+  and ``siqad`` keep their names
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each
@@ -335,7 +341,7 @@ Fixed
       does not guarantee
     - Fixed plain ``char`` values being passed to ``::toupper``, ``::tolower``, ``::isdigit``, and
       ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
-    - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
+    - Fixed a signed-integer overflow in ``to_siqad`` for the minimum representable ``y`` value
 - Continuous integration:
     - Renamed ``.readthedocs.yml`` to ``.readthedocs.yaml``. The preview guard and the
       ``check-readthedocs`` hook both expect that name, so editing the file now rebuilds the

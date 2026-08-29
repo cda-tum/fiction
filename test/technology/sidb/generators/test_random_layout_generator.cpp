@@ -806,8 +806,8 @@ TEST_CASE("Random coords::cube layout generation with defects", "[random-sidb-la
     using lyt = sidb_defect_cell_clk_lyt_cube;
 
     const sidb::generators::generate_random_layout_params<layouts::coords::cube> params{
-        .coordinate_pair = {layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{0, 0, 0}),
-                            layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 2, 0})},
+        .coordinate_pair = {layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{0, 0, 0}),
+                            layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 2, 0})},
         .number_of_sidbs = 10,
         .positive_sidbs =
             sidb::generators::generate_random_layout_params<layouts::coords::cube>::positive_charges::ALLOWED,
@@ -815,15 +815,15 @@ TEST_CASE("Random coords::cube layout generation with defects", "[random-sidb-la
 
     lyt layout{};
 
-    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}),
+    layout.assign_defect(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}),
                          sidb::model::defect{sidb::model::defect_type::DB, -1, 5.6, 5});
-    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 1, 0}),
+    layout.assign_defect(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{4, 1, 0}),
                          sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 7});
-    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{5, 1, 0}),
+    layout.assign_defect(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{5, 1, 0}),
                          sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 9});
-    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{7, 1, 0}),
+    layout.assign_defect(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{7, 1, 0}),
                          sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 2.6, 7});
-    layout.assign_defect(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}),
+    layout.assign_defect(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}),
                          sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE, 1, 7.6, 4});
 
     const auto result_lyt = sidb::generators::generate_random_layout(params, std::optional{layout});
@@ -836,11 +836,11 @@ TEST_CASE("Random coords::cube layout generation with defects", "[random-sidb-la
     result_lyt.value().foreach_cell(
         [](const auto& cell)
         {
-            CHECK(cell != layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}));
-            CHECK(cell != layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{4, 1, 0}));
-            CHECK(cell != layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{5, 1, 0}));
-            CHECK(cell != layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{7, 1, 0}));
-            CHECK(cell != layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}));
+            CHECK(cell != layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{2, 2, 0}));
+            CHECK(cell != layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{4, 1, 0}));
+            CHECK(cell != layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{5, 1, 0}));
+            CHECK(cell != layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{7, 1, 0}));
+            CHECK(cell != layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{2, 1, 0}));
         });
 }
 

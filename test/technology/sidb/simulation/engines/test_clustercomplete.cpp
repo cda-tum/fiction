@@ -868,24 +868,24 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
 {
     TestType lyt{};
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{16, 1, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{16, 1, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{14, 2, 0}),
-                         TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{8, 3, 0}),
-                         TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{12, 3, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{14, 2, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 5, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{8, 3, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 6, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{12, 3, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 8, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 5, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 8, 1}),
                          TestType::cell_type::NORMAL);
 
     const sidb::simulation::engines::clustercomplete_params<cell<TestType>> sim_params{
@@ -896,23 +896,23 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     REQUIRE(!simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{6, 2, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{12, 3, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{10, 8, 1})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{10, 6, 1})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{16, 1, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{10, 5, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{14, 2, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{8, 3, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{6, 2, 0})) == sidb::model::charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
@@ -925,24 +925,24 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
 {
     TestType lyt{};
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{16, 1, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{16, 1, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 2, 0}),
-                         TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{8, 3, 0}),
-                         TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{12, 3, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{14, 2, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 5, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{8, 3, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 6, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{12, 3, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 8, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 5, 0}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 8, 1}),
                          TestType::cell_type::NORMAL);
 
     const sidb::simulation::engines::clustercomplete_params<cell<TestType>> sim_params{
@@ -953,23 +953,23 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with in
     REQUIRE(!simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{6, 2, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{12, 3, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{10, 8, 1})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{10, 6, 1})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{16, 1, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{10, 5, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{14, 2, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{8, 3, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{6, 2, 0})) == sidb::model::charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
@@ -1017,50 +1017,50 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a Y-shaped SiDB OR gate with i
                    "[clustercomplete]", (sidb_100_cell_clk_lyt), (cds_sidb_100_cell_clk_lyt))
 {
     TestType lyt{};
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{8, 3, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{8, 3, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{12, 3, 0}),
-                         TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{14, 2, 0}),
-                         TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 5, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{12, 3, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 6, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{14, 2, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{10, 8, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 5, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{16, 1, 0}),
+
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 8, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{16, 1, 0}),
                          TestType::cell_type::NORMAL);
 
     sidb::simulation::engines::clustercomplete_params<cell<TestType>> params{
         sidb::model::simulation_parameters{3, -0.28}};
     params.local_external_potential.insert(
-        {{layouts::coords::to_fiction_coord<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}), -0.5}});
+        {{layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}), -0.5}});
 
     const auto simulation_results = sidb::simulation::engines::clustercomplete<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{6, 2, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{12, 3, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{10, 8, 1})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{10, 6, 1})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{16, 1, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{10, 5, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{14, 2, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::offset>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::offset>(
               layouts::coords::siqad{8, 3, 0})) == sidb::model::charge_state::NEGATIVE);
 }
 
@@ -1070,50 +1070,50 @@ TEMPLATE_TEST_CASE(
     "[clustercomplete]", (sidb_100_cell_clk_lyt_cube), (cds_sidb_100_cell_clk_lyt_cube))
 {
     TestType lyt{};
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{8, 3, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{8, 3, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{12, 3, 0}),
-                         TestType::cell_type::NORMAL);
-
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{14, 2, 0}),
-                         TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 5, 0}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{12, 3, 0}),
                          TestType::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 6, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{14, 2, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{10, 8, 1}),
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 5, 0}),
                          TestType::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{16, 1, 0}),
+
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 6, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 8, 1}),
+                         TestType::cell_type::NORMAL);
+    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{16, 1, 0}),
                          TestType::cell_type::NORMAL);
 
     sidb::simulation::engines::clustercomplete_params<cell<TestType>> params{
         sidb::model::simulation_parameters{3, -0.28}};
     params.local_external_potential.insert(
-        {{layouts::coords::to_fiction_coord<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}), -0.5}});
+        {{layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}), -0.5}});
 
     const auto simulation_results = sidb::simulation::engines::clustercomplete<TestType>(lyt, params);
 
     REQUIRE(!simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
 
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{6, 2, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{12, 3, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{10, 8, 1})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{10, 6, 1})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{16, 1, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{10, 5, 0})) == sidb::model::charge_state::NEGATIVE);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{14, 2, 0})) == sidb::model::charge_state::NEUTRAL);
-    CHECK(charge_lyt_first.get_charge_state(layouts::coords::to_fiction_coord<layouts::coords::cube>(
+    CHECK(charge_lyt_first.get_charge_state(layouts::coords::from_siqad<layouts::coords::cube>(
               layouts::coords::siqad{8, 3, 0})) == sidb::model::charge_state::NEGATIVE);
 }
 

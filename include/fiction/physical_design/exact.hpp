@@ -2933,7 +2933,7 @@ class exact_impl
                 if (result_aspect_ratio)
                 {
                     // stop working if its area is smaller or equal to the one currently at hand
-                    if (layouts::coords::area(*result_aspect_ratio) <= layouts::coords::area(ar))
+                    if (layouts::coords::area_of(*result_aspect_ratio) <= layouts::coords::area_of(ar))
                     {
                         return std::nullopt;
                     }
@@ -2961,7 +2961,7 @@ class exact_impl
                         }
                         else  // or if the own one is smaller
                         {
-                            if (layouts::coords::area(*result_aspect_ratio) > layouts::coords::area(ar))
+                            if (layouts::coords::area_of(*result_aspect_ratio) > layouts::coords::area_of(ar))
                             {
                                 result_aspect_ratio = ar;
                             }
@@ -2975,7 +2975,7 @@ class exact_impl
                     // interrupt other threads that are working on higher aspect ratios
                     for (const auto& ti : *ti_list)
                     {
-                        if (layouts::coords::area(ar) <= layouts::coords::area(ti.worker_aspect_ratio))
+                        if (layouts::coords::area_of(ar) <= layouts::coords::area_of(ti.worker_aspect_ratio))
                         {
                             ti.ctx->interrupt();
                         }

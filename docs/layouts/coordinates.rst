@@ -45,18 +45,18 @@ Coordinate iterator
 
 An iterator type that allows to enumerate coordinates in order within a boundary.
 
-.. doxygenclass:: fiction::layouts::coords::iterator
+.. doxygenclass:: fiction::layouts::coords::coordinate_iterator
 
 Utility functions
 -----------------
 
 .. tabs::
     .. tab:: C++
-        .. doxygenfunction:: fiction::layouts::coords::area(const CoordinateType& coord) noexcept
-        .. doxygenfunction:: fiction::layouts::coords::volume(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::layouts::coords::area_of(const CoordinateType& coord) noexcept
+        .. doxygenfunction:: fiction::layouts::coords::volume_of(const CoordinateType& coord) noexcept
 
-        .. doxygenfunction:: fiction::layouts::coords::to_fiction_coord
-        .. doxygenfunction:: fiction::layouts::coords::to_siqad_coord
+        .. doxygenfunction:: fiction::layouts::coords::from_siqad
+        .. doxygenfunction:: fiction::layouts::coords::to_siqad
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.offset_area
@@ -70,4 +70,4 @@ Utility functions
         .. autofunction:: mnt.pyfiction.to_offset_coord
         .. autofunction:: mnt.pyfiction.to_cube_coord
 
-        .. autofunction:: mnt.pyfiction.to_siqad_coord
+        .. autofunction:: mnt.pyfiction.to_siqad
