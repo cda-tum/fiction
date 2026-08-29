@@ -2842,7 +2842,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_area =
+static const char *mkd_doc_fiction_layouts_coords_area_of =
 R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
 exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
@@ -2858,6 +2858,84 @@ Returns:
     Area of coord.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator =
+R"doc(An iterator type that allows to enumerate coordinates in order within
+a boundary.
+
+Template Args:
+    CoordinateType: Type of coordinate to enumerate.
+
+Note:
+    Only `offset`, `cube`, and `siqad` are supported. This is enforced
+    on the boundary-and-start constructor via a `requires` clause
+    rather than on the class itself, so that the default constructor
+    (required for `std::semiregular`) remains usable for any
+    `CoordinateType`.)doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_aspect_ratio =
+R"doc(Boundary within to enumerate. Not `const`:
+`std::input_or_output_iterator` requires `iterator` to be
+`std::movable`, which in turn requires it to be assignable.)doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coord = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coordinate_iterator =
+R"doc(Default constructor. Required so that iterator satisfies
+`std::semiregular`, which in turn is required for it to serve as its
+own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coordinate_iterator_2 =
+R"doc(Standard constructor. Initializes the iterator with a starting
+position and the boundary within to enumerate.
+
+With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
+order would be enumerated for offset or cubic
+coordinates:
+
+- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
+  0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
+  2, 1)
+
+For SiQAD coordinates with the same parameters, we have the following
+order of enumeration:
+
+- (0, 0, 0) - (1, 0, 0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 0) - (1, 2,
+  0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
+  2, 1)
+
+iterator is compatible with the STL forward_iterator category. Does
+not iterate over negative coordinates.
+
+Args:
+    dimension: Boundary within to enumerate. Iteration wraps at its
+               limits.
+    start: Starting coordinate to enumerate first.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_eq = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_inc =
+R"doc(Increments the iterator, while keeping it within the boundary. Also
+defined on iterators that are out of bounds.
+
+Returns:
+    Reference to the incremented iterator.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_inc_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_le = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_lt = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_mul = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_ne = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_coords_cube =
 R"doc(Signed cube coordinates.
@@ -3048,83 +3126,19 @@ static const char *mkd_doc_fiction_layouts_coords_cube_y = R"doc(y coordinate.)d
 
 static const char *mkd_doc_fiction_layouts_coords_cube_z = R"doc(z coordinate.)doc";
 
-static const char *mkd_doc_fiction_layouts_coords_iterator =
-R"doc(An iterator type that allows to enumerate coordinates in order within
-a boundary.
-
-Template Args:
-    CoordinateType: Type of coordinate to enumerate.
-
-Note:
-    Only `offset`, `cube`, and `siqad` are supported. This is enforced
-    on the boundary-and-start constructor via a `requires` clause
-    rather than on the class itself, so that the default constructor
-    (required for `std::semiregular`) remains usable for any
-    `CoordinateType`.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_aspect_ratio =
-R"doc(Boundary within to enumerate. Not `const`:
-`std::input_or_output_iterator` requires `iterator` to be
-`std::movable`, which in turn requires it to be assignable.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_coord = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_iterator =
-R"doc(Default constructor. Required so that iterator satisfies
-`std::semiregular`, which in turn is required for it to serve as its
-own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_iterator_2 =
-R"doc(Standard constructor. Initializes the iterator with a starting
-position and the boundary within to enumerate.
-
-With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
-order would be enumerated for offset or cubic
-coordinates:
-
-- (0, 0, 0) - (1, 0, 0) - (0, 1, 0) - (1, 1, 0) - (0, 2, 0) - (1, 2,
-  0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 1) - (1, 1, 1) - (0, 2, 1) - (1,
-  2, 1)
-
-For SiQAD coordinates with the same parameters, we have the following
-order of enumeration:
-
-- (0, 0, 0) - (1, 0, 0) - (0, 0, 1) - (1, 0, 1) - (0, 1, 0) - (1, 2,
-  0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
-  2, 1)
-
-iterator is compatible with the STL forward_iterator category. Does
-not iterate over negative coordinates.
+static const char *mkd_doc_fiction_layouts_coords_from_siqad =
+R"doc(Converts SiQAD coordinates to other coordinates (offset, cube).
 
 Args:
-    dimension: Boundary within to enumerate. Iteration wraps at its
-               limits.
-    start: Starting coordinate to enumerate first.
+    coord: SiQAD coordinate to convert.
 
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_eq = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_inc =
-R"doc(Increments the iterator, while keeping it within the boundary. Also
-defined on iterators that are out of bounds.
+Template Args:
+    CoordinateType: The desired coordinate type.
 
 Returns:
-    Reference to the incremented iterator.
+    Coordinate of type `CoordinateType`.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_inc_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_le = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_lt = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_mul = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_coords_iterator_operator_ne = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_coords_offset =
 R"doc(Unsigned offset coordinates.
@@ -3297,25 +3311,6 @@ z)"` that does not respect the dead indicator.
 
 Returns:
     String representation of the form `"(x, y, z)"`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_offset_to_cube =
-R"doc(Converts offset coordinates to cube coordinates.
-
-Args:
-    coord: Offset coordinate to convert to a cube coordinate.
-
-Returns:
-    Cube coordinate equivalent to `coord`.
-
-Note:
-    This function assumes that the input coordinates are within the
-    valid range for cube coordinates. Specifically, the x, y, and z
-    coordinates should be within the range of :math:`(0, 0, 0)` to
-    :math:`(2^{31} - 1, 2^{31} - 1, 1)`. If the input coordinates are
-    outside this range, the behavior of the function is undefined. If
-    the input coordinate is dead, a dead cube coordinate is returned.
 
 )doc";
 
@@ -3533,21 +3528,26 @@ static const char *mkd_doc_fiction_layouts_coords_siqad_y = R"doc(31 bit for the
 
 static const char *mkd_doc_fiction_layouts_coords_siqad_z = R"doc(1 bit for the z coordinate.)doc";
 
-static const char *mkd_doc_fiction_layouts_coords_to_fiction_coord =
-R"doc(Converts SiQAD coordinates to other coordinates (offset, cube).
+static const char *mkd_doc_fiction_layouts_coords_to_cube =
+R"doc(Converts offset coordinates to cube coordinates.
 
 Args:
-    coord: SiQAD coordinate to convert.
-
-Template Args:
-    CoordinateType: The desired coordinate type.
+    coord: Offset coordinate to convert to a cube coordinate.
 
 Returns:
-    Coordinate of type `CoordinateType`.
+    Cube coordinate equivalent to `coord`.
+
+Note:
+    This function assumes that the input coordinates are within the
+    valid range for cube coordinates. Specifically, the x, y, and z
+    coordinates should be within the range of :math:`(0, 0, 0)` to
+    :math:`(2^{31} - 1, 2^{31} - 1, 1)`. If the input coordinates are
+    outside this range, the behavior of the function is undefined. If
+    the input coordinate is dead, a dead cube coordinate is returned.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_to_siqad_coord =
+static const char *mkd_doc_fiction_layouts_coords_to_siqad =
 R"doc(Converts any coordinate type to SiQAD coordinates.
 
 Args:
@@ -3561,7 +3561,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_volume =
+static const char *mkd_doc_fiction_layouts_coords_volume_of =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
 0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
 default. For SiQAD coordinates, which are planar by definition, the
