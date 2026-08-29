@@ -18,7 +18,7 @@ ci:
   skip: [mypy]
 
 # The fourth copy of this list. The others are `path_filters:` in `.coderabbit.yaml`,
-# `ignore:` in `.github/workflows/cpp-linter.yml`, and `exclude` in
+# `IGNORE` in `.github/scripts/clang_tidy_changed_lines.py`, and `exclude` in
 # `.license-tools-config.json`, which is JSON and cannot say so itself. Keep them in sync
 exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 

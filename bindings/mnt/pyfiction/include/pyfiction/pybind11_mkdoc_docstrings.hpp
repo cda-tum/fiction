@@ -162,7 +162,8 @@ static gate_ports<PortType> get_gate_ports()
 
  can optionally be provided to allow reverse access to the gate ports
  given a gate implementation. This interface is for example used in
- `sidb_surface_analysis` to determine which ports to blacklist.
+ `sidb::libraries::surface_analysis` to determine which ports to
+ blacklist.
 
 Template Args:
     Technology: FCN technology type of the implementing gate library.
@@ -5805,7 +5806,8 @@ Args:
 Template Args:
     Lyt: SiDB cell-level layout with charge-information based on SiQAD
          coordinates or defect-information, e.g., a
-         `charge_distribution_surface` or `sidb_defect_surface`.
+         `charge_distribution_surface` or
+         `sidb::primitives::defect_surface`.
 
 )doc";
 
@@ -6764,7 +6766,7 @@ digest, so a digest match still has to be confirmed with
 `are_cell_layouts_identical`.
 
 The digest covers the cells and their types, the defects of an
-`sidb_defect_surface`, and the charge states of a
+`sidb::primitives::defect_surface`, and the charge states of a
 `charge_distribution_surface`. Following `are_cell_layouts_identical`,
 it ignores the layout's aspect ratio.
 
@@ -8323,7 +8325,8 @@ R"doc(Applies a gate library to a given gate-level layout and, thereby,
 creates and returns a cell-level layout. The gate library type should
 provide all functions specified in gate_library. It is, thus, easiest
 to extend gate_library to implement a new gate library. Examples are
-`qca_one_library`, `topolinano_library`, and `sidb_bestagon_library`.
+`qca_one_library`, `topolinano_library`, and
+`sidb::libraries::bestagon_library`.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
@@ -8349,7 +8352,7 @@ and defect locations onto a defect surface. The gate library type
 should provide all functions specified in gate_library. It is, thus,
 easiest to extend gate_library to implement a new gate library.
 Examples are `qca_one_library`, `topolinano_library`, and
-`sidb_bestagon_library`.
+`sidb::libraries::bestagon_library`.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
@@ -21291,8 +21294,8 @@ to the end of its wire than its lower dot.
 
 `set_all_inputs` needs only this comparison, not the distances
 themselves, and both operands are fixed for this object's lifetime.
-Evaluating it once here keeps the two `sidb_nm_distance` calls per
-input pair out of every increment.
+Evaluating it once here keeps the two `sidb::model::nm_distance` calls
+per input pair out of every increment.
 
 Returns:
     One flag per input BDL pair, indexed like `input_pairs`.
@@ -23206,8 +23209,9 @@ first collecting all dots of the given type and then uniquely pairing
 them up based on their distance. Lower and upper distance thresholds
 can be defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow
 down the range in which SiDBs could be considered a BDL pair. The
-distance between two dots is computed using the `sidb_nm_distance`
-function. The algorithm returns a vector of BDL pairs.
+distance between two dots is computed using the
+`sidb::model::nm_distance` function. The algorithm returns a vector of
+BDL pairs.
 
 Args:
     lyt: The layout to detect BDL pairs in.
@@ -24123,7 +24127,7 @@ Template Args:
 static const char *mkd_doc_fiction_sidb_simulation_result_additional_simulation_parameters =
 R"doc(Additional named simulation parameters. This is used to store
 algorithm-dependent parameters that are not part of the
-`sidb_simulation_parameters` struct.
+`sidb::model::simulation_parameters` struct.
 
 The key of the map is the name of the parameter, the element is the
 value of the parameter.)doc";
