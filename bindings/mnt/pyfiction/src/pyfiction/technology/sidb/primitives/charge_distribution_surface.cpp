@@ -267,7 +267,7 @@ void charge_distribution_surfaces(nanobind::module_& m)
      * Charge index mode.
      */
     py::enum_<fiction::sidb::primitives::charge_index_mode>(m, "charge_index_mode",
-                                                            DOC(fiction_sidb_primitives_energy_calculation))
+                                                            DOC(fiction_sidb_primitives_charge_index_mode))
         .value("UPDATE_CHARGE_INDEX", fiction::sidb::primitives::charge_index_mode::UPDATE_CHARGE_INDEX,
                DOC(fiction_sidb_primitives_charge_index_mode_UPDATE_CHARGE_INDEX))
         .value("KEEP_CHARGE_INDEX", fiction::sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX,
