@@ -162,8 +162,7 @@ static gate_ports<PortType> get_gate_ports()
 
  can optionally be provided to allow reverse access to the gate ports
  given a gate implementation. This interface is for example used in
- `sidb::libraries::surface_analysis` to determine which ports to
- blacklist.
+ `sidb::surface_analysis` to determine which ports to blacklist.
 
 Template Args:
     Technology: FCN technology type of the implementing gate library.
@@ -618,6 +617,163 @@ static const char *mkd_doc_fiction_has_update_ranks = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_west = R"doc()doc";
 
+static const char *mkd_doc_fiction_inml_inml_technology =
+R"doc(in-plane Nanomagnet Logic (iNML) technology implementation of the FCN
+concept.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_mark_EMPTY = R"doc()doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_mark_INPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_mark_OUTPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_mode = R"doc(iNML cells do not have modes.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type = R"doc(Possible types of iNML cells.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_CROSSWIRE_MAGNET = R"doc(Symbol used for cross-wire magnets.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_EMPTY = R"doc(Symbol used for empty iNML cells.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_FANOUT_COUPLER_MAGNET = R"doc(Symbol used for coupler (fan-out) magnets.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_INPUT = R"doc(Symbol used for input iNML cells.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_INVERTER_MAGNET = R"doc(Symbol used for inverter magnets.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_NORMAL = R"doc(Symbol used for normal iNML cells.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_OUTPUT = R"doc(Symbol used for output iNML cells.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_SLANTED_EDGE_DOWN_MAGNET = R"doc(Symbol used for lower slanted edge magnets.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET = R"doc(Symbol used for upper slanted edge magnets.)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_inml_technology = R"doc()doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_crosswire_magnet =
+R"doc(Checks whether the given cell type is a crosswire magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::CROSSWIRE_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_empty_cell =
+R"doc(Checks whether the given cell type is empty.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_fanout_coupler_magnet =
+R"doc(Checks whether the given cell type is a fanout coupler magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::FANOUT_COUPLER_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_input_cell =
+R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_inverter_magnet =
+R"doc(Checks whether the given cell type is an inverter magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INVERTER_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_normal_cell =
+R"doc(Checks whether the given cell type is a normal cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_normal_cell_mode =
+R"doc(Checks whether the given cell mode is the normal mode. iNML cells do
+not have modes, so this always holds.
+
+Returns:
+    `true`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_output_cell =
+R"doc(Checks whether the given cell type is an output cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_slanted_edge_down_magnet =
+R"doc(Checks whether the given cell type is a down-slanted edge magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_slanted_edge_magnet =
+R"doc(Checks whether the given cell type is a slanted edge magnet, i.e.,
+either up- or down-slanted.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET` or
+    `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
+
+)doc";
+
+static const char *mkd_doc_fiction_inml_inml_technology_is_slanted_edge_up_magnet =
+R"doc(Checks whether the given cell type is an up-slanted edge magnet.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET`.
+
+)doc";
+
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_bb = R"doc()doc";
@@ -791,163 +947,6 @@ Returns:
     Number of magnets as counted by MagCAD.
 
 )doc";
-
-static const char *mkd_doc_fiction_inml_technology =
-R"doc(in-plane Nanomagnet Logic (iNML) technology implementation of the FCN
-concept.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_mode = R"doc(iNML cells do not have modes.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type = R"doc(Possible types of iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_CROSSWIRE_MAGNET = R"doc(Symbol used for cross-wire magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_EMPTY = R"doc(Symbol used for empty iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_FANOUT_COUPLER_MAGNET = R"doc(Symbol used for coupler (fan-out) magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_INPUT = R"doc(Symbol used for input iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_INVERTER_MAGNET = R"doc(Symbol used for inverter magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_NORMAL = R"doc(Symbol used for normal iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_OUTPUT = R"doc(Symbol used for output iNML cells.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_SLANTED_EDGE_DOWN_MAGNET = R"doc(Symbol used for lower slanted edge magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET = R"doc(Symbol used for upper slanted edge magnets.)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_crosswire_magnet =
-R"doc(Checks whether the given cell type is a crosswire magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::CROSSWIRE_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_fanout_coupler_magnet =
-R"doc(Checks whether the given cell type is a fanout coupler magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::FANOUT_COUPLER_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::INPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_inverter_magnet =
-R"doc(Checks whether the given cell type is an inverter magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::INVERTER_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode. iNML cells do
-not have modes, so this always holds.
-
-Returns:
-    `true`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_down_magnet =
-R"doc(Checks whether the given cell type is a down-slanted edge magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_magnet =
-R"doc(Checks whether the given cell type is a slanted edge magnet, i.e.,
-either up- or down-slanted.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET` or
-    `cell_type::SLANTED_EDGE_DOWN_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_is_slanted_edge_up_magnet =
-R"doc(Checks whether the given cell type is an up-slanted edge magnet.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::SLANTED_EDGE_UP_MAGNET`.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_technology_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_inml_topolinano_library =
 R"doc(A concrete FCN gate library as used in \"ToPoliNano\"
@@ -8008,8 +8007,7 @@ R"doc(Applies a gate library to a given gate-level layout and, thereby,
 creates and returns a cell-level layout. The gate library type should
 provide all functions specified in gate_library. It is, thus, easiest
 to extend gate_library to implement a new gate library. Examples are
-`qca_one_library`, `topolinano_library`, and
-`sidb::libraries::bestagon_library`.
+`qca_one_library`, `topolinano_library`, and `sidb::bestagon_library`.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
@@ -8035,7 +8033,7 @@ and defect locations onto a defect surface. The gate library type
 should provide all functions specified in gate_library. It is, thus,
 easiest to extend gate_library to implement a new gate library.
 Examples are `qca_one_library`, `topolinano_library`, and
-`sidb::libraries::bestagon_library`.
+`sidb::bestagon_library`.
 
 May pass through, and thereby throw, an
 `unsupported_gate_type_exception` or an
@@ -14092,7 +14090,7 @@ static const char *mkd_doc_fiction_qca_io_write_qca_layout_params = R"doc(Parame
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology =
+static const char *mkd_doc_fiction_qca_mol_qca_technology =
 R"doc(Molecular Quantum-dot Cellular Automata (molQCA) technology
 implementation of the FCN concept.
 
@@ -14101,7 +14099,7 @@ The helper predicates below keep phase handling centralized for
 writers and gate libraries that need to translate cell symbols into
 simulator-specific metadata.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_clock_number =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_clock_number =
 R"doc(Returns the SCERPA clock number encoded by a molQCA normal cell type.
 
 Non-normal cell types do not encode a clock phase and are mapped to
@@ -14115,45 +14113,45 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mark_EMPTY = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark_EMPTY = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mark_INPUT = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark_INPUT = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mark_OUTPUT = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mark_OUTPUT = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mode = R"doc(Possible cell modes for molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode = R"doc(Possible cell modes for molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mode_CROSSOVER = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mode_NORMAL = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_NORMAL = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mode_ROTATED = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_ROTATED = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_mode_VERTICAL = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_mode_VERTICAL = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type = R"doc(Possible types of molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type = R"doc(Possible types of molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_EMPTY = R"doc(Symbol used for empty molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_INPUT = R"doc(Symbol used for input molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_INPUT = R"doc(Symbol used for input molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking 0.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL1 = R"doc(Symbol used for normal molQCA cells with clocking 0.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking 1.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL2 = R"doc(Symbol used for normal molQCA cells with clocking 1.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking 2.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL3 = R"doc(Symbol used for normal molQCA cells with clocking 2.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking 3.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_NORMAL4 = R"doc(Symbol used for normal molQCA cells with clocking 3.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_cell_type_OUTPUT = R"doc(Symbol used for output molQCA cells.)doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output molQCA cells.)doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_const_0_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_const_0_cell =
 R"doc(Checks whether the given cell type is a constant-0 input cell.
 
 Args:
@@ -14164,7 +14162,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_const_1_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_const_1_cell =
 R"doc(Checks whether the given cell type is a constant-1 input cell.
 
 Args:
@@ -14175,7 +14173,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_constant_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_constant_cell =
 R"doc(Checks whether the given cell type is a constant input cell, i.e.,
 either `CONST_0` or `CONST_1`.
 
@@ -14187,7 +14185,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_crossover_cell_mode =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_crossover_cell_mode =
 R"doc(Checks whether the given cell mode is the crossover mode.
 
 Args:
@@ -14198,7 +14196,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_empty_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_empty_cell =
 R"doc(Checks whether the given cell type is empty.
 
 Args:
@@ -14209,7 +14207,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_input_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_input_cell =
 R"doc(Checks whether the given cell type is an input cell.
 
 Args:
@@ -14220,7 +14218,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_normal_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell =
 R"doc(Checks whether the given cell type is a normal cell, i.e., any of the
 four clocking phases.
 
@@ -14233,7 +14231,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_normal_cell1 =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell1 =
 R"doc(Checks whether the given cell type is a normal cell with clocking 0.
 
 Args:
@@ -14244,7 +14242,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_normal_cell2 =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell2 =
 R"doc(Checks whether the given cell type is a normal cell with clocking 1.
 
 Args:
@@ -14255,7 +14253,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_normal_cell3 =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell3 =
 R"doc(Checks whether the given cell type is a normal cell with clocking 2.
 
 Args:
@@ -14266,7 +14264,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_normal_cell4 =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell4 =
 R"doc(Checks whether the given cell type is a normal cell with clocking 3.
 
 Args:
@@ -14277,7 +14275,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_normal_cell_mode =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_normal_cell_mode =
 R"doc(Checks whether the given cell mode is the normal mode.
 
 Args:
@@ -14288,7 +14286,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_output_cell =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_output_cell =
 R"doc(Checks whether the given cell type is an output cell.
 
 Args:
@@ -14299,7 +14297,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_rotated_cell_mode =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_rotated_cell_mode =
 R"doc(Checks whether the given cell mode is the rotated mode.
 
 Args:
@@ -14310,7 +14308,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_is_vertical_cell_mode =
+static const char *mkd_doc_fiction_qca_mol_qca_technology_is_vertical_cell_mode =
 R"doc(Checks whether the given cell mode is the vertical mode.
 
 Args:
@@ -14321,7 +14319,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_mol_technology_mol_technology = R"doc()doc";
+static const char *mkd_doc_fiction_qca_mol_qca_technology_mol_qca_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_qca_one_library =
 R"doc(A concrete FCN gate library based on QCA ONE proposed in \"A
@@ -14369,6 +14367,166 @@ Returns:
     cells, etc.
 
 )doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology =
+R"doc(Quantum-dot Cellular Automata (QCA) technology implementation of the
+FCN concept.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mark_EMPTY = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mark_INPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mark_OUTPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mode = R"doc(Possible cell modes for QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_NORMAL = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_ROTATED = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_mode_VERTICAL = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type = R"doc(Possible types of QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type_INPUT = R"doc(Symbol used for input QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type_NORMAL = R"doc(Symbol used for normal QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output QCA cells.)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_const_0_cell =
+R"doc(Checks whether the given cell type is a constant-0 input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::CONST_0`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_const_1_cell =
+R"doc(Checks whether the given cell type is a constant-1 input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::CONST_1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_constant_cell =
+R"doc(Checks whether the given cell type is a constant input cell, i.e.,
+either `CONST_0` or `CONST_1`.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_crossover_cell_mode =
+R"doc(Checks whether the given cell mode is the crossover mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::CROSSOVER`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_empty_cell =
+R"doc(Checks whether the given cell type is empty.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_input_cell =
+R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_normal_cell =
+R"doc(Checks whether the given cell type is a normal cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_normal_cell_mode =
+R"doc(Checks whether the given cell mode is the normal mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::NORMAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_output_cell =
+R"doc(Checks whether the given cell type is an output cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_rotated_cell_mode =
+R"doc(Checks whether the given cell mode is the rotated mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::ROTATED`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_is_vertical_cell_mode =
+R"doc(Checks whether the given cell mode is the vertical mode.
+
+Args:
+    m: Cell mode to check.
+
+Returns:
+    `true` iff `m` is `cell_mode::VERTICAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_qca_technology_qca_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_sim7_mol_library =
 R"doc(SIM(7)-MolPDK molecular QCA gate library.
@@ -14452,165 +14610,116 @@ Returns:
 
 static const char *mkd_doc_fiction_qca_sim7_mol_library_sim7_mol_library = R"doc(Deleted constructor to prevent instantiation.)doc";
 
-static const char *mkd_doc_fiction_qca_technology =
-R"doc(Quantum-dot Cellular Automata (QCA) technology implementation of the
-FCN concept.)doc";
+static const char *mkd_doc_fiction_sidb_bestagon_library =
+R"doc(A gate library for the SiDB technology that is based on Y-shaped gates
+in hexagonal tiles. Y-shaped gates have been first introduced in
+\"Binary Atomic Silicon Logic\" by Taleana Huff, Hatem Labidi,
+Mohammad Rashidi, Lucian Livadaru, Thomas Dienel, Roshan Achal, Wyatt
+Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018.
+The Bestagon library was later proposed in \"Hexagons are the
+Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
+Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in
+Design Automation Conference 2022. The goal of the Bestagon library is
+to be as close to physically realizable SiDB circuits as possible by
+taking fabrication limitations of, e.g., clocking electrodes into
+account while also relying on established gate shape. Thus, the
+hexagonal tiles in the Bestagon library are quite large with a lot of
+free space to avoid unwanted gate interactions. The Bestagon library
+is intended for hexagonal, pointy-top layouts that are clocked with a
+row-based clocking scheme, i.e., where the information flow direction
+is north to south.)doc";
 
-static const char *mkd_doc_fiction_qca_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+static const char *mkd_doc_fiction_sidb_bestagon_library_bestagon_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_qca_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mode = R"doc(Possible cell modes for QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mode_CROSSOVER = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mode_NORMAL = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mode_ROTATED = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_mode_VERTICAL = R"doc()doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type = R"doc(Possible types of QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type_CONST_0 = R"doc(Symbol used for constant 0 input QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type_CONST_1 = R"doc(Symbol used for constant 1 input QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type_EMPTY = R"doc(Symbol used for empty QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type_INPUT = R"doc(Symbol used for input QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type_NORMAL = R"doc(Symbol used for normal QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_cell_type_OUTPUT = R"doc(Symbol used for output QCA cells.)doc";
-
-static const char *mkd_doc_fiction_qca_technology_is_const_0_cell =
-R"doc(Checks whether the given cell type is a constant-0 input cell.
+static const char *mkd_doc_fiction_sidb_bestagon_library_determine_port_routing =
+R"doc(Determines the port directions of a given tile.
 
 Args:
-    c: Cell type to check.
+    lyt: Given tile `t` for which the port directions are determined.
+
+Template Args:
+    GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    `true` iff `c` is `cell_type::CONST_0`.
+    port directions of the given tile are returned as `port_list`.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_const_1_cell =
-R"doc(Checks whether the given cell type is a constant-1 input cell.
+static const char *mkd_doc_fiction_sidb_bestagon_library_get_functional_implementations =
+R"doc(Returns a map of all gate functions supported by the library and their
+respectively possible implementations.
 
-Args:
-    c: Cell type to check.
+This is an optional interface function that is required by some
+algorithms.
 
 Returns:
-    `true` iff `c` is `cell_type::CONST_1`.
+    Map of all gate functions supported by the library and their
+    respective implementations as Bestagon gates.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_constant_cell =
-R"doc(Checks whether the given cell type is a constant input cell, i.e.,
-either `CONST_0` or `CONST_1`.
+static const char *mkd_doc_fiction_sidb_bestagon_library_get_gate_ports =
+R"doc(Returns a map of all different gate implementations and their
+respective port information.
 
-Args:
-    c: Cell type to check.
+This is an optional interface function that is required by some
+algorithms.
 
 Returns:
-    `true` iff `c` is `cell_type::CONST_0` or `cell_type::CONST_1`.
+    Map of all different gate implementations and their respective
+    port information.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_crossover_cell_mode =
-R"doc(Checks whether the given cell mode is the crossover mode.
+static const char *mkd_doc_fiction_sidb_bestagon_library_set_up_gate =
+R"doc(Overrides the corresponding function in gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to choose the correct fcn_gate representation for
+that tile. May it be a gate or wires. Rotation and special marks like
+input and output, const cells etc. are computed additionally.
 
 Args:
-    m: Cell mode to check.
+    lyt: Layout that hosts tile `t`.
+    t: Tile to be realized as a Bestagon gate.
+
+Template Args:
+    GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    `true` iff `m` is `cell_mode::CROSSOVER`.
+    Bestagon gate representation of `t` including mirroring.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
+static const char *mkd_doc_fiction_sidb_gate_design_exception =
+R"doc(This exception is thrown when an error occurs during the design of an
+SiDB gate. It provides information about the tile, truth table, and
+port list associated with the error.
+
+Template Args:
+    TT: The type representing the truth table.
+    GateLyt: The type representing the gate-level layout.)doc";
+
+static const char *mkd_doc_fiction_sidb_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
+
+static const char *mkd_doc_fiction_sidb_gate_design_exception_gate_design_exception =
+R"doc(Constructor for the gate_design_exception class.
 
 Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
+    ti: The tile associated with the error.
+    spec: The truth table associated with the error.
+    portlist: The port list associated with the error.
 
 )doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
+static const char *mkd_doc_fiction_sidb_gate_design_exception_p = R"doc(The port list associated with the error.)doc";
 
-Args:
-    c: Cell type to check.
+static const char *mkd_doc_fiction_sidb_gate_design_exception_truth_table = R"doc(The truth table associated with the error.)doc";
 
-Returns:
-    `true` iff `c` is `cell_type::INPUT`.
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_port_list = R"doc(Get the port list associated with the exception.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile = R"doc(Get the tile associated with the exception.)doc";
 
-static const char *mkd_doc_fiction_qca_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_technology_is_rotated_cell_mode =
-R"doc(Checks whether the given cell mode is the rotated mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::ROTATED`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_technology_is_vertical_cell_mode =
-R"doc(Checks whether the given cell mode is the vertical mode.
-
-Args:
-    m: Cell mode to check.
-
-Returns:
-    `true` iff `m` is `cell_mode::VERTICAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_qca_technology_technology = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
@@ -15789,379 +15898,6 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_libraries_bestagon_library =
-R"doc(A gate library for the SiDB technology that is based on Y-shaped gates
-in hexagonal tiles. Y-shaped gates have been first introduced in
-\"Binary Atomic Silicon Logic\" by Taleana Huff, Hatem Labidi,
-Mohammad Rashidi, Lucian Livadaru, Thomas Dienel, Roshan Achal, Wyatt
-Vine, Jason Pitters, and Robert A. Wolkow in Nature Electronics 2018.
-The Bestagon library was later proposed in \"Hexagons are the
-Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
-Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert Wille in
-Design Automation Conference 2022. The goal of the Bestagon library is
-to be as close to physically realizable SiDB circuits as possible by
-taking fabrication limitations of, e.g., clocking electrodes into
-account while also relying on established gate shape. Thus, the
-hexagonal tiles in the Bestagon library are quite large with a lot of
-free space to avoid unwanted gate interactions. The Bestagon library
-is intended for hexagonal, pointy-top layouts that are clocked with a
-row-based clocking scheme, i.e., where the information flow direction
-is north to south.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_bestagon_library_bestagon_library = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_bestagon_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Given tile `t` for which the port directions are determined.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
-Returns:
-    port directions of the given tile are returned as `port_list`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_bestagon_library_get_functional_implementations =
-R"doc(Returns a map of all gate functions supported by the library and their
-respectively possible implementations.
-
-This is an optional interface function that is required by some
-algorithms.
-
-Returns:
-    Map of all gate functions supported by the library and their
-    respective implementations as Bestagon gates.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_bestagon_library_get_gate_ports =
-R"doc(Returns a map of all different gate implementations and their
-respective port information.
-
-This is an optional interface function that is required by some
-algorithms.
-
-Returns:
-    Map of all different gate implementations and their respective
-    port information.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_bestagon_library_set_up_gate =
-R"doc(Overrides the corresponding function in gate_library. Given a tile
-`t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
-
-Args:
-    lyt: Layout that hosts tile `t`.
-    t: Tile to be realized as a Bestagon gate.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
-Returns:
-    Bestagon gate representation of `t` including mirroring.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception =
-R"doc(This exception is thrown when an error occurs during the design of an
-SiDB gate. It provides information about the tile, truth table, and
-port list associated with the error.
-
-Template Args:
-    TT: The type representing the truth table.
-    GateLyt: The type representing the gate-level layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_error_tile = R"doc(The tile associated with the error.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_gate_design_exception =
-R"doc(Constructor for the gate_design_exception class.
-
-Args:
-    ti: The tile associated with the error.
-    spec: The truth table associated with the error.
-    portlist: The port list associated with the error.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_p = R"doc(The port list associated with the error.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_truth_table = R"doc(The truth table associated with the error.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_which_port_list = R"doc(Get the port list associated with the exception.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_which_tile = R"doc(Get the tile associated with the exception.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library =
-R"doc(A parameterized gate library for SiDB technology. It allows the design
-of SiDB gates tailored to given atomic defects, thus enabling the
-design of SiDB circuits in the presence of atomic defects. The
-skeleton (i.e., the pre-defined input and output wires) are hexagonal
-in shape.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_add_defect_to_skeleton =
-R"doc(This function takes a defect surface and a skeleton skeleton and adds
-defects from the surrounding area to the skeleton. The defects within
-a specified distance from the center cell are taken into account. The
-resulting skeleton with added defects is returned.
-
-Args:
-    skeleton: The skeleton to which defects will be added.
-    center_cell: The coordinates of the center cell.
-    absolute_cell: The coordinates of the skeleton's absolute cell.
-    parameters: Parameters for defect handling.
-
-Template Args:
-    CellLyt: SiDB defect surface type.
-    Params: Type of Parameters.
-
-Returns:
-    The updated skeleton with added defects from the surrounding area.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_cell_level_layout_to_list =
-R"doc(Generates a cell-level layout as a 2D array of characters based on the
-provided cell layout information.
-
-Args:
-    lyt: Cell-level layout
-
-Template Args:
-    Lyt: Cell-level layout type.
-
-Returns:
-    A 2D array of characters representing the cell-level layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_cell_list_to_cell_level_layout =
-R"doc(The function generates a layout where each cell is assigned a specific
-cell type according to the characters in the cell list/input grid.
-
-Args:
-    cell_list: A 2D grid representing the cells and their types.
-
-Template Args:
-    Lyt: The type of the cell-level layout to be generated.
-
-Returns:
-    The cell-level layout with assigned cell types.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_design_gate =
-R"doc(This function designs an SiDB gate for a given Boolean function at a
-given tile and a given rotation. If atomic defects exist, they are
-incorporated into the design process.
-
-An exception is thrown in case there is no possible gate design.
-
-Args:
-    skeleton: Skeleton with atomic defects if available.
-    spec: Expected Boolean function of the layout given as a multi-
-          output truth table.
-    parameters: Parameters for the SiDB gate design process.
-    p: The list of ports and their directions.
-    tile: The specific tile on which the gate should be designed.
-
-Template Args:
-    LytSkeleton: The cell-level layout of the skeleton.
-    TT: Truth table type.
-    CellLyt: The cell-level layout.
-    GateLyt: The gate-level layout.
-
-Returns:
-    An `fcn_gate` object.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Given tile `t` for which the port directions are determined.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
-Returns:
-    port directions of the given tile are returned as `port_list`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_is_predefined_bestagon_gate_applicable =
-R"doc(This function evaluates whether a predefined Bestagon gate can be
-applied to the given node by considering various conditions, including
-the presence of defects and spacing requirements.
-
-Args:
-    bestagon_lyt: The Bestagon gate which is to be applied.
-    skeleton_with_defects: The skeleton layout with atomic defects.
-    truth_table: The truth table representing the gate's logic
-                 function.
-    parameters: Parameters for the gate design and simulation.
-
-Template Args:
-    CellLyt: SiDB defect surface type.
-    TT: Truth table type.
-    Params: Type of the parameters used for the parametrized gate
-            library.
-
-Returns:
-    `true` if the Bestagon gate is applicable to the layout,
-    considering the provided conditions; otherwise, returns `false`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_on_the_fly_gate_library = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params =
-R"doc(This struct encapsulates parameters for the parameterized SiDB gate
-library.
-
-Template Args:
-    CellType: SiDB cell type.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
-R"doc(This variable defines the number of canvas SiDBs dedicated to complex
-gates, such as crossing, double wire, and half-adder.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_complex_gate_design_policy =
-R"doc(This struct represents the policy for complex (i.e., crossing, double
-wire, half-adder) gate design.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY = R"doc(Design complex gates on-the-fly.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED = R"doc(Use predefined complex gates if possible.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_influence_radius_charged_defects =
-R"doc(This variable specifies the radius in nanometers around the center of
-the hexagon where atomic defects are incorporated into the gate
-design.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_params_using_predefined_crossing_and_double_wire_if_possible = R"doc(This variable specifies the policy for complex gate design.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_on_the_fly_gate_library_set_up_gate =
-R"doc(Overrides the corresponding function in gate_library. Given a tile
-`t`, this function takes all necessary information from the stored
-grid into account to design the correct fcn_gate representation for
-that tile. In case there is no possible SiDB design, the blacklist is
-updated and an error fcn gate is returned.
-
-Args:
-    lyt: Layout that hosts tile `t`.
-    t: Tile to be realized as a Bestagon gate.
-    parameters: Parameter to design SiDB gates.
-    defect_surface: Optional atomic defect surface in case atomic
-                    defects are present.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-    CellLyt: SiDB cell-level layout type.
-    Params: Type of the parameter used for the gate library.
-
-Returns:
-    Bestagon gate representation of `t` including mirroring.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_skeleton_bestagon_library =
-R"doc(This library contains SiDB I/O wires designed for both 1- and 2-input
-functions. Each wire comprises 2 BDL pairs. The library contains all
-mirrored versions, a double wire and a crossing.)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_skeleton_bestagon_library_determine_port_routing =
-R"doc(Determines the port directions of a given tile.
-
-Args:
-    lyt: Given tile `t` for which the port directions are determined.
-
-Template Args:
-    GateLyt: Pointy-top hexagonal gate-level layout type.
-
-Returns:
-    port directions of the given tile are returned as `port_list`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_skeleton_bestagon_library_get_functional_implementations =
-R"doc(Returns a map of all gate functions supported by the library and their
-respectively possible implementations.
-
-This is an optional interface function that is required by some
-algorithms.
-
-Returns:
-    Map of all gate functions supported by the library and their
-    respective implementations as Bestagon skeletons.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_skeleton_bestagon_library_get_gate_ports =
-R"doc(Returns a map of all different gate implementations and their
-respective port information.
-
-This is an optional interface function that is required by some
-algorithms.
-
-Returns:
-    Map of all different gate implementations and their respective
-    port information.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_skeleton_bestagon_library_skeleton_bestagon_library = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_libraries_surface_analysis =
-R"doc(Analyzes a given defective SiDB surface and matches it against gate
-tiles provided by a library. Any gate type that cannot be realized on
-a certain tile due to disturbances caused by defects gets blacklisted
-on said tile. The black list is then returned by this function.
-
-Args:
-    gate_lyt: Gate-level layout instance that specifies the aspect
-              ratio.
-    surface: SiDB surface that instantiates the defects.
-    charged_defect_spacing_overwrite: Override the default influence
-                                      distance of charged atomic
-                                      defects on SiDBs with an
-                                      optional pair of horizontal and
-                                      vertical distances.
-    neutral_defect_spacing_overwrite: Override the default influence
-                                      distance of neutral atomic
-                                      defects on SiDBs with an
-                                      optional pair of horizontal and
-                                      vertical distances.
-
-Template Args:
-    GateLibrary: FCN gate library type to fetch the gate descriptions
-                 from.
-    GateLyt: Gate-level layout type that specifies the tiling of the
-             SiDB surface.
-    CellLyt: SiDB cell-level layout type that is underlying to the
-             SiDB defect surface.
-
-Returns:
-    A black list of gate functions associated with tiles.
-
-Note:
-    The given gate library must implement both the
-    `get_functional_implementations()` and `get_gate_ports()`
-    functions.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
 
 static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
@@ -17335,6 +17071,182 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library =
+R"doc(A parameterized gate library for SiDB technology. It allows the design
+of SiDB gates tailored to given atomic defects, thus enabling the
+design of SiDB circuits in the presence of atomic defects. The
+skeleton (i.e., the pre-defined input and output wires) are hexagonal
+in shape.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_add_defect_to_skeleton =
+R"doc(This function takes a defect surface and a skeleton skeleton and adds
+defects from the surrounding area to the skeleton. The defects within
+a specified distance from the center cell are taken into account. The
+resulting skeleton with added defects is returned.
+
+Args:
+    skeleton: The skeleton to which defects will be added.
+    center_cell: The coordinates of the center cell.
+    absolute_cell: The coordinates of the skeleton's absolute cell.
+    parameters: Parameters for defect handling.
+
+Template Args:
+    CellLyt: SiDB defect surface type.
+    Params: Type of Parameters.
+
+Returns:
+    The updated skeleton with added defects from the surrounding area.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_cell_level_layout_to_list =
+R"doc(Generates a cell-level layout as a 2D array of characters based on the
+provided cell layout information.
+
+Args:
+    lyt: Cell-level layout
+
+Template Args:
+    Lyt: Cell-level layout type.
+
+Returns:
+    A 2D array of characters representing the cell-level layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_cell_list_to_cell_level_layout =
+R"doc(The function generates a layout where each cell is assigned a specific
+cell type according to the characters in the cell list/input grid.
+
+Args:
+    cell_list: A 2D grid representing the cells and their types.
+
+Template Args:
+    Lyt: The type of the cell-level layout to be generated.
+
+Returns:
+    The cell-level layout with assigned cell types.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_design_gate =
+R"doc(This function designs an SiDB gate for a given Boolean function at a
+given tile and a given rotation. If atomic defects exist, they are
+incorporated into the design process.
+
+An exception is thrown in case there is no possible gate design.
+
+Args:
+    skeleton: Skeleton with atomic defects if available.
+    spec: Expected Boolean function of the layout given as a multi-
+          output truth table.
+    parameters: Parameters for the SiDB gate design process.
+    p: The list of ports and their directions.
+    tile: The specific tile on which the gate should be designed.
+
+Template Args:
+    LytSkeleton: The cell-level layout of the skeleton.
+    TT: Truth table type.
+    CellLyt: The cell-level layout.
+    GateLyt: The gate-level layout.
+
+Returns:
+    An `fcn_gate` object.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_determine_port_routing =
+R"doc(Determines the port directions of a given tile.
+
+Args:
+    lyt: Given tile `t` for which the port directions are determined.
+
+Template Args:
+    GateLyt: Pointy-top hexagonal gate-level layout type.
+
+Returns:
+    port directions of the given tile are returned as `port_list`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_is_predefined_bestagon_gate_applicable =
+R"doc(This function evaluates whether a predefined Bestagon gate can be
+applied to the given node by considering various conditions, including
+the presence of defects and spacing requirements.
+
+Args:
+    bestagon_lyt: The Bestagon gate which is to be applied.
+    skeleton_with_defects: The skeleton layout with atomic defects.
+    truth_table: The truth table representing the gate's logic
+                 function.
+    parameters: Parameters for the gate design and simulation.
+
+Template Args:
+    CellLyt: SiDB defect surface type.
+    TT: Truth table type.
+    Params: Type of the parameters used for the parametrized gate
+            library.
+
+Returns:
+    `true` if the Bestagon gate is applicable to the layout,
+    considering the provided conditions; otherwise, returns `false`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_on_the_fly_gate_library = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params =
+R"doc(This struct encapsulates parameters for the parameterized SiDB gate
+library.
+
+Template Args:
+    CellType: SiDB cell type.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_canvas_sidb_complex_gates =
+R"doc(This variable defines the number of canvas SiDBs dedicated to complex
+gates, such as crossing, double wire, and half-adder.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy =
+R"doc(This struct represents the policy for complex (i.e., crossing, double
+wire, half-adder) gate design.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_DESIGN_ON_THE_FLY = R"doc(Design complex gates on-the-fly.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_complex_gate_design_policy_USING_PREDEFINED = R"doc(Use predefined complex gates if possible.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_design_gate_params = R"doc(This struct holds parameters to design SiDB gates.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_influence_radius_charged_defects =
+R"doc(This variable specifies the radius in nanometers around the center of
+the hexagon where atomic defects are incorporated into the gate
+design.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_using_predefined_crossing_and_double_wire_if_possible = R"doc(This variable specifies the policy for complex gate design.)doc";
+
+static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_set_up_gate =
+R"doc(Overrides the corresponding function in gate_library. Given a tile
+`t`, this function takes all necessary information from the stored
+grid into account to design the correct fcn_gate representation for
+that tile. In case there is no possible SiDB design, the blacklist is
+updated and an error fcn gate is returned.
+
+Args:
+    lyt: Layout that hosts tile `t`.
+    t: Tile to be realized as a Bestagon gate.
+    parameters: Parameter to design SiDB gates.
+    defect_surface: Optional atomic defect surface in case atomic
+                    defects are present.
+
+Template Args:
+    GateLyt: Pointy-top hexagonal gate-level layout type.
+    CellLyt: SiDB cell-level layout type.
+    Params: Type of the parameter used for the gate library.
+
+Returns:
+    Bestagon gate representation of `t` including mirroring.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_primitives = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_primitives_2 = R"doc()doc";
@@ -17486,6 +17398,101 @@ static const char *mkd_doc_fiction_sidb_primitives_lattice_100_lattice_100 = R"d
 static const char *mkd_doc_fiction_sidb_primitives_lattice_111 = R"doc(H-Si(111)-1x1 surface.)doc";
 
 static const char *mkd_doc_fiction_sidb_primitives_lattice_111_lattice_111 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology =
+R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
+concept.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_EMPTY = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_INPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_LOGIC = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mark_OUTPUT = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_mode = R"doc(SiDB cells do not have modes.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type = R"doc(Possible types of SiDB cells.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_EMPTY = R"doc(Symbol used for empty SiDB cells.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_INPUT = R"doc(Symbol used for input SiDB cells.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_LOGIC = R"doc(Symbol used for logic SiDB cells (e.g. canvas SiDBs).)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_NORMAL = R"doc(Symbol used for normal SiDB cells.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_cell_type_OUTPUT = R"doc(Symbol used for output SiDB cells.)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_is_empty_cell =
+R"doc(Checks whether the given cell type is empty.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::EMPTY`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_is_input_cell =
+R"doc(Checks whether the given cell type is an input cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::INPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_is_logic_cell =
+R"doc(Checks whether the given cell type is a logic cell (e.g., a canvas
+SiDB).
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::LOGIC`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_is_normal_cell =
+R"doc(Checks whether the given cell type is a normal cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::NORMAL`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_is_normal_cell_mode =
+R"doc(Checks whether the given cell mode is the normal mode. SiDB cells do
+not have modes, so this always holds.
+
+Returns:
+    `true`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_is_output_cell =
+R"doc(Checks whether the given cell type is an output cell.
+
+Args:
+    c: Cell type to check.
+
+Returns:
+    `true` iff `c` is `cell_type::OUTPUT`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_sidb_technology_sidb_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience =
 R"doc(Calculates the band bending resilience. This is the minimum
@@ -20765,136 +20772,6 @@ R"doc(*QuickExact* is also an exact simulation engine that requires
 exponential runtime, but it scales a lot better than ExGS due to its
 effective search-space pruning.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_generic_can_positive_charges_occur =
-R"doc(This algorithm determines if positively charged SiDBs can occur in a
-given SiDB cell-level layout due to strong electrostatic interaction.
-
-Args:
-    lyt: The layout to be analyzed.
-    sim_params: Physical parameters used to determine whether
-                positively charged SiDBs can occur.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_generic_is_ground_state =
-R"doc(This function checks if the elstrostatic ground state of an SiDB
-layout is found by a heuristic for the physical simulation (e.g.,
-*QuickSim* or *SimAnneal*).
-
-Args:
-    heuristic_results: Simulation results obtained from a heuristic
-                       physical simulation.
-    exact_results: Simulation results obtained from an exact physical
-                   simulation.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Returns `true` if the ground state is contained in the simulation
-    result provided by the heuristic physical simulation. `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_generic_minimum_energy =
-R"doc(Computes the minimum energy of a range of
-`charge_distribution_surface` objects. If the range is empty, infinity
-is returned to indicate no valid energy value exists.
-
-Args:
-    first: Begin of the range to examine.
-    last: End of the range to examine.
-
-Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
-
-Returns:
-    Value of the minimum energy found in the input range (unit: eV),
-    or `std::numeric_limits<double>::infinity()` if the range is
-    empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_generic_minimum_energy_distribution =
-R"doc(Returns an iterator to the charge distribution of minimum energy
-contained in a range of `charge_distribution_surface` objects. If the
-range is empty, `last` is returned.
-
-Args:
-    first: Begin of the range to examine.
-    last: End of the range to examine.
-
-Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
-
-Returns:
-    Iterator to the minimum energy charge distribution found in the
-    input range, or `last` if the range is empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_generic_physically_valid_parameters =
-R"doc(This function computes the physical parameters necessary for ensuring
-the physical validity of a given charge distribution and determines
-the corresponding excited state number. The ground state is denoted by
-zero, with each subsequent excited state incrementally numbered.
-
-This function is designed to derive the physical parameters from
-charge distribution measurements of SiDB layouts, often acquired
-through Atomic Force Microscopy (AFM). Given a specific charge
-distribution, the function typically yields several physically valid
-parameters.
-
-As more SiDB layouts with corresponding charge distributions are
-recorded, the number of physically valid parameters for all layouts
-decreases. Consequently, this enables a more precise determination of
-the physical parameters present on the surface.
-
-Args:
-    cds: The charge distribution surface for which physical parameters
-         are to be determined.
-    params: Operational domain parameters.
-
-Template Args:
-    Lyt: The charge distribution surface type.
-
-Returns:
-    Physically valid parameters with the corresponding excited state
-    number of the given charge distribution surface for each parameter
-    point.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_generic_potential_to_distance_conversion =
-R"doc(The electrostatic potential on hydrogen-passivated silicon is
-typically modeled using a screened Coulomb potential. This
-electrostatic potential is commonly employed to determine the
-electrostatic potential for a given distance (between SiDB and point
-under consideration) and given physical parameters. However, the
-function provided here serves the inverse purpose by calculating the
-distance for a given potential and given physical parameters.
-
-Args:
-    params: The physical parameters for a given hydrogen-passivated
-            silicon surface.
-    potential: The electrostatic potential (unit: V) to be converted
-               to a distance.
-    precision: The precision level for the conversion, specifying the
-               number of decimal places.
-
-Returns:
-    The distance (unit: nm) corresponding to the given electrostatic
-    potential.
-
-Note:
-    Runtime depends exponentially on the provided precision.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_get_engine =
 R"doc(Returns a simulation engine by name.
 
@@ -21472,8 +21349,8 @@ wire.
 
 Args:
     t: Type of BDL pair to search for
-       (`sidb::technology::cell_type::INPUT`,
-       `sidb::technology::cell_type::OUTPUT`, etc.).
+       (`sidb::sidb_technology::cell_type::INPUT`,
+       `sidb::sidb_technology::cell_type::OUTPUT`, etc.).
 
 Returns:
     Optional containing the first BDL pair with the specified type
@@ -23842,6 +23719,20 @@ static const char *mkd_doc_fiction_sidb_simulation_result_sim_params = R"doc(Phy
 
 static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_utils_can_positive_charges_occur =
+R"doc(This algorithm determines if positively charged SiDBs can occur in a
+given SiDB cell-level layout due to strong electrostatic interaction.
+
+Args:
+    lyt: The layout to be analyzed.
+    sim_params: Physical parameters used to determine whether
+                positively charged SiDBs can occur.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_utils_check_simulation_results_for_equivalence =
 R"doc(This function compares two SiDB simulation results for equivalence.
 Two results are considered equivalent if they have the same number of
@@ -23860,6 +23751,122 @@ Template Args:
 Returns:
     `true` if the two simulation results are equivalent, `false`
     otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_utils_is_ground_state =
+R"doc(This function checks if the elstrostatic ground state of an SiDB
+layout is found by a heuristic for the physical simulation (e.g.,
+*QuickSim* or *SimAnneal*).
+
+Args:
+    heuristic_results: Simulation results obtained from a heuristic
+                       physical simulation.
+    exact_results: Simulation results obtained from an exact physical
+                   simulation.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    Returns `true` if the ground state is contained in the simulation
+    result provided by the heuristic physical simulation. `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_utils_minimum_energy =
+R"doc(Computes the minimum energy of a range of
+`charge_distribution_surface` objects. If the range is empty, infinity
+is returned to indicate no valid energy value exists.
+
+Args:
+    first: Begin of the range to examine.
+    last: End of the range to examine.
+
+Template Args:
+    InputIt: Must meet the requirements of `LegacyInputIterator`.
+
+Returns:
+    Value of the minimum energy found in the input range (unit: eV),
+    or `std::numeric_limits<double>::infinity()` if the range is
+    empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_utils_minimum_energy_distribution =
+R"doc(Returns an iterator to the charge distribution of minimum energy
+contained in a range of `charge_distribution_surface` objects. If the
+range is empty, `last` is returned.
+
+Args:
+    first: Begin of the range to examine.
+    last: End of the range to examine.
+
+Template Args:
+    InputIt: Must meet the requirements of `LegacyInputIterator`.
+
+Returns:
+    Iterator to the minimum energy charge distribution found in the
+    input range, or `last` if the range is empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_utils_physically_valid_parameters =
+R"doc(This function computes the physical parameters necessary for ensuring
+the physical validity of a given charge distribution and determines
+the corresponding excited state number. The ground state is denoted by
+zero, with each subsequent excited state incrementally numbered.
+
+This function is designed to derive the physical parameters from
+charge distribution measurements of SiDB layouts, often acquired
+through Atomic Force Microscopy (AFM). Given a specific charge
+distribution, the function typically yields several physically valid
+parameters.
+
+As more SiDB layouts with corresponding charge distributions are
+recorded, the number of physically valid parameters for all layouts
+decreases. Consequently, this enables a more precise determination of
+the physical parameters present on the surface.
+
+Args:
+    cds: The charge distribution surface for which physical parameters
+         are to be determined.
+    params: Operational domain parameters.
+
+Template Args:
+    Lyt: The charge distribution surface type.
+
+Returns:
+    Physically valid parameters with the corresponding excited state
+    number of the given charge distribution surface for each parameter
+    point.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_utils_potential_to_distance_conversion =
+R"doc(The electrostatic potential on hydrogen-passivated silicon is
+typically modeled using a screened Coulomb potential. This
+electrostatic potential is commonly employed to determine the
+electrostatic potential for a given distance (between SiDB and point
+under consideration) and given physical parameters. However, the
+function provided here serves the inverse purpose by calculating the
+distance for a given potential and given physical parameters.
+
+Args:
+    params: The physical parameters for a given hydrogen-passivated
+            silicon surface.
+    potential: The electrostatic potential (unit: V) to be converted
+               to a distance.
+    precision: The precision level for the conversion, specifying the
+               number of decimal places.
+
+Returns:
+    The distance (unit: nm) corresponding to the given electrostatic
+    potential.
+
+Note:
+    Runtime depends exponentially on the provided precision.
 
 )doc";
 
@@ -23952,100 +23959,91 @@ algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
 
-static const char *mkd_doc_fiction_sidb_technology =
-R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
-concept.)doc";
+static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library =
+R"doc(This library contains SiDB I/O wires designed for both 1- and 2-input
+functions. Each wire comprises 2 BDL pairs. The library contains all
+mirrored versions, a double wire and a crossing.)doc";
 
-static const char *mkd_doc_fiction_sidb_technology_cell_mark = R"doc(Possible marks to be applied to a cell to change its type.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_mark_EMPTY = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_mark_INPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_mark_LOGIC = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_mark_OUTPUT = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_mode = R"doc(SiDB cells do not have modes.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_type = R"doc(Possible types of SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_type_EMPTY = R"doc(Symbol used for empty SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_type_INPUT = R"doc(Symbol used for input SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_type_LOGIC = R"doc(Symbol used for logic SiDB cells (e.g. canvas SiDBs).)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_type_NORMAL = R"doc(Symbol used for normal SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_cell_type_OUTPUT = R"doc(Symbol used for output SiDB cells.)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_is_empty_cell =
-R"doc(Checks whether the given cell type is empty.
+static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_determine_port_routing =
+R"doc(Determines the port directions of a given tile.
 
 Args:
-    c: Cell type to check.
+    lyt: Given tile `t` for which the port directions are determined.
+
+Template Args:
+    GateLyt: Pointy-top hexagonal gate-level layout type.
 
 Returns:
-    `true` iff `c` is `cell_type::EMPTY`.
+    port directions of the given tile are returned as `port_list`.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_technology_is_input_cell =
-R"doc(Checks whether the given cell type is an input cell.
+static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_get_functional_implementations =
+R"doc(Returns a map of all gate functions supported by the library and their
+respectively possible implementations.
+
+This is an optional interface function that is required by some
+algorithms.
+
+Returns:
+    Map of all gate functions supported by the library and their
+    respective implementations as Bestagon skeletons.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_get_gate_ports =
+R"doc(Returns a map of all different gate implementations and their
+respective port information.
+
+This is an optional interface function that is required by some
+algorithms.
+
+Returns:
+    Map of all different gate implementations and their respective
+    port information.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_skeleton_bestagon_library = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surface_analysis =
+R"doc(Analyzes a given defective SiDB surface and matches it against gate
+tiles provided by a library. Any gate type that cannot be realized on
+a certain tile due to disturbances caused by defects gets blacklisted
+on said tile. The black list is then returned by this function.
 
 Args:
-    c: Cell type to check.
+    gate_lyt: Gate-level layout instance that specifies the aspect
+              ratio.
+    surface: SiDB surface that instantiates the defects.
+    charged_defect_spacing_overwrite: Override the default influence
+                                      distance of charged atomic
+                                      defects on SiDBs with an
+                                      optional pair of horizontal and
+                                      vertical distances.
+    neutral_defect_spacing_overwrite: Override the default influence
+                                      distance of neutral atomic
+                                      defects on SiDBs with an
+                                      optional pair of horizontal and
+                                      vertical distances.
+
+Template Args:
+    GateLibrary: FCN gate library type to fetch the gate descriptions
+                 from.
+    GateLyt: Gate-level layout type that specifies the tiling of the
+             SiDB surface.
+    CellLyt: SiDB cell-level layout type that is underlying to the
+             SiDB defect surface.
 
 Returns:
-    `true` iff `c` is `cell_type::INPUT`.
+    A black list of gate functions associated with tiles.
+
+Note:
+    The given gate library must implement both the
+    `get_functional_implementations()` and `get_gate_ports()`
+    functions.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_technology_is_logic_cell =
-R"doc(Checks whether the given cell type is a logic cell (e.g., a canvas
-SiDB).
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::LOGIC`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_is_normal_cell =
-R"doc(Checks whether the given cell type is a normal cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::NORMAL`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_is_normal_cell_mode =
-R"doc(Checks whether the given cell mode is the normal mode. SiDB cells do
-not have modes, so this always holds.
-
-Returns:
-    `true`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_is_output_cell =
-R"doc(Checks whether the given cell type is an output cell.
-
-Args:
-    c: Cell type to check.
-
-Returns:
-    `true` iff `c` is `cell_type::OUTPUT`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_technology_technology = R"doc()doc";
 
 static const char *mkd_doc_fiction_synthesis_all_2_input_functions =
 R"doc(Auxiliary function to create technology mapping parameters for AND,
