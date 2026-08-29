@@ -52,7 +52,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 # Catch2
 if(FICTION_TEST)
   set(CATCH2_VERSION
-      3.15.3
+      3.16.0
       CACHE STRING "Catch2 version")
   if(NOT DEFINED CATCH2_URL)
     set(CATCH2_URL
