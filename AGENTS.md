@@ -138,6 +138,35 @@ code comments, and error messages.
   it in a code comment at the site or in the pull request — not in the changelog.
 - Break any of these rules rather than write something unclear or imprecise.
 
+### Pull request, issue, and comment bodies
+
+Default: **one paragraph, three sentences at most** — why the change was needed, what it
+does, and the one thing a reviewer needs in order to read the diff. Six lines is the
+ceiling. The title carries the _what_; the body carries only what the title and the diff
+cannot.
+
+`.github/pull_request_template.md` mandates the sections, not their length: `## Description`
+is that one paragraph, and the checklist is ticked, not annotated. The AI-disclosure line
+required under `Git and GitHub` sits outside the ceiling.
+
+Go longer only for a reason you can name:
+
+- a decision a reviewer cannot infer from the diff, with its reason;
+- a reproduction, a measurement, or a number that makes a claim checkable.
+
+Keep out of a pull request body: a restatement of the issue, a walk through the diff file by
+file, a list of tests by name, a log of every design decision considered, a closing summary.
+That detail belongs in the commit messages, attached to the code it explains, and in the
+issue. Length reads as padding, not thoroughness.
+
+An issue body takes the same shape: the symptom, what you observed, how to reproduce it. A
+review reply or a report of review findings gets a line or two per defect, then stops.
+
+Never hard-wrap prose you type into GitHub — pull request and issue bodies, review bodies,
+thread comments and replies. One line per paragraph, per list item, and per table row; let
+GitHub reflow it. The wrap in this repository belongs to the Markdown and reStructuredText
+files in the tree, not to a web textarea.
+
 ### Documentation describes the status quo
 
 Documentation, Doxygen comments, and docstrings state what the code does now and why. They
