@@ -46,7 +46,7 @@ int main()  // NOLINT
             "op. (FF)",
             "sim calls (FF)",
             "t in s (FF)"  // Flood Fill
-        };
+    };
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};

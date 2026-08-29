@@ -46,7 +46,7 @@ int main()  // NOLINT
             "#Lp3",                     // uint64_t
             "#Lp3/N [%]",               // double
             "t_pruning [s]"             // double
-        };
+    };
 
     const auto truth_tables_and_names =
         std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_and3_tt()}, "and3"},

@@ -35,7 +35,7 @@ int main()  // NOLINT
             "x_coord",          "y_coord",          "distance_grid_search",
             "#samples_grid",    "distance_random",  "#samples_random",
             "distance_contour", "#samples_contour",
-        };
+    };
 
     static const std::string bestagon_folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
     static const std::string plot_folder     = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);

@@ -50,7 +50,7 @@ int main()  // NOLINT
             "op. (CT)",
             "sim calls (CT)",
             "t in s (CT)"  // Contour Tracing
-        };
+    };
 
     // simulation parameters
     sidb_simulation_parameters sim_params{};
