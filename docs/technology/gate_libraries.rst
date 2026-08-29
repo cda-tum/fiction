@@ -8,8 +8,8 @@ cells. Thereby, via ``apply_gate_library``, a ``gate_level_layout`` can be compi
 concrete technology.
 
 The implementation of a gate library should be non-instantiatable plus ``static`` and ``constexpr`` wherever possible.
-The abstract class ``fcn_gate_library`` provides utility functions that can be used to implement custom gate libraries
-by extending it.
+The abstract class ``fiction::fcn::gate_library`` provides utility functions that can be used to implement custom
+gate libraries by extending it.
 
 Abstract Gate Library
 ---------------------

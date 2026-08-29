@@ -20,7 +20,7 @@ namespace alice
 /**
  * Executes an exact physical design approach utilizing the SMT solver Z3.
  *
- * See include/fiction/algorithms/physical_design/exact.hpp for more details.
+ * See include/fiction/physical_design/exact.hpp for more details.
  */
 class exact_command final : public command
 {

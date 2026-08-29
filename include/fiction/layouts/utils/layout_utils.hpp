@@ -9,7 +9,7 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/primitives/defect_surface.hpp"
-// cell_layout_digest names no symbol from this header, but relies on the std::hash<sidb_defect>
+// cell_layout_digest names no symbol from this header, but relies on the std::hash<sidb::model::defect>
 // specialization it provides
 #include "fiction/technology/sidb/model/defects.hpp"  // IWYU pragma: keep
 #include "fiction/technology/sidb/primitives/lattice.hpp"
@@ -815,8 +815,9 @@ template <typename Lyt>
  * digest a cheap filter in front of `are_cell_layouts_identical`. Different layouts may share a digest, so a
  * digest match still has to be confirmed with `are_cell_layouts_identical`.
  *
- * The digest covers the cells and their types, the defects of an `sidb_defect_surface`, and the charge states of a
- * `charge_distribution_surface`. Following `are_cell_layouts_identical`, it ignores the layout's aspect ratio.
+ * The digest covers the cells and their types, the defects of an `sidb::primitives::defect_surface`, and the charge
+ * states of a `charge_distribution_surface`. Following `are_cell_layouts_identical`, it ignores the layout's aspect
+ * ratio.
  *
  * @tparam Lyt The layout type. Must be a cell-level layout.
  * @param lyt The layout to digest.

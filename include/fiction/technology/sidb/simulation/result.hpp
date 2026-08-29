@@ -60,7 +60,7 @@ struct result
     sidb::model::simulation_parameters sim_params{};
     /**
      * Additional named simulation parameters. This is used to store algorithm-dependent parameters that are not part of
-     * the `sidb_simulation_parameters` struct.
+     * the `sidb::model::simulation_parameters` struct.
      *
      * The key of the map is the name of the parameter, the element is the value of the parameter.
      */

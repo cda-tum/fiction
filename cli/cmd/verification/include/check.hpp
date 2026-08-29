@@ -17,7 +17,7 @@ namespace alice
  * Performs design rule checks on the active gate-level layout. Checks for various design rule validations like crossing
  * gates, non-adjacent connections, wrongly assigned clock zones, etc.
  *
- * See fiction/algorithms/design_rule_violations.hpp for more details.
+ * See include/fiction/verification/design_rule_violations.hpp for more details.
  */
 class check_command final : public command
 {

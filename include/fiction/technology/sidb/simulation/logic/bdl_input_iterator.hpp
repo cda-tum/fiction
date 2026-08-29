@@ -442,8 +442,8 @@ class bdl_input_iterator
      * Determines, for each input BDL pair, whether its upper dot is closer to the end of its wire than its lower dot.
      *
      * `set_all_inputs` needs only this comparison, not the distances themselves, and both operands are fixed for this
-     * object's lifetime. Evaluating it once here keeps the two `sidb_nm_distance` calls per input pair out of every
-     * increment.
+     * object's lifetime. Evaluating it once here keeps the two `sidb::model::nm_distance` calls per input pair out of
+     * every increment.
      *
      * @note Assumes that `input_pairs` and `last_bdl_for_each_wire` are already initialized.
      *

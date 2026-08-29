@@ -123,10 +123,10 @@ void write_operational_domain(const OpDomain& opdom, std::ostream& os,
     const auto num_dimensions = opdom.get_number_of_dimensions();
 
     // the CSV format writes one sweep column per dimension, and `sweep_parameter` has exactly three enumerators, each
-    // mapping to a distinct field of `sidb_simulation_parameters`. A fourth dimension could therefore only repeat a
-    // parameter, which `set_dimension_value` would overwrite, leaving that axis without an effect on the simulation.
-    // The cap is that enum, not this writer: should `sweep_parameter` ever gain a fourth sweepable parameter, the
-    // branches below are what needs extending
+    // mapping to a distinct field of `sidb::model::simulation_parameters`. A fourth dimension could therefore only
+    // repeat a parameter, which `set_dimension_value` would overwrite, leaving that axis without an effect on the
+    // simulation. The cap is that enum, not this writer: should `sweep_parameter` ever gain a fourth sweepable
+    // parameter, the branches below are what needs extending
     if (num_dimensions == 0 || num_dimensions > 3)
     {
         throw std::invalid_argument("unsupported number of dimensions in the given operational domain");

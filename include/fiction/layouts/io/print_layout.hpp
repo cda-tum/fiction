@@ -338,7 +338,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
  *
  * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates or defect-information, e.g., a
- * `charge_distribution_surface` or `sidb_defect_surface`.
+ * `charge_distribution_surface` or `sidb::primitives::defect_surface`.
  * @param os Output stream to write into.
  * @param lyt The layout of which the information is to be printed.
  * @param lat_color Flag to utilize color escapes for the lattice, charge states, and atomic defects.
