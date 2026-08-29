@@ -7030,55 +7030,6 @@ static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label 
 
 static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label_callback = R"doc()doc";
 
-static const char *mkd_doc_fiction_networks_io_tt_reader =
-R"doc(Simple reader to parse truth tables from files. The files must be
-organized as follows: Each line consists of a truth table in
-hexadecimal form plus its corresponding Boolean expression. The two
-are separated by a space.
-
-This format is used by, e.g., Alan Mishchenko for his DSD functions:
-https://people.eecs.berkeley.edu/~alanmi/temp5/)doc";
-
-static const char *mkd_doc_fiction_networks_io_tt_reader_elements =
-R"doc(Contains the hexadecimal truth tables and their Boolean expressions in
-string representation. The two are alternating.)doc";
-
-static const char *mkd_doc_fiction_networks_io_tt_reader_next =
-R"doc(Returns the next truth table parsed from the file or std::nullopt if
-no further truth tables are available.
-
-Returns:
-    Next truth table from the file.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_io_tt_reader_pos = R"doc(Current position in the vector.)doc";
-
-static const char *mkd_doc_fiction_networks_io_tt_reader_read =
-R"doc(Reads hexadecimal truth table representations as well as Boolean
-expressions from the given stream.
-
-Args:
-    in_stream: Stream of truth table representations.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_io_tt_reader_tt_reader =
-R"doc(Standard constructor. Reads the given stream into a vector of lines.
-
-Args:
-    stream: Stream to parse.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_io_tt_reader_tt_reader_2 =
-R"doc(Standard constructor. Reads the given file into a vector of lines.
-
-Args:
-    filename: File to parse.
-
-)doc";
-
 static const char *mkd_doc_fiction_networks_technology_network =
 R"doc(A `mockturtle` logic network type that extends `klut_network`. It
 reimplements all node creation functions to disable structural
@@ -7273,273 +7224,6 @@ Args:
 
 Returns:
     A vector of all possible edge paths leading from terminals to `v`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_and3_tt =
-R"doc(Creates and returns a truth table that implements the conjunction in
-three variables.
-
-Returns:
-    Conjunction in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_and_tt =
-R"doc(Creates and returns a truth table that implements the conjunction in
-two variables.
-
-Returns:
-    Conjunction in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_and_xor_tt =
-R"doc(Creates and returns a truth table that implements the AND-XOR function
-(a xor b and c) in three variables.
-
-Returns:
-    AND-XOR in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_crossing_wire_tt =
-R"doc(Creates and returns a vector of truth tables for a crossing wire
-multi-output function.
-
-This function generates a vector of truth tables, each representing
-one of the outputs of a crossing wire multi-output function in two
-variables. The function returns a vector containing two truth tables.
-
-Returns:
-    Vector of truth tables, each representing an output of the
-    crossing wire function.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_dot_tt =
-R"doc(Creates and returns a truth table that implements the Dot function (a
-xor (c or a and b)) in three variables.
-
-Returns:
-    Dot function in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_double_wire_tt =
-R"doc(Creates and returns a vector of truth tables for a double wire multi-
-output function.
-
-This function generates a vector of truth tables, each representing
-one of the outputs of a double wire multi-output function in two
-variables. The function returns a vector containing two truth tables.
-
-Returns:
-    Vector of truth tables, each representing an output of the double
-    wire function.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_fan_out_tt =
-R"doc(Creates and returns a vector of truth tables for a multi-output
-function with two variables.
-
-This function generates a vector of truth tables, each representing
-one of the outputs of a multi-output function in two variables.
-
-Returns:
-    Vector of truth tables, each representing an output of the
-    identity function.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_gamble_tt =
-R"doc(Creates and returns a truth table that implements the Gamble function
-(all or none of a,b,c) in three variables.
-
-Returns:
-    Gamble in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_ge_tt =
-R"doc(Creates and returns a truth table that implements the greater-than-or-
-equal function in two variables.
-
-Returns:
-    Greater-than-or-equal function in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_gt_tt =
-R"doc(Creates and returns a truth table that implements the greater-than
-function in two variables.
-
-Returns:
-    Greater-than function in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_half_adder_tt =
-R"doc(Creates and returns a vector of truth tables for a half adder multi-
-output function.
-
-This function generates a vector of truth tables, each representing
-one of the outputs of a half adder multi-output function in two
-variables. The function returns a vector containing two truth tables.
-
-Returns:
-    Vector of truth tables, each representing an output of the half
-    adder function.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_id_tt =
-R"doc(Creates and returns a truth table that implements the identity
-function in one variable.
-
-Returns:
-    Identity function in one variable.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_ite_tt =
-R"doc(Creates and returns a truth table that implements the ITE (MUX)
-function (if a then b else c) in three variables.
-
-Returns:
-    ITE (MUX) in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_le_tt =
-R"doc(Creates and returns a truth table that implements the less-than-or-
-equal function in two variables.
-
-Returns:
-    Less-than-or-equal function in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_lt_tt =
-R"doc(Creates and returns a truth table that implements the less-than
-function in two variables.
-
-Returns:
-    Less-than function in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_maj_tt =
-R"doc(Creates and returns a truth table that implements the majority
-function in three variables.
-
-Returns:
-    Majority function in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_nand_tt =
-R"doc(Creates and returns a truth table that implements the negated
-conjunction in two variables.
-
-Returns:
-    Negated conjunction in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_nor_tt =
-R"doc(Creates and returns a truth table that implements the negated
-disjunction in two variables.
-
-Returns:
-    Negated disjunction in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_not_tt =
-R"doc(Creates and returns a truth table that implements the negation in one
-variable.
-
-Returns:
-    Negation in one variable.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_onehot_tt =
-R"doc(Creates and returns a truth table that implements the Onehot function
-(exactly one of a,b,c) in three variables.
-
-Returns:
-    Onehot in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_or_and_tt =
-R"doc(Creates and returns a truth table that implements the OR-AND function
-(a and (b or c)) in three variables.
-
-Returns:
-    OR-AND in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_or_tt =
-R"doc(Creates and returns a truth table that implements the disjunction in
-two variables.
-
-Returns:
-    Disjunction in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_xnor_tt =
-R"doc(Creates and returns a truth table that implements the negated
-exclusive disjunction in two variables.
-
-Returns:
-    Negated exclusive disjunction in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_xor3_tt =
-R"doc(Creates and returns a truth table that implements the exclusive
-disjunction in three variables.
-
-Returns:
-    Exclusive disjunction in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_xor_and_tt =
-R"doc(Creates and returns a truth table that implements the XOR-AND function
-(a and (b xor c)) in three variables.
-
-Returns:
-    XOR-AND in three variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_create_xor_tt =
-R"doc(Creates and returns a truth table that implements the exclusive
-disjunction in two variables.
-
-Returns:
-    Exclusive disjunction in two variables.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_evaluate_output =
-R"doc(This function evaluates the given multi-output truth table at the
-given input index.
-
-Args:
-    truth_tables: The truth tables to evaluate.
-    current_input_index: The index representing the current input
-                         pattern.
-
-Returns:
-    Output of the truth tables.
 
 )doc";
 
@@ -24449,6 +24133,259 @@ Note:
 
 )doc";
 
+static const char *mkd_doc_fiction_synthesis_create_and3_tt =
+R"doc(Creates and returns a truth table that implements the conjunction in
+three variables.
+
+Returns:
+    Conjunction in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_and_tt =
+R"doc(Creates and returns a truth table that implements the conjunction in
+two variables.
+
+Returns:
+    Conjunction in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_and_xor_tt =
+R"doc(Creates and returns a truth table that implements the AND-XOR function
+(a xor b and c) in three variables.
+
+Returns:
+    AND-XOR in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_crossing_wire_tt =
+R"doc(Creates and returns a vector of truth tables for a crossing wire
+multi-output function.
+
+This function generates a vector of truth tables, each representing
+one of the outputs of a crossing wire multi-output function in two
+variables. The function returns a vector containing two truth tables.
+
+Returns:
+    Vector of truth tables, each representing an output of the
+    crossing wire function.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_dot_tt =
+R"doc(Creates and returns a truth table that implements the Dot function (a
+xor (c or a and b)) in three variables.
+
+Returns:
+    Dot function in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_double_wire_tt =
+R"doc(Creates and returns a vector of truth tables for a double wire multi-
+output function.
+
+This function generates a vector of truth tables, each representing
+one of the outputs of a double wire multi-output function in two
+variables. The function returns a vector containing two truth tables.
+
+Returns:
+    Vector of truth tables, each representing an output of the double
+    wire function.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_fan_out_tt =
+R"doc(Creates and returns a vector of truth tables for a multi-output
+function with two variables.
+
+This function generates a vector of truth tables, each representing
+one of the outputs of a multi-output function in two variables.
+
+Returns:
+    Vector of truth tables, each representing an output of the
+    identity function.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_gamble_tt =
+R"doc(Creates and returns a truth table that implements the Gamble function
+(all or none of a,b,c) in three variables.
+
+Returns:
+    Gamble in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_ge_tt =
+R"doc(Creates and returns a truth table that implements the greater-than-or-
+equal function in two variables.
+
+Returns:
+    Greater-than-or-equal function in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_gt_tt =
+R"doc(Creates and returns a truth table that implements the greater-than
+function in two variables.
+
+Returns:
+    Greater-than function in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_half_adder_tt =
+R"doc(Creates and returns a vector of truth tables for a half adder multi-
+output function.
+
+This function generates a vector of truth tables, each representing
+one of the outputs of a half adder multi-output function in two
+variables. The function returns a vector containing two truth tables.
+
+Returns:
+    Vector of truth tables, each representing an output of the half
+    adder function.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_id_tt =
+R"doc(Creates and returns a truth table that implements the identity
+function in one variable.
+
+Returns:
+    Identity function in one variable.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_ite_tt =
+R"doc(Creates and returns a truth table that implements the ITE (MUX)
+function (if a then b else c) in three variables.
+
+Returns:
+    ITE (MUX) in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_le_tt =
+R"doc(Creates and returns a truth table that implements the less-than-or-
+equal function in two variables.
+
+Returns:
+    Less-than-or-equal function in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_lt_tt =
+R"doc(Creates and returns a truth table that implements the less-than
+function in two variables.
+
+Returns:
+    Less-than function in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_maj_tt =
+R"doc(Creates and returns a truth table that implements the majority
+function in three variables.
+
+Returns:
+    Majority function in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_nand_tt =
+R"doc(Creates and returns a truth table that implements the negated
+conjunction in two variables.
+
+Returns:
+    Negated conjunction in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_nor_tt =
+R"doc(Creates and returns a truth table that implements the negated
+disjunction in two variables.
+
+Returns:
+    Negated disjunction in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_not_tt =
+R"doc(Creates and returns a truth table that implements the negation in one
+variable.
+
+Returns:
+    Negation in one variable.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_onehot_tt =
+R"doc(Creates and returns a truth table that implements the Onehot function
+(exactly one of a,b,c) in three variables.
+
+Returns:
+    Onehot in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_or_and_tt =
+R"doc(Creates and returns a truth table that implements the OR-AND function
+(a and (b or c)) in three variables.
+
+Returns:
+    OR-AND in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_or_tt =
+R"doc(Creates and returns a truth table that implements the disjunction in
+two variables.
+
+Returns:
+    Disjunction in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_xnor_tt =
+R"doc(Creates and returns a truth table that implements the negated
+exclusive disjunction in two variables.
+
+Returns:
+    Negated exclusive disjunction in two variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_xor3_tt =
+R"doc(Creates and returns a truth table that implements the exclusive
+disjunction in three variables.
+
+Returns:
+    Exclusive disjunction in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_xor_and_tt =
+R"doc(Creates and returns a truth table that implements the XOR-AND function
+(a and (b xor c)) in three variables.
+
+Returns:
+    XOR-AND in three variables.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_create_xor_tt =
+R"doc(Creates and returns a truth table that implements the exclusive
+disjunction in two variables.
+
+Returns:
+    Exclusive disjunction in two variables.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_delete_virtual_pis =
 R"doc(Deletes virtual primary inputs (PIs) from a network and remaps all
 signals connected to the virtual PIs back to their corresponding real
@@ -24668,6 +24605,20 @@ Raises:
 
 )doc";
 
+static const char *mkd_doc_fiction_synthesis_evaluate_output =
+R"doc(This function evaluates the given multi-output truth table at the
+given input index.
+
+Args:
+    truth_tables: The truth tables to evaluate.
+    current_input_index: The index representing the current input
+                         pattern.
+
+Returns:
+    Output of the truth tables.
+
+)doc";
+
 static const char *mkd_doc_fiction_synthesis_fanout_substitution =
 R"doc(Substitutes high-output degrees in a logic network with fanout nodes
 that compute the identity function. For this purpose, `create_buf` is
@@ -24730,6 +24681,55 @@ fanout tree.)doc";
 static const char *mkd_doc_fiction_synthesis_fanout_substitution_params_threshold =
 R"doc(Maximum number of outputs any gate is allowed to have before
 substitution applies.)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader =
+R"doc(Simple reader to parse truth tables from files. The files must be
+organized as follows: Each line consists of a truth table in
+hexadecimal form plus its corresponding Boolean expression. The two
+are separated by a space.
+
+This format is used by, e.g., Alan Mishchenko for his DSD functions:
+https://people.eecs.berkeley.edu/~alanmi/temp5/)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader_elements =
+R"doc(Contains the hexadecimal truth tables and their Boolean expressions in
+string representation. The two are alternating.)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader_next =
+R"doc(Returns the next truth table parsed from the file or std::nullopt if
+no further truth tables are available.
+
+Returns:
+    Next truth table from the file.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader_pos = R"doc(Current position in the vector.)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader_read =
+R"doc(Reads hexadecimal truth table representations as well as Boolean
+expressions from the given stream.
+
+Args:
+    in_stream: Stream of truth table representations.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader =
+R"doc(Standard constructor. Reads the given stream into a vector of lines.
+
+Args:
+    stream: Stream to parse.
+
+)doc";
+
+static const char *mkd_doc_fiction_synthesis_io_tt_reader_tt_reader_2 =
+R"doc(Standard constructor. Reads the given file into a vector of lines.
+
+Args:
+    filename: File to parse.
+
+)doc";
 
 static const char *mkd_doc_fiction_synthesis_is_balanced =
 R"doc(Checks if a logic network is properly path-balanced with regard to the
