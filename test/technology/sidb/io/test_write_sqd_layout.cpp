@@ -15,9 +15,9 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
-#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/primitives/lattice.hpp>
@@ -180,7 +180,7 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
     auto g_layout = blueprints::row_clocked_and_xor_gate_layout<gate_layout>();
     g_layout.set_layout_name("Bestagon");
 
-    const auto c_layout = physical_design::apply_gate_library<sidb_layout, sidb::libraries::bestagon_library>(g_layout);
+    const auto c_layout = physical_design::apply_gate_library<sidb_layout, sidb::bestagon_library>(g_layout);
 
     std::stringstream layout_stream{};
 

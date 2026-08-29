@@ -67,20 +67,20 @@ iNML ToPoliNano Library
 SiDB Bestagon Library
 ---------------------
 
-**Header:** ``fiction/technology/sidb/libraries/bestagon_library.hpp``
+**Header:** ``fiction/technology/sidb/bestagon_library.hpp``
 
-.. doxygenclass:: fiction::sidb::libraries::bestagon_library
+.. doxygenclass:: fiction::sidb::bestagon_library
    :members:
 
 Parameterized SiDB Library
 --------------------------
 
-**Header:** ``fiction/technology/sidb/libraries/on_the_fly_gate_library.hpp``
+**Header:** ``fiction/technology/sidb/on_the_fly_gate_library.hpp``
 
-.. doxygenstruct:: fiction::sidb::libraries::on_the_fly_gate_library_params
+.. doxygenstruct:: fiction::sidb::on_the_fly_gate_library_params
    :members:
-.. doxygenclass:: fiction::sidb::libraries::on_the_fly_gate_library
+.. doxygenclass:: fiction::sidb::on_the_fly_gate_library
    :members:
 
-.. doxygenclass:: fiction::sidb::libraries::gate_design_exception
+.. doxygenclass:: fiction::sidb::gate_design_exception
    :members:

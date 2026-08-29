@@ -8,7 +8,7 @@
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
-#include "fiction/technology/sidb/simulation/generic/minimum_energy.hpp"
+#include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
 
 #include <algorithm>
 #include <any>
@@ -91,7 +91,7 @@ struct result
         if (!charge_distributions.empty())
         {
             min_energy =
-                sidb::simulation::generic::minimum_energy(charge_distributions.cbegin(), charge_distributions.cend());
+                sidb::simulation::utils::minimum_energy(charge_distributions.cbegin(), charge_distributions.cend());
         }
 
         for (const auto charge_index : charge_indices)

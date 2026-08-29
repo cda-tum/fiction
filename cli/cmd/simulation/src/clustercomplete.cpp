@@ -11,8 +11,8 @@
 #include <fiction/networks/utils/name_utils.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
-#include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/simulation/utils/minimum_energy.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -134,7 +134,7 @@ void clustercomplete_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr = fiction::sidb::simulation::generic::minimum_energy_distribution(
+                const auto min_energy_distr = fiction::sidb::simulation::utils::minimum_energy_distribution(
                     std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
                     std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
@@ -151,7 +151,7 @@ void clustercomplete_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr = fiction::sidb::simulation::generic::minimum_energy_distribution(
+                const auto min_energy_distr = fiction::sidb::simulation::utils::minimum_energy_distribution(
                     std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
                     std::get<sim_result_111>(sim_result).charge_distributions.cend());
 

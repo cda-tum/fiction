@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 18.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_GENERIC_IS_GROUND_STATE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_GENERIC_IS_GROUND_STATE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_IS_GROUND_STATE_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_IS_GROUND_STATE_HPP
 
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/traits.hpp"
@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <unordered_set>
 
-namespace fiction::sidb::simulation::generic
+namespace fiction::sidb::simulation::utils
 {
 
 /**
@@ -70,5 +70,5 @@ template <typename Lyt>
     return true;
 }
 
-}  // namespace fiction::sidb::simulation::generic
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_GENERIC_IS_GROUND_STATE_HPP
+}  // namespace fiction::sidb::simulation::utils
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_IS_GROUND_STATE_HPP

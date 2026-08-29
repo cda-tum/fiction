@@ -135,7 +135,7 @@ class unsupported_gate_orientation_exception : public std::exception
    \endverbatim
  *
  * can optionally be provided to allow reverse access to the gate ports given a gate implementation. This interface is
- * for example used in `sidb::libraries::surface_analysis` to determine which ports to blacklist.
+ * for example used in `sidb::surface_analysis` to determine which ports to blacklist.
  *
  * @tparam Technology FCN technology type of the implementing gate library.
  * @tparam GateSizeX Tile size in x-dimension.

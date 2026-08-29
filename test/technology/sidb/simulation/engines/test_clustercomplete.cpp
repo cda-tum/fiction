@@ -15,7 +15,7 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
-#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
+#include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
@@ -24,8 +24,8 @@
 #include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
-#include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/simulation/utils/minimum_energy.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -180,7 +180,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
     gate_lyt.create_nand({}, {}, {2, 2});
 
     const sidb_cell_clk_lyt& cell_lyt{
-        physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb::libraries::bestagon_library>(gate_lyt)};
+        physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb::bestagon_library>(gate_lyt)};
 
     sidb::simulation::engines::clustercomplete_params<> params{sidb::model::simulation_parameters{2}};
 
@@ -190,9 +190,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(sidb::simulation::generic::minimum_energy(res.charge_distributions.cbegin(),
-                                                             res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(
+            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+            Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("Base 3, multiple threads")
@@ -203,9 +203,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(sidb::simulation::generic::minimum_energy(res.charge_distributions.cbegin(),
-                                                             res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(
+            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+            Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
     }
 
     // from now on, we use only one thread
@@ -219,9 +219,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(sidb::simulation::generic::minimum_energy(res.charge_distributions.cbegin(),
-                                                             res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(
+            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+            Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
     }
 
     SECTION("Base 3, single thread")
@@ -232,9 +232,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(sidb::simulation::generic::minimum_energy(res.charge_distributions.cbegin(),
-                                                             res.charge_distributions.cend()),
-                   Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(
+            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
+            Catch::Matchers::WithinAbs(1.3192717848, fcn::constants::ERROR_MARGIN));
     }
 }
 

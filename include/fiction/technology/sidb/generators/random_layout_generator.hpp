@@ -8,7 +8,7 @@
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp"
+#include "fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -156,7 +156,7 @@ template <typename Lyt>
             }
 
             if (params.positive_sidbs == generate_random_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
-                sidb::simulation::generic::can_positive_charges_occur(lyt, params.sim_params))
+                sidb::simulation::utils::can_positive_charges_occur(lyt, params.sim_params))
             {
                 lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::EMPTY);
             }
@@ -165,7 +165,7 @@ template <typename Lyt>
     }
 
     if (params.positive_sidbs == generate_random_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
-        !sidb::simulation::generic::can_positive_charges_occur(lyt, params.sim_params))
+        !sidb::simulation::utils::can_positive_charges_occur(lyt, params.sim_params))
     {
         return generate_random_layout(params, skeleton);
     }

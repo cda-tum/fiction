@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/simulation/generic/is_ground_state.hpp>
+#include <fiction/technology/sidb/simulation/utils/is_ground_state.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
@@ -21,7 +21,7 @@ void is_ground_state_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("is_ground_state", &fiction::sidb::simulation::generic::is_ground_state<Lyt>, py::arg("heuristic_results"),
+    m.def("is_ground_state", &fiction::sidb::simulation::utils::is_ground_state<Lyt>, py::arg("heuristic_results"),
           py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_generic_is_ground_state));
 }
 

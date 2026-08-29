@@ -5,7 +5,7 @@
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/sim7_mol_library.hpp>
-#include <fiction/technology/sidb/libraries/bestagon_library.hpp>
+#include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>
@@ -49,7 +49,7 @@ void apply_gate_library(nanobind::module_& m)
     detail::apply_fcn_gate_library<fiction::qca::sim7_mol_library, py_cartesian_gate_layout>(m, "sim7_mol");
     detail::apply_fcn_gate_library<fiction::inml::topolinano_library, py_shifted_cartesian_gate_layout>(m,
                                                                                                         "topolinano");
-    detail::apply_fcn_gate_library<fiction::sidb::libraries::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
+    detail::apply_fcn_gate_library<fiction::sidb::bestagon_library, py_hexagonal_gate_layout>(m, "bestagon");
 }
 
 }  // namespace pyfiction

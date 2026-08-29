@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/simulation/generic/minimum_energy.hpp>
+#include <fiction/technology/sidb/simulation/utils/minimum_energy.hpp>
 
 #include <vector>
 
@@ -22,7 +22,7 @@ void minimum_energy_impl(nanobind::module_& m)
 
     m.def(
         "minimum_energy", [](const std::vector<Lyt>& layouts) -> double
-        { return fiction::sidb::simulation::generic::minimum_energy(layouts.cbegin(), layouts.cend()); },
+        { return fiction::sidb::simulation::utils::minimum_energy(layouts.cbegin(), layouts.cend()); },
         py::arg("layouts"), DOC(fiction_sidb_simulation_generic_minimum_energy));
 }
 

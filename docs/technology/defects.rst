@@ -65,6 +65,6 @@ fabrication defects on the H-Si(100) 2x1 surface.
 SiDB Defect Analysis
 --------------------
 
-**Header:** ``fiction/technology/sidb/libraries/surface_analysis.hpp``
+**Header:** ``fiction/technology/sidb/surface_analysis.hpp``
 
-.. doxygenfunction:: fiction::sidb::libraries::surface_analysis
+.. doxygenfunction:: fiction::sidb::surface_analysis

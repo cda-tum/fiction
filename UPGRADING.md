@@ -51,9 +51,8 @@ include/fiction/
 │       │   ├── analysis/          fiction::sidb::simulation::analysis::
 │       │   ├── defects/           fiction::sidb::simulation::defects::
 │       │   ├── logic/             fiction::sidb::simulation::logic::
-│       │   ├── generic/           fiction::sidb::simulation::generic::
+│       │   ├── generic/           fiction::sidb::simulation::utils::
 │       │   └── utils/             fiction::sidb::simulation::utils::
-│       ├── libraries/             fiction::sidb::libraries::
 │       ├── generators/            fiction::sidb::generators::
 │       └── io/                    fiction::sidb::io::
 └── utils/                         fiction::utils::
@@ -179,10 +178,10 @@ module whose data they serialize.
 | `fiction/io/write_operational_domain.hpp`                                         | `fiction/technology/sidb/io/write_operational_domain.hpp`                                  |
 | `fiction/io/write_sqd_layout.hpp`                                                 | `fiction/technology/sidb/io/write_sqd_layout.hpp`                                          |
 | `fiction/io/write_sqd_sim_result.hpp`                                             | `fiction/technology/sidb/io/write_sqd_sim_result.hpp`                                      |
-| `fiction/technology/sidb_bestagon_library.hpp`                                    | `fiction/technology/sidb/libraries/bestagon_library.hpp`                                   |
-| `fiction/technology/sidb_on_the_fly_gate_library.hpp`                             | `fiction/technology/sidb/libraries/on_the_fly_gate_library.hpp`                            |
-| `fiction/technology/sidb_skeleton_bestagon_library.hpp`                           | `fiction/technology/sidb/libraries/skeleton_bestagon_library.hpp`                          |
-| `fiction/technology/sidb_surface_analysis.hpp`                                    | `fiction/technology/sidb/libraries/surface_analysis.hpp`                                   |
+| `fiction/technology/sidb_bestagon_library.hpp`                                    | `fiction/technology/sidb/bestagon_library.hpp`                                             |
+| `fiction/technology/sidb_on_the_fly_gate_library.hpp`                             | `fiction/technology/sidb/on_the_fly_gate_library.hpp`                                      |
+| `fiction/technology/sidb_skeleton_bestagon_library.hpp`                           | `fiction/technology/sidb/skeleton_bestagon_library.hpp`                                    |
+| `fiction/technology/sidb_surface_analysis.hpp`                                    | `fiction/technology/sidb/surface_analysis.hpp`                                             |
 | `fiction/technology/sidb_charge_state.hpp`                                        | `fiction/technology/sidb/model/charge_state.hpp`                                           |
 | `fiction/technology/sidb_cluster_hierarchy.hpp`                                   | `fiction/technology/sidb/model/cluster_hierarchy.hpp`                                      |
 | `fiction/technology/sidb_defects.hpp`                                             | `fiction/technology/sidb/model/defect.hpp`                                                 |
@@ -209,11 +208,11 @@ module whose data they serialize.
 | `fiction/algorithms/simulation/sidb/ground_state_space.hpp`                       | `fiction/technology/sidb/simulation/engines/ground_state_space.hpp`                        |
 | `fiction/algorithms/simulation/sidb/quickexact.hpp`                               | `fiction/technology/sidb/simulation/engines/quickexact.hpp`                                |
 | `fiction/algorithms/simulation/sidb/quicksim.hpp`                                 | `fiction/technology/sidb/simulation/engines/quicksim.hpp`                                  |
-| `fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp`               | `fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp`                |
-| `fiction/algorithms/simulation/sidb/is_ground_state.hpp`                          | `fiction/technology/sidb/simulation/generic/is_ground_state.hpp`                           |
-| `fiction/algorithms/simulation/sidb/minimum_energy.hpp`                           | `fiction/technology/sidb/simulation/generic/minimum_energy.hpp`                            |
-| `fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp`              | `fiction/technology/sidb/simulation/generic/physically_valid_parameters.hpp`               |
-| `fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp`         | `fiction/technology/sidb/simulation/generic/potential_to_distance_conversion.hpp`          |
+| `fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp`               | `fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp`                  |
+| `fiction/algorithms/simulation/sidb/is_ground_state.hpp`                          | `fiction/technology/sidb/simulation/utils/is_ground_state.hpp`                             |
+| `fiction/algorithms/simulation/sidb/minimum_energy.hpp`                           | `fiction/technology/sidb/simulation/utils/minimum_energy.hpp`                              |
+| `fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp`              | `fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp`                 |
+| `fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp`         | `fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp`            |
 | `fiction/algorithms/iter/bdl_input_iterator.hpp`                                  | `fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp`                          |
 | `fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp`                         | `fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp`                            |
 | `fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp`                         | `fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp`                            |
@@ -325,7 +324,7 @@ here kept its identifier and only gained a namespace.
 | `fiction::row_clocking`                                        | `fiction::layouts::clocking::row`                                           |
 | `fiction::sidb_100_lattice`                                    | `fiction::sidb::primitives::lattice_100`                                    |
 | `fiction::sidb_111_lattice`                                    | `fiction::sidb::primitives::lattice_111`                                    |
-| `fiction::sidb_bestagon_library`                               | `fiction::sidb::libraries::bestagon_library`                                |
+| `fiction::sidb_bestagon_library`                               | `fiction::sidb::bestagon_library`                                           |
 | `fiction::sidb_binary_cluster_hierarchy_node`                  | `fiction::sidb::model::binary_cluster_hierarchy_node`                       |
 | `fiction::sidb_binary_cluster_hierarchy_node_ptr`              | `fiction::sidb::model::binary_cluster_hierarchy_node_ptr`                   |
 | `fiction::sidb_charge_space_composition`                       | `fiction::sidb::model::charge_space_composition`                            |
@@ -351,21 +350,21 @@ here kept its identifier and only gained a namespace.
 | `fiction::sidb_lattice`                                        | `fiction::sidb::primitives::lattice`                                        |
 | `fiction::sidb_nm_distance`                                    | `fiction::sidb::model::nm_distance`                                         |
 | `fiction::sidb_nm_position`                                    | `fiction::sidb::model::nm_position`                                         |
-| `fiction::sidb_on_the_fly_gate_library`                        | `fiction::sidb::libraries::on_the_fly_gate_library`                         |
-| `fiction::sidb_on_the_fly_gate_library_params`                 | `fiction::sidb::libraries::on_the_fly_gate_library_params`                  |
+| `fiction::sidb_on_the_fly_gate_library`                        | `fiction::sidb::on_the_fly_gate_library`                                    |
+| `fiction::sidb_on_the_fly_gate_library_params`                 | `fiction::sidb::on_the_fly_gate_library_params`                             |
 | `fiction::sidb_simulation_domain`                              | `fiction::sidb::simulation::domain`                                         |
 | `fiction::sidb_simulation_engine`                              | `fiction::sidb::simulation::engine`                                         |
 | `fiction::sidb_simulation_engine_name`                         | `fiction::sidb::simulation::engine_name`                                    |
 | `fiction::sidb_simulation_parameters`                          | `fiction::sidb::model::simulation_parameters`                               |
 | `fiction::sidb_simulation_result`                              | `fiction::sidb::simulation::result`                                         |
-| `fiction::sidb_skeleton_bestagon_library`                      | `fiction::sidb::libraries::skeleton_bestagon_library`                       |
-| `fiction::sidb_surface_analysis`                               | `fiction::sidb::libraries::surface_analysis`                                |
+| `fiction::sidb_skeleton_bestagon_library`                      | `fiction::sidb::skeleton_bestagon_library`                                  |
+| `fiction::sidb_surface_analysis`                               | `fiction::sidb::surface_analysis`                                           |
 | `fiction::sim7_mol_library`                                    | `fiction::qca::sim7_mol_library`                                            |
 | `fiction::siqad::coord_t`                                      | `fiction::layouts::coords::siqad`                                           |
 | `fiction::siqad::to_fiction_coord`                             | `fiction::layouts::coords::to_fiction_coord`                                |
 | `fiction::siqad::to_siqad_coord`                               | `fiction::layouts::coords::to_siqad_coord`                                  |
 | `fiction::srs_clocking`                                        | `fiction::layouts::clocking::srs`                                           |
-| `fiction::surface_black_list`                                  | `fiction::sidb::libraries::surface_black_list`                              |
+| `fiction::surface_black_list`                                  | `fiction::sidb::surface_black_list`                                         |
 | `fiction::twoddwave_clocking`                                  | `fiction::layouts::clocking::twoddwave`                                     |
 | `fiction::twoddwave_hex_clocking`                              | `fiction::layouts::clocking::twoddwave_hex`                                 |
 | `fiction::unsupported_clocking_scheme_exception`               | `fiction::layouts::clocking::unsupported_scheme_exception`                  |
@@ -406,6 +405,35 @@ rest of the code base, and the three conversions -- which spelled themselves
 `to_fiction_coord`, `to_siqad_coord` and `offset_to_cube`, in three different styles --
 now share one. `from_siqad` keeps its target as a template parameter because callers pass
 a dependent type; `to_siqad` and `to_cube` deduce theirs.
+
+### One `utils` for the simulation helpers
+
+`simulation::generic` and `simulation::utils` were two catch-alls with no boundary between
+them: nothing said why `is_ground_state` was generic while
+`equivalence_check_for_simulation_results` was a utility. They are one namespace now, and
+`utils` is the name, because `generic` described nothing.
+
+```text
+fiction::can_positive_charges_occur      ->  fiction::sidb::simulation::utils::can_positive_charges_occur
+fiction::is_ground_state                 ->  fiction::sidb::simulation::utils::is_ground_state
+fiction::minimum_energy                  ->  fiction::sidb::simulation::utils::minimum_energy
+fiction::physically_valid_parameters     ->  fiction::sidb::simulation::utils::physically_valid_parameters
+fiction::potential_to_distance_conversion -> fiction::sidb::simulation::utils::potential_to_distance_conversion
+```
+
+### The gate libraries
+
+`sidb::libraries` is dissolved; the four headers sit beside `technology.hpp` in
+`fiction::sidb`, as QCA's and iNML's libraries always have in theirs. A gate library's name
+already ends in `_library`, so the namespace level only repeated it, and `surface_analysis`
+-- which produces a port blacklist rather than being a library -- stops sitting among them.
+
+```text
+fiction::sidb_bestagon_library      ->  fiction::sidb::bestagon_library
+fiction::sidb_on_the_fly_gate_library -> fiction::sidb::on_the_fly_gate_library
+fiction::sidb_skeleton_bestagon_library -> fiction::sidb::skeleton_bestagon_library
+fiction::sidb_surface_analysis      ->  fiction::sidb::surface_analysis
+```
 
 ### The two kinds of defect
 

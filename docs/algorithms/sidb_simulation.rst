@@ -128,15 +128,15 @@ Energy Calculation
         .. doxygenfunction:: fiction::sidb::simulation::analysis::calculate_energy_distribution
 
 
-        **Header:** ``fiction/technology/sidb/simulation/generic/minimum_energy.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/utils/minimum_energy.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::generic::minimum_energy
-        .. doxygenfunction:: fiction::sidb::simulation::generic::minimum_energy_distribution
+        .. doxygenfunction:: fiction::sidb::simulation::utils::minimum_energy
+        .. doxygenfunction:: fiction::sidb::simulation::utils::minimum_energy_distribution
 
 
-        **Header:** ``fiction/technology/sidb/simulation/generic/is_ground_state.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/utils/is_ground_state.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::generic::is_ground_state
+        .. doxygenfunction:: fiction::sidb::simulation::utils::is_ground_state
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.calculate_energy_distribution
@@ -386,9 +386,9 @@ Physically Valid Parameters
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/generic/physically_valid_parameters.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::generic::physically_valid_parameters
+        .. doxygenfunction:: fiction::sidb::simulation::utils::physically_valid_parameters
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
@@ -445,9 +445,9 @@ Charge Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::generic::can_positive_charges_occur
+        .. doxygenfunction:: fiction::sidb::simulation::utils::can_positive_charges_occur
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.can_positive_charges_occur
@@ -545,9 +545,9 @@ Convert Potential to Distance
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/generic/potential_to_distance_conversion.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::generic::potential_to_distance_conversion
+        .. doxygenfunction:: fiction::sidb::simulation::utils::potential_to_distance_conversion
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.potential_to_distance_conversion
@@ -621,9 +621,9 @@ SiDB Defect Analysis
 
 .. _defect_influence:
 
-**Header:** ``fiction/technology/sidb/libraries/surface_analysis.hpp``
+**Header:** ``fiction/technology/sidb/surface_analysis.hpp``
 
-.. doxygenfunction:: fiction::sidb::libraries::surface_analysis
+.. doxygenfunction:: fiction::sidb::surface_analysis
 
 
 **Header:** ``fiction/technology/sidb/simulation/defects/defect_influence.hpp``

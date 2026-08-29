@@ -137,6 +137,14 @@ Changed
   unused for the same reason: the electrostatics use the Coulomb constant ``K_E``, which folds
   in the ``1 / (4 * pi * epsilon_0)`` the two of them spelled out. ``ELEMENTARY_CHARGE``,
   ``K_E``, ``BOLTZMANN_CONSTANT``, ``EV_TO_JOULE`` and ``ERROR_MARGIN`` stay
+- **Breaking:** ``fiction::sidb::libraries`` is dissolved. The SiDB gate libraries sit beside
+  ``technology.hpp`` in ``fiction::sidb``, as QCA's and iNML's libraries do in theirs, so
+  ``fiction::sidb_bestagon_library`` becomes ``fiction::sidb::bestagon_library``. A gate
+  library's name already ends in ``_library``, and ``surface_analysis`` -- which produces a port
+  blacklist rather than being a library -- no longer sits among them
+- **Breaking:** ``fiction::sidb::simulation::generic`` is merged into
+  ``fiction::sidb::simulation::utils``. The two were catch-alls with no boundary between them,
+  and ``generic`` described nothing
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each

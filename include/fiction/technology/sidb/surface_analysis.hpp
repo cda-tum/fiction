@@ -2,8 +2,8 @@
 // Created by marcel on 01.04.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_LIBRARIES_SURFACE_ANALYSIS_HPP
-#define FICTION_TECHNOLOGY_SIDB_LIBRARIES_SURFACE_ANALYSIS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP
+#define FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -20,7 +20,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction::sidb::libraries
+namespace fiction::sidb
 {
 
 /**
@@ -152,5 +152,5 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
     return black_list;
 }
 
-}  // namespace fiction::sidb::libraries
-#endif  // FICTION_TECHNOLOGY_SIDB_LIBRARIES_SURFACE_ANALYSIS_HPP
+}  // namespace fiction::sidb
+#endif  // FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP

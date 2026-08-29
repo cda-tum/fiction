@@ -9,8 +9,8 @@
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
-#include "fiction/technology/sidb/simulation/generic/potential_to_distance_conversion.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -207,7 +207,7 @@ class physical_population_stability_impl
             for (const auto& transition : population_stability_info.transition_potentials)
             {
                 population_stability_info.distance_corresponding_to_potential[transition.first] =
-                    sidb::simulation::generic::potential_to_distance_conversion(
+                    sidb::simulation::utils::potential_to_distance_conversion(
                         transition.second.second, params.sim_params,
                         params.precision_for_distance_corresponding_to_potential);
                 if (transition.second.second < minimum_potential_difference)

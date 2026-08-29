@@ -9,9 +9,9 @@
 #include "fiction/physical_design/exact.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
-#include "fiction/technology/sidb/libraries/on_the_fly_gate_library.hpp"
-#include "fiction/technology/sidb/libraries/skeleton_bestagon_library.hpp"
-#include "fiction/technology/sidb/libraries/surface_analysis.hpp"
+#include "fiction/technology/sidb/on_the_fly_gate_library.hpp"
+#include "fiction/technology/sidb/skeleton_bestagon_library.hpp"
+#include "fiction/technology/sidb/surface_analysis.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -68,7 +68,7 @@ struct on_the_fly_circuit_design_on_defective_surface_params
     /**
      * Parameters for the SiDB on-the-fly gate library.
      */
-    sidb::libraries::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
+    sidb::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
     /**
      * Parameters for the *exact* placement and routing algorithm.
      */
@@ -86,7 +86,7 @@ struct on_the_fly_circuit_design_params
     /**
      * Parameters for the SiDB on-the-fly gate library.
      */
-    sidb::libraries::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
+    sidb::on_the_fly_gate_library_params<CellLyt> sidb_on_the_fly_gate_library_parameters = {};
 };
 
 /**
@@ -165,9 +165,8 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
 
         // generating the blacklist based on neutral defects. The long-range electrostatic influence of charged defects
         // is not considered as gates are designed on-the-fly.
-        auto black_list =
-            sidb::libraries::surface_analysis<sidb::libraries::skeleton_bestagon_library, GateLyt, CellLyt>(
-                lattice_tiling, defective_surface, std::make_pair(0, 0));
+        auto black_list = sidb::surface_analysis<sidb::skeleton_bestagon_library, GateLyt, CellLyt>(
+            lattice_tiling, defective_surface, std::make_pair(0, 0));
 
         while (!gate_level_layout.has_value())
         {
@@ -183,14 +182,14 @@ template <typename Ntk, typename CellLyt, typename GateLyt>
                 try
                 {
                     lyt = physical_design::apply_parameterized_gate_library_to_defective_surface<
-                        CellLyt, sidb::libraries::on_the_fly_gate_library, GateLyt,
-                        sidb::libraries::on_the_fly_gate_library_params<cell<CellLyt>>>(
+                        CellLyt, sidb::on_the_fly_gate_library, GateLyt,
+                        sidb::on_the_fly_gate_library_params<cell<CellLyt>>>(
                         *gate_level_layout, params.sidb_on_the_fly_gate_library_parameters, defective_surface);
                 }
 
                 // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
                 // blacklist and the process is rerun.
-                catch (const sidb::libraries::gate_design_exception<tt, GateLyt>& e)
+                catch (const sidb::gate_design_exception<tt, GateLyt>& e)
                 {
                     gate_level_layout = std::nullopt;
                     black_list[e.which_tile()][e.which_truth_table()].push_back(e.which_port_list());
@@ -256,15 +255,14 @@ template <typename CellLyt, typename GateLyt>
 
     try
     {
-        return physical_design::apply_parameterized_gate_library<
-            CellLyt, sidb::libraries::on_the_fly_gate_library, GateLyt,
-            sidb::libraries::on_the_fly_gate_library_params<CellLyt>>(*gate_lyt,
-                                                                      params.sidb_on_the_fly_gate_library_parameters);
+        return physical_design::apply_parameterized_gate_library<CellLyt, sidb::on_the_fly_gate_library, GateLyt,
+                                                                 sidb::on_the_fly_gate_library_params<CellLyt>>(
+            *gate_lyt, params.sidb_on_the_fly_gate_library_parameters);
     }
 
     // on-the-fly gate design was unsuccessful at a certain tile. Hence, this tile-gate pair is added to the
     // blacklist and the process is rerun.
-    catch (const sidb::libraries::gate_design_exception<tt, GateLyt>& e)
+    catch (const sidb::gate_design_exception<tt, GateLyt>& e)
     {
         throw unsuccessful_gate_design_error("Gate design was unsuccessful");
     }

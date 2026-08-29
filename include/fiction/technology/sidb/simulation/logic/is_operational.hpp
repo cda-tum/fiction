@@ -17,11 +17,11 @@
 #include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
-#include "fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -354,7 +354,7 @@ class is_operational_impl
         cds_layout.assign_physical_parameters(parameters.sim_params);
 
         if ((parameters.sim_params.base == 2) &&
-            (sidb::simulation::generic::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
+            (sidb::simulation::utils::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
         {
             return layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES;
         }
@@ -421,7 +421,7 @@ class is_operational_impl
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
-                if ((parameters.sim_params.base == 2) && (sidb::simulation::generic::can_positive_charges_occur(
+                if ((parameters.sim_params.base == 2) && (sidb::simulation::utils::can_positive_charges_occur(
                                                              lyt_with_input_pattern, parameters.sim_params)))
                 {
                     return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
@@ -486,7 +486,7 @@ class is_operational_impl
 
         // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
         if (parameters.sim_params.base == 2 &&
-            sidb::simulation::generic::can_positive_charges_occur(given_cds, parameters.sim_params))
+            sidb::simulation::utils::can_positive_charges_occur(given_cds, parameters.sim_params))
         {
             return {operational_status::NON_OPERATIONAL, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES};
         }
@@ -571,7 +571,7 @@ class is_operational_impl
 
             // if positively charged SiDBs can occur, the SiDB layout is considered non-operational
             if ((parameters.sim_params.base == 2) &&
-                (sidb::simulation::generic::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
+                (sidb::simulation::utils::can_positive_charges_occur(lyt_with_input_pattern, parameters.sim_params)))
             {
                 non_operational_input_pattern_and_non_operationality_reason.emplace_back(
                     i, non_operationality_reason::POTENTIAL_POSITIVE_CHARGES);

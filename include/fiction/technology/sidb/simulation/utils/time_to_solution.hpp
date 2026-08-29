@@ -10,8 +10,8 @@
 #include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
-#include "fiction/technology/sidb/simulation/generic/is_ground_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/simulation/utils/is_ground_state.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -199,7 +199,7 @@ void time_to_solution_for_given_simulation_results(const sidb::simulation::resul
 
     for (const auto& heuristic : results_heuristic)
     {
-        if (sidb::simulation::generic::is_ground_state(heuristic, results_exact))
+        if (sidb::simulation::utils::is_ground_state(heuristic, results_exact))
         {
             ++gs_count;
         }

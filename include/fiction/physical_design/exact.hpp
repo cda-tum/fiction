@@ -17,7 +17,7 @@
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/sidb/libraries/surface_analysis.hpp"
+#include "fiction/technology/sidb/surface_analysis.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -179,8 +179,7 @@ class exact_impl
 {
   public:
     exact_impl(mockturtle::names_view<networks::technology_network>& src, exact_physical_design_params p,
-               exact_physical_design_stats&                                         st,
-               const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
+               exact_physical_design_stats& st, const sidb::surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
             scheme{*layouts::clocking::get_scheme<Lyt>(ps.scheme)},
@@ -236,7 +235,7 @@ class exact_impl
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
-    const sidb::libraries::surface_black_list<Lyt, fcn::port_direction> black_list;
+    const sidb::surface_black_list<Lyt, fcn::port_direction> black_list;
     /**
      * Lower bound for the number of layout tiles.
      */
@@ -274,7 +273,7 @@ class exact_impl
          * @param ps The parameters to respect in the SMT instance generation process.
          */
         smt_handler(ctx_ptr ctxp, Lyt& lyt, const topology_ntk_t& ntk, exact_physical_design_params ps,
-                    const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& sbl) noexcept :
+                    const sidb::surface_black_list<Lyt, fcn::port_direction>& sbl) noexcept :
                 ctx{std::move(ctxp)},
                 layout{lyt},
                 network{ntk},
@@ -499,7 +498,7 @@ class exact_impl
         /**
          * Maps tiles to blacklisted gate types via their truth tables and port information.
          */
-        const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& black_list;
+        const sidb::surface_black_list<Lyt, fcn::port_direction>& black_list;
         /**
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
@@ -3281,7 +3280,7 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
  */
 template <typename Lyt, typename Ntk>
 std::optional<Lyt>
-exact_with_blacklist(const Ntk& ntk, const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& black_list,
+exact_with_blacklist(const Ntk& ntk, const sidb::surface_black_list<Lyt, fcn::port_direction>& black_list,
                      exact_physical_design_params ps = {}, exact_physical_design_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
