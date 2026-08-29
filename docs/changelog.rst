@@ -112,7 +112,7 @@ Changed
   ``twoddwave``, ``twoddwave_hex``, ``use``, ``res``, ``esr``, ``cfe``, ``ripple``, and
   ``srs``. The type they return, the enum they take, and the helpers around them move with
   them: ``clocking_scheme`` becomes ``clocking::scheme``, ``clock_name::TWODDWAVE`` becomes
-  ``clocking::TWODDWAVE``, ``get_clocking_scheme`` becomes ``clocking::get_scheme``, and
+  ``clocking::TWODDWAVE_NAME``, ``get_clocking_scheme`` becomes ``clocking::get_scheme``, and
   ``is_linear_scheme`` becomes ``clocking::is_linear``. ``clocking_scheme.hpp`` keeps its
   path, the scheme name strings are unchanged, and the ``clocked_layout`` members that
   mention clocking keep their names

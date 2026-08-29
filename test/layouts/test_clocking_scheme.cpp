@@ -2087,18 +2087,18 @@ TEST_CASE("Clocking lookup", "[clocking-scheme]")
         }
     };
 
-    check({"open", "OPEN", "oPeN", "OpEn"}, layouts::clocking::OPEN);
-    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, layouts::clocking::COLUMNAR);
-    check({"row", "ROW", "RoW", "rOw"}, layouts::clocking::ROW);
-    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, layouts::clocking::TWODDWAVE);
-    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, layouts::clocking::TWODDWAVE);
-    check({"use", "USE", "uSe", "UsE"}, layouts::clocking::USE);
-    check({"res", "RES", "rEs", "ReS"}, layouts::clocking::RES);
-    check({"esr", "ESR", "eSr", "EsR"}, layouts::clocking::ESR);
-    check({"cfe", "CFE", "cFe", "CfE"}, layouts::clocking::CFE);
-    check({"ripple", "RIPPLE", "RiPpLe", "RIppLE"}, layouts::clocking::RIPPLE);
-    check({"srs", "SRS", "sRs", "SrS"}, layouts::clocking::SRS);
-    check({"bancs", "BANCS", "BaNCs", "banCS"}, layouts::clocking::BANCS);
+    check({"open", "OPEN", "oPeN", "OpEn"}, layouts::clocking::OPEN_NAME);
+    check({"columnar", "COLUMNAR", "CoLumNar", "COLUMnar"}, layouts::clocking::COLUMNAR_NAME);
+    check({"row", "ROW", "RoW", "rOw"}, layouts::clocking::ROW_NAME);
+    check({"2DDwave", "2DdWaVe", "2ddwave", "2DDWAVE", "2DDWave"}, layouts::clocking::TWODDWAVE_NAME);
+    check({"2DDwavehex", "2DdWaVeHeX", "2ddwavehex", "2DDWAVEHEX", "2DDWaveHex"}, layouts::clocking::TWODDWAVE_NAME);
+    check({"use", "USE", "uSe", "UsE"}, layouts::clocking::USE_NAME);
+    check({"res", "RES", "rEs", "ReS"}, layouts::clocking::RES_NAME);
+    check({"esr", "ESR", "eSr", "EsR"}, layouts::clocking::ESR_NAME);
+    check({"cfe", "CFE", "cFe", "CfE"}, layouts::clocking::CFE_NAME);
+    check({"ripple", "RIPPLE", "RiPpLe", "RIppLE"}, layouts::clocking::RIPPLE_NAME);
+    check({"srs", "SRS", "sRs", "SrS"}, layouts::clocking::SRS_NAME);
+    check({"bancs", "BANCS", "BaNCs", "banCS"}, layouts::clocking::BANCS_NAME);
 
     CHECK(!layouts::clocking::get_scheme<clk_lyt>("").has_value());
     CHECK(!layouts::clocking::get_scheme<clk_lyt>("Column").has_value());
@@ -2126,18 +2126,18 @@ TEST_CASE("Linear schemes", "[clocking-scheme]")
     };
 
     // Linear clocking schemes
-    check_linear_scheme(layouts::clocking::COLUMNAR, true);
-    check_linear_scheme(layouts::clocking::ROW, true);
-    check_linear_scheme(layouts::clocking::TWODDWAVE, true);
-    check_linear_scheme(layouts::clocking::TWODDWAVE_HEX, true);
+    check_linear_scheme(layouts::clocking::COLUMNAR_NAME, true);
+    check_linear_scheme(layouts::clocking::ROW_NAME, true);
+    check_linear_scheme(layouts::clocking::TWODDWAVE_NAME, true);
+    check_linear_scheme(layouts::clocking::TWODDWAVE_HEX_NAME, true);
 
     // Non-linear clocking schemes
-    check_linear_scheme(layouts::clocking::OPEN, false);
-    check_linear_scheme(layouts::clocking::USE, false);
-    check_linear_scheme(layouts::clocking::RES, false);
-    check_linear_scheme(layouts::clocking::ESR, false);
-    check_linear_scheme(layouts::clocking::CFE, false);
-    check_linear_scheme(layouts::clocking::RIPPLE, false);
-    check_linear_scheme(layouts::clocking::SRS, false);
-    check_linear_scheme(layouts::clocking::BANCS, false);
+    check_linear_scheme(layouts::clocking::OPEN_NAME, false);
+    check_linear_scheme(layouts::clocking::USE_NAME, false);
+    check_linear_scheme(layouts::clocking::RES_NAME, false);
+    check_linear_scheme(layouts::clocking::ESR_NAME, false);
+    check_linear_scheme(layouts::clocking::CFE_NAME, false);
+    check_linear_scheme(layouts::clocking::RIPPLE_NAME, false);
+    check_linear_scheme(layouts::clocking::SRS_NAME, false);
+    check_linear_scheme(layouts::clocking::BANCS_NAME, false);
 }

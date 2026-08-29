@@ -290,7 +290,7 @@ here kept its identifier and only gained a namespace.
 | `fiction::area`                                                | `fiction::layouts::coords::area`                                            |
 | `fiction::bancs_clocking`                                      | `fiction::layouts::clocking::bancs`                                         |
 | `fiction::cfe_clocking`                                        | `fiction::layouts::clocking::cfe`                                           |
-| `fiction::clock_name::<NAME>`                                  | `fiction::layouts::clocking::<NAME>`                                        |
+| `fiction::clock_name::<SCHEME>`                                | `fiction::layouts::clocking::<SCHEME>_NAME`                                 |
 | `fiction::clocking_scheme`                                     | `fiction::layouts::clocking::scheme`                                        |
 | `fiction::columnar_clocking`                                   | `fiction::layouts::clocking::columnar`                                      |
 | `fiction::constants`                                           | `fiction::fcn::constants`                                                   |
@@ -430,7 +430,7 @@ them:
 ```text
 fiction::clocking_scheme                        ->  fiction::layouts::clocking::scheme
 fiction::num_clks                               ->  fiction::layouts::clocking::num_clks
-fiction::clock_name::TWODDWAVE                  ->  fiction::layouts::clocking::TWODDWAVE
+fiction::clock_name::TWODDWAVE                  ->  fiction::layouts::clocking::TWODDWAVE_NAME
 fiction::get_clocking_scheme                    ->  fiction::layouts::clocking::get_scheme
 fiction::is_linear_scheme                       ->  fiction::layouts::clocking::is_linear
 fiction::ptr                                    ->  fiction::layouts::clocking::ptr
@@ -439,7 +439,8 @@ fiction::unsupported_clocking_scheme_exception  ->  fiction::layouts::clocking::
 
 The scheme names lose their namespace rather than gaining one: `clock_name` held twelve
 `const char*` and nothing else, so the constants sit directly in `clocking` beside the
-factories that use them. They stay strings because a scheme is identified by its name
+factories that use them, suffixed `_NAME` so that no constant differs from a factory by
+case alone -- `clocking::USE_NAME` beside `clocking::use`. They stay strings because a scheme is identified by its name
 across FGL files, the CLI, and `pyfiction`, and because `get_scheme` also accepts the
 phase-count spellings that carry no constant -- `OPEN3`, `ROW4`, `2DDWAVEHEX3` -- and
 matches case-insensitively. An enum would have to convert back to a string at every use

@@ -40,14 +40,14 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(layouts::clocking::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME));
     CHECK(original.get_synchronization_element({0, 0}) == 1);
     CHECK(original.get_synchronization_element({1, 0}) == 2);
 
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(layouts::clocking::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clocking::USE_NAME));
     CHECK(copy.get_synchronization_element({0, 0}) == 2);
     CHECK(copy.get_synchronization_element({1, 0}) == 3);
 }
@@ -61,7 +61,7 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
 
     layout.assign_synchronization_element({1, 1}, 1);
 
-    CHECK(layout.is_clocking_scheme(layouts::clocking::TWODDWAVE));
+    CHECK(layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME));
     CHECK(layout.is_regularly_clocked());
     CHECK(layout.num_clocks() == 4);
 

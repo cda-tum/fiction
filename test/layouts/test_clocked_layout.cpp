@@ -36,12 +36,12 @@ TEST_CASE("Deep copy clocked layout", "[clocked-layout]")
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(layouts::clocking::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME));
 
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(layouts::clocking::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clocking::USE_NAME));
 }
 
 TEST_CASE("Clock zone assignment", "[clocked-layout]")
@@ -52,8 +52,8 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
 
     SECTION("2DDWave Clocking")
     {
-        CHECK(layout.is_clocking_scheme(layouts::clocking::TWODDWAVE));
-        CHECK(!layout.is_clocking_scheme(layouts::clocking::RES));
+        CHECK(layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME));
+        CHECK(!layout.is_clocking_scheme(layouts::clocking::RES_NAME));
         CHECK(layout.is_regularly_clocked());
         CHECK(layout.num_clocks() == 4);
 
@@ -102,8 +102,8 @@ TEST_CASE("Clock zone assignment", "[clocked-layout]")
     {
         layout.replace_clocking_scheme(layouts::clocking::use<clk_lyt>());
 
-        CHECK(!layout.is_clocking_scheme(layouts::clocking::TWODDWAVE));
-        CHECK(layout.is_clocking_scheme(layouts::clocking::USE));
+        CHECK(!layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_NAME));
+        CHECK(layout.is_clocking_scheme(layouts::clocking::USE_NAME));
         CHECK(layout.is_regularly_clocked());
 
         CHECK(layout.get_clock_number({0, 0}) == 0);
