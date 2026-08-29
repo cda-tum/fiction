@@ -7,15 +7,8 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 ## Working Principles
 
 - Prefer the smallest change that fully solves the task, then improve what you found on
-  the way there. Dependency bumps are the one thing that still belongs in its own pull
-  request; Renovate opens those itself.
-- Never add an abstraction, a template parameter, or a configuration option until a
-  second concrete caller needs it. _fiction_ is header-only and template-heavy, so every
-  added template parameter costs compile time and instantiation surface in every
-  translation unit that includes the header.
-- Prefer an existing facility from the STL, `mockturtle`, or `kitty` over a new
-  implementation. If you add a helper that duplicates one of them, say in the pull request
-  description why the existing one does not fit.
+  the way there. `Coding` below says how to get there. Dependency bumps are the one thing
+  that still belongs in its own pull request; Renovate opens those itself.
 - Test the documented contract. Never pin down a provisional implementation choice: a
   test that asserts on an internal detail blocks the next refactor without protecting a
   user.
@@ -45,6 +38,76 @@ Subdirectories carry their own `AGENTS.md` with rules that apply only there.
 - A redesign is the exception, because it costs more to review than to write. Say what you
   would change and why, and act once the maintainer agrees.
 - Prioritize the architecture and maintainability of the project as a whole.
+
+## Coding
+
+How much code to write. `Writing` governs the prose and `Code Style` governs how the code
+looks; this section governs how much of it there is.
+
+### The ladder
+
+Understand the problem before you climb: read the task, read the code it touches, and trace
+the real flow end to end. Then stop at the first rung that holds.
+
+1. Does this need to exist? A speculative need is no need. Skip it, and say so in one line.
+2. Does _fiction_ already have it? Reuse the trait, the type, or the pattern that sits a few
+   headers over. Re-implementing what `include/fiction/` already carries is the most common
+   way a change grows.
+3. Do the STL, `mockturtle`, or `kitty` do it? Use them. If you add a helper that duplicates
+   one of them, say in the pull request description why the existing one does not fit.
+4. Does a build or language feature cover it? A CMake option, a compiler flag, a
+   `static_assert`, or a concept beats runtime code.
+5. Does a dependency already in the tree solve it? Use it. Never add one for what a few
+   lines cover; adding one is an ask-first case, see `Boundaries`.
+6. Can it be one line? Write one line.
+7. Only then: the minimum code that works.
+
+The ladder shortens the solution, never the reading. A small diff in the wrong place is not
+a lazy win, it is a second bug.
+
+Fix the root cause, not the symptom. A bug report names a symptom. Grep every caller of the
+function you touch and fix the shared function once: one guard there is a smaller diff than
+one guard per caller, and it leaves no sibling caller broken.
+
+### Rules
+
+- No abstraction nobody asked for: no template parameter, no configuration option, no
+  policy class until a second concrete caller needs it. _fiction_ is header-only and
+  template-heavy, so every added template parameter costs compile time and instantiation
+  surface in every translation unit that includes the header.
+- No scaffolding for a caller that does not exist yet. That caller can scaffold.
+- Deletion over addition. Boring over clever. Fewest files.
+- Two options of the same size? Take the one that is correct at the edges. The goal is less
+  code, not a flimsier algorithm.
+- Mark a deliberate simplification that cuts a real corner with a known ceiling — an O(n²)
+  scan, a naive heuristic, a bound that holds only for the layouts in `benchmarks/` — in one
+  comment naming the ceiling and the upgrade path. Name the ceiling, never the tool or the
+  agent that wrote the code.
+
+### Never cut
+
+Cutting one of these is a defect, not minimalism:
+
+- Input validation at a public API boundary, and error handling that prevents a silent wrong
+  answer.
+- Anything the task explicitly asked for. If the maintainer wants the full version after you
+  argue for the small one, build it and stop re-arguing.
+- What this repository mandates: the Doxygen block on every symbol, the `docs/changelog.rst`
+  entry, the boxes in `.github/pull_request_template.md`.
+- The check. Non-trivial logic — a branch, a loop, a lifetime, a bound — leaves behind one
+  runnable test that fails if the logic breaks. Match the style of the tests around it and
+  add the case, not a suite. A one-line change needs no test.
+
+### Explaining the code
+
+Code first, then at most three lines: what you skipped, and when to add it. If the
+explanation outruns the code, delete the explanation — a paragraph defending a
+simplification is complexity smuggled back in as prose. A report, walkthrough, or review the
+maintainer asked for is not padding; give that one in full.
+
+A subagent inherits none of this. Any subagent that plans, writes, or reviews code gets the
+ladder and the `Never cut` list in its prompt, or the absolute path to this file. A plan is
+where the abstraction nobody asked for gets designed in, and every later step inherits it.
 
 ## Writing
 
