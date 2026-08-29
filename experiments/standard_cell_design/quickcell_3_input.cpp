@@ -46,7 +46,7 @@ int main()  // NOLINT
             "#Lp3",                     // uint64_t
             "#Lp3/N [%]",               // double
             "t_pruning [s]"             // double
-        };
+    };
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 11>{
         {{std::vector<tt>{networks::utils::create_and3_tt()}, "and3"},
@@ -72,14 +72,19 @@ int main()  // NOLINT
         fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
     const sidb::generators::design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
-        sidb::simulation::logic::is_operational_params{
-            sidb::model::simulation_parameters{2, -0.31}, sidb::simulation::engine::QUICKEXACT,
-            sidb::simulation::logic::bdl_input_iterator_params{sidb::simulation::logic::detect_bdl_wires_params{3.0}},
-            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-        sidb::generators::design_sidb_gates_params<
+        .operational_params =
+            sidb::simulation::logic::is_operational_params{
+                .sim_params = sidb::model::simulation_parameters{2, -0.31},
+                .sim_engine = sidb::simulation::engine::QUICKEXACT,
+                .input_bdl_iterator_params =
+                    sidb::simulation::logic::bdl_input_iterator_params{
+                        .bdl_wire_params =
+                            sidb::simulation::logic::detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
+                .op_condition = sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
+        .design_mode = sidb::generators::design_sidb_gates_params<
             fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
-        {{22, 6, 0}, {32, 12, 0}},
-        4};
+        .canvas                 = {{22, 6, 0}, {32, 12, 0}},
+        .number_of_canvas_sidbs = 4};
 
     for (const auto& [truth_tables, gate_names] : truth_tables_and_names)
     {

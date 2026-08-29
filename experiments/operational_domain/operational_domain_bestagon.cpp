@@ -18,8 +18,6 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <filesystem>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -50,7 +48,7 @@ int main()  // NOLINT
             "op. (CT)",
             "sim calls (CT)",
             "t in s (CT)"  // Contour Tracing
-        };
+    };
 
     // simulation parameters
     sidb::model::simulation_parameters sim_params{};

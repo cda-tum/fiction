@@ -35,7 +35,7 @@ int main()  // NOLINT
             "x_coord",          "y_coord",          "distance_grid_search",
             "#samples_grid",    "distance_random",  "#samples_random",
             "distance_contour", "#samples_contour",
-        };
+    };
 
     static const std::string bestagon_folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
     static const std::string plot_folder     = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
@@ -53,7 +53,7 @@ int main()  // NOLINT
         std::make_pair("inv_diag", std::vector<tt>{networks::utils::create_not_tt()})};
 
     const sidb::simulation::logic::is_operational_params is_op_params{
-        sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0}};
+        .sim_params = sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0}};
 
     // for this experiment we use a stray SiDB defect
     const auto stray_db = fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8};

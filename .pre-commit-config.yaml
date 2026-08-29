@@ -106,7 +106,7 @@ repos:
 
   # clang-format the C++ part of the code base
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: v22.1.8
+    rev: v23.1.0
     hooks:
       - id: clang-format
         types_or: [c++, c]
@@ -115,14 +115,14 @@ repos:
 
   # Ensure uv lock file is up-to-date
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.5
+    rev: 0.12.7
     hooks:
       - id: uv-lock
         priority: 0
 
   # Python linting using ruff
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.4
+    rev: v0.16.5
     hooks:
       - id: ruff-format
         priority: 6
@@ -191,7 +191,7 @@ repos:
 
   # Check the pyproject.toml file
   - repo: https://github.com/henryiii/validate-pyproject-schema-store
-    rev: 2026.08.15
+    rev: 2026.08.29
     hooks:
       - id: validate-pyproject
         priority: 0

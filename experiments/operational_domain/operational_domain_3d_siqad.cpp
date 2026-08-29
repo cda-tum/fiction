@@ -18,8 +18,6 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <filesystem>
-#include <iostream>
 #include <string>
 #include <utility>
 #include <vector>
@@ -46,7 +44,7 @@ int main()  // NOLINT
             "op. (FF)",
             "sim calls (FF)",
             "t in s (FF)"  // Flood Fill
-        };
+    };
 
     // simulation parameters
     sidb::model::simulation_parameters sim_params{};
