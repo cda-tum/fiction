@@ -33,14 +33,14 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
         layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-    cell_layout original{{5, 5, 0}, layouts::twoddwave_clocking<cell_layout>(), "Original", 2, 2};
+    cell_layout original{{5, 5, 0}, layouts::clocking::twoddwave<cell_layout>(), "Original", 2, 2};
     original.assign_cell_type({0, 2}, qca::technology::cell_type::NORMAL);
     original.assign_cell_type({2, 4}, qca::technology::cell_type::NORMAL);
 
     auto copy = original.clone();
 
     copy.resize({10, 10, 1});
-    copy.replace_clocking_scheme(layouts::use_clocking<cell_layout>());
+    copy.replace_clocking_scheme(layouts::clocking::use<cell_layout>());
     copy.set_layout_name("Copy");
     copy.assign_cell_type({0, 2}, qca::technology::cell_type::INPUT);
     copy.assign_cell_type({2, 4}, qca::technology::cell_type::INPUT);
@@ -48,7 +48,7 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
     CHECK(original.get_layout_name() == "Original");
     CHECK(original.get_cell_type({0, 2}) == qca::technology::cell_type::NORMAL);
     CHECK(original.get_cell_type({2, 4}) == qca::technology::cell_type::NORMAL);
@@ -56,7 +56,7 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(layouts::clock_name::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clocking::name::USE));
     CHECK(copy.get_layout_name() == "Copy");
     CHECK(copy.get_cell_type({0, 2}) == qca::technology::cell_type::INPUT);
     CHECK(copy.get_cell_type({2, 4}) == qca::technology::cell_type::INPUT);
@@ -324,7 +324,7 @@ TEST_CASE("Clock zone assignment to cells", "[cell-level-layout]")
         layouts::cell_level_layout<qca::technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-    const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, layouts::twoddwave_clocking<clk_cell_lyt>(), "Lyt",
+    const clk_cell_lyt layout{clk_cell_lyt::aspect_ratio{4, 4, 0}, layouts::clocking::twoddwave<clk_cell_lyt>(), "Lyt",
                               2, 2};
 
     CHECK(layout.get_clock_number({0, 0}) == 0);

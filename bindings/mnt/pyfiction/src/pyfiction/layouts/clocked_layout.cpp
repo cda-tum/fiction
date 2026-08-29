@@ -49,7 +49,7 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
             [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension,
                const std::string& scheme_name)
             {
-                if (const auto scheme = fiction::layouts::get_clocking_scheme<ClockedLyt>(scheme_name);
+                if (const auto scheme = fiction::layouts::clocking::get_scheme<ClockedLyt>(scheme_name);
                     scheme.has_value())
                 {
                     new (self.p) ClockedLyt{dimension, *scheme};

@@ -810,7 +810,7 @@ class graph_oriented_layout_design_impl
         ssg_vec.resize(num_search_space_graphs);
 
         // initialize layout to keep track of current best solution
-        Lyt best_lyt{{}, layouts::twoddwave_clocking<Lyt>()};
+        Lyt best_lyt{{}, layouts::clocking::twoddwave<Lyt>()};
 
         // initialize search space graphs
         initialize();
@@ -1844,7 +1844,7 @@ class graph_oriented_layout_design_impl
     ObstrLyt initialize_layout(uint64_t min_layout_width)
     {
         const auto layout_depth = ps.planar ? 0 : 1;
-        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, layouts::twoddwave_clocking<Lyt>()};
+        Lyt        lyt{{min_layout_width - 1, 0, layout_depth}, layouts::clocking::twoddwave<Lyt>()};
         return layouts::obstruction_layout<Lyt>(lyt);
     }
     /**

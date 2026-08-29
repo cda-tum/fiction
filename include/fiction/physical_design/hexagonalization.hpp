@@ -417,7 +417,7 @@ class hexagonalization_impl
         static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
 
         // ensure the layout uses the correct clocking scheme
-        assert(layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+        assert(layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
 
         // get Cartesian layout dimensions
         const auto layout_width  = layout.x() + 1;
@@ -438,7 +438,7 @@ class hexagonalization_impl
         }
 
         // create the initial hexagonal layout
-        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, layouts::row_clocking<HexLyt>()};
+        HexLyt hex_layout{{hex_width, hex_height, hex_depth}, layouts::clocking::row<HexLyt>()};
 
         // initialize statistics for hexagonalization
         hexagonalization_stats stats{};

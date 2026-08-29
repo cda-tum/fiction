@@ -209,7 +209,7 @@ int main(int argc, char* argv[])  // NOLINT
 
     // set up parameters for orthogonal physical design
     fiction::physical_design::orthogonal_physical_design_params ortho_params{};
-    ortho_params.number_of_clock_phases = fiction::layouts::num_clks::FOUR;
+    ortho_params.number_of_clock_phases = fiction::layouts::clocking::num_clks::FOUR;
     fiction::physical_design::orthogonal_physical_design_stats ortho_stats{};
 
     // perform layout generation with a scalable algorithm

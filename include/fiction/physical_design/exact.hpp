@@ -183,7 +183,7 @@ class exact_impl
                const sidb::libraries::surface_black_list<Lyt, fcn::port_direction>& sbl = {}) :
             ps{std::move(p)},
             pst{st},
-            scheme{*layouts::get_clocking_scheme<Lyt>(ps.scheme)},
+            scheme{*layouts::clocking::get_scheme<Lyt>(ps.scheme)},
             black_list{sbl}
     {
         // create PO nodes in the network
@@ -232,7 +232,7 @@ class exact_impl
     /**
      * The utilized clocking scheme.
      */
-    layouts::clocking_scheme<tile<Lyt>> scheme;
+    layouts::clocking::scheme<tile<Lyt>> scheme;
     /**
      * Maps tiles to blacklisted gate types via their truth tables and port information.
      */
@@ -311,7 +311,7 @@ class exact_impl
                 }
             }
             // Columnar clocking optimization
-            else if (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR))
+            else if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if (ar.x < depth_ntk.depth())
@@ -325,7 +325,7 @@ class exact_impl
                 }
             }
             // Row clocking optimization
-            else if (layout.is_clocking_scheme(layouts::clock_name::ROW))
+            else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if (ar.y < depth_ntk.depth())
@@ -1419,7 +1419,7 @@ class exact_impl
                     });
             };
 
-            if (!(params.border_io && layouts::is_linear_scheme<Lyt>(layout.get_clocking_scheme())))
+            if (!(params.border_io && layouts::clocking::is_linear<Lyt>(layout.get_clocking_scheme())))
             {
                 // ensure that exactly one ncl variable is set for each node
                 network.foreach_node(
@@ -1522,8 +1522,8 @@ class exact_impl
             };
 
             // much simpler but equisatisfiable version of the constraint for 2DDWave clocking with border I/Os
-            if (params.border_io && (layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE) ||
-                                     layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE_HEX)))
+            if (params.border_io && (layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE) ||
+                                     layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE_HEX)))
             {
                 if (params.io_pins)
                 {
@@ -1540,8 +1540,8 @@ class exact_impl
                         });
                 }
             }
-            else if (params.border_io && (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR) ||
-                                          layout.is_clocking_scheme(layouts::clock_name::ROW)))
+            else if (params.border_io && (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR) ||
+                                          layout.is_clocking_scheme(layouts::clocking::name::ROW)))
             {
                 // Columnar and row clocking scheme don't need the path length constraints when border pins are enabled
             }
@@ -1836,7 +1836,7 @@ class exact_impl
         void utilize_hierarchical_information()
         {
             // symmetry breaking for columnar clocking
-            if (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR))
+            if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
             {
                 // restrict node placement according to the hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1900,7 +1900,7 @@ class exact_impl
                 }
             }
             // symmetry breaking for row clocking
-            if (layout.is_clocking_scheme(layouts::clock_name::ROW))
+            if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
             {
                 // restrict node placement according to the hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1964,7 +1964,7 @@ class exact_impl
                 }
             }
             // symmetry breaking for 2DDWave clocking
-            else if (layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE))
+            else if (layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE))
             {
                 // restrict node placement according to its hierarchy level
                 if (params.io_pins && params.border_io)
@@ -2079,11 +2079,11 @@ class exact_impl
                 network.foreach_pi(
                     [this, &assign_north, &assign_west, &assign_border](const auto& pi)
                     {
-                        if (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR))
+                        if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
                         {
                             assign_west(pi);
                         }
-                        else if (layout.is_clocking_scheme(layouts::clock_name::ROW))
+                        else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
                         {
                             assign_north(pi);
                         }
@@ -2095,11 +2095,11 @@ class exact_impl
                 network.foreach_po(
                     [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
-                        if (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR))
+                        if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
                         {
                             assign_east(network.get_node(po));
                         }
-                        else if (layout.is_clocking_scheme(layouts::clock_name::ROW))
+                        else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
                         {
                             assign_south(network.get_node(po));
                         }
@@ -2119,11 +2119,11 @@ class exact_impl
                                                {
                                                    if (!skip_const_or_io_node(fon))
                                                    {
-                                                       if (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR))
+                                                       if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
                                                        {
                                                            assign_west(fon);
                                                        }
-                                                       else if (layout.is_clocking_scheme(layouts::clock_name::ROW))
+                                                       else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
                                                        {
                                                            assign_north(fon);
                                                        }
@@ -2144,11 +2144,11 @@ class exact_impl
                                                   if (const auto fin = network.get_node(fi);
                                                       !skip_const_or_io_node(fin))
                                                   {
-                                                      if (layout.is_clocking_scheme(layouts::clock_name::COLUMNAR))
+                                                      if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
                                                       {
                                                           assign_east(fin);
                                                       }
-                                                      else if (layout.is_clocking_scheme(layouts::clock_name::ROW))
+                                                      else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
                                                       {
                                                           assign_south(fin);
                                                       }
@@ -2571,7 +2571,7 @@ class exact_impl
             }
 
             // path/cycle constraints
-            if (!layouts::is_linear_scheme<Lyt>(
+            if (!layouts::clocking::is_linear<Lyt>(
                     layout.get_clocking_scheme()))  // linear schemes; no cycles by definition
             {
                 establish_sub_paths();
@@ -3217,11 +3217,11 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::get_clocking_scheme<Lyt>(ps.scheme);
+    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
 
     if (!clocking_scheme.has_value())
     {
-        throw layouts::unsupported_clocking_scheme_exception();
+        throw layouts::clocking::unsupported_scheme_exception();
     }
     // check for input degree
     if (networks::utils::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
@@ -3290,11 +3290,11 @@ exact_with_blacklist(const Ntk& ntk, const sidb::libraries::surface_black_list<L
                   "Ntk is not a network type");  // Ntk is being converted to a networks::technology_network anyway,
                                                  // therefore, this is the only relevant check here
 
-    const auto clocking_scheme = layouts::get_clocking_scheme<Lyt>(ps.scheme);
+    const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(ps.scheme);
 
     if (!clocking_scheme.has_value())
     {
-        throw layouts::unsupported_clocking_scheme_exception();
+        throw layouts::clocking::unsupported_scheme_exception();
     }
     // check for input degree
     if (networks::utils::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))

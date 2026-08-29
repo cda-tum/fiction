@@ -177,7 +177,7 @@ class gate_level_layout : public ClockedLayout
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme,
+    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking::scheme<tile>& scheme,
                       const std::string& name = {}) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<gate_level_layout_storage>()},

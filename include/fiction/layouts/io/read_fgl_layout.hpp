@@ -7,7 +7,7 @@
 
 // clang-format off
 // NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but clocked_layout.hpp's
-// get_clocking_scheme free function is looked up via two-phase name lookup at template instantiation time, so
+// clocking::get_scheme free function is looked up via two-phase name lookup at template instantiation time, so
 // removing any of these breaks the build despite the tool's "not used directly" heuristic
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/clocked_layout.hpp"
@@ -254,7 +254,7 @@ class read_fgl_layout_impl
             if (auto* const clocking_scheme_name = clocking->FirstChildElement("name");
                 clocking_scheme_name != nullptr && (clocking_scheme_name->GetText() != nullptr))
             {
-                const auto clocking_scheme = layouts::get_clocking_scheme<Lyt>(clocking_scheme_name->GetText());
+                const auto clocking_scheme = layouts::clocking::get_scheme<Lyt>(clocking_scheme_name->GetText());
                 if (clocking_scheme.has_value())
                 {
                     lyt.replace_clocking_scheme(*clocking_scheme);

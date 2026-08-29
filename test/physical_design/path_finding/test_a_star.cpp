@@ -70,7 +70,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{1, 1}, layouts::twoddwave_clocking<clk_lyt>()};
+            const clk_lyt layout{{1, 1}, layouts::clocking::twoddwave<clk_lyt>()};
 
             SECTION("(0,0) to (1,1)")  // path of length 3
             {
@@ -105,7 +105,7 @@ TEST_CASE("A* on 2x2 layouts", "[A*]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{1, 1}, layouts::use_clocking<clk_lyt>()};
+            const clk_lyt layout{{1, 1}, layouts::clocking::use<clk_lyt>()};
 
             SECTION("(0,0) to (0,1)")  // path of length 4
             {
@@ -159,7 +159,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{3, 3}, layouts::twoddwave_clocking<clk_lyt>()};
+            const clk_lyt layout{{3, 3}, layouts::clocking::twoddwave<clk_lyt>()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
@@ -174,7 +174,7 @@ TEST_CASE("A* on 4x4 layouts", "[A*]")
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{3, 3}, layouts::use_clocking<clk_lyt>()};
+            const clk_lyt layout{{3, 3}, layouts::clocking::use<clk_lyt>()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
@@ -231,7 +231,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{{3, 3}, layouts::twoddwave_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::clocking::twoddwave<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
             {
@@ -261,7 +261,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with coordinate obstruction", "[A*]")
         }
         SECTION("USE")
         {
-            const gate_lyt layout{{3, 3}, layouts::use_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::clocking::use<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with coordinate obstruction")  // path of length 7
             {
@@ -308,7 +308,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{2, 2, 1}, layouts::twoddwave_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{2, 2, 1}, layouts::clocking::twoddwave<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -327,7 +327,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
             }
             SECTION("USE")
             {
-                const gate_lyt layout{{2, 2, 1}, layouts::use_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{2, 2, 1}, layouts::clocking::use<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (2,2) with obstruction and crossings")  // 1 valid path
                 {
@@ -352,7 +352,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{3, 3, 1}, layouts::twoddwave_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{3, 3, 1}, layouts::clocking::twoddwave<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,3) with obstruction and crossings")  // 2 valid paths
                 {
@@ -384,7 +384,7 @@ TEST_CASE("A* with coordinate obstruction but crossings enabled", "[A*]")
         {
             SECTION("2DDWave")
             {
-                const gate_lyt layout{{3, 2, 1}, layouts::twoddwave_clocking<gate_lyt>()};  // create a crossing layer
+                const gate_lyt layout{{3, 2, 1}, layouts::clocking::twoddwave<gate_lyt>()};  // create a crossing layer
 
                 SECTION("(0,0) to (3,2) with obstruction and crossings")  // 1 valid paths
                 {
@@ -446,7 +446,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
     {
         SECTION("2DDWave")
         {
-            const gate_lyt layout{{3, 3}, layouts::twoddwave_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::clocking::twoddwave<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
@@ -473,7 +473,7 @@ TEST_CASE("A* on 4x4 gate-level layouts with connection obstruction", "[A*]")
         }
         SECTION("USE")
         {
-            const gate_lyt layout{{3, 3}, layouts::use_clocking<gate_lyt>()};
+            const gate_lyt layout{{3, 3}, layouts::clocking::use<gate_lyt>()};
 
             SECTION("(0,0) to (3,3) with connection obstruction")  // path of length 7
             {
@@ -524,7 +524,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
         {
             SECTION("RES")
             {
-                const clk_lyt layout{{9, 9}, layouts::res_clocking<clk_lyt>()};
+                const clk_lyt layout{{9, 9}, layouts::clocking::res<clk_lyt>()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
@@ -538,7 +538,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
             }
             SECTION("ESP")
             {
-                const clk_lyt layout{{9, 9}, layouts::esr_clocking<clk_lyt>()};
+                const clk_lyt layout{{9, 9}, layouts::clocking::esr<clk_lyt>()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
@@ -572,7 +572,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
         {
             SECTION("RES")
             {
-                const clk_lyt layout{{9, 9}, layouts::res_clocking<clk_lyt>()};
+                const clk_lyt layout{{9, 9}, layouts::clocking::res<clk_lyt>()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
@@ -586,7 +586,7 @@ TEST_CASE("A* on 10x10 layouts with varying distance functions", "[A*]")
             }
             SECTION("ESP")
             {
-                const clk_lyt layout{{9, 9}, layouts::esr_clocking<clk_lyt>()};
+                const clk_lyt layout{{9, 9}, layouts::clocking::esr<clk_lyt>()};
 
                 SECTION("(0,0) to (9,9) without obstruction")  // path of length 19
                 {
@@ -607,7 +607,7 @@ TEST_CASE("A* on 4x4 layouts with varying cost functions", "[A*]")
     using clk_lyt    = layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>;
     using coord_path = physical_design::utils::layout_coordinate_path<clk_lyt>;
 
-    const clk_lyt layout{{3, 3}, layouts::use_clocking<clk_lyt>()};
+    const clk_lyt layout{{3, 3}, layouts::clocking::use<clk_lyt>()};
 
     SECTION("Unit cost")
     {
@@ -656,7 +656,7 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
 
         SECTION("2DDWave")
         {
-            const clk_lyt layout{{3, 3}, layouts::twoddwave_clocking<clk_lyt>()};
+            const clk_lyt layout{{3, 3}, layouts::clocking::twoddwave<clk_lyt>()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {
@@ -670,7 +670,7 @@ TEST_CASE("A* path finding with the A* distance functor (don't do this!)", "[A*]
         }
         SECTION("USE")
         {
-            const clk_lyt layout{{3, 3}, layouts::use_clocking<clk_lyt>()};
+            const clk_lyt layout{{3, 3}, layouts::clocking::use<clk_lyt>()};
 
             SECTION("(0,0) to (3,3) without obstruction")  // path of length 7
             {

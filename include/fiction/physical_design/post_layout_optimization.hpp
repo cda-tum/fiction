@@ -1241,7 +1241,7 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     // check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(layouts::clock_name::TWODDWAVE))
+    if (!lyt.is_clocking_scheme(layouts::clocking::name::TWODDWAVE))
     {
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;

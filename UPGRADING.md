@@ -26,6 +26,8 @@ include/fiction/
 ├── layouts/                       fiction::layouts::
 │   ├── io/                        fiction::layouts::io::
 │   └── utils/                     fiction::layouts::utils::
+│                                  (coordinates.hpp adds fiction::layouts::coords::,
+│                                   clocking_scheme.hpp adds fiction::layouts::clocking::)
 ├── networks/                      fiction::networks::
 │   ├── views/                     fiction::networks::views::
 │   ├── io/                        fiction::networks::io::
@@ -266,7 +268,7 @@ Their namespace still changed — see the tree above.
 | `fiction/types.hpp`                                  | `fiction`                  |
 | `fiction/utils/debug/layout_printer.hpp`             | `fiction::utils::debug`    |
 | `fiction/utils/debug/network_writer.hpp`             | `fiction::utils::debug`    |
-| `fiction/utils/version_info.hpp.in`                  | `fiction::utils`           |
+| `fiction/utils/version_info.hpp.in`                  | `fiction`                  |
 
 ### New files
 
@@ -280,37 +282,50 @@ Their namespace still changed — see the tree above.
 
 ### Renamed symbols
 
-70 public symbols changed name as well as namespace. Everything not listed
+88 public symbols changed name as well as namespace. Everything not listed
 here kept its identifier and only gained a namespace.
 
 | old                                                            | new                                                                         |
 | -------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | `fiction::area`                                                | `fiction::layouts::coords::area`                                            |
+| `fiction::bancs_clocking`                                      | `fiction::layouts::clocking::bancs`                                         |
+| `fiction::cfe_clocking`                                        | `fiction::layouts::clocking::cfe`                                           |
+| `fiction::clock_name`                                          | `fiction::layouts::clocking::name`                                          |
+| `fiction::clocking_scheme`                                     | `fiction::layouts::clocking::scheme`                                        |
+| `fiction::columnar_clocking`                                   | `fiction::layouts::clocking::columnar`                                      |
 | `fiction::constants`                                           | `fiction::fcn::constants`                                                   |
 | `fiction::coord_iterator`                                      | `fiction::layouts::coords::iterator`                                        |
 | `fiction::cube::coord_t`                                       | `fiction::layouts::coords::cube`                                            |
+| `fiction::esr_clocking`                                        | `fiction::layouts::clocking::esr`                                           |
 | `fiction::exact_sidb_simulation_engine`                        | `fiction::sidb::simulation::exact_engine`                                   |
 | `fiction::fcn_gate_library`                                    | `fiction::fcn::gate_library`                                                |
 | `fiction::generate_multiple_random_sidb_layouts`               | `fiction::sidb::generators::generate_multiple_random_layouts`               |
 | `fiction::generate_random_sidb_layout`                         | `fiction::sidb::generators::generate_random_layout`                         |
 | `fiction::generate_random_sidb_layout_params`                  | `fiction::sidb::generators::generate_random_layout_params`                  |
+| `fiction::get_clocking_scheme`                                 | `fiction::layouts::clocking::get_scheme`                                    |
 | `fiction::get_sidb_simulation_engine`                          | `fiction::sidb::simulation::get_engine`                                     |
 | `fiction::has_offset_ucoord_v`                                 | `fiction::has_offset_coord_v`                                               |
 | `fiction::heuristic_sidb_simulation_engine`                    | `fiction::sidb::simulation::heuristic_engine`                               |
 | `fiction::inml_technology`                                     | `fiction::inml::technology`                                                 |
 | `fiction::inml_topolinano_library`                             | `fiction::inml::topolinano_library`                                         |
+| `fiction::is_linear_scheme`                                    | `fiction::layouts::clocking::is_linear`                                     |
 | `fiction::is_offset_ucoord_v`                                  | `fiction::is_offset_coord_v`                                                |
 | `fiction::is_sidb_gate_design_impossible`                      | `fiction::sidb::generators::is_gate_design_impossible`                      |
 | `fiction::mol_qca_technology`                                  | `fiction::qca::mol_technology`                                              |
+| `fiction::num_clks`                                            | `fiction::layouts::clocking::num_clks`                                      |
 | `fiction::offset::ucoord_t`                                    | `fiction::layouts::coords::offset`                                          |
 | `fiction::offset_to_cube_coord`                                | `fiction::layouts::coords::offset_to_cube`                                  |
 | `fiction::on_the_fly_sidb_circuit_design`                      | `fiction::sidb::generators::on_the_fly_circuit_design`                      |
 | `fiction::on_the_fly_sidb_circuit_design_on_defective_surface` | `fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface` |
 | `fiction::on_the_fly_sidb_circuit_design_params`               | `fiction::sidb::generators::on_the_fly_circuit_design_params`               |
+| `fiction::open_clocking`                                       | `fiction::layouts::clocking::open`                                          |
+| `fiction::ptr`                                                 | `fiction::layouts::clocking::ptr`                                           |
 | `fiction::qca_one_library`                                     | `fiction::qca::qca_one_library`                                             |
 | `fiction::qca_technology`                                      | `fiction::qca::technology`                                                  |
-| `fiction::random_sidb_layout_generator`                        | `fiction::sidb::generators::random_layout_generator`                        |
 | `fiction::read_sidb_surface_defects`                           | `fiction::sidb::io::read_surface_defects`                                   |
+| `fiction::res_clocking`                                        | `fiction::layouts::clocking::res`                                           |
+| `fiction::ripple_clocking`                                     | `fiction::layouts::clocking::ripple`                                        |
+| `fiction::row_clocking`                                        | `fiction::layouts::clocking::row`                                           |
 | `fiction::sidb_100_lattice`                                    | `fiction::sidb::primitives::lattice_100`                                    |
 | `fiction::sidb_111_lattice`                                    | `fiction::sidb::primitives::lattice_111`                                    |
 | `fiction::sidb_bestagon_library`                               | `fiction::sidb::libraries::bestagon_library`                                |
@@ -353,12 +368,13 @@ here kept its identifier and only gained a namespace.
 | `fiction::siqad::coord_t`                                      | `fiction::layouts::coords::siqad`                                           |
 | `fiction::siqad::to_fiction_coord`                             | `fiction::layouts::coords::to_fiction_coord`                                |
 | `fiction::siqad::to_siqad_coord`                               | `fiction::layouts::coords::to_siqad_coord`                                  |
+| `fiction::srs_clocking`                                        | `fiction::layouts::clocking::srs`                                           |
 | `fiction::surface_black_list`                                  | `fiction::sidb::libraries::surface_black_list`                              |
+| `fiction::twoddwave_clocking`                                  | `fiction::layouts::clocking::twoddwave`                                     |
+| `fiction::twoddwave_hex_clocking`                              | `fiction::layouts::clocking::twoddwave_hex`                                 |
+| `fiction::unsupported_clocking_scheme_exception`               | `fiction::layouts::clocking::unsupported_scheme_exception`                  |
+| `fiction::use_clocking`                                        | `fiction::layouts::clocking::use`                                           |
 | `fiction::volume`                                              | `fiction::layouts::coords::volume`                                          |
-
-Two rows change only the namespace. They are listed because the prefix looks droppable
-and deliberately was not dropped: `qca_one_library` is the published name of the QCA ONE
-gate library, and `sim7_mol_library` names the SIM(7)-MolPDK library.
 
 ### The coordinate namespaces
 
@@ -386,6 +402,48 @@ fiction::volume                  -> fiction::layouts::coords::volume
 
 `is_offset_ucoord_v` and `has_offset_ucoord_v` become `is_offset_coord_v` and
 `has_offset_coord_v`. The cube and siqad traits keep their names.
+
+### The clocking namespace
+
+Every clocking scheme carried the word `clocking` in its own name while sitting in a
+namespace that said nothing about clocking. The schemes now share one namespace, and
+the schemes themselves are what the identifiers name:
+
+```text
+fiction::open_clocking           ->  fiction::layouts::clocking::open
+fiction::columnar_clocking       ->  fiction::layouts::clocking::columnar
+fiction::row_clocking            ->  fiction::layouts::clocking::row
+fiction::twoddwave_clocking      ->  fiction::layouts::clocking::twoddwave
+fiction::twoddwave_hex_clocking  ->  fiction::layouts::clocking::twoddwave_hex
+fiction::use_clocking            ->  fiction::layouts::clocking::use
+fiction::res_clocking            ->  fiction::layouts::clocking::res
+fiction::esr_clocking            ->  fiction::layouts::clocking::esr
+fiction::cfe_clocking            ->  fiction::layouts::clocking::cfe
+fiction::ripple_clocking         ->  fiction::layouts::clocking::ripple
+fiction::srs_clocking            ->  fiction::layouts::clocking::srs
+fiction::bancs_clocking          ->  fiction::layouts::clocking::bancs
+```
+
+The type they return, the enum they take, and the helpers that operate on them move with
+them:
+
+```text
+fiction::clocking_scheme                        ->  fiction::layouts::clocking::scheme
+fiction::num_clks                               ->  fiction::layouts::clocking::num_clks
+fiction::clock_name                             ->  fiction::layouts::clocking::name
+fiction::get_clocking_scheme                    ->  fiction::layouts::clocking::get_scheme
+fiction::is_linear_scheme                       ->  fiction::layouts::clocking::is_linear
+fiction::ptr                                    ->  fiction::layouts::clocking::ptr
+fiction::unsupported_clocking_scheme_exception  ->  fiction::layouts::clocking::unsupported_scheme_exception
+```
+
+`clocking_scheme.hpp` keeps its path. Like `coords`, `clocking` is a namespace the header
+adds rather than a directory, because one header holds the whole family.
+
+The scheme name strings are unchanged, so `get_scheme("2DDWave")` still resolves, and the
+`clocked_layout` members that mention clocking -- `get_clocking_scheme`,
+`is_clocking_scheme`, `replace_clocking_scheme` -- keep their names: they are scoped by
+their class, not by a namespace.
 
 ### Renamed struct members
 

@@ -48,7 +48,8 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
             [](py::pointer_and_handle<GateLyt> self, const fiction::aspect_ratio<GateLyt>& dimension,
                const std::string& scheme_name, const std::string& layout_name)
             {
-                if (const auto scheme = fiction::layouts::get_clocking_scheme<GateLyt>(scheme_name); scheme.has_value())
+                if (const auto scheme = fiction::layouts::clocking::get_scheme<GateLyt>(scheme_name);
+                    scheme.has_value())
                 {
                     new (self.p) GateLyt{dimension, *scheme, layout_name};
                     return;

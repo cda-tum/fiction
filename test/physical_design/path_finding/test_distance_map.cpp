@@ -21,7 +21,7 @@ TEST_CASE("Distance map", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::twoddwave<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -40,7 +40,7 @@ TEST_CASE("Distance map", "[distance-map]")
     }
     SECTION("USE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::use_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::use<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -59,7 +59,7 @@ TEST_CASE("Distance map", "[distance-map]")
     }
     SECTION("RES clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::res_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::res<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -78,7 +78,7 @@ TEST_CASE("Distance map", "[distance-map]")
     }
     SECTION("CFE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::cfe_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::cfe<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -104,7 +104,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::twoddwave<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_sparse_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -123,7 +123,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     }
     SECTION("USE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::use_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::use<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_sparse_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -142,7 +142,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     }
     SECTION("RES clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::res_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::res<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_sparse_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -161,7 +161,7 @@ TEST_CASE("Sparse distance map", "[distance-map]")
     }
     SECTION("CFE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::cfe_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::cfe<clk_lyt>()};
 
         const auto dist_map = physical_design::path_finding::initialize_sparse_distance_map(
             layout, physical_design::path_finding::a_star_distance_functor<clk_lyt, dist>{});
@@ -187,7 +187,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
 
     SECTION("2DDWave clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::twoddwave_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::twoddwave<clk_lyt>()};
 
         const auto dist_map_func = physical_design::path_finding::smart_distance_cache_functor<clk_lyt, dist>{
             layout, &physical_design::path_finding::a_star_distance<clk_lyt, dist>};
@@ -217,7 +217,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     }
     SECTION("USE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::use_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::use<clk_lyt>()};
 
         const auto dist_map_func = physical_design::path_finding::smart_distance_cache_functor<clk_lyt, dist>{
             layout, &physical_design::path_finding::a_star_distance<clk_lyt, dist>};
@@ -247,7 +247,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     }
     SECTION("RES clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::res_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::res<clk_lyt>()};
 
         const auto dist_map_func = physical_design::path_finding::smart_distance_cache_functor<clk_lyt, dist>{
             layout, &physical_design::path_finding::a_star_distance<clk_lyt, dist>};
@@ -277,7 +277,7 @@ TEST_CASE("Smart distance cache functor", "[distance-map]")
     }
     SECTION("CFE clocking")
     {
-        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::cfe_clocking<clk_lyt>()};
+        const clk_lyt layout{aspect_ratio<clk_lyt>{4, 4}, layouts::clocking::cfe<clk_lyt>()};
 
         const auto dist_map_func = physical_design::path_finding::smart_distance_cache_functor<clk_lyt, dist>{
             layout, &physical_design::path_finding::a_star_distance<clk_lyt, dist>};

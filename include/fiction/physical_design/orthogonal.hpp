@@ -45,7 +45,7 @@ struct orthogonal_physical_design_params
     /**
      * Number of clock phases to use. 3 and 4 are supported.
      */
-    layouts::num_clks number_of_clock_phases = layouts::num_clks::FOUR;
+    layouts::clocking::num_clks number_of_clock_phases = layouts::clocking::num_clks::FOUR;
 };
 
 struct orthogonal_physical_design_stats
@@ -486,7 +486,7 @@ class orthogonal_impl
 
         // instantiate the layout
         Lyt layout{determine_layout_size<Lyt>(ctn, num_multi_output_nodes),
-                   layouts::twoddwave_clocking<Lyt>(ps.number_of_clock_phases)};
+                   layouts::clocking::twoddwave<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
         auto pi2node = physical_design::utils::reserve_input_nodes(layout, ctn.color_ntk);

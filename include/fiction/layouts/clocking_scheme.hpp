@@ -21,7 +21,7 @@
 #include <string_view>
 #include <utility>
 
-namespace fiction::layouts
+namespace fiction::layouts::clocking
 {
 
 /**
@@ -38,7 +38,7 @@ namespace fiction::layouts
  * @tparam ClockZone Clock zone type. Usually, a coordinate type in a layout.
  */
 template <typename ClockZone>
-class clocking_scheme
+class scheme
 {
   public:
     using clock_zone     = ClockZone;
@@ -56,8 +56,8 @@ class clocking_scheme
      * @param cn Number of clock phases that make up one clock cycle, i.e., the number of different clock numbers.
      * @param r Flag to identify the scheme as regular.
      */
-    explicit clocking_scheme(std::string_view n, clock_function f, const degree in_deg, const degree out_deg,
-                             const clock_number cn = 4, const bool r = true) noexcept :
+    explicit scheme(std::string_view n, clock_function f, const degree in_deg, const degree out_deg,
+                    const clock_number cn = 4, const bool r = true) noexcept :
             name{n},
             max_in_degree{in_deg},
             max_out_degree{out_deg},
@@ -155,7 +155,7 @@ class clocking_scheme
     clocking_map override{};
 };
 
-namespace clock_name
+namespace name
 {
 
 inline constexpr const char* OPEN          = "OPEN";
@@ -171,7 +171,7 @@ inline constexpr const char* RIPPLE        = "RIPPLE";
 inline constexpr const char* SRS           = "SRS";
 inline constexpr const char* BANCS         = "BANCS";
 
-}  // namespace clock_name
+}  // namespace name
 
 enum class num_clks : uint8_t
 {
@@ -194,28 +194,26 @@ enum class num_clks : uint8_t
  * @return Irregular clocking scheme.
  */
 template <typename Lyt>
-static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
+static auto open(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function open_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function open_clock_function =
         []([[maybe_unused]] const clock_zone<Lyt>& cz) noexcept
-    { return typename clocking_scheme<clock_zone<Lyt>>::clock_number{}; };
+    { return typename scheme<clock_zone<Lyt>>::clock_number{}; };
 
     switch (n)
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{
-                clock_name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 3u, false};
+            return scheme{name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 3u, false};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{
-                clock_name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
+            return scheme{name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
         }
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{clock_name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
+    return scheme{name::OPEN, open_clock_function, Lyt::max_fanin_size, Lyt::max_fanin_size, 4u, false};
 }
 /**
  * Returns a linear 1D clocking as originally introduced in \"A device architecture for computing with quantum dots\" by
@@ -226,21 +224,21 @@ static auto open_clocking(const num_clks& n = num_clks::FOUR) noexcept
  * @return Columnar clocking scheme.
  */
 template <typename Lyt>
-static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
+static auto columnar(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function columnar_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
 
         return cutout[cz.y % 3ul][cz.x % 3ul];
     };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function columnar_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function columnar_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
@@ -250,19 +248,16 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{
-                clock_name::COLUMNAR, columnar_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
+            return scheme{name::COLUMNAR, columnar_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{
-                clock_name::COLUMNAR, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
+            return scheme{name::COLUMNAR, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
         }
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{
-        clock_name::COLUMNAR, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
+    return scheme{name::COLUMNAR, columnar_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
 }
 /**
  * Returns a 90° rotated linear 1D clocking based on the one originally introduced in \"A device architecture for
@@ -273,21 +268,21 @@ static auto columnar_clocking(const num_clks& n = num_clks::FOUR) noexcept
  * @return Row-based clocking scheme.
  */
 template <typename Lyt>
-static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
+static auto row(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function row_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 0, 0}}, {{1, 1, 1}}, {{2, 2, 2}}}};
 
         return cutout[cz.y % 3ul][cz.x % 3ul];
     };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function row_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function row_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 0, 0, 0}}, {{1, 1, 1, 1}}, {{2, 2, 2, 2}}, {{3, 3, 3, 3}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
@@ -297,18 +292,16 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{
-                clock_name::ROW, row_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
+            return scheme{name::ROW, row_3_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 3u, true};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{
-                clock_name::ROW, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
+            return scheme{name::ROW, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
         }
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{clock_name::ROW, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
+    return scheme{name::ROW, row_4_clock_function, std::min(Lyt::max_fanin_size, 3u), 2u, 4u, true};
 }
 /**
  * Returns the 2DDWave clocking as defined in \"Clocking and Cell Placement for QCA\" by V. Vankamamidi, M. Ottavi,
@@ -319,21 +312,21 @@ static auto row_clocking(const num_clks& n = num_clks::FOUR) noexcept
  * @return 2DDWave clocking scheme.
  */
 template <typename Lyt>
-static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
+static auto twoddwave(const num_clks& n = num_clks::FOUR) noexcept
 {
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function twoddwave_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 1, 2}}, {{1, 2, 0}}, {{2, 0, 1}}}};
 
         return cutout[cz.y % 3ul][cz.x % 3ul];
     };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function twoddwave_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function twoddwave_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{2, 3, 0, 1}}, {{3, 0, 1, 2}}}};
 
         return cutout[cz.y % 4ul][cz.x % 4ul];
@@ -343,19 +336,16 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
     {
         case num_clks::THREE:
         {
-            return clocking_scheme{
-                clock_name::TWODDWAVE, twoddwave_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
+            return scheme{name::TWODDWAVE, twoddwave_3_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
         }
         case num_clks::FOUR:
         {
-            return clocking_scheme{
-                clock_name::TWODDWAVE, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
+            return scheme{name::TWODDWAVE, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
         }
     }
 
     // fix -Wreturn-type warning
-    return clocking_scheme{
-        clock_name::TWODDWAVE, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
+    return scheme{name::TWODDWAVE, twoddwave_4_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
 }
 /**
  * Returns a hexagonal variation of the 2DDWave clocking as originally defined in \"Clocking and Cell Placement for
@@ -366,11 +356,11 @@ static auto twoddwave_clocking(const num_clks& n = num_clks::FOUR) noexcept
  * @return Hexagonal 2DDWave clocking scheme.
  */
 template <typename Lyt>
-static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
+static auto twoddwave_hex(const num_clks& n = num_clks::FOUR) noexcept
 {
     // clang-format off
 
-    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
+    static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
         odd_3_cutout{{{{0, 1, 2}},
                       {{1, 2, 0}},
                       {{1, 2, 0}},
@@ -378,7 +368,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                       {{2, 0, 1}},
                       {{0, 1, 2}}}};
 
-    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
+    static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u>
         even_3_cutout{{{{0, 1, 2}},
                        {{0, 1, 2}},
                        {{1, 2, 0}},
@@ -386,7 +376,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                        {{2, 0, 1}},
                        {{2, 0, 1}}}};
 
-    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
+    static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
         odd_4_cutout{{{{0, 1, 2, 3}},
                       {{1, 2, 3, 0}},
                       {{1, 2, 3, 0}},
@@ -396,7 +386,7 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
                       {{3, 0, 1, 2}},
                       {{0, 1, 2, 3}}}};
 
-    static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
+    static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 8u>
         even_4_cutout{{{{0, 1, 2, 3}},
                        {{0, 1, 2, 3}},
                        {{1, 2, 3, 0}},
@@ -408,28 +398,28 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
 
     // clang-format on
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return odd_4_cutout[cz.y % 8ul][cz.x % 4ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return even_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return even_4_cutout[cz.y % 8ul][cz.x % 4ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.x % 6ul][cz.y % 3ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return odd_4_cutout[cz.x % 8ul][cz.y % 4ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_3_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_3_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return even_3_cutout[cz.x % 6ul][cz.y % 3ul]; };
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_4_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_4_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept { return even_4_cutout[cz.x % 8ul][cz.y % 4ul]; };
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
@@ -440,21 +430,21 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
             {
                 case num_clks::THREE:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           odd_row_twoddwave_hex_3_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           3u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  odd_row_twoddwave_hex_3_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  3u,
+                                  true};
                 }
                 case num_clks::FOUR:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           odd_row_twoddwave_hex_4_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           4u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  odd_row_twoddwave_hex_4_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  4u,
+                                  true};
                 }
             }
         }
@@ -464,21 +454,21 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
             {
                 case num_clks::THREE:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           even_row_twoddwave_hex_3_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           3u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  even_row_twoddwave_hex_3_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  3u,
+                                  true};
                 }
                 case num_clks::FOUR:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           even_row_twoddwave_hex_4_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           4u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  even_row_twoddwave_hex_4_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  4u,
+                                  true};
                 }
             }
         }
@@ -488,21 +478,21 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
             {
                 case num_clks::THREE:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           odd_column_twoddwave_hex_3_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           3u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  odd_column_twoddwave_hex_3_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  3u,
+                                  true};
                 }
                 case num_clks::FOUR:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           odd_column_twoddwave_hex_4_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           4u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  odd_column_twoddwave_hex_4_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  4u,
+                                  true};
                 }
             }
         }
@@ -512,31 +502,31 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
             {
                 case num_clks::THREE:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           even_column_twoddwave_hex_3_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           3u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  even_column_twoddwave_hex_3_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  3u,
+                                  true};
                 }
                 case num_clks::FOUR:
                 {
-                    return clocking_scheme{clock_name::TWODDWAVE_HEX,
-                                           even_column_twoddwave_hex_4_clock_function,
-                                           std::min(Lyt::max_fanin_size, 2u),
-                                           2u,
-                                           4u,
-                                           true};
+                    return scheme{name::TWODDWAVE_HEX,
+                                  even_column_twoddwave_hex_4_clock_function,
+                                  std::min(Lyt::max_fanin_size, 2u),
+                                  2u,
+                                  4u,
+                                  true};
                 }
             }
         }
 
         // not a supported hexagonal orientation; fall back to regular 2DDWave clocking
-        return twoddwave_clocking<Lyt>();
+        return twoddwave<Lyt>();
     }
     else  // not a hexagonal layout; fall back to regular 2DDWave clocking
     {
-        return twoddwave_clocking<Lyt>();
+        return twoddwave<Lyt>();
     }
 }
 /**
@@ -547,14 +537,14 @@ static auto twoddwave_hex_clocking(const num_clks& n = num_clks::FOUR) noexcept
  * @return USE clocking scheme.
  */
 template <typename Lyt>
-static auto use_clocking() noexcept
+static auto use() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function use_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function use_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}},
              {{3, 2, 1, 0}},
              {{2, 3, 0, 1}},
@@ -563,7 +553,7 @@ static auto use_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::USE, use_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
+    return scheme{name::USE, use_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
 
     // clang-format on
 }
@@ -576,14 +566,14 @@ static auto use_clocking() noexcept
  * @return RES clocking scheme.
  */
 template <typename Lyt>
-static auto res_clocking() noexcept
+static auto res() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function res_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function res_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{3, 0, 1, 2}},
              {{0, 1, 0, 3}},
              {{1, 2, 3, 0}},
@@ -592,7 +582,7 @@ static auto res_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::RES, res_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+    return scheme{name::RES, res_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 
     // clang-format on
 }
@@ -605,14 +595,14 @@ static auto res_clocking() noexcept
  * @return ESR clocking scheme.
  */
 template <typename Lyt>
-static auto esr_clocking() noexcept
+static auto esr() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function esr_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function esr_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{3, 0, 1, 2}},
              {{0, 1, 2, 3}},
              {{1, 2, 3, 0}},
@@ -621,7 +611,7 @@ static auto esr_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::ESR, esr_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+    return scheme{name::ESR, esr_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 
     // clang-format on
 }
@@ -634,14 +624,14 @@ static auto esr_clocking() noexcept
  * @return CFE clocking scheme.
  */
 template <typename Lyt>
-static auto cfe_clocking() noexcept
+static auto cfe() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function cfe_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function cfe_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 0, 1}},
              {{3, 2, 3, 2}},
              {{0, 1, 0, 1}},
@@ -650,7 +640,7 @@ static auto cfe_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::CFE, cfe_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+    return scheme{name::CFE, cfe_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 
     // clang-format on
 }
@@ -662,14 +652,14 @@ static auto cfe_clocking() noexcept
  * @return Ripple clocking scheme.
  */
 template <typename Lyt>
-static auto ripple_clocking() noexcept
+static auto ripple() noexcept
 {
     // clang-format off
 
-   static const typename clocking_scheme<clock_zone<Lyt>>::clock_function ripple_clock_function =
+   static const typename scheme<clock_zone<Lyt>>::clock_function ripple_clock_function =
        [](const clock_zone<Lyt>& cz) noexcept
    {
-       static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+       static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
            {{{0, 1, 2, 3}},
             {{3, 2, 1, 0}},
             {{0, 1, 2, 3}},
@@ -678,7 +668,7 @@ static auto ripple_clocking() noexcept
        return cutout[cz.y % 4ul][cz.x % 4ul];
    };
 
-   return clocking_scheme{clock_name::RIPPLE, ripple_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+   return scheme{name::RIPPLE, ripple_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 
     // clang-format on
 }
@@ -691,14 +681,14 @@ static auto ripple_clocking() noexcept
  * @return SRS clocking scheme.
  */
 template <typename Lyt>
-static auto srs_clocking() noexcept
+static auto srs() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function srs_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function srs_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{1, 0, 3, 2}},
              {{2, 3, 0, 1}},
              {{3, 2, 3, 0}},
@@ -707,7 +697,7 @@ static auto srs_clocking() noexcept
         return cutout[cz.y % 4ul][cz.x % 4ul];
     };
 
-    return clocking_scheme{clock_name::SRS, srs_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
+    return scheme{name::SRS, srs_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
 
     // clang-format on
 }
@@ -719,14 +709,14 @@ static auto srs_clocking() noexcept
  * @return BANCS clocking scheme.
  */
 template <typename Lyt>
-static auto bancs_clocking() noexcept
+static auto bancs() noexcept
 {
     // clang-format off
 
-    static const typename clocking_scheme<clock_zone<Lyt>>::clock_function bancs_clock_function =
+    static const typename scheme<clock_zone<Lyt>>::clock_function bancs_clock_function =
         [](const clock_zone<Lyt>& cz) noexcept
     {
-        static constexpr std::array<std::array<typename clocking_scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
+        static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 6u> cutout{
             {{{0, 1, 2}},
              {{2, 1, 0}},
              {{2, 0, 1}},
@@ -737,7 +727,7 @@ static auto bancs_clocking() noexcept
         return cutout[cz.y % 6ul][cz.x % 3ul];
     };
 
-    return clocking_scheme{clock_name::BANCS, bancs_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
+    return scheme{name::BANCS, bancs_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};
 
     // clang-format on
 }
@@ -747,12 +737,12 @@ static auto bancs_clocking() noexcept
  *
  * @tparam Lyt Layout type.
  * @param scheme Universal reference to a clocking scheme.
- * @return A shared pointer to the given `scheme`.
+ * @return A shared pointer to the given `scm`.
  */
 template <typename Lyt>
-std::shared_ptr<clocking_scheme<clock_zone<Lyt>>> ptr(clocking_scheme<clock_zone<Lyt>>&& scheme) noexcept
+std::shared_ptr<scheme<clock_zone<Lyt>>> ptr(scheme<clock_zone<Lyt>>&& scm) noexcept
 {
-    return std::make_shared<clocking_scheme<clock_zone<Lyt>>>(std::move(scheme));
+    return std::make_shared<scheme<clock_zone<Lyt>>>(std::move(scm));
 }
 /**
  * Checks whether a given clocking scheme is registered as a cycle-free one. These currently are
@@ -763,24 +753,24 @@ std::shared_ptr<clocking_scheme<clock_zone<Lyt>>> ptr(clocking_scheme<clock_zone
  * - 2DDWAVEHEX
  *
  * @tparam Lyt Layout type.
- * @param scheme Clocking scheme to check.
- * @return `true` iff `scheme` is listed as one of the linear clocking schemes.
+ * @param scm Clocking scheme to check.
+ * @return `true` iff `scm` is listed as one of the linear clocking schemes.
  */
 template <typename Lyt>
-bool is_linear_scheme(const clocking_scheme<clock_zone<Lyt>>& scheme) noexcept
+bool is_linear(const scheme<clock_zone<Lyt>>& scm) noexcept
 {
     static constexpr const std::array<const char*, 4> linear_schemes{
-        {clock_name::COLUMNAR, clock_name::ROW, clock_name::TWODDWAVE, clock_name::TWODDWAVE_HEX}};
+        {name::COLUMNAR, name::ROW, name::TWODDWAVE, name::TWODDWAVE_HEX}};
 
-    return std::ranges::any_of(linear_schemes, [&scheme](const auto& name) { return scheme == name; });
+    return std::ranges::any_of(linear_schemes, [&scm](const auto& linear) { return scm == linear; });
 }
 /**
  * Exception to be thrown when an unsupported clocking scheme is requested.
  */
-class unsupported_clocking_scheme_exception : public std::exception
+class unsupported_scheme_exception : public std::exception
 {
   public:
-    explicit unsupported_clocking_scheme_exception() noexcept : std::exception() {}
+    explicit unsupported_scheme_exception() noexcept : std::exception() {}
 
     /**
      * Returns the diagnostic message for an unsupported clocking scheme.
@@ -796,38 +786,38 @@ class unsupported_clocking_scheme_exception : public std::exception
  * Returns a clocking scheme by name.
  *
  * @tparam Lyt Layout type.
- * @param name Name of the desired clocking scheme.
- * @return Clocking scheme object that matches the given `name`, or `std::nullopt` if no clocking scheme by the given
+ * @param scheme_name Name of the desired clocking scheme.
+ * @return Clocking scheme object that matches the given `scheme_name`, or `std::nullopt` if no clocking scheme by the
  * `name` exists.
  */
 template <typename Lyt>
-std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::string_view& name) noexcept
+std::optional<scheme<clock_zone<Lyt>>> get_scheme(const std::string_view& scheme_name) noexcept
 {
-    static const phmap::flat_hash_map<std::string, clocking_scheme<clock_zone<Lyt>>> scheme_lookup{
-        {clock_name::OPEN, open_clocking<Lyt>(num_clks::FOUR)},
-        {"OPEN3", open_clocking<Lyt>(num_clks::THREE)},
-        {"OPEN4", open_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::COLUMNAR, columnar_clocking<Lyt>(num_clks::FOUR)},
-        {"COLUMNAR3", columnar_clocking<Lyt>(num_clks::THREE)},
-        {"COLUMNAR4", columnar_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::ROW, row_clocking<Lyt>(num_clks::FOUR)},
-        {"ROW3", row_clocking<Lyt>(num_clks::THREE)},
-        {"ROW4", row_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::TWODDWAVE, twoddwave_clocking<Lyt>(num_clks::FOUR)},
-        {"2DDWAVE3", twoddwave_clocking<Lyt>(num_clks::THREE)},
-        {"2DDWAVE4", twoddwave_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::TWODDWAVE_HEX, twoddwave_hex_clocking<Lyt>(num_clks::FOUR)},
-        {"2DDWAVEHEX3", twoddwave_hex_clocking<Lyt>(num_clks::THREE)},
-        {"2DDWAVEHEX4", twoddwave_hex_clocking<Lyt>(num_clks::FOUR)},
-        {clock_name::USE, use_clocking<Lyt>()},
-        {clock_name::RES, res_clocking<Lyt>()},
-        {clock_name::ESR, esr_clocking<Lyt>()},
-        {clock_name::CFE, cfe_clocking<Lyt>()},
-        {clock_name::RIPPLE, ripple_clocking<Lyt>()},
-        {clock_name::SRS, srs_clocking<Lyt>()},
-        {clock_name::BANCS, bancs_clocking<Lyt>()}};
+    static const phmap::flat_hash_map<std::string, scheme<clock_zone<Lyt>>> scheme_lookup{
+        {name::OPEN, open<Lyt>(num_clks::FOUR)},
+        {"OPEN3", open<Lyt>(num_clks::THREE)},
+        {"OPEN4", open<Lyt>(num_clks::FOUR)},
+        {name::COLUMNAR, columnar<Lyt>(num_clks::FOUR)},
+        {"COLUMNAR3", columnar<Lyt>(num_clks::THREE)},
+        {"COLUMNAR4", columnar<Lyt>(num_clks::FOUR)},
+        {name::ROW, row<Lyt>(num_clks::FOUR)},
+        {"ROW3", row<Lyt>(num_clks::THREE)},
+        {"ROW4", row<Lyt>(num_clks::FOUR)},
+        {name::TWODDWAVE, twoddwave<Lyt>(num_clks::FOUR)},
+        {"2DDWAVE3", twoddwave<Lyt>(num_clks::THREE)},
+        {"2DDWAVE4", twoddwave<Lyt>(num_clks::FOUR)},
+        {name::TWODDWAVE_HEX, twoddwave_hex<Lyt>(num_clks::FOUR)},
+        {"2DDWAVEHEX3", twoddwave_hex<Lyt>(num_clks::THREE)},
+        {"2DDWAVEHEX4", twoddwave_hex<Lyt>(num_clks::FOUR)},
+        {name::USE, use<Lyt>()},
+        {name::RES, res<Lyt>()},
+        {name::ESR, esr<Lyt>()},
+        {name::CFE, cfe<Lyt>()},
+        {name::RIPPLE, ripple<Lyt>()},
+        {name::SRS, srs<Lyt>()},
+        {name::BANCS, bancs<Lyt>()}};
 
-    std::string upper_name{name};
+    std::string upper_name{scheme_name};
     std::ranges::transform(upper_name, upper_name.begin(), [](const char ch)
                            { return static_cast<char>(std::toupper(static_cast<unsigned char>(ch))); });
 
@@ -839,5 +829,5 @@ std::optional<clocking_scheme<clock_zone<Lyt>>> get_clocking_scheme(const std::s
     return std::nullopt;
 }
 
-}  // namespace fiction::layouts
+}  // namespace fiction::layouts::clocking
 #endif  // FICTION_CLOCKING_SCHEME_HPP

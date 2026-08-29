@@ -106,6 +106,16 @@ Changed
   ``charge_distribution_surface::set_sidb_simulation_engine`` becomes ``set_simulation_engine``,
   and ``defect_surface::assign_sidb_defect`` and ``get_sidb_defect`` become ``assign_defect`` and
   ``get_defect``
+- **Breaking:** The clocking schemes share one ``fiction::layouts::clocking`` namespace and
+  drop the ``clocking`` their identifiers repeated, so ``fiction::bancs_clocking`` becomes
+  ``fiction::layouts::clocking::bancs``, and likewise for ``open``, ``columnar``, ``row``,
+  ``twoddwave``, ``twoddwave_hex``, ``use``, ``res``, ``esr``, ``cfe``, ``ripple``, and
+  ``srs``. The type they return, the enum they take, and the helpers around them move with
+  them: ``clocking_scheme`` becomes ``clocking::scheme``, ``clock_name`` becomes
+  ``clocking::name``, ``get_clocking_scheme`` becomes ``clocking::get_scheme``, and
+  ``is_linear_scheme`` becomes ``clocking::is_linear``. ``clocking_scheme.hpp`` keeps its
+  path, the scheme name strings are unchanged, and the ``clocked_layout`` members that
+  mention clocking keep their names
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each

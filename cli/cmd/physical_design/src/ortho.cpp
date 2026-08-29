@@ -52,8 +52,8 @@ void ortho_command::execute()
         return;
     }
 
-    ps.number_of_clock_phases =
-        num_clock_phases == 3 ? fiction::layouts::num_clks::THREE : fiction::layouts::num_clks::FOUR;
+    ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::layouts::clocking::num_clks::THREE :
+                                                        fiction::layouts::clocking::num_clks::FOUR;
 
     if (is_set("hex"))
     {

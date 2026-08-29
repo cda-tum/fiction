@@ -111,7 +111,7 @@ class cell_level_layout : public ClockedLayout
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
      */
-    cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<cell>& scheme,
+    cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking::scheme<cell>& scheme,
                       const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}

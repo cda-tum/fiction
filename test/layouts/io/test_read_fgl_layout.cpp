@@ -42,7 +42,7 @@ TEST_CASE("Read empty FGL layout", "[read-fgl-layout]")
         CHECK(lyt.y() == 0);
         CHECK(lyt.area() == 1);
         CHECK(networks::utils::get_name(lyt) == "Test");
-        CHECK(lyt.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+        CHECK(lyt.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
     };
 
     using gate_layout = layouts::gate_level_layout<
@@ -136,7 +136,7 @@ TEST_CASE("Read simple FGL layout", "[read-fgl-layout]")
         CHECK(lyt.y() == 1);
         CHECK(lyt.area() == 6);
         CHECK(networks::utils::get_name(lyt) == "Test");
-        CHECK(lyt.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+        CHECK(lyt.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
         CHECK(lyt.is_pi_tile({0, 1}));
         CHECK(lyt.get_name(lyt.get_node({0, 1})) == "pi0");
         CHECK(lyt.is_pi_tile({1, 0}));
@@ -237,7 +237,7 @@ TEST_CASE("Read FGL layout with hexadecimal gate type", "[read-fgl-layout]")
         CHECK(lyt.y() == 1);
         CHECK(lyt.area() == 6);
         CHECK(networks::utils::get_name(lyt) == "Test");
-        CHECK(lyt.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+        CHECK(lyt.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
         CHECK(lyt.is_pi_tile({0, 1}));
         CHECK(lyt.get_name(lyt.get_node({0, 1})) == "pi0");
         CHECK(lyt.is_pi_tile({1, 0}));

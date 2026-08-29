@@ -26,28 +26,28 @@ TEST_CASE("Deep copy synchronization element layout", "[synchronization-element-
     using se_layout = layouts::synchronization_element_layout<
         layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-    se_layout original{{5, 5, 0}, layouts::twoddwave_clocking<se_layout>()};
+    se_layout original{{5, 5, 0}, layouts::clocking::twoddwave<se_layout>()};
     original.assign_synchronization_element({0, 0}, 1);
     original.assign_synchronization_element({1, 0}, 2);
 
     auto copy = original.clone();
 
     copy.resize({10, 10, 1});
-    copy.replace_clocking_scheme(layouts::use_clocking<se_layout>());
+    copy.replace_clocking_scheme(layouts::clocking::use<se_layout>());
     copy.assign_synchronization_element({0, 0}, 2);
     copy.assign_synchronization_element({1, 0}, 3);
 
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
     CHECK(original.get_synchronization_element({0, 0}) == 1);
     CHECK(original.get_synchronization_element({1, 0}) == 2);
 
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(layouts::clock_name::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clocking::name::USE));
     CHECK(copy.get_synchronization_element({0, 0}) == 2);
     CHECK(copy.get_synchronization_element({1, 0}) == 3);
 }
@@ -57,11 +57,11 @@ TEST_CASE("Shifted clocking with synchronization elements", "[synchronization-el
     using se_layout = layouts::synchronization_element_layout<
         layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::clocking::twoddwave<se_layout>()};
 
     layout.assign_synchronization_element({1, 1}, 1);
 
-    CHECK(layout.is_clocking_scheme(layouts::clock_name::TWODDWAVE));
+    CHECK(layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
     CHECK(layout.is_regularly_clocked());
     CHECK(layout.num_clocks() == 4);
 
@@ -93,7 +93,7 @@ TEST_CASE("Iteration over synchronization elements", "[synchronization-element-l
     using se_layout = layouts::synchronization_element_layout<
         layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::clocking::twoddwave<se_layout>()};
 
     layout.assign_synchronization_element({0, 1}, 1);
     layout.assign_synchronization_element({1, 0}, 1);
@@ -121,7 +121,7 @@ TEST_CASE("Synchronization element layout properties", "[synchronization-element
     using se_layout = layouts::synchronization_element_layout<
         layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
-    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::twoddwave_clocking<se_layout>()};
+    se_layout layout{se_layout::aspect_ratio{2, 2, 0}, layouts::clocking::twoddwave<se_layout>()};
 
     CHECK(layout.num_se() == 0);
     layout.assign_synchronization_element({0, 0}, 0);

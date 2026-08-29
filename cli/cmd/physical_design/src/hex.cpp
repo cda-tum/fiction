@@ -46,7 +46,7 @@ void hex_command::execute()
     const auto& lyt = gls.current();
 
     const auto check_clocking_scheme_2ddwave = [](auto&& lyt_ptr)
-    { return lyt_ptr->is_clocking_scheme(fiction::layouts::clock_name::TWODDWAVE); };
+    { return lyt_ptr->is_clocking_scheme(fiction::layouts::clocking::name::TWODDWAVE); };
 
     // error case: layout is not 2DDWave-clocked
     if (const auto is_2ddwave_clocked = std::visit(check_clocking_scheme_2ddwave, lyt); !is_2ddwave_clocked)

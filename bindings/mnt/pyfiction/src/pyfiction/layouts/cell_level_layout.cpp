@@ -128,7 +128,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
                const std::string& scheme_name, const std::string& layout_name)
             {
                 if (const auto scheme =
-                        fiction::layouts::get_clocking_scheme<py_cartesian_technology_cell_layout>(scheme_name);
+                        fiction::layouts::clocking::get_scheme<py_cartesian_technology_cell_layout>(scheme_name);
                     scheme.has_value())
                 {
                     new (self.p) py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};

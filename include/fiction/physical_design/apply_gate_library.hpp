@@ -55,7 +55,7 @@ class apply_gate_library_impl
         // otherwise, try to find a matching clocking scheme (this will discard overwritten clock numbers)
         else
         {
-            if (const auto clk_scheme = layouts::get_clocking_scheme<CellLyt>(gate_lyt.get_clocking_scheme().name);
+            if (const auto clk_scheme = layouts::clocking::get_scheme<CellLyt>(gate_lyt.get_clocking_scheme().name);
                 clk_scheme.has_value())
             {
                 cell_lyt.replace_clocking_scheme(clk_scheme.value());
