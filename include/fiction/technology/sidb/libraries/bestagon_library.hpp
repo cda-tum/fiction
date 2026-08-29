@@ -31,7 +31,7 @@ namespace fiction::sidb::libraries
  * The Bestagon library is intended for hexagonal, pointy-top layouts that are clocked with a row-based clocking scheme,
  * i.e., where the information flow direction is north to south.
  */
-class bestagon_library : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
+class bestagon_library : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit bestagon_library() = delete;

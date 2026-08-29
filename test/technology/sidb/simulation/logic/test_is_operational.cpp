@@ -163,8 +163,8 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
         sidb::simulation::logic::bdl_wire_selection::OUTPUT);
 
     sidb_100_cell_clk_lyt_siqad canvas_lyt{};
-    canvas_lyt.assign_cell_type({10, 4, 1}, sidb::technology::cell_type::NORMAL);
-    canvas_lyt.assign_cell_type({10, 5, 1}, sidb::technology::cell_type::NORMAL);
+    canvas_lyt.assign_cell_type({10, 4, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    canvas_lyt.assign_cell_type({10, 5, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     SECTION("use pre-determined I/O pins")
     {
@@ -180,22 +180,22 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 1}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({19, 1, 1}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 1}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({19, 1, 1}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 2, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 6, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 9, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -411,24 +411,24 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDB
-    lyt.assign_cell_type({14, 6, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 6, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({24, 15, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
@@ -528,20 +528,20 @@ TEST_CASE("BDL wire", "[is-operational]")
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 

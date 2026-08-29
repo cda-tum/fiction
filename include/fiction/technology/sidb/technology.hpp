@@ -13,7 +13,7 @@ namespace fiction::sidb
 /**
  * Silicon Dangling Bond (SiDB) technology implementation of the FCN concept.
  */
-struct technology
+struct sidb_technology
 {
     /**
      * Possible types of SiDB cells.
@@ -144,7 +144,7 @@ struct technology
     static constexpr double CELL_VSPACE = 0.384;
 
     // Deleted constructors to prevent instantiation
-    technology() = delete;
+    sidb_technology() = delete;
 };
 
 }  // namespace fiction::sidb

@@ -20,7 +20,7 @@ using namespace fiction;
 /**
  * This is simply a test library, its gates do not represent real entities that would work when fabricated.
  */
-class dummy_gate_library : public fcn::gate_library<sidb::technology, 3, 3>
+class dummy_gate_library : public fcn::gate_library<sidb::sidb_technology, 3, 3>
 {
   public:
     dummy_gate_library() = delete;

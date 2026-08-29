@@ -61,7 +61,7 @@ template <typename Lyt, typename TT>
     assert(skeleton_with_defects.num_pos() > 0 && "lyt needs output cells");
 
     const auto output_pairs =
-        sidb::simulation::logic::detect_bdl_pairs(skeleton_with_defects, sidb::technology::cell_type::OUTPUT,
+        sidb::simulation::logic::detect_bdl_pairs(skeleton_with_defects, sidb::sidb_technology::cell_type::OUTPUT,
                                                   params.bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
     assert(output_pairs.empty() == false && "lyt needs output BDL pairs");

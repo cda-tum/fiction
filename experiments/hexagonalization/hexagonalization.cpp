@@ -149,8 +149,8 @@ int main()  // NOLINT
                 hex_layout);
 
         // compute area
-        fiction::fcn::area_stats                             area_stats{};
-        fiction::fcn::area_params<fiction::sidb::technology> area_ps{};
+        fiction::fcn::area_stats                                  area_stats{};
+        fiction::fcn::area_params<fiction::sidb::sidb_technology> area_ps{};
         fiction::fcn::area(cell_level_layout, area_ps, &area_stats);
 
         // log results

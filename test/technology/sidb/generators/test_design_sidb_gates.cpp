@@ -91,25 +91,25 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     siqad_layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 0}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 0}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 3, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 3, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 2, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 2, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 7, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 6, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 7, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, 9, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 10, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 9, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 10, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 12, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 12, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     CHECK(lyt.num_cells() == 13);
 
@@ -251,22 +251,22 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 1}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 1}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 2, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 6, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 9, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
@@ -340,37 +340,37 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 {
     sidb_100_cell_clk_lyt_siqad lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 6, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 7, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 6, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 7, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
     // SiDB, originally part of the Bestagon fo2 gate, is excluded.
-    // lyt.assign_cell_type({17, 11, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({21, 11, 1}, sidb::technology::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 13, 0}, sidb::technology::cell_type::LOGIC);
+    // lyt.assign_cell_type({17, 11, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({21, 11, 1}, sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 13, 0}, sidb::sidb_technology::cell_type::LOGIC);
     // ----------------------------
 
-    lyt.assign_cell_type({24, 15, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({30, 17, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 19, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
     SECTION("generate original FO2")
     {
@@ -545,9 +545,9 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
     lyt.foreach_cell(
         [&lyt](const auto& c)
         {
-            if (lyt.get_cell_type(c) == sidb::technology::cell_type::LOGIC)
+            if (lyt.get_cell_type(c) == sidb::sidb_technology::cell_type::LOGIC)
             {
-                lyt.assign_cell_type(c, sidb::technology::cell_type::EMPTY);
+                lyt.assign_cell_type(c, sidb::sidb_technology::cell_type::EMPTY);
             }
         });
 

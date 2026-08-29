@@ -282,7 +282,7 @@ Their namespace still changed — see the tree above.
 
 ### Renamed symbols
 
-88 public symbols changed name as well as namespace. Everything not listed
+84 public symbols changed name as well as namespace. Everything not listed
 here kept its identifier and only gained a namespace.
 
 | old                                                            | new                                                                         |
@@ -306,12 +306,10 @@ here kept its identifier and only gained a namespace.
 | `fiction::get_sidb_simulation_engine`                          | `fiction::sidb::simulation::get_engine`                                     |
 | `fiction::has_offset_ucoord_v`                                 | `fiction::has_offset_coord_v`                                               |
 | `fiction::heuristic_sidb_simulation_engine`                    | `fiction::sidb::simulation::heuristic_engine`                               |
-| `fiction::inml_technology`                                     | `fiction::inml::technology`                                                 |
 | `fiction::inml_topolinano_library`                             | `fiction::inml::topolinano_library`                                         |
 | `fiction::is_linear_scheme`                                    | `fiction::layouts::clocking::is_linear`                                     |
 | `fiction::is_offset_ucoord_v`                                  | `fiction::is_offset_coord_v`                                                |
 | `fiction::is_sidb_gate_design_impossible`                      | `fiction::sidb::generators::is_gate_design_impossible`                      |
-| `fiction::mol_qca_technology`                                  | `fiction::qca::mol_technology`                                              |
 | `fiction::num_clks`                                            | `fiction::layouts::clocking::num_clks`                                      |
 | `fiction::offset::ucoord_t`                                    | `fiction::layouts::coords::offset`                                          |
 | `fiction::offset_to_cube_coord`                                | `fiction::layouts::coords::offset_to_cube`                                  |
@@ -321,7 +319,6 @@ here kept its identifier and only gained a namespace.
 | `fiction::open_clocking`                                       | `fiction::layouts::clocking::open`                                          |
 | `fiction::ptr`                                                 | `fiction::layouts::clocking::ptr`                                           |
 | `fiction::qca_one_library`                                     | `fiction::qca::qca_one_library`                                             |
-| `fiction::qca_technology`                                      | `fiction::qca::technology`                                                  |
 | `fiction::read_sidb_surface_defects`                           | `fiction::sidb::io::read_surface_defects`                                   |
 | `fiction::res_clocking`                                        | `fiction::layouts::clocking::res`                                           |
 | `fiction::ripple_clocking`                                     | `fiction::layouts::clocking::ripple`                                        |
@@ -363,7 +360,6 @@ here kept its identifier and only gained a namespace.
 | `fiction::sidb_simulation_result`                              | `fiction::sidb::simulation::result`                                         |
 | `fiction::sidb_skeleton_bestagon_library`                      | `fiction::sidb::libraries::skeleton_bestagon_library`                       |
 | `fiction::sidb_surface_analysis`                               | `fiction::sidb::libraries::surface_analysis`                                |
-| `fiction::sidb_technology`                                     | `fiction::sidb::technology`                                                 |
 | `fiction::sim7_mol_library`                                    | `fiction::qca::sim7_mol_library`                                            |
 | `fiction::siqad::coord_t`                                      | `fiction::layouts::coords::siqad`                                           |
 | `fiction::siqad::to_fiction_coord`                             | `fiction::layouts::coords::to_fiction_coord`                                |
@@ -512,14 +508,6 @@ defect_surface::get_sidb_defect                         -> ::get_defect
 `charge_distribution_surface::get_sidb_order` keeps its name: there "SiDB" names what
 is being ordered, it does not echo the namespace.
 
-### A name collision to know about
-
-`fiction::technology<Lyt>` is a trait alias in `traits.hpp` that yields a layout's
-technology tag. The tags themselves are now called `technology` inside their own
-namespace, so within `fiction::qca`, `fiction::inml`, and `fiction::sidb` the struct
-shadows the trait. Code in those namespaces that wants the trait must name it
-`fiction::technology<Lyt>` explicitly. Outside them, both resolve as before.
-
 ### Removed
 
 `fiction::constants::PI` is gone. It was a `double` "accurate to 11 decimal places", which
@@ -565,6 +553,11 @@ all of them are used.
   These live in plain `fiction::`, where the prefix is the only thing distinguishing
   `qca_cell_clk_lyt` from `sidb_cell_clk_lyt`. Dropping it would collide.
 
+- **The technology tags keep their prefixes.** `qca_technology`, `mol_qca_technology`,
+  `inml_technology` and `sidb_technology` are named the same inside `fiction::qca`,
+  `fiction::inml` and `fiction::sidb` as they were in `fiction::`. Shedding the prefix would
+  have made all four `technology`, which reads as nothing in a `Technology` template
+  argument and shadows the `fiction::technology<Lyt>` trait inside those namespaces.
 - **Nested members keep their names.** `fcn_gate_library::fcn_gate`,
   `sidb_defect_surface::sidb_surface_storage` and
   `write_sidb_layout_svg_params::sidb_lattice_mode` are scoped by their enclosing type,

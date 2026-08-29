@@ -31,7 +31,7 @@ struct bdl_pair
      * The type of the SiDBs in the pair. BDL SiDBs must be of the same type. They can either be normal, input, or
      * output SiDBs.
      */
-    sidb::technology::cell_type type{};
+    sidb::sidb_technology::cell_type type{};
     /**
      * The upper SiDB of the pair. Upper and lower are defined relative to each other via the `operator<` overload.
      */
@@ -51,7 +51,7 @@ struct bdl_pair
      * @param u The upper SiDB of the pair.
      * @param l The lower SiDB of the pair.
      */
-    bdl_pair(const sidb::technology::cell_type t, const CellType& u, const CellType& l) noexcept :
+    bdl_pair(const sidb::sidb_technology::cell_type t, const CellType& u, const CellType& l) noexcept :
             type{t},
             upper{u},
             lower{l}

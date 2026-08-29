@@ -52,7 +52,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     // fetch technology name
     auto tech_name = std::string{fiction::tech_impl_name<Technology>};
     std::ranges::transform(tech_name, tech_name.begin(), ::tolower);
-    if constexpr (std::is_same_v<Technology, fiction::qca::mol_technology>)
+    if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
     {
         // Keep the Python technology name readable by preserving the word boundary in molQCA.
         tech_name = "mol_qca";
@@ -66,7 +66,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     py::enum_<typename Technology::cell_type> cell_type(tech, "cell_type");
 
     cell_type.value("EMPTY", Technology::cell_type::EMPTY);
-    if constexpr (std::is_same_v<Technology, fiction::qca::mol_technology>)
+    if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
     {
         cell_type.value("NORMAL1", Technology::cell_type::NORMAL1, DOC(fiction_qca_mol_technology_cell_type_NORMAL1));
         cell_type.value("NORMAL2", Technology::cell_type::NORMAL2, DOC(fiction_qca_mol_technology_cell_type_NORMAL2));
@@ -80,17 +80,17 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     cell_type.value("INPUT", Technology::cell_type::INPUT);
     cell_type.value("OUTPUT", Technology::cell_type::OUTPUT);
 
-    if constexpr (std::is_same_v<Technology, fiction::qca::technology>)
+    if constexpr (std::is_same_v<Technology, fiction::qca::qca_technology>)
     {
         cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_qca_technology_cell_type_CONST_0));
         cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_qca_technology_cell_type_CONST_1));
     }
-    else if constexpr (std::is_same_v<Technology, fiction::qca::mol_technology>)
+    else if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
     {
         cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_qca_mol_technology_cell_type_CONST_0));
         cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_qca_mol_technology_cell_type_CONST_1));
     }
-    else if constexpr (std::is_same_v<Technology, fiction::inml::technology>)
+    else if constexpr (std::is_same_v<Technology, fiction::inml::inml_technology>)
     {
         cell_type.value("SLANTED_EDGE_UP_MAGNET", Technology::cell_type::SLANTED_EDGE_UP_MAGNET,
                         DOC(fiction_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET));
@@ -103,7 +103,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
         cell_type.value("FANOUT_COUPLER_MAGNET", Technology::cell_type::FANOUT_COUPLER_MAGNET,
                         DOC(fiction_inml_technology_cell_type_FANOUT_COUPLER_MAGNET));
     }
-    else if constexpr (std::is_same_v<Technology, fiction::sidb::technology>)
+    else if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
     {
         cell_type.value("LOGIC", Technology::cell_type::LOGIC);
     }
@@ -211,7 +211,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
             {
                 std::stringstream stream{};
 
-                if constexpr (std::is_same_v<Technology, fiction::sidb::technology>)
+                if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
                 {
                     fiction::layouts::io::print_layout(
                         fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt), stream);
@@ -232,10 +232,10 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
 void cell_level_layouts(nanobind::module_& m)
 {
-    detail::fcn_technology_cell_level_layout<fiction::qca::technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::qca::mol_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::inml::technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::sidb::technology>(m);
+    detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m);
+    detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology>(m);
+    detail::fcn_technology_cell_level_layout<fiction::inml::inml_technology>(m);
+    detail::fcn_technology_cell_level_layout<fiction::sidb::sidb_technology>(m);
 }
 
 }  // namespace pyfiction

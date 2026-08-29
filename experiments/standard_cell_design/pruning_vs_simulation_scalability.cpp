@@ -119,32 +119,32 @@ int main()  // NOLINT
         fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
 
     auto two_one = skeleton_2i1o;
-    two_one.assign_cell_type({22, 10}, sidb::technology::cell_type::LOGIC);
-    two_one.assign_cell_type({17, 7}, sidb::technology::cell_type::LOGIC);
+    two_one.assign_cell_type({22, 10}, sidb::sidb_technology::cell_type::LOGIC);
+    two_one.assign_cell_type({17, 7}, sidb::sidb_technology::cell_type::LOGIC);
 
     auto two_two = skeleton_2i2o;
-    two_two.assign_cell_type({15, 7}, sidb::technology::cell_type::LOGIC);
-    two_two.assign_cell_type({22, 8}, sidb::technology::cell_type::LOGIC);
-    two_two.assign_cell_type({22, 10}, sidb::technology::cell_type::LOGIC);
-    two_two.assign_cell_type({17, 7}, sidb::technology::cell_type::LOGIC);
+    two_two.assign_cell_type({15, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({22, 8}, sidb::sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({22, 10}, sidb::sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({17, 7}, sidb::sidb_technology::cell_type::LOGIC);
 
     auto three_one = skeleton_3i1o;
-    three_one.assign_cell_type({25, 7}, sidb::technology::cell_type::LOGIC);
-    three_one.assign_cell_type({32, 8}, sidb::technology::cell_type::LOGIC);
-    three_one.assign_cell_type({36, 11}, sidb::technology::cell_type::LOGIC);
-    three_one.assign_cell_type({40, 7}, sidb::technology::cell_type::LOGIC);
+    three_one.assign_cell_type({25, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({32, 8}, sidb::sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({36, 11}, sidb::sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({40, 7}, sidb::sidb_technology::cell_type::LOGIC);
 
     auto three_two = skeleton_3i2o;
-    three_two.assign_cell_type({25, 7}, sidb::technology::cell_type::LOGIC);
-    three_two.assign_cell_type({32, 8}, sidb::technology::cell_type::LOGIC);
-    three_two.assign_cell_type({36, 11}, sidb::technology::cell_type::LOGIC);
-    three_two.assign_cell_type({40, 7}, sidb::technology::cell_type::LOGIC);
+    three_two.assign_cell_type({25, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({32, 8}, sidb::sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({36, 11}, sidb::sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({40, 7}, sidb::sidb_technology::cell_type::LOGIC);
 
     auto three_three = skeleton_3i3o;
-    three_three.assign_cell_type({25, 7}, sidb::technology::cell_type::LOGIC);
-    three_three.assign_cell_type({32, 8}, sidb::technology::cell_type::LOGIC);
-    three_three.assign_cell_type({36, 11}, sidb::technology::cell_type::LOGIC);
-    three_three.assign_cell_type({40, 7}, sidb::technology::cell_type::LOGIC);
+    three_three.assign_cell_type({25, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({32, 8}, sidb::sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({36, 11}, sidb::sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({40, 7}, sidb::sidb_technology::cell_type::LOGIC);
 
     const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>>
         layout_truth_table{{two_one, {synthesis::create_or_tt()}},

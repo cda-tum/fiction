@@ -157,19 +157,19 @@ inline constexpr auto sidb_name    = "SiDB";
 template <class Tech>
 constexpr const char* get_tech_impl_name()
 {
-    if constexpr (std::is_same_v<std::decay_t<Tech>, qca::technology>)
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca::qca_technology>)
     {
         return qca_name;
     }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, qca::mol_technology>)
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, qca::mol_qca_technology>)
     {
         return mol_qca_name;
     }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml::technology>)
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml::inml_technology>)
     {
         return inml_name;
     }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb::technology>)
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb::sidb_technology>)
     {
         return sidb_name;
     }
@@ -190,19 +190,19 @@ inline constexpr auto sidb_cell_name    = "dots";
 template <class Tech>
 constexpr const char* get_tech_cell_name()
 {
-    if constexpr (std::is_same_v<std::decay_t<Tech>, qca::technology>)
+    if constexpr (std::is_same_v<std::decay_t<Tech>, qca::qca_technology>)
     {
         return qca_cell_name;
     }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, qca::mol_technology>)
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, qca::mol_qca_technology>)
     {
         return mol_qca_cell_name;
     }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml::technology>)
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, inml::inml_technology>)
     {
         return inml_cell_name;
     }
-    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb::technology>)
+    else if constexpr (std::is_same_v<std::decay_t<Tech>, sidb::sidb_technology>)
     {
         return sidb_cell_name;
     }
@@ -242,39 +242,39 @@ inline constexpr const char* sidb_lattice_name = get_sidb_lattice_name<Orientati
  * FCN cell-level layouts.
  */
 using qca_cell_clk_lyt =
-    layouts::cell_level_layout<qca::technology,
+    layouts::cell_level_layout<qca::qca_technology,
                                layouts::synchronization_element_layout  // se_layouts have only been investigated for
                                                                         // QCA technologies
                                <layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
 using qca_cell_clk_lyt_ptr = std::shared_ptr<qca_cell_clk_lyt>;
 
 using stacked_qca_cell_clk_lyt =
-    layouts::cell_level_layout<qca::technology,
+    layouts::cell_level_layout<qca::qca_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 using stacked_qca_cell_clk_lyt_ptr = std::shared_ptr<stacked_qca_cell_clk_lyt>;
 
 using mol_qca_cell_clk_lyt =
-    layouts::cell_level_layout<qca::mol_technology,
+    layouts::cell_level_layout<qca::mol_qca_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 using mol_qca_cell_clk_lyt_ptr = std::shared_ptr<mol_qca_cell_clk_lyt>;
 
 using inml_cell_clk_lyt =
-    layouts::cell_level_layout<inml::technology,
+    layouts::cell_level_layout<inml::inml_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 using inml_cell_clk_lyt_ptr = std::shared_ptr<inml_cell_clk_lyt>;
 
 using sidb_cell_clk_lyt =
-    layouts::cell_level_layout<sidb::technology,
+    layouts::cell_level_layout<sidb::sidb_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 using sidb_cell_clk_lyt_ptr = std::shared_ptr<sidb_cell_clk_lyt>;
 
 using sidb_cell_clk_lyt_siqad =
-    layouts::cell_level_layout<sidb::technology,
+    layouts::cell_level_layout<sidb::sidb_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>;
 using sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_cell_clk_lyt_siqad>;
 
 using sidb_cell_clk_lyt_cube =
-    layouts::cell_level_layout<sidb::technology,
+    layouts::cell_level_layout<sidb::sidb_technology,
                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 using sidb_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_cell_clk_lyt_cube>;
 

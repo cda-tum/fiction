@@ -144,7 +144,8 @@ struct on_the_fly_gate_library_params
  * defects, thus enabling the design of SiDB circuits in the presence of atomic defects. The skeleton (i.e., the
  * pre-defined input and output wires) are hexagonal in shape.
  */
-class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
+class on_the_fly_gate_library
+        : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit on_the_fly_gate_library() = delete;
@@ -610,7 +611,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
 
         for (const auto& l_cells : logic_cells)
         {
-            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb::technology::cell_type::LOGIC);
+            skeleton_with_defects_copy.assign_cell_type(l_cells, sidb::sidb_technology::cell_type::LOGIC);
         }
 
         const auto status =

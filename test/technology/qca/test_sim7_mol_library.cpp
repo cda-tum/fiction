@@ -34,30 +34,30 @@ TEST_CASE("Molecular QCA library traits", "[molecular-qca-library]")
 
 TEST_CASE("Molecular QCA technology helpers", "[molecular-qca-library]")
 {
-    CHECK(qca::mol_technology::is_empty_cell(qca::mol_technology::cell_type::EMPTY));
-    CHECK(qca::mol_technology::is_normal_cell(qca::mol_technology::cell_type::NORMAL1));
-    CHECK(qca::mol_technology::is_normal_cell(qca::mol_technology::cell_type::NORMAL2));
-    CHECK(qca::mol_technology::is_normal_cell(qca::mol_technology::cell_type::NORMAL3));
-    CHECK(qca::mol_technology::is_normal_cell(qca::mol_technology::cell_type::NORMAL4));
-    CHECK(!qca::mol_technology::is_normal_cell(qca::mol_technology::cell_type::INPUT));
+    CHECK(qca::mol_qca_technology::is_empty_cell(qca::mol_qca_technology::cell_type::EMPTY));
+    CHECK(qca::mol_qca_technology::is_normal_cell(qca::mol_qca_technology::cell_type::NORMAL1));
+    CHECK(qca::mol_qca_technology::is_normal_cell(qca::mol_qca_technology::cell_type::NORMAL2));
+    CHECK(qca::mol_qca_technology::is_normal_cell(qca::mol_qca_technology::cell_type::NORMAL3));
+    CHECK(qca::mol_qca_technology::is_normal_cell(qca::mol_qca_technology::cell_type::NORMAL4));
+    CHECK(!qca::mol_qca_technology::is_normal_cell(qca::mol_qca_technology::cell_type::INPUT));
 
-    CHECK(qca::mol_technology::cell_clock_number(qca::mol_technology::cell_type::NORMAL1) == 0);
-    CHECK(qca::mol_technology::cell_clock_number(qca::mol_technology::cell_type::NORMAL2) == 1);
-    CHECK(qca::mol_technology::cell_clock_number(qca::mol_technology::cell_type::NORMAL3) == 2);
-    CHECK(qca::mol_technology::cell_clock_number(qca::mol_technology::cell_type::NORMAL4) == 3);
-    CHECK(qca::mol_technology::cell_clock_number(qca::mol_technology::cell_type::OUTPUT) == 0);
+    CHECK(qca::mol_qca_technology::cell_clock_number(qca::mol_qca_technology::cell_type::NORMAL1) == 0);
+    CHECK(qca::mol_qca_technology::cell_clock_number(qca::mol_qca_technology::cell_type::NORMAL2) == 1);
+    CHECK(qca::mol_qca_technology::cell_clock_number(qca::mol_qca_technology::cell_type::NORMAL3) == 2);
+    CHECK(qca::mol_qca_technology::cell_clock_number(qca::mol_qca_technology::cell_type::NORMAL4) == 3);
+    CHECK(qca::mol_qca_technology::cell_clock_number(qca::mol_qca_technology::cell_type::OUTPUT) == 0);
 
-    CHECK(qca::mol_technology::is_input_cell(qca::mol_technology::cell_type::INPUT));
-    CHECK(qca::mol_technology::is_output_cell(qca::mol_technology::cell_type::OUTPUT));
-    CHECK(qca::mol_technology::is_const_0_cell(qca::mol_technology::cell_type::CONST_0));
-    CHECK(qca::mol_technology::is_const_1_cell(qca::mol_technology::cell_type::CONST_1));
-    CHECK(qca::mol_technology::is_constant_cell(qca::mol_technology::cell_type::CONST_0));
-    CHECK(qca::mol_technology::is_constant_cell(qca::mol_technology::cell_type::CONST_1));
+    CHECK(qca::mol_qca_technology::is_input_cell(qca::mol_qca_technology::cell_type::INPUT));
+    CHECK(qca::mol_qca_technology::is_output_cell(qca::mol_qca_technology::cell_type::OUTPUT));
+    CHECK(qca::mol_qca_technology::is_const_0_cell(qca::mol_qca_technology::cell_type::CONST_0));
+    CHECK(qca::mol_qca_technology::is_const_1_cell(qca::mol_qca_technology::cell_type::CONST_1));
+    CHECK(qca::mol_qca_technology::is_constant_cell(qca::mol_qca_technology::cell_type::CONST_0));
+    CHECK(qca::mol_qca_technology::is_constant_cell(qca::mol_qca_technology::cell_type::CONST_1));
 
-    CHECK(qca::mol_technology::is_normal_cell_mode(qca::mol_technology::cell_mode::NORMAL));
-    CHECK(qca::mol_technology::is_rotated_cell_mode(qca::mol_technology::cell_mode::ROTATED));
-    CHECK(qca::mol_technology::is_vertical_cell_mode(qca::mol_technology::cell_mode::VERTICAL));
-    CHECK(qca::mol_technology::is_crossover_cell_mode(qca::mol_technology::cell_mode::CROSSOVER));
+    CHECK(qca::mol_qca_technology::is_normal_cell_mode(qca::mol_qca_technology::cell_mode::NORMAL));
+    CHECK(qca::mol_qca_technology::is_rotated_cell_mode(qca::mol_qca_technology::cell_mode::ROTATED));
+    CHECK(qca::mol_qca_technology::is_vertical_cell_mode(qca::mol_qca_technology::cell_mode::VERTICAL));
+    CHECK(qca::mol_qca_technology::is_crossover_cell_mode(qca::mol_qca_technology::cell_mode::CROSSOVER));
 }
 
 TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")

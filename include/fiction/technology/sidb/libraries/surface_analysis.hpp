@@ -57,7 +57,7 @@ using surface_black_list =
  * @return A black list of gate functions associated with tiles.
  */
 template <typename GateLibrary, typename GateLyt, typename CellLyt>
-    requires std::same_as<fiction::technology<CellLyt>, sidb::technology> &&
+    requires std::same_as<fiction::technology<CellLyt>, sidb::sidb_technology> &&
              std::same_as<fiction::technology<CellLyt>, fiction::technology<GateLibrary>>
 [[nodiscard]] auto surface_analysis(
     const GateLyt& gate_lyt, const CellLyt& surface,

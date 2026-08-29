@@ -24,20 +24,20 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb::technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb::technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb::technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 

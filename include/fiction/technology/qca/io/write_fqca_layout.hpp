@@ -163,12 +163,12 @@ class write_fqca_layout_impl
             os << cell_designator;
         }
         // const-0 cell
-        else if (const auto cell_type = lyt.get_cell_type(c); qca::technology::is_const_0_cell(cell_type))
+        else if (const auto cell_type = lyt.get_cell_type(c); qca::qca_technology::is_const_0_cell(cell_type))
         {
             os << qca_stack::CONST_0_CELL;
         }
         // const-1 cell
-        else if (qca::technology::is_const_1_cell(cell_type))
+        else if (qca::qca_technology::is_const_1_cell(cell_type))
         {
             os << qca_stack::CONST_1_CELL;
         }
@@ -185,7 +185,7 @@ class write_fqca_layout_impl
     void write_via_cell(const cell<Lyt>& c, std::stringstream& via_stream) const
     {
         // if cell is marked as a vertical cell
-        if (const auto cell_mode = lyt.get_cell_mode(c); qca::technology::is_vertical_cell_mode(cell_mode))
+        if (const auto cell_mode = lyt.get_cell_mode(c); qca::qca_technology::is_vertical_cell_mode(cell_mode))
         {
             via_stream << std::to_string(lyt.get_clock_number(c));
         }

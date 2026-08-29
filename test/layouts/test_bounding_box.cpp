@@ -112,15 +112,15 @@ TEST_CASE("Update 2D cell-level bounding box", "[bounding-box]")
     lyt_and.resize({7, 7});
 
     // erase an input cell and the constant cell
-    lyt_and.assign_cell_type({0, 2}, qca::technology::cell_type::EMPTY);
-    lyt_and.assign_cell_type({2, 0}, qca::technology::cell_type::EMPTY);
+    lyt_and.assign_cell_type({0, 2}, qca::qca_technology::cell_type::EMPTY);
+    lyt_and.assign_cell_type({2, 0}, qca::qca_technology::cell_type::EMPTY);
 
     // add a wire segment below
-    lyt_and.assign_cell_type({1, 6}, qca::technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({2, 6}, qca::technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({3, 6}, qca::technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({4, 6}, qca::technology::cell_type::NORMAL);
-    lyt_and.assign_cell_type({5, 6}, qca::technology::cell_type::NORMAL);
+    lyt_and.assign_cell_type({1, 6}, qca::qca_technology::cell_type::NORMAL);
+    lyt_and.assign_cell_type({2, 6}, qca::qca_technology::cell_type::NORMAL);
+    lyt_and.assign_cell_type({3, 6}, qca::qca_technology::cell_type::NORMAL);
+    lyt_and.assign_cell_type({4, 6}, qca::qca_technology::cell_type::NORMAL);
+    lyt_and.assign_cell_type({5, 6}, qca::qca_technology::cell_type::NORMAL);
 
     // still the old bounding box
     CHECK(bb_and.get_min() == tile<cart_gate_clk_lyt>{0, 0});

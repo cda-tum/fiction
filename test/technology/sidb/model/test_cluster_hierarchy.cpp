@@ -76,17 +76,17 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
 {
     TestType lyt{};
 
-    lyt.assign_cell_type({50, -11, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({54, -9, 0}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({50, -11, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({54, -9, 0}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, -5, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, -3, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, -5, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, -3, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({-2, -2, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, -2, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({-2, -2, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, -2, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({53, 10, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({48, 13, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({53, 10, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({48, 13, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     const sidb::model::binary_cluster_hierarchy_node& h = sidb::model::cluster_hierarchy(lyt);
 

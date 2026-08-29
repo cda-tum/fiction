@@ -138,7 +138,7 @@ TEST_CASE("Gate library application", "[orthogonal]")
     using gate_layout = layouts::gate_level_layout<
         layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
     using cell_layout =
-        layouts::cell_level_layout<qca::technology,
+        layouts::cell_level_layout<qca::qca_technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const auto check = [](const auto& ntk)

@@ -30,7 +30,7 @@ namespace fiction::qca
  * More information and the open-source implementation are available at
  * https://github.com/vlsi-nanocomputing/The-OpenSource-MolPDK.
  */
-class sim7_mol_library : public fcn::gate_library<qca::mol_technology, 10, 10>
+class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 10>
 {
   public:
     /**

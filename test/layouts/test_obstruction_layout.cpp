@@ -72,7 +72,7 @@ TEST_CASE("Traits and construction", "[obstruction-layout]")
     SECTION("Cell-level layout")
     {
         using layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         REQUIRE(is_cell_level_layout_v<layout>);
@@ -206,7 +206,7 @@ TEST_CASE("Coordinate obstruction", "[obstruction-layout]")
     SECTION("Cell-level layout")
     {
         using layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         const auto lyt = blueprints::single_layer_qca_and_gate<layout>();
@@ -441,7 +441,7 @@ TEST_CASE("Connection obstruction", "[obstruction-layout]")
     SECTION("Cell-level layout")
     {
         using layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         const auto lyt = blueprints::single_layer_qca_and_gate<layout>();

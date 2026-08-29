@@ -261,28 +261,28 @@ class write_sqd_layout_impl
 
                     switch (type)
                     {
-                        case (sidb::technology::cell_type::NORMAL):
+                        case (sidb::sidb_technology::cell_type::NORMAL):
                         {
                             type_str = "";
                             break;
                         }
-                        case (sidb::technology::cell_type::INPUT):
+                        case (sidb::sidb_technology::cell_type::INPUT):
                         {
                             type_str = fmt::format(siqad::DOT_TYPE, "input");
                             break;
                         }
-                        case (sidb::technology::cell_type::OUTPUT):
+                        case (sidb::sidb_technology::cell_type::OUTPUT):
                         {
                             type_str = fmt::format(siqad::DOT_TYPE, "output");
                             break;
                         }
-                        case (sidb::technology::cell_type::LOGIC):
+                        case (sidb::sidb_technology::cell_type::LOGIC):
                         {
                             type_str = fmt::format(siqad::DOT_TYPE, "logic");
                             break;
                         }
                             // LCOV_EXCL_START
-                        case (sidb::technology::cell_type::EMPTY):
+                        case (sidb::sidb_technology::cell_type::EMPTY):
                         {
                             // this case can never happen; it exists to comfort the compilers
                             break;
@@ -314,25 +314,25 @@ class write_sqd_layout_impl
 
                     switch (type)
                     {
-                        case (qca::technology::cell_type::INPUT):
+                        case (qca::qca_technology::cell_type::INPUT):
                         {
                             color = siqad::INPUT_COLOR;
                             break;
                         }
-                        case (qca::technology::cell_type::OUTPUT):
+                        case (qca::qca_technology::cell_type::OUTPUT):
                         {
                             color = siqad::OUTPUT_COLOR;
                             break;
                         }
-                        case (qca::technology::cell_type::CONST_0):
-                        case (qca::technology::cell_type::CONST_1):
+                        case (qca::qca_technology::cell_type::CONST_0):
+                        case (qca::qca_technology::cell_type::CONST_1):
                         {
                             color = siqad::CONST_COLOR;
                             break;
                         }
                     }
 
-                    if (!qca::technology::is_const_1_cell(type))
+                    if (!qca::qca_technology::is_const_1_cell(type))
                     {
                         // top left
                         design << fmt::format(siqad::DBDOT_BLOCK,
@@ -342,7 +342,7 @@ class write_sqd_layout_impl
                                               fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, (c.y * 7) + 3, 0),
                                               "", color);
                     }
-                    if (!qca::technology::is_const_0_cell(type))
+                    if (!qca::qca_technology::is_const_0_cell(type))
                     {
                         // top right
                         design << fmt::format(siqad::DBDOT_BLOCK,

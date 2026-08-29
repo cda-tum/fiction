@@ -222,13 +222,13 @@ struct bdl_wire
     /**
      * Find the first Binary-dot Logic (BDL) pair of a specified type in the wire.
      *
-     * @param t Type of BDL pair to search for (`sidb::technology::cell_type::INPUT`,
-     * `sidb::technology::cell_type::OUTPUT`, etc.).
+     * @param t Type of BDL pair to search for (`sidb::sidb_technology::cell_type::INPUT`,
+     * `sidb::sidb_technology::cell_type::OUTPUT`, etc.).
      * @return Optional containing the first BDL pair with the specified type `t`,
      *         or `std::nullopt` if no such BDL pair is found.
      */
     [[nodiscard]] std::optional<bdl_pair<cell<Lyt>>>
-    find_bdl_pair_by_type(const sidb::technology::cell_type& t) const noexcept
+    find_bdl_pair_by_type(const sidb::sidb_technology::cell_type& t) const noexcept
     {
         const auto it = std::ranges::find_if(pairs, [&t](const auto& bdl) { return bdl.type == t; });
 
@@ -254,23 +254,24 @@ struct bdl_wire
         }
 
         // a wire without input or output cells does not have a port
-        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == sidb::technology::cell_type::NORMAL; }))
+        if (std::ranges::all_of(pairs,
+                                [](const auto& bdl) { return bdl.type == sidb::sidb_technology::cell_type::NORMAL; }))
         {
             port.dir = fcn::port_direction::NONE;
             return;
         }
 
-        const auto input_exists =
-            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb::technology::cell_type::INPUT; });
+        const auto input_exists = std::ranges::any_of(pairs, [](const auto& bdl)
+                                                      { return bdl.type == sidb::sidb_technology::cell_type::INPUT; });
 
-        const auto output_exists =
-            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb::technology::cell_type::OUTPUT; });
+        const auto output_exists = std::ranges::any_of(
+            pairs, [](const auto& bdl) { return bdl.type == sidb::sidb_technology::cell_type::OUTPUT; });
 
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            first_bdl_pair = find_bdl_pair_by_type(sidb::technology::cell_type::INPUT);
-            last_bdl_pair  = find_bdl_pair_by_type(sidb::technology::cell_type::OUTPUT);
+            first_bdl_pair = find_bdl_pair_by_type(sidb::sidb_technology::cell_type::INPUT);
+            last_bdl_pair  = find_bdl_pair_by_type(sidb::sidb_technology::cell_type::OUTPUT);
 
             // determine the port of the wire based on the position of input and output BDL pairs
             if (first_bdl_pair.value() < last_bdl_pair)
@@ -303,7 +304,7 @@ struct bdl_wire
         // only input cells are present
         else if (input_exists)
         {
-            first_bdl_pair = find_bdl_pair_by_type(sidb::technology::cell_type::INPUT).value();
+            first_bdl_pair = find_bdl_pair_by_type(sidb::sidb_technology::cell_type::INPUT).value();
 
             auto max_distance = 0.0;
 
@@ -344,7 +345,7 @@ struct bdl_wire
         // only output cells are present
         else
         {
-            last_bdl_pair = find_bdl_pair_by_type(sidb::technology::cell_type::OUTPUT).value();
+            last_bdl_pair = find_bdl_pair_by_type(sidb::sidb_technology::cell_type::OUTPUT).value();
 
             auto max_distance = 0.0;
 

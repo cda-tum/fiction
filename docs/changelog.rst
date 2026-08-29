@@ -85,7 +85,10 @@ Changed
       namespace level
     - Identifiers shed prefixes the namespace now carries, so ``sidb_simulation_parameters``
       becomes ``fiction::sidb::model::simulation_parameters``. Published names are kept, so
-      ``qca_one_library`` stays ``fiction::qca::qca_one_library``
+      ``qca_one_library`` stays ``fiction::qca::qca_one_library``, and so do the technology
+      tags ``qca_technology``, ``mol_qca_technology``, ``inml_technology`` and
+      ``sidb_technology``: bare ``technology`` reads as nothing in a ``Technology`` template
+      argument and would shadow the ``fiction::technology<Lyt>`` trait in its own namespace
     - The coordinate types are renamed: ``fiction::offset::ucoord_t`` becomes
       ``fiction::layouts::coords::offset``, and likewise for ``cube`` and ``siqad``
 

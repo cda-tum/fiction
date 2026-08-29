@@ -54,7 +54,7 @@ TEST_CASE("Read empty layout", "[fqca]")
     SECTION("Cartesian layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         check(qca::io::read_fqca_layout<qca_layout>(layout_stream));
@@ -62,7 +62,7 @@ TEST_CASE("Read empty layout", "[fqca]")
     SECTION("Stacked layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
         check(qca::io::read_fqca_layout<qca_layout>(layout_stream));
@@ -109,15 +109,15 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
         CHECK(lyt.area() == 25);
         CHECK(lyt.get_layout_name() == "AND");
 
-        CHECK(lyt.get_cell_type({0, 2}) == qca::technology::cell_type::INPUT);
-        CHECK(lyt.get_cell_type({2, 4}) == qca::technology::cell_type::INPUT);
-        CHECK(lyt.get_cell_type({2, 0}) == qca::technology::cell_type::CONST_0);
-        CHECK(lyt.get_cell_type({2, 1}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({2, 2}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({2, 3}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({1, 2}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({3, 2}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({4, 2}) == qca::technology::cell_type::OUTPUT);
+        CHECK(lyt.get_cell_type({0, 2}) == qca::qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 4}) == qca::qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 0}) == qca::qca_technology::cell_type::CONST_0);
+        CHECK(lyt.get_cell_type({2, 1}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 2}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 3}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({1, 2}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({3, 2}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({4, 2}) == qca::qca_technology::cell_type::OUTPUT);
 
         CHECK(lyt.get_clock_number({0, 2}) == 0);
         CHECK(lyt.get_clock_number({2, 4}) == 0);
@@ -137,7 +137,7 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
     SECTION("Cartesian layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         check(qca::io::read_fqca_layout<qca_layout>(layout_stream, "AND"));
@@ -145,7 +145,7 @@ TEST_CASE("Read single-layer AND gate", "[fqca]")
     SECTION("Stacked layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
         check(qca::io::read_fqca_layout<qca_layout>(layout_stream, "AND"));
@@ -203,7 +203,7 @@ TEST_CASE("Read multi-layer wire crossing", "[fqca]")
     std::istringstream layout_stream{fqca_layout};
 
     using qca_layout =
-        layouts::cell_level_layout<qca::technology,
+        layouts::cell_level_layout<qca::qca_technology,
                                    layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
     const auto layout = qca::io::read_fqca_layout<qca_layout>(layout_stream, "Crossover");
@@ -228,39 +228,39 @@ TEST_CASE("Read multi-layer wire crossing", "[fqca]")
     CHECK(layout.is_po({4, 2, 0}));
     CHECK(layout.is_po({2, 4, 0}));
 
-    CHECK(layout.get_cell_type({0, 2, 0}) == qca::technology::cell_type::INPUT);
-    CHECK(layout.get_cell_type({2, 0, 0}) == qca::technology::cell_type::INPUT);
-    CHECK(layout.get_cell_type({2, 4, 0}) == qca::technology::cell_type::OUTPUT);
-    CHECK(layout.get_cell_type({4, 2, 0}) == qca::technology::cell_type::OUTPUT);
-    CHECK(layout.get_cell_type({1, 2, 0}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 2, 0}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({3, 2, 0}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({1, 2, 0}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({3, 2, 0}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 0, 1}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 0, 2}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 1, 2}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 2, 2}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 3, 2}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 4, 2}) == qca::technology::cell_type::NORMAL);
-    CHECK(layout.get_cell_type({2, 4, 1}) == qca::technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({0, 2, 0}) == qca::qca_technology::cell_type::INPUT);
+    CHECK(layout.get_cell_type({2, 0, 0}) == qca::qca_technology::cell_type::INPUT);
+    CHECK(layout.get_cell_type({2, 4, 0}) == qca::qca_technology::cell_type::OUTPUT);
+    CHECK(layout.get_cell_type({4, 2, 0}) == qca::qca_technology::cell_type::OUTPUT);
+    CHECK(layout.get_cell_type({1, 2, 0}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 2, 0}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({3, 2, 0}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({1, 2, 0}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({3, 2, 0}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 0, 1}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 0, 2}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 1, 2}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 2, 2}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 3, 2}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 4, 2}) == qca::qca_technology::cell_type::NORMAL);
+    CHECK(layout.get_cell_type({2, 4, 1}) == qca::qca_technology::cell_type::NORMAL);
 
-    CHECK(layout.get_cell_mode({0, 2, 0}) == qca::technology::cell_mode::NORMAL);
-    CHECK(layout.get_cell_mode({1, 2, 0}) == qca::technology::cell_mode::NORMAL);
-    CHECK(layout.get_cell_mode({2, 2, 0}) == qca::technology::cell_mode::NORMAL);
-    CHECK(layout.get_cell_mode({3, 2, 0}) == qca::technology::cell_mode::NORMAL);
-    CHECK(layout.get_cell_mode({4, 2, 0}) == qca::technology::cell_mode::NORMAL);
-    CHECK(layout.get_cell_mode({2, 0, 0}) == qca::technology::cell_mode::NORMAL);
-    CHECK(layout.get_cell_mode({2, 4, 0}) == qca::technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({0, 2, 0}) == qca::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({1, 2, 0}) == qca::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 2, 0}) == qca::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({3, 2, 0}) == qca::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({4, 2, 0}) == qca::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 0, 0}) == qca::qca_technology::cell_mode::NORMAL);
+    CHECK(layout.get_cell_mode({2, 4, 0}) == qca::qca_technology::cell_mode::NORMAL);
 
-    CHECK(layout.get_cell_mode({2, 0, 1}) == qca::technology::cell_mode::VERTICAL);
-    CHECK(layout.get_cell_mode({2, 4, 1}) == qca::technology::cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({2, 0, 1}) == qca::qca_technology::cell_mode::VERTICAL);
+    CHECK(layout.get_cell_mode({2, 4, 1}) == qca::qca_technology::cell_mode::VERTICAL);
 
-    CHECK(layout.get_cell_mode({2, 0, 2}) == qca::technology::cell_mode::CROSSOVER);
-    CHECK(layout.get_cell_mode({2, 1, 2}) == qca::technology::cell_mode::CROSSOVER);
-    CHECK(layout.get_cell_mode({2, 2, 2}) == qca::technology::cell_mode::CROSSOVER);
-    CHECK(layout.get_cell_mode({2, 3, 2}) == qca::technology::cell_mode::CROSSOVER);
-    CHECK(layout.get_cell_mode({2, 4, 2}) == qca::technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 0, 2}) == qca::qca_technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 1, 2}) == qca::qca_technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 2, 2}) == qca::qca_technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 3, 2}) == qca::qca_technology::cell_mode::CROSSOVER);
+    CHECK(layout.get_cell_mode({2, 4, 2}) == qca::qca_technology::cell_mode::CROSSOVER);
 }
 
 TEST_CASE("Parsing of unsupported features", "[fqca]")
@@ -306,15 +306,15 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
         CHECK(lyt.area() == 25);
         CHECK(lyt.get_layout_name() == "AND");
 
-        CHECK(lyt.get_cell_type({0, 2}) == qca::technology::cell_type::INPUT);
-        CHECK(lyt.get_cell_type({2, 4}) == qca::technology::cell_type::INPUT);
-        CHECK(lyt.get_cell_type({2, 0}) == qca::technology::cell_type::CONST_0);
-        CHECK(lyt.get_cell_type({2, 1}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({2, 2}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({2, 3}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({1, 2}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({3, 2}) == qca::technology::cell_type::NORMAL);
-        CHECK(lyt.get_cell_type({4, 2}) == qca::technology::cell_type::OUTPUT);
+        CHECK(lyt.get_cell_type({0, 2}) == qca::qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 4}) == qca::qca_technology::cell_type::INPUT);
+        CHECK(lyt.get_cell_type({2, 0}) == qca::qca_technology::cell_type::CONST_0);
+        CHECK(lyt.get_cell_type({2, 1}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 2}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({2, 3}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({1, 2}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({3, 2}) == qca::qca_technology::cell_type::NORMAL);
+        CHECK(lyt.get_cell_type({4, 2}) == qca::qca_technology::cell_type::OUTPUT);
 
         CHECK(lyt.get_clock_number({0, 2}) == 0);
         CHECK(lyt.get_clock_number({2, 4}) == 0);
@@ -334,7 +334,7 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
     SECTION("Cartesian layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         // despite unsupported features, the parsing should proceed normally
@@ -343,7 +343,7 @@ TEST_CASE("Parsing of unsupported features", "[fqca]")
     SECTION("Stacked layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
         // despite unsupported features, the parsing should proceed normally
@@ -390,7 +390,7 @@ TEST_CASE("Exceptions", "[fqca]")
         SECTION("Cartesian layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca::technology,
+                layouts::cell_level_layout<qca::qca_technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
             CHECK_THROWS_AS(qca::io::read_fqca_layout<qca_layout>(layout_stream),
                             qca::io::unsupported_character_exception);
@@ -398,7 +398,7 @@ TEST_CASE("Exceptions", "[fqca]")
         SECTION("Stacked layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca::technology,
+                layouts::cell_level_layout<qca::qca_technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
             CHECK_THROWS_AS(qca::io::read_fqca_layout<qca_layout>(layout_stream),
                             qca::io::unsupported_character_exception);
@@ -443,7 +443,7 @@ TEST_CASE("Exceptions", "[fqca]")
         SECTION("Cartesian layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca::technology,
+                layouts::cell_level_layout<qca::qca_technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
             CHECK_THROWS_AS(qca::io::read_fqca_layout<qca_layout>(layout_stream),
                             qca::io::undefined_cell_label_exception);
@@ -451,7 +451,7 @@ TEST_CASE("Exceptions", "[fqca]")
         SECTION("Stacked layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca::technology,
+                layouts::cell_level_layout<qca::qca_technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
             CHECK_THROWS_AS(qca::io::read_fqca_layout<qca_layout>(layout_stream),
                             qca::io::undefined_cell_label_exception);
@@ -495,7 +495,7 @@ TEST_CASE("Exceptions", "[fqca]")
         SECTION("Cartesian layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca::technology,
+                layouts::cell_level_layout<qca::qca_technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
             CHECK_THROWS_AS(qca::io::read_fqca_layout<qca_layout>(layout_stream),
                             qca::io::unrecognized_cell_definition_exception);
@@ -503,7 +503,7 @@ TEST_CASE("Exceptions", "[fqca]")
         SECTION("Stacked layout")
         {
             using qca_layout =
-                layouts::cell_level_layout<qca::technology,
+                layouts::cell_level_layout<qca::qca_technology,
                                            layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
             CHECK_THROWS_AS(qca::io::read_fqca_layout<qca_layout>(layout_stream),
                             qca::io::unrecognized_cell_definition_exception);
@@ -533,7 +533,7 @@ TEST_CASE("Read written layouts", "[fqca]")
     SECTION("Cartesian layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
         read_write_layout(blueprints::single_layer_qca_and_gate<qca_layout>());
@@ -541,7 +541,7 @@ TEST_CASE("Read written layouts", "[fqca]")
     SECTION("Stacked layout")
     {
         using qca_layout =
-            layouts::cell_level_layout<qca::technology,
+            layouts::cell_level_layout<qca::qca_technology,
                                        layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::cube>>>;
 
         read_write_layout(blueprints::single_layer_qca_and_gate<qca_layout>());

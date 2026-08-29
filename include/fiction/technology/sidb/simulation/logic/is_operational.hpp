@@ -212,7 +212,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
             input_bdl_wires{
@@ -239,7 +239,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{tt},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(layout, sidb::technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(layout, sidb::sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii{initialize_bii ? bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires} :
                                  bdl_input_iterator<Lyt>{Lyt{}}},
@@ -265,7 +265,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii{bdl_input_iterator<Lyt>{layout, params.input_bdl_iterator_params, input_wires}},
             input_bdl_wires{input_wires},
@@ -287,7 +287,7 @@ class is_operational_impl
             layout{lyt},
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(lyt, sidb::sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             bii(bdl_input_iterator<Lyt>{lyt, params.input_bdl_iterator_params}),
             input_bdl_wires{
@@ -318,7 +318,7 @@ class is_operational_impl
                         const std::vector<bdl_wire<Lyt>>& output_wires, const Lyt& c_lyt) :
             truth_table{spec},
             parameters{params},
-            output_bdl_pairs(detect_bdl_pairs(input_pattern_lyts.front(), sidb::technology::cell_type::OUTPUT,
+            output_bdl_pairs(detect_bdl_pairs(input_pattern_lyts.front(), sidb::sidb_technology::cell_type::OUTPUT,
                                               params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params)),
             // the input pattern layouts make the iterator redundant; this is the same no-op instantiation that
             // `verify_logic_match` uses
@@ -698,7 +698,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb::technology::cell_type::INPUT)
+                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -712,7 +712,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb::technology::cell_type::INPUT)
+                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -729,7 +729,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb::technology::cell_type::INPUT)
+                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -743,7 +743,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : input_bdl_wires[number_of_input_wires - 1 - i].pairs)
                     {
-                        if (bdl.type == sidb::technology::cell_type::INPUT)
+                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -799,7 +799,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        if (bdl.type == sidb::technology::cell_type::INPUT)
+                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -826,7 +826,7 @@ class is_operational_impl
                 {
                     for (const auto& bdl : output_bdl_wires[i].pairs)
                     {
-                        if (bdl.type == sidb::technology::cell_type::INPUT)
+                        if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                         {
                             continue;
                         }
@@ -1092,7 +1092,7 @@ class is_operational_impl
                 return std::ranges::any_of(wire.pairs,
                                            [this, &ground_state, &current_bit_set, &wire](const auto& bdl)
                                            {
-                                               if (bdl.type == sidb::technology::cell_type::INPUT)
+                                               if (bdl.type == sidb::sidb_technology::cell_type::INPUT)
                                                {
                                                    return false;  // Skip processing for input type.
                                                }

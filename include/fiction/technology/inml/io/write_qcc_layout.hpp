@@ -85,11 +85,15 @@ inline constexpr const char* PROPERTY_LENGTH      = "length";
 inline constexpr const std::array<const char*, 6> COMPONENTS{"Magnet", "Coupler",  "Cross Wire",
                                                              "And",    "Inverter", "Or"};
 
-inline const std::unordered_map<inml::technology::cell_type, uint8_t> COMPONENT_SELECTOR{
-    {inml::technology::cell_type::NORMAL, 0},           {inml::technology::cell_type::INPUT, 0},
-    {inml::technology::cell_type::OUTPUT, 0},           {inml::technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
-    {inml::technology::cell_type::CROSSWIRE_MAGNET, 2}, {inml::technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
-    {inml::technology::cell_type::INVERTER_MAGNET, 4},  {inml::technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5},
+inline const std::unordered_map<inml::inml_technology::cell_type, uint8_t> COMPONENT_SELECTOR{
+    {inml::inml_technology::cell_type::NORMAL, 0},
+    {inml::inml_technology::cell_type::INPUT, 0},
+    {inml::inml_technology::cell_type::OUTPUT, 0},
+    {inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET, 1},
+    {inml::inml_technology::cell_type::CROSSWIRE_MAGNET, 2},
+    {inml::inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET, 3},
+    {inml::inml_technology::cell_type::INVERTER_MAGNET, 4},
+    {inml::inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET, 5},
 };
 
 }  // namespace qcc
@@ -289,14 +293,14 @@ class write_qcc_layout_impl
 
                 // if an AND or an OR structure is encountered, the next two magnets in southern direction need to
                 // be skipped
-                if (type == inml::technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
-                    type == inml::technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
+                if (type == inml::inml_technology::cell_type::SLANTED_EDGE_UP_MAGNET ||
+                    type == inml::inml_technology::cell_type::SLANTED_EDGE_DOWN_MAGNET)
                 {
                     skip.insert({c.x, c.y + 1});
                     skip.insert({c.x, c.y + 2});
                 }
                 // if a coupler is encountered, skip all magnets relating to the fan-out structure
-                else if (type == inml::technology::cell_type::FANOUT_COUPLER_MAGNET)
+                else if (type == inml::inml_technology::cell_type::FANOUT_COUPLER_MAGNET)
                 {
                     skip.insert({c.x, c.y + 1});
                     skip.insert({c.x, c.y + 2});
@@ -304,7 +308,7 @@ class write_qcc_layout_impl
                     skip.insert({c.x + 1, c.y + 2});
                 }
                 // if a cross wire is encountered, skip all magnets relating to the crossing structure
-                else if (type == inml::technology::cell_type::CROSSWIRE_MAGNET)
+                else if (type == inml::inml_technology::cell_type::CROSSWIRE_MAGNET)
                 {
                     skip.insert({c.x + 2, c.y});
                     skip.insert({c.x, c.y + 2});
@@ -313,7 +317,7 @@ class write_qcc_layout_impl
                 }
                 // inverters are single structures taking up 4 magnets in the library, so skip the next 3 if
                 // encountered one
-                else if (type == inml::technology::cell_type::INVERTER_MAGNET)
+                else if (type == inml::inml_technology::cell_type::INVERTER_MAGNET)
                 {
                     skip.insert({c.x + 1, c.y});
                     skip.insert({c.x + 2, c.y});
@@ -331,7 +335,7 @@ class write_qcc_layout_impl
 
                 os << fmt::format(qcc::LAYOUT_ITEM_PROPERTY, qcc::PROPERTY_PHASE, lyt.get_clock_number(c));
 
-                if (type == inml::technology::cell_type::INVERTER_MAGNET)
+                if (type == inml::inml_technology::cell_type::INVERTER_MAGNET)
                 {
                     os << fmt::format(qcc::LAYOUT_ITEM_PROPERTY, qcc::PROPERTY_LENGTH, 4);
                 }

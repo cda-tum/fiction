@@ -193,8 +193,8 @@ int main()  // NOLINT
             const auto bb = fiction::layouts::bounding_box_2d<cell_lyt>(dot_accurate_layout);
 
             // compute area
-            fiction::fcn::area_stats                             area_stats{};
-            fiction::fcn::area_params<fiction::sidb::technology> area_ps{};
+            fiction::fcn::area_stats                                  area_stats{};
+            fiction::fcn::area_params<fiction::sidb::sidb_technology> area_ps{};
             fiction::fcn::area(bb, area_ps, &area_stats);
 
             // write a SiQAD simulation file

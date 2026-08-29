@@ -18,7 +18,8 @@ namespace fiction::sidb::libraries
  * This library contains SiDB I/O wires designed for both 1- and 2-input functions.
  * Each wire comprises 2 BDL pairs. The library contains all mirrored versions, a double wire and a crossing.
  */
-class skeleton_bestagon_library : public fcn::gate_library<sidb::technology, 60, 46>  // width and height of a hexagon
+class skeleton_bestagon_library
+        : public fcn::gate_library<sidb::sidb_technology, 60, 46>  // width and height of a hexagon
 {
   public:
     explicit skeleton_bestagon_library() = delete;

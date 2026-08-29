@@ -202,7 +202,7 @@ int main(int argc, char* argv[])  // NOLINT
 
     // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
     using qca_cell_level_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::technology,
+        fiction::qca::qca_technology,
         fiction::layouts::clocked_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>;
 
     std::cout << "[i] orthogonal physical design" << std::endl;

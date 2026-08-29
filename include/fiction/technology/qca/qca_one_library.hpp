@@ -28,7 +28,7 @@ namespace fiction::qca
  * in the same tile. Furthermore, it can be used for a range of clocking schemes. Tiles in QCA ONE are \f$5 \times 5\f$
  * QCA cells.
  */
-class qca_one_library : public fcn::gate_library<qca::technology, 5, 5>
+class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
 {
   public:
     explicit qca_one_library() = delete;
@@ -133,11 +133,11 @@ class qca_one_library : public fcn::gate_library<qca::technology, 5, 5>
                         if (std::ranges::distance(adjacent_cells) <= 1)
                         {
                             // change cell mode to via
-                            lyt.assign_cell_mode(c, qca::technology::cell_mode::VERTICAL);
+                            lyt.assign_cell_mode(c, qca::qca_technology::cell_mode::VERTICAL);
                             // create a corresponding via ground cell
                             const cell<CellLyt> ground_via_cell{c.x, c.y, 0};
-                            lyt.assign_cell_type(ground_via_cell, qca::technology::cell_type::NORMAL);
-                            lyt.assign_cell_mode(ground_via_cell, qca::technology::cell_mode::VERTICAL);
+                            lyt.assign_cell_type(ground_via_cell, qca::qca_technology::cell_type::NORMAL);
+                            lyt.assign_cell_mode(ground_via_cell, qca::qca_technology::cell_mode::VERTICAL);
                         }
                     }
                 }

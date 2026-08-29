@@ -13,7 +13,7 @@ namespace fiction::qca
 /**
  * Quantum-dot Cellular Automata (QCA) technology implementation of the FCN concept.
  */
-struct technology
+struct qca_technology
 {
     /**
      * Possible types of QCA cells.
@@ -203,7 +203,7 @@ struct technology
     static constexpr uint64_t CELL_VSPACE = 2ul;
 
     // Deleted constructors to prevent instantiation
-    technology() = delete;
+    qca_technology() = delete;
 };
 
 /**
@@ -212,7 +212,7 @@ struct technology
  * MolQCA normal cell symbols encode their SCERPA clock phase directly. The helper predicates below keep phase handling
  * centralized for writers and gate libraries that need to translate cell symbols into simulator-specific metadata.
  */
-struct mol_technology
+struct mol_qca_technology
 {
     /**
      * Possible types of molQCA cells.
@@ -489,7 +489,7 @@ struct mol_technology
     static constexpr uint64_t CELL_VSPACE = 0ul;
 
     // Deleted constructors to prevent instantiation
-    mol_technology() = delete;
+    mol_qca_technology() = delete;
 };
 
 }  // namespace fiction::qca

@@ -13,7 +13,7 @@ namespace fiction::inml
 /**
  * in-plane Nanomagnet Logic (iNML) technology implementation of the FCN concept.
  */
-struct technology
+struct inml_technology
 {
     /**
      * Possible types of iNML cells.
@@ -211,7 +211,7 @@ struct technology
     static constexpr uint64_t CELL_VSPACE = 25ul;
 
     // Deleted constructors to prevent instantiation
-    technology() = delete;
+    inml_technology() = delete;
 };
 
 }  // namespace fiction::inml

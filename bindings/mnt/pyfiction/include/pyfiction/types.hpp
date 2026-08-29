@@ -100,19 +100,19 @@ using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<Technology,
 /**
  * QCA cell layout.
  */
-using py_qca_layout = py_cartesian_cell_layout<fiction::qca::technology>;
+using py_qca_layout = py_cartesian_cell_layout<fiction::qca::qca_technology>;
 /**
  * iNML cell layout.
  */
-using py_inml_layout = py_cartesian_cell_layout<fiction::inml::technology>;
+using py_inml_layout = py_cartesian_cell_layout<fiction::inml::inml_technology>;
 /**
  * MolQCA cell layout.
  */
-using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_technology>;
+using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_qca_technology>;
 /**
  * SiDB cell layout.
  */
-using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb::technology>;
+using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb::sidb_technology>;
 
 /**
  * SiDB lattice layout.

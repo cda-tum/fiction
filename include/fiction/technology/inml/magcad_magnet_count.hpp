@@ -33,7 +33,7 @@ uint64_t magcad_magnet_count(const Lyt& lyt) noexcept
     lyt.foreach_cell(
         [&lyt, &num_inv_cells](const auto& c)
         {
-            if (lyt.get_cell_type(c) == inml::technology::cell_type::INVERTER_MAGNET)
+            if (lyt.get_cell_type(c) == inml::inml_technology::cell_type::INVERTER_MAGNET)
             {
                 ++num_inv_cells;
             }

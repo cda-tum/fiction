@@ -723,7 +723,7 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb::technology::cell_type::EMPTY)
+            if (lyt_copy.get_cell_type(all_sidbs_in_canvas[i]) == sidb::sidb_technology::cell_type::EMPTY)
             {
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
                 {
@@ -732,7 +732,7 @@ class design_sidb_gates_impl
                         continue;
                     }
                 }
-                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb::technology::cell_type::LOGIC);
+                lyt_copy.assign_cell_type(all_sidbs_in_canvas[i], sidb::sidb_technology::cell_type::LOGIC);
             }
         }
 
@@ -753,7 +753,7 @@ class design_sidb_gates_impl
         {
             assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            if (skeleton_layout.get_cell_type(all_sidbs_in_canvas[i]) == sidb::technology::cell_type::EMPTY)
+            if (skeleton_layout.get_cell_type(all_sidbs_in_canvas[i]) == sidb::sidb_technology::cell_type::EMPTY)
             {
                 // SiDBs cannot be placed on positions which are already occupied by atomic defects.
                 if constexpr (is_sidb_defect_surface_v<Lyt>)
@@ -763,7 +763,7 @@ class design_sidb_gates_impl
                         return std::nullopt;
                     }
                 }
-                lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb::technology::cell_type::LOGIC);
+                lyt.assign_cell_type(all_sidbs_in_canvas[i], sidb::sidb_technology::cell_type::LOGIC);
             }
         }
 
@@ -771,7 +771,7 @@ class design_sidb_gates_impl
         skeleton_layout.foreach_cell(
             [this, &lyt](const auto& c)
             {
-                if (skeleton_layout.get_cell_type(c) == sidb::technology::cell_type::LOGIC)
+                if (skeleton_layout.get_cell_type(c) == sidb::sidb_technology::cell_type::LOGIC)
                 {
                     lyt.assign_cell_type(c, Lyt::technology::cell_type::LOGIC);
                 }

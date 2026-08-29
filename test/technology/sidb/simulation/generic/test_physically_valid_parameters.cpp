@@ -24,14 +24,14 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
     layout lyt{{20, 10}, "AND gate"};
 
-    lyt.assign_cell_type({-2, -1, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 0, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 1, 1}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 4, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 5, 0}, sidb::technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 7, 1}, sidb::technology::cell_type::NORMAL);
+    lyt.assign_cell_type({-2, -1, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 1, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 4, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 5, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 7, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;

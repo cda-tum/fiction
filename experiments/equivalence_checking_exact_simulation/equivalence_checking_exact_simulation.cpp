@@ -81,7 +81,7 @@ int main()  // NOLINT
 
                     for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
                     {
-                        lyt.assign_cell_type(all_cells_in_region[idx], sidb::technology::cell_type::NORMAL);
+                        lyt.assign_cell_type(all_cells_in_region[idx], sidb::sidb_technology::cell_type::NORMAL);
                     }
 
                     auto result_exgs       = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params);

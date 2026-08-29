@@ -132,7 +132,8 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::technology, fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+        fiction::qca::qca_technology,
+        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
@@ -154,19 +155,20 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::technology, fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+        fiction::qca::qca_technology,
+        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, fiction::qca::technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, fiction::qca::technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, fiction::qca::technology::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::qca::technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, fiction::qca::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, fiction::qca::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, fiction::qca::qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, fiction::qca::qca_technology::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
@@ -189,24 +191,25 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
     using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::technology, fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+        fiction::qca::qca_technology,
+        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
-    layout.assign_cell_type({0, 2, 0}, fiction::qca::technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, fiction::qca::technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 2, 0}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 0}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2, 0}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 1, 1}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 1}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3, 1}, fiction::qca::technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 4, 0}, fiction::qca::technology::cell_type::OUTPUT);
-    layout.assign_cell_type({4, 2, 0}, fiction::qca::technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2, 0}, fiction::qca::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, fiction::qca::qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 2, 0}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 0}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 0}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4, 0}, fiction::qca::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 0}, fiction::qca::qca_technology::cell_type::OUTPUT);
 
-    layout.assign_cell_mode({2, 1, 1}, fiction::qca::technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 2, 1}, fiction::qca::technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 3, 1}, fiction::qca::technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 1, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 3, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 0}, "b");

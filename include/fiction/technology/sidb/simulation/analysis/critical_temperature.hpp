@@ -200,7 +200,7 @@ class critical_temperature_impl
                 pre_detected_output_bdl_pairs != nullptr ?
                     std::vector<sidb::simulation::logic::bdl_pair<cell<Lyt>>>{} :
                     sidb::simulation::logic::detect_bdl_pairs(
-                        layout, sidb::technology::cell_type::OUTPUT,
+                        layout, sidb::sidb_technology::cell_type::OUTPUT,
                         params.operational_params.input_bdl_iterator_params.bdl_wire_params.bdl_pairs_params);
 
             const auto& output_bdl_pairs =

@@ -464,13 +464,13 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
             }
 
             if (const auto ct = lyt.get_cell_type(loop_coordinate);
-                ct != sidb::technology::cell_type::EMPTY && !already_printed)
+                ct != sidb::sidb_technology::cell_type::EMPTY && !already_printed)
             {
-                if (ct == sidb::technology::cell_type::INPUT)
+                if (ct == sidb::sidb_technology::cell_type::INPUT)
                 {
                     os << fmt::format(lat_color ? detail::INP_COLOR : detail::NO_COLOR, " ◯ ");
                 }
-                else if (ct == sidb::technology::cell_type::OUTPUT)
+                else if (ct == sidb::sidb_technology::cell_type::OUTPUT)
                 {
                     os << fmt::format(lat_color ? detail::OUT_COLOR : detail::NO_COLOR, " ◯ ");
                 }
