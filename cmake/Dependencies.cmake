@@ -52,7 +52,7 @@ FetchContent_MakeAvailable(nlohmann_json)
 # Catch2
 if(FICTION_TEST)
   set(CATCH2_VERSION
-      3.15.3
+      3.16.0
       CACHE STRING "Catch2 version")
   if(NOT DEFINED CATCH2_URL)
     set(CATCH2_URL
@@ -61,7 +61,7 @@ if(FICTION_TEST)
   endif()
   if(NOT DEFINED CATCH2_SHA256)
     set(CATCH2_SHA256
-        b0299ae552918220a7a6e21e7de5b714777f4e8c883fb70c4bb23fe01df8c6e3)
+        0957cae5821b17ce07f0833aaa52b5137643a8382203221f363a8303c109af34)
   endif()
   FetchContent_Declare(
     Catch2

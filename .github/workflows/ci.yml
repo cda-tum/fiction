@@ -243,7 +243,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the Ubuntu tests succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
@@ -259,7 +259,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the macOS tests succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
@@ -275,7 +275,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the Windows tests succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-cpp-tests)
@@ -294,7 +294,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the Docker image build succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-docker)
@@ -310,7 +310,7 @@ jobs:
     runs-on: ubuntu-slim
     steps:
       - name: Decide whether the CodeQL analysis succeeded or failed
-        uses: re-actors/alls-green@05ac9388f0aebcb5727afa17fcccfecd6f8ec5fe # v1.2.2
+        uses: re-actors/alls-green@b5b5b37504aa4183270bd3d855c52a67f212be35 # v1.3.0
         with:
           allowed-skips: >-
             ${{ !fromJSON(needs.change-detection.outputs.run-codeql)
