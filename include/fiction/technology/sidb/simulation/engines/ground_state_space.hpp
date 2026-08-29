@@ -11,7 +11,7 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <btree.h>
@@ -218,12 +218,12 @@ class ground_state_space_impl
      * @return The two charge distribution surfaces that each represent respective bounds on the electrostatic potential
      * in the layout.
      */
-    [[nodiscard]] static std::pair<sidb::primitives::charge_distribution_surface<Lyt>,
-                                   sidb::primitives::charge_distribution_surface<Lyt>>
+    [[nodiscard]] static std::pair<sidb::surfaces::charge_distribution_surface<Lyt>,
+                                   sidb::surfaces::charge_distribution_surface<Lyt>>
     get_local_potential_bounds(const Lyt& lyt, const sidb::model::simulation_parameters& sim_params) noexcept
     {
-        sidb::primitives::charge_distribution_surface<Lyt> cds_min{lyt};
-        sidb::primitives::charge_distribution_surface<Lyt> cds_max{lyt};
+        sidb::surfaces::charge_distribution_surface<Lyt> cds_min{lyt};
+        sidb::surfaces::charge_distribution_surface<Lyt> cds_max{lyt};
 
         cds_min.assign_physical_parameters(sim_params);
         cds_max.assign_physical_parameters(sim_params);
@@ -256,9 +256,9 @@ class ground_state_space_impl
      * @return The clst that contains only singleton clusters, one for each SiDB in the layout.
      */
     [[nodiscard]] static sidb::model::clustering get_initial_clustering(
-        const sidb::model::cluster_ptr&                                      c,
-        const std::pair<sidb::primitives::charge_distribution_surface<Lyt>,
-                        sidb::primitives::charge_distribution_surface<Lyt>>& local_potential_bound_containers) noexcept
+        const sidb::model::cluster_ptr&                                    c,
+        const std::pair<sidb::surfaces::charge_distribution_surface<Lyt>,
+                        sidb::surfaces::charge_distribution_surface<Lyt>>& local_potential_bound_containers) noexcept
     {
         const auto& [min_loc_pot_cds, max_loc_pot_cds] = local_potential_bound_containers;
 

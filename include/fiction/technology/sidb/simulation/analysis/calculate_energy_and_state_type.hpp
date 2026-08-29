@@ -7,12 +7,12 @@
 
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/logic/verify_logic_match.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/bit_operations.hpp>
@@ -64,8 +64,8 @@ using energy_and_state_type = std::vector<std::pair<double, state_type>>;
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] energy_and_state_type calculate_energy_and_state_type_with_kinks_accepted(
-    const energy_distribution&                                             energy_dist,
-    const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& valid_charge_distributions,
+    const energy_distribution&                                           energy_dist,
+    const std::vector<sidb::surfaces::charge_distribution_surface<Lyt>>& valid_charge_distributions,
     const std::vector<sidb::simulation::logic::bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<TT>& spec,
     const uint64_t input_index) noexcept
 
@@ -124,8 +124,8 @@ template <typename Lyt, typename TT>
  */
 template <typename Lyt, typename TT>
 [[nodiscard]] energy_and_state_type calculate_energy_and_state_type_with_kinks_rejected(
-    const energy_distribution&                                             energy_dist,
-    const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& valid_charge_distributions,
+    const energy_distribution&                                           energy_dist,
+    const std::vector<sidb::surfaces::charge_distribution_surface<Lyt>>& valid_charge_distributions,
     const std::vector<TT>& spec, const uint64_t input_index,
     const std::vector<sidb::simulation::logic::bdl_wire<Lyt>>& input_bdl_wires,
     const std::vector<sidb::simulation::logic::bdl_wire<Lyt>>& output_bdl_wires) noexcept

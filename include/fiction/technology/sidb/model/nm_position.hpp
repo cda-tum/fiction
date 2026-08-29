@@ -6,8 +6,8 @@
 #define FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/sidb/primitives/lattice.hpp"
-#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
+#include "fiction/technology/sidb/surfaces/lattice.hpp"
+#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
@@ -31,9 +31,9 @@ template <typename Lyt>
 
     if constexpr (!is_sidb_lattice_v<Lyt>)
     {
-        return nm_position<sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>>(
-            sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>(lyt),
-            cell<sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>>(c));
+        return nm_position<sidb::surfaces::lattice<sidb::surfaces::lattice_100, Lyt>>(
+            sidb::surfaces::lattice<sidb::surfaces::lattice_100, Lyt>(lyt),
+            cell<sidb::surfaces::lattice<sidb::surfaces::lattice_100, Lyt>>(c));
     }
     else
     {

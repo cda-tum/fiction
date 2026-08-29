@@ -19,9 +19,9 @@
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -76,13 +76,13 @@ TEST_CASE("Write empty SQD layout", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lattice_layout{layout};
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lattice_layout{layout};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream,
-                                                                                                         "empty");
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout>>(layout_stream,
+                                                                                                     "empty");
 
     compare_written_and_read_layout(lattice_layout, read_layout);
 }
@@ -94,14 +94,14 @@ TEST_CASE("Write single-dot SQD layout", "[sqd]")
     sidb_layout layout{{2, 2}};
     layout.assign_cell_type({1, 2}, sidb::sidb_technology::cell_type::NORMAL);
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lattice_layout{layout};
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lattice_layout{layout};
 
     std::stringstream layout_stream{};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout>>(layout_stream);
 
     compare_written_and_read_layout(lattice_layout, read_layout);
 }
@@ -113,11 +113,11 @@ TEST_CASE("Write single-dot SQD layout with SiQAD coordinates", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    sidb::io::write_sqd_layout(
-        sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>{layout}, layout_stream);
+    sidb::io::write_sqd_layout(sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>{layout},
+                               layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>>(
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>>(
             layout_stream);
 
     CHECK(read_layout.get_cell_type({1, 4}) == sidb_cell_clk_lyt_siqad::cell_type::EMPTY);
@@ -137,12 +137,12 @@ TEST_CASE("Write multi-dot SQD layout", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lattice_layout{layout};
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lattice_layout{layout};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout>>(layout_stream);
 
     compare_written_and_read_layout(lattice_layout, read_layout);
 }
@@ -161,12 +161,12 @@ TEST_CASE("Write multi-dot SQD layout with differing dot types", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lattice_layout{layout};
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lattice_layout{layout};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream);
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout>>(layout_stream);
 
     compare_written_and_read_layout(lattice_layout, read_layout);
 }
@@ -184,13 +184,13 @@ TEST_CASE("Write Bestagon SQD layout", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout> lattice_layout{c_layout};
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lattice_layout{c_layout};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_layout>>(layout_stream,
-                                                                                                         "Bestagon");
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout>>(layout_stream,
+                                                                                                     "Bestagon");
 
     compare_written_and_read_layout(lattice_layout, read_layout);
 }
@@ -215,7 +215,7 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
 
     const sidb_cell_clk_lyt lyt{aspect_ratio<sidb_cell_clk_lyt>{0, defect_map.size() - 1}};
 
-    sidb::primitives::defect_surface<sidb_cell_clk_lyt> defect_layout{lyt};
+    sidb::surfaces::defect_surface<sidb_cell_clk_lyt> defect_layout{lyt};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
@@ -223,18 +223,18 @@ TEST_CASE("Write defective surface SQD layout", "[sqd]")
         defect_layout.assign_defect(c, d);
     }
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb::primitives::defect_surface<sidb_cell_clk_lyt>>
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt>>
         lattice_layout{defect_layout};
 
     std::stringstream layout_stream{};
 
     sidb::io::write_sqd_layout(
-        sidb::primitives::lattice<sidb::primitives::lattice_100, sidb::primitives::defect_surface<sidb_cell_clk_lyt>>{
+        sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt>>{
             defect_layout},
         layout_stream);
 
     const auto read_layout = sidb::io::read_sqd_layout<
-        sidb::primitives::lattice<sidb::primitives::lattice_100, sidb::primitives::defect_surface<sidb_cell_clk_lyt>>>(
+        sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt>>>(
         layout_stream);
 
     compare_written_and_read_layout(lattice_layout, read_layout);
@@ -251,12 +251,12 @@ TEST_CASE("Write multi-dot SQD layout based on SiQAD coordinates", "[sqd]")
 
     std::stringstream layout_stream{};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad> lattice_layout{layout};
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad> lattice_layout{layout};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
     const auto read_layout =
-        sidb::io::read_sqd_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>>(
+        sidb::io::read_sqd_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>>(
             layout_stream);
 
     compare_written_and_read_layout(lattice_layout, read_layout);
@@ -282,7 +282,7 @@ TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd
 
     const sidb_cell_clk_lyt_siqad lyt{aspect_ratio<sidb_cell_clk_lyt_siqad>{0, defect_map.size() - 1}};
 
-    sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad> defect_layout{lyt};
+    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad> defect_layout{lyt};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
@@ -292,14 +292,14 @@ TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd
 
     std::stringstream layout_stream{};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100,
-                                    sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad>>
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>
         lattice_layout{defect_layout};
 
     sidb::io::write_sqd_layout(lattice_layout, layout_stream);
 
-    const auto read_layout = sidb::io::read_sqd_layout<sidb::primitives::lattice<
-        sidb::primitives::lattice_100, sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad>>>(layout_stream);
+    const auto read_layout = sidb::io::read_sqd_layout<
+        sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>>(
+        layout_stream);
 
     compare_written_and_read_layout(lattice_layout, read_layout);
 }

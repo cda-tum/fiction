@@ -2,14 +2,14 @@
 // Created by Jan Drewniok on 12.02.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_HPP
-#define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_HPP
+#define FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_HPP
 
 #include "fiction/traits.hpp"
 
 #include <string>
 
-namespace fiction::sidb::primitives
+namespace fiction::sidb::surfaces
 {
 /**
  * A layout type to layer on top of an SiDB cell-level layout. It implements an interface for different lattice
@@ -85,5 +85,5 @@ class lattice<LatticeOrientation, Lyt, false> : public Lyt
 template <class T, class U>
 lattice(const T&, const U&) -> lattice<T, U>;
 
-}  // namespace fiction::sidb::primitives
+}  // namespace fiction::sidb::surfaces
 #endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_HPP

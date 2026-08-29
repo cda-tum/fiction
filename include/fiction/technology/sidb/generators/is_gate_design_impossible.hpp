@@ -9,9 +9,9 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>
@@ -70,7 +70,7 @@ template <typename Lyt, typename TT>
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {
-        auto charge_lyt = sidb::primitives::charge_distribution_surface<Lyt>{*bdl_iter, params.sim_params};
+        auto charge_lyt = sidb::surfaces::charge_distribution_surface<Lyt>{*bdl_iter, params.sim_params};
         charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
         charge_lyt.update_after_charge_change();
 
@@ -84,7 +84,7 @@ template <typename Lyt, typename TT>
             if (-*charge_lyt.get_local_internal_potential_by_index(static_cast<uint64_t>(ix_lower)) >
                 charge_lyt.get_effective_charge_transition_thresholds(
                     static_cast<uint64_t>(ix_lower))[static_cast<std::size_t>(
-                    sidb::primitives::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
+                    sidb::surfaces::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
             {
                 return true;  // the lower part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore
@@ -97,7 +97,7 @@ template <typename Lyt, typename TT>
             if (-*charge_lyt.get_local_internal_potential_by_index(static_cast<uint64_t>(ix_upper)) >
                 charge_lyt.get_effective_charge_transition_thresholds(
                     static_cast<uint64_t>(ix_upper))[static_cast<std::size_t>(
-                    sidb::primitives::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
+                    sidb::surfaces::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)])
             {
                 return true;  // the upper part can never be negatively charged. Thus, BDL property is not fulfilled
                               // anymore

@@ -23,13 +23,13 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         lyt.assign_cell_type({5, 5}, lattice::cell_type::NORMAL);
         lyt.assign_cell_type({5, 6}, lattice::cell_type::NORMAL);
 
-        sidb::primitives::charge_distribution_surface cds1{lyt};
+        sidb::surfaces::charge_distribution_surface cds1{lyt};
 
-        sidb::primitives::charge_distribution_surface cds2{lyt};
+        sidb::surfaces::charge_distribution_surface cds2{lyt};
         cds2.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
         cds2.update_after_charge_change();
 
-        sidb::primitives::charge_distribution_surface cds3{lyt};
+        sidb::surfaces::charge_distribution_surface cds3{lyt};
         cds2.assign_all_charge_states(sidb::model::charge_state::POSITIVE);
         cds3.update_after_charge_change();
 
@@ -37,9 +37,9 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         CHECK(cds2.get_electrostatic_potential_energy() < cds3.get_electrostatic_potential_energy());
         CHECK(cds2.get_electrostatic_potential_energy() < cds1.get_electrostatic_potential_energy());
 
-        cds1.assign_charge_index(0, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
-        cds2.assign_charge_index(1, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
-        cds3.assign_charge_index(2, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds1.assign_charge_index(0, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds2.assign_charge_index(1, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds3.assign_charge_index(2, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
 
         sidb::simulation::result<lattice> results{};
         results.charge_distributions = {cds1, cds2, cds3};
@@ -55,27 +55,27 @@ TEST_CASE("Determine the groundstate from simulation results", "[sidb-simulation
         lyt.assign_cell_type({5, 4}, lattice::cell_type::NORMAL);
         lyt.assign_cell_type({6, 4}, lattice::cell_type::NORMAL);
 
-        sidb::primitives::charge_distribution_surface cds1{lyt};
+        sidb::surfaces::charge_distribution_surface cds1{lyt};
         cds1.assign_charge_state({5, 4}, sidb::model::charge_state::NEUTRAL);
         cds1.assign_charge_state({6, 4}, sidb::model::charge_state::NEGATIVE);
         cds1.update_after_charge_change();
 
-        sidb::primitives::charge_distribution_surface cds2{lyt};
+        sidb::surfaces::charge_distribution_surface cds2{lyt};
         cds2.assign_charge_state({5, 4}, sidb::model::charge_state::NEGATIVE);
         cds2.assign_charge_state({6, 4}, sidb::model::charge_state::NEUTRAL);
         cds2.update_after_charge_change();
 
-        sidb::primitives::charge_distribution_surface cds3{lyt};
+        sidb::surfaces::charge_distribution_surface cds3{lyt};
         cds2.assign_all_charge_states(sidb::model::charge_state::POSITIVE);
         cds3.update_after_charge_change();
 
         // copy cds2 to check for degeneracy.
-        sidb::primitives::charge_distribution_surface cds4{cds2};
+        sidb::surfaces::charge_distribution_surface cds4{cds2};
 
-        cds1.assign_charge_index(0, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
-        cds2.assign_charge_index(1, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
-        cds3.assign_charge_index(2, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
-        cds4.assign_charge_index(3, sidb::primitives::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds1.assign_charge_index(0, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds2.assign_charge_index(1, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds3.assign_charge_index(2, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
+        cds4.assign_charge_index(3, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
 
         CHECK_THAT(cds2.get_electrostatic_potential_energy() - cds1.get_electrostatic_potential_energy(),
                    Catch::Matchers::WithinAbs(0.0, 0.00001));

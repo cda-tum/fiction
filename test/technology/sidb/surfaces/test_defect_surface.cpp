@@ -11,9 +11,9 @@
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -49,7 +49,7 @@ TEMPLATE_TEST_CASE(
 
         TestType lyt{};
 
-        using defect_layout = sidb::primitives::defect_surface<TestType>;
+        using defect_layout = sidb::surfaces::defect_surface<TestType>;
         CHECK(is_cell_level_layout_v<defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_layout>);
@@ -59,7 +59,7 @@ TEMPLATE_TEST_CASE(
         const defect_layout defect_lyt{};
         const defect_layout defect_lyt_from_lyt{defect_lyt};
 
-        using defect_defect_layout = sidb::primitives::defect_surface<defect_layout>;
+        using defect_defect_layout = sidb::surfaces::defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
@@ -68,7 +68,7 @@ TEMPLATE_TEST_CASE(
     }
     SECTION("With SiDB lattice")
     {
-        using lattice = sidb::primitives::lattice<sidb::primitives::lattice_100, TestType>;
+        using lattice = sidb::surfaces::lattice<sidb::surfaces::lattice_100, TestType>;
         REQUIRE(is_cell_level_layout_v<lattice>);
         CHECK(!has_assign_sidb_defect_v<lattice>);
         CHECK(!has_get_sidb_defect_v<lattice>);
@@ -76,7 +76,7 @@ TEMPLATE_TEST_CASE(
         CHECK(!is_sidb_defect_surface_v<lattice>);
         CHECK(is_sidb_lattice_100_v<lattice>);
 
-        using defect_layout = sidb::primitives::defect_surface<lattice>;
+        using defect_layout = sidb::surfaces::defect_surface<lattice>;
         CHECK(is_cell_level_layout_v<defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_layout>);
@@ -84,7 +84,7 @@ TEMPLATE_TEST_CASE(
         CHECK(is_sidb_defect_surface_v<defect_layout>);
         CHECK(is_sidb_lattice_100_v<lattice>);
 
-        using defect_defect_layout = sidb::primitives::defect_surface<defect_layout>;
+        using defect_defect_layout = sidb::surfaces::defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
@@ -95,7 +95,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("With SiDB lattice, Si-111")
     {
-        using lattice = sidb::primitives::lattice<sidb::primitives::lattice_111, TestType>;
+        using lattice = sidb::surfaces::lattice<sidb::surfaces::lattice_111, TestType>;
         REQUIRE(is_cell_level_layout_v<lattice>);
         CHECK(!has_assign_sidb_defect_v<lattice>);
         CHECK(!has_get_sidb_defect_v<lattice>);
@@ -103,7 +103,7 @@ TEMPLATE_TEST_CASE(
         CHECK(!is_sidb_defect_surface_v<lattice>);
         CHECK(is_sidb_lattice_111_v<lattice>);
 
-        using defect_layout = sidb::primitives::defect_surface<lattice>;
+        using defect_layout = sidb::surfaces::defect_surface<lattice>;
         CHECK(is_cell_level_layout_v<defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_layout>);
@@ -111,7 +111,7 @@ TEMPLATE_TEST_CASE(
         CHECK(is_sidb_defect_surface_v<defect_layout>);
         CHECK(is_sidb_lattice_111_v<lattice>);
 
-        using defect_defect_layout = sidb::primitives::defect_surface<defect_layout>;
+        using defect_defect_layout = sidb::surfaces::defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
@@ -123,18 +123,18 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "SiDB surface construction with aspect ratio as input", "[sidb-surface]",
-    (sidb::primitives::defect_surface<layouts::cell_level_layout<
+    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
          sidb::sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>),
-    (sidb::primitives::defect_surface<layouts::cell_level_layout<
+    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
          sidb::sidb_technology,
          layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>),
-    (sidb::primitives::defect_surface<layouts::cell_level_layout<
+    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
          sidb::sidb_technology,
          layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>),
-    (sidb::primitives::defect_surface<layouts::cell_level_layout<
+    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
          sidb::sidb_technology,
          layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>>),
-    (sidb::primitives::defect_surface<layouts::cell_level_layout<
+    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
          sidb::sidb_technology,
          layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>>))
 {
@@ -206,7 +206,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{{1, 1}};
 
-    sidb::primitives::defect_surface<TestType> defect_layout{lyt};
+    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
 
     defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
     CHECK(defect_layout.get_defect({0, 0}).type == sidb::model::defect_type::UNKNOWN);
@@ -237,7 +237,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{{4, 4}};
 
-    sidb::primitives::defect_surface<TestType> defect_layout{lyt};
+    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
 
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
                                      { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
@@ -280,7 +280,7 @@ TEMPLATE_TEST_CASE(
 
     TestType lyt{aspect_ratio<TestType>{0, defect_map.size() - 1}};
 
-    sidb::primitives::defect_surface<TestType> defect_layout{lyt};
+    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
@@ -328,7 +328,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{aspect_ratio<TestType>{11, 9}};
 
-    sidb::primitives::defect_surface<TestType> defect_layout{lyt};
+    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
 
     SECTION("charged defects")
     {
@@ -492,7 +492,7 @@ TEMPLATE_TEST_CASE(
 {
     TestType lyt{aspect_ratio<TestType>{11, 9}};
 
-    sidb::primitives::defect_surface<TestType> defect_layout{lyt};
+    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
 
     SECTION("charged defects")
     {
@@ -580,9 +580,9 @@ TEMPLATE_TEST_CASE(
 
     SECTION("DB")
     {
-        const sidb::primitives::defect_surface_params params{
+        const sidb::surfaces::defect_surface_params params{
             std::unordered_set<sidb::model::defect_type>{sidb::model::defect_type::DB}};
-        sidb::primitives::defect_surface<TestType> defect_layout{lyt, params};
+        sidb::surfaces::defect_surface<TestType> defect_layout{lyt, params};
 
         defect_layout.assign_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::DB});
 
@@ -591,9 +591,9 @@ TEMPLATE_TEST_CASE(
     }
     SECTION("Siloxane + Silicon Vacancy")
     {
-        const sidb::primitives::defect_surface_params params{std::unordered_set<sidb::model::defect_type>{
+        const sidb::surfaces::defect_surface_params params{std::unordered_set<sidb::model::defect_type>{
             {sidb::model::defect_type::SILOXANE, sidb::model::defect_type::SI_VACANCY}}};
-        sidb::primitives::defect_surface<TestType>    defect_layout{lyt, params};
+        sidb::surfaces::defect_surface<TestType>    defect_layout{lyt, params};
 
         defect_layout.assign_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
         defect_layout.assign_defect({2, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});

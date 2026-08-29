@@ -10,8 +10,8 @@
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/lattice.hpp"
-#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
+#include "fiction/technology/sidb/surfaces/lattice.hpp"
+#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/color.h>
@@ -338,7 +338,7 @@ void print_cell_level_layout(std::ostream& os, const Lyt& layout, const bool io_
  * Writes a simplified 2D representation of an SiDB layout (SiDB and defect charges are supported) to an output stream.
  *
  * @tparam Lyt SiDB cell-level layout with charge-information based on SiQAD coordinates or defect-information, e.g., a
- * `charge_distribution_surface` or `sidb::primitives::defect_surface`.
+ * `charge_distribution_surface` or `sidb::surfaces::defect_surface`.
  * @param os Output stream to write into.
  * @param lyt The layout of which the information is to be printed.
  * @param lat_color Flag to utilize color escapes for the lattice, charge states, and atomic defects.
@@ -361,9 +361,8 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
     if constexpr (!is_sidb_lattice_v<Lyt>)
     {
-        return print_sidb_layout<sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>>(
-            os, sidb::primitives::lattice<sidb::primitives::lattice_100, Lyt>{lyt}, lat_color, crop_layout,
-            draw_lattice);
+        return print_sidb_layout<sidb::surfaces::lattice<sidb::surfaces::lattice_100, Lyt>>(
+            os, sidb::surfaces::lattice<sidb::surfaces::lattice_100, Lyt>{lyt}, lat_color, crop_layout, draw_lattice);
     }
 
     if constexpr (has_siqad_coord_v<Lyt> && is_sidb_lattice_v<Lyt>)

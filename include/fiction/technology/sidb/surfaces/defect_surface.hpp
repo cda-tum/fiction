@@ -2,8 +2,8 @@
 // Created by marcel on 07.03.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP
-#define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_DEFECT_SURFACE_HPP
+#define FICTION_TECHNOLOGY_SIDB_SURFACES_DEFECT_SURFACE_HPP
 
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/traits.hpp"
@@ -19,7 +19,7 @@
 #include <unordered_set>
 #include <utility>
 
-namespace fiction::sidb::primitives
+namespace fiction::sidb::surfaces
 {
 /**
  * This struct stores parameters for the `defect_surface`
@@ -347,5 +347,5 @@ class defect_surface<Lyt, false> : public Lyt
 template <class T>
 defect_surface(const T&) -> defect_surface<T>;
 
-}  // namespace fiction::sidb::primitives
+}  // namespace fiction::sidb::surfaces
 #endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP

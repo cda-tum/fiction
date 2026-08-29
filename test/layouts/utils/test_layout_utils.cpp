@@ -13,9 +13,9 @@
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -201,13 +201,13 @@ TEST_CASE("Convert cds/sidb_defect_surface (without lattice information) in coor
           "coordinate layout",
           "[layout-utils]")
 {
-    sidb::primitives::defect_surface<sidb_cell_clk_lyt> sidb_surface{};
+    sidb::surfaces::defect_surface<sidb_cell_clk_lyt> sidb_surface{};
 
     sidb_surface.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt::technology::cell_type::NORMAL);
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_cell_clk_lyt::technology::cell_type::INPUT);
     sidb_surface.assign_cell_type({0, 3, 0}, sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
 
-    sidb::primitives::charge_distribution_surface cds{sidb_surface};
+    sidb::surfaces::charge_distribution_surface cds{sidb_surface};
 
     cds.assign_charge_state({0, 0, 0}, sidb::model::charge_state::NEUTRAL);
     cds.assign_charge_state({1, 0, 0}, sidb::model::charge_state::POSITIVE);
@@ -236,7 +236,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in coords::
           "coordinate layout",
           "[layout-utils]")
 {
-    sidb::primitives::defect_surface<sidb_cell_clk_lyt> sidb_surface{};
+    sidb::surfaces::defect_surface<sidb_cell_clk_lyt> sidb_surface{};
 
     sidb_surface.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt::technology::cell_type::NORMAL);
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_cell_clk_lyt::technology::cell_type::INPUT);
@@ -266,7 +266,7 @@ TEST_CASE("Convert cds (without lattice information) in coords::offset layout to
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_cell_clk_lyt::technology::cell_type::INPUT);
     sidb_surface.assign_cell_type({0, 3, 0}, sidb_cell_clk_lyt::technology::cell_type::OUTPUT);
 
-    sidb::primitives::charge_distribution_surface cds{sidb_surface};
+    sidb::surfaces::charge_distribution_surface cds{sidb_surface};
 
     cds.assign_charge_state({0, 0, 0}, sidb::model::charge_state::NEUTRAL);
     cds.assign_charge_state({1, 0, 0}, sidb::model::charge_state::POSITIVE);
@@ -286,13 +286,13 @@ TEST_CASE("Convert cds (without lattice information) in coords::offset layout to
 
 TEST_CASE("Convert cds/sidb_defect_surface (100) in SiQAD coordinates to coords::offset coordinates", "[layout-utils]")
 {
-    sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad> sidb_surface{};
+    sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad> sidb_surface{};
 
     sidb_surface.assign_cell_type({0, 0, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::INPUT);
     sidb_surface.assign_cell_type({0, 3, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::OUTPUT);
 
-    sidb::primitives::charge_distribution_surface cds{sidb_surface};
+    sidb::surfaces::charge_distribution_surface cds{sidb_surface};
 
     cds.assign_charge_state({0, 0, 0}, sidb::model::charge_state::NEUTRAL);
     cds.assign_charge_state({1, 0, 0}, sidb::model::charge_state::POSITIVE);
@@ -330,7 +330,7 @@ TEST_CASE("Convert cds (without lattice information) in SiQAD coordinates to coo
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::INPUT);
     sidb_surface.assign_cell_type({0, 3, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::OUTPUT);
 
-    sidb::primitives::charge_distribution_surface cds{sidb_surface};
+    sidb::surfaces::charge_distribution_surface cds{sidb_surface};
 
     cds.assign_charge_state({0, 0, 0}, sidb::model::charge_state::NEUTRAL);
     cds.assign_charge_state({1, 0, 0}, sidb::model::charge_state::POSITIVE);
@@ -356,7 +356,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD co
           "coordinates",
           "[layout-utils]")
 {
-    sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad> sidb_surface{};
+    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad> sidb_surface{};
 
     sidb_surface.assign_cell_type({0, 0, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
     sidb_surface.assign_cell_type({1, 0, 0}, sidb_100_cell_clk_lyt_siqad::technology::cell_type::INPUT);
@@ -366,7 +366,7 @@ TEST_CASE("Convert sidb_defect_surface (without lattice information) in SiQAD co
     sidb_surface.assign_defect({1, 1, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 
     auto lyt_transformed =
-        layouts::utils::convert_layout_to_fiction_coordinates<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt>>(
+        layouts::utils::convert_layout_to_fiction_coordinates<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt>>(
             sidb_surface);
     CHECK(is_sidb_lattice_100_v<decltype(lyt_transformed)>);
     CHECK(has_assign_sidb_defect_v<decltype(lyt_transformed)>);
@@ -973,8 +973,8 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
         }
     }
 
-    sidb::primitives::charge_distribution_surface cds_first{lyt_first};
-    sidb::primitives::charge_distribution_surface cds_second{lyt_second};
+    sidb::surfaces::charge_distribution_surface cds_first{lyt_first};
+    sidb::surfaces::charge_distribution_surface cds_second{lyt_second};
 
     SECTION("charge distribution surface")
     {
@@ -995,11 +995,11 @@ TEST_CASE("Test identity of two layouts", "[layout-utils]")
 
     SECTION("SiDB defect surface on top of the charge distribution surface")
     {
-        sidb::primitives::defect_surface defect_first{cds_first};
+        sidb::surfaces::defect_surface defect_first{cds_first};
         defect_first.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
         defect_first.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
-        sidb::primitives::defect_surface defect_second{cds_second};
+        sidb::surfaces::defect_surface defect_second{cds_second};
         defect_second.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
         defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
@@ -1079,8 +1079,8 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
         }
     }
 
-    sidb::primitives::charge_distribution_surface cds_first{lyt_first};
-    sidb::primitives::charge_distribution_surface cds_second{lyt_second};
+    sidb::surfaces::charge_distribution_surface cds_first{lyt_first};
+    sidb::surfaces::charge_distribution_surface cds_second{lyt_second};
 
     SECTION("charge distribution surface")
     {
@@ -1111,11 +1111,11 @@ TEST_CASE("Digest of a cell-level layout", "[layout-utils]")
 
     SECTION("SiDB defect surface on top of the charge distribution surface")
     {
-        sidb::primitives::defect_surface defect_first{cds_first};
+        sidb::surfaces::defect_surface defect_first{cds_first};
         defect_first.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
         defect_first.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
 
-        sidb::primitives::defect_surface defect_second{cds_second};
+        sidb::surfaces::defect_surface defect_second{cds_second};
         defect_second.assign_defect({1, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
         defect_second.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN});
 

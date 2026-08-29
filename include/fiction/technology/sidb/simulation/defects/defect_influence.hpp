@@ -8,11 +8,11 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/defect_surface.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 
@@ -422,7 +422,7 @@ class defect_influence_impl
     /**
      * The SiDB cell-level layout to investigate.
      */
-    sidb::primitives::defect_surface<Lyt> layout{};
+    sidb::surfaces::defect_surface<Lyt> layout{};
     /**
      * The parameters for the defect influence domain computation.
      */
@@ -657,7 +657,7 @@ class defect_influence_impl
 
         if (lyt_without_defect.get_cell_type(defect_pos) == Lyt::technology::cell_type::EMPTY)
         {
-            sidb::primitives::defect_surface<Lyt> lyt_defect{lyt_without_defect};
+            sidb::surfaces::defect_surface<Lyt> lyt_defect{lyt_without_defect};
 
             lyt_defect.assign_defect(defect_pos, params.defect);
 

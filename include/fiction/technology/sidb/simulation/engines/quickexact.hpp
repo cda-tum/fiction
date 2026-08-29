@@ -9,9 +9,9 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/gray_code_iterator.hpp"
 
@@ -114,7 +114,7 @@ class quickexact_impl
                 // If the layout consists of SiDBs that do not need to be negatively charged.
                 if (!all_sidbs_in_lyt_without_negative_preassigned_ones.empty())
                 {
-                    sidb::primitives::charge_distribution_surface charge_layout{layout};
+                    sidb::surfaces::charge_distribution_surface charge_layout{layout};
                     conduct_simulation(charge_layout, base_number);
                 }
 
@@ -148,8 +148,8 @@ class quickexact_impl
                     }
 
                     charge_lyt.increase_charge_index_by_one(
-                        sidb::primitives::dependent_cell_mode::
-                            VARIABLE);  // `sidb::primitives::dependent_cell_mode::VARIABLE`
+                        sidb::surfaces::dependent_cell_mode::
+                            VARIABLE);  // `sidb::surfaces::dependent_cell_mode::VARIABLE`
                                         // allows that the charge state of the
                                         // dependent cell is automatically changed
                                         // based on the new charge distribution.
@@ -180,7 +180,7 @@ class quickexact_impl
     /**
      * Charge distribution surface.
      */
-    sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{};
+    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{};
     /**
      * Parameters used for the simulation.
      */
@@ -244,7 +244,7 @@ class quickexact_impl
         charge_layout.set_simulation_engine(engine::QUICKEXACT);
         charge_layout.assign_physical_parameters(params.sim_params);
         charge_layout.assign_all_charge_states(sidb::model::charge_state::NEUTRAL);
-        charge_layout.update_after_charge_change(sidb::primitives::dependent_cell_mode::FIXED);
+        charge_layout.update_after_charge_change(sidb::surfaces::dependent_cell_mode::FIXED);
         charge_layout.assign_dependent_cell(all_sidbs_in_lyt_without_negative_preassigned_ones[0]);
 
         charge_layout.assign_local_external_potential(params.local_external_potential);
@@ -278,7 +278,7 @@ class quickexact_impl
         // Update all local potentials, system energy, and physical validity. The flag is set to
         // `dependent_cell_mode::VARIABLE` to allow the dependent cell to change its charge state based on the N-1 SiDBs
         // to fulfill the local population stability at its position.
-        charge_layout.update_after_charge_change(sidb::primitives::dependent_cell_mode::VARIABLE);
+        charge_layout.update_after_charge_change(sidb::surfaces::dependent_cell_mode::VARIABLE);
 
         if (base_number == required_simulation_base_number::TWO)
         {
@@ -314,21 +314,21 @@ class quickexact_impl
         for (gci = 0; gci <= charge_layout.get_max_charge_index(); ++gci)
         {
             charge_layout.assign_charge_index_by_gray_code(*gci, previous_charge_index,
-                                                           sidb::primitives::dependent_cell_mode::VARIABLE,
-                                                           sidb::primitives::energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                                                           sidb::primitives::charge_distribution_history::CONSIDER);
+                                                           sidb::surfaces::dependent_cell_mode::VARIABLE,
+                                                           sidb::surfaces::energy_calculation::KEEP_OLD_ENERGY_VALUE,
+                                                           sidb::surfaces::charge_distribution_history::CONSIDER);
 
             previous_charge_index = *gci;
 
             if (charge_layout.is_physically_valid())
             {
-                sidb::primitives::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
                     {
                         charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
-                                                            sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                            sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
                 charge_lyt_copy.update_after_charge_change();
@@ -361,7 +361,7 @@ class quickexact_impl
         // Not executed to detect if 3-state simulation is required, but to detect the SiDBs that could be positively
         // charged (important to speed up the simulation).
         charge_layout.is_three_state_simulation_required();
-        charge_layout.update_after_charge_change(sidb::primitives::dependent_cell_mode::VARIABLE);
+        charge_layout.update_after_charge_change(sidb::surfaces::dependent_cell_mode::VARIABLE);
 
         while (charge_layout.get_charge_index_and_base().first < charge_layout.get_max_charge_index())
         {
@@ -369,13 +369,13 @@ class quickexact_impl
             {
                 if (charge_layout.is_physically_valid())
                 {
-                    sidb::primitives::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
                     charge_layout.foreach_cell(
                         [&charge_lyt_copy, &charge_layout](const auto& c)
                         {
                             charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
-                                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
                         });
 
                     charge_lyt_copy.update_after_charge_change();
@@ -384,23 +384,24 @@ class quickexact_impl
                 }
 
                 charge_layout.increase_charge_index_of_sub_layout_by_one(
-                    sidb::primitives::dependent_cell_mode::VARIABLE,
-                    sidb::primitives::energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                    sidb::primitives::charge_distribution_history::
-                        CONSIDER);  // `sidb::primitives::dependent_cell_mode::VARIABLE` allows that the
-                                    // charge state of the dependent cell is automatically
-                                    // changed based on the new charge distribution.
+                    sidb::surfaces::dependent_cell_mode::VARIABLE,
+                    sidb::surfaces::energy_calculation::KEEP_OLD_ENERGY_VALUE,
+                    sidb::surfaces::charge_distribution_history::
+                        CONSIDER);  // `sidb::surfaces::dependent_cell_mode::VARIABLE`
+                                    // allows that the charge state of the
+                                    // dependent cell is automatically changed
+                                    // based on the new charge distribution.
             }
 
             if (charge_layout.is_physically_valid())
             {
-                sidb::primitives::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
                     {
                         charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
-                                                            sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                            sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
                 charge_lyt_copy.update_after_charge_change();
@@ -414,10 +415,11 @@ class quickexact_impl
             }
 
             charge_layout.increase_charge_index_by_one(
-                sidb::primitives::dependent_cell_mode::VARIABLE,
-                sidb::primitives::energy_calculation::
-                    KEEP_OLD_ENERGY_VALUE);  // `sidb::primitives::dependent_cell_mode::VARIABLE` allows that the charge
-                                             // state of the dependent cell is automatically changed
+                sidb::surfaces::dependent_cell_mode::VARIABLE,
+                sidb::surfaces::energy_calculation::
+                    KEEP_OLD_ENERGY_VALUE);  // `sidb::surfaces::dependent_cell_mode::VARIABLE`
+                                             // allows that the charge state of the
+                                             // dependent cell is automatically changed
                                              // based on the new charge distribution.
         }
 
@@ -426,13 +428,13 @@ class quickexact_impl
         {
             if (charge_layout.is_physically_valid())
             {
-                sidb::primitives::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+                sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
                 charge_layout.foreach_cell(
                     [&charge_lyt_copy, &charge_layout](const auto& c)
                     {
                         charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
-                                                            sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                            sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
                     });
 
                 charge_lyt_copy.update_after_charge_change();
@@ -441,20 +443,20 @@ class quickexact_impl
             }
 
             charge_layout.increase_charge_index_of_sub_layout_by_one(
-                sidb::primitives::dependent_cell_mode::VARIABLE,
-                sidb::primitives::energy_calculation::KEEP_OLD_ENERGY_VALUE,
-                sidb::primitives::charge_distribution_history::CONSIDER);
+                sidb::surfaces::dependent_cell_mode::VARIABLE,
+                sidb::surfaces::energy_calculation::KEEP_OLD_ENERGY_VALUE,
+                sidb::surfaces::charge_distribution_history::CONSIDER);
         }
 
         if (charge_layout.is_physically_valid())
         {
-            sidb::primitives::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
+            sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt_copy{charge_lyt};
 
             charge_layout.foreach_cell(
                 [&charge_lyt_copy, &charge_layout](const auto& c)
                 {
                     charge_lyt_copy.assign_charge_state(c, charge_layout.get_charge_state(c),
-                                                        sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                        sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
                 });
 
             charge_lyt_copy.update_after_charge_change();

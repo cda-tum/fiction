@@ -8,8 +8,8 @@
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/surface_analysis.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -77,7 +77,7 @@ TEST_CASE("Dummy gate library simple defects", "[sidb-surface-analysis]")
     static const fcn::port_list<fcn::port_position> y_ports{{fcn::port_position(0, 0), fcn::port_position(0, 2)},
                                                             {fcn::port_position(2, 1)}};
 
-    sidb::primitives::defect_surface defect_layout{cell_lyt};
+    sidb::surfaces::defect_surface defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {
@@ -203,7 +203,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         aspect_ratio<hex_even_col_gate_clk_lyt>{0, 0}};     // 1 x 1 tiles of size 60 x 46 cells each
     static const sidb_100_cell_clk_lyt cell_lyt{{59, 45}};  // makes for exactly one gate of the Bestagon library
 
-    sidb::primitives::defect_surface defect_layout{cell_lyt};
+    sidb::surfaces::defect_surface defect_layout{cell_lyt};
 
     SECTION("defect-free")
     {

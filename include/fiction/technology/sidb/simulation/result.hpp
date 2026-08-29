@@ -7,8 +7,8 @@
 
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 
 #include <algorithm>
 #include <any>
@@ -53,7 +53,7 @@ struct result
     /**
      * Charge distributions determined by the algorithm.
      */
-    std::vector<sidb::primitives::charge_distribution_surface<Lyt>> charge_distributions{};
+    std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> charge_distributions{};
     /**
      * Physical parameters used in the simulation.
      */
@@ -73,10 +73,10 @@ struct result
      *
      * @return A vector of charge distributions with the minimal energy.
      */
-    [[nodiscard]] std::vector<sidb::primitives::charge_distribution_surface<Lyt>> groundstates() const noexcept
+    [[nodiscard]] std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> groundstates() const noexcept
     {
-        std::vector<sidb::primitives::charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
-        std::set<uint64_t>                                              charge_indices{};
+        std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> groundstate_charge_distributions{};
+        std::set<uint64_t>                                            charge_indices{};
 
         // Find all unique charge indices. This is done because simulation results can have multiple identical charge
         // distributions.

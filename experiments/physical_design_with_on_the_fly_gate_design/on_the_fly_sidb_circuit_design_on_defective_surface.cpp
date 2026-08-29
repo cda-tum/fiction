@@ -13,8 +13,8 @@
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -71,7 +71,7 @@ int main()  // NOLINT
         "../../experiments/physical_design_with_on_the_fly_gate_design/0.5_percent_with_charged_surface.txt");
 
     // create an empty surface.
-    fiction::sidb::primitives::defect_surface<cell_lyt> surface_lattice{};
+    fiction::sidb::surfaces::defect_surface<cell_lyt> surface_lattice{};
 
     // add physical parameters of the defects to the surface_lattice.
     surface_lattice_initial.foreach_sidb_defect(

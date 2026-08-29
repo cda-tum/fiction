@@ -145,6 +145,10 @@ Changed
 - **Breaking:** ``fiction::sidb::simulation::generic`` is merged into
   ``fiction::sidb::simulation::utils``. The two were catch-alls with no boundary between them,
   and ``generic`` described nothing
+- **Breaking:** ``fiction::sidb::primitives`` is renamed ``fiction::sidb::surfaces``. The four
+  headers each wrap a cell-level layout and add a surface's worth of SiDB state, stacking as
+  ``lattice``, ``defect_surface``, ``charge_distribution_surface``; "primitive" suggested
+  something atomic, which the heaviest type in the subtree is not
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each

@@ -6,8 +6,8 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/model/charge_state.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #include <vector>
@@ -18,9 +18,9 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
 {
     SECTION("one empty layout")
     {
-        const sidb_100_cell_clk_lyt_siqad                                                       lyt{};
-        std::vector<sidb::primitives::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
-        const sidb::primitives::charge_distribution_surface                                     charge_layout{lyt};
+        const sidb_100_cell_clk_lyt_siqad                                                     lyt{};
+        std::vector<sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
+        const sidb::surfaces::charge_distribution_surface                                     charge_layout{lyt};
         all_lyts.push_back(charge_layout);
         auto result = sidb::simulation::analysis::calculate_energy_distribution(all_lyts);
         CHECK(result.size() == 1);
@@ -33,8 +33,8 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
     {
         sidb_100_cell_clk_lyt_siqad lyt{};
         lyt.assign_cell_type({0, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        std::vector<sidb::primitives::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
-        sidb::primitives::charge_distribution_surface                                           charge_layout{lyt};
+        std::vector<sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
+        sidb::surfaces::charge_distribution_surface                                           charge_layout{lyt};
         charge_layout.assign_charge_state({0, 0}, sidb::model::charge_state::NEUTRAL);
         all_lyts.push_back(charge_layout);
 
@@ -51,28 +51,28 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         lyt.assign_cell_type({12, 10}, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
 
         const auto sim_param = sidb::model::simulation_parameters{};
-        std::vector<sidb::primitives::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
-        sidb::primitives::charge_distribution_surface charge_layout_first{lyt, sim_param};
+        std::vector<sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>> all_lyts{};
+        sidb::surfaces::charge_distribution_surface charge_layout_first{lyt, sim_param};
 
         charge_layout_first.assign_charge_state({10, 10}, sidb::model::charge_state::NEUTRAL,
-                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.assign_charge_state({11, 10}, sidb::model::charge_state::NEUTRAL,
-                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.assign_charge_state({12, 10}, sidb::model::charge_state::NEUTRAL,
-                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_first.update_local_internal_potential();
         charge_layout_first.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_first);
         all_lyts.push_back(charge_layout_first);
         all_lyts.push_back(charge_layout_first);
 
-        sidb::primitives::charge_distribution_surface charge_layout_second{lyt};
+        sidb::surfaces::charge_distribution_surface charge_layout_second{lyt};
         charge_layout_second.assign_charge_state({10, 10}, sidb::model::charge_state::NEUTRAL,
-                                                 sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                 sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.assign_charge_state({11, 10}, sidb::model::charge_state::NEGATIVE,
-                                                 sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                 sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.assign_charge_state({12, 10}, sidb::model::charge_state::NEUTRAL,
-                                                 sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                 sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_second.update_local_internal_potential();
         charge_layout_second.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_second);
@@ -80,13 +80,13 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         all_lyts.push_back(charge_layout_second);
         all_lyts.push_back(charge_layout_second);
 
-        sidb::primitives::charge_distribution_surface charge_layout_third{lyt};
+        sidb::surfaces::charge_distribution_surface charge_layout_third{lyt};
         charge_layout_third.assign_charge_state({10, 10}, sidb::model::charge_state::NEGATIVE,
-                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.assign_charge_state({11, 10}, sidb::model::charge_state::NEGATIVE,
-                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.assign_charge_state({12, 10}, sidb::model::charge_state::NEGATIVE,
-                                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
         charge_layout_third.update_local_internal_potential();
         charge_layout_third.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_third);

@@ -44,7 +44,7 @@ include/fiction/
 │   ├── inml/                      fiction::inml::
 │   │   └── io/                    fiction::inml::io::
 │   └── sidb/                      fiction::sidb::
-│       ├── primitives/            fiction::sidb::primitives::
+│       ├── surfaces/              fiction::sidb::surfaces::
 │       ├── model/                 fiction::sidb::model::
 │       ├── simulation/            fiction::sidb::simulation::
 │       │   ├── engines/           fiction::sidb::simulation::engines::
@@ -188,10 +188,10 @@ module whose data they serialize.
 | `fiction/technology/sidb_nm_distance.hpp`                                         | `fiction/technology/sidb/model/nm_distance.hpp`                                            |
 | `fiction/technology/sidb_nm_position.hpp`                                         | `fiction/technology/sidb/model/nm_position.hpp`                                            |
 | `fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp`               | `fiction/technology/sidb/model/simulation_parameters.hpp`                                  |
-| `fiction/technology/charge_distribution_surface.hpp`                              | `fiction/technology/sidb/primitives/charge_distribution_surface.hpp`                       |
-| `fiction/technology/sidb_defect_surface.hpp`                                      | `fiction/technology/sidb/primitives/defect_surface.hpp`                                    |
-| `fiction/technology/sidb_lattice.hpp`                                             | `fiction/technology/sidb/primitives/lattice.hpp`                                           |
-| `fiction/technology/sidb_lattice_orientations.hpp`                                | `fiction/technology/sidb/primitives/lattice_orientations.hpp`                              |
+| `fiction/technology/charge_distribution_surface.hpp`                              | `fiction/technology/sidb/surfaces/charge_distribution_surface.hpp`                         |
+| `fiction/technology/sidb_defect_surface.hpp`                                      | `fiction/technology/sidb/surfaces/defect_surface.hpp`                                      |
+| `fiction/technology/sidb_lattice.hpp`                                             | `fiction/technology/sidb/surfaces/lattice.hpp`                                             |
+| `fiction/technology/sidb_lattice_orientations.hpp`                                | `fiction/technology/sidb/surfaces/lattice_orientations.hpp`                                |
 | `fiction/algorithms/simulation/sidb/band_bending_resilience.hpp`                  | `fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp`                  |
 | `fiction/algorithms/simulation/sidb/calculate_energy_and_state_type.hpp`          | `fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp`          |
 | `fiction/algorithms/simulation/sidb/critical_temperature.hpp`                     | `fiction/technology/sidb/simulation/analysis/critical_temperature.hpp`                     |
@@ -322,8 +322,8 @@ here kept its identifier and only gained a namespace.
 | `fiction::res_clocking`                                        | `fiction::layouts::clocking::res`                                           |
 | `fiction::ripple_clocking`                                     | `fiction::layouts::clocking::ripple`                                        |
 | `fiction::row_clocking`                                        | `fiction::layouts::clocking::row`                                           |
-| `fiction::sidb_100_lattice`                                    | `fiction::sidb::primitives::lattice_100`                                    |
-| `fiction::sidb_111_lattice`                                    | `fiction::sidb::primitives::lattice_111`                                    |
+| `fiction::sidb_100_lattice`                                    | `fiction::sidb::surfaces::lattice_100`                                      |
+| `fiction::sidb_111_lattice`                                    | `fiction::sidb::surfaces::lattice_111`                                      |
 | `fiction::sidb_bestagon_library`                               | `fiction::sidb::bestagon_library`                                           |
 | `fiction::sidb_binary_cluster_hierarchy_node`                  | `fiction::sidb::model::binary_cluster_hierarchy_node`                       |
 | `fiction::sidb_binary_cluster_hierarchy_node_ptr`              | `fiction::sidb::model::binary_cluster_hierarchy_node_ptr`                   |
@@ -343,11 +343,11 @@ here kept its identifier and only gained a namespace.
 | `fiction::sidb_clustering`                                     | `fiction::sidb::model::clustering`                                          |
 | `fiction::sidb_clustering_state`                               | `fiction::sidb::model::clustering_state`                                    |
 | `fiction::sidb_defect`                                         | `fiction::sidb::model::defect`                                              |
-| `fiction::sidb_defect_surface`                                 | `fiction::sidb::primitives::defect_surface`                                 |
-| `fiction::sidb_defect_surface_params`                          | `fiction::sidb::primitives::defect_surface_params`                          |
+| `fiction::sidb_defect_surface`                                 | `fiction::sidb::surfaces::defect_surface`                                   |
+| `fiction::sidb_defect_surface_params`                          | `fiction::sidb::surfaces::defect_surface_params`                            |
 | `fiction::sidb_defect_type`                                    | `fiction::sidb::model::defect_type`                                         |
 | `fiction::sidb_energy_and_state_type`                          | `fiction::sidb::simulation::analysis::energy_and_state_type`                |
-| `fiction::sidb_lattice`                                        | `fiction::sidb::primitives::lattice`                                        |
+| `fiction::sidb_lattice`                                        | `fiction::sidb::surfaces::lattice`                                          |
 | `fiction::sidb_nm_distance`                                    | `fiction::sidb::model::nm_distance`                                         |
 | `fiction::sidb_nm_position`                                    | `fiction::sidb::model::nm_position`                                         |
 | `fiction::sidb_on_the_fly_gate_library`                        | `fiction::sidb::on_the_fly_gate_library`                                    |
@@ -433,6 +433,24 @@ fiction::sidb_bestagon_library      ->  fiction::sidb::bestagon_library
 fiction::sidb_on_the_fly_gate_library -> fiction::sidb::on_the_fly_gate_library
 fiction::sidb_skeleton_bestagon_library -> fiction::sidb::skeleton_bestagon_library
 fiction::sidb_surface_analysis      ->  fiction::sidb::surface_analysis
+```
+
+### `surfaces`, not `primitives`
+
+The four headers that decorate a cell-level layout with SiDB state are
+`fiction::sidb::surfaces`. "Primitive" suggests something atomic, and
+`charge_distribution_surface` is the heaviest type in the subtree; what the family has in
+common is that each wraps a layout and adds a surface's worth of state, stacking as
+`lattice` then `defect_surface` then `charge_distribution_surface`.
+
+`layouts` would have been the literal name and is unavailable: inside `fiction::sidb` it
+would shadow `fiction::layouts`, which is the collision the technology tags keep their
+prefixes to avoid.
+
+```text
+fiction::charge_distribution_surface ->  fiction::sidb::surfaces::charge_distribution_surface
+fiction::sidb_defect_surface         ->  fiction::sidb::surfaces::defect_surface
+fiction::sidb_lattice                ->  fiction::sidb::surfaces::lattice
 ```
 
 ### The two kinds of defect

@@ -12,8 +12,8 @@
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/io/write_location_and_ground_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #include <cctype>
@@ -42,9 +42,9 @@ TEMPLATE_TEST_CASE(
                                 layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
     (layouts::cell_level_layout<sidb::sidb_technology,
                                 layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>),
-    (sidb::primitives::charge_distribution_surface<layouts::cell_level_layout<
+    (sidb::surfaces::charge_distribution_surface<layouts::cell_level_layout<
          sidb::sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>>),
-    (sidb::primitives::charge_distribution_surface<layouts::cell_level_layout<
+    (sidb::surfaces::charge_distribution_surface<layouts::cell_level_layout<
          sidb::sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>))
 {
     lattice lyt{};

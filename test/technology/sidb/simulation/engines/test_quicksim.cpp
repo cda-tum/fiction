@@ -11,10 +11,10 @@
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -806,7 +806,7 @@ TEMPLATE_TEST_CASE("Edge case with four SiDBs", "[quicksim]", (sidb_100_cell_clk
 
 TEMPLATE_TEST_CASE("QuickSim simulation of a Y-shaped SiDB OR gate with input 01", "[ExGS]",
                    (sidb_100_cell_clk_lyt_siqad),
-                   (sidb::primitives::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
+                   (sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
 {
     TestType lyt{};
 

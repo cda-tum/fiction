@@ -6,7 +6,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/model/nm_position.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/pair.h>  // NOLINT(misc-include-cleaner)
@@ -32,8 +32,8 @@ void sidb_nm_position(nanobind::module_& m)
 {
     detail::sidb_nm_position<py_charge_distribution_surface>(m);
     detail::sidb_nm_position<py_sidb_layout>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::primitives::lattice_100>>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::primitives::lattice_111>>(m);
+    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::surfaces::lattice_100>>(m);
+    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::surfaces::lattice_111>>(m);
 }
 
 }  // namespace pyfiction

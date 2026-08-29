@@ -12,11 +12,11 @@
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/cluster_hierarchy.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/ground_state_space.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -35,7 +35,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -50,7 +50,7 @@ TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-stat
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -81,7 +81,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]",
-                   sidb_cell_clk_lyt_siqad, sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_cell_clk_lyt_siqad, sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -106,7 +106,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
 }
 
 TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -295,7 +295,7 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
 }
 
 TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -333,7 +333,7 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
 }
 
 TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -393,8 +393,8 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground
 }
 
 template <typename Lyt>
-static bool verify_ground_state_space_stats(const sidb::primitives::charge_distribution_surface<Lyt>& valid_cl,
-                                            const sidb::model::cluster_ptr&                           gss_node) noexcept
+static bool verify_ground_state_space_stats(const sidb::surfaces::charge_distribution_surface<Lyt>& valid_cl,
+                                            const sidb::model::cluster_ptr&                         gss_node) noexcept
 {
     sidb::model::cluster_charge_state cl_m_conf{};
 
@@ -443,13 +443,13 @@ TEMPLATE_TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[gro
         const sidb::simulation::engines::ground_state_space_results& gss_res =
             sidb::simulation::engines::ground_state_space(lyt);
 
-        for (const sidb::primitives::charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
+        for (const sidb::surfaces::charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
         {
             const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
             CHECK(verification);
         }
 
-        for (const sidb::primitives::charge_distribution_surface<TestType>& cl : exgs_res.charge_distributions)
+        for (const sidb::surfaces::charge_distribution_surface<TestType>& cl : exgs_res.charge_distributions)
         {
             const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
             CHECK(verification);

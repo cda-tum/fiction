@@ -13,9 +13,9 @@
 #include "fiction/technology/sidb/model/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engines/ground_state_space.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -241,7 +241,7 @@ class clustercomplete_impl
     /**
      * The base layout that is used to create charge distribution surface copies.
      */
-    const sidb::primitives::charge_distribution_surface<Lyt> charge_layout;
+    const sidb::surfaces::charge_distribution_surface<Lyt> charge_layout;
     /**
      * Globally available array of bounds that section the band gap, used for pruning.
      */
@@ -314,10 +314,10 @@ class clustercomplete_impl
      * @param params Parameters for ClusterComplete.
      * @return The charge layout initializes with defects specified in the given parameters.
      */
-    [[nodiscard]] static sidb::primitives::charge_distribution_surface<Lyt>
+    [[nodiscard]] static sidb::surfaces::charge_distribution_surface<Lyt>
     initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
     {
-        sidb::primitives::charge_distribution_surface<Lyt> cds{lyt};
+        sidb::surfaces::charge_distribution_surface<Lyt> cds{lyt};
         cds.assign_physical_parameters(params.sim_params);
 
         // assign defects if applicable
@@ -401,7 +401,7 @@ class clustercomplete_impl
      */
     void add_if_configuration_stability_is_met(const sidb::model::clustering_state& cl_state) noexcept
     {
-        sidb::primitives::charge_distribution_surface charge_layout_copy{charge_layout};
+        sidb::surfaces::charge_distribution_surface charge_layout_copy{charge_layout};
 
         // convert bottom clustering state to charge distribution
         for (const auto& pst : cl_state.proj_states)
@@ -409,7 +409,7 @@ class clustercomplete_impl
             const uint64_t sidb_ix = sidb::model::get_singleton_sidb_ix(pst->cluster);
             charge_layout_copy.assign_charge_state_by_index(
                 sidb_ix, sidb::model::singleton_multiset_conf_to_charge_state(pst->multiset_conf),
-                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
 
             assert(charge_layout_copy.get_local_external_potential_by_index(sidb_ix).has_value() &&
                    "Local external potential at SiDB is undefined");

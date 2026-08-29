@@ -7,8 +7,8 @@
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
@@ -238,7 +238,7 @@ class write_sqd_sim_result_impl
         os << siqad::OPEN_ELEC_DIST;
 
         // a vector of pointers to avoid copying the surfaces (use raw pointers at your own risk, kids!)
-        std::vector<const sidb::primitives::charge_distribution_surface<Lyt>*> ordered_surface_pointers{};
+        std::vector<const sidb::surfaces::charge_distribution_surface<Lyt>*> ordered_surface_pointers{};
         ordered_surface_pointers.reserve(sim_result.charge_distributions.size());
 
         // obtain pointers to all the surfaces

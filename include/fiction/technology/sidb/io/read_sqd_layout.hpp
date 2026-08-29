@@ -8,7 +8,7 @@
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
+#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/traits.hpp"
 
 #include <tinyxml2.h>
@@ -222,14 +222,14 @@ class read_sqd_layout_impl
     {
         if (name == "Si(111) 1x1")
         {
-            if (!has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_111>)
+            if (!has_given_lattice_orientation_v<Lyt, sidb::surfaces::lattice_111>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }
         }
         else if (name == "Si(100) 2x1")
         {
-            if (!has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_100>)
+            if (!has_given_lattice_orientation_v<Lyt, sidb::surfaces::lattice_100>)
             {
                 throw sqd_parsing_error("Error parsing SQD file: mismatch in lattice orientations");
             }

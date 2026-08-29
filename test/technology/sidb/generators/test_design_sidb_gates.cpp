@@ -14,11 +14,11 @@
 #include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -320,7 +320,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
         params.design_mode            = sidb::generators::design_sidb_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
 
-        sidb::primitives::defect_surface defect_layout{lyt};
+        sidb::surfaces::defect_surface defect_layout{lyt};
         defect_layout.assign_defect({10, 6, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
                                                                     params.operational_params.sim_params.epsilon_r,
                                                                     params.operational_params.sim_params.lambda_tf});
@@ -409,7 +409,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
             .canvas                 = {{17, 11, 0}, {17, 11, 0}},
             .number_of_canvas_sidbs = 1};
 
-        sidb::primitives::defect_surface defect_layout{lyt};
+        sidb::surfaces::defect_surface defect_layout{lyt};
         defect_layout.assign_cell_type({36, 19, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
         defect_layout.assign_cell_type({2, 19, 0}, sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
         CHECK(defect_layout.get_cell_type({36, 19, 0}) == sidb_100_cell_clk_lyt_siqad::cell_type::EMPTY);
@@ -470,7 +470,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
     SECTION("Random and QuickCell with defects")
     {
-        sidb::primitives::defect_surface defect_layout{lyt};
+        sidb::surfaces::defect_surface defect_layout{lyt};
 
         sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
@@ -512,7 +512,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
     SECTION("QuickCell with defect blocking canvas SiDB placement")
     {
-        sidb::primitives::defect_surface defect_layout{lyt};
+        sidb::surfaces::defect_surface defect_layout{lyt};
 
         const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =

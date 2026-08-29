@@ -12,7 +12,7 @@
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
+#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 
 #include <mockturtle/traits.hpp>
 
@@ -717,7 +717,7 @@ struct is_sidb_lattice_100 : std::false_type
 
 template <typename Lyt>
 struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_100>, std::true_type,
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::surfaces::lattice_100>, std::true_type,
                              std::false_type>
 {};
 
@@ -732,7 +732,7 @@ struct is_sidb_lattice_111 : std::false_type
 
 template <typename Lyt>
 struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::primitives::lattice_111>, std::true_type,
+        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::surfaces::lattice_111>, std::true_type,
                              std::false_type>
 {};
 

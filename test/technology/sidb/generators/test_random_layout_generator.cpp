@@ -10,8 +10,8 @@
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -664,7 +664,7 @@ TEST_CASE("Random coords::siqad layout generation", "[random-sidb-layout-generat
 }
 
 TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[random-sidb-layout-generator]",
-                   sidb_defect_cell_clk_lyt_siqad, sidb::primitives::defect_surface<sidb_111_cell_clk_lyt_siqad>)
+                   sidb_defect_cell_clk_lyt_siqad, sidb::surfaces::defect_surface<sidb_111_cell_clk_lyt_siqad>)
 {
     SECTION("given two identical coordinates")
     {

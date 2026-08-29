@@ -6,7 +6,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/model/nm_position.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -20,67 +20,67 @@ TEST_CASE("SiDB position in nanometer for siqad coordinates", "[sidb-nm-position
     SECTION("Cell-level layout without lattice layout")
     {
         const auto [pos_x, pos_y] = sidb::model::nm_position(lattice{}, {1, 0, 0});
-        CHECK_THAT(pos_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
 
         const auto [pos2_x, pos2_y] = sidb::model::nm_position(lattice{}, {0, 1, 0});
         CHECK_THAT(pos2_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos2_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos2_y, WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos3_x, pos3_y] = sidb::model::nm_position(lattice{}, {0, 8, 1});
         CHECK_THAT(pos3_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos3_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.8 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
-                                     1E-5));
+        CHECK_THAT(pos3_y,
+                   WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.8 + sidb::surfaces::lattice_100::LAT_C.second * 0.1,
+                             1E-5));
 
         const auto [pos4_x, pos4_y] = sidb::model::nm_position(lattice{}, {1, 1});
-        CHECK_THAT(pos4_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos4_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos4_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos4_y, WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos5_x, pos5_y] = sidb::model::nm_position(lattice{}, {1, 1, 1});
-        CHECK_THAT(pos5_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos5_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
-                                     1E-5));
+        CHECK_THAT(pos5_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos5_y,
+                   WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1 + sidb::surfaces::lattice_100::LAT_C.second * 0.1,
+                             1E-5));
 
         const auto [pos6_x, pos6_y] = sidb::model::nm_position(lattice{}, {1, 10, 1});
-        CHECK_THAT(pos6_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos6_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
         CHECK_THAT(
             pos6_y,
-            WithinAbs(sidb::primitives::lattice_100::LAT_B + sidb::primitives::lattice_100::LAT_C.second * 0.1, 1E-5));
+            WithinAbs(sidb::surfaces::lattice_100::LAT_B + sidb::surfaces::lattice_100::LAT_C.second * 0.1, 1E-5));
     }
 
     SECTION("Default lattice constants, positive cell coordinates")
     {
         const auto [pos_x, pos_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 0, 0});
-        CHECK_THAT(pos_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
 
         const auto [pos2_x, pos2_y] = sidb::model::nm_position<lattice>(lattice{}, {0, 1, 0});
         CHECK_THAT(pos2_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos2_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos2_y, WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos3_x, pos3_y] = sidb::model::nm_position<lattice>(lattice{}, {0, 8, 1});
         CHECK_THAT(pos3_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos3_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.8 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
-                                     1E-5));
+        CHECK_THAT(pos3_y,
+                   WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.8 + sidb::surfaces::lattice_100::LAT_C.second * 0.1,
+                             1E-5));
 
         const auto [pos4_x, pos4_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 1});
-        CHECK_THAT(pos4_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos4_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos4_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos4_y, WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos5_x, pos5_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 1, 1});
-        CHECK_THAT(pos5_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos5_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
-                                     1E-5));
+        CHECK_THAT(pos5_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos5_y,
+                   WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1 + sidb::surfaces::lattice_100::LAT_C.second * 0.1,
+                             1E-5));
 
         const auto [pos6_x, pos6_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 10, 1});
-        CHECK_THAT(pos6_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos6_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
         CHECK_THAT(
             pos6_y,
-            WithinAbs(sidb::primitives::lattice_100::LAT_B + sidb::primitives::lattice_100::LAT_C.second * 0.1, 1E-5));
+            WithinAbs(sidb::surfaces::lattice_100::LAT_B + sidb::surfaces::lattice_100::LAT_C.second * 0.1, 1E-5));
     }
 
     SECTION("Default (Si-100) lattice constants, negative cell coordinates")
@@ -145,74 +145,74 @@ TEST_CASE("SiDB position in nanometer for fiction coordinates", "[sidb-nm-positi
     SECTION("Default lattice constants, positive cell coordinates")
     {
         const auto [pos_x, pos_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 0});
-        CHECK_THAT(pos_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
 
         const auto [pos2_x, pos2_y] = sidb::model::nm_position<lattice>(lattice{}, {0, 2});
         CHECK_THAT(pos2_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos2_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos2_y, WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos3_x, pos3_y] = sidb::model::nm_position<lattice>(lattice{}, {0, 17});
         CHECK_THAT(pos3_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos3_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.8 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
-                                     1E-5));
+        CHECK_THAT(pos3_y,
+                   WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.8 + sidb::surfaces::lattice_100::LAT_C.second * 0.1,
+                             1E-5));
 
         const auto [pos4_x, pos4_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 2});
-        CHECK_THAT(pos4_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos4_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos4_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos4_y, WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos5_x, pos5_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 3});
-        CHECK_THAT(pos5_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos5_y, WithinAbs(sidb::primitives::lattice_100::LAT_B * 0.1 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
-                                     1E-5));
+        CHECK_THAT(pos5_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos5_y,
+                   WithinAbs(sidb::surfaces::lattice_100::LAT_B * 0.1 + sidb::surfaces::lattice_100::LAT_C.second * 0.1,
+                             1E-5));
 
         const auto [pos6_x, pos6_y] = sidb::model::nm_position<lattice>(lattice{}, {1, 21});
-        CHECK_THAT(pos6_x, WithinAbs(sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos6_x, WithinAbs(sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
         CHECK_THAT(
             pos6_y,
-            WithinAbs(sidb::primitives::lattice_100::LAT_B + sidb::primitives::lattice_100::LAT_C.second * 0.1, 1E-5));
+            WithinAbs(sidb::surfaces::lattice_100::LAT_B + sidb::surfaces::lattice_100::LAT_C.second * 0.1, 1E-5));
     }
 
     SECTION("Default lattice constants, negative cell coordinates")
     {
         const auto [pos_x, pos_y] = sidb::model::nm_position<lattice>(lattice{}, {-1, 0});
-        CHECK_THAT(pos_x, WithinAbs(-sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos_x, WithinAbs(-sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
         CHECK_THAT(pos_y, WithinAbs(0.0, 1E-5));
 
         const auto [pos2_x, pos2_y] = sidb::model::nm_position<lattice>(lattice{}, {0, -2});
         CHECK_THAT(pos2_x, WithinAbs(0.0, 1E-5));
-        CHECK_THAT(pos2_y, WithinAbs(-sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos2_y, WithinAbs(-sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos3_x, pos3_y] = sidb::model::nm_position<lattice>(lattice{}, {-5, -10});
-        CHECK_THAT(pos3_x, WithinAbs(-sidb::primitives::lattice_100::LAT_A * 0.5, 1E-5));
-        CHECK_THAT(pos3_y, WithinAbs(-sidb::primitives::lattice_100::LAT_B * 0.5, 1E-5));
+        CHECK_THAT(pos3_x, WithinAbs(-sidb::surfaces::lattice_100::LAT_A * 0.5, 1E-5));
+        CHECK_THAT(pos3_y, WithinAbs(-sidb::surfaces::lattice_100::LAT_B * 0.5, 1E-5));
 
         const auto [pos4_x, pos4_y] = sidb::model::nm_position<lattice>(lattice{}, {-1, -3});
-        CHECK_THAT(pos4_x, WithinAbs(-sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos4_y, WithinAbs(-2 * sidb::primitives::lattice_100::LAT_B * 0.1 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
+        CHECK_THAT(pos4_x, WithinAbs(-sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos4_y, WithinAbs(-2 * sidb::surfaces::lattice_100::LAT_B * 0.1 +
+                                         sidb::surfaces::lattice_100::LAT_C.second * 0.1,
                                      1E-5));
 
         const auto [pos5_x, pos5_y] = sidb::model::nm_position<lattice>(lattice{}, {-1, -21});
-        CHECK_THAT(pos5_x, WithinAbs(-sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos5_y, WithinAbs(-11 * sidb::primitives::lattice_100::LAT_B * 0.1 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
+        CHECK_THAT(pos5_x, WithinAbs(-sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos5_y, WithinAbs(-11 * sidb::surfaces::lattice_100::LAT_B * 0.1 +
+                                         sidb::surfaces::lattice_100::LAT_C.second * 0.1,
                                      1E-5));
 
         const auto [pos6_x, pos6_y] = sidb::model::nm_position<lattice>(lattice{}, {-1, -2});
-        CHECK_THAT(pos6_x, WithinAbs(-sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos6_y, WithinAbs(-sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos6_x, WithinAbs(-sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos6_y, WithinAbs(-sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos7_x, pos7_y] = sidb::model::nm_position<lattice>(lattice{}, {-2, -4});
-        CHECK_THAT(pos7_x, WithinAbs(-2 * sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos7_y, WithinAbs(-2 * sidb::primitives::lattice_100::LAT_B * 0.1, 1E-5));
+        CHECK_THAT(pos7_x, WithinAbs(-2 * sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos7_y, WithinAbs(-2 * sidb::surfaces::lattice_100::LAT_B * 0.1, 1E-5));
 
         const auto [pos8_x, pos8_y] = sidb::model::nm_position<lattice>(lattice{}, {-2, -1});
-        CHECK_THAT(pos8_x, WithinAbs(-2 * sidb::primitives::lattice_100::LAT_A * 0.1, 1E-5));
-        CHECK_THAT(pos8_y, WithinAbs(-sidb::primitives::lattice_100::LAT_B * 0.1 +
-                                         sidb::primitives::lattice_100::LAT_C.second * 0.1,
+        CHECK_THAT(pos8_x, WithinAbs(-2 * sidb::surfaces::lattice_100::LAT_A * 0.1, 1E-5));
+        CHECK_THAT(pos8_y, WithinAbs(-sidb::surfaces::lattice_100::LAT_B * 0.1 +
+                                         sidb::surfaces::lattice_100::LAT_C.second * 0.1,
                                      1E-5));
     }
 }

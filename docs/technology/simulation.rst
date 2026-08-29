@@ -37,20 +37,20 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/primitives/charge_distribution_surface.hpp``
+        **Header:** ``fiction/technology/sidb/surfaces/charge_distribution_surface.hpp``
 
-        .. doxygenenum:: fiction::sidb::primitives::dependent_cell_mode
-        .. doxygenenum:: fiction::sidb::primitives::energy_calculation
-        .. doxygenenum:: fiction::sidb::primitives::charge_distribution_history
-        .. doxygenenum:: fiction::sidb::primitives::charge_index_recomputation
-        .. doxygenenum:: fiction::sidb::primitives::charge_distribution_mode
-        .. doxygenenum:: fiction::sidb::primitives::charge_index_mode
-        .. doxygenenum:: fiction::sidb::primitives::charge_transition_threshold_bounds
-        .. doxygenclass:: fiction::sidb::primitives::charge_distribution_surface
+        .. doxygenenum:: fiction::sidb::surfaces::dependent_cell_mode
+        .. doxygenenum:: fiction::sidb::surfaces::energy_calculation
+        .. doxygenenum:: fiction::sidb::surfaces::charge_distribution_history
+        .. doxygenenum:: fiction::sidb::surfaces::charge_index_recomputation
+        .. doxygenenum:: fiction::sidb::surfaces::charge_distribution_mode
+        .. doxygenenum:: fiction::sidb::surfaces::charge_index_mode
+        .. doxygenenum:: fiction::sidb::surfaces::charge_transition_threshold_bounds
+        .. doxygenclass:: fiction::sidb::surfaces::charge_distribution_surface
            :members:
-        .. doxygenclass:: fiction::sidb::primitives::charge_distribution_surface< Lyt, true >
+        .. doxygenclass:: fiction::sidb::surfaces::charge_distribution_surface< Lyt, true >
            :members:
-        .. doxygenclass:: fiction::sidb::primitives::charge_distribution_surface< Lyt, false >
+        .. doxygenclass:: fiction::sidb::surfaces::charge_distribution_surface< Lyt, false >
            :members:
 
     .. tab:: Python

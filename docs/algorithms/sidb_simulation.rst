@@ -603,16 +603,16 @@ SiDB Defect Types
 SiDB Defect Surface
 ^^^^^^^^^^^^^^^^^^
 
-**Header:** ``fiction/technology/sidb/primitives/defect_surface.hpp``
+**Header:** ``fiction/technology/sidb/surfaces/defect_surface.hpp``
 
 A layout type to layer on top of any SiDB cell-level layout. It implements an interface to store and access
 fabrication defects on the H-Si(100) 2x1 surface.
 
-.. doxygenclass:: fiction::sidb::primitives::defect_surface
+.. doxygenclass:: fiction::sidb::surfaces::defect_surface
    :members:
-.. doxygenclass:: fiction::sidb::primitives::defect_surface< Lyt, true >
+.. doxygenclass:: fiction::sidb::surfaces::defect_surface< Lyt, true >
    :members:
-.. doxygenclass:: fiction::sidb::primitives::defect_surface< Lyt, false >
+.. doxygenclass:: fiction::sidb::surfaces::defect_surface< Lyt, false >
    :members:
 
 

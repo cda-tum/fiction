@@ -10,11 +10,11 @@
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 
@@ -593,9 +593,9 @@ class design_sidb_gates_impl
                     dependent_cell = c;
                 });
 
-            sidb::primitives::charge_distribution_surface<Lyt> cds_canvas{
+            sidb::surfaces::charge_distribution_surface<Lyt> cds_canvas{
                 canvas_lyt, params.operational_params.sim_params, sidb::model::charge_state::NEGATIVE,
-                sidb::primitives::cds_configuration::CHARGE_LOCATION_ONLY};
+                sidb::surfaces::cds_configuration::CHARGE_LOCATION_ONLY};
 
             cds_canvas.assign_dependent_cell(dependent_cell);
 

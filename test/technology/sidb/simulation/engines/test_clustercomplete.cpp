@@ -18,14 +18,14 @@
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/simulation/utils/minimum_energy.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -39,7 +39,7 @@
 using namespace fiction;
 
 TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -59,7 +59,7 @@ TEMPLATE_TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -92,11 +92,11 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercompl
 
 template <typename Lyt>
 static bool
-verify_clustercomplete_result(const sidb::primitives::charge_distribution_surface<Lyt>&              qe_cds,
-                              const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& cc_cdss) noexcept
+verify_clustercomplete_result(const sidb::surfaces::charge_distribution_surface<Lyt>&              qe_cds,
+                              const std::vector<sidb::surfaces::charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
     return std::any_of(cc_cdss.cbegin(), cc_cdss.cend(),
-                       [&](const sidb::primitives::charge_distribution_surface<Lyt>& cc_cds)
+                       [&](const sidb::surfaces::charge_distribution_surface<Lyt>& cc_cds)
                        {
                            for (const auto& c : qe_cds.get_sidb_order())
                            {
@@ -112,8 +112,8 @@ verify_clustercomplete_result(const sidb::primitives::charge_distribution_surfac
 
 template <typename Lyt>
 static bool verify_clustercomplete_result_by_charge_indices(
-    const sidb::primitives::charge_distribution_surface<Lyt>&              qe_cds,
-    const std::vector<sidb::primitives::charge_distribution_surface<Lyt>>& cc_cdss) noexcept
+    const sidb::surfaces::charge_distribution_surface<Lyt>&              qe_cds,
+    const std::vector<sidb::surfaces::charge_distribution_surface<Lyt>>& cc_cdss) noexcept
 {
     return std::any_of(
         cc_cdss.cbegin(), cc_cdss.cend(), [&](const auto& cc_cds)
@@ -121,7 +121,7 @@ static bool verify_clustercomplete_result_by_charge_indices(
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]",
-                   sidb_cell_clk_lyt_siqad, sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_cell_clk_lyt_siqad, sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 
 {
     TestType lyt{};
@@ -144,7 +144,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
         REQUIRE(qe_res.charge_distributions.size() == 1);
         CHECK(cc_res.charge_distributions.size() == 1);
 
-        for (const sidb::primitives::charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
+        for (const sidb::surfaces::charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
         {
             CHECK(verify_clustercomplete_result<TestType>(cds, cc_res.charge_distributions));
             CHECK(verify_clustercomplete_result_by_charge_indices<TestType>(cds, cc_res.charge_distributions));
@@ -165,7 +165,7 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive 
         REQUIRE(qe_res.charge_distributions.size() == 2);
         CHECK(cc_res.charge_distributions.size() == 2);
 
-        for (const sidb::primitives::charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
+        for (const sidb::surfaces::charge_distribution_surface<TestType>& cds : qe_res.charge_distributions)
         {
             CHECK(verify_clustercomplete_result(cds, cc_res.charge_distributions));
             CHECK(verify_clustercomplete_result_by_charge_indices<TestType>(cds, cc_res.charge_distributions));
@@ -240,8 +240,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 under varying physical parameters",
-    "[clustercomplete]", sidb_cell_clk_lyt_siqad,
-    sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+    "[clustercomplete]", sidb_cell_clk_lyt_siqad, sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -429,8 +428,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (default initialization) in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -448,8 +447,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (changed lambda_tf) in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -468,8 +467,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one negatively charge defect (changed epsilon_r) in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -490,8 +489,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "four SiDBs ClusterComplete simulation with one negatively charge defect (changed mu_minus) in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({-2, 0, 1}, TestType::cell_type::NORMAL);
@@ -521,8 +520,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity", "[clustercomplete]",
-    (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -543,8 +542,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with one highly negatively charge defect in proximity but with high "
     "screening",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -564,8 +563,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB ClusterComplete simulation with two highly negatively and oppositely charged defects in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -758,7 +757,7 @@ TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    sidb::primitives::charge_distribution_surface charge_layout_kon{lyt, params};
+    sidb::surfaces::charge_distribution_surface charge_layout_kon{lyt, params};
 
     charge_layout_kon.assign_charge_state({0, 0, 0}, sidb::model::charge_state::NEGATIVE);
     charge_layout_kon.assign_charge_state({5, 0, 0}, sidb::model::charge_state::NEUTRAL);
@@ -1214,8 +1213,8 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clus
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete with one SiDB and one negatively charged defect in proximity", "[clustercomplete]",
-    (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1235,8 +1234,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation  of four SiDBs (far away) with one negatively charged defects in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1262,8 +1261,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of four SiDBs (far away) with two negatively charged defects in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1295,8 +1294,8 @@ TEMPLATE_TEST_CASE(
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of four SiDBs (far away) with one negatively and positively charged "
     "defect in proximity",
-    "[clustercomplete]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1592,9 +1591,9 @@ TEMPLATE_TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]
 }
 
 TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]",
-                   (sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>),
-                   (sidb::primitives::charge_distribution_surface<
-                       sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>>))
+                   (sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>),
+                   (sidb::surfaces::charge_distribution_surface<
+                       sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1834,9 +1833,9 @@ TEMPLATE_TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplet
 TEMPLATE_TEST_CASE(
     "ClusterComplete simulation of two SiDBs placed directly next to each other with non-realistic relative "
     "permittivity",
-    "[clustercomplete]", (sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<
-        sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>>))
+    "[clustercomplete]", (sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<
+        sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);

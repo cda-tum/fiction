@@ -7,8 +7,8 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/model/charge_state.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/simulation/utils/minimum_energy.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
@@ -24,8 +24,8 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
     SECTION("layout with no SiDB placed")
     {
-        const sidb::primitives::charge_distribution_surface                 charge_layout{lyt};
-        std::vector<sidb::primitives::charge_distribution_surface<lattice>> all_lyts{};
+        const sidb::surfaces::charge_distribution_surface                 charge_layout{lyt};
+        std::vector<sidb::surfaces::charge_distribution_surface<lattice>> all_lyts{};
 
         CHECK(std::isinf(sidb::simulation::utils::minimum_energy(all_lyts.begin(), all_lyts.end())));
 
@@ -38,8 +38,8 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
     {
         lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
 
-        const sidb::primitives::charge_distribution_surface                 charge_layout{lyt};
-        std::vector<sidb::primitives::charge_distribution_surface<lattice>> all_lyts{};
+        const sidb::surfaces::charge_distribution_surface                 charge_layout{lyt};
+        std::vector<sidb::surfaces::charge_distribution_surface<lattice>> all_lyts{};
 
         CHECK(std::isinf(sidb::simulation::utils::minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
 
@@ -54,8 +54,8 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         lyt.assign_cell_type({10, 10}, lattice::cell_type::NORMAL);
         lyt.assign_cell_type({9, 9}, lattice::cell_type::NORMAL);
 
-        sidb::primitives::charge_distribution_surface                       charge_layout_first{lyt};
-        std::vector<sidb::primitives::charge_distribution_surface<lattice>> all_lyts{};
+        sidb::surfaces::charge_distribution_surface                       charge_layout_first{lyt};
+        std::vector<sidb::surfaces::charge_distribution_surface<lattice>> all_lyts{};
 
         CHECK(std::isinf(sidb::simulation::utils::minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
 
@@ -65,7 +65,7 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
         charge_layout_first.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_first);
 
-        sidb::primitives::charge_distribution_surface charge_layout_second{lyt};
+        sidb::surfaces::charge_distribution_surface charge_layout_second{lyt};
 
         charge_layout_second.assign_charge_state({10, 10}, sidb::model::charge_state::NEUTRAL);
         charge_layout_second.assign_charge_state({9, 9}, sidb::model::charge_state::NEUTRAL);

@@ -7,9 +7,9 @@
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -52,7 +52,7 @@ sidb::simulation::result<Lyt> exhaustive_ground_state_simulation(
     {
         const mockturtle::stopwatch stop{time_counter};
 
-        sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{lyt};
+        sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
 
         charge_lyt.set_simulation_engine(engine::EXGS);
         charge_lyt.assign_physical_parameters(params);
@@ -64,7 +64,7 @@ sidb::simulation::result<Lyt> exhaustive_ground_state_simulation(
             if (charge_lyt.is_physically_valid())
             {
                 simulation_result.charge_distributions.push_back(
-                    sidb::primitives::charge_distribution_surface<Lyt>{charge_lyt});
+                    sidb::surfaces::charge_distribution_surface<Lyt>{charge_lyt});
             }
 
             charge_lyt.increase_charge_index_by_one();
@@ -73,7 +73,7 @@ sidb::simulation::result<Lyt> exhaustive_ground_state_simulation(
         if (charge_lyt.is_physically_valid())
         {
             simulation_result.charge_distributions.push_back(
-                sidb::primitives::charge_distribution_surface<Lyt>{charge_lyt});
+                sidb::surfaces::charge_distribution_surface<Lyt>{charge_lyt});
         }
     }
     simulation_result.simulation_runtime = time_counter;

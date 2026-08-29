@@ -14,7 +14,7 @@
 // #define DEBUG_SIDB_CLUSTER_HIERARCHY
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>
@@ -141,7 +141,7 @@ template <typename Lyt>
         return binary_cluster_hierarchy_node{{0}, {nullptr, nullptr}};
     }
 
-    sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{lyt};
+    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
 
     alglib::real_2d_array d{};
     d.setlength(static_cast<alglib::ae_int_t>(charge_lyt.num_cells()), 2);

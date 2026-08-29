@@ -5,9 +5,9 @@
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/lattice.hpp"
-#include "fiction/technology/sidb/primitives/lattice_orientations.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
+#include "fiction/technology/sidb/surfaces/lattice.hpp"
+#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>

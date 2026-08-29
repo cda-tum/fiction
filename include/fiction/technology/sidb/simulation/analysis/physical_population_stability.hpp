@@ -7,10 +7,10 @@
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -144,14 +144,14 @@ class physical_population_stability_impl
         // Access the unique indices
         for (const auto& energy_and_index : energy_and_unique_charge_index)
         {
-            const auto it = std::ranges::find_if(
-                simulation_results.charge_distributions,
-                [&](const sidb::primitives::charge_distribution_surface<Lyt>& charge_lyt)
-                {
-                    // Compare with the first element of the pair returned by
-                    // get_charge_index_and_base()
-                    return charge_lyt.get_charge_index_and_base().first == energy_and_index.charge_index;
-                });
+            const auto it = std::ranges::find_if(simulation_results.charge_distributions,
+                                                 [&](const sidb::surfaces::charge_distribution_surface<Lyt>& charge_lyt)
+                                                 {
+                                                     // Compare with the first element of the pair returned by
+                                                     // get_charge_index_and_base()
+                                                     return charge_lyt.get_charge_index_and_base().first ==
+                                                            energy_and_index.charge_index;
+                                                 });
 
             if (it == simulation_results.charge_distributions.end())
             {

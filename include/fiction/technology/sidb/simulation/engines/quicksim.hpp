@@ -7,9 +7,9 @@
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -107,7 +107,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
     {
         const mockturtle::stopwatch stop{time_counter};
 
-        sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{lyt};
+        sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
         charge_lyt.set_simulation_engine(engine::QUICKSIM);
 
         // set the given physical parameters
@@ -187,7 +187,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                         return;
                     }
 
-                    auto charge_lyt_copy = sidb::primitives::charge_distribution_surface{charge_lyt};
+                    auto charge_lyt_copy = sidb::surfaces::charge_distribution_surface{charge_lyt};
 
                     for (uint64_t l = 0ul; l < iter_per_thread; ++l)
                     {
@@ -209,7 +209,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 
                             charge_lyt_copy.assign_all_charge_states(
                                 sidb::model::charge_state::NEUTRAL,
-                                sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
 
                             auto negative_sidbs_indices = predefined_negative_sidb_indices;
                             negative_sidbs_indices.push_back(sidb_index_with_unknown_charge_state);
@@ -218,7 +218,7 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
                             {
                                 charge_lyt_copy.assign_charge_state_by_index(
                                     negative_sidb_index, sidb::model::charge_state::NEGATIVE,
-                                    sidb::primitives::charge_index_mode::KEEP_CHARGE_INDEX);
+                                    sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
                             }
 
                             charge_lyt_copy.update_after_charge_change();

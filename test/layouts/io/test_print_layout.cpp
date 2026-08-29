@@ -11,7 +11,7 @@
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/defect_surface.hpp"
+#include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -21,9 +21,9 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -235,7 +235,7 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
     const sidb_cell_clk_lyt_siqad     lyt{{2, 2}, "Empty"};
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const sidb::primitives::charge_distribution_surface layout{lat};
+    const sidb::surfaces::charge_distribution_surface layout{lat};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -254,13 +254,12 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
 
 TEST_CASE("layout which is sidb_defect_surface and charge distribution surface but empty", "[print-charge-layout]")
 {
-    const sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
+    const sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
 
-    const sidb::primitives::lattice<sidb::primitives::lattice_100,
-                                    sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad>>
+    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>
         lat{sidb_layout};
 
-    const sidb::primitives::charge_distribution_surface layout{lat};
+    const sidb::surfaces::charge_distribution_surface layout{lat};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
@@ -288,8 +287,8 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
     const auto lyt = layouts::utils::convert_layout_to_siqad_coordinates(
         physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library>(layout));
 
-    sidb::primitives::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
-                                                     sidb::model::charge_state::NEGATIVE};
+    sidb::surfaces::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
+                                                   sidb::model::charge_state::NEGATIVE};
 
     cl.assign_charge_state({16, 3, 0}, sidb::model::charge_state::NEUTRAL);
     cl.assign_charge_state({42, 3, 0}, sidb::model::charge_state::NEGATIVE);
@@ -445,11 +444,11 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    const auto lyt = sidb::primitives::defect_surface{layouts::utils::convert_layout_to_siqad_coordinates(
+    const auto lyt = sidb::surfaces::defect_surface{layouts::utils::convert_layout_to_siqad_coordinates(
         physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library>(layout))};
 
-    sidb::primitives::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
-                                                     sidb::model::charge_state::NEGATIVE};
+    sidb::surfaces::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
+                                                   sidb::model::charge_state::NEGATIVE};
 
     cl.assign_defect({18, 3, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
     cl.assign_defect({44, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
@@ -552,7 +551,7 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 {
     const sidb_100_cell_clk_lyt layout{};
 
-    sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad> cl{
+    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad> cl{
         layouts::utils::convert_layout_to_siqad_coordinates(layout)};
 
     cl.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
@@ -569,8 +568,8 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
     {
         layouts::io::print_sidb_layout(
             print_stream,
-            sidb::primitives::lattice<sidb::primitives::lattice_100,
-                                      sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
+            sidb::surfaces::lattice<sidb::surfaces::lattice_100,
+                                    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
             false, true, true);
 
         constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -589,8 +588,8 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
     {
         layouts::io::print_sidb_layout(
             print_stream,
-            sidb::primitives::lattice<sidb::primitives::lattice_100,
-                                      sidb::primitives::defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
+            sidb::surfaces::lattice<sidb::surfaces::lattice_100,
+                                    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
             false, false, true);
 
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
@@ -720,7 +719,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "
                                              "\n"
                                              "\n";
 
-        const sidb::primitives::lattice<sidb::primitives::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
@@ -743,11 +742,11 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "
                                              "\n"
                                              "\n";
 
-        const sidb::primitives::lattice<sidb::primitives::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
-        const auto cds = sidb::primitives::charge_distribution_surface{lattice_lyt};
+        const auto cds = sidb::surfaces::charge_distribution_surface{lattice_lyt};
 
         layouts::io::print_sidb_layout(print_stream, cds, false, true, true);
         CHECK(layout_print == print_stream.str());
@@ -781,7 +780,7 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset co
                                              "\n"
                                              "\n";
 
-        const sidb::primitives::lattice<sidb::primitives::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
@@ -804,11 +803,11 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset co
                                              "\n"
                                              "\n";
 
-        const sidb::primitives::lattice<sidb::primitives::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
-        const auto cds = sidb::primitives::charge_distribution_surface{lattice_lyt};
+        const auto cds = sidb::surfaces::charge_distribution_surface{lattice_lyt};
 
         layouts::io::print_sidb_layout(print_stream, cds, false, true);
         CHECK(layout_print == print_stream.str());

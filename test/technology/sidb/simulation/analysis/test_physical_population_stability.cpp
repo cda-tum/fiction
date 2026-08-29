@@ -10,9 +10,9 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
-#include <fiction/technology/sidb/primitives/lattice_orientations.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
+#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>
@@ -315,7 +315,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_cube> lat{lyt};
+        const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_cube> lat{lyt};
 
         const auto result = sidb::simulation::analysis::physical_population_stability(lat, population_stability_params);
         REQUIRE(result.size() == 20);
@@ -402,7 +402,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_100_cell_clk_lyt> lat{lyt};
+        const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_100_cell_clk_lyt> lat{lyt};
 
         const auto result = sidb::simulation::analysis::physical_population_stability(lat, params);
         REQUIRE(result.size() == 20);

@@ -8,7 +8,7 @@
 
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/cluster_hierarchy.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
@@ -28,7 +28,7 @@ using set_container = phmap::flat_hash_set<uint64_t>;
 #endif
 
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]",
-                   sidb_cell_clk_lyt_siqad, sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_cell_clk_lyt_siqad, sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -72,7 +72,7 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
 
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiDBs",
                    "[sidb-cluster-hierarchy]", sidb_cell_clk_lyt_siqad,
-                   sidb::primitives::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 

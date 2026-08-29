@@ -6,20 +6,20 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/bounding_box.hpp>                       // bounding box
-#include <fiction/physical_design/apply_gate_library.hpp>         // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                      // SMT-based physical design of FCN layouts
-#include <fiction/synthesis/technology_mapping_library.hpp>       // pre-defined gate types for technology mapping
-#include <fiction/technology/fcn/area.hpp>                        // area requirement calculations
-#include <fiction/technology/fcn/cell_technologies.hpp>           // cell implementations
-#include <fiction/technology/sidb/bestagon_library.hpp>           // a pre-defined SiDB gate library
-#include <fiction/technology/sidb/io/read_sqd_layout.hpp>         // reader for SiDB layouts including surface scan data
-#include <fiction/technology/sidb/io/read_surface_defects.hpp>    // reader for simulated SiDB surfaces
-#include <fiction/technology/sidb/io/write_sqd_layout.hpp>        // writer for SiQAD files (physical simulation)
-#include <fiction/technology/sidb/model/defect.hpp>               // SiDB defect classes
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>  // H-Si(100) 2x1 surface model
-#include <fiction/technology/sidb/surface_analysis.hpp>           // SiDB surface analysis
-#include <fiction/types.hpp>                                      // pre-defined types suitable for the FCN domain
+#include <fiction/layouts/bounding_box.hpp>                     // bounding box
+#include <fiction/physical_design/apply_gate_library.hpp>       // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                    // SMT-based physical design of FCN layouts
+#include <fiction/synthesis/technology_mapping_library.hpp>     // pre-defined gate types for technology mapping
+#include <fiction/technology/fcn/area.hpp>                      // area requirement calculations
+#include <fiction/technology/fcn/cell_technologies.hpp>         // cell implementations
+#include <fiction/technology/sidb/bestagon_library.hpp>         // a pre-defined SiDB gate library
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>       // reader for SiDB layouts including surface scan data
+#include <fiction/technology/sidb/io/read_surface_defects.hpp>  // reader for simulated SiDB surfaces
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>      // writer for SiQAD files (physical simulation)
+#include <fiction/technology/sidb/model/defect.hpp>             // SiDB defect classes
+#include <fiction/technology/sidb/surface_analysis.hpp>         // SiDB surface analysis
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>  // H-Si(100) 2x1 surface model
+#include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
@@ -115,7 +115,7 @@ int main()  // NOLINT
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    const fiction::sidb::primitives::defect_surface_params surface_params{
+    const fiction::sidb::surfaces::defect_surface_params surface_params{
         std::unordered_set<fiction::sidb::model::defect_type>{fiction::sidb::model::defect_type::DB}};
 
     // fiction::sidb_defect_surface<cell_lyt> surface_lattice{surface_params};
@@ -186,8 +186,8 @@ int main()  // NOLINT
 
             // apply gate library
             const auto dot_accurate_layout = fiction::physical_design::apply_gate_library_to_defective_surface<
-                fiction::sidb::primitives::defect_surface<cell_lyt>, fiction::sidb::bestagon_library>(
-                *gate_level_layout, surface_lattice);
+                fiction::sidb::surfaces::defect_surface<cell_lyt>, fiction::sidb::bestagon_library>(*gate_level_layout,
+                                                                                                    surface_lattice);
 
             // determine bounding box
             const auto bb = fiction::layouts::bounding_box_2d<cell_lyt>(dot_accurate_layout);

@@ -9,10 +9,10 @@
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;
@@ -36,7 +36,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    sidb::primitives::charge_distribution_surface cds{lyt, sim_params};
+    sidb::surfaces::charge_distribution_surface cds{lyt, sim_params};
 
     sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
@@ -119,7 +119,7 @@ TEST_CASE(
     sidb::model::simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    sidb::primitives::charge_distribution_surface cds{bestagon_and, sim_params};
+    sidb::surfaces::charge_distribution_surface cds{bestagon_and, sim_params};
 
     sidb::simulation::logic::operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;

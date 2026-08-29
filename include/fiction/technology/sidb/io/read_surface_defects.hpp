@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
 
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/primitives/defect_surface.hpp"
+#include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <array>
@@ -92,11 +92,11 @@ class read_sidb_surface_defects_impl
 {
   public:
     explicit read_sidb_surface_defects_impl(std::istream& s, const std::string_view& name) :
-            lyt{sidb::primitives::defect_surface{Lyt{{}, name.data()}}},
+            lyt{sidb::surfaces::defect_surface{Lyt{{}, name.data()}}},
             defect_matrix{std::istreambuf_iterator<char>(s), {}}  // read the stream into a string to perform regex
     {}
 
-    sidb::primitives::defect_surface<Lyt> run()
+    sidb::surfaces::defect_surface<Lyt> run()
     {
         // each match is one row
         const std::vector<std::smatch> matrix_matches{
@@ -154,7 +154,7 @@ class read_sidb_surface_defects_impl
     }
 
   private:
-    sidb::primitives::defect_surface<Lyt> lyt;
+    sidb::surfaces::defect_surface<Lyt> lyt;
 
     const std::string defect_matrix;
 
@@ -179,7 +179,7 @@ class read_sidb_surface_defects_impl
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-sidb::primitives::defect_surface<Lyt> read_surface_defects(std::istream& is, const std::string_view& name = "")
+sidb::surfaces::defect_surface<Lyt> read_surface_defects(std::istream& is, const std::string_view& name = "")
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -204,8 +204,8 @@ sidb::primitives::defect_surface<Lyt> read_surface_defects(std::istream& is, con
  * @param name The name to give to the generated layout.
  */
 template <typename Lyt>
-sidb::primitives::defect_surface<Lyt> read_surface_defects(const std::string_view& filename,
-                                                           const std::string_view& name = "")
+sidb::surfaces::defect_surface<Lyt> read_surface_defects(const std::string_view& filename,
+                                                         const std::string_view& name = "")
 {
     std::ifstream is{std::string{filename}, std::ifstream::in};
 

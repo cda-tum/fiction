@@ -1,9 +1,9 @@
-#ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP
-#define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_ORIENTATIONS_HPP
+#define FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_ORIENTATIONS_HPP
 
 #include <utility>
 
-namespace fiction::sidb::primitives
+namespace fiction::sidb::surfaces
 {
 /**
  * H-Si(100)-2x1 surface.
@@ -48,5 +48,5 @@ struct lattice_111
     lattice_111() = delete;
 };
 
-}  // namespace fiction::sidb::primitives
+}  // namespace fiction::sidb::surfaces
 #endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP

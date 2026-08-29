@@ -7,7 +7,7 @@
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <cstddef>
@@ -34,7 +34,7 @@ template <typename Lyt>
     // The charge layout is initialized with negatively charged SiDBs. Therefore, the local electrostatic potentials are
     // maximal. In this extreme case, if the banding is not sufficient for any SiDB to be positively charged, it will
     // not be for any other charge distribution. Therefore, no positively charged SiDBs can occur.
-    sidb::primitives::charge_distribution_surface<Lyt> charge_lyt{lyt};
+    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
     charge_lyt.assign_physical_parameters(sim_params);
     charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
 
@@ -42,8 +42,8 @@ template <typename Lyt>
     {
         // access does not need to be checked since 0 <= i < lyt.num_cells()
         if (-*charge_lyt.get_local_internal_potential_by_index(i) >
-            charge_lyt.get_effective_charge_transition_thresholds(i)[static_cast<std::size_t>(
-                sidb::primitives::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
+            charge_lyt.get_effective_charge_transition_thresholds(
+                i)[static_cast<std::size_t>(sidb::surfaces::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
         {
             return true;
         }

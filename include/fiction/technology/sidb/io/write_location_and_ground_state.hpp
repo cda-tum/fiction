@@ -7,9 +7,9 @@
 
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/primitives/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
 
@@ -46,14 +46,14 @@ class write_location_and_ground_state_impl
                                                     sim_result.charge_distributions.cend()),
             6);
 
-        std::vector<sidb::primitives::charge_distribution_surface<Lyt>> ground_state_layouts{};
+        std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> ground_state_layouts{};
         for (const auto& valid_layout : sim_result.charge_distributions)
         {
             if (std::fabs(fiction::utils::math::round_to_n_decimal_places(
                               valid_layout.get_electrostatic_potential_energy(), 6) -
                           min_energy) < fcn::constants::ERROR_MARGIN)
             {
-                ground_state_layouts.emplace_back(sidb::primitives::charge_distribution_surface<Lyt>{valid_layout});
+                ground_state_layouts.emplace_back(sidb::surfaces::charge_distribution_surface<Lyt>{valid_layout});
             }
         }
 

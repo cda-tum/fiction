@@ -12,12 +12,12 @@
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
-#include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
-#include <fiction/technology/sidb/primitives/defect_surface.hpp>
-#include <fiction/technology/sidb/primitives/lattice.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -59,8 +59,8 @@ TEMPLATE_TEST_CASE("Single SiDB QuickExact simulation", "[quickexact]", (sidb_10
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one negatively charge defect (default initialization) in proximity",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -78,8 +78,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one negatively charge defect (changed lambda_tf) in proximity",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -98,8 +98,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one negatively charge defect (changed epsilon_r) in proximity",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -120,9 +120,9 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "four SiDBs QuickExact simulation with one negatively charge defect (changed mu_minus) in proximity",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>,
-    sidb::primitives::defect_surface<sidb::primitives::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>>)
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>,
+    sidb::surfaces::defect_surface<sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>>)
 {
     TestType lyt{};
     lyt.assign_cell_type({-2, 0, 1}, TestType::cell_type::NORMAL);
@@ -152,8 +152,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one highly negatively charge defect in proximity", "[quickexact]",
-    (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -173,8 +173,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with one highly negatively charge defect in proximity but with high screening",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({1, 3, 0}, TestType::cell_type::NORMAL);
@@ -194,8 +194,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Single SiDB QuickExact simulation with two highly negatively and oppositely charged defects in proximity",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
@@ -383,7 +383,7 @@ TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[
 
     const sidb::model::simulation_parameters params{2, -0.32};
 
-    sidb::primitives::charge_distribution_surface charge_layout_kon{lyt, params};
+    sidb::surfaces::charge_distribution_surface charge_layout_kon{lyt, params};
 
     charge_layout_kon.assign_charge_state({0, 0, 0}, sidb::model::charge_state::NEGATIVE);
     charge_layout_kon.assign_charge_state({5, 0, 0}, sidb::model::charge_state::NEUTRAL);
@@ -835,8 +835,8 @@ TEMPLATE_TEST_CASE("QuickExact simulation of four SiDBs (far away)", "[quickexac
 
 TEMPLATE_TEST_CASE(
     "QuickExact with one SiDB and one negatively charged defect in proximity", "[quickexact]",
-    (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -856,8 +856,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation  of four SiDBs (far away) with one negatively charged defects in proximity", "[quickexact]",
-    (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -883,8 +883,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of four SiDBs (far away) with two negatively charged defects in proximity", "[quickexact]",
-    (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -915,8 +915,8 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "QuickExact simulation of four SiDBs (far away) with one negatively and positively charged defect in proximity",
-    "[quickexact]", (sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>),
-    (sidb::primitives::charge_distribution_surface<sidb::primitives::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
+    "[quickexact]", (sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>),
+    (sidb::surfaces::charge_distribution_surface<sidb::surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
 
@@ -1549,7 +1549,7 @@ TEMPLATE_TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of a 3 DB Wire", "[quickexact]", (sidb_100_cell_clk_lyt_siqad),
-                   (sidb::primitives::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
+                   (sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>))
 {
     TestType lyt{};
 
@@ -1826,9 +1826,9 @@ TEMPLATE_TEST_CASE(
 }
 
 TEMPLATE_TEST_CASE("QuickExact simulation of positively charged SiDBs", "[quickexact]",
-                   (sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>),
-                   (sidb::primitives::charge_distribution_surface<
-                       sidb::primitives::lattice<sidb::primitives::lattice_100, sidb_cell_clk_lyt_siqad>>))
+                   (sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>),
+                   (sidb::surfaces::charge_distribution_surface<
+                       sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>>))
 {
     TestType lyt{};
     lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
