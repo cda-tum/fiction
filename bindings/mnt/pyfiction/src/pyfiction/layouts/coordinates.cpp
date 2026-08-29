@@ -248,9 +248,9 @@ void coordinate_utility(nanobind::module_& m)
     m.def("to_cube_coord", &fiction::layouts::coords::from_siqad<py_cube_coordinate>, py::arg("coord"),
           DOC(fiction_layouts_coords_from_siqad));
 
-    m.def("to_siqad", &fiction::layouts::coords::to_siqad<py_offset_coordinate>, py::arg("coord"),
+    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad<py_offset_coordinate>, py::arg("coord"),
           DOC(fiction_layouts_coords_to_siqad));
-    m.def("to_siqad", &fiction::layouts::coords::to_siqad<py_cube_coordinate>, py::arg("coord"),
+    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad<py_cube_coordinate>, py::arg("coord"),
           DOC(fiction_layouts_coords_to_siqad));
 }
 
