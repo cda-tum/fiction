@@ -90,8 +90,22 @@ Changed
       ``fiction::layouts::coords::offset``, and likewise for ``cube`` and ``siqad``
 
   *fiction* is header-only, so an include path is public API. This is a clean break: no
-  forwarding headers are left behind and no deprecated ``using`` declarations. ``UPGRADING.md``
-  lists every moved header and every renamed symbol.
+  forwarding headers are left behind and no deprecated ``using`` declarations.
+  `UPGRADING.md <https://github.com/cda-tum/fiction/blob/main/UPGRADING.md>`_ is the migration
+  guide: it lists every moved header, every renamed symbol, every renamed struct member and
+  member function, and the three headers that were split rather than moved.
+- **Breaking:** ``quickexact_params``, ``quicksim_params``, ``clustercomplete_params``,
+  ``is_operational_params``, ``critical_temperature_params``,
+  ``physical_population_stability_params``, ``generate_random_sidb_layout_params``,
+  ``ground_state_space_params``, ``sidb_simulation_result``, and ``charge_distribution_surface``
+  renamed their ``simulation_parameters`` member to ``sim_params``, which is what several of them
+  already called it. ``is_sidb_gate_design_impossible_params`` spelled it ``simulation_params``
+  and is unified to ``sim_params`` too. The Python attribute keeps the name
+  ``simulation_parameters``
+- **Breaking:** Three member functions lose the prefix their class's namespace now carries:
+  ``charge_distribution_surface::set_sidb_simulation_engine`` becomes ``set_simulation_engine``,
+  and ``defect_surface::assign_sidb_defect`` and ``get_sidb_defect`` become ``assign_defect`` and
+  ``get_defect``
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each
