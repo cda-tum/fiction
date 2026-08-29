@@ -51,6 +51,10 @@ FILE_HEADER = re.compile(r"^\+\+\+ b/(.+)$")
 HUNK_HEADER = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@")
 LOCATED = re.compile(r"^\S.*?:\d+:\d+: (?:warning|error|note):")
 UNLOCATED = re.compile(r"^(?:warning|error): ")
+# stderr lines that mean clang-tidy never linted the file, rather than found nothing in it
+UNUSABLE = re.compile(
+    r"Compile command not found|unable to handle compilation|Error while processing|compilation database"
+)
 
 
 def parse_diff(diff: str) -> dict[str, list[tuple[int, int]]]:
@@ -77,7 +81,9 @@ def parse_diff(diff: str) -> dict[str, list[tuple[int, int]]]:
             else:
                 ranges.append((line_number, line_number))
             line_number += 1
-        elif not line.startswith("-"):
+        # `\ No newline at end of file` is a note about the neighbouring line, not a line of
+        # its own. Counting it shifts every range after it in the hunk down by one
+        elif not line.startswith(("-", "\\")):
             line_number += 1
     return added
 
@@ -122,13 +128,19 @@ def run_one(
     disabled: list[str],
     path: str,
     ranges: list[tuple[int, int]],
-) -> tuple[str, str]:
+) -> tuple[str, str, str]:
     """Lint one file, reporting only what falls inside the ranges the diff added.
 
     Returns:
-        The path and whatever Clang-Tidy wrote to stdout for it.
+        The path, whatever Clang-Tidy wrote to stdout for it, and the reason it could not run
+        at all, empty when it ran.
     """
-    line_filter = json.dumps([{"name": Path(path).name, "lines": [[a, b] for a, b in ranges]}])
+    # `name` is matched as a suffix of the diagnostic's file name, not compared to its base
+    # name, so the repository-relative path is what scopes the filter to one file. A bare
+    # base name would admit every header that ends the same way -- `include/fiction/traits.hpp`
+    # and the `mockturtle/traits.hpp` it includes both end in `traits.hpp` -- and report the
+    # other one's diagnostics against this one's line numbers
+    line_filter = json.dumps([{"name": path, "lines": [[a, b] for a, b in ranges]}])
     argv = [clang_tidy, "-p", build_dir, f"--line-filter={line_filter}", "--quiet"]
     if disabled:
         # `--checks` layers on top of the config file rather than replacing it
@@ -141,14 +153,42 @@ def run_one(
         text=True,
         check=False,
     )
-    return path, located_only(completed.stdout)
+    # Diagnostics go to both streams, so stdout carries everything worth reporting. What only
+    # ever reaches stderr is the run failing outright -- no entry in the compile database, a
+    # compilation the driver cannot handle, a crash -- and that leaves stdout empty, which is
+    # indistinguishable from a clean file unless it is looked for
+    stderr = completed.stderr
+    unusable = next((line for line in stderr.splitlines() if UNUSABLE.search(line)), "")
+    return path, located_only(completed.stdout), unusable
+
+
+def write_summary(linted: int, findings: dict[str, str], unusable: dict[str, str]) -> None:
+    """Append what the run found to the job's step summary, when there is one to append to."""
+    summary = os.environ.get("GITHUB_STEP_SUMMARY")
+    if not summary:
+        return
+    with Path(summary).open("a", encoding="utf-8") as handle:
+        if unusable:
+            handle.write(f"### Clang-Tidy could not lint {len(unusable)} of {linted} files\n\n")
+            handle.writelines(f"- `{path}`: {unusable[path]}\n" for path in sorted(unusable))
+            handle.write("\n")
+        if findings:
+            total = sum(len(re.findall(r"(?:warning|error):", text)) for text in findings.values())
+            handle.write(f"### Clang-Tidy reported {total} diagnostics in {len(findings)} files\n\n")
+            handle.writelines(
+                f"<details><summary>{path}</summary>\n\n```\n{findings[path]}\n```\n\n</details>\n"
+                for path in sorted(findings)
+            )
+        elif not unusable:
+            handle.write(f"Clang-Tidy found nothing on the changed lines of {linted} files.\n")
 
 
 def main() -> int:
     """Lint the diff on stdin.
 
     Returns:
-        ``0`` when the changed lines are clean, ``1`` when any diagnostic survives.
+        ``0`` when the changed lines are clean, ``1`` when any diagnostic survives or any file
+        could not be linted at all.
     """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build-dir", required=True, help="directory holding compile_commands.json")
@@ -171,6 +211,7 @@ def main() -> int:
     sys.stderr.write(f"Clang-Tidy over the changed lines of {len(files)} files\n")
 
     findings: dict[str, str] = {}
+    unusable: dict[str, str] = {}
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
         futures = [
             pool.submit(
@@ -179,9 +220,11 @@ def main() -> int:
             for path in files
         ]
         for future in concurrent.futures.as_completed(futures):
-            path, output = future.result()
+            path, output, failure = future.result()
             if "warning:" in output or "error:" in output:
                 findings[path] = output
+            if failure:
+                unusable[path] = failure
 
     # A clang-tidy that cannot find its builtin headers still runs and still reports, it just
     # reports against libc and the intrinsics headers instead of against the code. That has
@@ -196,20 +239,18 @@ def main() -> int:
             "resource directory holding its builtin headers come from the same release.\n"
         )
 
-    summary = os.environ.get("GITHUB_STEP_SUMMARY")
-    if summary:
-        with Path(summary).open("a", encoding="utf-8") as handle:
-            if findings:
-                total = sum(len(re.findall(r"(?:warning|error):", text)) for text in findings.values())
-                handle.write(f"### Clang-Tidy reported {total} diagnostics in {len(findings)} files\n\n")
-                for path in sorted(findings):
-                    handle.write(f"<details><summary>{path}</summary>\n\n```\n{findings[path]}\n```\n\n</details>\n")
-            else:
-                handle.write(f"Clang-Tidy found nothing on the changed lines of {len(files)} files.\n")
+    # A file clang-tidy could not lint reports nothing, which reads exactly like a clean one.
+    # Fail on it rather than let the check go green over files it never looked at.
+    if unusable:
+        sys.stderr.write(f"\nclang-tidy could not lint {len(unusable)} of {len(files)} files:\n")
+        for path in sorted(unusable):
+            sys.stderr.write(f"  {path}: {unusable[path]}\n")
+
+    write_summary(len(files), findings, unusable)
 
     for path in sorted(findings):
         sys.stderr.write(findings[path])
-    return 1 if findings else 0
+    return 1 if findings or unusable else 0
 
 
 if __name__ == "__main__":
