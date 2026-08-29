@@ -105,10 +105,31 @@ jobs:
       # used, which is the safe direction for a temporary, deliberately narrowed run.
       - name: Run clang-tidy over the changed lines
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # One per event shape that reaches this workflow. `pull_request` is the only one
+          # `cpp-linter-action` used to handle by itself, but `ci.yml` also calls in on
+          # `push`, `merge_group`, and `workflow_dispatch`, and on those the pull request
+          # context is empty.
+          BASE_SHA: >-
+            ${{ github.event.pull_request.base.sha
+            || github.event.merge_group.base_sha
+            || github.event.before }}
         # `fetch-depth: 0` above is what makes the base commit available to diff against
         run: |
           set -euo pipefail
+          # `git diff` answers an unresolvable revision with a message on stderr and exit 0,
+          # so an empty or stale BASE_SHA would hand the linter an empty diff and pass the
+          # check having linted nothing. Resolve it first and fail loudly when it does not.
+          # `workflow_dispatch` carries no base of any kind; the previous commit is the only
+          # honest answer there, and the all-zero SHA `github.event.before` reports for a new
+          # branch means the same thing.
+          if [[ -z "${BASE_SHA}" || "${BASE_SHA}" =~ ^0+$ ]]; then
+            BASE_SHA="HEAD^"
+          fi
+          if ! BASE_SHA="$(git rev-parse --verify --quiet "${BASE_SHA}^{commit}")"; then
+            echo "::error::cannot resolve a base commit to diff against on ${GITHUB_EVENT_NAME}"
+            exit 1
+          fi
+          echo "Diffing against ${BASE_SHA}"
           git diff -U0 "${BASE_SHA}...HEAD" -- include/fiction | python3 .github/scripts/clang_tidy_changed_lines.py \
             --build-dir build-ci-tidy \
             --clang-tidy clang-tidy-18 \
