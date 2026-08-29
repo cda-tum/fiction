@@ -52,7 +52,7 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
 
-    const is_operational_params is_op_params{sidb_simulation_parameters{2, -0.32, 5.6, 5.0}};
+    const is_operational_params is_op_params{.simulation_parameters = sidb_simulation_parameters{2, -0.32, 5.6, 5.0}};
 
     // for this experiment we use a stray SiDB defect
     const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
