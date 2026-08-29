@@ -531,11 +531,11 @@ static auto twoddwave_hex(const num_clks& n = num_clks::FOUR) noexcept
     }
 }
 /**
- * Returns the USE_NAME clocking as defined in \"USE_NAME: A Universal, Scalable, and Efficient Clocking Scheme for
+ * Returns the USE clocking as defined in \"USE: A Universal, Scalable, and Efficient Clocking Scheme for
  * QCA\" by Caio Araujo T. Campos, Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD 2015.
  *
  * @tparam Lyt Clocked layout type.
- * @return USE_NAME clocking scheme.
+ * @return USE clocking scheme.
  */
 template <typename Lyt>
 static auto use() noexcept
@@ -559,12 +559,12 @@ static auto use() noexcept
     // clang-format on
 }
 /**
- * Returns the RES_NAME clocking as defined in \"An efficient clocking scheme for quantum-dot cellular automata\" by
+ * Returns the RES clocking as defined in \"An efficient clocking scheme for quantum-dot cellular automata\" by
  * Mrinal Goswami, Anindan Mondal, Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in International Journal
  * of Electronics Letters 2019.
  *
  * @tparam Lyt Clocked layout type.
- * @return RES_NAME clocking scheme.
+ * @return RES clocking scheme.
  */
 template <typename Lyt>
 static auto res() noexcept
@@ -588,12 +588,12 @@ static auto res() noexcept
     // clang-format on
 }
 /**
- * Returns the ESR_NAME clocking as defined in \"An efficient, scalable, regular clocking scheme based on quantum dot
+ * Returns the ESR clocking as defined in \"An efficient, scalable, regular clocking scheme based on quantum dot
  * cellular automata\" by Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar Saha, and Bibhash Sen in
  * Analog Integrated Circuits and Signal Processing 2021.
  *
  * @tparam Lyt Clocked layout type.
- * @return ESR_NAME clocking scheme.
+ * @return ESR clocking scheme.
  */
 template <typename Lyt>
 static auto esr() noexcept
@@ -617,12 +617,12 @@ static auto esr() noexcept
     // clang-format on
 }
 /**
- * Returns the CFE_NAME clocking as defined in \"CFE_NAME: a convenient, flexible, and efficient clocking scheme for
+ * Returns the CFE clocking as defined in \"CFE: a convenient, flexible, and efficient clocking scheme for
  * quantum-dot cellular automata\" by Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang Zhang in IET
  * Circuits, Devices & Systems 2020.
  *
  * @tparam Lyt Clocked layout type.
- * @return CFE_NAME clocking scheme.
+ * @return CFE clocking scheme.
  */
 template <typename Lyt>
 static auto cfe() noexcept
@@ -674,12 +674,12 @@ static auto ripple() noexcept
     // clang-format on
 }
 /**
- * Returns the SRS_NAME clocking as defined in \"Simple, robust and systematic QCA clocking scheme for area-efficient
+ * Returns the SRS clocking as defined in \"Simple, robust and systematic QCA clocking scheme for area-efficient
  * nanocircuits\" by Mrinal Goswami, Tonmoy Jyoti Sharma, and Arpita Nath Boruah in International Journal of Electronics
  * Letters 2025.
  *
  * @tparam Lyt Clocked layout type.
- * @return SRS_NAME clocking scheme.
+ * @return SRS clocking scheme.
  */
 template <typename Lyt>
 static auto srs() noexcept
@@ -703,11 +703,11 @@ static auto srs() noexcept
     // clang-format on
 }
 /**
- * Returns the BANCS_NAME clocking as defined in \"BANCS_NAME: Bidirectional Alternating Nanomagnetic Clocking Scheme\"
+ * Returns the BANCS clocking as defined in \"BANCS: Bidirectional Alternating Nanomagnetic Clocking Scheme\"
  * by Ruan Evangelista Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI 2018.
  *
  * @tparam Lyt Clocked layout type.
- * @return BANCS_NAME clocking scheme.
+ * @return BANCS clocking scheme.
  */
 template <typename Lyt>
 static auto bancs() noexcept
@@ -748,8 +748,8 @@ std::shared_ptr<scheme<clock_zone<Lyt>>> ptr(scheme<clock_zone<Lyt>>&& scm) noex
 /**
  * Checks whether a given clocking scheme is registered as a cycle-free one. These currently are
  *
- * - COLUMNAR_NAME
- * - ROW_NAME
+ * - COLUMNAR
+ * - ROW
  * - 2DDWAVE
  * - 2DDWAVEHEX
  *
