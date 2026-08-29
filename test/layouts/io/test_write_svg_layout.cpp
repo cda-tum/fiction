@@ -624,10 +624,10 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 {
     TestType layout{{4, 4}};
 
-    layout.assign_cell_type({0, 0}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 3}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 3}, sidb::sidb_technology::cell_type::NORMAL);
 
     SECTION("cell-level layout")
     {
@@ -745,10 +745,10 @@ TEMPLATE_TEST_CASE(
 {
     TestType layout{{4, 4}};
 
-    layout.assign_cell_type({0, 0}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0, 1}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 1, 1}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 1, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
     SECTION("cell-level layout")
     {
@@ -845,10 +845,10 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
 {
     TestType layout{{4, 4}};
 
-    layout.assign_cell_type({0, 0}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb::technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 3}, sidb::technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 3}, sidb::sidb_technology::cell_type::NORMAL);
 
     SECTION("cell-level layout")
     {
@@ -895,8 +895,8 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
 TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-svg]")
 {
     mol_qca_cell_clk_lyt layout{{0, 0, 1}, "unsupported molQCA crossing"};
-    layout.assign_cell_type({0, 0, 0}, qca::mol_technology::cell_type::NORMAL1);
-    layout.assign_cell_type({0, 0, 1}, qca::mol_technology::cell_type::NORMAL2);
+    layout.assign_cell_type({0, 0, 0}, qca::mol_qca_technology::cell_type::NORMAL1);
+    layout.assign_cell_type({0, 0, 1}, qca::mol_qca_technology::cell_type::NORMAL2);
 
     std::ostringstream                             layout_stream{};
     const layouts::io::write_qca_layout_svg_params params{.simple = true};
@@ -908,14 +908,14 @@ TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-s
 TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
 {
     mol_qca_cell_clk_lyt layout{{6, 0, 1}, "molQCA SVG"};
-    layout.assign_cell_type({0, 0, 0}, qca::mol_technology::cell_type::NORMAL1);
-    layout.assign_cell_type({1, 0, 0}, qca::mol_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, qca::mol_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({3, 0, 0}, qca::mol_technology::cell_type::CONST_0);
-    layout.assign_cell_type({4, 0, 0}, qca::mol_technology::cell_type::CONST_1);
-    layout.assign_cell_type({5, 0, 1}, qca::mol_technology::cell_type::NORMAL4);
-    layout.assign_cell_mode({5, 0, 1}, qca::mol_technology::cell_mode::VERTICAL);
-    layout.assign_cell_type({6, 0, 1}, qca::mol_technology::cell_type::NORMAL2);
+    layout.assign_cell_type({0, 0, 0}, qca::mol_qca_technology::cell_type::NORMAL1);
+    layout.assign_cell_type({1, 0, 0}, qca::mol_qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, qca::mol_qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({3, 0, 0}, qca::mol_qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({4, 0, 0}, qca::mol_qca_technology::cell_type::CONST_1);
+    layout.assign_cell_type({5, 0, 1}, qca::mol_qca_technology::cell_type::NORMAL4);
+    layout.assign_cell_mode({5, 0, 1}, qca::mol_qca_technology::cell_mode::VERTICAL);
+    layout.assign_cell_type({6, 0, 1}, qca::mol_qca_technology::cell_type::NORMAL2);
 
     SECTION("detailed mode")
     {
@@ -970,8 +970,8 @@ TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]"
 TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-qca-layout-svg]")
 {
     qca_cell_clk_lyt layout{{1, 0}, "QCA constant cells"};
-    layout.assign_cell_type({0, 0}, qca::technology::cell_type::CONST_0);
-    layout.assign_cell_type({1, 0}, qca::technology::cell_type::CONST_1);
+    layout.assign_cell_type({0, 0}, qca::qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({1, 0}, qca::qca_technology::cell_type::CONST_1);
 
     std::ostringstream                             layout_stream{};
     const layouts::io::write_qca_layout_svg_params params{.simple = true};
