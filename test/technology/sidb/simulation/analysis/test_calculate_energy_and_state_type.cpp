@@ -7,7 +7,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -47,7 +47,7 @@ TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
     const auto energy_state_with_state_info =
         sidb::simulation::analysis::calculate_energy_and_state_type_with_kinks_accepted(
             energy_distribution, simulated_charge_distributions, output_bdls,
-            std::vector<tt>{networks::utils::create_and_tt()}, 1);
+            std::vector<tt>{synthesis::create_and_tt()}, 1);
 
     REQUIRE(energy_state_with_state_info.size() == 5);
 

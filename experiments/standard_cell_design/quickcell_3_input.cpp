@@ -4,7 +4,7 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -49,17 +49,17 @@ int main()  // NOLINT
     };
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 11>{
-        {{std::vector<tt>{networks::utils::create_and3_tt()}, "and3"},
-         {std::vector<tt>{networks::utils::create_xor_and_tt()}, "xor_and"},
-         {std::vector<tt>{networks::utils::create_or_and_tt()}, "or_and"},
-         {std::vector<tt>{networks::utils::create_onehot_tt()}, "onehot"},
-         {std::vector<tt>{networks::utils::create_maj_tt()}, "maj"},
-         {std::vector<tt>{networks::utils::create_gamble_tt()}, "gamble"},
-         {std::vector<tt>{networks::utils::create_dot_tt()}, "dot"},
-         {std::vector<tt>{networks::utils::create_ite_tt()}, "ite"},
-         {std::vector<tt>{networks::utils::create_and_xor_tt()}, "and_xor"},
-         {std::vector<tt>{networks::utils::create_xor3_tt()}, "xor3"},
-         {std::vector<tt>{networks::utils::create_ite_tt()}, "21_mux"}}};
+        {{std::vector<tt>{synthesis::create_and3_tt()}, "and3"},
+         {std::vector<tt>{synthesis::create_xor_and_tt()}, "xor_and"},
+         {std::vector<tt>{synthesis::create_or_and_tt()}, "or_and"},
+         {std::vector<tt>{synthesis::create_onehot_tt()}, "onehot"},
+         {std::vector<tt>{synthesis::create_maj_tt()}, "maj"},
+         {std::vector<tt>{synthesis::create_gamble_tt()}, "gamble"},
+         {std::vector<tt>{synthesis::create_dot_tt()}, "dot"},
+         {std::vector<tt>{synthesis::create_ite_tt()}, "ite"},
+         {std::vector<tt>{synthesis::create_and_xor_tt()}, "and_xor"},
+         {std::vector<tt>{synthesis::create_xor3_tt()}, "xor3"},
+         {std::vector<tt>{synthesis::create_ite_tt()}, "21_mux"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 

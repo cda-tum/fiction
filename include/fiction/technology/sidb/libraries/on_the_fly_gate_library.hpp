@@ -7,7 +7,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/networks/utils/truth_table_utils.hpp"
+#include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -208,11 +208,11 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
                                     center_cell, absolute_cell);
 
                                 return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                                    skeleton_with_defects, networks::utils::create_fan_out_tt(), params, p, t);
+                                    skeleton_with_defects, synthesis::create_fan_out_tt(), params, p, t);
                             }
                         }
-                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                            skeleton, networks::utils::create_fan_out_tt(), params, p, t);
+                        return design_gate<CellLyt, tt, CellLyt, GateLyt>(skeleton, synthesis::create_fan_out_tt(),
+                                                                          params, p, t);
                     }
                 }
             }
@@ -242,14 +242,13 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
 
                                         if (is_predefined_bestagon_gate_applicable(
                                                 cell_list_to_cell_level_layout<CellLyt>(DOUBLE_WIRE),
-                                                skeleton_with_defects, networks::utils::create_double_wire_tt(),
-                                                params))
+                                                skeleton_with_defects, synthesis::create_double_wire_tt(), params))
                                         {
                                             return DOUBLE_WIRE;
                                         }
 
                                         return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                            skeleton_with_defects, networks::utils::create_double_wire_tt(),
+                                            skeleton_with_defects, synthesis::create_double_wire_tt(),
                                             complex_gate_param, p, t);
                                     }
                                 }
@@ -261,7 +260,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
                                 }
 
                                 return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                                    skeleton, networks::utils::create_double_wire_tt(), complex_gate_param, p, t);
+                                    skeleton, synthesis::create_double_wire_tt(), complex_gate_param, p, t);
                             }
 
                             if constexpr (is_sidb_defect_surface_v<CellLyt>)
@@ -274,14 +273,14 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
 
                                     if (is_predefined_bestagon_gate_applicable(
                                             cell_list_to_cell_level_layout<CellLyt>(CROSSING), skeleton_with_defects,
-                                            networks::utils::create_crossing_wire_tt(), params))
+                                            synthesis::create_crossing_wire_tt(), params))
                                     {
                                         return CROSSING;
                                     }
 
                                     return design_gate<decltype(skeleton_with_defects), tt, CellLyt, GateLyt>(
-                                        skeleton_with_defects, networks::utils::create_crossing_wire_tt(),
-                                        complex_gate_param, p, t);
+                                        skeleton_with_defects, synthesis::create_crossing_wire_tt(), complex_gate_param,
+                                        p, t);
                                 }
                             }
 
@@ -292,7 +291,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
                             }
 
                             return design_gate<CellLyt, tt, CellLyt, GateLyt>(
-                                skeleton, networks::utils::create_crossing_wire_tt(), complex_gate_param, p, t);
+                                skeleton, synthesis::create_crossing_wire_tt(), complex_gate_param, p, t);
                         }
 
                         const auto cell_list = ONE_IN_ONE_OUT_MAP.at(p);
@@ -709,13 +708,13 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
         const auto params = sidb::generators::is_gate_design_impossible_params{
             parameters.design_gate_params.operational_params.sim_params};
 
-        if (spec == networks::utils::create_crossing_wire_tt() || spec == networks::utils::create_double_wire_tt())
+        if (spec == synthesis::create_crossing_wire_tt() || spec == synthesis::create_double_wire_tt())
         {
             if constexpr (is_sidb_defect_surface_v<LytSkeleton>)
             {
                 if (sidb::generators::is_gate_design_impossible(skeleton, spec, params))
                 {
-                    throw gate_design_exception<tt, GateLyt>(tile, networks::utils::create_id_tt(), p);
+                    throw gate_design_exception<tt, GateLyt>(tile, synthesis::create_id_tt(), p);
                 }
             }
 
@@ -724,7 +723,7 @@ class on_the_fly_gate_library : public fcn::gate_library<sidb::technology, 60, 4
 
             if (found_gate_layouts.empty())
             {
-                throw gate_design_exception<tt, GateLyt>(tile, networks::utils::create_id_tt(), p);
+                throw gate_design_exception<tt, GateLyt>(tile, synthesis::create_id_tt(), p);
             }
 
             return cell_list_to_gate<char>(cell_level_layout_to_list(found_gate_layouts.front()));

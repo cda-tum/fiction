@@ -116,6 +116,13 @@ Changed
   ``is_linear_scheme`` becomes ``clocking::is_linear``. ``clocking_scheme.hpp`` keeps its
   path, the scheme name strings are unchanged, and the ``clocked_layout`` members that
   mention clocking keep their names
+- **Breaking:** The truth table helpers move from ``networks`` to ``synthesis``, where the gate
+  libraries and technology mapping that specify functions with them live:
+  ``fiction::create_and_tt`` becomes ``fiction::synthesis::create_and_tt``, and
+  ``fiction::tt_reader`` becomes ``fiction::synthesis::io::tt_reader``. The header sheds its
+  ``_utils`` suffix to match its siblings, so ``fiction/utils/truth_table_utils.hpp`` is now
+  ``fiction/synthesis/truth_tables.hpp``. Neither header depends on a network; both include only
+  ``kitty`` and the standard library
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each

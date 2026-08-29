@@ -6,7 +6,7 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/defects.hpp>
@@ -75,16 +75,16 @@ int main()  // NOLINT
     const std::size_t maximum_number_of_canvas_sidbs = 6;
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{networks::utils::create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{networks::utils::create_nand_tt()}),
-        std::make_pair("nor", std::vector<tt>{networks::utils::create_nor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{networks::utils::create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()}),
-        std::make_pair("wire", std::vector<tt>{networks::utils::create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{networks::utils::create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{networks::utils::create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{networks::utils::create_not_tt()})};
+        std::make_pair("and", std::vector<tt>{synthesis::create_and_tt()}),
+        std::make_pair("nand", std::vector<tt>{synthesis::create_nand_tt()}),
+        std::make_pair("nor", std::vector<tt>{synthesis::create_nor_tt()}),
+        std::make_pair("xnor", std::vector<tt>{synthesis::create_xnor_tt()}),
+        std::make_pair("xor", std::vector<tt>{synthesis::create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{synthesis::create_or_tt()}),
+        std::make_pair("wire", std::vector<tt>{synthesis::create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<tt>{synthesis::create_id_tt()}),
+        std::make_pair("inv", std::vector<tt>{synthesis::create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<tt>{synthesis::create_not_tt()})};
 
     const sidb::simulation::analysis::critical_temperature_params ct_params{op_params};
 

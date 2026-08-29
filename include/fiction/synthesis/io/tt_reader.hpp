@@ -2,8 +2,8 @@
 // Created by marcel on 05.05.20.
 //
 
-#ifndef FICTION_NETWORKS_IO_TT_READER_HPP
-#define FICTION_NETWORKS_IO_TT_READER_HPP
+#ifndef FICTION_SYNTHESIS_IO_TT_READER_HPP
+#define FICTION_SYNTHESIS_IO_TT_READER_HPP
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-namespace fiction::networks::io
+namespace fiction::synthesis::io
 {
 
 /**
@@ -101,5 +101,5 @@ class tt_reader
     std::size_t pos = 0ul;
 };
 
-}  // namespace fiction::networks::io
-#endif  // FICTION_NETWORKS_IO_TT_READER_HPP
+}  // namespace fiction::synthesis::io
+#endif  // FICTION_SYNTHESIS_IO_TT_READER_HPP

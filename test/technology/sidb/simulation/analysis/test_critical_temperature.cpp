@@ -9,7 +9,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
@@ -51,7 +51,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                         = 0.0;
 
         const auto ct = sidb::simulation::analysis::critical_temperature_gate_based<TestType>(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.num_valid_lyt == 0);
         CHECK(ct == 0.0);
@@ -116,7 +116,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                         = 0.7;
 
         const auto ct = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(ct == 0.0);
 
@@ -125,7 +125,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(ct_cc == 0.0);
 
@@ -197,7 +197,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                         = 0.7;
 
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
         CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 350);
@@ -207,7 +207,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
         CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 350);
@@ -228,7 +228,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_or_gate, std::vector{networks::utils::create_or_tt()}, params, &critical_stats);
+            lyt_or_gate, std::vector{synthesis::create_or_tt()}, params, &critical_stats);
 
         CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_qe == 400);
@@ -238,7 +238,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_or_gate, std::vector{networks::utils::create_or_tt()}, params, &critical_stats);
+            lyt_or_gate, std::vector{synthesis::create_or_tt()}, params, &critical_stats);
 
         CHECK(std::isinf(critical_stats.energy_between_ground_state_and_first_erroneous));
         CHECK(ct_cc == 400);
@@ -287,7 +287,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         SECTION("Kinks are allowed")
         {
             const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(26.02, 0.01));
@@ -298,7 +298,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
             const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(26.02, 0.01));
@@ -312,7 +312,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
                 sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
             params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 2.5;
             const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(5.1153718076, 0.01));
@@ -323,7 +323,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
             const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous),
                        Catch::Matchers::WithinAbs(5.1153718076, 0.01));
@@ -372,7 +372,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                         = 0.6;
 
         const auto ct_qs = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
         CHECK(ct_qs > 0);
 
@@ -381,7 +381,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
         CHECK(ct_cc > 0);
 
@@ -428,7 +428,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         SECTION("Kinks are allowed")
         {
             const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_fan_out_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_fan_out_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -439,7 +439,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
             const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_fan_out_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_fan_out_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -452,7 +452,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.op_condition =
                 sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_fan_out_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_fan_out_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -463,7 +463,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
             const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_fan_out_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_fan_out_tt()}, params, &critical_stats);
 
             CHECK_THAT(std::abs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.56),
                        Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -484,7 +484,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                         = 0.7;
 
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            crossing_lyt, std::vector{networks::utils::create_crossing_wire_tt()}, params, &critical_stats);
+            crossing_lyt, std::vector{synthesis::create_crossing_wire_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -495,7 +495,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            crossing_lyt, std::vector{networks::utils::create_crossing_wire_tt()}, params, &critical_stats);
+            crossing_lyt, std::vector{synthesis::create_crossing_wire_tt()}, params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -540,7 +540,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         SECTION("Kinks are allowed")
         {
             const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_or_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_or_tt()}, params, &critical_stats);
 
             CHECK(ct_qe < 350);
 
@@ -549,7 +549,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
             const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_or_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_or_tt()}, params, &critical_stats);
 
             CHECK(ct_cc < 350);
 
@@ -560,7 +560,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.op_condition =
                 sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
             const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_or_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_or_tt()}, params, &critical_stats);
 
             CHECK(ct_qe < 350);
 
@@ -569,7 +569,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
             params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
             const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-                lyt, std::vector{networks::utils::create_or_tt()}, params, &critical_stats);
+                lyt, std::vector{synthesis::create_or_tt()}, params, &critical_stats);
 
             CHECK(ct_cc < 350);
 
@@ -606,7 +606,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.alpha                         = 0.7;
 
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
@@ -619,7 +619,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function", "[critical-temperature]
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "ClusterComplete");
 
@@ -697,7 +697,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.alpha                         = 0.0;
 
         const auto ct_qs = sidb::simulation::analysis::critical_temperature_gate_based<TestType>(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickSim");
 
@@ -754,7 +754,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.alpha                         = 0.7;
 
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(ct_qe == 0.0);
 
@@ -763,7 +763,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_id_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_id_tt()}, params, &critical_stats);
 
         CHECK(ct_cc == 0.0);
 
@@ -838,7 +838,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.alpha                         = 0.7;
 
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "QuickExact");
 
@@ -850,7 +850,7 @@ TEMPLATE_TEST_CASE("Test critical_temperature function, using offset coordinates
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt, std::vector{networks::utils::create_and_tt()}, params, &critical_stats);
+            lyt, std::vector{synthesis::create_and_tt()}, params, &critical_stats);
 
         CHECK(critical_stats.algorithm_name == "ClusterComplete");
 
@@ -876,7 +876,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
         sidb::simulation::analysis::critical_temperature_stats expected_stats{};
 
         const auto expected_ct = sidb::simulation::analysis::critical_temperature_gate_based(
-            lat, std::vector<tt>{networks::utils::create_and_tt()}, params, &expected_stats);
+            lat, std::vector<tt>{synthesis::create_and_tt()}, params, &expected_stats);
 
         const auto input_wires = sidb::simulation::logic::detect_bdl_wires(
             lat, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
@@ -894,7 +894,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
         sidb::simulation::analysis::critical_temperature_stats stats{};
 
         const auto ct = sidb::simulation::analysis::critical_temperature_gate_based(
-            input_pattern_layouts, std::vector<tt>{networks::utils::create_and_tt()}, params, output_pairs, input_wires,
+            input_pattern_layouts, std::vector<tt>{synthesis::create_and_tt()}, params, output_pairs, input_wires,
             output_wires, &stats);
 
         // the two overloads run the same computation, so the results must be bit-identical
@@ -934,10 +934,10 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
     {
         const std::vector<sidb_100_cell_clk_lyt_siqad> too_few{input_pattern_layouts.front()};
 
-        CHECK_THROWS_AS(sidb::simulation::analysis::critical_temperature_gate_based(
-                            too_few, std::vector<tt>{networks::utils::create_and_tt()}, params, output_pairs,
-                            input_wires, output_wires),
-                        std::invalid_argument);
+        CHECK_THROWS_AS(
+            sidb::simulation::analysis::critical_temperature_gate_based(
+                too_few, std::vector<tt>{synthesis::create_and_tt()}, params, output_pairs, input_wires, output_wires),
+            std::invalid_argument);
     }
     SECTION("more output BDL pairs than truth tables")
     {
@@ -945,7 +945,7 @@ TEST_CASE("Pre-generated input pattern layouts reject mismatched BDL data", "[cr
         too_many.push_back(output_pairs.front());
 
         CHECK_THROWS_AS(sidb::simulation::analysis::critical_temperature_gate_based(
-                            input_pattern_layouts, std::vector<tt>{networks::utils::create_and_tt()}, params, too_many,
+                            input_pattern_layouts, std::vector<tt>{synthesis::create_and_tt()}, params, too_many,
                             input_wires, output_wires),
                         std::invalid_argument);
     }
@@ -1009,7 +1009,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
     params.max_temperature               = 350;
 
     const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-        lyt, networks::utils::create_crossing_wire_tt(), params, &critical_stats);
+        lyt, synthesis::create_crossing_wire_tt(), params, &critical_stats);
 
     CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1021,7 +1021,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon CX, QuickExact", "[critical
     params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
     const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-        lyt, networks::utils::create_crossing_wire_tt(), params, &critical_stats);
+        lyt, synthesis::create_crossing_wire_tt(), params, &critical_stats);
 
     CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.32),
                Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1048,7 +1048,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
     SECTION("Kinks are allowed")
     {
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_double_wire_gate, networks::utils::create_double_wire_tt(), params, &critical_stats);
+            lyt_double_wire_gate, synthesis::create_double_wire_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1059,7 +1059,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_double_wire_gate, networks::utils::create_double_wire_tt(), params, &critical_stats);
+            lyt_double_wire_gate, synthesis::create_double_wire_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1072,7 +1072,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
         params.operational_params.op_condition =
             sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_double_wire_gate, networks::utils::create_double_wire_tt(), params, &critical_stats);
+            lyt_double_wire_gate, synthesis::create_double_wire_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1083,7 +1083,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon double wire, QuickExact", "
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_double_wire_gate, networks::utils::create_double_wire_tt(), params, &critical_stats);
+            lyt_double_wire_gate, synthesis::create_double_wire_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 10.717),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1111,7 +1111,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
     SECTION("Kinks are allowed")
     {
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_half_adder_gate, networks::utils::create_half_adder_tt(), params, &critical_stats);
+            lyt_half_adder_gate, synthesis::create_half_adder_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1122,7 +1122,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_half_adder_gate, networks::utils::create_half_adder_tt(), params, &critical_stats);
+            lyt_half_adder_gate, synthesis::create_half_adder_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1135,7 +1135,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
         params.operational_params.op_condition =
             sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
         const auto ct_qe = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_half_adder_gate, networks::utils::create_half_adder_tt(), params, &critical_stats);
+            lyt_half_adder_gate, synthesis::create_half_adder_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));
@@ -1146,7 +1146,7 @@ TEMPLATE_TEST_CASE("Critical temperature of Bestagon half adder gate, QuickExact
         params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
 
         const auto ct_cc = sidb::simulation::analysis::critical_temperature_gate_based(
-            lyt_half_adder_gate, networks::utils::create_half_adder_tt(), params, &critical_stats);
+            lyt_half_adder_gate, synthesis::create_half_adder_tt(), params, &critical_stats);
 
         CHECK_THAT(std::fabs(critical_stats.energy_between_ground_state_and_first_erroneous - 0.15),
                    Catch::Matchers::WithinAbs(0.00, 0.01));

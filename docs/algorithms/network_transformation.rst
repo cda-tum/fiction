@@ -84,3 +84,65 @@ Delete Virtual PIs
         **Header:** ``fiction/synthesis/delete_virtual_pis.hpp``
 
         .. doxygenfunction:: fiction::synthesis::delete_virtual_pis
+
+Truth Tables
+------------
+
+.. tabs::
+    .. tab:: C++
+        **Header:** ``fiction/synthesis/truth_tables.hpp``
+
+        .. doxygenfunction:: fiction::synthesis::create_id_tt
+        .. doxygenfunction:: fiction::synthesis::create_not_tt
+        .. doxygenfunction:: fiction::synthesis::create_and_tt
+        .. doxygenfunction:: fiction::synthesis::create_or_tt
+        .. doxygenfunction:: fiction::synthesis::create_nand_tt
+        .. doxygenfunction:: fiction::synthesis::create_nor_tt
+        .. doxygenfunction:: fiction::synthesis::create_xor_tt
+        .. doxygenfunction:: fiction::synthesis::create_xnor_tt
+        .. doxygenfunction:: fiction::synthesis::create_lt_tt
+        .. doxygenfunction:: fiction::synthesis::create_gt_tt
+        .. doxygenfunction:: fiction::synthesis::create_le_tt
+        .. doxygenfunction:: fiction::synthesis::create_ge_tt
+        .. doxygenfunction:: fiction::synthesis::create_and3_tt
+        .. doxygenfunction:: fiction::synthesis::create_xor_and_tt
+        .. doxygenfunction:: fiction::synthesis::create_or_and_tt
+        .. doxygenfunction:: fiction::synthesis::create_onehot_tt
+        .. doxygenfunction:: fiction::synthesis::create_maj_tt
+        .. doxygenfunction:: fiction::synthesis::create_gamble_tt
+        .. doxygenfunction:: fiction::synthesis::create_dot_tt
+        .. doxygenfunction:: fiction::synthesis::create_ite_tt
+        .. doxygenfunction:: fiction::synthesis::create_and_xor_tt
+        .. doxygenfunction:: fiction::synthesis::create_xor3_tt
+        .. doxygenfunction:: fiction::synthesis::create_double_wire_tt
+        .. doxygenfunction:: fiction::synthesis::create_crossing_wire_tt
+        .. doxygenfunction:: fiction::synthesis::create_fan_out_tt
+        .. doxygenfunction:: fiction::synthesis::create_half_adder_tt
+
+    .. tab:: Python
+        .. autofunction:: mnt.pyfiction.create_id_tt
+        .. autofunction:: mnt.pyfiction.create_not_tt
+        .. autofunction:: mnt.pyfiction.create_and_tt
+        .. autofunction:: mnt.pyfiction.create_or_tt
+        .. autofunction:: mnt.pyfiction.create_nand_tt
+        .. autofunction:: mnt.pyfiction.create_nor_tt
+        .. autofunction:: mnt.pyfiction.create_xor_tt
+        .. autofunction:: mnt.pyfiction.create_xnor_tt
+        .. autofunction:: mnt.pyfiction.create_lt_tt
+        .. autofunction:: mnt.pyfiction.create_gt_tt
+        .. autofunction:: mnt.pyfiction.create_le_tt
+        .. autofunction:: mnt.pyfiction.create_ge_tt
+        .. autofunction:: mnt.pyfiction.create_and3_tt
+        .. autofunction:: mnt.pyfiction.create_xor_and_tt
+        .. autofunction:: mnt.pyfiction.create_or_and_tt
+        .. autofunction:: mnt.pyfiction.create_onehot_tt
+        .. autofunction:: mnt.pyfiction.create_maj_tt
+        .. autofunction:: mnt.pyfiction.create_gamble_tt
+        .. autofunction:: mnt.pyfiction.create_dot_tt
+        .. autofunction:: mnt.pyfiction.create_ite_tt
+        .. autofunction:: mnt.pyfiction.create_and_xor_tt
+        .. autofunction:: mnt.pyfiction.create_xor3_tt
+        .. autofunction:: mnt.pyfiction.create_double_wire_tt
+        .. autofunction:: mnt.pyfiction.create_crossing_wire_tt
+        .. autofunction:: mnt.pyfiction.create_fan_out_tt
+        .. autofunction:: mnt.pyfiction.create_half_adder_tt

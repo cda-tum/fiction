@@ -4,7 +4,7 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/networks/utils/truth_table_utils.hpp>                     // truth tables helper functions
+#include <fiction/synthesis/truth_tables.hpp>                               // truth tables helper functions
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>                   // reader for SiDB layouts
 #include <fiction/technology/sidb/io/write_operational_domain.hpp>          // writer for operational domains
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>          // SiDB simulation parameters
@@ -81,11 +81,11 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/siqad_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 5> gates = {
-        std::make_pair("and", std::vector<tt>{networks::utils::create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{networks::utils::create_nand_tt()}),
-        std::make_pair("xnor", std::vector<tt>{networks::utils::create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{networks::utils::create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{networks::utils::create_or_tt()})};
+        std::make_pair("and", std::vector<tt>{synthesis::create_and_tt()}),
+        std::make_pair("nand", std::vector<tt>{synthesis::create_nand_tt()}),
+        std::make_pair("xnor", std::vector<tt>{synthesis::create_xnor_tt()}),
+        std::make_pair("xor", std::vector<tt>{synthesis::create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{synthesis::create_or_tt()})};
 
     // total number of samples
     static std::size_t total_samples_gs = 0;

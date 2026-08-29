@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/networks/io/tt_reader.hpp>
+#include <fiction/synthesis/io/tt_reader.hpp>
 
 #include <kitty/constructors.hpp>
 #include <kitty/operations.hpp>
@@ -24,7 +24,7 @@ TEST_CASE("Read truth tables", "[tt-reader]")
 
     std::stringstream stream{std::string{file}};
 
-    networks::io::tt_reader<kitty::dynamic_truth_table> reader{stream};
+    synthesis::io::tt_reader<kitty::dynamic_truth_table> reader{stream};
 
     const auto check = [&reader](const auto num_vars, const std::string& hex)
     {

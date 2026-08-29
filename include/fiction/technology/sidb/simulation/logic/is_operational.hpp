@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_IS_OPERATIONAL_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_IS_OPERATIONAL_HPP
 
-#include "fiction/networks/utils/truth_table_utils.hpp"
+#include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/constants.hpp"
@@ -362,13 +362,12 @@ class is_operational_impl
         const auto input_index = input_pattern;
 
         set_charge_distribution_of_input_pins(cds_layout, input_index);
-        set_charge_distribution_of_output_pins(cds_layout, networks::utils::evaluate_output(truth_table, input_index));
+        set_charge_distribution_of_output_pins(cds_layout, synthesis::evaluate_output(truth_table, input_index));
 
         if (const auto physical_validity = is_physical_validity_feasible(cds_layout); physical_validity.has_value())
         {
-            if (const auto output_index = networks::utils::evaluate_output(truth_table, input_index);
-                is_io_signal_unstable(cds_layout, truth_table.front().num_bits(), input_index, output_index,
-                                      physical_validity.value()))
+            if (const auto output_index = synthesis::evaluate_output(truth_table, input_index); is_io_signal_unstable(
+                    cds_layout, truth_table.front().num_bits(), input_index, output_index, physical_validity.value()))
             {
                 return layout_invalidity_reason::IO_INSTABILITY;
             };

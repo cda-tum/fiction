@@ -11,9 +11,9 @@
 
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/networks/utils/network_utils.hpp>
-#include <fiction/networks/utils/truth_table_utils.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/exact.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
@@ -162,7 +162,7 @@ sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&&
 blacklist_wire(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_direction>>& ports,
                sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
 {
-    sbl[t].insert({networks::utils::create_id_tt(), ports});
+    sbl[t].insert({synthesis::create_id_tt(), ports});
 
     return std::move(sbl);
 }
@@ -172,7 +172,7 @@ sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&&
 blacklist_and(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_direction>>& ports,
               sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
 {
-    sbl[t].insert({networks::utils::create_and_tt(), ports});
+    sbl[t].insert({synthesis::create_and_tt(), ports});
 
     return std::move(sbl);
 }
@@ -182,7 +182,7 @@ sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&&
 blacklist_or(const tile<Lyt>& t, const std::vector<fcn::port_list<fcn::port_direction>>& ports,
              sidb::libraries::surface_black_list<Lyt, fcn::port_direction>&& sbl) noexcept
 {
-    sbl[t].insert({networks::utils::create_or_tt(), ports});
+    sbl[t].insert({synthesis::create_or_tt(), ports});
 
     return std::move(sbl);
 }

@@ -20,9 +20,9 @@ Logic Networks
 Truth Tables
 ############
 
-**Header:** ``fiction/networks/io/tt_reader.hpp``
+**Header:** ``fiction/synthesis/io/tt_reader.hpp``
 
-.. doxygenclass:: fiction::networks::io::tt_reader
+.. doxygenclass:: fiction::synthesis::io::tt_reader
    :members:
 
 

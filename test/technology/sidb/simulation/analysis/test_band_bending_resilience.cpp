@@ -8,7 +8,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
@@ -32,7 +32,7 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
     SECTION("Minimal potential required to conduct a charge change from neutral to negative")
     {
         const auto min_potential = sidb::simulation::analysis::band_bending_resilience(
-            lyt, std::vector{networks::utils::create_and_tt()}, params,
+            lyt, std::vector{synthesis::create_and_tt()}, params,
             sidb::simulation::analysis::transition_type::NEUTRAL_TO_NEGATIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, fcn::constants::ERROR_MARGIN));
@@ -41,7 +41,7 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
     SECTION("Minimal potential required to conduct a charge change from negative to neutral")
     {
         const auto min_potential = sidb::simulation::analysis::band_bending_resilience(
-            lyt, std::vector{networks::utils::create_and_tt()}, params,
+            lyt, std::vector{synthesis::create_and_tt()}, params,
             sidb::simulation::analysis::transition_type::NEGATIVE_TO_NEUTRAL);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.087417, fcn::constants::ERROR_MARGIN));
@@ -50,7 +50,7 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
     SECTION("Minimal potential required to conduct a charge change from positive to neutral")
     {
         const auto min_potential = sidb::simulation::analysis::band_bending_resilience(
-            lyt, std::vector{networks::utils::create_and_tt()}, params,
+            lyt, std::vector{synthesis::create_and_tt()}, params,
             sidb::simulation::analysis::transition_type::NEUTRAL_TO_POSITIVE);
 
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.413859, fcn::constants::ERROR_MARGIN));
@@ -58,8 +58,8 @@ TEST_CASE("Single SiDB", "[band-bending-resilience]")
 
     SECTION("Minimal potential required to conduct a charge change")
     {
-        const auto min_potential = sidb::simulation::analysis::band_bending_resilience(
-            lyt, std::vector{networks::utils::create_and_tt()}, params);
+        const auto min_potential =
+            sidb::simulation::analysis::band_bending_resilience(lyt, std::vector{synthesis::create_and_tt()}, params);
 
         // the minimal potential for any charge change is the same as for neutral to negative
         CHECK_THAT(min_potential, Catch::Matchers::WithinAbs(0.020652, fcn::constants::ERROR_MARGIN));

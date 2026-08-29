@@ -12,10 +12,10 @@
 #include "fiction/networks/technology_network.hpp"
 #include "fiction/networks/utils/name_utils.hpp"
 #include "fiction/networks/utils/network_utils.hpp"
-#include "fiction/networks/utils/truth_table_utils.hpp"
 #include "fiction/physical_design/utils/aspect_ratio_iterator.hpp"
 #include "fiction/physical_design/utils/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
+#include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/sidb/libraries/surface_analysis.hpp"
 #include "fiction/traits.hpp"
@@ -2422,7 +2422,7 @@ class exact_impl
             };
 
             // the identity function as a truth table
-            const auto identity = networks::utils::create_id_tt();
+            const auto identity = synthesis::create_id_tt();
 
             // for each tile-functions pair
             for (const auto& [tile, exclusions] : black_list)

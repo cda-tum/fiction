@@ -92,15 +92,13 @@ module whose data they serialize.
 
 #### `networks`
 
-| old                                   | new                                            |
-| ------------------------------------- | ---------------------------------------------- |
-| `fiction/io/dot_drawers.hpp`          | `fiction/networks/io/dot_drawers.hpp`          |
-| `fiction/io/network_reader.hpp`       | `fiction/networks/io/network_reader.hpp`       |
-| `fiction/io/tt_reader.hpp`            | `fiction/networks/io/tt_reader.hpp`            |
-| `fiction/utils/mockturtle_utils.hpp`  | `fiction/networks/utils/mockturtle_utils.hpp`  |
-| `fiction/utils/name_utils.hpp`        | `fiction/networks/utils/name_utils.hpp`        |
-| `fiction/utils/network_utils.hpp`     | `fiction/networks/utils/network_utils.hpp`     |
-| `fiction/utils/truth_table_utils.hpp` | `fiction/networks/utils/truth_table_utils.hpp` |
+| old                                  | new                                           |
+| ------------------------------------ | --------------------------------------------- |
+| `fiction/io/dot_drawers.hpp`         | `fiction/networks/io/dot_drawers.hpp`         |
+| `fiction/io/network_reader.hpp`      | `fiction/networks/io/network_reader.hpp`      |
+| `fiction/utils/mockturtle_utils.hpp` | `fiction/networks/utils/mockturtle_utils.hpp` |
+| `fiction/utils/name_utils.hpp`       | `fiction/networks/utils/name_utils.hpp`       |
+| `fiction/utils/network_utils.hpp`    | `fiction/networks/utils/network_utils.hpp`    |
 
 #### `synthesis`
 
@@ -111,7 +109,9 @@ module whose data they serialize.
 | `fiction/algorithms/network_transformation/network_balancing.hpp`   | `fiction/synthesis/network_balancing.hpp`          |
 | `fiction/algorithms/network_transformation/network_conversion.hpp`  | `fiction/synthesis/network_conversion.hpp`         |
 | `fiction/algorithms/network_transformation/technology_mapping.hpp`  | `fiction/synthesis/technology_mapping.hpp`         |
+| `fiction/io/tt_reader.hpp`                                          | `fiction/synthesis/io/tt_reader.hpp`               |
 | `fiction/technology/technology_mapping_library.hpp`                 | `fiction/synthesis/technology_mapping_library.hpp` |
+| `fiction/utils/truth_table_utils.hpp`                               | `fiction/synthesis/truth_tables.hpp`               |
 
 #### `physical_design`
 
@@ -453,6 +453,26 @@ The scheme name strings are unchanged, so `get_scheme("2DDWave")` still resolves
 `clocked_layout` members that mention clocking -- `get_clocking_scheme`,
 `is_clocking_scheme`, `replace_clocking_scheme` -- keep their names: they are scoped by
 their class, not by a namespace.
+
+### Truth tables
+
+`truth_table_utils.hpp` and `tt_reader.hpp` sit under `synthesis/` rather than `networks/`.
+Neither depends on a network: both include only `kitty` and the standard library, and the
+callers in the library are the SiDB gate libraries, `sidb::simulation::logic::is_operational`,
+and `physical_design::exact`. A truth table is what a gate library and technology mapping
+specify a function _with_, which is synthesis' subject, and `synthesis/` already holds the
+genlib gate definitions in `technology_mapping_library.hpp`.
+
+```text
+fiction::create_and_tt   ->  fiction::synthesis::create_and_tt
+fiction::evaluate_output ->  fiction::synthesis::evaluate_output
+fiction::tt_reader       ->  fiction::synthesis::io::tt_reader
+```
+
+The header drops its `_utils` suffix to match its new siblings, so
+`fiction/utils/truth_table_utils.hpp` is now `fiction/synthesis/truth_tables.hpp`. The
+26 `create_*_tt` functions and `evaluate_output` keep their names, and the Python API is
+unchanged.
 
 ### Renamed struct members
 

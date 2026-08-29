@@ -6,7 +6,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -69,7 +69,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
         const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
-            lat, std::vector<tt>{networks::utils::create_id_tt()},
+            lat, std::vector<tt>{synthesis::create_id_tt()},
             sidb::simulation::logic::parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size (1.0)
@@ -91,8 +91,8 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
         const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
         const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
-            lat, std::vector<tt>{networks::utils::create_id_tt()},
-            sidb::simulation::logic::parameter_point({4.25, 4.25}), op_ratio_params);
+            lat, std::vector<tt>{synthesis::create_id_tt()}, sidb::simulation::logic::parameter_point({4.25, 4.25}),
+            op_ratio_params);
 
         CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
     }
@@ -132,16 +132,16 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 
     // pruning and simulation to determine the operational status of the layout
     const auto op_domain_ratio_pruning_and_simulation = sidb::simulation::logic::operational_domain_ratio(
-        lyt, std::vector<tt>{networks::utils::create_nand_tt()},
-        sidb::simulation::logic::parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
+        lyt, std::vector<tt>{synthesis::create_nand_tt()}, sidb::simulation::logic::parameter_point({5.6, 5.0, -0.28}),
+        op_ratio_params);
 
     // only pruning to determine the operational status of the layout
     op_ratio_params.op_domain_params.operational_params.strategy_to_analyze_operational_status =
         sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
     const auto op_domain_ratio_only_pruning = sidb::simulation::logic::operational_domain_ratio(
-        lyt, std::vector<tt>{networks::utils::create_nand_tt()},
-        sidb::simulation::logic::parameter_point({5.6, 5.0, -0.28}), op_ratio_params);
+        lyt, std::vector<tt>{synthesis::create_nand_tt()}, sidb::simulation::logic::parameter_point({5.6, 5.0, -0.28}),
+        op_ratio_params);
 
     CHECK_THAT(op_domain_ratio_pruning_and_simulation,
                Catch::Matchers::WithinAbs(0.11918914799573235, fcn::constants::ERROR_MARGIN));
@@ -184,7 +184,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
         const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
-            lyt, std::vector<tt>{networks::utils::create_and_tt()},
+            lyt, std::vector<tt>{synthesis::create_and_tt()},
             sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
@@ -200,7 +200,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
         const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
-            lyt, std::vector<tt>{networks::utils::create_and_tt()},
+            lyt, std::vector<tt>{synthesis::create_and_tt()},
             sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
@@ -219,7 +219,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
         const sidb::simulation::logic::operational_domain_ratio_params op_ratio_params{op_domain_params};
 
         const auto op_domain_ratio = sidb::simulation::logic::operational_domain_ratio(
-            lyt, std::vector<tt>{networks::utils::create_and_tt()},
+            lyt, std::vector<tt>{synthesis::create_and_tt()},
             sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size

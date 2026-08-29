@@ -4,7 +4,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
@@ -43,7 +43,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
         CHECK(sidb::simulation::logic::verify_logic_match<sidb_cell_clk_lyt_siqad>(
                   gs.front(), sidb::simulation::logic::is_operational_params{},
-                  std::vector<tt>{networks::utils::create_fan_out_tt()}, 2, input_wires,
+                  std::vector<tt>{synthesis::create_fan_out_tt()}, 2, input_wires,
                   output_wires) == sidb::simulation::logic::operational_status::OPERATIONAL);
     }
 
@@ -61,14 +61,14 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
         {
             CHECK(sidb::simulation::logic::verify_logic_match<sidb_cell_clk_lyt_siqad>(
                       gs.front(), sidb::simulation::logic::is_operational_params{},
-                      std::vector<tt>{networks::utils::create_fan_out_tt()}, 1, input_wires,
+                      std::vector<tt>{synthesis::create_fan_out_tt()}, 1, input_wires,
                       output_wires) == sidb::simulation::logic::operational_status::OPERATIONAL);
         }
         SECTION("Wrong input index")
         {
             CHECK(sidb::simulation::logic::verify_logic_match<sidb_cell_clk_lyt_siqad>(
                       gs.front(), sidb::simulation::logic::is_operational_params{},
-                      std::vector<tt>{networks::utils::create_fan_out_tt()}, 2, input_wires,
+                      std::vector<tt>{synthesis::create_fan_out_tt()}, 2, input_wires,
                       output_wires) == sidb::simulation::logic::operational_status::NON_OPERATIONAL);
         }
     }
@@ -105,7 +105,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
         CHECK(sidb::simulation::logic::verify_logic_match<sidb_111_cell_clk_lyt_siqad>(
                   gs.front(), sidb::simulation::logic::is_operational_params{},
-                  std::vector<tt>{networks::utils::create_and_tt()}, 2, input_wires,
+                  std::vector<tt>{synthesis::create_and_tt()}, 2, input_wires,
                   output_wires) == sidb::simulation::logic::operational_status::OPERATIONAL);
     }
 
@@ -126,13 +126,13 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
         SECTION("Correct index")
         {
             CHECK(sidb::simulation::logic::verify_logic_match<sidb_111_cell_clk_lyt_siqad>(
-                      gs.front(), op_params, std::vector<tt>{networks::utils::create_and_tt()}, 1, input_wires,
+                      gs.front(), op_params, std::vector<tt>{synthesis::create_and_tt()}, 1, input_wires,
                       output_wires) == sidb::simulation::logic::operational_status::OPERATIONAL);
         }
         SECTION("Wrong input index")
         {
             CHECK(sidb::simulation::logic::verify_logic_match<sidb_111_cell_clk_lyt_siqad>(
-                      gs.front(), op_params, std::vector<tt>{networks::utils::create_and_tt()}, 2, input_wires,
+                      gs.front(), op_params, std::vector<tt>{synthesis::create_and_tt()}, 2, input_wires,
                       output_wires) == sidb::simulation::logic::operational_status::NON_OPERATIONAL);
         }
     }

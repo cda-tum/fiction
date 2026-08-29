@@ -4,7 +4,7 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/networks/utils/truth_table_utils.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -50,21 +50,21 @@ int main()  // NOLINT
                        "t_pruning [s]"};                       // double
 
     const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 15>{
-        {{std::vector<tt>{networks::utils::create_not_tt()}, "inv"},
-         {std::vector<tt>{networks::utils::create_id_tt()}, "wire"},
-         {std::vector<tt>{networks::utils::create_and_tt()}, "and"},
-         {std::vector<tt>{networks::utils::create_nand_tt()}, "nand"},
-         {std::vector<tt>{networks::utils::create_or_tt()}, "or"},
-         {std::vector<tt>{networks::utils::create_nor_tt()}, "nor"},
-         {std::vector<tt>{networks::utils::create_xor_tt()}, "xor"},
-         {std::vector<tt>{networks::utils::create_xnor_tt()}, "xnor"},
-         {std::vector<tt>{networks::utils::create_lt_tt()}, "lt"},
-         {std::vector<tt>{networks::utils::create_gt_tt()}, "gt"},
-         {std::vector<tt>{networks::utils::create_le_tt()}, "le"},
-         {std::vector<tt>{networks::utils::create_ge_tt()}, "ge"},
-         {std::vector<tt>{networks::utils::create_crossing_wire_tt()}, "cx"},
-         {std::vector<tt>{networks::utils::create_half_adder_tt()}, "ha"},
-         {std::vector<tt>{networks::utils::create_double_wire_tt()}, "hourglass"}}};
+        {{std::vector<tt>{synthesis::create_not_tt()}, "inv"},
+         {std::vector<tt>{synthesis::create_id_tt()}, "wire"},
+         {std::vector<tt>{synthesis::create_and_tt()}, "and"},
+         {std::vector<tt>{synthesis::create_nand_tt()}, "nand"},
+         {std::vector<tt>{synthesis::create_or_tt()}, "or"},
+         {std::vector<tt>{synthesis::create_nor_tt()}, "nor"},
+         {std::vector<tt>{synthesis::create_xor_tt()}, "xor"},
+         {std::vector<tt>{synthesis::create_xnor_tt()}, "xnor"},
+         {std::vector<tt>{synthesis::create_lt_tt()}, "lt"},
+         {std::vector<tt>{synthesis::create_gt_tt()}, "gt"},
+         {std::vector<tt>{synthesis::create_le_tt()}, "le"},
+         {std::vector<tt>{synthesis::create_ge_tt()}, "ge"},
+         {std::vector<tt>{synthesis::create_crossing_wire_tt()}, "cx"},
+         {std::vector<tt>{synthesis::create_half_adder_tt()}, "ha"},
+         {std::vector<tt>{synthesis::create_double_wire_tt()}, "hourglass"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
