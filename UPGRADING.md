@@ -185,7 +185,7 @@ module whose data they serialize.
 | `fiction/technology/sidb_surface_analysis.hpp`                                    | `fiction/technology/sidb/libraries/surface_analysis.hpp`                                   |
 | `fiction/technology/sidb_charge_state.hpp`                                        | `fiction/technology/sidb/model/charge_state.hpp`                                           |
 | `fiction/technology/sidb_cluster_hierarchy.hpp`                                   | `fiction/technology/sidb/model/cluster_hierarchy.hpp`                                      |
-| `fiction/technology/sidb_defects.hpp`                                             | `fiction/technology/sidb/model/defects.hpp`                                                |
+| `fiction/technology/sidb_defects.hpp`                                             | `fiction/technology/sidb/model/defect.hpp`                                                 |
 | `fiction/technology/sidb_nm_distance.hpp`                                         | `fiction/technology/sidb/model/nm_distance.hpp`                                            |
 | `fiction/technology/sidb_nm_position.hpp`                                         | `fiction/technology/sidb/model/nm_position.hpp`                                            |
 | `fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp`               | `fiction/technology/sidb/model/simulation_parameters.hpp`                                  |
@@ -406,6 +406,18 @@ rest of the code base, and the three conversions -- which spelled themselves
 `to_fiction_coord`, `to_siqad_coord` and `offset_to_cube`, in three different styles --
 now share one. `from_siqad` keeps its target as a template parameter because callers pass
 a dependent type; `to_siqad` and `to_cube` deduce theirs.
+
+### The two kinds of defect
+
+`fiction::sidb::model` owns what a defect _is_ -- `defect`, `defect_type`, the spacing
+constants, `defect_extent`, and the `is_*_defect` predicates -- while
+`fiction::sidb::simulation::defects` holds the simulations _about_ defects:
+`defect_influence`, `defect_clearance` and `displacement_robustness_domain`. The second is
+a sibling of `analysis`, `logic` and `generic`, which group simulations by subject.
+
+The header is `model/defect.hpp`, singular, named after the type it defines, as every
+other header in `model/` is. Its old plural name survived from `sidb_defects.hpp` and read
+as though it ought to own the `defects` namespace, which belongs to the simulations.
 
 ### The clocking namespace
 

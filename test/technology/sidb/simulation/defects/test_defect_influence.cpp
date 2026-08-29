@@ -11,7 +11,7 @@
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/constants.hpp>
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/defects/defect_clearance.hpp>
 #include <fiction/technology/sidb/simulation/defects/defect_influence.hpp>

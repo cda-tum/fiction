@@ -7,7 +7,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/primitives/defect_surface.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"

@@ -18,7 +18,7 @@
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/technology/sidb/libraries/bestagon_library.hpp>
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/primitives/lattice.hpp>
 #include <fiction/technology/sidb/primitives/lattice_orientations.hpp>

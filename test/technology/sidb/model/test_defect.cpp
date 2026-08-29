@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 
 #include <cstdint>
 #include <utility>

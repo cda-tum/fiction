@@ -11,7 +11,7 @@
 #include "fiction/technology/sidb/primitives/defect_surface.hpp"
 // cell_layout_digest names no symbol from this header, but relies on the std::hash<sidb::model::defect>
 // specialization it provides
-#include "fiction/technology/sidb/model/defects.hpp"  // IWYU pragma: keep
+#include "fiction/technology/sidb/model/defect.hpp"  // IWYU pragma: keep
 #include "fiction/technology/sidb/primitives/lattice.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"

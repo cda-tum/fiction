@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
 #define FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
 
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/primitives/defect_surface.hpp"
 #include "fiction/traits.hpp"
 

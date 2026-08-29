@@ -10,7 +10,7 @@
 #include "fiction/layouts/utils/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/primitives/defect_surface.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 

@@ -9,7 +9,7 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>

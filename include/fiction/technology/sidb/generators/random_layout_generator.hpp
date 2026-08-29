@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
 
 #include "fiction/layouts/utils/layout_utils.hpp"
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/generic/can_positive_charges_occur.hpp"
 #include "fiction/traits.hpp"

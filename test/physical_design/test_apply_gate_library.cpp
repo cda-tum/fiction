@@ -20,7 +20,7 @@
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/libraries/bestagon_library.hpp>
 #include <fiction/technology/sidb/libraries/on_the_fly_gate_library.hpp>
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/traits.hpp>

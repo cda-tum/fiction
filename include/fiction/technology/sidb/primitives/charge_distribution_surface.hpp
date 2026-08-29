@@ -7,7 +7,7 @@
 
 #include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"

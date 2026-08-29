@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"

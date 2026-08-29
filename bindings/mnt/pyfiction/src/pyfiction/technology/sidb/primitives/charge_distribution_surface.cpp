@@ -9,7 +9,7 @@
 #include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): used via ADL for print_layout(...)
 #include <fiction/layouts/utils/layout_utils.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/primitives/charge_distribution_surface.hpp>
 #include <fiction/traits.hpp>

@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP
 #define FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP
 
-#include "fiction/technology/sidb/model/defects.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/traits.hpp"
 
 #include <phmap.h>

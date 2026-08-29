@@ -17,7 +17,7 @@
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>      // writer for SiQAD files (physical simulation)
 #include <fiction/technology/sidb/libraries/bestagon_library.hpp>  // a pre-defined SiDB gate library
 #include <fiction/technology/sidb/libraries/surface_analysis.hpp>  // SiDB surface analysis
-#include <fiction/technology/sidb/model/defects.hpp>               // SiDB defect classes
+#include <fiction/technology/sidb/model/defect.hpp>                // SiDB defect classes
 #include <fiction/technology/sidb/primitives/defect_surface.hpp>   // H-Si(100) 2x1 surface model
 #include <fiction/types.hpp>                                       // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations

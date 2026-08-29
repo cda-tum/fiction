@@ -2,8 +2,8 @@
 // Created by marcel on 07.03.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_DEFECTS_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_DEFECTS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_DEFECT_HPP
+#define FICTION_TECHNOLOGY_SIDB_MODEL_DEFECT_HPP
 
 #include "fiction/utils/stl/hash.hpp"
 
@@ -280,4 +280,4 @@ struct hash<fiction::sidb::model::defect>
 
 }  // namespace std
 
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_DEFECTS_HPP
+#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_DEFECT_HPP

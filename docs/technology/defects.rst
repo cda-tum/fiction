@@ -8,7 +8,7 @@ SiDB Defect Types
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/model/defects.hpp``
+        **Header:** ``fiction/technology/sidb/model/defect.hpp``
 
         .. doxygenenum:: fiction::sidb::model::defect_type
 

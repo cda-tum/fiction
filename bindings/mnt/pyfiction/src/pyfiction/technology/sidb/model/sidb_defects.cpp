@@ -4,7 +4,7 @@
 
 #include "pyfiction/documentation.hpp"
 
-#include <fiction/technology/sidb/model/defects.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 
 #include <cstdint>
 
