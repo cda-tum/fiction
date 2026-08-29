@@ -50,7 +50,7 @@ void sidb_lattice_cell_level_layout(nanobind::module_& m)
                                                 DOC(fiction_layouts_cell_level_layout))
         .def(py::init<>(), "Default constructor.")
         .def(py::init<const fiction::aspect_ratio<py_sidb_layout>&, const std::string&>(), py::arg("dimension"),
-             py::arg("name") = "", DOC(fiction_sidb_primitives_lattice))
+             py::arg("name") = "", DOC(fiction_sidb_surfaces_lattice))
         .def("clone", &py_sidb_lattice::clone)
 
         ;

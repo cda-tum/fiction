@@ -50,7 +50,7 @@ void charge_distribution_surface_layout(nanobind::module_& m, const std::string&
      */
 
     py::class_<py_cds, Lyt>(m, fmt::format("charge_distribution_surface{}", lattice).c_str(),
-                            DOC(fiction_sidb_primitives_charge_distribution_surface))
+                            DOC(fiction_sidb_surfaces_charge_distribution_surface))
         .def(py::init<const fiction::sidb::model::simulation_parameters&, const fiction::sidb::model::charge_state&>(),
              py::arg("params") = fiction::sidb::model::simulation_parameters{},
              py::arg("cs")     = fiction::sidb::model::charge_state::NEGATIVE)
@@ -229,11 +229,11 @@ void charge_distribution_surfaces(nanobind::module_& m)
      * Dependent cell mode.
      */
     py::enum_<fiction::sidb::surfaces::dependent_cell_mode>(m, "dependent_cell_mode",
-                                                            DOC(fiction_sidb_primitives_dependent_cell_mode))
+                                                            DOC(fiction_sidb_surfaces_dependent_cell_mode))
         .value("FIXED", fiction::sidb::surfaces::dependent_cell_mode::FIXED,
-               DOC(fiction_sidb_primitives_dependent_cell_mode_FIXED))
+               DOC(fiction_sidb_surfaces_dependent_cell_mode_FIXED))
         .value("VARIABLE", fiction::sidb::surfaces::dependent_cell_mode::VARIABLE,
-               DOC(fiction_sidb_primitives_dependent_cell_mode_VARIABLE))
+               DOC(fiction_sidb_surfaces_dependent_cell_mode_VARIABLE))
 
         ;
 
@@ -241,11 +241,11 @@ void charge_distribution_surfaces(nanobind::module_& m)
      * Energy calculation.
      */
     py::enum_<fiction::sidb::surfaces::energy_calculation>(m, "energy_calculation",
-                                                           DOC(fiction_sidb_primitives_energy_calculation))
+                                                           DOC(fiction_sidb_surfaces_energy_calculation))
         .value("KEEP_OLD_ENERGY_VALUE", fiction::sidb::surfaces::energy_calculation::KEEP_OLD_ENERGY_VALUE,
-               DOC(fiction_sidb_primitives_energy_calculation_KEEP_OLD_ENERGY_VALUE))
+               DOC(fiction_sidb_surfaces_energy_calculation_KEEP_OLD_ENERGY_VALUE))
         .value("UPDATE_ENERGY", fiction::sidb::surfaces::energy_calculation::UPDATE_ENERGY,
-               DOC(fiction_sidb_primitives_energy_calculation_UPDATE_ENERGY))
+               DOC(fiction_sidb_surfaces_energy_calculation_UPDATE_ENERGY))
 
         ;
 
@@ -253,12 +253,12 @@ void charge_distribution_surfaces(nanobind::module_& m)
      * Charge distribution mode.
      */
     py::enum_<fiction::sidb::surfaces::charge_distribution_mode>(m, "charge_distribution_mode",
-                                                                 DOC(fiction_sidb_primitives_charge_distribution_mode))
+                                                                 DOC(fiction_sidb_surfaces_charge_distribution_mode))
         .value("UPDATE_CHARGE_DISTRIBUTION",
                fiction::sidb::surfaces::charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION,
-               DOC(fiction_sidb_primitives_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION))
+               DOC(fiction_sidb_surfaces_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION))
         .value("KEEP_CHARGE_DISTRIBUTION", fiction::sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION,
-               DOC(fiction_sidb_primitives_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION))
+               DOC(fiction_sidb_surfaces_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION))
 
         ;
 
@@ -266,11 +266,11 @@ void charge_distribution_surfaces(nanobind::module_& m)
      * Charge index mode.
      */
     py::enum_<fiction::sidb::surfaces::charge_index_mode>(m, "charge_index_mode",
-                                                          DOC(fiction_sidb_primitives_charge_index_mode))
+                                                          DOC(fiction_sidb_surfaces_charge_index_mode))
         .value("UPDATE_CHARGE_INDEX", fiction::sidb::surfaces::charge_index_mode::UPDATE_CHARGE_INDEX,
-               DOC(fiction_sidb_primitives_charge_index_mode_UPDATE_CHARGE_INDEX))
+               DOC(fiction_sidb_surfaces_charge_index_mode_UPDATE_CHARGE_INDEX))
         .value("KEEP_CHARGE_INDEX", fiction::sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX,
-               DOC(fiction_sidb_primitives_charge_index_mode_KEEP_CHARGE_INDEX))
+               DOC(fiction_sidb_surfaces_charge_index_mode_KEEP_CHARGE_INDEX))
 
         ;
 
@@ -278,27 +278,27 @@ void charge_distribution_surfaces(nanobind::module_& m)
      * Charge distribution history.
      */
     py::enum_<fiction::sidb::surfaces::charge_distribution_history>(
-        m, "charge_distribution_history", DOC(fiction_sidb_primitives_charge_distribution_history))
+        m, "charge_distribution_history", DOC(fiction_sidb_surfaces_charge_distribution_history))
         .value("CONSIDER", fiction::sidb::surfaces::charge_distribution_history::CONSIDER,
-               DOC(fiction_sidb_primitives_charge_distribution_history_CONSIDER))
+               DOC(fiction_sidb_surfaces_charge_distribution_history_CONSIDER))
         .value("NEGLECT", fiction::sidb::surfaces::charge_distribution_history::NEGLECT,
-               DOC(fiction_sidb_primitives_charge_distribution_history_NEGLECT));
+               DOC(fiction_sidb_surfaces_charge_distribution_history_NEGLECT));
 
     /**
      * Charge transition threshold bounds.
      */
     py::enum_<fiction::sidb::surfaces::charge_transition_threshold_bounds>(
-        m, "charge_transition_threshold_bounds", DOC(fiction_sidb_primitives_charge_transition_threshold_bounds))
+        m, "charge_transition_threshold_bounds", DOC(fiction_sidb_surfaces_charge_transition_threshold_bounds))
         .value("NEGATIVE_UPPER_BOUND",
                fiction::sidb::surfaces::charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND,
-               DOC(fiction_sidb_primitives_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND))
+               DOC(fiction_sidb_surfaces_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND))
         .value("POSITIVE_LOWER_BOUND",
                fiction::sidb::surfaces::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND,
-               DOC(fiction_sidb_primitives_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND))
+               DOC(fiction_sidb_surfaces_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND))
         .value("NEUTRAL_LOWER_BOUND", fiction::sidb::surfaces::charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND,
-               DOC(fiction_sidb_primitives_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND))
+               DOC(fiction_sidb_surfaces_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND))
         .value("NEUTRAL_UPPER_BOUND", fiction::sidb::surfaces::charge_transition_threshold_bounds::NEUTRAL_UPPER_BOUND,
-               DOC(fiction_sidb_primitives_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND));
+               DOC(fiction_sidb_surfaces_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND));
 
     detail::charge_distribution_surface_layout<py_sidb_111_lattice>(m, "_111");
     detail::charge_distribution_surface_layout<py_sidb_100_lattice>(m, "_100");

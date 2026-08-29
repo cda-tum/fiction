@@ -5976,7 +5976,7 @@ Template Args:
     Lyt: SiDB cell-level layout with charge-information based on SiQAD
          coordinates or defect-information, e.g., a
          `charge_distribution_surface` or
-         `sidb::primitives::defect_surface`.
+         `sidb::surfaces::defect_surface`.
 
 )doc";
 
@@ -6764,7 +6764,7 @@ digest, so a digest match still has to be confirmed with
 `are_cell_layouts_identical`.
 
 The digest covers the cells and their types, the defects of an
-`sidb::primitives::defect_surface`, and the charge states of a
+`sidb::surfaces::defect_surface`, and the charge states of a
 `charge_distribution_surface`. Following `are_cell_layouts_identical`,
 it ignores the layout's aspect ratio.
 
@@ -17247,158 +17247,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_primitives = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_3 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_4 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_5 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_6 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_cds_configuration_CHARGE_LOCATION_AND_ELECTROSTATIC =
-R"doc(In addition to the location of the charge states, the electrostatic
-computation is conducted and stored.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_cds_configuration_CHARGE_LOCATION_ONLY =
-R"doc(The charge distribution is exclusively used to store the charge
-states.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_history =
-R"doc(An enumeration of modes to decide if the previous charge distribution
-is used to simply the computation of the properties of a new charge
-distribution.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_history_CONSIDER = R"doc(The previous charge distribution is used.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_history_NEGLECT =
-R"doc(The previous charge distribution is not used. Hence, the local
-electrostatic potential of the given charge distribution is calculated
-from scratch.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_mode =
-R"doc(An enumeration of modes for handling the charge distribution when
-assigning a charge index to the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION =
-R"doc(The charge distribution is kept and is not updated after a charge
-index is assigned to the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION =
-R"doc(The charge distribution is updated after the charge index is assigned
-to the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_distribution_surface =
-R"doc(A layout type to layer on top of any SiDB cell-level layout. It
-implements an interface to store and access SiDBs' charge states.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    has_charge_distribution_interface: Automatically determines
-                                       whether a charge distribution
-                                       interface is already present.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_index_mode =
-R"doc(An enumeration of modes for handling the charge index during charge
-state assignment.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_index_mode_KEEP_CHARGE_INDEX =
-R"doc(The charge state is assigned to the cell but the old charge index is
-kept.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_index_mode_UPDATE_CHARGE_INDEX =
-R"doc(The charge state is assigned to the cell and the charge index is
-updated.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_index_recomputation =
-R"doc(An enumeration of modes to specifying if the charge index should be
-recomputed fully.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_index_recomputation_FROM_SCRATCH = R"doc(The charge index is recomputed from scratch.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_index_recomputation_IGNORE_LEADING_ZEROES =
-R"doc(The charge index is recomputed with the leading zeroes ignored. This
-optimization can be applied if we know that the charge index was
-incremented after the last charge index computation.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_transition_threshold_bounds =
-R"doc(An enumeration of charge transition threshold bounds to test against
-for population stability assessment.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_minus to validate DB-.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_minus to validate DB0.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_plus to validate DB0.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_plus to validate DB+.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_defect_surface =
-R"doc(A layout type to layer on top of any SiDB cell-level layout. It
-implements an interface to store and access fabrication defects on the
-H-Si(100) 2x1 surface.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    has_sidb_defect_surface: Automatically determines whether a defect
-                             interface is already present.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_defect_surface_params = R"doc(This struct stores parameters for the `defect_surface`)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_defect_surface_params_ignore =
-R"doc(Specifies which defects are to be ignored, e.g., when they are not
-relevant for the current analysis.
-
-Note:
-    Ignored defects are not stored in the surface instance!)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_dependent_cell_mode_FIXED =
-R"doc(The charge state of the dependent cell is not changed based on the
-local electrostatic potential at its position.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_dependent_cell_mode_VARIABLE =
-R"doc(The charge state of the dependent cell is changed based on the local
-electrostatic potential at its position.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_energy_calculation =
-R"doc(An enumeration of modes for calculation of the electrostatic potential
-energy of a given charge distribution.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_energy_calculation_KEEP_OLD_ENERGY_VALUE =
-R"doc(The electrostatic potential energy of a given charge distribution is
-not updated after it is changed.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_energy_calculation_UPDATE_ENERGY =
-R"doc(The electrostatic potential energy of a given charge distribution is
-updated after it is changed.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_lattice =
-R"doc(A layout type to layer on top of an SiDB cell-level layout. It
-implements an interface for different lattice orientations of the H-Si
-crystal.
-
-Template Args:
-    LatticeOrientation: Type of the lattice orientation.
-    Lyt: SiDB cell-level layout type.
-    has_sidb_lattice_interface: Automatically determines whether an
-                                SiDB lattice interface is already
-                                present.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_lattice_100 = R"doc(H-Si(100)-2x1 surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_lattice_100_lattice_100 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_lattice_111 = R"doc(H-Si(111)-1x1 surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_primitives_lattice_111_lattice_111 = R"doc()doc";
-
 static const char *mkd_doc_fiction_sidb_sidb_technology =
 R"doc(Silicon Dangling Bond (SiDB) technology implementation of the FCN
 concept.)doc";
@@ -24044,6 +23892,158 @@ Note:
     functions.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_3 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_4 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_5 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_6 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_cds_configuration_CHARGE_LOCATION_AND_ELECTROSTATIC =
+R"doc(In addition to the location of the charge states, the electrostatic
+computation is conducted and stored.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_cds_configuration_CHARGE_LOCATION_ONLY =
+R"doc(The charge distribution is exclusively used to store the charge
+states.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_history =
+R"doc(An enumeration of modes to decide if the previous charge distribution
+is used to simply the computation of the properties of a new charge
+distribution.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_history_CONSIDER = R"doc(The previous charge distribution is used.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_history_NEGLECT =
+R"doc(The previous charge distribution is not used. Hence, the local
+electrostatic potential of the given charge distribution is calculated
+from scratch.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_mode =
+R"doc(An enumeration of modes for handling the charge distribution when
+assigning a charge index to the charge distribution surface.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is kept and is not updated after a charge
+index is assigned to the charge distribution surface.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION =
+R"doc(The charge distribution is updated after the charge index is assigned
+to the charge distribution surface.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_surface =
+R"doc(A layout type to layer on top of any SiDB cell-level layout. It
+implements an interface to store and access SiDBs' charge states.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+    has_charge_distribution_interface: Automatically determines
+                                       whether a charge distribution
+                                       interface is already present.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_index_mode =
+R"doc(An enumeration of modes for handling the charge index during charge
+state assignment.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_index_mode_KEEP_CHARGE_INDEX =
+R"doc(The charge state is assigned to the cell but the old charge index is
+kept.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_index_mode_UPDATE_CHARGE_INDEX =
+R"doc(The charge state is assigned to the cell and the charge index is
+updated.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_index_recomputation =
+R"doc(An enumeration of modes to specifying if the charge index should be
+recomputed fully.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_index_recomputation_FROM_SCRATCH = R"doc(The charge index is recomputed from scratch.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_index_recomputation_IGNORE_LEADING_ZEROES =
+R"doc(The charge index is recomputed with the leading zeroes ignored. This
+optimization can be applied if we know that the charge index was
+incremented after the last charge index computation.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds =
+R"doc(An enumeration of charge transition threshold bounds to test against
+for population stability assessment.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_minus to validate DB-.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_minus to validate DB0.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_plus to validate DB0.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_plus to validate DB+.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_defect_surface =
+R"doc(A layout type to layer on top of any SiDB cell-level layout. It
+implements an interface to store and access fabrication defects on the
+H-Si(100) 2x1 surface.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+    has_sidb_defect_surface: Automatically determines whether a defect
+                             interface is already present.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_defect_surface_params = R"doc(This struct stores parameters for the `defect_surface`)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_defect_surface_params_ignore =
+R"doc(Specifies which defects are to be ignored, e.g., when they are not
+relevant for the current analysis.
+
+Note:
+    Ignored defects are not stored in the surface instance!)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_dependent_cell_mode_FIXED =
+R"doc(The charge state of the dependent cell is not changed based on the
+local electrostatic potential at its position.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_dependent_cell_mode_VARIABLE =
+R"doc(The charge state of the dependent cell is changed based on the local
+electrostatic potential at its position.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_energy_calculation =
+R"doc(An enumeration of modes for calculation of the electrostatic potential
+energy of a given charge distribution.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_energy_calculation_KEEP_OLD_ENERGY_VALUE =
+R"doc(The electrostatic potential energy of a given charge distribution is
+not updated after it is changed.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_energy_calculation_UPDATE_ENERGY =
+R"doc(The electrostatic potential energy of a given charge distribution is
+updated after it is changed.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_lattice =
+R"doc(A layout type to layer on top of an SiDB cell-level layout. It
+implements an interface for different lattice orientations of the H-Si
+crystal.
+
+Template Args:
+    LatticeOrientation: Type of the lattice orientation.
+    Lyt: SiDB cell-level layout type.
+    has_sidb_lattice_interface: Automatically determines whether an
+                                SiDB lattice interface is already
+                                present.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_lattice_100 = R"doc(H-Si(100)-2x1 surface.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_lattice_100_lattice_100 = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_lattice_111 = R"doc(H-Si(111)-1x1 surface.)doc";
+
+static const char *mkd_doc_fiction_sidb_surfaces_lattice_111_lattice_111 = R"doc()doc";
 
 static const char *mkd_doc_fiction_synthesis_all_2_input_functions =
 R"doc(Auxiliary function to create technology mapping parameters for AND,
