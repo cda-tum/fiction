@@ -526,9 +526,14 @@ shadows the trait. Code in those namespaces that wants the trait must name it
 is less precise than the `double` the standard now supplies, and nothing in the library
 used it. Use `std::numbers::pi` from `<numbers>`.
 
-The physical constants beside it stay: the standard library offers mathematical constants
-only, so `EPSILON`, `ELEMENTARY_CHARGE`, `K_E`, `BOLTZMANN_CONSTANT` and `EV_TO_JOULE` have
-no replacement in `<numbers>`.
+`fiction::constants::physical::EPSILON`, the vacuum permittivity, is gone too. It went
+unused for the same reason: the electrostatics reach for the Coulomb constant `K_E`, which
+already folds in the `1 / (4 * pi * epsilon_0)` that `PI` and `EPSILON` used to spell out
+between them. It has no `<numbers>` equivalent -- the standard library supplies
+mathematical constants, not physical ones -- so restate it locally if you need it.
+
+`ELEMENTARY_CHARGE`, `K_E`, `BOLTZMANN_CONSTANT`, `EV_TO_JOULE` and `ERROR_MARGIN` stay;
+all of them are used.
 
 ### Deliberately unchanged
 

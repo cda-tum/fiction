@@ -17,10 +17,6 @@ namespace physical
 {
 
 /**
- * The vacuum permittivity \f$\epsilon_0\f$ in \f$F \cdot m^{-1}\f$.
- */
-inline constexpr double EPSILON = 8.8541878 * 1E-12;
-/**
  * The elementary charge \f$e\f$ in \f$C\f$.
  */
 inline constexpr double ELEMENTARY_CHARGE = 1.6021766 * 1E-19;

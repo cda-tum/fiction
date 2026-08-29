@@ -130,8 +130,10 @@ Changed
   into ``from_siqad``, ``to_siqad`` and ``to_cube``. The coordinate types ``offset``, ``cube``
   and ``siqad`` keep their names
 - **Breaking:** Removed ``fiction::constants::PI``, which duplicated ``std::numbers::pi`` at
-  lower precision and was unused. The physical constants beside it stay: ``<numbers>`` supplies
-  mathematical constants only
+  lower precision and was unused, and ``fiction::constants::physical::EPSILON``, which was
+  unused for the same reason: the electrostatics use the Coulomb constant ``K_E``, which folds
+  in the ``1 / (4 * pi * epsilon_0)`` the two of them spelled out. ``ELEMENTARY_CHARGE``,
+  ``K_E``, ``BOLTZMANN_CONSTANT``, ``EV_TO_JOULE`` and ``ERROR_MARGIN`` stay
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each

@@ -88,7 +88,6 @@ Physical Constants
 
 .. doxygenvariable:: fiction::fcn::constants::physical::BOLTZMANN_CONSTANT
 .. doxygenvariable:: fiction::fcn::constants::physical::EV_TO_JOULE
-.. doxygenvariable:: fiction::fcn::constants::physical::EPSILON
 .. doxygenvariable:: fiction::fcn::constants::physical::ELEMENTARY_CHARGE
 .. doxygenvariable:: fiction::fcn::constants::physical::K_E
 .. doxygenvariable:: fiction::fcn::constants::ERROR_MARGIN
