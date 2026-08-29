@@ -417,7 +417,7 @@ class hexagonalization_impl
         static_assert(is_cartesian_layout_v<CartLyt>, "CartLyt is not a Cartesian layout");
 
         // ensure the layout uses the correct clocking scheme
-        assert(layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
+        assert(layout.is_clocking_scheme(layouts::clocking::TWODDWAVE));
 
         // get Cartesian layout dimensions
         const auto layout_width  = layout.x() + 1;

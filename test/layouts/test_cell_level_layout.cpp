@@ -48,7 +48,7 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clocking::TWODDWAVE));
     CHECK(original.get_layout_name() == "Original");
     CHECK(original.get_cell_type({0, 2}) == qca::technology::cell_type::NORMAL);
     CHECK(original.get_cell_type({2, 4}) == qca::technology::cell_type::NORMAL);
@@ -56,7 +56,7 @@ TEST_CASE("Deep copy cell-level layout", "[cell-level-layout]")
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(layouts::clocking::name::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clocking::USE));
     CHECK(copy.get_layout_name() == "Copy");
     CHECK(copy.get_cell_type({0, 2}) == qca::technology::cell_type::INPUT);
     CHECK(copy.get_cell_type({2, 4}) == qca::technology::cell_type::INPUT);

@@ -53,7 +53,7 @@ TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
     CHECK(original.x() == 5);
     CHECK(original.y() == 5);
     CHECK(original.z() == 0);
-    CHECK(original.is_clocking_scheme(layouts::clocking::name::TWODDWAVE));
+    CHECK(original.is_clocking_scheme(layouts::clocking::TWODDWAVE));
     CHECK(original.get_layout_name() == "Original");
     CHECK(original.is_pi_tile({0, 2}));
     CHECK(original.is_pi_tile({2, 4}));
@@ -61,7 +61,7 @@ TEST_CASE("Deep copy gate-level layout", "[gate-level-layout]")
     CHECK(copy.x() == 10);
     CHECK(copy.y() == 10);
     CHECK(copy.z() == 1);
-    CHECK(copy.is_clocking_scheme(layouts::clocking::name::USE));
+    CHECK(copy.is_clocking_scheme(layouts::clocking::USE));
     CHECK(copy.get_layout_name() == "Copy");
     CHECK(copy.is_pi_tile({0, 0}));
     CHECK(copy.is_pi_tile({2, 0}));

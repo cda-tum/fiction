@@ -1248,7 +1248,7 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
 
     // check if the clocking scheme is 2DDWave
-    if (!lyt.is_clocking_scheme(layouts::clocking::name::TWODDWAVE))
+    if (!lyt.is_clocking_scheme(layouts::clocking::TWODDWAVE))
     {
         std::cout << "[e] the given layout has to be 2DDWave-clocked\n";
         return;

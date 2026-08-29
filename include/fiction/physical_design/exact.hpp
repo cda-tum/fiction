@@ -311,7 +311,7 @@ class exact_impl
                 }
             }
             // Columnar clocking optimization
-            else if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
+            else if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if (ar.x < depth_ntk.depth())
@@ -325,7 +325,7 @@ class exact_impl
                 }
             }
             // Row clocking optimization
-            else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
+            else if (layout.is_clocking_scheme(layouts::clocking::ROW))
             {
                 // skip all aspect ratios that are too shallow for the network's depth
                 if (ar.y < depth_ntk.depth())
@@ -1522,8 +1522,8 @@ class exact_impl
             };
 
             // much simpler but equisatisfiable version of the constraint for 2DDWave clocking with border I/Os
-            if (params.border_io && (layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE) ||
-                                     layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE_HEX)))
+            if (params.border_io && (layout.is_clocking_scheme(layouts::clocking::TWODDWAVE) ||
+                                     layout.is_clocking_scheme(layouts::clocking::TWODDWAVE_HEX)))
             {
                 if (params.io_pins)
                 {
@@ -1540,8 +1540,8 @@ class exact_impl
                         });
                 }
             }
-            else if (params.border_io && (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR) ||
-                                          layout.is_clocking_scheme(layouts::clocking::name::ROW)))
+            else if (params.border_io && (layout.is_clocking_scheme(layouts::clocking::COLUMNAR) ||
+                                          layout.is_clocking_scheme(layouts::clocking::ROW)))
             {
                 // Columnar and row clocking scheme don't need the path length constraints when border pins are enabled
             }
@@ -1836,7 +1836,7 @@ class exact_impl
         void utilize_hierarchical_information()
         {
             // symmetry breaking for columnar clocking
-            if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
+            if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR))
             {
                 // restrict node placement according to the hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1900,7 +1900,7 @@ class exact_impl
                 }
             }
             // symmetry breaking for row clocking
-            if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
+            if (layout.is_clocking_scheme(layouts::clocking::ROW))
             {
                 // restrict node placement according to the hierarchy level
                 if (params.io_pins && params.border_io)
@@ -1964,7 +1964,7 @@ class exact_impl
                 }
             }
             // symmetry breaking for 2DDWave clocking
-            else if (layout.is_clocking_scheme(layouts::clocking::name::TWODDWAVE))
+            else if (layout.is_clocking_scheme(layouts::clocking::TWODDWAVE))
             {
                 // restrict node placement according to its hierarchy level
                 if (params.io_pins && params.border_io)
@@ -2079,11 +2079,11 @@ class exact_impl
                 network.foreach_pi(
                     [this, &assign_north, &assign_west, &assign_border](const auto& pi)
                     {
-                        if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
+                        if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR))
                         {
                             assign_west(pi);
                         }
-                        else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
+                        else if (layout.is_clocking_scheme(layouts::clocking::ROW))
                         {
                             assign_north(pi);
                         }
@@ -2095,11 +2095,11 @@ class exact_impl
                 network.foreach_po(
                     [this, &assign_east, &assign_south, &assign_border](const auto& po)
                     {
-                        if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
+                        if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR))
                         {
                             assign_east(network.get_node(po));
                         }
-                        else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
+                        else if (layout.is_clocking_scheme(layouts::clocking::ROW))
                         {
                             assign_south(network.get_node(po));
                         }
@@ -2119,11 +2119,11 @@ class exact_impl
                                                {
                                                    if (!skip_const_or_io_node(fon))
                                                    {
-                                                       if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
+                                                       if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR))
                                                        {
                                                            assign_west(fon);
                                                        }
-                                                       else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
+                                                       else if (layout.is_clocking_scheme(layouts::clocking::ROW))
                                                        {
                                                            assign_north(fon);
                                                        }
@@ -2144,11 +2144,11 @@ class exact_impl
                                                   if (const auto fin = network.get_node(fi);
                                                       !skip_const_or_io_node(fin))
                                                   {
-                                                      if (layout.is_clocking_scheme(layouts::clocking::name::COLUMNAR))
+                                                      if (layout.is_clocking_scheme(layouts::clocking::COLUMNAR))
                                                       {
                                                           assign_east(fin);
                                                       }
-                                                      else if (layout.is_clocking_scheme(layouts::clocking::name::ROW))
+                                                      else if (layout.is_clocking_scheme(layouts::clocking::ROW))
                                                       {
                                                           assign_south(fin);
                                                       }
