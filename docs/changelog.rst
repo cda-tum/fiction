@@ -129,6 +129,9 @@ Changed
   three conversions unify from ``to_fiction_coord``, ``to_siqad_coord`` and ``offset_to_cube``
   into ``from_siqad``, ``to_siqad`` and ``to_cube``. The coordinate types ``offset``, ``cube``
   and ``siqad`` keep their names
+- **Breaking:** Removed ``fiction::constants::PI``, which duplicated ``std::numbers::pi`` at
+  lower precision and was unused. The physical constants beside it stay: ``<numbers>`` supplies
+  mathematical constants only
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each

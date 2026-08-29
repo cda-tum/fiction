@@ -9,10 +9,6 @@ namespace fiction::fcn::constants
 {
 
 /**
- * A value of \f$\pi\f$ that is accurate to 11 decimal places.
- */
-inline constexpr double PI = 3.14159265359;
-/**
  * This error margin is used for the comparison of floating-point numbers.
  */
 inline constexpr double ERROR_MARGIN = 1E-6;

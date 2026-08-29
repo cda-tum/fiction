@@ -92,7 +92,6 @@ Physical Constants
 .. doxygenvariable:: fiction::fcn::constants::physical::ELEMENTARY_CHARGE
 .. doxygenvariable:: fiction::fcn::constants::physical::K_E
 .. doxygenvariable:: fiction::fcn::constants::ERROR_MARGIN
-.. doxygenvariable:: fiction::fcn::constants::PI
 
 
 Euclidean distance between two SiDBs in nanometers

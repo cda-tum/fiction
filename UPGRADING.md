@@ -520,6 +520,16 @@ namespace, so within `fiction::qca`, `fiction::inml`, and `fiction::sidb` the st
 shadows the trait. Code in those namespaces that wants the trait must name it
 `fiction::technology<Lyt>` explicitly. Outside them, both resolve as before.
 
+### Removed
+
+`fiction::constants::PI` is gone. It was a `double` "accurate to 11 decimal places", which
+is less precise than the `double` the standard now supplies, and nothing in the library
+used it. Use `std::numbers::pi` from `<numbers>`.
+
+The physical constants beside it stay: the standard library offers mathematical constants
+only, so `EPSILON`, `ELEMENTARY_CHARGE`, `K_E`, `BOLTZMANN_CONSTANT` and `EV_TO_JOULE` have
+no replacement in `<numbers>`.
+
 ### Deliberately unchanged
 
 - **`fiction/traits.hpp` and `fiction/types.hpp`** keep their paths and stay in plain
