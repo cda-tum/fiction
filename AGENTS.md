@@ -76,7 +76,9 @@ one guard per caller, and it leaves no sibling caller broken.
   template-heavy, so every added template parameter costs compile time and instantiation
   surface in every translation unit that includes the header.
 - No scaffolding for a caller that does not exist yet. That caller can scaffold.
-- Deletion over addition. Boring over clever. Fewest files.
+- Deletion over addition. Boring over clever. Fewest files. That last one describes the
+  shape of the solution; it is not a reason to leave a cleanup you found on the way for
+  someone else, which `Working Principles` requires you to ship here.
 - Two options of the same size? Take the one that is correct at the edges. The goal is less
   code, not a flimsier algorithm.
 - Mark a deliberate simplification that cuts a real corner with a known ceiling — an O(n²)
@@ -96,13 +98,15 @@ Cutting one of these is a defect, not minimalism:
   entry, the boxes in `.github/pull_request_template.md`.
 - The check. Non-trivial logic — a branch, a loop, a lifetime, a bound — leaves behind one
   runnable test that fails if the logic breaks. Match the style of the tests around it and
-  add the case, not a suite. A one-line change needs no test.
+  add the case, not a suite. Size is not the criterion: a one-line fix to a bound or a
+  branch is exactly what a regression test protects. A mechanical or documentation-only
+  change needs none.
 
 ### Explaining the code
 
 Code first, then at most three lines: what you skipped, and when to add it. If the
 explanation outruns the code, delete the explanation — a paragraph defending a
-simplification is complexity smuggled back in as prose. A report, walkthrough, or review the
+simplification adds back the complexity it removed. A report, walkthrough, or review the
 maintainer asked for is not padding; give that one in full.
 
 A subagent inherits none of this. Any subagent that plans, writes, or reviews code gets the
