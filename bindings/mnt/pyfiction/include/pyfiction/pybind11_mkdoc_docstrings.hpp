@@ -1057,20 +1057,6 @@ static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_bancs_clocking =
-R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
-Alternating Nanomagnetic Clocking Scheme\" by Ruan Evangelista
-Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI
-2018.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    BANCS clocking scheme.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
 non-empty coordinates in a given layout. Layouts can be of arbitrary
@@ -2274,20 +2260,6 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_cell_level_layout_strg = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_cfe_clocking =
-R"doc(Returns the CFE clocking as defined in \"CFE: a convenient, flexible,
-and efficient clocking scheme for quantum-dot cellular automata\" by
-Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang
-Zhang in IET Circuits, Devices & Systems 2020.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    CFE clocking scheme.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_clocked_layout =
 R"doc(A layout type to layer on top of a coordinate layout, e.g.,
 `cartesian_layout`, `hexagonal_layout`, or `tile_based_layout`. This
@@ -2443,7 +2415,7 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_clocked_layout_is_clocking_scheme =
 R"doc(Compares the stored clocking scheme against the provided name. Names
-of pre-defined clocking schemes are given in the `clock_name`
+of pre-defined clocking schemes are given in the `clocking::name`
 namespace.
 
 Args:
@@ -2536,6 +2508,176 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_clocked_layout_strg = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_bancs =
+R"doc(Returns the BANCS clocking as defined in \"BANCS: Bidirectional
+Alternating Nanomagnetic Clocking Scheme\" by Ruan Evangelista
+Formigoni, Omar P. Vilela Neto, and Jose Augusto M. Nacif in SBCCI
+2018.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    BANCS clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_cfe =
+R"doc(Returns the CFE clocking as defined in \"CFE: a convenient, flexible,
+and efficient clocking scheme for quantum-dot cellular automata\" by
+Feifei Deng, Guang-Jun Xie, Xin Cheng, Zhang Zhang, and Yongqiang
+Zhang in IET Circuits, Devices & Systems 2020.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    CFE clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_columnar =
+R"doc(Returns a linear 1D clocking as originally introduced in \"A device
+architecture for computing with quantum dots\" by C. S. Lent and P. D.
+Tougaw in the Proceedings of the IEEE 1997.
+
+Args:
+    n: Number of clocks.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    Columnar clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_esr =
+R"doc(Returns the ESR clocking as defined in \"An efficient, scalable,
+regular clocking scheme based on quantum dot cellular automata\" by
+Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar
+Saha, and Bibhash Sen in Analog Integrated Circuits and Signal
+Processing 2021.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    ESR clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_get_scheme =
+R"doc(Returns a clocking scheme by name.
+
+Args:
+    scheme_name: Name of the desired clocking scheme.
+
+Template Args:
+    Lyt: Layout type.
+
+Returns:
+    Clocking scheme object that matches the given `scheme_name`, or
+    `std::nullopt` if no clocking scheme by the `name` exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_is_linear =
+R"doc(Checks whether a given clocking scheme is registered as a cycle-free
+one. These currently are
+
+- COLUMNAR - ROW - 2DDWAVE - 2DDWAVEHEX
+
+Args:
+    scm: Clocking scheme to check.
+
+Template Args:
+    Lyt: Layout type.
+
+Returns:
+    `true` iff `scm` is listed as one of the linear clocking schemes.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_num_clks = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_num_clks_FOUR = R"doc(Four clocks.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_num_clks_THREE = R"doc(Three clocks.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_open =
+R"doc(Returns an irregular clocking that maps every coordinate to the
+standard clock. It is intended to be overridden.
+
+Args:
+    n: Number of clocks.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    Irregular clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_ptr =
+R"doc(Returns a smart pointer to the given scheme.
+
+Args:
+    scheme: Universal reference to a clocking scheme.
+
+Template Args:
+    Lyt: Layout type.
+
+Returns:
+    A shared pointer to the given `scm`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_res =
+R"doc(Returns the RES clocking as defined in \"An efficient clocking scheme
+for quantum-dot cellular automata\" by Mrinal Goswami, Anindan Mondal,
+Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in
+International Journal of Electronics Letters 2019.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    RES clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_ripple =
+R"doc(Returns the Ripple clocking as defined in \"Ripple Clock Schemes for
+Quantum-dot Cellular Automata Circuits\" by Prafull Purohit, Master
+Thesis, Rochester Institute of Technology, 2012.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    Ripple clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_row =
+R"doc(Returns a 90° rotated linear 1D clocking based on the one originally
+introduced in \"A device architecture for computing with quantum
+dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE
+1997.
+
+Args:
+    n: Number of clocks.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    Row-based clocking scheme.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_scheme =
 R"doc(Clocking scheme type that assigns a clock number to each element of
 the provided type `ClockZone`. Clocking scheme objects are utilized,
@@ -2553,21 +2695,6 @@ Clocking schemes are uniquely identified via their name.
 Template Args:
     ClockZone: Clock zone type. Usually, a coordinate type in a
                layout.)doc";
-
-static const char *mkd_doc_fiction_layouts_clocking_scheme_clocking_scheme =
-R"doc(Standard constructor.
-
-Args:
-    n: The clocking scheme's name. The name is utilized as the key to
-       uniquely identify a scheme.
-    f: A function that assigns a clock number to each clock zone.
-    in_deg: Maximum possible in-degree in the provided scheme.
-    out_deg: Maximum possible out-degree in the provided scheme.
-    cn: Number of clock phases that make up one clock cycle, i.e., the
-        number of different clock numbers.
-    r: Flag to identify the scheme as regular.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_fn = R"doc(A function that determines clock numbers for given zones.)doc";
 
@@ -2626,10 +2753,39 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_clocking_scheme_regular = R"doc(Defines the clocking as regular and well-defined by the scheme.)doc";
 
-static const char *mkd_doc_fiction_layouts_columnar_clocking =
-R"doc(Returns a linear 1D clocking as originally introduced in \"A device
-architecture for computing with quantum dots\" by C. S. Lent and P. D.
-Tougaw in the Proceedings of the IEEE 1997.
+static const char *mkd_doc_fiction_layouts_clocking_scheme_scheme =
+R"doc(Standard constructor.
+
+Args:
+    n: The clocking scheme's name. The name is utilized as the key to
+       uniquely identify a scheme.
+    f: A function that assigns a clock number to each clock zone.
+    in_deg: Maximum possible in-degree in the provided scheme.
+    out_deg: Maximum possible out-degree in the provided scheme.
+    cn: Number of clock phases that make up one clock cycle, i.e., the
+        number of different clock numbers.
+    r: Flag to identify the scheme as regular.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_srs =
+R"doc(Returns the SRS clocking as defined in \"Simple, robust and systematic
+QCA clocking scheme for area-efficient nanocircuits\" by Mrinal
+Goswami, Tonmoy Jyoti Sharma, and Arpita Nath Boruah in International
+Journal of Electronics Letters 2025.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    SRS clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_twoddwave =
+R"doc(Returns the 2DDWave clocking as defined in \"Clocking and Cell
+Placement for QCA\" by V. Vankamamidi, M. Ottavi, and F. Lombardi in
+IEEE Conference on Nanotechnology 2006.
 
 Args:
     n: Number of clocks.
@@ -2638,7 +2794,51 @@ Template Args:
     Lyt: Clocked layout type.
 
 Returns:
-    Columnar clocking scheme.
+    2DDWave clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_twoddwave_hex =
+R"doc(Returns a hexagonal variation of the 2DDWave clocking as originally
+defined in \"Clocking and Cell Placement for QCA\" by V. Vankamamidi,
+M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
+
+Args:
+    n: Number of clocks.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    Hexagonal 2DDWave clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_unsupported_scheme_exception =
+R"doc(Exception to be thrown when an unsupported clocking scheme is
+requested.)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_unsupported_scheme_exception_unsupported_scheme_exception = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_unsupported_scheme_exception_what =
+R"doc(Returns the diagnostic message for an unsupported clocking scheme.
+
+Returns:
+    A null-terminated diagnostic message.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_clocking_use =
+R"doc(Returns the USE clocking as defined in \"USE: A Universal, Scalable,
+and Efficient Clocking Scheme for QCA\" by Caio Araujo T. Campos,
+Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD
+2015.
+
+Template Args:
+    Lyt: Clocked layout type.
+
+Returns:
+    USE clocking scheme.
 
 )doc";
 
@@ -3375,21 +3575,6 @@ Template Args:
 
 Returns:
     Volume of coord.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_esr_clocking =
-R"doc(Returns the ESR clocking as defined in \"An efficient, scalable,
-regular clocking scheme based on quantum dot cellular automata\" by
-Jayanta Pal, Amit Kumar Pramanik, Jyotirmoy Sil Sharma, Apu Kumar
-Saha, and Bibhash Sen in Analog Integrated Circuits and Signal
-Processing 2021.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    ESR clocking scheme.
 
 )doc";
 
@@ -4666,21 +4851,6 @@ static const char *mkd_doc_fiction_layouts_gate_level_layout_trav_id = R"doc()do
 static const char *mkd_doc_fiction_layouts_gate_level_layout_value = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_gate_level_layout_visited = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_get_clocking_scheme =
-R"doc(Returns a clocking scheme by name.
-
-Args:
-    name: Name of the desired clocking scheme.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    Clocking scheme object that matches the given `name`, or
-    `std::nullopt` if no clocking scheme by the given `name` exists.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_hexagonal_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -6115,30 +6285,6 @@ static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_
 
 static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
-static const char *mkd_doc_fiction_layouts_is_linear_scheme =
-R"doc(Checks whether a given clocking scheme is registered as a cycle-free
-one. These currently are
-
-- COLUMNAR - ROW - 2DDWAVE - 2DDWAVEHEX
-
-Args:
-    scheme: Clocking scheme to check.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    `true` iff `scheme` is listed as one of the linear clocking
-    schemes.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_num_clks = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_num_clks_FOUR = R"doc(Four clocks.)doc";
-
-static const char *mkd_doc_fiction_layouts_num_clks_THREE = R"doc(Three clocks.)doc";
-
 static const char *mkd_doc_fiction_layouts_obstruction_layout =
 R"doc(A layout type to layer on top of any coordinate layout. It implements
 a unified obstruction interface that determines whether a coordinate
@@ -6228,21 +6374,6 @@ R"doc(
 \ /     \ /     \ /
 ```)doc";
 
-static const char *mkd_doc_fiction_layouts_open_clocking =
-R"doc(Returns an irregular clocking that maps every coordinate to the
-standard clock. It is intended to be overridden.
-
-Args:
-    n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    Irregular clocking scheme.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_pointy_top_hex =
 R"doc( 
 ```
@@ -6253,64 +6384,6 @@ R"doc(
 \     /
 \ /
 ```)doc";
-
-static const char *mkd_doc_fiction_layouts_ptr =
-R"doc(Returns a smart pointer to the given scheme.
-
-Args:
-    scheme: Universal reference to a clocking scheme.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    A shared pointer to the given `scheme`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_res_clocking =
-R"doc(Returns the RES clocking as defined in \"An efficient clocking scheme
-for quantum-dot cellular automata\" by Mrinal Goswami, Anindan Mondal,
-Mahabub Hasan Mahalat, Bibhash Sen, and Biplab K. Sikdar in
-International Journal of Electronics Letters 2019.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    RES clocking scheme.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_ripple_clocking =
-R"doc(Returns the Ripple clocking as defined in \"Ripple Clock Schemes for
-Quantum-dot Cellular Automata Circuits\" by Prafull Purohit, Master
-Thesis, Rochester Institute of Technology, 2012.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    Ripple clocking scheme.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_row_clocking =
-R"doc(Returns a 90° rotated linear 1D clocking based on the one originally
-introduced in \"A device architecture for computing with quantum
-dots\" by C. S. Lent and P. D. Tougaw in the Proceedings of the IEEE
-1997.
-
-Args:
-    n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    Row-based clocking scheme.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -6344,20 +6417,6 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout_shifted_cartesian_layout_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_srs_clocking =
-R"doc(Returns the SRS clocking as defined in \"Simple, robust and systematic
-QCA clocking scheme for area-efficient nanocircuits\" by Mrinal
-Goswami, Tonmoy Jyoti Sharma, and Arpita Nath Boruah in International
-Journal of Electronics Letters 2025.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    SRS clocking scheme.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_synchronization_element_layout =
 R"doc(This layout provides synchronization elements on top of a clocked
@@ -6649,66 +6708,6 @@ static const char *mkd_doc_fiction_layouts_tile_based_layout_tile_based_layout_2
 static const char *mkd_doc_fiction_layouts_tile_based_layout_tile_based_layout_3 = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_tile_based_layout_tiles = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_twoddwave_clocking =
-R"doc(Returns the 2DDWave clocking as defined in \"Clocking and Cell
-Placement for QCA\" by V. Vankamamidi, M. Ottavi, and F. Lombardi in
-IEEE Conference on Nanotechnology 2006.
-
-Args:
-    n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    2DDWave clocking scheme.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_twoddwave_hex_clocking =
-R"doc(Returns a hexagonal variation of the 2DDWave clocking as originally
-defined in \"Clocking and Cell Placement for QCA\" by V. Vankamamidi,
-M. Ottavi, and F. Lombardi in IEEE Conference on Nanotechnology 2006.
-
-Args:
-    n: Number of clocks.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    Hexagonal 2DDWave clocking scheme.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_unsupported_clocking_scheme_exception =
-R"doc(Exception to be thrown when an unsupported clocking scheme is
-requested.)doc";
-
-static const char *mkd_doc_fiction_layouts_unsupported_clocking_scheme_exception_unsupported_clocking_scheme_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_unsupported_clocking_scheme_exception_what =
-R"doc(Returns the diagnostic message for an unsupported clocking scheme.
-
-Returns:
-    A null-terminated diagnostic message.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_use_clocking =
-R"doc(Returns the USE clocking as defined in \"USE: A Universal, Scalable,
-and Efficient Clocking Scheme for QCA\" by Caio Araujo T. Campos,
-Abner L. Marciano, Omar P. Vilela Neto, and Frank Sill Torres in TCAD
-2015.
-
-Template Args:
-    Lyt: Clocked layout type.
-
-Returns:
-    USE clocking scheme.
-
-)doc";
 
 static const char *mkd_doc_fiction_layouts_utils_all_coordinates_in_spanned_area =
 R"doc(Generates a vector of all coordinates within an area spanned by two
