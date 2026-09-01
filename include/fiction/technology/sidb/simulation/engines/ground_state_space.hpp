@@ -8,8 +8,8 @@
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -66,10 +66,11 @@ struct ground_state_space_params
 struct ground_state_space_results
 {
     /**
-     * The top cluster is the root of the cluster hierarchy. It therefore allows access to the entire cluster hierarchy,
-     * including the charge spaces of each cluster.
+     * The root of the cluster hierarchy the construction built, with the charge space of every cluster below it. The
+     * hierarchy is the engines' working state: `detail::cluster` and what it points to are implementation, not API,
+     * and may change without notice.
      */
-    const sidb::model::cluster_ptr top_cluster{nullptr};
+    const detail::cluster_ptr top_cluster{nullptr};
     /**
      * The runtime of the construction is stored.
      */
@@ -128,7 +129,7 @@ class ground_state_space_impl
      */
     ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
             params{parameters},
-            top_cluster{sidb::model::to_sidb_cluster(sidb::model::cluster_hierarchy(lyt))},
+            top_cluster{to_cluster(cluster_hierarchy(lyt))},
             clst{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.sim_params))},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
@@ -255,18 +256,18 @@ class ground_state_space_impl
      * minimum and maximum electrostatic potential.
      * @return The clst that contains only singleton clusters, one for each SiDB in the layout.
      */
-    [[nodiscard]] static sidb::model::clustering get_initial_clustering(
-        const sidb::model::cluster_ptr&                                    c,
+    [[nodiscard]] static clustering get_initial_clustering(
+        const cluster_ptr&                                                 c,
         const std::pair<sidb::surfaces::charge_distribution_surface<Lyt>,
                         sidb::surfaces::charge_distribution_surface<Lyt>>& local_potential_bound_containers) noexcept
     {
         const auto& [min_loc_pot_cds, max_loc_pot_cds] = local_potential_bound_containers;
 
-        sidb::model::clustering clst{};
+        clustering clst{};
 
         if (c->children.empty())
         {
-            const uint64_t i = sidb::model::get_singleton_sidb_ix(c);
+            const uint64_t i = get_singleton_ix(c);
 
             assert(min_loc_pot_cds.get_local_potential_caused_by_defects_by_index(i).has_value() &&
                    "SiDB i is out of range");
@@ -284,26 +285,25 @@ class ground_state_space_impl
             c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot,
                                                          min_loc_pot_cds.get_simulation_params().base, c);
 
-            c->pot_projs[i] = sidb::model::potential_projection_order{
-                -loc_ext_pot, min_loc_pot_cds.get_simulation_params().base, true};
+            c->pot_projs[i] =
+                potential_projection_order{-loc_ext_pot, min_loc_pot_cds.get_simulation_params().base, true};
 
             for (uint64_t j = 0; j < min_loc_pot_cds.num_cells(); ++j)
             {
                 if (j != i)
                 {
-                    c->pot_projs[j] = sidb::model::potential_projection_order{
-                        min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
-                        min_loc_pot_cds.get_simulation_params().base};
+                    c->pot_projs[j] =
+                        potential_projection_order{min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
+                                                   min_loc_pot_cds.get_simulation_params().base};
                 }
             }
 
             clst.emplace(c);
         }
 
-        for (const sidb::model::cluster_ptr& child : c->children)
+        for (const cluster_ptr& child : c->children)
         {
-            const sidb::model::clustering& child_clustering =
-                get_initial_clustering(child, local_potential_bound_containers);
+            const clustering& child_clustering = get_initial_clustering(child, local_potential_bound_containers);
             clst.insert(child_clustering.cbegin(), child_clustering.cend());
         }
 
@@ -319,9 +319,9 @@ class ground_state_space_impl
      * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
      * with a multiset charge configuration of the given cluster.
      */
-    template <sidb::model::bound_direction bound>
-    [[nodiscard]] static constexpr sidb::model::potential_projection
-    get_projection_bound(const sidb::model::cluster_ptr& c, const uint64_t sidb_ix) noexcept
+    template <bound_direction bound>
+    [[nodiscard]] static constexpr potential_projection get_projection_bound(const cluster_ptr& c,
+                                                                             const uint64_t     sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_bound<bound>();
     }
@@ -335,9 +335,9 @@ class ground_state_space_impl
      * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
      * with a multiset charge configuration of the given cluster.
      */
-    template <sidb::model::bound_direction bound>
-    [[nodiscard]] static constexpr double get_next_projected_pot_bound(const sidb::model::cluster_ptr& c,
-                                                                       const uint64_t                  sidb_ix) noexcept
+    template <bound_direction bound>
+    [[nodiscard]] static constexpr double get_next_projected_pot_bound(const cluster_ptr& c,
+                                                                       const uint64_t     sidb_ix) noexcept
     {
         return c->pot_projs.at(sidb_ix).get_next_bound<bound>().pot_val;
     }
@@ -352,9 +352,9 @@ class ground_state_space_impl
      * @return The potential projection associated with this bound; i.e., an electrostatic potential (in V) associated
      * with the given projector state.
      */
-    template <sidb::model::bound_direction bound>
-    [[nodiscard]] static constexpr sidb::model::potential_projection
-    get_projector_state_bound(const sidb::model::cluster_projector_state& pst, const uint64_t sidb_ix) noexcept
+    template <bound_direction bound>
+    [[nodiscard]] static constexpr potential_projection get_projector_state_bound(const cluster_projector_state& pst,
+                                                                                  const uint64_t sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf);
     }
@@ -368,8 +368,8 @@ class ground_state_space_impl
      * @param sidb_ix SiDB that receives the given potential projection from `c`.
      * @param pp Potential projection from `c` to `sidb_ix` to add.
      */
-    static constexpr void add_pot_projection(const sidb::model::cluster_ptr& c, const uint64_t sidb_ix,
-                                             const sidb::model::potential_projection& pp) noexcept
+    static constexpr void add_pot_projection(const cluster_ptr& c, const uint64_t sidb_ix,
+                                             const potential_projection& pp) noexcept
     {
         c->pot_projs[sidb_ix].add(pp);
     }
@@ -381,9 +381,8 @@ class ground_state_space_impl
      * @param rm_pst Projector state to move all occurrences of in the projection onto `sidb_ix`.
      * @param sidb_ix SiDB that receives the potential projections to be removed.
      */
-    static constexpr void
-    remove_all_cluster_charge_state_occurrences(const sidb::model::cluster_projector_state& rm_pst,
-                                                const uint64_t                              sidb_ix) noexcept
+    static constexpr void remove_all_cluster_charge_state_occurrences(const cluster_projector_state& rm_pst,
+                                                                      const uint64_t                 sidb_ix) noexcept
     {
         rm_pst.cluster->pot_projs[sidb_ix].remove_m_conf(rm_pst.multiset_conf);
     }
@@ -398,12 +397,11 @@ class ground_state_space_impl
      * @param rst Receptor state that contains the cluster object at which the accumulation of externally received
      * potentials may need to be updated, and the relevant SiDB that receives the potential projection.
      */
-    template <sidb::model::bound_direction bound>
-    static constexpr void
-    update_external_pot_projection_if_bound_removed(const sidb::model::cluster_projector_state& pst,
-                                                    const sidb::model::cluster_receptor_state&  rst) noexcept
+    template <bound_direction bound>
+    static constexpr void update_external_pot_projection_if_bound_removed(const cluster_projector_state& pst,
+                                                                          const cluster_receptor_state&  rst) noexcept
     {
-        const sidb::model::potential_projection& cur_bound = get_projection_bound<bound>(pst.cluster, rst.sidb_ix);
+        const potential_projection& cur_bound = get_projection_bound<bound>(pst.cluster, rst.sidb_ix);
 
         if (cur_bound.multiset == pst.multiset_conf)
         {
@@ -422,11 +420,11 @@ class ground_state_space_impl
      * @param rst Receptor state at which the updates to the accumulation of externally received potential should be
      * made when necessary.
      */
-    constexpr void update_external_potential_projection(const sidb::model::cluster_projector_state& pst,
-                                                        const sidb::model::cluster_receptor_state&  rst) const noexcept
+    constexpr void update_external_potential_projection(const cluster_projector_state& pst,
+                                                        const cluster_receptor_state&  rst) const noexcept
     {
-        update_external_pot_projection_if_bound_removed<sidb::model::bound_direction::LOWER>(pst, rst);
-        update_external_pot_projection_if_bound_removed<sidb::model::bound_direction::UPPER>(pst, rst);
+        update_external_pot_projection_if_bound_removed<bound_direction::LOWER>(pst, rst);
+        update_external_pot_projection_if_bound_removed<bound_direction::UPPER>(pst, rst);
 
         // remove projection
         remove_all_cluster_charge_state_occurrences(pst, rst.sidb_ix);
@@ -438,10 +436,10 @@ class ground_state_space_impl
      * @param pst Projector state of which the multiset charge configuration is to be purged from the cluster hierarchy
      * data structure.
      */
-    void handle_invalid_state(const sidb::model::cluster_projector_state& pst) noexcept
+    void handle_invalid_state(const cluster_projector_state& pst) noexcept
     {
         // pruned multiset---update projections onto each other cluster (which respectively update their received store)
-        for (const sidb::model::cluster_ptr& other_c : clst)
+        for (const cluster_ptr& other_c : clst)
         {
             if (other_c == pst.cluster)
             {
@@ -450,8 +448,8 @@ class ground_state_space_impl
 
             for (const uint64_t sidb_ix : other_c->sidbs)
             {
-                update_external_potential_projection(
-                    pst, sidb::model::cluster_receptor_state{.cluster = other_c, .sidb_ix = sidb_ix});
+                update_external_potential_projection(pst,
+                                                     cluster_receptor_state{.cluster = other_c, .sidb_ix = sidb_ix});
             }
         }
     }
@@ -495,7 +493,7 @@ class ground_state_space_impl
         /**
          * Constructor. Converts the multiset charge configuration into requirements for each charge state.
          */
-        explicit witness_partitioning_state(const sidb::model::cluster_projector_state& pst) noexcept :
+        explicit witness_partitioning_state(const cluster_projector_state& pst) noexcept :
                 required_neg_count{pst.get_count<sidb::model::charge_state::NEGATIVE>()},
                 required_pos_count{pst.get_count<sidb::model::charge_state::POSITIVE>()},
                 required_neut_count{pst.get_count<sidb::model::charge_state::NEUTRAL>()}
@@ -658,27 +656,25 @@ class ground_state_space_impl
      * SiDB.
      */
     template <potential_bound_analysis_mode mode>
-    [[nodiscard]] static std::pair<double, double> get_received_potential_bounds(
-        const sidb::model::cluster_projector_state& pst, const uint64_t sidb_ix,
-        const std::optional<sidb::model::complete_potential_bounds_store>& composition_pot_bounds) noexcept
+    [[nodiscard]] static std::pair<double, double>
+    get_received_potential_bounds(const cluster_projector_state& pst, const uint64_t sidb_ix,
+                                  const std::optional<complete_potential_bounds_store>& composition_pot_bounds) noexcept
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
             // this considers the flattened self-projection (defined below---CTRL+F)
-            return {get_projector_state_bound<sidb::model::bound_direction::LOWER>(pst, sidb_ix).pot_val +
-                        pst.cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::LOWER>(sidb_ix),
-                    get_projector_state_bound<sidb::model::bound_direction::UPPER>(pst, sidb_ix).pot_val +
-                        pst.cluster->received_ext_pot_bounds.get<sidb::model::bound_direction::UPPER>(sidb_ix)};
+            return {get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val +
+                        pst.cluster->received_ext_pot_bounds.get<bound_direction::LOWER>(sidb_ix),
+                    get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val +
+                        pst.cluster->received_ext_pot_bounds.get<bound_direction::UPPER>(sidb_ix)};
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
             // this considers the flattened self-projection of the previous level
-            return {composition_pot_bounds.value().get<sidb::model::bound_direction::LOWER>(sidb_ix) +
-                        pst.cluster->parent.lock()->received_ext_pot_bounds.get<sidb::model::bound_direction::LOWER>(
-                            sidb_ix),
-                    composition_pot_bounds.value().get<sidb::model::bound_direction::UPPER>(sidb_ix) +
-                        pst.cluster->parent.lock()->received_ext_pot_bounds.get<sidb::model::bound_direction::UPPER>(
-                            sidb_ix)};
+            return {composition_pot_bounds.value().get<bound_direction::LOWER>(sidb_ix) +
+                        pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::LOWER>(sidb_ix),
+                    composition_pot_bounds.value().get<bound_direction::UPPER>(sidb_ix) +
+                        pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::UPPER>(sidb_ix)};
         }
     }
     /**
@@ -693,10 +689,9 @@ class ground_state_space_impl
      * @return `false` if and only if `pst` can be excluded from the *Ground State Space*.
      */
     template <potential_bound_analysis_mode mode>
-    [[nodiscard]] bool perform_potential_bound_analysis(
-        const sidb::model::cluster_projector_state&                        pst,
-        const std::optional<sidb::model::complete_potential_bounds_store>& composition_potential_bounds =
-            std::nullopt) const noexcept
+    [[nodiscard]] bool perform_potential_bound_analysis(const cluster_projector_state& pst,
+                                                        const std::optional<complete_potential_bounds_store>&
+                                                            composition_potential_bounds = std::nullopt) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -753,7 +748,7 @@ class ground_state_space_impl
      * @param c The cluster to check the charge space of.
      * @return `true` if and only if charge space of `c` has no invalid elements.
      */
-    [[nodiscard]] bool check_charge_space(const sidb::model::cluster_ptr& c) noexcept
+    [[nodiscard]] bool check_charge_space(const cluster_ptr& c) noexcept
     {
         // skip if |charge space| = 1
         if (c->charge_space.size() == 1)
@@ -767,9 +762,9 @@ class ground_state_space_impl
         removed_ms.reserve(c->charge_space.size());
 
         // perform potential bound analysis on every multiset in the charge space
-        for (const sidb::model::cluster_charge_state& m : c->charge_space)
+        for (const cluster_charge_state& m : c->charge_space)
         {
-            const sidb::model::cluster_projector_state pst{.cluster = c, .multiset_conf = static_cast<uint64_t>(m)};
+            const cluster_projector_state pst{.cluster = c, .multiset_conf = static_cast<uint64_t>(m)};
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_MULTISET>(pst))
             {
@@ -781,7 +776,7 @@ class ground_state_space_impl
 
         for (const uint64_t m : removed_ms)
         {
-            c->charge_space.erase(sidb::model::cluster_charge_state{m});
+            c->charge_space.erase(cluster_charge_state{m});
         }
 
         return fixpoint;
@@ -799,7 +794,7 @@ class ground_state_space_impl
         bool fixpoint = true;
 
         // make a pass over the clst and see if the charge spaces contain invalid cluster charge states
-        for (const sidb::model::cluster_ptr& c : clst)
+        for (const cluster_ptr& c : clst)
         {
             if (!skip_cluster.has_value() || c->uid != *skip_cluster)
             {
@@ -817,24 +812,24 @@ class ground_state_space_impl
      *
      * @param parent The newly-forming parent cluster whose children's charge spaces become fixed upon their merging.
      */
-    void write_children_pot_bounds_to_complete_store(const sidb::model::cluster_ptr& parent) const noexcept
+    void write_children_pot_bounds_to_complete_store(const cluster_ptr& parent) const noexcept
     {
-        for (const sidb::model::cluster_ptr& child : parent->children)
+        for (const cluster_ptr& child : parent->children)
         {
-            for (const sidb::model::cluster_charge_state& m : child->charge_space)
+            for (const cluster_charge_state& m : child->charge_space)
             {
                 const auto ccs = static_cast<uint64_t>(m);
 
-                const sidb::model::cluster_projector_state pst{.cluster = child, .multiset_conf = ccs};
+                const cluster_projector_state pst{.cluster = child, .multiset_conf = ccs};
 
-                sidb::model::complete_potential_bounds_store complete_pot_store{};
+                complete_potential_bounds_store complete_pot_store{};
                 complete_pot_store.initialize_complete_potential_bounds(top_cluster->num_sidbs());
 
                 for (const uint64_t sidb_ix : top_cluster->sidbs)
                 {
-                    complete_pot_store.set(
-                        sidb_ix, get_projector_state_bound<sidb::model::bound_direction::LOWER>(pst, sidb_ix).pot_val,
-                        get_projector_state_bound<sidb::model::bound_direction::UPPER>(pst, sidb_ix).pot_val);
+                    complete_pot_store.set(sidb_ix,
+                                           get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val,
+                                           get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val);
                 }
 
                 child->pot_projs_complete_store[ccs] = std::move(complete_pot_store);
@@ -852,29 +847,24 @@ class ground_state_space_impl
      * @return The number of projector states that is the accumulation of the number of projector states in the
      * composition of each charge space element of each child.
      */
-    [[nodiscard]] static uint64_t
-    compute_external_pot_bounds_for_saved_compositions(const sidb::model::cluster_ptr& parent) noexcept
+    [[nodiscard]] static uint64_t compute_external_pot_bounds_for_saved_compositions(const cluster_ptr& parent) noexcept
     {
         uint64_t saved_projector_states = 0;
 
-        for (const sidb::model::cluster_ptr& child : parent->children)
+        for (const cluster_ptr& child : parent->children)
         {
-            for (const sidb::model::cluster_charge_state& m : child->charge_space)
+            for (const cluster_charge_state& m : child->charge_space)
             {
-                for (sidb::model::charge_space_composition& composition : m.compositions)
+                for (charge_space_composition& composition : m.compositions)
                 {
                     for (const uint64_t sidb_ix : child->external_sidbs)
                     {
-                        for (const sidb::model::cluster_projector_state& child_pst_of_child : composition.proj_states)
+                        for (const cluster_projector_state& child_pst_of_child : composition.proj_states)
                         {
                             composition.pot_bounds.update(
                                 sidb_ix,
-                                get_projector_state_bound<sidb::model::bound_direction::LOWER>(child_pst_of_child,
-                                                                                               sidb_ix)
-                                    .pot_val,
-                                get_projector_state_bound<sidb::model::bound_direction::UPPER>(child_pst_of_child,
-                                                                                               sidb_ix)
-                                    .pot_val);
+                                get_projector_state_bound<bound_direction::LOWER>(child_pst_of_child, sidb_ix).pot_val,
+                                get_projector_state_bound<bound_direction::UPPER>(child_pst_of_child, sidb_ix).pot_val);
                         }
                     }
 
@@ -893,13 +883,13 @@ class ground_state_space_impl
      * @param parent The newly forming parent cluster.
      * @param child_rst Receptor state from one of the children of the parent.
      */
-    template <sidb::model::bound_direction bound>
-    void subtract_sibling_pot_from_received_ext_pot_bound(
-        const sidb::model::cluster_ptr& parent, const sidb::model::cluster_receptor_state& child_rst) const noexcept
+    template <bound_direction bound>
+    void subtract_sibling_pot_from_received_ext_pot_bound(const cluster_ptr&            parent,
+                                                          const cluster_receptor_state& child_rst) const noexcept
     {
         double received_pot_without_siblings = child_rst.cluster->received_ext_pot_bounds.get<bound>(child_rst.sidb_ix);
 
-        for (const sidb::model::cluster_ptr& sibling : parent->children)
+        for (const cluster_ptr& sibling : parent->children)
         {
             if (sibling != child_rst.cluster)
             {
@@ -915,17 +905,15 @@ class ground_state_space_impl
      *
      * @param parent The newly forming parent cluster.
      */
-    void derive_children_received_bounds_without_siblings(const sidb::model::cluster_ptr& parent) const noexcept
+    void derive_children_received_bounds_without_siblings(const cluster_ptr& parent) const noexcept
     {
-        for (const sidb::model::cluster_ptr& child : parent->children)
+        for (const cluster_ptr& child : parent->children)
         {
             for (const uint64_t sidb_ix : child->sidbs)
             {
-                const sidb::model::cluster_receptor_state child_rst{.cluster = child, .sidb_ix = sidb_ix};
-                subtract_sibling_pot_from_received_ext_pot_bound<sidb::model::bound_direction::LOWER>(parent,
-                                                                                                      child_rst);
-                subtract_sibling_pot_from_received_ext_pot_bound<sidb::model::bound_direction::UPPER>(parent,
-                                                                                                      child_rst);
+                const cluster_receptor_state child_rst{.cluster = child, .sidb_ix = sidb_ix};
+                subtract_sibling_pot_from_received_ext_pot_bound<bound_direction::LOWER>(parent, child_rst);
+                subtract_sibling_pot_from_received_ext_pot_bound<bound_direction::UPPER>(parent, child_rst);
             }
         }
     }
@@ -940,25 +928,23 @@ class ground_state_space_impl
      * element of their direct parent.
      * @return `false` if and only if the given composition can be rejected.
      */
-    [[nodiscard]] bool verify_composition(sidb::model::charge_space_composition& composition) const noexcept
+    [[nodiscard]] bool verify_composition(charge_space_composition& composition) const noexcept
     {
         // initialize the composition potential bounds to (0.0, 0.0) for all SiDBs
         composition.pot_bounds.initialize_complete_potential_bounds(top_cluster->num_sidbs());
 
         // perform physically informed space pruning for a multiset composition
-        for (sidb::model::cluster_projector_state& receiving_pst : composition.proj_states)
+        for (cluster_projector_state& receiving_pst : composition.proj_states)
         {
             for (const uint64_t sidb_ix : receiving_pst.cluster->sidbs)
             {
                 double internal_pot_lb{};
                 double internal_pot_ub{};
 
-                for (const sidb::model::cluster_projector_state& pst : composition.proj_states)
+                for (const cluster_projector_state& pst : composition.proj_states)
                 {
-                    internal_pot_lb +=
-                        get_projector_state_bound<sidb::model::bound_direction::LOWER>(pst, sidb_ix).pot_val;
-                    internal_pot_ub +=
-                        get_projector_state_bound<sidb::model::bound_direction::UPPER>(pst, sidb_ix).pot_val;
+                    internal_pot_lb += get_projector_state_bound<bound_direction::LOWER>(pst, sidb_ix).pot_val;
+                    internal_pot_ub += get_projector_state_bound<bound_direction::UPPER>(pst, sidb_ix).pot_val;
                 }
 
                 composition.pot_bounds.set(sidb_ix, internal_pot_lb, internal_pot_ub);
@@ -988,8 +974,8 @@ class ground_state_space_impl
      * verification passes. After, `m` is dynamically transformed to the next combination until no new combination
      * exists.
      */
-    void fill_merged_charge_state_space(const sidb::model::cluster_ptr& parent, const uint64_t cur_child_ix,
-                                        sidb::model::cluster_charge_state& m) const noexcept
+    void fill_merged_charge_state_space(const cluster_ptr& parent, const uint64_t cur_child_ix,
+                                        cluster_charge_state& m) const noexcept
     {
         if (cur_child_ix >= parent->children.size())
         {
@@ -1012,14 +998,12 @@ class ground_state_space_impl
             return;
         }
 
-        const sidb::model::cluster_ptr& cur_child =
-            *std::next(parent->children.cbegin(), static_cast<int64_t>(cur_child_ix));
+        const cluster_ptr& cur_child = *std::next(parent->children.cbegin(), static_cast<int64_t>(cur_child_ix));
 
-        for (const sidb::model::cluster_charge_state& m_part : cur_child->charge_space)
+        for (const cluster_charge_state& m_part : cur_child->charge_space)
         {
             m.compositions.front().proj_states.emplace_back(
-                sidb::model::cluster_projector_state{.cluster       = cur_child,
-                                                     .multiset_conf = static_cast<uint64_t>(m_part)});
+                cluster_projector_state{.cluster = cur_child, .multiset_conf = static_cast<uint64_t>(m_part)});
             m += m_part;
 
             fill_merged_charge_state_space(parent, cur_child_ix + 1, m);
@@ -1034,9 +1018,9 @@ class ground_state_space_impl
      *
      * @param parent The parent cluster to which charge spaces are combined.
      */
-    void construct_merged_charge_state_space(const sidb::model::cluster_ptr& parent) const noexcept
+    void construct_merged_charge_state_space(const cluster_ptr& parent) const noexcept
     {
-        sidb::model::cluster_charge_state m{};
+        cluster_charge_state m{};
         m.compositions.emplace_back();
 
         fill_merged_charge_state_space(parent, 0, m);
@@ -1049,18 +1033,17 @@ class ground_state_space_impl
      * @param parent The newly-forming parent cluster.
      * @param rst The receptor state with the receiving SiDB that is currently handled.
      */
-    template <sidb::model::bound_direction bound>
-    void merge_pot_projection_bounds(const sidb::model::cluster_ptr&            parent,
-                                     const sidb::model::cluster_receptor_state& rst) const noexcept
+    template <bound_direction bound>
+    void merge_pot_projection_bounds(const cluster_ptr& parent, const cluster_receptor_state& rst) const noexcept
     {
         // construct external projected potential bounds for every composition of every element in the charge space
-        for (const sidb::model::cluster_charge_state& m : parent->charge_space)
+        for (const cluster_charge_state& m : parent->charge_space)
         {
-            for (const sidb::model::charge_space_composition& composition : m.compositions)
+            for (const charge_space_composition& composition : m.compositions)
             {
-                sidb::model::potential_projection pot_proj_onto_other_c{};
+                potential_projection pot_proj_onto_other_c{};
 
-                for (const sidb::model::cluster_projector_state& pst : composition.proj_states)
+                for (const cluster_projector_state& pst : composition.proj_states)
                 {
                     pot_proj_onto_other_c += get_projector_state_bound<bound>(pst, rst.sidb_ix);
                 }
@@ -1072,7 +1055,7 @@ class ground_state_space_impl
         // update the received external potential bound for the subject
         double diff = get_projection_bound<bound>(parent, rst.sidb_ix).pot_val;
 
-        for (const sidb::model::cluster_ptr& child : parent->children)
+        for (const cluster_ptr& child : parent->children)
         {
             diff -= get_projection_bound<bound>(child, rst.sidb_ix).pot_val;
         }
@@ -1086,17 +1069,17 @@ class ground_state_space_impl
      *
      * @param parent The newly-forming parent cluster.
      */
-    void construct_merged_potential_projections(const sidb::model::cluster_ptr& parent) const noexcept
+    void construct_merged_potential_projections(const cluster_ptr& parent) const noexcept
     {
         // merge the projections of the children to projections of the parent
-        for (const sidb::model::cluster_ptr& non_child : clst)
+        for (const cluster_ptr& non_child : clst)
         {
             for (const uint64_t sidb_ix : non_child->sidbs)
             {
-                const sidb::model::cluster_receptor_state rst{.cluster = non_child, .sidb_ix = sidb_ix};
+                const cluster_receptor_state rst{.cluster = non_child, .sidb_ix = sidb_ix};
 
-                merge_pot_projection_bounds<sidb::model::bound_direction::LOWER>(parent, rst);
-                merge_pot_projection_bounds<sidb::model::bound_direction::UPPER>(parent, rst);
+                merge_pot_projection_bounds<bound_direction::LOWER>(parent, rst);
+                merge_pot_projection_bounds<bound_direction::UPPER>(parent, rst);
             }
         }
     }
@@ -1110,27 +1093,25 @@ class ground_state_space_impl
      *
      * @param parent The newly-forming parent cluster.
      */
-    static void compute_meets_for_internal_pot_bounds(const sidb::model::cluster_ptr& parent) noexcept
+    static void compute_meets_for_internal_pot_bounds(const cluster_ptr& parent) noexcept
     {
-        for (const sidb::model::cluster_charge_state& m : parent->charge_space)
+        for (const cluster_charge_state& m : parent->charge_space)
         {
             for (const uint64_t sidb_ix : parent->sidbs)
             {
-                double lb_meet = sidb::model::potential_bound_top<sidb::model::bound_direction::LOWER>();
-                double ub_meet = sidb::model::potential_bound_top<sidb::model::bound_direction::UPPER>();
+                double lb_meet = potential_bound_top<bound_direction::LOWER>();
+                double ub_meet = potential_bound_top<bound_direction::UPPER>();
 
-                for (const sidb::model::charge_space_composition& composition : m.compositions)
+                for (const charge_space_composition& composition : m.compositions)
                 {
-                    sidb::model::take_meet_of_potential_bounds<sidb::model::bound_direction::LOWER>(
-                        lb_meet, composition.pot_bounds.get<sidb::model::bound_direction::LOWER>(sidb_ix));
-                    sidb::model::take_meet_of_potential_bounds<sidb::model::bound_direction::UPPER>(
-                        ub_meet, composition.pot_bounds.get<sidb::model::bound_direction::UPPER>(sidb_ix));
+                    take_meet_of_potential_bounds<bound_direction::LOWER>(
+                        lb_meet, composition.pot_bounds.get<bound_direction::LOWER>(sidb_ix));
+                    take_meet_of_potential_bounds<bound_direction::UPPER>(
+                        ub_meet, composition.pot_bounds.get<bound_direction::UPPER>(sidb_ix));
                 }
 
-                add_pot_projection(parent, sidb_ix,
-                                   sidb::model::potential_projection{lb_meet, static_cast<uint64_t>(m)});
-                add_pot_projection(parent, sidb_ix,
-                                   sidb::model::potential_projection{ub_meet, static_cast<uint64_t>(m)});
+                add_pot_projection(parent, sidb_ix, potential_projection{lb_meet, static_cast<uint64_t>(m)});
+                add_pot_projection(parent, sidb_ix, potential_projection{ub_meet, static_cast<uint64_t>(m)});
             }
         }
     }
@@ -1151,12 +1132,12 @@ class ground_state_space_impl
         }
 
         // find the parent with the minimum cluster size
-        const sidb::model::cluster_ptr& min_parent =
-            (*std::ranges::min_element(clst, [](const sidb::model::cluster_ptr& c1, const sidb::model::cluster_ptr& c2)
+        const cluster_ptr& min_parent =
+            (*std::ranges::min_element(clst, [](const cluster_ptr& c1, const cluster_ptr& c2)
                                        { return c1->get_parent()->num_sidbs() < c2->get_parent()->num_sidbs(); }))
                 ->get_parent();
 
-        for (const sidb::model::cluster_ptr& c : min_parent->children)
+        for (const cluster_ptr& c : min_parent->children)
         {
             clst.erase(c);
         }
@@ -1206,11 +1187,11 @@ class ground_state_space_impl
     /**
      * The top cluster, the cluster that contains all SiDBs, is returned as the result of the construction.
      */
-    const sidb::model::cluster_ptr top_cluster;
+    const cluster_ptr top_cluster;
     /**
      * The clst starts at all singletons, then moves up through merges until only the top cluster remains
      */
-    sidb::model::clustering clst;
+    clustering clst;
     /**
      * Count the total number of projector states that are stored in the constructed hierarchy.
      */

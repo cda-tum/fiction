@@ -9,9 +9,9 @@
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/simulation/engines/ground_state_space.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
@@ -261,9 +261,9 @@ class clustercomplete_impl
      * @param sidb_ix Receiving SiDB.
      * @return The potential projection value associated with this bound; i.e., an electrostatic potential (in V),
      */
-    template <sidb::model::bound_direction bound>
-    [[nodiscard]] static constexpr double get_projector_state_bound(const sidb::model::cluster_projector_state& pst,
-                                                                    const uint64_t sidb_ix) noexcept
+    template <bound_direction bound>
+    [[nodiscard]] static constexpr double get_projector_state_bound(const cluster_projector_state& pst,
+                                                                    const uint64_t                 sidb_ix) noexcept
     {
         return pst.cluster->pot_projs.at(sidb_ix).get_pot_proj_for_m_conf<bound>(pst.multiset_conf).pot_val;
     }
@@ -350,10 +350,9 @@ class clustercomplete_impl
      * @return `false` if and only if a physically valid charge distribution cannot be extracted from the clustering
      * state.
      */
-    [[nodiscard]] bool
-    meets_population_stability_criterion(const sidb::model::clustering_state& cl_state) const noexcept
+    [[nodiscard]] bool meets_population_stability_criterion(const clustering_state& cl_state) const noexcept
     {
-        for (const sidb::model::cluster_projector_state_ptr& pst : cl_state.proj_states)
+        for (const cluster_projector_state_ptr& pst : cl_state.proj_states)
         {
             // number of respective witnesses to count
             uint64_t required_neg_count  = pst->get_count<sidb::model::charge_state::NEGATIVE>();
@@ -362,8 +361,8 @@ class clustercomplete_impl
 
             for (const auto sidb_ix : pst->cluster->sidbs)
             {
-                const double recv_pot_lb = cl_state.pot_bounds.get<sidb::model::bound_direction::LOWER>(sidb_ix);
-                const double recv_pot_ub = cl_state.pot_bounds.get<sidb::model::bound_direction::UPPER>(sidb_ix);
+                const double recv_pot_lb = cl_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix);
+                const double recv_pot_ub = cl_state.pot_bounds.get<bound_direction::UPPER>(sidb_ix);
 
                 if (required_neg_count != 0 && !fail_onto_negative_charge(recv_pot_lb))
                 {
@@ -399,23 +398,23 @@ class clustercomplete_impl
      * @param cl_state A clustering state consisting of only singleton clusters along with associated charge
      * states that make up a charge distribution that conforms to the *population stability* criterion.
      */
-    void add_if_configuration_stability_is_met(const sidb::model::clustering_state& cl_state) noexcept
+    void add_if_configuration_stability_is_met(const clustering_state& cl_state) noexcept
     {
         sidb::surfaces::charge_distribution_surface charge_layout_copy{charge_layout};
 
         // convert bottom clustering state to charge distribution
         for (const auto& pst : cl_state.proj_states)
         {
-            const uint64_t sidb_ix = sidb::model::get_singleton_sidb_ix(pst->cluster);
-            charge_layout_copy.assign_charge_state_by_index(
-                sidb_ix, sidb::model::singleton_multiset_conf_to_charge_state(pst->multiset_conf),
-                sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
+            const uint64_t sidb_ix = get_singleton_ix(pst->cluster);
+            charge_layout_copy.assign_charge_state_by_index(sidb_ix,
+                                                            singleton_multiset_conf_to_charge_state(pst->multiset_conf),
+                                                            sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
 
             assert(charge_layout_copy.get_local_external_potential_by_index(sidb_ix).has_value() &&
                    "Local external potential at SiDB is undefined");
 
             charge_layout_copy.assign_local_internal_potential_by_index(
-                sidb_ix, -cl_state.pot_bounds.get<sidb::model::bound_direction::LOWER>(sidb_ix) -
+                sidb_ix, -cl_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
                              *charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
         }
 
@@ -451,7 +450,7 @@ class clustercomplete_impl
      * @return The index in this vector of the projector state that contains the cluster of maximum size.
      */
     [[nodiscard]] static uint64_t
-    find_cluster_of_maximum_size(const std::vector<sidb::model::cluster_projector_state_ptr>& proj_states) noexcept
+    find_cluster_of_maximum_size(const std::vector<cluster_projector_state_ptr>& proj_states) noexcept
     {
         uint64_t max_cluster_size = proj_states.front()->cluster->num_sidbs();
         uint64_t max_pst_ix       = 0;
@@ -476,14 +475,14 @@ class clustercomplete_impl
      * out.
      * @return The parent projector state that was taken out of the given clustering state.
      */
-    static sidb::model::cluster_projector_state_ptr take_parent_out(sidb::model::clustering_state& cl_state,
-                                                                    const uint64_t parent_pst_ix) noexcept
+    static cluster_projector_state_ptr take_parent_out(clustering_state& cl_state,
+                                                       const uint64_t    parent_pst_ix) noexcept
     {
         // swap with last
         std::swap(cl_state.proj_states.at(parent_pst_ix), cl_state.proj_states.back());
 
         // move out
-        sidb::model::cluster_projector_state_ptr parent_pst = std::move(cl_state.proj_states.back());
+        cluster_projector_state_ptr parent_pst = std::move(cl_state.proj_states.back());
 
         // pop
         cl_state.proj_states.pop_back();
@@ -504,8 +503,8 @@ class clustercomplete_impl
      * @param parent_pst The parent projector state that needs to be added back to the given clustering state at the
      * given index.
      */
-    static void add_parent(sidb::model::clustering_state& cl_state, const uint64_t parent_pst_ix,
-                           sidb::model::cluster_projector_state_ptr parent_pst) noexcept
+    static void add_parent(clustering_state& cl_state, const uint64_t parent_pst_ix,
+                           cluster_projector_state_ptr parent_pst) noexcept
     {
         // add parent potential from potential bounds store
         cl_state.pot_bounds += parent_pst->cluster->pot_projs_complete_store.at(parent_pst->multiset_conf);
@@ -523,15 +522,14 @@ class clustercomplete_impl
      * @param cl_state Clustering state to which the given composition should be added.
      * @param composition The composition that needs to be added to the given clustering state.
      */
-    static void add_composition(sidb::model::clustering_state&               cl_state,
-                                const sidb::model::charge_space_composition& composition) noexcept
+    static void add_composition(clustering_state& cl_state, const charge_space_composition& composition) noexcept
     {
         cl_state.pot_bounds += composition.pot_bounds;
 
-        for (const sidb::model::cluster_projector_state& child_pst : composition.proj_states)
+        for (const cluster_projector_state& child_pst : composition.proj_states)
         {
             // move child projector state in clustering state
-            cl_state.proj_states.emplace_back(std::make_unique<sidb::model::cluster_projector_state>(child_pst));
+            cl_state.proj_states.emplace_back(std::make_unique<cluster_projector_state>(child_pst));
         }
     }
     /**
@@ -541,8 +539,7 @@ class clustercomplete_impl
      * @param cl_state Clustering state from which the given composition should be removed.
      * @param composition The composition that needs to be removed from the given clustering state.
      */
-    static void remove_composition(sidb::model::clustering_state&               cl_state,
-                                   const sidb::model::charge_space_composition& composition) noexcept
+    static void remove_composition(clustering_state& cl_state, const charge_space_composition& composition) noexcept
     {
         for (uint64_t i = 0; i < composition.proj_states.size(); ++i)
         {
@@ -574,7 +571,7 @@ class clustercomplete_impl
      * @param cl_state A clustering state that holds a specific combination of multiset charge configurations as
      * projector states of which the respectively associated clusters form a clustering in the cluster hierarchy.
      */
-    void add_physically_valid_charge_configurations(sidb::model::clustering_state& cl_state) noexcept
+    void add_physically_valid_charge_configurations(clustering_state& cl_state) noexcept
     {
         // check for pruning
         if (!meets_population_stability_criterion(cl_state))
@@ -593,11 +590,10 @@ class clustercomplete_impl
         const uint64_t max_pst_ix = find_cluster_of_maximum_size(cl_state.proj_states);
 
         // un-apply max_pst, thereby making space for specialization
-        sidb::model::cluster_projector_state_ptr max_pst = take_parent_out(cl_state, max_pst_ix);
+        cluster_projector_state_ptr max_pst = take_parent_out(cl_state, max_pst_ix);
 
         // specialise for all compositions of max_pst
-        for (const sidb::model::charge_space_composition& max_pst_composition :
-             sidb::model::get_projector_state_compositions(*max_pst))
+        for (const charge_space_composition& max_pst_composition : get_projector_state_compositions(*max_pst))
         {
             // specialise parent to a specific composition of its children
             add_composition(cl_state, max_pst_composition);
@@ -621,15 +617,14 @@ class clustercomplete_impl
      * @param top_cluster The top cluster that is returned by the *Ground State Space construction; it contains the
      * entire cluster hierarchy construct.
      */
-    void
-    collect_physically_valid_charge_distributions_single_threaded(const sidb::model::cluster_ptr& top_cluster) noexcept
+    void collect_physically_valid_charge_distributions_single_threaded(const cluster_ptr& top_cluster) noexcept
     {
-        for (const sidb::model::cluster_charge_state& ccs : top_cluster->charge_space)
+        for (const cluster_charge_state& ccs : top_cluster->charge_space)
         {
-            for (const sidb::model::charge_space_composition& composition : ccs.compositions)
+            for (const charge_space_composition& composition : ccs.compositions)
             {
                 // convert charge space composition to clustering state
-                sidb::model::clustering_state cl_state{charge_layout.num_cells()};
+                clustering_state cl_state{charge_layout.num_cells()};
                 add_composition(cl_state, composition);
 
                 // unfold
@@ -645,7 +640,7 @@ class clustercomplete_impl
     /**
      * A work item is a constant reference to SiDB charge space composition.
      */
-    using work_t = std::reference_wrapper<const sidb::model::charge_space_composition>;
+    using work_t = std::reference_wrapper<const charge_space_composition>;
     /**
      * A worker queue contains a double-layer queue of work items, a clustering state for thieves that want to steal
      * from the lowest layer of the queue, along with a queue of moles that tell how to transition this clustering state
@@ -671,13 +666,13 @@ class clustercomplete_impl
              * out the currently selected parent. Thus, this work item becomes the `composition` value of the next mole
              * in line.
              */
-            const sidb::model::charge_space_composition& composition;
+            const charge_space_composition& composition;
         };
         /**
          * The clustering state for thieves, which enables thieves to join in and steal work from the bottom of the
          * queue, while the owner of this queue will take items from the top of the queue.
          */
-        sidb::model::clustering_state clustering_state_for_thieves;
+        clustering_state clustering_state_for_thieves;
         /**
          * The queue of moles. For each transition between layers of the double layer work queue below, there is an
          * associated mole which informs how the transition takes place. This way, the clustering state for thieves can
@@ -710,7 +705,7 @@ class clustercomplete_impl
         /**
          * Initializes this queue with stolen work. The work itself is kept on the stack.
          */
-        void initialize_queue_after_stealing(const sidb::model::clustering_state& cl_state) noexcept
+        void initialize_queue_after_stealing(const clustering_state& cl_state) noexcept
         {
             const std::scoped_lock lock(mutex_to_protect_this_queue);
 
@@ -762,8 +757,7 @@ class clustercomplete_impl
          * enable forward-tracking. The mole says which composition to add to the clustering state, and which cluster is
          * selected for the subsequent unfolding.
          */
-        void add_to_queue(const std::vector<sidb::model::charge_space_composition>& compositions,
-                          mole&&                                                    informant) noexcept
+        void add_to_queue(const std::vector<charge_space_composition>& compositions, mole&& informant) noexcept
         {
             const std::scoped_lock lock{mutex_to_protect_this_queue};
 
@@ -823,8 +817,7 @@ class clustercomplete_impl
          * @return Either `true` when the queue is locked, `false` when there is no work in this queue, or a pair of a
          * copy of the updated (forward-tracked) clustering state for thieves along with the corresponding work item.
          */
-        [[nodiscard]] std::variant<bool, std::pair<sidb::model::clustering_state, work_t>>
-        try_steal_from_this_queue() noexcept
+        [[nodiscard]] std::variant<bool, std::pair<clustering_state, work_t>> try_steal_from_this_queue() noexcept
         {
             const std::unique_lock lock{mutex_to_protect_this_queue, std::try_to_lock};
 
@@ -858,7 +851,7 @@ class clustercomplete_impl
             --work_in_queue_count;
 
             // make copy
-            sidb::model::clustering_state stolen_clustering_state{clustering_state_for_thieves};
+            clustering_state stolen_clustering_state{clustering_state_for_thieves};
 
             return std::pair{std::move(stolen_clustering_state), work};
         }
@@ -882,7 +875,7 @@ class clustercomplete_impl
          * configuration, and a store containing lower and upper bounds on the local potential for each SiDB under this
          * multiset charge configuration assignment.
          */
-        sidb::model::clustering_state cl_state;
+        clustering_state cl_state;
         /**
          * The vector of all workers where this worker is at `ix`.
          */
@@ -932,16 +925,16 @@ class clustercomplete_impl
                         continue;
                     }
 
-                    std::variant<bool, std::pair<sidb::model::clustering_state, work_t>> work =
+                    std::variant<bool, std::pair<clustering_state, work_t>> work =
                         all_workers[i]->work_stealing_queue.try_steal_from_this_queue();
 
                     if (!std::holds_alternative<bool>(work))
                     {
-                        cl_state = std::move(std::get<std::pair<sidb::model::clustering_state, work_t>>(work).first);
+                        cl_state = std::move(std::get<std::pair<clustering_state, work_t>>(work).first);
 
                         work_stealing_queue.initialize_queue_after_stealing(cl_state);
 
-                        return std::get<std::pair<sidb::model::clustering_state, work_t>>(work).second;
+                        return std::get<std::pair<clustering_state, work_t>>(work).second;
                     }
 
                     encountered_locked_queue |= std::get<bool>(work);
@@ -959,14 +952,13 @@ class clustercomplete_impl
      * @param top_cluster The top cluster that is returned by running the *Ground State Space* construction.
      * @return A vector containing all work contained by the top cluster in random order.
      */
-    [[nodiscard]] static std::vector<work_t>
-    extract_work_from_top_cluster(const sidb::model::cluster_ptr& top_cluster) noexcept
+    [[nodiscard]] static std::vector<work_t> extract_work_from_top_cluster(const cluster_ptr& top_cluster) noexcept
     {
         std::vector<work_t> work_from_top_cluster{};
 
-        for (const sidb::model::cluster_charge_state& ccs : top_cluster->charge_space)
+        for (const cluster_charge_state& ccs : top_cluster->charge_space)
         {
-            for (const sidb::model::charge_space_composition& composition : ccs.compositions)
+            for (const charge_space_composition& composition : ccs.compositions)
             {
                 work_from_top_cluster.emplace_back(std::ref(composition));
             }
@@ -1054,9 +1046,8 @@ class clustercomplete_impl
      * @return `false` if and only if queue of this worker is found to be completely empty and thus backtracking is
      * not required.
      */
-    [[nodiscard]] bool
-    add_physically_valid_charge_configurations(worker&                                      w,
-                                               const sidb::model::charge_space_composition& composition) noexcept
+    [[nodiscard]] bool add_physically_valid_charge_configurations(worker&                         w,
+                                                                  const charge_space_composition& composition) noexcept
     {
         // check for pruning
         if (!meets_population_stability_criterion(w.cl_state))
@@ -1075,10 +1066,10 @@ class clustercomplete_impl
         const uint64_t max_pst_ix = find_cluster_of_maximum_size(w.cl_state.proj_states);
 
         // un-apply max_pst, thereby making space for specialization
-        sidb::model::cluster_projector_state_ptr max_pst = take_parent_out(w.cl_state, max_pst_ix);
+        cluster_projector_state_ptr max_pst = take_parent_out(w.cl_state, max_pst_ix);
 
         // unfold all compositions
-        if (!unfold_all_compositions(w, sidb::model::get_projector_state_compositions(*max_pst),
+        if (!unfold_all_compositions(w, get_projector_state_compositions(*max_pst),
                                      typename worker_queue::mole{max_pst_ix, composition}))
         {
             return false;
@@ -1106,8 +1097,7 @@ class clustercomplete_impl
      * not required.
      */
     // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
-    [[nodiscard]] bool unfold_all_compositions(worker&                                                   w,
-                                               const std::vector<sidb::model::charge_space_composition>& compositions,
+    [[nodiscard]] bool unfold_all_compositions(worker& w, const std::vector<charge_space_composition>& compositions,
                                                typename worker_queue::mole&& informant) noexcept
     {
         if (compositions.empty())
@@ -1145,7 +1135,7 @@ class clustercomplete_impl
      * @param composition The composition to unfold.
      * @return `false` if and only if there is no need for backtracking after this return.
      */
-    bool unfold_composition(worker& w, const sidb::model::charge_space_composition& composition) noexcept
+    bool unfold_composition(worker& w, const charge_space_composition& composition) noexcept
     {
         // specialize parent to a specific composition of its children
         add_composition(w.cl_state, composition);

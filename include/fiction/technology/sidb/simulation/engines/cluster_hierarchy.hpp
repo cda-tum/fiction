@@ -2,8 +2,8 @@
 // Created by Willem Lambooy on 04.02.2024.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_CLUSTER_HIERARCHY_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_CLUSTER_HIERARCHY_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTER_HIERARCHY_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTER_HIERARCHY_HPP
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -42,7 +42,7 @@
 #include <ap.h>
 #include <dataanalysis.h>
 
-namespace fiction::sidb::model
+namespace fiction::sidb::simulation::engines::detail
 {
 
 /**
@@ -257,13 +257,13 @@ struct cluster_projector_state
      * @return The number of occurrences of the given charge state in the multiset charge configuration. For a neutral
      * charge, the number of occurrences is inferred by considering the size of the cluster in the projector state.
      */
-    template <charge_state cs>
+    template <model::charge_state cs>
     [[nodiscard]] constexpr uint64_t get_count() const noexcept
     {
         switch (cs)
         {
-            case charge_state::NEGATIVE: return multiset_conf >> 32ull;
-            case charge_state::POSITIVE: return multiset_conf & 0xFFFFFFFF;
+            case model::charge_state::NEGATIVE: return multiset_conf >> 32ull;
+            case model::charge_state::POSITIVE: return multiset_conf & 0xFFFFFFFF;
             default: return get_cluster_size(cluster) - (multiset_conf >> 32ull) - (multiset_conf & 0xFFFFFFFF);
         }
     }
@@ -337,7 +337,7 @@ static constexpr void take_meet_of_potential_bounds(double& a, const double b) n
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
-static uint64_t get_singleton_sidb_ix(const cluster_ptr& c) noexcept;
+static uint64_t get_singleton_ix(const cluster_ptr& c) noexcept;
 /**
  * Forward declaration. Required for compilation due to the mutually recursive structure in this file.
  */
@@ -617,14 +617,14 @@ struct cluster_charge_state
      * sum of the local defect potential and the local external potential.
      * @param total_num_sidbs The total number of SiDBs in the layout.
      */
-    cluster_charge_state(const cluster_ptr& singleton, const charge_state cs, const double loc_ext_pot,
+    cluster_charge_state(const cluster_ptr& singleton, const model::charge_state cs, const double loc_ext_pot,
                          const uint64_t total_num_sidbs) noexcept :
-            neg_count{static_cast<decltype(neg_count)>(cs == charge_state::NEGATIVE)},
-            pos_count{static_cast<decltype(pos_count)>(cs == charge_state::POSITIVE)},
+            neg_count{static_cast<decltype(neg_count)>(cs == model::charge_state::NEGATIVE)},
+            pos_count{static_cast<decltype(pos_count)>(cs == model::charge_state::POSITIVE)},
             compositions{{.proj_states = {{.cluster = singleton, .multiset_conf = static_cast<uint64_t>(*this)}}}}
     {
         compositions.front().pot_bounds.initialize_complete_potential_bounds(total_num_sidbs);
-        compositions.front().pot_bounds.set(get_singleton_sidb_ix(singleton), loc_ext_pot, loc_ext_pot);
+        compositions.front().pot_bounds.set(get_singleton_ix(singleton), loc_ext_pot, loc_ext_pot);
     }
     /**
      * Constructor for cluster charge state given a multiset charge configuration represented in its compressed form. It
@@ -650,16 +650,16 @@ struct cluster_charge_state
      *
      * @param cs The charge state to add.
      */
-    constexpr void add_charge(const charge_state cs) noexcept
+    constexpr void add_charge(const model::charge_state cs) noexcept
     {
         switch (cs)
         {
-            case charge_state::NEGATIVE:
+            case model::charge_state::NEGATIVE:
             {
                 neg_count++;
                 return;
             }
-            case charge_state::POSITIVE:
+            case model::charge_state::POSITIVE:
             {
                 pos_count++;
                 return;
@@ -675,9 +675,11 @@ struct cluster_charge_state
      *
      * @param charge_states initializer list of charge states to form into a cluster charge state.
      */
-    cluster_charge_state(const std::initializer_list<charge_state>& charge_states) noexcept : neg_count{0}, pos_count{0}
+    cluster_charge_state(const std::initializer_list<model::charge_state>& charge_states) noexcept :
+            neg_count{0},
+            pos_count{0}
     {
-        for (const charge_state cs : charge_states)
+        for (const model::charge_state cs : charge_states)
         {
             add_charge(cs);
         }
@@ -735,9 +737,9 @@ struct cluster_charge_state
  * @param m A singleton multiset charge configuration.
  * @return The charge state associated with the sole element contained in the given multiset charge configuration.
  */
-[[nodiscard]] static constexpr charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
+[[nodiscard]] static constexpr model::charge_state singleton_multiset_conf_to_charge_state(const uint64_t m) noexcept
 {
-    return sign_to_charge_state(
+    return model::sign_to_charge_state(
         static_cast<int8_t>(static_cast<uint32_t>(m) - static_cast<uint32_t>(static_cast<uint32_t>(m) < m)));
 }
 /**
@@ -774,7 +776,7 @@ struct potential_projection
      * associated `charge_distribution_surface` object.
      * @param cs Charge state associated with the singleton cluster projector for this potential projection.
      */
-    potential_projection(const double inter_sidb_pot, const charge_state cs) noexcept :
+    potential_projection(const double inter_sidb_pot, const model::charge_state cs) noexcept :
             pot_val{inter_sidb_pot},
             multiset{static_cast<uint64_t>(cluster_charge_state{cs})}
     {}
@@ -842,11 +844,11 @@ struct potential_projection_order
      */
     potential_projection_order(const double loc_ext_pot, const uint8_t base,
                                [[maybe_unused]] const bool self_projection) noexcept :
-            order{base == 3 ? pot_proj_order{potential_projection{loc_ext_pot, charge_state::POSITIVE},
-                                             potential_projection{loc_ext_pot, charge_state::NEUTRAL},
-                                             potential_projection{loc_ext_pot, charge_state::NEGATIVE}} :
-                              pot_proj_order{potential_projection{loc_ext_pot, charge_state::NEUTRAL},
-                                             potential_projection{loc_ext_pot, charge_state::NEGATIVE}}}
+            order{base == 3 ? pot_proj_order{potential_projection{loc_ext_pot, model::charge_state::POSITIVE},
+                                             potential_projection{loc_ext_pot, model::charge_state::NEUTRAL},
+                                             potential_projection{loc_ext_pot, model::charge_state::NEGATIVE}} :
+                              pot_proj_order{potential_projection{loc_ext_pot, model::charge_state::NEUTRAL},
+                                             potential_projection{loc_ext_pot, model::charge_state::NEGATIVE}}}
     {}
     /**
      * Constructor for a potential projection from a singleton cluster onto an SiDB.
@@ -856,11 +858,11 @@ struct potential_projection_order
      * @param base The simulation base. This defines whether positive charges are considered.
      */
     potential_projection_order(const double inter_sidb_pot, const uint8_t base) noexcept :
-            order{base == 3 ? pot_proj_order{potential_projection{-inter_sidb_pot, charge_state::POSITIVE},
-                                             potential_projection{0.0, charge_state::NEUTRAL},
-                                             potential_projection{inter_sidb_pot, charge_state::NEGATIVE}} :
-                              pot_proj_order{potential_projection{0.0, charge_state::NEUTRAL},
-                                             potential_projection{inter_sidb_pot, charge_state::NEGATIVE}}}
+            order{base == 3 ? pot_proj_order{potential_projection{-inter_sidb_pot, model::charge_state::POSITIVE},
+                                             potential_projection{0.0, model::charge_state::NEUTRAL},
+                                             potential_projection{inter_sidb_pot, model::charge_state::NEGATIVE}} :
+                              pot_proj_order{potential_projection{0.0, model::charge_state::NEUTRAL},
+                                             potential_projection{inter_sidb_pot, model::charge_state::NEGATIVE}}}
     {}
     /**
      * A getter for a potential projection bound, which is the first or last item in the ordered set.
@@ -1086,7 +1088,7 @@ struct cluster
         const uint64_t ix = *sidbs.cbegin();
 
         // fill the initial charge space as determined by the simulation base
-        for (const charge_state cs : charge_states_for_base_number(base))
+        for (const model::charge_state cs : model::charge_states_for_base_number(base))
         {
             charge_space.emplace(self_ptr, cs, loc_ext_pot, external_sidbs.size() + 1);
         }
@@ -1139,7 +1141,7 @@ struct cluster
  * @param c Singleton cluster of which the single SiDB (index) it contains is requested.
  * @return The SiDB index contained in the given cluster. It is equal to the unique identifier of the cluster.
  */
-[[nodiscard]] static uint64_t get_singleton_sidb_ix(const cluster_ptr& c) noexcept
+[[nodiscard]] static uint64_t get_singleton_ix(const cluster_ptr& c) noexcept
 {
     assert(get_cluster_size(c) == 1 && "Not a singleton cluster");
     return get_unique_cluster_id(c);
@@ -1164,8 +1166,8 @@ get_projector_state_compositions(const cluster_projector_state& pst) noexcept
  * @param uid Variable reference which is updated in each execution to ensure uniqueness.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-[[nodiscard]] static cluster_ptr to_unique_sidb_cluster(const uint64_t                       total_sidbs,
-                                                        const binary_cluster_hierarchy_node& n, uint64_t& uid) noexcept
+[[nodiscard]] static cluster_ptr to_unique_cluster(const uint64_t total_sidbs, const binary_cluster_hierarchy_node& n,
+                                                   uint64_t& uid) noexcept
 {
     clustering children;
 
@@ -1173,7 +1175,7 @@ get_projector_state_compositions(const cluster_projector_state& pst) noexcept
     {
         if (n.sub.at(c))
         {
-            children.insert(to_unique_sidb_cluster(total_sidbs, *n.sub.at(c), uid));
+            children.insert(to_unique_cluster(total_sidbs, *n.sub.at(c), uid));
         }
     }
 
@@ -1214,12 +1216,12 @@ get_projector_state_compositions(const cluster_projector_state& pst) noexcept
  * @param n A node from a binary cluster hierarchy, as for instance returned by parsing ALGLIB's result.
  * @return A uniquely identified node in a decorated cluster hierarchy that follows the "general tree" structure.
  */
-[[nodiscard]] inline cluster_ptr to_sidb_cluster(const binary_cluster_hierarchy_node& n) noexcept
+[[nodiscard]] inline cluster_ptr to_cluster(const binary_cluster_hierarchy_node& n) noexcept
 {
 
     if (uint64_t uid = n.c.size(); uid != 1)
     {
-        return to_unique_sidb_cluster(n.c.size(), n, uid);
+        return to_unique_cluster(n.c.size(), n, uid);
     }
 
     // to avoid weird shared pointer deallocation behaviour, give a parent to a singleton cluster hierarchy
@@ -1231,7 +1233,7 @@ get_projector_state_compositions(const cluster_projector_state& pst) noexcept
     return parent;
 }
 
-}  // namespace fiction::sidb::model
+}  // namespace fiction::sidb::simulation::engines::detail
 #endif  // FICTION_ALGLIB_ENABLED
 
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_CLUSTER_HIERARCHY_HPP
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTER_HIERARCHY_HPP

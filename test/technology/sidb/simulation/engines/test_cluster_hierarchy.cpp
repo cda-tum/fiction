@@ -6,7 +6,7 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/technology/sidb/model/cluster_hierarchy.hpp>
+#include <fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
@@ -46,7 +46,8 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
     // check for spooky non-determinism in alglib
     for (int8_t i = 0; i < 100; ++i)
     {
-        const sidb::model::binary_cluster_hierarchy_node& h = sidb::model::cluster_hierarchy(lyt);
+        const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
+            sidb::simulation::engines::detail::cluster_hierarchy(lyt);
 
         REQUIRE(h.c.size() == 8);
         REQUIRE(h.sub.at(0) != nullptr);
@@ -88,7 +89,8 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated grou
     lyt.assign_cell_type({53, 10, 1}, sidb::sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({48, 13, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    const sidb::model::binary_cluster_hierarchy_node& h = sidb::model::cluster_hierarchy(lyt);
+    const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
+        sidb::simulation::engines::detail::cluster_hierarchy(lyt);
 
     REQUIRE(h.c.size() == 8);
     REQUIRE(h.sub.at(0) != nullptr);
