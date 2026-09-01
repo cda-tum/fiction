@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
 #define FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
 
-#include "fiction/networks/utils/name_utils.hpp"
+#include "fiction/networks/name_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
@@ -51,7 +51,7 @@ class read_sqd_layout_impl
   public:
     read_sqd_layout_impl(std::istream& s, const std::string_view& name) : lyt{}, is{s}
     {
-        fiction::networks::utils::set_name(lyt, name);
+        networks::set_name(lyt, name);
     }
 
     read_sqd_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}

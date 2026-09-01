@@ -6,7 +6,7 @@
 #define FICTION_GATE_LEVEL_LAYOUT_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/networks/utils/mockturtle_utils.hpp"
+#include "fiction/networks/mockturtle_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <kitty/constructors.hpp>

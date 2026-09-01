@@ -7,7 +7,7 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/networks/utils/network_utils.hpp>
+#include <fiction/networks/network_utils.hpp>
 #include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/types.hpp>
 
@@ -119,7 +119,7 @@ void ortho_command::orthogonal_physical_design()
             st.report(env->out());
         }
     }
-    catch (const fiction::networks::utils::high_degree_fanin_exception& e)
+    catch (const fiction::networks::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {}\n", e.what());
     }

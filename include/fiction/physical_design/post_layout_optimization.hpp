@@ -14,7 +14,7 @@
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
-#include "fiction/physical_design/utils/routing_utils.hpp"
+#include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/physical_design/wiring_reduction.hpp"
 #include "fiction/traits.hpp"
 
@@ -162,25 +162,25 @@ struct fanin_fanout_data
      * This layout_coordinate_path object represents the path for routing signals from the first fan-in
      * to the gate within the layout.
      */
-    physical_design::utils::layout_coordinate_path<Lyt> route_fanin_1_to_gate;
+    layout_coordinate_path<Lyt> route_fanin_1_to_gate;
 
     /**
      * This layout_coordinate_path object represents the path for routing signals from the second fan-in
      * to the gate within the layout.
      */
-    physical_design::utils::layout_coordinate_path<Lyt> route_fanin_2_to_gate;
+    layout_coordinate_path<Lyt> route_fanin_2_to_gate;
 
     /**
      * This layout_coordinate_path object represents the path for routing signals from the gate to
      * the first fan-out within the layout.
      */
-    physical_design::utils::layout_coordinate_path<Lyt> route_gate_to_fanout_1;
+    layout_coordinate_path<Lyt> route_gate_to_fanout_1;
 
     /**
      * This layout_coordinate_path object represents the path for routing signals from the gate to
      * the second fan-out within the layout.
      */
-    physical_design::utils::layout_coordinate_path<Lyt> route_gate_to_fanout_2;
+    layout_coordinate_path<Lyt> route_gate_to_fanout_2;
 };
 /**
  * Utility function that moves outputs from the last row to the previous row, and from the last column to the previous
@@ -828,17 +828,16 @@ class post_layout_optimization_impl
      * @param end_tile The ending coordinate of the path.
      * @return The computed path as a sequence of coordinates in the layout.
      */
-    physical_design::utils::layout_coordinate_path<ObstrLyt>
-    get_path_and_obstruct(ObstrLyt& lyt, const tile<ObstrLyt>& start_tile, const tile<ObstrLyt>& end_tile)
+    layout_coordinate_path<ObstrLyt> get_path_and_obstruct(ObstrLyt& lyt, const tile<ObstrLyt>& start_tile,
+                                                           const tile<ObstrLyt>& end_tile)
     {
         using dist = physical_design::path_finding::twoddwave_distance_functor<ObstrLyt, uint64_t>;
         using cost = physical_design::path_finding::unit_cost_functor<ObstrLyt, uint8_t>;
         static physical_design::path_finding::a_star_params astar_params{};
         astar_params.crossings = !ps.planar_optimization;
 
-        const auto path =
-            physical_design::path_finding::a_star<physical_design::utils::layout_coordinate_path<ObstrLyt>>(
-                lyt, {start_tile, end_tile}, dist(), cost(), astar_params);
+        const auto path = physical_design::path_finding::a_star<layout_coordinate_path<ObstrLyt>>(
+            lyt, {start_tile, end_tile}, dist(), cost(), astar_params);
 
         // obstruct the tiles along the computed path.
         for (const auto& tile : path)
@@ -895,8 +894,8 @@ class post_layout_optimization_impl
             lyt.clear_obstructed_coordinate({current_pos.x, current_pos.y, 1});
 
             // get paths for fanins and fanouts
-            physical_design::utils::layout_coordinate_path<ObstrLyt> new_path_from_fanin_1_to_gate,
-                new_path_from_fanin_2_to_gate, new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2;
+            layout_coordinate_path<ObstrLyt> new_path_from_fanin_1_to_gate, new_path_from_fanin_2_to_gate,
+                new_path_from_gate_to_fanout_1, new_path_from_gate_to_fanout_2;
             // get paths for fanins and fanouts
             if (!fanins.empty())
             {
@@ -928,7 +927,7 @@ class post_layout_optimization_impl
                 {
                     if (!path.empty())
                     {
-                        physical_design::utils::route_path(lyt, path);
+                        route_path(lyt, path);
                         for (const auto& tile : path)
                         {
                             lyt.obstruct_coordinate(tile);
@@ -1007,12 +1006,12 @@ class post_layout_optimization_impl
      * @param old_pos Original position of the gate before relocation attempt.
      * @param fanouts Vector of fanout tiles connected to the gate.
      */
-    void restore_original_wiring(
-        ObstrLyt& lyt, const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_fanin_1_to_gate,
-        const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_fanin_2_to_gate,
-        const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_1,
-        const physical_design::utils::layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_2,
-        const tile<ObstrLyt>& current_pos, const tile<ObstrLyt>& old_pos, const std::vector<tile<Lyt>> fanouts) noexcept
+    void restore_original_wiring(ObstrLyt& lyt, const layout_coordinate_path<ObstrLyt> old_path_from_fanin_1_to_gate,
+                                 const layout_coordinate_path<ObstrLyt> old_path_from_fanin_2_to_gate,
+                                 const layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_1,
+                                 const layout_coordinate_path<ObstrLyt> old_path_from_gate_to_fanout_2,
+                                 const tile<ObstrLyt>& current_pos, const tile<ObstrLyt>& old_pos,
+                                 const std::vector<tile<Lyt>> fanouts) noexcept
     {
         lyt.move_node(lyt.get_node(current_pos), old_pos, {});
 
@@ -1021,8 +1020,7 @@ class post_layout_optimization_impl
         {
             if (!r.empty())
             {
-                physical_design::utils::route_path<ObstrLyt, physical_design::utils::layout_coordinate_path<ObstrLyt>>(
-                    lyt, r);
+                route_path<ObstrLyt, layout_coordinate_path<ObstrLyt>>(lyt, r);
             }
             for (const auto& t : r)
             {

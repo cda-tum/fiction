@@ -3,7 +3,7 @@
 //
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
@@ -35,7 +35,7 @@ using namespace fiction;
 int main()  // NOLINT
 {
     const auto all_cells_in_region =
-        layouts::utils::all_coordinates_in_spanned_area<layouts::coords::offset>({0, 0}, {10, 10});
+        layouts::all_coordinates_in_spanned_area<layouts::coords::offset>({0, 0}, {10, 10});
 
     const auto all_distributions =
         fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(

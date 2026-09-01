@@ -7,7 +7,7 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/physical_design/post_layout_optimization.hpp>
 #include <fiction/physical_design/wiring_reduction.hpp>
 #include <fiction/traits.hpp>
@@ -104,7 +104,7 @@ void optimize_command::execute()
                 }
             }
 
-            fiction::networks::utils::restore_names(*lyt_ptr, lyt_copy);
+            fiction::networks::restore_names(*lyt_ptr, lyt_copy);
 
             gls.extend() = std::make_shared<Lyt>(lyt_copy);
         }

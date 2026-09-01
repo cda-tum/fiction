@@ -7,7 +7,7 @@
 
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp>
@@ -214,7 +214,7 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
         const auto& first_lyt  = result_lyts.value().front();
         const auto& second_lyt = result_lyts.value().back();
 
-        CHECK(!layouts::utils::are_cell_layouts_identical(first_lyt, second_lyt));
+        CHECK(!layouts::are_cell_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check uniqueness of many layouts")
@@ -237,7 +237,7 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
         {
             for (std::size_t j = i + 1; j < lyts.size(); ++j)
             {
-                CHECK(!layouts::utils::are_cell_layouts_identical(lyts.at(i), lyts.at(j)));
+                CHECK(!layouts::are_cell_layouts_identical(lyts.at(i), lyts.at(j)));
             }
         }
     }
@@ -439,7 +439,7 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
         const auto& first_lyt  = result_lyts.value().front();
         const auto& second_lyt = result_lyts.value().back();
 
-        CHECK(!layouts::utils::are_cell_layouts_identical(first_lyt, second_lyt));
+        CHECK(!layouts::are_cell_layouts_identical(first_lyt, second_lyt));
     }
 
     SECTION("Check that duplicates are rejected when the region admits only two layouts")
@@ -461,7 +461,7 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
 
         REQUIRE(lyts.size() == 2);
 
-        CHECK(!layouts::utils::are_cell_layouts_identical(lyts.front(), lyts.back()));
+        CHECK(!layouts::are_cell_layouts_identical(lyts.front(), lyts.back()));
     }
 
     SECTION("Check correct use of skeleton layout when generating only one random layout")
@@ -759,7 +759,7 @@ TEMPLATE_TEST_CASE("Random coords::siqad layout generation with defects", "[rand
 
             for (std::size_t j = i + 1; j < lyts.size(); ++j)
             {
-                CHECK(!layouts::utils::are_cell_layouts_identical(lyts.at(i), lyts.at(j)));
+                CHECK(!layouts::are_cell_layouts_identical(lyts.at(i), lyts.at(j)));
             }
         }
     }

@@ -2,7 +2,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/path_finding/k_shortest_paths.hpp>
-#include <fiction/physical_design/utils/routing_utils.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/traits.hpp>
 
 #include <cstdint>
@@ -34,7 +34,7 @@ void yen_k_shortest_paths_impl(nanobind::module_& m)
            const uint32_t k, const fiction::physical_design::path_finding::yen_k_shortest_paths_params& params)
         {
             const auto k_paths = fiction::physical_design::path_finding::yen_k_shortest_paths<
-                fiction::physical_design::utils::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params);
+                fiction::physical_design::layout_coordinate_path<Lyt>, Lyt>(lyt, {source, target}, k, params);
 
             std::vector<std::vector<fiction::coordinate<Lyt>>> paths{};
             paths.reserve(k_paths.size());

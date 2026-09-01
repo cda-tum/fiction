@@ -13,7 +13,7 @@
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
-#include "fiction/physical_design/utils/routing_utils.hpp"
+#include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -679,17 +679,17 @@ void add_obstructions(WiringReductionLyt& lyt) noexcept
  * @return The computed path as a sequence of coordinates in the layout.
  */
 template <typename WiringReductionLyt>
-[[nodiscard]] physical_design::utils::layout_coordinate_path<WiringReductionLyt>
-get_path(WiringReductionLyt& lyt, const coordinate<WiringReductionLyt>& start,
-         const coordinate<WiringReductionLyt>& end) noexcept
+[[nodiscard]] layout_coordinate_path<WiringReductionLyt> get_path(WiringReductionLyt&                   lyt,
+                                                                  const coordinate<WiringReductionLyt>& start,
+                                                                  const coordinate<WiringReductionLyt>& end) noexcept
 {
     using dist = physical_design::path_finding::manhattan_distance_functor<WiringReductionLyt, uint64_t>;
     using cost = physical_design::path_finding::unit_cost_functor<WiringReductionLyt, uint8_t>;
 
     static const physical_design::path_finding::a_star_params params{false};
 
-    return physical_design::path_finding::a_star<physical_design::utils::layout_coordinate_path<WiringReductionLyt>>(
-        lyt, {start, end}, dist(), cost(), params);
+    return physical_design::path_finding::a_star<layout_coordinate_path<WiringReductionLyt>>(lyt, {start, end}, dist(),
+                                                                                             cost(), params);
 }
 /**
  * Update the to-delete list based on a possible path in a wiring_reduction_layout.
@@ -706,9 +706,8 @@ get_path(WiringReductionLyt& lyt, const coordinate<WiringReductionLyt>& start,
  * @param to_delete Reference to the to-delete list to be updated with new coordinates.
  */
 template <typename Lyt, typename WiringReductionLyt>
-void update_to_delete_list(WiringReductionLyt&                                                       lyt,
-                           const physical_design::utils::layout_coordinate_path<WiringReductionLyt>& possible_path,
-                           physical_design::utils::layout_coordinate_path<WiringReductionLyt>&       to_delete) noexcept
+void update_to_delete_list(WiringReductionLyt& lyt, const layout_coordinate_path<WiringReductionLyt>& possible_path,
+                           layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
 {
     for (const auto& coord : possible_path)
     {
@@ -748,8 +747,8 @@ using offset_matrix = std::vector<std::vector<uint64_t>>;
  */
 template <typename Lyt, typename WiringReductionLyt>
 [[nodiscard]] offset_matrix
-calculate_offset_matrix(const WiringReductionLyt&                                                 lyt,
-                        const physical_design::utils::layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
+calculate_offset_matrix(const WiringReductionLyt&                         lyt,
+                        const layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
 {
     // initialize matrix with zeros
     offset_matrix matrix(lyt.y() + 1, std::vector<uint64_t>(lyt.x() + 1, 0));
@@ -1027,7 +1026,7 @@ void adjust_tile(Lyt& lyt, const LytCpy& layout_copy, const WiringReductionLyt& 
  */
 template <typename Lyt, typename WiringReductionLyt>
 void delete_wires(Lyt& lyt, WiringReductionLyt& wiring_reduction_layout,
-                  const physical_design::utils::layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
+                  const layout_coordinate_path<WiringReductionLyt>& to_delete) noexcept
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
     static_assert(is_cartesian_layout_v<Lyt>, "Lyt is not a Cartesian layout");
@@ -1094,7 +1093,7 @@ class wiring_reduction_impl
         auto layout = layouts::obstruction_layout<Lyt>(plyt);
 
         // initialize the list of wires to delete
-        physical_design::utils::layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
+        layout_coordinate_path<wiring_reduction_layout_type<coordinate<Lyt>>> to_delete = {};
 
         bool found_wires = true;
 

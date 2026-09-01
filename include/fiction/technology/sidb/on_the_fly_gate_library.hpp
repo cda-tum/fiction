@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
@@ -179,12 +179,11 @@ class on_the_fly_gate_library
         // center cell of the Bestagon tile. IMPORTANT: There is no center for the specified Bestagon library. The
         // middle is at 22.66666 (34*2/3). However, this is not an integer and does not specify a cell. Cell close to it
         // is chosen.
-        auto center_cell =
-            layouts::utils::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
-                lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
+        auto center_cell = layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+            lyt, t, cell<CellLyt>{gate_x_size() / 2, gate_y_size() / 2});
         // center cell of the current tile
         auto absolute_cell =
-            layouts::utils::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
+            layouts::relative_to_absolute_cell_position<gate_x_size(), gate_y_size(), GateLyt, CellLyt>(
                 lyt, t, cell<CellLyt>{0, 0});
 
         auto complex_gate_param                                      = params;
@@ -636,7 +635,7 @@ class on_the_fly_gate_library
     {
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
         const auto                                                 all_coordinates_in_the_spanned_area =
-            layouts::utils::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
+            layouts::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
 
         uint64_t cell_index = 0;
 
@@ -762,7 +761,7 @@ class on_the_fly_gate_library
         Lyt lyt{};
 
         const auto all_cell =
-            layouts::utils::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
+            layouts::all_coordinates_in_spanned_area({0, 0, 0}, cell<Lyt>{gate_x_size() - 1, gate_y_size() - 1});
         uint64_t counter = 0;
 
         for (std::size_t i = 0; i < gate_y_size(); ++i)

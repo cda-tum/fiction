@@ -6,7 +6,7 @@
 #define FICTION_BOUNDING_BOX_HPP
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>

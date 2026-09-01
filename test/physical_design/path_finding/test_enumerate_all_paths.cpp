@@ -17,7 +17,7 @@ using namespace fiction;
 TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 {
     using lyt  = layouts::cartesian_layout<layouts::coords::offset>;
-    using path = physical_design::utils::layout_coordinate_path<lyt>;
+    using path = physical_design::layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
     {
@@ -117,7 +117,7 @@ TEST_CASE("Enumerate all paths on 2x2 layouts", "[enumerate-all-paths]")
 TEST_CASE("Enumerate all paths on 4x4 layouts", "[enumerate-all-paths]")
 {
     using lyt  = layouts::cartesian_layout<layouts::coords::offset>;
-    using path = physical_design::utils::layout_coordinate_path<lyt>;
+    using path = physical_design::layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
     {
@@ -165,7 +165,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with coordinate obstruc
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using path = physical_design::utils::layout_coordinate_path<gate_lyt>;
+    using path = physical_design::layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
     {
@@ -227,7 +227,7 @@ TEST_CASE("Enumerate all paths with coordinate obstruction but crossings enabled
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using path = physical_design::utils::layout_coordinate_path<gate_lyt>;
+    using path = physical_design::layout_coordinate_path<gate_lyt>;
 
     // enable crossings
     const physical_design::path_finding::enumerate_all_paths_params params{true};
@@ -347,7 +347,7 @@ TEST_CASE("Enumerate all paths on 4x4 gate-level layouts with connection obstruc
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using path = physical_design::utils::layout_coordinate_path<gate_lyt>;
+    using path = physical_design::layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
     {

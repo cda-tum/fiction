@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP
 #define FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP
 
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/traits.hpp"
@@ -108,9 +108,10 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
                         // cell position within the gate
                         const cell<CellLyt> relative_cell_pos{x, y, t.z};
 
-                        const auto sidb_pos = layouts::utils::relative_to_absolute_cell_position<
-                            GateLibrary::gate_x_size(), GateLibrary::gate_y_size(), GateLyt, CellLyt>(
-                            gate_lyt, t, relative_cell_pos);
+                        const auto sidb_pos =
+                            layouts::relative_to_absolute_cell_position<GateLibrary::gate_x_size(),
+                                                                        GateLibrary::gate_y_size(), GateLyt, CellLyt>(
+                                gate_lyt, t, relative_cell_pos);
 
                         // if any SiDB position of the current gate is compromised
                         if (sidbs_affected_by_defects.count(sidb_pos) > 0)

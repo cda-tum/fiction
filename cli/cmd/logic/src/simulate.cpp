@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -104,7 +104,7 @@ template <typename NtkOrLytVariant>
 void simulate_command::perform_simulation(const NtkOrLytVariant& network_or_layout_variant)
 {
     const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
-    { return fiction::networks::utils::get_name(*ntk_or_lyt_ptr); };
+    { return fiction::networks::get_name(*ntk_or_lyt_ptr); };
 
     const auto store_po_names = [this](auto&& ntk_or_lyt_ptr)
     {

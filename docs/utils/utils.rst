@@ -3,33 +3,33 @@ Network Utils
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/networks/utils/network_utils.hpp``
+        **Header:** ``fiction/networks/network_utils.hpp``
 
         .. doxygenstruct:: mockturtle::edge
 
-        .. doxygenfunction:: fiction::networks::utils::foreach_edge
-        .. doxygenfunction:: fiction::networks::utils::foreach_outgoing_edge
-        .. doxygenfunction:: fiction::networks::utils::foreach_incoming_edge
-        .. doxygenfunction:: fiction::networks::utils::fanouts
+        .. doxygenfunction:: fiction::networks::foreach_edge
+        .. doxygenfunction:: fiction::networks::foreach_outgoing_edge
+        .. doxygenfunction:: fiction::networks::foreach_incoming_edge
+        .. doxygenfunction:: fiction::networks::fanouts
 
-        .. doxygenstruct:: fiction::networks::utils::fanin_container
+        .. doxygenstruct:: fiction::networks::fanin_container
            :members:
 
-        .. doxygenfunction:: fiction::networks::utils::fanins
-        .. doxygenfunction:: fiction::networks::utils::num_constant_fanins
+        .. doxygenfunction:: fiction::networks::fanins
+        .. doxygenfunction:: fiction::networks::num_constant_fanins
 
-        .. doxygenclass:: fiction::networks::utils::high_degree_fanin_exception
+        .. doxygenclass:: fiction::networks::high_degree_fanin_exception
 
-        .. doxygenfunction:: fiction::networks::utils::has_high_degree_fanin_nodes
+        .. doxygenfunction:: fiction::networks::has_high_degree_fanin_nodes
 
-        .. doxygenstruct:: fiction::networks::utils::fanin_edge_container
+        .. doxygenstruct:: fiction::networks::fanin_edge_container
            :members:
 
-        .. doxygenfunction:: fiction::networks::utils::fanin_edges
+        .. doxygenfunction:: fiction::networks::fanin_edges
 
-        .. doxygenfunction:: fiction::networks::utils::has_incoming_primary_input
-        .. doxygenfunction:: fiction::networks::utils::all_incoming_edge_paths
-        .. doxygenfunction:: fiction::networks::utils::inverse_levels
+        .. doxygenfunction:: fiction::networks::has_incoming_primary_input
+        .. doxygenfunction:: fiction::networks::all_incoming_edge_paths
+        .. doxygenfunction:: fiction::networks::inverse_levels
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.high_degree_fanin_exception
@@ -42,16 +42,16 @@ Layout Utils
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/layouts/utils/layout_utils.hpp``
+        **Header:** ``fiction/layouts/layout_utils.hpp``
 
-        .. doxygenfunction:: fiction::layouts::utils::num_adjacent_coordinates
-        .. doxygenfunction:: fiction::layouts::utils::relative_to_absolute_cell_position
-        .. doxygenfunction:: fiction::layouts::utils::port_direction_to_coordinate
-        .. doxygenfunction:: fiction::layouts::utils::normalize_layout_coordinates
-        .. doxygenfunction:: fiction::layouts::utils::convert_layout_to_siqad_coordinates
-        .. doxygenfunction:: fiction::layouts::utils::convert_layout_to_fiction_coordinates
-        .. doxygenfunction:: fiction::layouts::utils::random_coordinate
-        .. doxygenfunction:: fiction::layouts::utils::all_coordinates_in_spanned_area
+        .. doxygenfunction:: fiction::layouts::num_adjacent_coordinates
+        .. doxygenfunction:: fiction::layouts::relative_to_absolute_cell_position
+        .. doxygenfunction:: fiction::layouts::port_direction_to_coordinate
+        .. doxygenfunction:: fiction::layouts::normalize_layout_coordinates
+        .. doxygenfunction:: fiction::layouts::convert_layout_to_siqad_coordinates
+        .. doxygenfunction:: fiction::layouts::convert_layout_to_fiction_coordinates
+        .. doxygenfunction:: fiction::layouts::random_coordinate
+        .. doxygenfunction:: fiction::layouts::all_coordinates_in_spanned_area
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.num_adjacent_coordinates
@@ -75,19 +75,19 @@ Placement Utils
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/physical_design/utils/placement_utils.hpp``
+        **Header:** ``fiction/physical_design/placement_utils.hpp``
 
-        .. doxygenfunction:: fiction::physical_design::utils::reserve_input_nodes
-        .. doxygenfunction:: fiction::physical_design::utils::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
-        .. doxygenfunction:: fiction::physical_design::utils::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a) noexcept
-        .. doxygenfunction:: fiction::physical_design::utils::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const std::optional<bool>& c = std::nullopt) noexcept
-        .. doxygenfunction:: fiction::physical_design::utils::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c) noexcept
-        .. doxygenfunction:: fiction::physical_design::utils::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos) noexcept
+        .. doxygenfunction:: fiction::physical_design::reserve_input_nodes
+        .. doxygenfunction:: fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n) noexcept
+        .. doxygenfunction:: fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a) noexcept
+        .. doxygenfunction:: fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const std::optional<bool>& c = std::nullopt) noexcept
+        .. doxygenfunction:: fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::signal<Lyt>& a, const mockturtle::signal<Lyt>& b, const mockturtle::signal<Lyt>& c) noexcept
+        .. doxygenfunction:: fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<mockturtle::signal<Lyt>, Ntk>& node2pos) noexcept
 
-        .. doxygenstruct:: fiction::physical_design::utils::branching_signal_container
+        .. doxygenstruct:: fiction::physical_design::branching_signal_container
            :members:
 
-        .. doxygenfunction:: fiction::physical_design::utils::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
+        .. doxygenfunction:: fiction::physical_design::place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>& n, const mockturtle::node_map<branching_signal_container<Lyt, Ntk, fanout_size>, Ntk>& node2pos) noexcept
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.reserve_input_nodes
@@ -99,25 +99,25 @@ Routing Utils
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/physical_design/utils/routing_utils.hpp``
+        **Header:** ``fiction/physical_design/routing_utils.hpp``
 
-        .. doxygenstruct:: fiction::physical_design::utils::routing_objective
+        .. doxygenstruct:: fiction::physical_design::routing_objective
            :members:
 
-        .. doxygenclass:: fiction::physical_design::utils::layout_coordinate_path
+        .. doxygenclass:: fiction::physical_design::layout_coordinate_path
            :members:
 
-        .. doxygenclass:: fiction::physical_design::utils::path_collection
+        .. doxygenclass:: fiction::physical_design::path_collection
            :members:
-        .. doxygenclass:: fiction::physical_design::utils::path_set
+        .. doxygenclass:: fiction::physical_design::path_set
            :members:
 
-        .. doxygenfunction:: fiction::physical_design::utils::is_crossable_wire
+        .. doxygenfunction:: fiction::physical_design::is_crossable_wire
 
-        .. doxygenfunction:: fiction::physical_design::utils::route_path
+        .. doxygenfunction:: fiction::physical_design::route_path
 
-        .. doxygenfunction:: fiction::physical_design::utils::extract_routing_objectives
-        .. doxygenfunction:: fiction::physical_design::utils::clear_routing
+        .. doxygenfunction:: fiction::physical_design::extract_routing_objectives
+        .. doxygenfunction:: fiction::physical_design::clear_routing
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.is_crossable_wire
@@ -131,17 +131,17 @@ Name Utils
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/networks/utils/name_utils.hpp``
+        **Header:** ``fiction/networks/name_utils.hpp``
 
-        .. doxygenfunction:: fiction::networks::utils::get_name
-        .. doxygenfunction:: fiction::networks::utils::set_name
-        .. doxygenfunction:: fiction::networks::utils::restore_network_name
-        .. doxygenfunction:: fiction::networks::utils::restore_input_names
-        .. doxygenfunction:: fiction::networks::utils::restore_output_names
-        .. doxygenfunction:: fiction::networks::utils::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
-        .. doxygenfunction:: fiction::networks::utils::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<branching_signal_container<NtkDest, NtkSrc, fanout_size>, NtkSrc>& old2new) noexcept
-        .. doxygenfunction:: fiction::networks::utils::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
-        .. doxygenfunction:: fiction::networks::utils::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
+        .. doxygenfunction:: fiction::networks::get_name
+        .. doxygenfunction:: fiction::networks::set_name
+        .. doxygenfunction:: fiction::networks::restore_network_name
+        .. doxygenfunction:: fiction::networks::restore_input_names
+        .. doxygenfunction:: fiction::networks::restore_output_names
+        .. doxygenfunction:: fiction::networks::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<mockturtle::signal<NtkDest>, NtkSrc>& old2new) noexcept
+        .. doxygenfunction:: fiction::networks::restore_signal_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, const mockturtle::node_map<branching_signal_container<NtkDest, NtkSrc, fanout_size>, NtkSrc>& old2new) noexcept
+        .. doxygenfunction:: fiction::networks::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest) noexcept
+        .. doxygenfunction:: fiction::networks::restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_map<T, NtkSrc>& old2new) noexcept
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.get_name

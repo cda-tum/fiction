@@ -8,7 +8,7 @@
 
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
@@ -135,7 +135,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
         CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
 
         // using cube coordinates
-        const auto lyt_in_cube_coord = layouts::utils::convert_layout_to_fiction_coordinates<cube_layout>(lyt);
+        const auto lyt_in_cube_coord = layouts::convert_layout_to_fiction_coordinates<cube_layout>(lyt);
         const sidb::generators::design_sidb_gates_params<cell<cube_layout>> params_cube{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
@@ -156,7 +156,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
                   layouts::coords::siqad{10, 4, 0})) == siqad_layout::technology::cell_type::LOGIC);
 
         // using offset coordinates
-        const auto lyt_in_offset_coord = layouts::utils::convert_layout_to_fiction_coordinates<offset_layout>(lyt);
+        const auto lyt_in_offset_coord = layouts::convert_layout_to_fiction_coordinates<offset_layout>(lyt);
         const sidb::generators::design_sidb_gates_params<cell<offset_layout>> params_offset{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =

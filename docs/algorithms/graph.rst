@@ -1,13 +1,13 @@
 Generate Edge Intersection Graph
 --------------------------------
 
-**Header:** ``fiction/physical_design/utils/generate_edge_intersection_graph.hpp``
+**Header:** ``fiction/physical_design/generate_edge_intersection_graph.hpp``
 
-.. doxygenstruct:: fiction::physical_design::utils::generate_edge_intersection_graph_params
+.. doxygenstruct:: fiction::physical_design::generate_edge_intersection_graph_params
    :members:
-.. doxygenstruct:: fiction::physical_design::utils::generate_edge_intersection_graph_stats
+.. doxygenstruct:: fiction::physical_design::generate_edge_intersection_graph_stats
    :members:
-.. doxygenfunction:: fiction::physical_design::utils::generate_edge_intersection_graph
+.. doxygenfunction:: fiction::physical_design::generate_edge_intersection_graph
 
 
 Graph Coloring
@@ -15,19 +15,19 @@ Graph Coloring
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/physical_design/utils/graph_coloring.hpp``
+        **Header:** ``fiction/utils/graph/graph_coloring.hpp``
 
-        .. doxygenenum:: fiction::physical_design::utils::graph_coloring_engine
-        .. doxygenenum:: fiction::physical_design::utils::graph_coloring_sat_search_tactic
-        .. doxygenstruct:: fiction::physical_design::utils::determine_vertex_coloring_sat_params
+        .. doxygenenum:: fiction::utils::graph::graph_coloring_engine
+        .. doxygenenum:: fiction::utils::graph::graph_coloring_sat_search_tactic
+        .. doxygenstruct:: fiction::utils::graph::determine_vertex_coloring_sat_params
            :members:
-        .. doxygenstruct:: fiction::physical_design::utils::determine_vertex_coloring_heuristic_params
+        .. doxygenstruct:: fiction::utils::graph::determine_vertex_coloring_heuristic_params
            :members:
-        .. doxygenstruct:: fiction::physical_design::utils::determine_vertex_coloring_params
+        .. doxygenstruct:: fiction::utils::graph::determine_vertex_coloring_params
            :members:
-        .. doxygenstruct:: fiction::physical_design::utils::determine_vertex_coloring_stats
+        .. doxygenstruct:: fiction::utils::graph::determine_vertex_coloring_stats
            :members:
-        .. doxygenfunction:: fiction::physical_design::utils::determine_vertex_coloring
+        .. doxygenfunction:: fiction::utils::graph::determine_vertex_coloring
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.graph_coloring_engine

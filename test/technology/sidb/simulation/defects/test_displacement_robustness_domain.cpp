@@ -8,7 +8,7 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
@@ -229,7 +229,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
 {
     auto lyt = blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>();
 
-    const auto lyt_offset = layouts::utils::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
+    const auto lyt_offset = layouts::convert_layout_to_fiction_coordinates<sidb_cell_clk_lyt>(lyt);
 
     SECTION("one displacement variation in y-direction")
     {

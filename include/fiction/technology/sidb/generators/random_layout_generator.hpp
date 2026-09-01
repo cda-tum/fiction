@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
 #define FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
 
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp"
@@ -126,7 +126,7 @@ template <typename Lyt>
     {
         // random coordinate within the area specified by two coordinates
         const auto random_coord =
-            layouts::utils::random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
+            layouts::random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
         bool next_to_neutral_defect = false;
 
         if (sidbs_affected_by_defects.count(random_coord) > 0)
@@ -213,7 +213,7 @@ generate_multiple_random_layouts(const generate_random_layout_params<coordinate<
     {
         if (auto random_lyt = generate_random_layout(params, skeleton); random_lyt.has_value())
         {
-            const auto digest = layouts::utils::cell_layout_digest(random_lyt.value());
+            const auto digest = layouts::cell_layout_digest(random_lyt.value());
 
             // only a collected layout that shares the candidate's digest can be identical to it; comparing those
             // exactly keeps the result independent of digest collisions
@@ -221,7 +221,7 @@ generate_multiple_random_layouts(const generate_random_layout_params<coordinate<
 
             const auto is_identical = std::any_of(
                 first_match, last_match, [&random_lyt, &unique_lyts](const auto& match)
-                { return layouts::utils::are_cell_layouts_identical(random_lyt.value(), unique_lyts[match.second]); });
+                { return layouts::are_cell_layouts_identical(random_lyt.value(), unique_lyts[match.second]); });
 
             // add layout if unique
             if (!is_identical)

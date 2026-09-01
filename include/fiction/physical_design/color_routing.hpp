@@ -5,10 +5,10 @@
 #ifndef FICTION_PHYSICAL_DESIGN_COLOR_ROUTING_HPP
 #define FICTION_PHYSICAL_DESIGN_COLOR_ROUTING_HPP
 
-#include "fiction/physical_design/utils/generate_edge_intersection_graph.hpp"
-#include "fiction/physical_design/utils/graph_coloring.hpp"
-#include "fiction/physical_design/utils/routing_utils.hpp"
+#include "fiction/physical_design/generate_edge_intersection_graph.hpp"
+#include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/graph/graph_coloring.hpp"
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -43,7 +43,7 @@ struct color_routing_params
     /**
      * The engine to use.
      */
-    physical_design::utils::graph_coloring_engine engine = physical_design::utils::graph_coloring_engine::SAT;
+    utils::graph::graph_coloring_engine engine = utils::graph::graph_coloring_engine::SAT;
     /**
      * Allow partial solutions when the SAT engine is used.
      */
@@ -63,11 +63,11 @@ struct color_routing_stats
     /**
      * Statistics of the edge intersection graph generation.
      */
-    physical_design::utils::generate_edge_intersection_graph_stats epg_stats{};
+    generate_edge_intersection_graph_stats epg_stats{};
     /**
      * Statistics of the vertex coloring.
      */
-    physical_design::utils::determine_vertex_coloring_stats<> color_stats{};
+    utils::graph::determine_vertex_coloring_stats<> color_stats{};
 };
 
 namespace detail
@@ -77,8 +77,8 @@ template <typename Lyt>
 class color_routing_impl
 {
   public:
-    color_routing_impl(Lyt& lyt, const std::vector<physical_design::utils::routing_objective<Lyt>>& obj,
-                       const color_routing_params& p, color_routing_stats& st) :
+    color_routing_impl(Lyt& lyt, const std::vector<routing_objective<Lyt>>& obj, const color_routing_params& p,
+                       color_routing_stats& st) :
             layout{lyt},
             objectives{obj},
             ps{p},
@@ -90,11 +90,11 @@ class color_routing_impl
         // measure runtime
         mockturtle::stopwatch stop{pst.time_total};
 
-        const physical_design::utils::generate_edge_intersection_graph_params epg_params{.crossings  = ps.crossings,
-                                                                                         .path_limit = ps.path_limit};
+        const generate_edge_intersection_graph_params epg_params{.crossings  = ps.crossings,
+                                                                 .path_limit = ps.path_limit};
 
         const auto edge_intersection_graph =
-            physical_design::utils::generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
+            generate_edge_intersection_graph(layout, objectives, epg_params, &pst.epg_stats);
 
         // if no partial routing is allowed, abort if some objectives cannot be satisfied by path enumeration
         if (!ps.conduct_partial_routing && pst.epg_stats.number_of_unroutable_objectives > 0)
@@ -102,17 +102,16 @@ class color_routing_impl
             return false;
         }
 
-        const physical_design::utils::determine_vertex_coloring_params<
-            ::fiction::physical_design::utils::edge_intersection_graph<Lyt>>
-            dvc_ps{.engine     = ps.engine,
-                   .sat_params = {.sat_engine = bill::solvers::glucose_41,
-                                  .sat_search_tactic =
-                                      physical_design::utils::graph_coloring_sat_search_tactic::LINEARLY_ASCENDING,
-                                  .cliques                     = pst.epg_stats.cliques,
-                                  .clique_size_color_frequency = !ps.partial_sat}};
+        const utils::graph::determine_vertex_coloring_params<::fiction::physical_design::edge_intersection_graph<Lyt>>
+            dvc_ps{
+                .engine     = ps.engine,
+                .sat_params = {.sat_engine        = bill::solvers::glucose_41,
+                               .sat_search_tactic = utils::graph::graph_coloring_sat_search_tactic::LINEARLY_ASCENDING,
+                               .cliques           = pst.epg_stats.cliques,
+                               .clique_size_color_frequency = !ps.partial_sat}};
 
         const auto vertex_coloring =
-            physical_design::utils::determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
+            utils::graph::determine_vertex_coloring(edge_intersection_graph, dvc_ps, &pst.color_stats);
 
         // if no partial routing is allowed, abort if the coloring does not satisfy all objectives
         if (!ps.conduct_partial_routing && pst.color_stats.color_frequency != pst.epg_stats.cliques.size())
@@ -133,7 +132,7 @@ class color_routing_impl
     /**
      * The routing objectives.
      */
-    const std::vector<physical_design::utils::routing_objective<Lyt>> objectives;
+    const std::vector<routing_objective<Lyt>> objectives;
     /**
      * Parameters.
      */
@@ -156,7 +155,7 @@ class color_routing_impl
      * @param color The color to extract and route.
      */
     template <typename Graph, typename Color>
-    void conduct_routing(const Graph& graph, const physical_design::utils::vertex_coloring<Graph, Color>& coloring,
+    void conduct_routing(const Graph& graph, const utils::graph::vertex_coloring<Graph, Color>& coloring,
                          const Color& color) noexcept
     {
         std::size_t num_satisfied_objectives{0};
@@ -167,7 +166,7 @@ class color_routing_impl
                                   const auto& [vertex, path] = v_path_pair;
                                   if (coloring.at(vertex) == color)
                                   {
-                                      physical_design::utils::route_path(layout, path);
+                                      route_path(layout, path);
                                       ++num_satisfied_objectives;
                                   }
                               });
@@ -214,8 +213,8 @@ class color_routing_impl
  * @return `true` iff routing was successful, i.e., iff all objectives could be satisfied.
  */
 template <typename Lyt>
-bool color_routing(Lyt& lyt, const std::vector<physical_design::utils::routing_objective<Lyt>>& objectives,
-                   color_routing_params ps = {}, color_routing_stats* pst = nullptr)
+bool color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectives, color_routing_params ps = {},
+                   color_routing_stats* pst = nullptr)
 {
     static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 

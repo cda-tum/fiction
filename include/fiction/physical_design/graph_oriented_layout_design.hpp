@@ -7,14 +7,14 @@
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
-#include "fiction/networks/utils/name_utils.hpp"
-#include "fiction/networks/utils/network_utils.hpp"
+#include "fiction/networks/name_utils.hpp"
+#include "fiction/networks/network_utils.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
+#include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/physical_design/post_layout_optimization.hpp"
-#include "fiction/physical_design/utils/placement_utils.hpp"
-#include "fiction/physical_design/utils/routing_utils.hpp"
+#include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -849,7 +849,7 @@ class graph_oriented_layout_design_impl
                                        {
                                            const std::scoped_lock lock(update_best_layout_mutex);
                                            best_lyt = std::move(*result);
-                                           networks::utils::restore_names(ssg_ptr->network, best_lyt);
+                                           networks::restore_names(ssg_ptr->network, best_lyt);
                                            update_stats(best_lyt);
 
                                            if (ps.return_first)
@@ -914,7 +914,7 @@ class graph_oriented_layout_design_impl
                     if (result)
                     {
                         best_lyt = *result;
-                        networks::utils::restore_names(ssg.network, best_lyt);
+                        networks::restore_names(ssg.network, best_lyt);
                         update_stats(best_lyt);
 
                         if (ps.return_first)
@@ -1185,7 +1185,7 @@ class graph_oriented_layout_design_impl
      * Defaults to `new_gate_location::NONE`.
      * @return A path from `src` to `dest` if one exists.
      */
-    [[nodiscard]] physical_design::utils::layout_coordinate_path<ObstrLyt>
+    [[nodiscard]] layout_coordinate_path<ObstrLyt>
     check_path(const ObstrLyt& layout, const tile<ObstrLyt>& src, const tile<ObstrLyt>& dest,
                const new_gate_location new_gate_loc            = new_gate_location::NONE,
                const bool              check_straight_inverter = false) noexcept
@@ -1202,9 +1202,8 @@ class graph_oriented_layout_design_impl
             physical_design::path_finding::a_star_params a_star_crossing_params{};
             a_star_crossing_params.crossings = !ps.planar;
 
-            const auto path =
-                physical_design::path_finding::a_star<physical_design::utils::layout_coordinate_path<ObstrLyt>>(
-                    layout, {src, dest}, dist(), cost(), a_star_crossing_params);
+            const auto path = physical_design::path_finding::a_star<layout_coordinate_path<ObstrLyt>>(
+                layout, {src, dest}, dist(), cost(), a_star_crossing_params);
 
             if (path.size() < 2)
             {
@@ -1369,7 +1368,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_pos(const ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                               const networks::utils::fanin_container<tec_nt>& fc) noexcept
+                               const networks::fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
 
@@ -1417,7 +1416,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_single_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const networks::utils::fanin_container<tec_nt>& fc) noexcept
+                                        const networks::fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1479,7 +1478,7 @@ class graph_oriented_layout_design_impl
      */
     [[nodiscard]] coord_vec_type<ObstrLyt>
     get_possible_positions_double_fanin(ObstrLyt& layout, const placement_info<ObstrLyt>& place_info,
-                                        const networks::utils::fanin_container<tec_nt>& fc) noexcept
+                                        const networks::fanin_container<tec_nt>& fc) noexcept
     {
         coord_vec_type<ObstrLyt> possible_positions{};
         possible_positions.reserve(ps.num_vertex_expansions);
@@ -1564,7 +1563,7 @@ class graph_oriented_layout_design_impl
                                                                   const search_space_graph<ObstrLyt>& ssg,
                                                                   const placement_info<ObstrLyt>& place_info) noexcept
     {
-        const auto fc = networks::utils::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
+        const auto fc = networks::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
@@ -1672,8 +1671,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the single fanin node.
      */
     void route_single_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>&               node2pos,
-                                 const networks::utils::fanin_container<tec_nt>& fc) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>&        node2pos,
+                                 const networks::fanin_container<tec_nt>& fc) noexcept
     {
         const auto& pre   = fc.fanin_nodes[0];
         const auto  pre_t = static_cast<tile<ObstrLyt>>(node2pos[pre]);
@@ -1683,7 +1682,7 @@ class graph_oriented_layout_design_impl
         const auto path = check_path(layout, pre_t, position, new_gate_location::NONE);
         assert(!path.empty());
 
-        physical_design::utils::route_path(layout, path);
+        route_path(layout, path);
 
         for (const auto& el : path)
         {
@@ -1699,8 +1698,8 @@ class graph_oriented_layout_design_impl
      * @param fc A vector of nodes that precede the double fanin node.
      */
     void route_double_input_node(const tile<ObstrLyt>& position, ObstrLyt& layout,
-                                 node_dict_type<ObstrLyt, tec_nt>&               node2pos,
-                                 const networks::utils::fanin_container<tec_nt>& fc) noexcept
+                                 node_dict_type<ObstrLyt, tec_nt>&        node2pos,
+                                 const networks::fanin_container<tec_nt>& fc) noexcept
     {
         const auto& pre1 = fc.fanin_nodes[0];
         const auto& pre2 = fc.fanin_nodes[1];
@@ -1726,8 +1725,8 @@ class graph_oriented_layout_design_impl
             layout.obstruct_coordinate(el);
         }
 
-        physical_design::utils::route_path(layout, path_1);
-        physical_design::utils::route_path(layout, path_2);
+        route_path(layout, path_1);
+        route_path(layout, path_2);
     }
     /**
      * Executes a single placement step in the layout for the given network node. It determines the type of the node,
@@ -1744,7 +1743,7 @@ class graph_oriented_layout_design_impl
                                        search_space_graph<ObstrLyt>& ssg, placement_info<ObstrLyt>& place_info) noexcept
     {
         // vector to store preceding nodes
-        const auto fc = networks::utils::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
+        const auto fc = networks::fanins(ssg.network, ssg.nodes_to_place[place_info.current_node]);
 
         if (ssg.network.is_pi(ssg.nodes_to_place[place_info.current_node]))
         {
@@ -1775,8 +1774,8 @@ class graph_oriented_layout_design_impl
                 const auto pre_t = static_cast<tile<ObstrLyt>>(place_info.node2pos[pre]);
                 auto       a     = static_cast<mockturtle::signal<ObstrLyt>>(pre_t);
 
-                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = physical_design::utils::place(
-                    layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a);
+                place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] =
+                    place(layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a);
             }
 
             route_single_input_node(position, layout, place_info.node2pos, fc);
@@ -1790,7 +1789,7 @@ class graph_oriented_layout_design_impl
             const auto a1 = static_cast<mockturtle::signal<ObstrLyt>>(pre1);
             const auto a2 = static_cast<mockturtle::signal<ObstrLyt>>(pre2);
 
-            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = physical_design::utils::place(
+            place_info.node2pos[ssg.nodes_to_place[place_info.current_node]] = place(
                 layout, position, ssg.network, ssg.nodes_to_place[place_info.current_node], a1, a2, fc.constant_fanin);
 
             route_double_input_node(position, layout, place_info.node2pos, fc);
@@ -1965,7 +1964,7 @@ class graph_oriented_layout_design_impl
 
         auto layout = initialize_layout(min_layout_width);
 
-        auto                             pi2node = physical_design::utils::reserve_input_nodes(layout, ssg.network);
+        auto                             pi2node = reserve_input_nodes(layout, ssg.network);
         node_dict_type<ObstrLyt, tec_nt> node2pos{ssg.network};
         placement_info<ObstrLyt>         place_info{0ul, 0ul, node2pos, pi2node};
 
@@ -2490,9 +2489,9 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
                                                  // therefore, this is the only relevant check here
 
     // check for input degree
-    if (networks::utils::has_high_degree_fanin_nodes(ntk, 2))
+    if (networks::has_high_degree_fanin_nodes(ntk, 2))
     {
-        throw networks::utils::high_degree_fanin_exception();
+        throw networks::high_degree_fanin_exception();
     }
 
     if (ps.cost == graph_oriented_layout_design_params::cost_objective::CUSTOM && !custom_cost_objective)

@@ -4,7 +4,7 @@
 #include <fiction/physical_design/path_finding/a_star.hpp>
 #include <fiction/physical_design/path_finding/cost.hpp>
 #include <fiction/physical_design/path_finding/distance.hpp>
-#include <fiction/physical_design/utils/routing_utils.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/traits.hpp>
 
 #include <vector>
@@ -35,8 +35,8 @@ void a_star_impl(nanobind::module_& m)
            const fiction::physical_design::path_finding::a_star_params& params)
         {
             return static_cast<std::vector<fiction::coordinate<Lyt>>>(
-                fiction::physical_design::path_finding::a_star<
-                    fiction::physical_design::utils::layout_coordinate_path<Lyt>, Lyt>(
+                fiction::physical_design::path_finding::a_star<fiction::physical_design::layout_coordinate_path<Lyt>,
+                                                               Lyt>(
                     lyt, {source, target}, fiction::physical_design::path_finding::manhattan_distance_functor<Lyt>(),
                     fiction::physical_design::path_finding::unit_cost_functor<Lyt>(), params));
         },

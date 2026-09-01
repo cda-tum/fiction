@@ -1,9 +1,9 @@
 Simulated Annealing
 -------------------
 
-**Header:** ``fiction/physical_design/utils/simulated_annealing.hpp``
+**Header:** ``fiction/utils/optimization/simulated_annealing.hpp``
 
-.. doxygenfunction:: fiction::physical_design::utils::linear_temperature_schedule
-.. doxygenfunction:: fiction::physical_design::utils::geometric_temperature_schedule
-.. doxygenfunction:: fiction::physical_design::utils::simulated_annealing
-.. doxygenfunction:: fiction::physical_design::utils::multi_simulated_annealing
+.. doxygenfunction:: fiction::utils::optimization::linear_temperature_schedule
+.. doxygenfunction:: fiction::utils::optimization::geometric_temperature_schedule
+.. doxygenfunction:: fiction::utils::optimization::simulated_annealing
+.. doxygenfunction:: fiction::utils::optimization::multi_simulated_annealing

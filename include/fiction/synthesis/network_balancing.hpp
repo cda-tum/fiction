@@ -119,7 +119,7 @@ class network_balancing_impl
             });
 
         // restore signal names if applicable
-        fiction::networks::utils::restore_names(ntk_topo, balanced, old2new);
+        networks::restore_names(ntk_topo, balanced, old2new);
 
         return balanced;
     }

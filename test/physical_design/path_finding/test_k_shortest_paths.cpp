@@ -17,7 +17,7 @@ using namespace fiction;
 TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 {
     using lyt  = layouts::cartesian_layout<>;
-    using path = physical_design::utils::layout_coordinate_path<lyt>;
+    using path = physical_design::layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
     {
@@ -287,7 +287,7 @@ TEST_CASE("Yen's algorithm on 2x2 layouts", "[k-shortest-paths]")
 TEST_CASE("Yen's algorithm on 4x4 layouts", "[k-shortest-paths]")
 {
     using lyt  = layouts::cartesian_layout<>;
-    using path = physical_design::utils::layout_coordinate_path<lyt>;
+    using path = physical_design::layout_coordinate_path<lyt>;
 
     SECTION("coordinate paths")
     {
@@ -459,7 +459,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with coordinate obstruction
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using coord_path = physical_design::utils::layout_coordinate_path<gate_lyt>;
+    using coord_path = physical_design::layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
     {
@@ -608,7 +608,7 @@ TEST_CASE("Yen's algorithm with coordinate obstruction but crossings enabled", "
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
     using obst_lyt   = layouts::obstruction_layout<gate_lyt>;
-    using coord_path = physical_design::utils::layout_coordinate_path<obst_lyt>;
+    using coord_path = physical_design::layout_coordinate_path<obst_lyt>;
 
     // enable crossings
     const physical_design::path_finding::yen_k_shortest_paths_params params{
@@ -734,7 +734,7 @@ TEST_CASE("Yen's algorithm on 4x4 gate-level layouts with connection obstruction
 {
     using gate_lyt =
         layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    using coord_path = physical_design::utils::layout_coordinate_path<gate_lyt>;
+    using coord_path = physical_design::layout_coordinate_path<gate_lyt>;
 
     SECTION("coordinate paths")
     {

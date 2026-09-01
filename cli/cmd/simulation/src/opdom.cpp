@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/sidb/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
@@ -254,7 +254,7 @@ void opdom_command::execute()
         sweep_dimensions.pop_back();
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::utils::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto opdom = [this, &ts, &get_name](auto&& lyt_ptr)
     {

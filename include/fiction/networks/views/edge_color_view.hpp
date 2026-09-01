@@ -5,7 +5,7 @@
 #ifndef FICTION_EDGE_COLOR_VIEW_HPP
 #define FICTION_EDGE_COLOR_VIEW_HPP
 
-#include "fiction/networks/utils/network_utils.hpp"
+#include "fiction/networks/network_utils.hpp"
 
 #include <mockturtle/views/color_view.hpp>
 

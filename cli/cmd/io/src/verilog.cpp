@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -48,7 +48,7 @@ template <typename NtkOrLytVariant>
 void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
 {
     const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
-    { return fiction::networks::utils::get_name(*ntk_or_lyt_ptr); };
+    { return fiction::networks::get_name(*ntk_or_lyt_ptr); };
 
     const auto write_verilog = [this](auto&& ntk_or_lyt_ptr)
     {

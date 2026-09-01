@@ -4,8 +4,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/physical_design/utils/generate_edge_intersection_graph.hpp>
-#include <fiction/physical_design/utils/routing_utils.hpp>
+#include <fiction/physical_design/generate_edge_intersection_graph.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
 
@@ -59,8 +59,8 @@ TEST_CASE("Test find_first_two_of with different iterator types", "[find_first_t
 
 TEST_CASE("Test find_first_two_of with layout_coordinate_paths", "[first_first_two_of]")
 {
-    static const physical_design::utils::layout_coordinate_path<cart_gate_clk_lyt> p1{{1, 1}, {2, 1}};
-    static const physical_design::utils::layout_coordinate_path<cart_gate_clk_lyt> p2{{0, 1}, {1, 1}, {2, 1}};
+    static const physical_design::layout_coordinate_path<cart_gate_clk_lyt> p1{{1, 1}, {2, 1}};
+    static const physical_design::layout_coordinate_path<cart_gate_clk_lyt> p2{{0, 1}, {1, 1}, {2, 1}};
 
     // regular iterators
     const auto it1 = fiction::utils::stl::find_first_two_of(p1.begin(), p1.end(), p2.begin(), p2.end());

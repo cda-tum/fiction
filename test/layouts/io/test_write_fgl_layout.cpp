@@ -55,7 +55,7 @@ void check_parsing_equiv(const Ntk& ntk)
     std::stringstream layout_stream{};
     layouts::io::write_fgl_layout(layout, layout_stream);
 
-    const auto read_layout = layouts::io::read_fgl_layout<Lyt>(layout_stream, networks::utils::get_name(layout));
+    const auto read_layout = layouts::io::read_fgl_layout<Lyt>(layout_stream, networks::get_name(layout));
 
     compare_written_and_read_layout(layout, read_layout);
 

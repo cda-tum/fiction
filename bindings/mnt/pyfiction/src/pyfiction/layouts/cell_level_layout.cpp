@@ -10,8 +10,8 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
+#include <fiction/layouts/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/tile_based_layout.hpp>
-#include <fiction/layouts/utils/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 
@@ -219,8 +219,8 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
                 if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
                 {
-                    fiction::layouts::io::print_layout(
-                        fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt), stream);
+                    fiction::layouts::io::print_layout(fiction::layouts::convert_layout_to_siqad_coordinates(lyt),
+                                                       stream);
                 }
                 else
                 {

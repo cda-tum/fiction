@@ -1,7 +1,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/networks/io/network_reader.hpp>            // custom reader for folders of networks
-#include <fiction/networks/utils/name_utils.hpp>             // name utilities
+#include <fiction/networks/name_utils.hpp>                   // name utilities
 #include <fiction/physical_design/determine_clocking.hpp>    // SAT-based clock number assignment
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // library for technology mapping

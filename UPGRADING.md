@@ -87,17 +87,17 @@ module whose data they serialize.
 | `fiction/io/read_fgl_layout.hpp`  | `fiction/layouts/io/read_fgl_layout.hpp`  |
 | `fiction/io/write_fgl_layout.hpp` | `fiction/layouts/io/write_fgl_layout.hpp` |
 | `fiction/io/write_svg_layout.hpp` | `fiction/layouts/io/write_svg_layout.hpp` |
-| `fiction/utils/layout_utils.hpp`  | `fiction/layouts/utils/layout_utils.hpp`  |
+| `fiction/utils/layout_utils.hpp`  | `fiction/layouts/layout_utils.hpp`        |
 
 #### `networks`
 
-| old                                  | new                                           |
-| ------------------------------------ | --------------------------------------------- |
-| `fiction/io/dot_drawers.hpp`         | `fiction/networks/io/dot_drawers.hpp`         |
-| `fiction/io/network_reader.hpp`      | `fiction/networks/io/network_reader.hpp`      |
-| `fiction/utils/mockturtle_utils.hpp` | `fiction/networks/utils/mockturtle_utils.hpp` |
-| `fiction/utils/name_utils.hpp`       | `fiction/networks/utils/name_utils.hpp`       |
-| `fiction/utils/network_utils.hpp`    | `fiction/networks/utils/network_utils.hpp`    |
+| old                                  | new                                      |
+| ------------------------------------ | ---------------------------------------- |
+| `fiction/io/dot_drawers.hpp`         | `fiction/networks/io/dot_drawers.hpp`    |
+| `fiction/io/network_reader.hpp`      | `fiction/networks/io/network_reader.hpp` |
+| `fiction/utils/mockturtle_utils.hpp` | `fiction/networks/mockturtle_utils.hpp`  |
+| `fiction/utils/name_utils.hpp`       | `fiction/networks/name_utils.hpp`        |
+| `fiction/utils/network_utils.hpp`    | `fiction/networks/network_utils.hpp`     |
 
 #### `synthesis`
 
@@ -114,30 +114,30 @@ module whose data they serialize.
 
 #### `physical_design`
 
-| old                                                                   | new                                                                  |
-| --------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `fiction/algorithms/physical_design/apply_gate_library.hpp`           | `fiction/physical_design/apply_gate_library.hpp`                     |
-| `fiction/algorithms/physical_design/color_routing.hpp`                | `fiction/physical_design/color_routing.hpp`                          |
-| `fiction/algorithms/physical_design/determine_clocking.hpp`           | `fiction/physical_design/determine_clocking.hpp`                     |
-| `fiction/algorithms/physical_design/exact.hpp`                        | `fiction/physical_design/exact.hpp`                                  |
-| `fiction/algorithms/physical_design/graph_oriented_layout_design.hpp` | `fiction/physical_design/graph_oriented_layout_design.hpp`           |
-| `fiction/algorithms/physical_design/hexagonalization.hpp`             | `fiction/physical_design/hexagonalization.hpp`                       |
-| `fiction/algorithms/physical_design/orthogonal.hpp`                   | `fiction/physical_design/orthogonal.hpp`                             |
-| `fiction/algorithms/path_finding/a_star.hpp`                          | `fiction/physical_design/path_finding/a_star.hpp`                    |
-| `fiction/algorithms/path_finding/cost.hpp`                            | `fiction/physical_design/path_finding/cost.hpp`                      |
-| `fiction/algorithms/path_finding/distance.hpp`                        | `fiction/physical_design/path_finding/distance.hpp`                  |
-| `fiction/algorithms/path_finding/distance_map.hpp`                    | `fiction/physical_design/path_finding/distance_map.hpp`              |
-| `fiction/algorithms/path_finding/enumerate_all_paths.hpp`             | `fiction/physical_design/path_finding/enumerate_all_paths.hpp`       |
-| `fiction/algorithms/path_finding/k_shortest_paths.hpp`                | `fiction/physical_design/path_finding/k_shortest_paths.hpp`          |
-| `fiction/algorithms/physical_design/post_layout_optimization.hpp`     | `fiction/physical_design/post_layout_optimization.hpp`               |
-| `fiction/algorithms/iter/aspect_ratio_iterator.hpp`                   | `fiction/physical_design/utils/aspect_ratio_iterator.hpp`            |
-| `fiction/algorithms/graph/generate_edge_intersection_graph.hpp`       | `fiction/physical_design/utils/generate_edge_intersection_graph.hpp` |
-| `fiction/algorithms/graph/graph_coloring.hpp`                         | `fiction/physical_design/utils/graph_coloring.hpp`                   |
-| `fiction/algorithms/graph/mincross.hpp`                               | `fiction/physical_design/utils/mincross.hpp`                         |
-| `fiction/utils/placement_utils.hpp`                                   | `fiction/physical_design/utils/placement_utils.hpp`                  |
-| `fiction/utils/routing_utils.hpp`                                     | `fiction/physical_design/utils/routing_utils.hpp`                    |
-| `fiction/algorithms/optimization/simulated_annealing.hpp`             | `fiction/physical_design/utils/simulated_annealing.hpp`              |
-| `fiction/algorithms/physical_design/wiring_reduction.hpp`             | `fiction/physical_design/wiring_reduction.hpp`                       |
+| old                                                                   | new                                                            |
+| --------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `fiction/algorithms/physical_design/apply_gate_library.hpp`           | `fiction/physical_design/apply_gate_library.hpp`               |
+| `fiction/algorithms/physical_design/color_routing.hpp`                | `fiction/physical_design/color_routing.hpp`                    |
+| `fiction/algorithms/physical_design/determine_clocking.hpp`           | `fiction/physical_design/determine_clocking.hpp`               |
+| `fiction/algorithms/physical_design/exact.hpp`                        | `fiction/physical_design/exact.hpp`                            |
+| `fiction/algorithms/physical_design/graph_oriented_layout_design.hpp` | `fiction/physical_design/graph_oriented_layout_design.hpp`     |
+| `fiction/algorithms/physical_design/hexagonalization.hpp`             | `fiction/physical_design/hexagonalization.hpp`                 |
+| `fiction/algorithms/physical_design/orthogonal.hpp`                   | `fiction/physical_design/orthogonal.hpp`                       |
+| `fiction/algorithms/path_finding/a_star.hpp`                          | `fiction/physical_design/path_finding/a_star.hpp`              |
+| `fiction/algorithms/path_finding/cost.hpp`                            | `fiction/physical_design/path_finding/cost.hpp`                |
+| `fiction/algorithms/path_finding/distance.hpp`                        | `fiction/physical_design/path_finding/distance.hpp`            |
+| `fiction/algorithms/path_finding/distance_map.hpp`                    | `fiction/physical_design/path_finding/distance_map.hpp`        |
+| `fiction/algorithms/path_finding/enumerate_all_paths.hpp`             | `fiction/physical_design/path_finding/enumerate_all_paths.hpp` |
+| `fiction/algorithms/path_finding/k_shortest_paths.hpp`                | `fiction/physical_design/path_finding/k_shortest_paths.hpp`    |
+| `fiction/algorithms/physical_design/post_layout_optimization.hpp`     | `fiction/physical_design/post_layout_optimization.hpp`         |
+| `fiction/algorithms/iter/aspect_ratio_iterator.hpp`                   | `fiction/physical_design/aspect_ratio_iterator.hpp`            |
+| `fiction/algorithms/graph/generate_edge_intersection_graph.hpp`       | `fiction/physical_design/generate_edge_intersection_graph.hpp` |
+| `fiction/algorithms/graph/graph_coloring.hpp`                         | `fiction/utils/graph/graph_coloring.hpp`                       |
+| `fiction/algorithms/graph/mincross.hpp`                               | `fiction/utils/graph/mincross.hpp`                             |
+| `fiction/utils/placement_utils.hpp`                                   | `fiction/physical_design/placement_utils.hpp`                  |
+| `fiction/utils/routing_utils.hpp`                                     | `fiction/physical_design/routing_utils.hpp`                    |
+| `fiction/algorithms/optimization/simulated_annealing.hpp`             | `fiction/utils/optimization/simulated_annealing.hpp`           |
+| `fiction/algorithms/physical_design/wiring_reduction.hpp`             | `fiction/physical_design/wiring_reduction.hpp`                 |
 
 #### `verification`
 

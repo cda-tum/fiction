@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
 #define FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
 
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
@@ -177,8 +177,7 @@ class design_sidb_gates_impl
             skeleton_layout{skeleton},
             truth_table{spec},
             params{ps},
-            all_sidbs_in_canvas{
-                layouts::utils::all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
+            all_sidbs_in_canvas{layouts::all_coordinates_in_spanned_area(params.canvas.first, params.canvas.second)},
             stats{st},
             input_bdl_wires{sidb::simulation::logic::detect_bdl_wires(
                 skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,

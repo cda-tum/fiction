@@ -8,7 +8,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
@@ -28,7 +28,7 @@ TEMPLATE_TEST_CASE("novel designed AND Gate influence distance function which fa
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
 
-    const auto cube_lyt = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
+    const auto cube_lyt = layouts::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
     const sidb::model::defect defect{sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
@@ -69,7 +69,7 @@ TEMPLATE_TEST_CASE(
     "[defect-influence]", sidb_cell_clk_lyt_cube)
 {
     const auto lyt      = blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>();
-    const auto lyt_cube = layouts::utils::convert_layout_to_fiction_coordinates<TestType>(lyt);
+    const auto lyt_cube = layouts::convert_layout_to_fiction_coordinates<TestType>(lyt);
 
     SECTION("Si Vacancy")
     {

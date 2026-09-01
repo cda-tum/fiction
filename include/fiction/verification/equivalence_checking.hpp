@@ -5,7 +5,7 @@
 #ifndef FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP
 #define FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP
 
-#include "fiction/networks/utils/name_utils.hpp"
+#include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/verification/critical_path_length_and_throughput.hpp"
 #include "fiction/verification/design_rule_violations.hpp"

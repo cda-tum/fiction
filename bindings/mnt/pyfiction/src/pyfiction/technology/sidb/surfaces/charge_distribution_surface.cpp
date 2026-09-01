@@ -7,7 +7,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): used via ADL for print_layout(...)
-#include <fiction/layouts/utils/layout_utils.hpp>
+#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -210,8 +210,7 @@ void charge_distribution_surface_layout(nanobind::module_& m, const std::string&
             [](const py_cds& lyt)
             {
                 std::stringstream ss;
-                fiction::layouts::io::print_layout(fiction::layouts::utils::convert_layout_to_siqad_coordinates(lyt),
-                                                   ss);
+                fiction::layouts::io::print_layout(fiction::layouts::convert_layout_to_siqad_coordinates(lyt), ss);
                 return ss.str();
             },
             "Returns a string representation of the layout.")

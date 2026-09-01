@@ -6,12 +6,12 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/physical_design/color_routing.hpp>        // routing based on graph coloring
-#include <fiction/physical_design/exact.hpp>                // SMT-based physical design of FCN layouts
-#include <fiction/physical_design/orthogonal.hpp>           // OGD-based physical design of FCN layouts
-#include <fiction/physical_design/utils/routing_utils.hpp>  // routing utility functions
-#include <fiction/types.hpp>                                // pre-defined types suitable for the FCN domain
-#include <fiction/verification/equivalence_checking.hpp>    // equivalence checking of FCN layouts
+#include <fiction/physical_design/color_routing.hpp>      // routing based on graph coloring
+#include <fiction/physical_design/exact.hpp>              // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/orthogonal.hpp>         // OGD-based physical design of FCN layouts
+#include <fiction/physical_design/routing_utils.hpp>      // routing utility functions
+#include <fiction/types.hpp>                              // pre-defined types suitable for the FCN domain
+#include <fiction/verification/equivalence_checking.hpp>  // equivalence checking of FCN layouts
 
 #include <fmt/format.h>                      // output formatting
 #include <lorina/lorina.hpp>                 // Verilog/BLIF/AIGER/... file parsing
@@ -61,10 +61,10 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
     equiv_stats   = {};
 
     // extract routing objectives
-    const auto objectives = fiction::physical_design::utils::extract_routing_objectives(lyt);
+    const auto objectives = fiction::physical_design::extract_routing_objectives(lyt);
 
     // remove routing
-    fiction::physical_design::utils::clear_routing(lyt);
+    fiction::physical_design::clear_routing(lyt);
 
     // perform routing
     const auto success = fiction::physical_design::color_routing(lyt, objectives, routing_params, &routing_stats);
@@ -119,7 +119,7 @@ void smt_sat_complete()
     fiction::physical_design::color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
-    routing_params.engine                  = fiction::physical_design::utils::graph_coloring_engine::SAT;
+    routing_params.engine                  = fiction::utils::graph::graph_coloring_engine::SAT;
 
     constexpr const uint64_t bench_select = fiction_experiments::all;
 
@@ -158,7 +158,7 @@ void ortho_sat_complete()
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
     routing_params.path_limit              = 75;
-    routing_params.engine                  = fiction::physical_design::utils::graph_coloring_engine::SAT;
+    routing_params.engine                  = fiction::utils::graph::graph_coloring_engine::SAT;
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_sat_complete",
                                                       "benchmark",
@@ -205,7 +205,7 @@ void ortho_mcs()
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
     routing_params.path_limit              = 75;
-    routing_params.engine                  = fiction::physical_design::utils::graph_coloring_engine::MCS;
+    routing_params.engine                  = fiction::utils::graph::graph_coloring_engine::MCS;
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_mcs",
                                                       "benchmark",

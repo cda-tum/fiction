@@ -1,9 +1,9 @@
 Aspect Ratio Iterator
 ---------------------
 
-**Header:** ``fiction/physical_design/utils/aspect_ratio_iterator.hpp``
+**Header:** ``fiction/physical_design/aspect_ratio_iterator.hpp``
 
-.. doxygenclass:: fiction::physical_design::utils::aspect_ratio_iterator
+.. doxygenclass:: fiction::physical_design::aspect_ratio_iterator
    :members:
 
 

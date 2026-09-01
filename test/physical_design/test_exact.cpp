@@ -9,8 +9,8 @@
 #include "utils/blueprints/network_blueprints.hpp"
 #include "utils/equivalence_checking_utils.hpp"
 
+#include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/exact.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
@@ -677,10 +677,10 @@ TEST_CASE("High degree input networks", "[exact]")
 {
     CHECK_THROWS_AS(physical_design::exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
                                                               twoddwave(configuration())),
-                    networks::utils::high_degree_fanin_exception);
+                    networks::high_degree_fanin_exception);
     CHECK_THROWS_AS(physical_design::exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
                                                               use(configuration())),
-                    networks::utils::high_degree_fanin_exception);
+                    networks::high_degree_fanin_exception);
 
     CHECK_NOTHROW(physical_design::exact<cart_gate_clk_lyt>(blueprints::maj1_network<mockturtle::mig_network>(),
                                                             res(configuration())));

@@ -1,7 +1,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/io/read_fgl_layout.hpp>          // custom reader for layouts
-#include <fiction/networks/utils/name_utils.hpp>           // name utilities
+#include <fiction/networks/name_utils.hpp>                 // name utilities
 #include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
 #include <fiction/synthesis/network_conversion.hpp>        // conversion of networks
 #include <fiction/types.hpp>                               // pre-defined types

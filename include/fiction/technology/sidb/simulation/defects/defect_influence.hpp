@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_INFLUENCE_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/simulation/domain.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
@@ -165,8 +165,8 @@ class defect_influence_impl
     grid_search(const std::size_t step_size, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
     {
         mockturtle::stopwatch stop{stats.time_total};
-        const auto all_possible_defect_positions = layouts::utils::all_coordinates_in_spanned_area(nw_cell, se_cell);
-        const std::size_t num_positions          = all_possible_defect_positions.size();
+        const auto        all_possible_defect_positions = layouts::all_coordinates_in_spanned_area(nw_cell, se_cell);
+        const std::size_t num_positions                 = all_possible_defect_positions.size();
 
         // floored at `1` so that the slice arithmetic below stays well-defined when there is nothing to distribute;
         // the `start >= end` guard in the loop then keeps the worker from being launched
@@ -233,7 +233,7 @@ class defect_influence_impl
         mockturtle::stopwatch stop{stats.time_total};
 
         // Get all possible defect positions within the grid spanned by nw_cell and se_cell
-        auto all_possible_defect_positions = layouts::utils::all_coordinates_in_spanned_area(nw_cell, se_cell);
+        auto all_possible_defect_positions = layouts::all_coordinates_in_spanned_area(nw_cell, se_cell);
 
         // Shuffle the vector using std::ranges::shuffle
         std::ranges::shuffle(all_possible_defect_positions, generator);

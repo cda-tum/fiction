@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/traits.hpp>
@@ -104,7 +104,7 @@ void temp_command::execute()
         }
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::utils::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto temp = [this, &ts, &get_name](auto&& lyt_ptr)
     {

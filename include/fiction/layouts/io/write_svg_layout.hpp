@@ -7,7 +7,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/traits.hpp"
@@ -736,7 +736,7 @@ class write_sidb_layout_svg_impl
         if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
         {
             // Generate all lattice points
-            const auto all_coords = layouts::utils::all_coordinates_in_spanned_area(min_coord, max_coord);
+            const auto all_coords = all_coordinates_in_spanned_area(min_coord, max_coord);
 
             for (const auto& coord : all_coords)
             {

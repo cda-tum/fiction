@@ -8,12 +8,12 @@
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction/layouts/clocking_scheme.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
+#include "fiction/networks/name_utils.hpp"
+#include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/networks/utils/name_utils.hpp"
-#include "fiction/networks/utils/network_utils.hpp"
-#include "fiction/physical_design/utils/aspect_ratio_iterator.hpp"
-#include "fiction/physical_design/utils/placement_utils.hpp"
+#include "fiction/physical_design/aspect_ratio_iterator.hpp"
+#include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -193,7 +193,7 @@ class exact_impl
         lower_bound = static_cast<decltype(lower_bound)>(ntk->num_gates() + ntk->num_pis());
 
         // NOLINTNEXTLINE(*-prefer-member-initializer)
-        ari = physical_design::utils::aspect_ratio_iterator<typename Lyt::aspect_ratio>{
+        ari = aspect_ratio_iterator<typename Lyt::aspect_ratio>{
             ps.fixed_size ? std::min(static_cast<uint64_t>(ps.upper_bound_area),
                                      static_cast<uint64_t>(ps.upper_bound_x * ps.upper_bound_y)) :
                             static_cast<uint64_t>(lower_bound)};
@@ -243,7 +243,7 @@ class exact_impl
     /**
      * Iterator for the factorization of possible aspect ratios.
      */
-    physical_design::utils::aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
+    aspect_ratio_iterator<typename Lyt::aspect_ratio> ari{0};
     /**
      * Aspect ratio of found result. Only needed for the asynchronous case.
      */
@@ -281,7 +281,7 @@ class exact_impl
                 black_list{sbl},
                 node2pos{ntk},
                 depth_ntk{ntk},
-                inv_levels{networks::utils::inverse_levels(ntk)}
+                inv_levels{networks::inverse_levels(ntk)}
         {}
         /**
          * Evaluates a given aspect ratio regarding the stored configurations whether it can be skipped, i.e., does not
@@ -503,7 +503,7 @@ class exact_impl
          * Maps nodes to tile positions when creating the layout from the SMT model.
          */
         mockturtle::node_map<
-            physical_design::utils::branching_signal_container<
+            branching_signal_container<
                 Lyt, topology_ntk_t, Lyt::max_fanin_size>  // this currently assumes that max_fanin_size is equal to the
                                                            // maximum fanout size of a layout type. Should the maximum
                                                            // fanout size exceed max_fanin_size, this will break
@@ -998,14 +998,14 @@ class exact_impl
 
                         z3::expr_vector te{*ctx};
 
-                        networks::utils::foreach_edge(network,
-                                                      [this, &t, &te](const auto& e)
-                                                      {
-                                                          if (!skip_const_or_io_edge(e))
-                                                          {
-                                                              te.push_back(get_te(t, e));
-                                                          }
-                                                      });
+                        networks::foreach_edge(network,
+                                               [this, &t, &te](const auto& e)
+                                               {
+                                                   if (!skip_const_or_io_edge(e))
+                                                   {
+                                                       te.push_back(get_te(t, e));
+                                                   }
+                                               });
 
                         if (!te.empty())
                         {
@@ -1032,14 +1032,14 @@ class exact_impl
                                 }
                             });
 
-                        networks::utils::foreach_edge(network,
-                                                      [this, &t, &tn](const auto& e)
-                                                      {
-                                                          if (!skip_const_or_io_edge(e))
-                                                          {
-                                                              tn.push_back(get_te(t, e));
-                                                          }
-                                                      });
+                        networks::foreach_edge(network,
+                                               [this, &t, &tn](const auto& e)
+                                               {
+                                                   if (!skip_const_or_io_edge(e))
+                                                   {
+                                                       tn.push_back(get_te(t, e));
+                                                   }
+                                               });
 
                         if (!tn.empty())
                         {
@@ -1106,7 +1106,7 @@ class exact_impl
                                 const auto tn = get_tn(t, n);
 
                                 z3::expr_vector conj{*ctx};
-                                networks::utils::foreach_outgoing_edge(
+                                networks::foreach_outgoing_edge(
                                     network, n,
                                     [this, &t, &conj](const auto& ae)
                                     {
@@ -1171,7 +1171,7 @@ class exact_impl
 
                                 z3::expr_vector conj{*ctx};
 
-                                networks::utils::foreach_incoming_edge(
+                                networks::foreach_incoming_edge(
                                     network, n,
                                     [this, &t, &conj](const auto& iae)
                                     {
@@ -1228,7 +1228,7 @@ class exact_impl
             apply_to_added_and_updated_tiles(
                 [this](const auto& t)
                 {
-                    networks::utils::foreach_edge(
+                    networks::foreach_edge(
                         network,
                         [this, &t](const auto& e)
                         {
@@ -1274,7 +1274,7 @@ class exact_impl
             apply_to_added_and_updated_tiles(
                 [this](const auto& t)
                 {
-                    networks::utils::foreach_edge(
+                    networks::foreach_edge(
                         network,
                         [this, &t](const auto& e)
                         {
@@ -1474,7 +1474,7 @@ class exact_impl
 
             const auto define_length = [this](const mockturtle::node<topology_ntk_t>& n)
             {
-                const auto paths = networks::utils::all_incoming_edge_paths(network, n);
+                const auto paths = networks::all_incoming_edge_paths(network, n);
 
                 const auto longest_path = std::max_element(
                     paths.cbegin(), paths.cend(), [](const auto& p1, const auto& p2) { return p1.size() < p2.size(); });
@@ -1505,7 +1505,7 @@ class exact_impl
                         }
                         else if (!params.io_pins)
                         {
-                            if (networks::utils::has_incoming_primary_input(network, src))
+                            if (networks::has_incoming_primary_input(network, src))
                             {
                                 path_length.push_back(ncl_to_real(src));
                             }
@@ -1599,7 +1599,7 @@ class exact_impl
                                     }
                                 });
 
-                            networks::utils::foreach_edge(
+                            networks::foreach_edge(
                                 network,
                                 [this, &t](const auto& e)
                                 {
@@ -1625,7 +1625,7 @@ class exact_impl
                         }
                         else  // irregular clocking
                         {
-                            const auto tile_degree = layouts::utils::num_adjacent_coordinates(layout, t);
+                            const auto tile_degree = layouts::num_adjacent_coordinates(layout, t);
 
                             network.foreach_node(
                                 [this, &t, &tile_degree](const auto& n)
@@ -1730,16 +1730,16 @@ class exact_impl
                         });
 
                     z3::expr_vector wg{*ctx};
-                    networks::utils::foreach_edge(network,
-                                                  [this, &t, &ow, &wg](const auto& e)
-                                                  {
-                                                      if (!skip_const_or_io_edge(e))
-                                                      {
-                                                          const auto te = get_te(t, e);
-                                                          ow.push_back(te);
-                                                          wg.push_back(te);
-                                                      }
-                                                  });
+                    networks::foreach_edge(network,
+                                           [this, &t, &ow, &wg](const auto& e)
+                                           {
+                                               if (!skip_const_or_io_edge(e))
+                                               {
+                                                   const auto te = get_te(t, e);
+                                                   ow.push_back(te);
+                                                   wg.push_back(te);
+                                               }
+                                           });
 
                     // if there is any edge assigned to a tile, the number of connections need to correspond
                     if (!wg.empty())
@@ -1811,14 +1811,14 @@ class exact_impl
                                     ow.push_back(get_tn(t, n));
                                 }
                             });
-                        networks::utils::foreach_edge(network,
-                                                      [this, &t, &ow](const auto& e)
-                                                      {
-                                                          if (!skip_const_or_io_edge(e))
-                                                          {
-                                                              ow.push_back(get_te(t, e));
-                                                          }
-                                                      });
+                        networks::foreach_edge(network,
+                                               [this, &t, &ow](const auto& e)
+                                               {
+                                                   if (!skip_const_or_io_edge(e))
+                                                   {
+                                                       ow.push_back(get_te(t, e));
+                                                   }
+                                               });
 
                         // if tile t is empty, the clock number does not matter and can be fixed to 0
                         if (!ow.empty())
@@ -1859,14 +1859,14 @@ class exact_impl
                                             solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
-                                            networks::utils::foreach_outgoing_edge(network, n,
-                                                                                   [this, &t](const auto& e)
-                                                                                   {
-                                                                                       if (!skip_const_or_io_edge(e))
-                                                                                       {
-                                                                                           solver->add(!(get_te(t, e)));
-                                                                                       }
-                                                                                   });
+                                            networks::foreach_outgoing_edge(network, n,
+                                                                            [this, &t](const auto& e)
+                                                                            {
+                                                                                if (!skip_const_or_io_edge(e))
+                                                                                {
+                                                                                    solver->add(!(get_te(t, e)));
+                                                                                }
+                                                                            });
                                         }
                                     }
                                 }
@@ -1883,15 +1883,15 @@ class exact_impl
                                         check_point->assumptions.push_back(!(get_tn(t, n)));
 
                                         // same for the incoming edges
-                                        networks::utils::foreach_incoming_edge(
-                                            network, n,
-                                            [this, &t](const auto& e)
-                                            {
-                                                if (!skip_const_or_io_edge(e))
-                                                {
-                                                    check_point->assumptions.push_back(!(get_te(t, e)));
-                                                }
-                                            });
+                                        networks::foreach_incoming_edge(network, n,
+                                                                        [this, &t](const auto& e)
+                                                                        {
+                                                                            if (!skip_const_or_io_edge(e))
+                                                                            {
+                                                                                check_point->assumptions.push_back(
+                                                                                    !(get_te(t, e)));
+                                                                            }
+                                                                        });
                                     }
                                 }
                             }
@@ -1923,14 +1923,14 @@ class exact_impl
                                             solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
-                                            networks::utils::foreach_outgoing_edge(network, n,
-                                                                                   [this, &t](const auto& e)
-                                                                                   {
-                                                                                       if (!skip_const_or_io_edge(e))
-                                                                                       {
-                                                                                           solver->add(!(get_te(t, e)));
-                                                                                       }
-                                                                                   });
+                                            networks::foreach_outgoing_edge(network, n,
+                                                                            [this, &t](const auto& e)
+                                                                            {
+                                                                                if (!skip_const_or_io_edge(e))
+                                                                                {
+                                                                                    solver->add(!(get_te(t, e)));
+                                                                                }
+                                                                            });
                                         }
                                     }
                                 }
@@ -1947,15 +1947,15 @@ class exact_impl
                                         check_point->assumptions.push_back(!(get_tn(t, n)));
 
                                         // same for the incoming edges
-                                        networks::utils::foreach_incoming_edge(
-                                            network, n,
-                                            [this, &t](const auto& e)
-                                            {
-                                                if (!skip_const_or_io_edge(e))
-                                                {
-                                                    check_point->assumptions.push_back(!(get_te(t, e)));
-                                                }
-                                            });
+                                        networks::foreach_incoming_edge(network, n,
+                                                                        [this, &t](const auto& e)
+                                                                        {
+                                                                            if (!skip_const_or_io_edge(e))
+                                                                            {
+                                                                                check_point->assumptions.push_back(
+                                                                                    !(get_te(t, e)));
+                                                                            }
+                                                                        });
                                     }
                                 }
                             }
@@ -1985,8 +1985,8 @@ class exact_impl
                                             solver->add(!(get_tn(t, n)));
 
                                             // same for the outgoing edges
-                                            networks::utils::foreach_outgoing_edge(network, n, [this, &t](const auto& e)
-                                                                                   { solver->add(!(get_te(t, e))); });
+                                            networks::foreach_outgoing_edge(network, n, [this, &t](const auto& e)
+                                                                            { solver->add(!(get_te(t, e))); });
                                         }
                                         // cannot be placed with too little distance to south-east corner
                                         if (layout.x() - t.x + layout.y() - t.y < il)
@@ -1996,7 +1996,7 @@ class exact_impl
                                             check_point->assumptions.push_back(!(get_tn(t, n)));
 
                                             // same for the incoming edges
-                                            networks::utils::foreach_incoming_edge(
+                                            networks::foreach_incoming_edge(
                                                 network, n, [this, &t](const auto& e)
                                                 { check_point->assumptions.push_back(!(get_te(t, e))); });
                                         }
@@ -2240,14 +2240,14 @@ class exact_impl
                         // tiles without wires cannot be synchronization elements
                         z3::expr_vector te{*ctx};
 
-                        networks::utils::foreach_edge(network,
-                                                      [this, &t, &te](const auto& e)
-                                                      {
-                                                          if (!skip_const_or_io_edge(e))
-                                                          {
-                                                              te.push_back(get_te(t, e));
-                                                          }
-                                                      });
+                        networks::foreach_edge(network,
+                                               [this, &t, &te](const auto& e)
+                                               {
+                                                   if (!skip_const_or_io_edge(e))
+                                                   {
+                                                       te.push_back(get_te(t, e));
+                                                   }
+                                               });
 
                         solver->add(z3::implies(z3::atmost(te, 0u), l == zero));
                     });
@@ -2305,14 +2305,14 @@ class exact_impl
 
                                             // additionally, no crossing can precede a fan-out
                                             z3::expr_vector wv{*ctx};
-                                            networks::utils::foreach_edge(network,
-                                                                          [this, &nw, &wv](const auto& e)
-                                                                          {
-                                                                              if (!skip_const_or_io_edge(e))
-                                                                              {
-                                                                                  wv.push_back(get_te(nw, e));
-                                                                              }
-                                                                          });
+                                            networks::foreach_edge(network,
+                                                                   [this, &nw, &wv](const auto& e)
+                                                                   {
+                                                                       if (!skip_const_or_io_edge(e))
+                                                                       {
+                                                                           wv.push_back(get_te(nw, e));
+                                                                       }
+                                                                   });
 
                                             solver->add(z3::implies(get_tn(t, fon), z3::atmost(wv, 1u)));
                                         }
@@ -2373,14 +2373,14 @@ class exact_impl
                                     {
                                         // north-eastern tile exists, do not create a crossing here
                                         z3::expr_vector wv{*ctx};
-                                        networks::utils::foreach_edge(network,
-                                                                      [this, &ne, &wv](const auto& e)
-                                                                      {
-                                                                          if (!skip_const_or_io_edge(e))
-                                                                          {
-                                                                              wv.push_back(get_te(ne, e));
-                                                                          }
-                                                                      });
+                                        networks::foreach_edge(network,
+                                                               [this, &ne, &wv](const auto& e)
+                                                               {
+                                                                   if (!skip_const_or_io_edge(e))
+                                                                   {
+                                                                       wv.push_back(get_te(ne, e));
+                                                                   }
+                                                               });
 
                                         solver->add(z3::implies(get_tn(t, n1), z3::atmost(wv, 1u)));
                                     }
@@ -2410,11 +2410,11 @@ class exact_impl
 
                 for (const auto& i : port.inp)
                 {
-                    iop.push_back(!(get_tc(layouts::utils::port_direction_to_coordinate(layout, t, i), t)));
+                    iop.push_back(!(get_tc(layouts::port_direction_to_coordinate(layout, t, i), t)));
                 }
                 for (const auto& o : port.out)
                 {
-                    iop.push_back(!(get_tc(t, layouts::utils::port_direction_to_coordinate(layout, t, o))));
+                    iop.push_back(!(get_tc(t, layouts::port_direction_to_coordinate(layout, t, o))));
                 }
 
                 return iop;
@@ -2454,7 +2454,7 @@ class exact_impl
                     // truth table represents the identity; wires need to be additionally excluded
                     if (kitty::equal(gate, identity))
                     {
-                        networks::utils::foreach_edge(
+                        networks::foreach_edge(
                             network,
                             [this, &gather_black_list_expr, &t = tile, &ports = port_list](const auto& e)
                             {
@@ -2486,15 +2486,15 @@ class exact_impl
             layout.foreach_ground_tile(
                 [this, &wire_counter](const auto& t)
                 {
-                    networks::utils::foreach_edge(
-                        network,
-                        [this, &wire_counter, &t](const auto& e)
-                        {
-                            if (!skip_const_or_io_edge(e))
-                            {
-                                wire_counter.push_back(z3::ite(get_te(t, e), ctx->real_val(1u), ctx->real_val(0u)));
-                            }
-                        });
+                    networks::foreach_edge(network,
+                                           [this, &wire_counter, &t](const auto& e)
+                                           {
+                                               if (!skip_const_or_io_edge(e))
+                                               {
+                                                   wire_counter.push_back(
+                                                       z3::ite(get_te(t, e), ctx->real_val(1u), ctx->real_val(0u)));
+                                               }
+                                           });
                 });
 
             optimize->minimize(z3::sum(wire_counter));
@@ -2511,14 +2511,14 @@ class exact_impl
                 [this, &crossings_counter](const auto& t)
                 {
                     z3::expr_vector wv{*ctx};
-                    networks::utils::foreach_edge(network,
-                                                  [this, &t, &wv](const auto& e)
-                                                  {
-                                                      if (!skip_const_or_io_edge(e))
-                                                      {
-                                                          wv.push_back(get_te(t, e));
-                                                      }
-                                                  });
+                    networks::foreach_edge(network,
+                                           [this, &t, &wv](const auto& e)
+                                           {
+                                               if (!skip_const_or_io_edge(e))
+                                               {
+                                                   wv.push_back(get_te(t, e));
+                                               }
+                                           });
 
                     crossings_counter.push_back(z3::ite(z3::atleast(wv, 2u), ctx->real_val(1u), ctx->real_val(0u)));
                 });
@@ -2663,7 +2663,7 @@ class exact_impl
          */
         void place_output(const typename Lyt::tile& t, const mockturtle::node<topology_ntk_t>& n)
         {
-            const auto output_signal = network.make_signal(networks::utils::fanins(network, n).fanin_nodes[0]);
+            const auto output_signal = network.make_signal(networks::fanins(network, n).fanin_nodes[0]);
 
             layout.create_po(node2pos[output_signal][n], "", t);
         }
@@ -2745,7 +2745,7 @@ class exact_impl
             // from now on, a clocking scheme is assigned and no distinction between regular and irregular clocking
             // must be made
 
-            const auto pis = physical_design::utils::reserve_input_nodes(layout, network);
+            const auto pis = reserve_input_nodes(layout, network);
 
             // network is topologically sorted, therefore, foreach_node ensures conflict-free traversal
             network.foreach_node(
@@ -2774,7 +2774,7 @@ class exact_impl
                                     else
                                     {
                                         // assign n to t in layout and save the resulting signal
-                                        lyt_signal = physical_design::utils::place(layout, t, network, n, node2pos);
+                                        lyt_signal = place(layout, t, network, n, node2pos);
                                     }
 
                                     // check n's outgoing edges
@@ -2839,7 +2839,7 @@ class exact_impl
             }
 
             // restore possibly set signal names
-            networks::utils::restore_names(network, layout, node2pos);
+            networks::restore_names(network, layout, node2pos);
         }
     };
 
@@ -3223,9 +3223,9 @@ std::optional<Lyt> exact(const Ntk& ntk, const exact_physical_design_params& ps 
         throw layouts::clocking::unsupported_scheme_exception();
     }
     // check for input degree
-    if (networks::utils::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
-        throw networks::utils::high_degree_fanin_exception();
+        throw networks::high_degree_fanin_exception();
     }
 
     if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)
@@ -3296,9 +3296,9 @@ exact_with_blacklist(const Ntk& ntk, const sidb::surface_black_list<Lyt, fcn::po
         throw layouts::clocking::unsupported_scheme_exception();
     }
     // check for input degree
-    if (networks::utils::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
+    if (networks::has_high_degree_fanin_nodes(ntk, clocking_scheme->max_in_degree))
     {
-        throw networks::utils::high_degree_fanin_exception();
+        throw networks::high_degree_fanin_exception();
     }
 
     if constexpr (!fiction::has_foreach_adjacent_opposite_tiles_v<Lyt>)

@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
@@ -415,7 +415,7 @@ class displacement_robustness_domain_impl
                         }
                     }
 
-                    const auto all_coord = layouts::utils::all_coordinates_in_spanned_area<cell<Lyt>>(
+                    const auto all_coord = layouts::all_coordinates_in_spanned_area<cell<Lyt>>(
                         fiction::layouts::coords::to_siqad(new_pos_nw), fiction::layouts::coords::to_siqad(new_pos_se));
                     all_possible_sidb_misplacements.push_back(all_coord);
                 }
@@ -494,8 +494,7 @@ class displacement_robustness_domain_impl
                         }
                     }
 
-                    const auto all_coord =
-                        layouts::utils::all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
+                    const auto all_coord = layouts::all_coordinates_in_spanned_area<cell<Lyt>>(new_pos_se, new_pos_nw);
                     all_possible_sidb_misplacements.push_back(all_coord);
                 }
             });

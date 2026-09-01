@@ -6,7 +6,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/utils/name_utils.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/inml/io/write_qll_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -44,7 +44,7 @@ void qll_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::utils::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto write_qll = [this, &get_name](auto&& lyt_ptr)
     {

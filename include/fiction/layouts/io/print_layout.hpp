@@ -6,7 +6,7 @@
 #define FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/utils/layout_utils.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -355,8 +355,7 @@ void print_sidb_layout(std::ostream& os, const Lyt& lyt, const bool lat_color = 
 
     if constexpr (!has_siqad_coord_v<Lyt>)
     {
-        return print_sidb_layout(os, layouts::utils::convert_layout_to_siqad_coordinates(lyt), lat_color, crop_layout,
-                                 draw_lattice);
+        return print_sidb_layout(os, convert_layout_to_siqad_coordinates(lyt), lat_color, crop_layout, draw_lattice);
     }
 
     if constexpr (!is_sidb_lattice_v<Lyt>)

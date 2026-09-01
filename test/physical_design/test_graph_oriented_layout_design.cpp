@@ -12,8 +12,8 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/networks/network_utils.hpp>
 #include <fiction/networks/technology_network.hpp>
-#include <fiction/networks/utils/network_utils.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
@@ -477,7 +477,7 @@ TEST_CASE("High fanin exception", "[graph-oriented-layout-design]")
     physical_design::graph_oriented_layout_design_params params{};
 
     CHECK_THROWS_AS(physical_design::graph_oriented_layout_design<gate_layout>(ntk, params, &stats),
-                    networks::utils::high_degree_fanin_exception);
+                    networks::high_degree_fanin_exception);
 }
 
 TEST_CASE("No custom cost objective provided exception", "[graph-oriented-layout-design]")

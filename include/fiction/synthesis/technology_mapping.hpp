@@ -5,7 +5,7 @@
 #ifndef FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP
 #define FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP
 
-#include "fiction/networks/utils/name_utils.hpp"
+#include "fiction/networks/name_utils.hpp"
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/synthesis/technology_mapping_library.hpp"
 #include "fiction/types.hpp"
@@ -568,7 +568,7 @@ class technology_mapping_impl
         {
             // convert network
             converted_ntk = convert_network<tec_nt>(mapped_ntk);
-            networks::utils::restore_names(ntk, converted_ntk);
+            networks::restore_names(ntk, converted_ntk);
         }
 
         return converted_ntk;

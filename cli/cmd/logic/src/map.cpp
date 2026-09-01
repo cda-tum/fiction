@@ -118,7 +118,7 @@ void map_command::execute()
         {
             env->out() << fmt::format(
                 "[w] network '{}' is already mapped; you might encounter mapping errors during remapping\n",
-                fiction::networks::utils::get_name(*ntk_ptr));
+                fiction::networks::get_name(*ntk_ptr));
         }
 
         fiction::synthesis::technology_mapping_stats st{};

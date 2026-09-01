@@ -6,11 +6,11 @@
 #define FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/networks/name_utils.hpp"
+#include "fiction/networks/network_utils.hpp"
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/networks/utils/name_utils.hpp"
-#include "fiction/networks/utils/network_utils.hpp"
 #include "fiction/networks/views/edge_color_view.hpp"
-#include "fiction/physical_design/utils/placement_utils.hpp"
+#include "fiction/physical_design/placement_utils.hpp"
 #include "fiction/synthesis/fanout_substitution.hpp"
 #include "fiction/traits.hpp"
 
@@ -102,24 +102,24 @@ void recursively_paint_edges(const coloring_container<Ntk>&                     
     ctn.color_ntk.paint_edge(e, c);
 
     // paint children edges
-    networks::utils::foreach_outgoing_edge(ctn.color_ntk, e.source,
-                                           [&ctn, &e, &c](const auto& oe)
-                                           {
-                                               if (oe != e)
-                                               {
-                                                   recursively_paint_edges(ctn, oe, ctn.opposite_color(c));
-                                               }
-                                           });
+    networks::foreach_outgoing_edge(ctn.color_ntk, e.source,
+                                    [&ctn, &e, &c](const auto& oe)
+                                    {
+                                        if (oe != e)
+                                        {
+                                            recursively_paint_edges(ctn, oe, ctn.opposite_color(c));
+                                        }
+                                    });
 
     // paint spouse edges
-    networks::utils::foreach_incoming_edge(ctn.color_ntk, e.target,
-                                           [&ctn, &e, &c](const auto& ie)
-                                           {
-                                               if (ie != e)
-                                               {
-                                                   recursively_paint_edges(ctn, ie, c);
-                                               }
-                                           });
+    networks::foreach_incoming_edge(ctn.color_ntk, e.target,
+                                    [&ctn, &e, &c](const auto& ie)
+                                    {
+                                        if (ie != e)
+                                        {
+                                            recursively_paint_edges(ctn, ie, c);
+                                        }
+                                    });
 }
 
 template <typename Ntk>
@@ -137,7 +137,7 @@ coloring_container<Ntk> east_south_edge_coloring(const Ntk& ntk) noexcept
     rtv.foreach_gate_reverse(
         [&](const auto& n, [[maybe_unused]] const auto i)
         {
-            const auto finc = networks::utils::fanin_edges(ctn.color_ntk, n);
+            const auto finc = networks::fanin_edges(ctn.color_ntk, n);
 
             // if any incoming edge is colored east, color them all east, and south otherwise
             const auto color = std::ranges::any_of(finc.fanin_edges, [&ctn](const auto& fe)
@@ -339,7 +339,7 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
         std::swap(pre1_t, pre2_t);
     }
 
-    return physical_design::utils::place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
+    return place(lyt, t, ntk, n, wire_south(lyt, pre1_t, t), wire_east(lyt, pre2_t, t), c);
 }
 
 template <typename Lyt, typename Ntk>
@@ -348,11 +348,11 @@ mockturtle::signal<Lyt> connect_and_place(Lyt& lyt, const tile<Lyt>& t, const Nt
 {
     if (lyt.is_westwards_of(t, pre_t))
     {
-        return physical_design::utils::place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
+        return place(lyt, t, ntk, n, wire_east(lyt, pre_t, t));
     }
     if (lyt.is_northwards_of(t, pre_t))
     {
-        return physical_design::utils::place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
+        return place(lyt, t, ntk, n, wire_south(lyt, pre_t, t));
     }
 
     assert(false);  // gates cannot be placed elsewhere
@@ -489,7 +489,7 @@ class orthogonal_impl
                    layouts::clocking::twoddwave<Lyt>(ps.number_of_clock_phases)};
 
         // reserve PI nodes without positions
-        auto pi2node = physical_design::utils::reserve_input_nodes(layout, ctn.color_ntk);
+        auto pi2node = reserve_input_nodes(layout, ctn.color_ntk);
 
         // first x-pos to use for gates is 1 because PIs take up the 0th column
         tile<Lyt> latest_pos{1, 0};
@@ -530,7 +530,7 @@ class orthogonal_impl
                         ++latest_pos.y;
                     }
                     // if n has only one fanin
-                    else if (const auto fc = networks::utils::fanins(ctn.color_ntk, n); fc.fanin_nodes.size() == 1)
+                    else if (const auto fc = networks::fanins(ctn.color_ntk, n); fc.fanin_nodes.size() == 1)
                     {
                         const auto& pre = fc.fanin_nodes[0];
 
@@ -641,7 +641,7 @@ class orthogonal_impl
         place_outputs(layout, ctn, po_counter, node2pos);
 
         // restore possibly set signal names
-        networks::utils::restore_names(ctn.color_ntk, layout, node2pos);
+        networks::restore_names(ctn.color_ntk, layout, node2pos);
 
         // statistical information
         pst.x_size        = layout.x() + 1;
@@ -707,9 +707,9 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
                                                  // therefore, this is the only relevant check here
 
     // check for input degree
-    if (networks::utils::has_high_degree_fanin_nodes(ntk, 2))
+    if (networks::has_high_degree_fanin_nodes(ntk, 2))
     {
-        throw networks::utils::high_degree_fanin_exception();
+        throw networks::high_degree_fanin_exception();
     }
 
     orthogonal_physical_design_stats st{};

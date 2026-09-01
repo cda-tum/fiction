@@ -2,9 +2,9 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/physical_design/color_routing.hpp>
-#include <fiction/physical_design/utils/graph_coloring.hpp>
-#include <fiction/physical_design/utils/routing_utils.hpp>
+#include <fiction/physical_design/routing_utils.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/utils/graph/graph_coloring.hpp>
 
 #include <utility>
 #include <vector>
@@ -36,7 +36,7 @@ void color_routing_impl(nanobind::module_& m)
         [](Lyt& lyt, const std::vector<std::pair<fiction::coordinate<Lyt>, fiction::coordinate<Lyt>>>& objectives,
            const fiction::physical_design::color_routing_params& params)
         {
-            std::vector<fiction::physical_design::utils::routing_objective<Lyt>> objs{};
+            std::vector<fiction::physical_design::routing_objective<Lyt>> objs{};
             objs.reserve(objectives.size());
 
             for (const auto& obj : objectives)
@@ -59,18 +59,18 @@ void color_routing(nanobind::module_& m)
     /**
      * Graph coloring engine selector type.
      */
-    nanobind::enum_<fiction::physical_design::utils::graph_coloring_engine>(
-        m, "graph_coloring_engine", DOC(fiction_physical_design_utils_graph_coloring_engine))
-        .value("MCS", fiction::physical_design::utils::graph_coloring_engine::MCS,
-               DOC(fiction_physical_design_utils_graph_coloring_engine_MCS))
-        .value("DSATUR", fiction::physical_design::utils::graph_coloring_engine::DSATUR,
-               DOC(fiction_physical_design_utils_graph_coloring_engine_DSATUR))
-        .value("LMXRLF", fiction::physical_design::utils::graph_coloring_engine::LMXRLF,
-               DOC(fiction_physical_design_utils_graph_coloring_engine_LMXRLF))
-        .value("TABUCOL", fiction::physical_design::utils::graph_coloring_engine::TABUCOL,
-               DOC(fiction_physical_design_utils_graph_coloring_engine_TABUCOL))
-        .value("SAT", fiction::physical_design::utils::graph_coloring_engine::SAT,
-               DOC(fiction_physical_design_utils_graph_coloring_engine_SAT));
+    nanobind::enum_<fiction::utils::graph::graph_coloring_engine>(m, "graph_coloring_engine",
+                                                                  DOC(fiction_utils_graph_graph_coloring_engine))
+        .value("MCS", fiction::utils::graph::graph_coloring_engine::MCS,
+               DOC(fiction_utils_graph_graph_coloring_engine_MCS))
+        .value("DSATUR", fiction::utils::graph::graph_coloring_engine::DSATUR,
+               DOC(fiction_utils_graph_graph_coloring_engine_DSATUR))
+        .value("LMXRLF", fiction::utils::graph::graph_coloring_engine::LMXRLF,
+               DOC(fiction_utils_graph_graph_coloring_engine_LMXRLF))
+        .value("TABUCOL", fiction::utils::graph::graph_coloring_engine::TABUCOL,
+               DOC(fiction_utils_graph_graph_coloring_engine_TABUCOL))
+        .value("SAT", fiction::utils::graph::graph_coloring_engine::SAT,
+               DOC(fiction_utils_graph_graph_coloring_engine_SAT));
 
     py::class_<fiction::physical_design::color_routing_params>(m, "color_routing_params",
                                                                DOC(fiction_physical_design_color_routing_params))

@@ -7,7 +7,7 @@
 
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
-#include "fiction/physical_design/utils/routing_utils.hpp"
+#include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 
@@ -43,9 +43,8 @@ template <typename Path, typename Lyt, typename Dist, typename Cost>
 class a_star_impl
 {
   public:
-    a_star_impl(const Lyt& lyt, const physical_design::utils::routing_objective<Lyt>& obj,
-                const distance_functor<Lyt, Dist>& dist_fn, const cost_functor<Lyt, Cost>& cost_fn,
-                const a_star_params& p) :
+    a_star_impl(const Lyt& lyt, const routing_objective<Lyt>& obj, const distance_functor<Lyt, Dist>& dist_fn,
+                const cost_functor<Lyt, Cost>& cost_fn, const a_star_params& p) :
             layout{lyt},
             objective{obj},
             distance{dist_fn},
@@ -96,7 +95,7 @@ class a_star_impl
     /**
      * The source-target coordinate pair.
      */
-    const physical_design::utils::routing_objective<Lyt> objective;
+    const routing_objective<Lyt> objective;
     /**
      * The distance functor that implements the heuristic estimation function.
      */
@@ -205,8 +204,8 @@ class a_star_impl
                 if (layout.is_obstructed_coordinate(successor) && successor != objective.target)
                 {
                     // if crossings are enabled, check if it is possible to switch to the crossing layer
-                    if (params.crossings && (physical_design::utils::is_crossable_wire(layout, current, successor) ||
-                                             layout.above(successor) == objective.target))
+                    if (params.crossings &&
+                        (is_crossable_wire(layout, current, successor) || layout.above(successor) == objective.target))
                     {
                         // if the crossing layer is not obstructed
                         if (const auto above_successor = layout.above(successor);
@@ -399,7 +398,7 @@ class a_star_impl
  */
 template <typename Path, typename Lyt, typename Dist = uint64_t, typename Cost = uint8_t>
     requires is_coordinate_layout_v<Lyt>
-[[nodiscard]] Path a_star(const Lyt& layout, const physical_design::utils::routing_objective<Lyt>& objective,
+[[nodiscard]] Path a_star(const Lyt& layout, const routing_objective<Lyt>& objective,
                           const distance_functor<Lyt, Dist>& dist_fn = manhattan_distance_functor<Lyt, uint64_t>(),
                           const cost_functor<Lyt, Cost>&     cost_fn = unit_cost_functor<Lyt, uint8_t>(),
                           const a_star_params&               params  = {}) noexcept
@@ -427,8 +426,7 @@ template <typename Lyt, typename Dist = uint64_t>
 [[nodiscard]] Dist a_star_distance(const Lyt& layout, const coordinate<Lyt>& source,
                                    const coordinate<Lyt>& target) noexcept
 {
-    const auto path_length =
-        a_star<physical_design::utils::layout_coordinate_path<Lyt>>(layout, {source, target}).size();
+    const auto path_length = a_star<layout_coordinate_path<Lyt>>(layout, {source, target}).size();
 
     if (path_length == 0ul)
     {
