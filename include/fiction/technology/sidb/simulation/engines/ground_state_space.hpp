@@ -7,12 +7,12 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <btree.h>
 #include <fmt/format.h>
@@ -130,10 +130,10 @@ class ground_state_space_impl
             params{parameters},
             top_cluster{sidb::model::to_sidb_cluster(sidb::model::cluster_hierarchy(lyt))},
             clst{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.sim_params))},
-            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
-                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
-                                 fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus(),
-                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus()}
+            mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus(),
+                                 -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus()}
     {}
     /**
      * The main loop in the *Ground State Space* construction. Charge spaces are updated until a fixed point is reached,

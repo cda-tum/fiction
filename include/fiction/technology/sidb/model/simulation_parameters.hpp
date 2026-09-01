@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP
 #define FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/physical_constants.hpp"
 
 #include <cassert>
 #include <cstdint>
@@ -63,7 +63,7 @@ struct simulation_parameters
      */
     [[nodiscard]] double k() const noexcept
     {
-        return fcn::constants::physical::K_E / epsilon_r;
+        return K_E / epsilon_r;
     }
     /**
      * `mu_plus` (µ+) is the energy transition level (+/0) (unit: eV).

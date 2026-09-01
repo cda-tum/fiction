@@ -12,13 +12,13 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -56,8 +56,8 @@ check_op_domain_params_and_operational_status(const OpDomain&                   
                 const auto& sweep_param = params.sweep_dimensions[d];
                 const auto& coord_value = coord.get_parameters()[d];
 
-                CHECK(sweep_param.min <= (coord_value + fcn::constants::ERROR_MARGIN));
-                CHECK(sweep_param.max >= (coord_value - fcn::constants::ERROR_MARGIN));
+                CHECK(sweep_param.min <= (coord_value + utils::math::ERROR_MARGIN));
+                CHECK(sweep_param.max >= (coord_value - utils::math::ERROR_MARGIN));
                 CHECK(sweep_param.step > 0.0);
             }
 

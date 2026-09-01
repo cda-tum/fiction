@@ -8,11 +8,11 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 using namespace fiction;
 
@@ -107,7 +107,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
     CHECK(charge_lyt_first.get_charge_state({19, 0, 0}) == sidb::model::charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-               Catch::Matchers::WithinAbs(0.2460493219, fcn::constants::ERROR_MARGIN));
+               Catch::Matchers::WithinAbs(0.2460493219, utils::math::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, using offset coordinates",
@@ -166,7 +166,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
               layouts::coords::siqad{19, 0, 0})) == sidb::model::charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-               Catch::Matchers::WithinAbs(0.2460493219, fcn::constants::ERROR_MARGIN));
+               Catch::Matchers::WithinAbs(0.2460493219, utils::math::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, using cube coordinates",
@@ -226,7 +226,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a two-pair BDL wire with one perturber, u
               layouts::coords::siqad{19, 0, 0})) == sidb::model::charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-               Catch::Matchers::WithinAbs(0.2460493219, fcn::constants::ERROR_MARGIN));
+               Catch::Matchers::WithinAbs(0.2460493219, utils::math::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB arrangement", "[exhaustive-ground-state-simulation]",
@@ -262,7 +262,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB arrangement", "[exhaustiv
     CHECK(charge_lyt_first.get_charge_state({-7, 3, 0}) == sidb::model::charge_state::NEGATIVE);
 
     CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-               Catch::Matchers::WithinAbs(0.3191788254, fcn::constants::ERROR_MARGIN));
+               Catch::Matchers::WithinAbs(0.3191788254, utils::math::ERROR_MARGIN));
 }
 
 TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "[exhaustive-ground-state-simulation]",
@@ -301,7 +301,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb::model::charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-                   Catch::Matchers::WithinAbs(0.4662582096, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.4662582096, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Increased mu_minus")
@@ -324,7 +324,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb::model::charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-                   Catch::Matchers::WithinAbs(0.061037632, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.061037632, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Decreased mu_minus")
@@ -347,7 +347,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb::model::charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-                   Catch::Matchers::WithinAbs(2.069954113, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(2.069954113, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Decreased lambda_tf")
@@ -370,7 +370,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb::model::charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-                   Catch::Matchers::WithinAbs(0.5432404075, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.5432404075, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Increased lambda_tf")
@@ -393,7 +393,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb::model::charge_state::NEUTRAL);
 
         CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-                   Catch::Matchers::WithinAbs(0.2930574885, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.2930574885, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Increased epsilon_r")
@@ -416,7 +416,7 @@ TEMPLATE_TEST_CASE("ExGS simulation of a Y-shaped SiDB OR gate with input 01", "
         CHECK(charge_lyt_first.get_charge_state({8, 3, 0}) == sidb::model::charge_state::NEGATIVE);
 
         CHECK_THAT(charge_lyt_first.get_electrostatic_potential_energy(),
-                   Catch::Matchers::WithinAbs(0.505173434, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(0.505173434, utils::math::ERROR_MARGIN));
     }
 }
 

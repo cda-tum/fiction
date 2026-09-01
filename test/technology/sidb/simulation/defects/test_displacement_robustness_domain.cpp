@@ -10,11 +10,11 @@
 
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <cmath>
 #include <cstdlib>
@@ -169,9 +169,9 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
         CHECK_THAT(static_cast<double>(stats.num_operational_sidb_displacements) /
                        static_cast<double>(stats.num_operational_sidb_displacements +
                                            stats.num_non_operational_sidb_displacements),
-                   Catch::Matchers::WithinAbs(result, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(result, utils::math::ERROR_MARGIN));
 
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.67578125, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.67578125, utils::math::ERROR_MARGIN));
 
         const auto result_20_percent_error =
             sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
@@ -194,7 +194,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
 
         const auto result = sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
             lyt, std::vector<tt>{synthesis::create_id_tt()}, params, 0.2);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.66666666666666, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.66666666666666, utils::math::ERROR_MARGIN));
     }
 
     SECTION("one displacement variation in x-direction, random sampling")
@@ -207,7 +207,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
 
         const auto result = sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
             lyt, std::vector<tt>{synthesis::create_id_tt()}, params, 0.0);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, utils::math::ERROR_MARGIN));
     }
 
     SECTION("fabrication error rate p = 0.0")
@@ -220,7 +220,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
 
         const auto result = sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
             lyt, std::vector<tt>{synthesis::create_id_tt()}, params, 0.0);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, utils::math::ERROR_MARGIN));
     }
 }
 
@@ -253,9 +253,9 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
         CHECK_THAT(static_cast<double>(stats.num_operational_sidb_displacements) /
                        static_cast<double>(stats.num_operational_sidb_displacements +
                                            stats.num_non_operational_sidb_displacements),
-                   Catch::Matchers::WithinAbs(result, fcn::constants::ERROR_MARGIN));
+                   Catch::Matchers::WithinAbs(result, utils::math::ERROR_MARGIN));
 
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.63671875, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(0.63671875, utils::math::ERROR_MARGIN));
 
         const auto result_20_percent_error =
             sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
@@ -293,7 +293,7 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
 
         const auto result = sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
             lyt_offset, std::vector<tt>{synthesis::create_id_tt()}, params, 0.0);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.00, utils::math::ERROR_MARGIN));
     }
 
     SECTION("fabrication error rate p = 0.0")
@@ -306,6 +306,6 @@ TEST_CASE("Determine the probability of fabricating an operational BDL, offset c
 
         const auto result = sidb::simulation::defects::determine_probability_of_fabricating_operational_gate(
             lyt_offset, std::vector<tt>{synthesis::create_id_tt()}, params, 0.0);
-        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, utils::math::ERROR_MARGIN));
     }
 }

@@ -8,7 +8,6 @@
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
@@ -23,6 +22,7 @@
 #include "fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>
 #include <kitty/bit_operations.hpp>
@@ -652,7 +652,7 @@ class is_operational_impl
             if (cds_layout.is_physically_valid())
             {
                 cds_layout.recompute_electrostatic_potential_energy();
-                if (cds_layout.get_electrostatic_potential_energy() + fcn::constants::ERROR_MARGIN < min_energy)
+                if (cds_layout.get_electrostatic_potential_energy() + fiction::utils::math::ERROR_MARGIN < min_energy)
                 {
                     min_energy = cds_layout.get_electrostatic_potential_energy();
                 }
@@ -886,7 +886,7 @@ class is_operational_impl
 
                 if (physical_validity.has_value())
                 {
-                    if (physical_validity.value() + fcn::constants::ERROR_MARGIN <
+                    if (physical_validity.value() + fiction::utils::math::ERROR_MARGIN <
                         minimal_energy_of_physically_valid_layout)
                     {
                         return true;

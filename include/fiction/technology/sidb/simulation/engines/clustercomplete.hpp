@@ -8,7 +8,6 @@
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -17,6 +16,7 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -117,10 +117,10 @@ class clustercomplete_impl
     clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
             charge_layout{initialize_charge_layout(lyt, params)},
-            mu_bounds_with_error{fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
-                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_minus,
-                                 fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus(),
-                                 -fcn::constants::ERROR_MARGIN - params.sim_params.mu_plus()}
+            mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
+                                 fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus(),
+                                 -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus()}
     {}
     /**
      * This function performs the *ClusterComplete* simulation; first executing the *Ground State Space* construction,

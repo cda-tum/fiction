@@ -5,7 +5,6 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
 #define FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
@@ -51,7 +50,7 @@ class write_location_and_ground_state_impl
         {
             if (std::fabs(fiction::utils::math::round_to_n_decimal_places(
                               valid_layout.get_electrostatic_potential_energy(), 6) -
-                          min_energy) < fcn::constants::ERROR_MARGIN)
+                          min_energy) < utils::math::ERROR_MARGIN)
             {
                 ground_state_layouts.emplace_back(sidb::surfaces::charge_distribution_surface<Lyt>{valid_layout});
             }

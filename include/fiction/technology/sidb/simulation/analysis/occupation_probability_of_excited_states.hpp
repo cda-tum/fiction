@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/physical_constants.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -31,8 +31,7 @@ namespace fiction::sidb::simulation::analysis
 [[nodiscard]] inline double calculate_boltzmann_factor(const double energy, const double min_energy,
                                                        const double temperature) noexcept
 {
-    return std::exp(-((energy - min_energy) * fcn::constants::physical::EV_TO_JOULE /
-                      (fcn::constants::physical::BOLTZMANN_CONSTANT * temperature)));
+    return std::exp(-((energy - min_energy) * model::EV_TO_JOULE / (model::BOLTZMANN_CONSTANT * temperature)));
 }
 
 /**
@@ -117,7 +116,8 @@ namespace fiction::sidb::simulation::analysis
         [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
         {
             if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
-                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) > fcn::constants::ERROR_MARGIN)
+                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) >
+                fiction::utils::math::ERROR_MARGIN)
             {
                 p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
             }

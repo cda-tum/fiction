@@ -6,7 +6,6 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
@@ -97,7 +96,7 @@ struct parameter_point
      */
     [[nodiscard]] static int64_t quantize(const double value) noexcept
     {
-        return static_cast<int64_t>(std::llround(value / fcn::constants::ERROR_MARGIN));
+        return static_cast<int64_t>(std::llround(value / fiction::utils::math::ERROR_MARGIN));
     }
     /**
      * Support for structured bindings.
@@ -522,7 +521,7 @@ class operational_domain_impl
             if ((params.sweep_dimensions.at(d).min +
                  (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
                     params.sweep_dimensions.at(d).max >
-                fcn::constants::ERROR_MARGIN)
+                fiction::utils::math::ERROR_MARGIN)
             {
                 indices.at(d).pop_back();
             }
@@ -570,7 +569,7 @@ class operational_domain_impl
             if ((params.sweep_dimensions.at(d).min +
                  (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
                     params.sweep_dimensions.at(d).max >
-                fcn::constants::ERROR_MARGIN)
+                fiction::utils::math::ERROR_MARGIN)
             {
                 indices.at(d).pop_back();
             }

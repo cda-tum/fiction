@@ -1,19 +1,11 @@
 //
-// Created by Jan Drewniok on 25.07.23.
+// Created by marcel on 02.09.26.
 //
 
-#ifndef FICTION_TECHNOLOGY_FCN_CONSTANTS_HPP
-#define FICTION_TECHNOLOGY_FCN_CONSTANTS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_PHYSICAL_CONSTANTS_HPP
+#define FICTION_TECHNOLOGY_SIDB_MODEL_PHYSICAL_CONSTANTS_HPP
 
-namespace fiction::fcn::constants
-{
-
-/**
- * This error margin is used for the comparison of floating-point numbers.
- */
-inline constexpr double ERROR_MARGIN = 1E-6;
-
-namespace physical
+namespace fiction::sidb::model
 {
 
 /**
@@ -33,8 +25,6 @@ inline constexpr double BOLTZMANN_CONSTANT = 1.38064852 * 1E-23;
  */
 inline constexpr double EV_TO_JOULE = ELEMENTARY_CHARGE;
 
-}  // namespace physical
+}  // namespace fiction::sidb::model
 
-}  // namespace fiction::fcn::constants
-
-#endif  // FICTION_TECHNOLOGY_FCN_CONSTANTS_HPP
+#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_PHYSICAL_CONSTANTS_HPP

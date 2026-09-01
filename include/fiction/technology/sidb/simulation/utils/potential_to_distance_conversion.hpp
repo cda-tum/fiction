@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
+#include "fiction/technology/sidb/model/physical_constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 
 #include <cmath>
@@ -36,7 +36,7 @@ namespace fiction::sidb::simulation::utils
     const auto calculate_potential_for_given_distance = [&params](const double distance) noexcept
     {
         return params.k() * params.epsilon_r / params.epsilon_r / (distance * 1e-9) *
-               std::exp(-distance / params.lambda_tf) * fcn::constants::physical::ELEMENTARY_CHARGE;
+               std::exp(-distance / params.lambda_tf) * model::ELEMENTARY_CHARGE;
     };
 
     // calculate the step size based on the precision

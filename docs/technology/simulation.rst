@@ -84,13 +84,12 @@ Is SiDB gate design deemed impossible
 Physical Constants
 ------------------
 
-**Header:** ``fiction/technology/fcn/constants.hpp``
+**Header:** ``fiction/technology/sidb/model/physical_constants.hpp``
 
-.. doxygenvariable:: fiction::fcn::constants::physical::BOLTZMANN_CONSTANT
-.. doxygenvariable:: fiction::fcn::constants::physical::EV_TO_JOULE
-.. doxygenvariable:: fiction::fcn::constants::physical::ELEMENTARY_CHARGE
-.. doxygenvariable:: fiction::fcn::constants::physical::K_E
-.. doxygenvariable:: fiction::fcn::constants::ERROR_MARGIN
+.. doxygenvariable:: fiction::sidb::model::BOLTZMANN_CONSTANT
+.. doxygenvariable:: fiction::sidb::model::EV_TO_JOULE
+.. doxygenvariable:: fiction::sidb::model::ELEMENTARY_CHARGE
+.. doxygenvariable:: fiction::sidb::model::K_E
 
 
 Euclidean distance between two SiDBs in nanometers

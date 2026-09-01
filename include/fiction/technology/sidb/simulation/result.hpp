@@ -5,10 +5,10 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_RESULT_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_RESULT_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <algorithm>
 #include <any>
@@ -96,13 +96,14 @@ struct result
 
         for (const auto charge_index : charge_indices)
         {
-            const auto cds_it = std::ranges::find_if(charge_distributions,
-                                                     [&](const auto& cds)
-                                                     {
-                                                         return cds.get_charge_index_and_base().first == charge_index &&
-                                                                std::abs(cds.get_electrostatic_potential_energy() -
-                                                                         min_energy) < fcn::constants::ERROR_MARGIN;
-                                                     });
+            const auto cds_it =
+                std::ranges::find_if(charge_distributions,
+                                     [&](const auto& cds)
+                                     {
+                                         return cds.get_charge_index_and_base().first == charge_index &&
+                                                std::abs(cds.get_electrostatic_potential_energy() - min_energy) <
+                                                    fiction::utils::math::ERROR_MARGIN;
+                                     });
 
             if (cds_it != charge_distributions.cend())
             {

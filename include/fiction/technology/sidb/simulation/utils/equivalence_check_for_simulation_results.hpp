@@ -5,8 +5,8 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -79,7 +79,7 @@ template <typename Lyt>
         const auto& cds1 = result1.charge_distributions.at(i);
         const auto& cds2 = result2.charge_distributions.at(i);
         if (std::abs(cds1.get_electrostatic_potential_energy() - cds2.get_electrostatic_potential_energy()) >
-            fcn::constants::ERROR_MARGIN)
+            fiction::utils::math::ERROR_MARGIN)
         {
             return false;
         }

@@ -5,8 +5,8 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_ENERGY_DISTRIBUTION_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_ENERGY_DISTRIBUTION_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -93,7 +93,7 @@ class energy_distribution
 
         for (const auto& [key, value] : distribution)
         {
-            if (std::abs(key - energy) < fcn::constants::ERROR_MARGIN)
+            if (std::abs(key - energy) < fiction::utils::math::ERROR_MARGIN)
             {
                 return degeneracy;
             }
@@ -216,7 +216,7 @@ calculate_energy_distribution(const std::vector<sidb::surfaces::charge_distribut
                 const auto energy    = lyt.get_electrostatic_potential_energy();
                 for (const auto& unique_energy : unique_energies)
                 {
-                    if (std::fabs(energy - unique_energy) < fcn::constants::ERROR_MARGIN)
+                    if (std::fabs(energy - unique_energy) < fiction::utils::math::ERROR_MARGIN)
                     {
                         is_unique = false;
                         break;
@@ -239,8 +239,11 @@ calculate_energy_distribution(const std::vector<sidb::surfaces::charge_distribut
     for (const auto& energy : unique_energies)
     {
         const auto number_of_states_with_given_energy = static_cast<uint64_t>(std::ranges::count_if(
-            unique_cds, [&energy](const auto& lyt)
-            { return std::abs(lyt.get_electrostatic_potential_energy() - energy) < fcn::constants::ERROR_MARGIN; }));
+            unique_cds,
+            [&energy](const auto& lyt)
+            {
+                return std::abs(lyt.get_electrostatic_potential_energy() - energy) < fiction::utils::math::ERROR_MARGIN;
+            }));
 
         distribution.add_energy_state(energy_state(energy, number_of_states_with_given_energy));
     }

@@ -5,7 +5,7 @@
 #ifndef FICTION_UTILS_MATH_MAP_UTILS_HPP
 #define FICTION_UTILS_MATH_MAP_UTILS_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <algorithm>
 #include <concepts>
@@ -27,7 +27,7 @@ template <typename MapType>
     requires std::floating_point<typename MapType::key_type>
 typename MapType::const_iterator find_key_with_tolerance(const MapType& map, const typename MapType::key_type& key)
 {
-    constexpr double tolerance = fcn::constants::ERROR_MARGIN;
+    constexpr double tolerance = ERROR_MARGIN;
 
     auto compare_keys = [&key, &tolerance](const auto& pair) { return std::abs(pair.first - key) < tolerance; };
 

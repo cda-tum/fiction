@@ -5,7 +5,6 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
 
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
@@ -14,6 +13,7 @@
 #include "fiction/technology/sidb/simulation/logic/verify_logic_match.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/traits.hpp>
@@ -84,7 +84,8 @@ template <typename Lyt, typename TT>
         {
             for (const auto& valid_layout : valid_charge_distributions)
             {
-                if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < fcn::constants::ERROR_MARGIN)
+                if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) <
+                    fiction::utils::math::ERROR_MARGIN)
                 {
                     state_type type_of_considered_state = state_type::ACCEPTED;
 
@@ -141,7 +142,8 @@ template <typename Lyt, typename TT>
         {
             for (const auto& valid_layout : valid_charge_distributions)
             {
-                if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) < fcn::constants::ERROR_MARGIN)
+                if (std::abs(valid_layout.get_electrostatic_potential_energy() - energy) <
+                    fiction::utils::math::ERROR_MARGIN)
                 {
                     // The output SiDB matches the truth table entry. Hence, state is called transparent.
                     est.emplace_back(energy, state_type::ACCEPTED);

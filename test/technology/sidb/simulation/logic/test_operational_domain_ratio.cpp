@@ -8,11 +8,11 @@
 
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_technologies.hpp>
-#include <fiction/technology/fcn/constants.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 #include <fiction/types.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <vector>
 
@@ -73,7 +73,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
             sidb::simulation::logic::parameter_point({5.5, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size (1.0)
-        CHECK_THAT(op_domain_ratio - 1.0, Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio - 1.0, Catch::Matchers::WithinAbs(0.0, utils::math::ERROR_MARGIN));
     }
 
     SECTION("semi-operational domain")
@@ -94,7 +94,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
             lat, std::vector<tt>{synthesis::create_id_tt()}, sidb::simulation::logic::parameter_point({4.25, 4.25}),
             op_ratio_params);
 
-        CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio - (80.0 / 256.0), Catch::Matchers::WithinAbs(0.0, utils::math::ERROR_MARGIN));
     }
 }
 
@@ -144,10 +144,10 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
         op_ratio_params);
 
     CHECK_THAT(op_domain_ratio_pruning_and_simulation,
-               Catch::Matchers::WithinAbs(0.11918914799573235, fcn::constants::ERROR_MARGIN));
+               Catch::Matchers::WithinAbs(0.11918914799573235, utils::math::ERROR_MARGIN));
 
     CHECK_THAT(op_domain_ratio_only_pruning,
-               Catch::Matchers::WithinAbs(0.11918914799573235, fcn::constants::ERROR_MARGIN));
+               Catch::Matchers::WithinAbs(0.11918914799573235, utils::math::ERROR_MARGIN));
 }
 
 // to save runtime in the CI, this test is only run in RELEASE mode
@@ -188,7 +188,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
             sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, utils::math::ERROR_MARGIN));
     }
 
     SECTION("semi-operational domain, reject kinks")
@@ -204,7 +204,7 @@ TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
             sidb::simulation::logic::parameter_point({5.6, 5.0, -0.32}), op_ratio_params);
 
         // check if the operational domain has the correct size
-        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, fcn::constants::ERROR_MARGIN));
+        CHECK_THAT(op_domain_ratio - (23.0 / 121.0), Catch::Matchers::WithinAbs(0.0, utils::math::ERROR_MARGIN));
     }
 
     SECTION(

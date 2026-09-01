@@ -6,7 +6,6 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CRITICAL_TEMPERATURE_HPP
 
 #include "fiction/technology/fcn/cell_technologies.hpp"
-#include "fiction/technology/fcn/constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
@@ -421,7 +420,7 @@ class critical_temperature_impl
             // comparability with the min_energy.
             if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
                          fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) <
-                    fcn::constants::ERROR_MARGIN &&
+                    fiction::utils::math::ERROR_MARGIN &&
                 state_type == state_type::ACCEPTED)
             {
                 ground_state_is_transparent = true;

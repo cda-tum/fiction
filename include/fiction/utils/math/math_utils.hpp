@@ -18,6 +18,11 @@ namespace fiction::utils::math
 {
 
 /**
+ * The tolerance for comparing floating-point numbers.
+ */
+inline constexpr double ERROR_MARGIN = 1E-6;
+
+/**
  * Rounds a number to a specified number of decimal places.
  *
  * @tparam T The type of the number to round.
