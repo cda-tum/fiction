@@ -16,10 +16,10 @@
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
+#include <fiction/technology/sidb/simulation/analysis/minimum_energy.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/simulation/utils/minimum_energy.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/technology/sidb/surfaces/lattice.hpp>
@@ -188,9 +188,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(
-            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-            Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
+        CHECK_THAT(sidb::simulation::analysis::minimum_energy(res.charge_distributions.cbegin(),
+                                                              res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Base 3, multiple threads")
@@ -201,9 +201,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(
-            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-            Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
+        CHECK_THAT(sidb::simulation::analysis::minimum_energy(res.charge_distributions.cbegin(),
+                                                              res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
     }
 
     // from now on, we use only one thread
@@ -217,9 +217,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(
-            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-            Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
+        CHECK_THAT(sidb::simulation::analysis::minimum_energy(res.charge_distributions.cbegin(),
+                                                              res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
     }
 
     SECTION("Base 3, single thread")
@@ -230,9 +230,9 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
             sidb::simulation::engines::clustercomplete(cell_lyt, params);
 
         CHECK(res.charge_distributions.size() == 81);
-        CHECK_THAT(
-            sidb::simulation::utils::minimum_energy(res.charge_distributions.cbegin(), res.charge_distributions.cend()),
-            Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
+        CHECK_THAT(sidb::simulation::analysis::minimum_energy(res.charge_distributions.cbegin(),
+                                                              res.charge_distributions.cend()),
+                   Catch::Matchers::WithinAbs(1.3192717848, utils::math::ERROR_MARGIN));
     }
 }
 

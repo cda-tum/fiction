@@ -8,11 +8,11 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
-#include <fiction/technology/sidb/simulation/utils/time_to_solution.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -57,7 +57,7 @@ int main()  // NOLINT
     const sidb::model::simulation_parameters                                   sim_params{2, -0.32};
     const sidb::simulation::engines::quicksim_params                           qs_params{sim_params};
     const sidb::simulation::engines::quickexact_params<layouts::coords::siqad> qe_params{sim_params};
-    const sidb::simulation::utils::time_to_solution_params                     tts_params{};
+    const sidb::simulation::analysis::time_to_solution_params                  tts_params{};
 
     double      total_runtime_exhaustive      = 0.0;
     double      total_runtime_quickexact      = 0.0;
@@ -81,8 +81,8 @@ int main()  // NOLINT
         // simulate layout with no input pattern
         const auto exhaustive_results_layout =
             sidb::simulation::engines::exhaustive_ground_state_simulation(layout, sim_params);
-        sidb::simulation::utils::time_to_solution_stats stats{};
-        sidb::simulation::utils::time_to_solution(layout, qs_params, tts_params, &stats);
+        sidb::simulation::analysis::time_to_solution_stats stats{};
+        sidb::simulation::analysis::time_to_solution(layout, qs_params, tts_params, &stats);
         const auto quickexact_results_layout = sidb::simulation::engines::quickexact(layout, qe_params);
 
         runtime_exhaustive += mockturtle::to_seconds(exhaustive_results_layout.simulation_runtime);
@@ -101,8 +101,8 @@ int main()  // NOLINT
         {
             const auto exhaustive_results =
                 sidb::simulation::engines::exhaustive_ground_state_simulation(*bii, sim_params);
-            sidb::simulation::utils::time_to_solution_stats tts_stats{};
-            sidb::simulation::utils::time_to_solution(*bii, qs_params, tts_params, &tts_stats);
+            sidb::simulation::analysis::time_to_solution_stats tts_stats{};
+            sidb::simulation::analysis::time_to_solution(*bii, qs_params, tts_params, &tts_stats);
             const auto quickexact_results = sidb::simulation::engines::quickexact(*bii, qe_params);
 
             runtime_exhaustive += mockturtle::to_seconds(exhaustive_results.simulation_runtime);

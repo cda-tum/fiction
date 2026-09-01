@@ -2,16 +2,16 @@
 // Created by Jan Drewniok on 23.12.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_TIME_TO_SOLUTION_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_TIME_TO_SOLUTION_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_TIME_TO_SOLUTION_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_TIME_TO_SOLUTION_HPP
 
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/engines/clustercomplete.hpp"
 #include "fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
+#include "fiction/technology/sidb/simulation/is_ground_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/simulation/utils/is_ground_state.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>
@@ -24,7 +24,7 @@
 #include <string>
 #include <vector>
 
-namespace fiction::sidb::simulation::utils
+namespace fiction::sidb::simulation::analysis
 {
 
 struct time_to_solution_params
@@ -199,7 +199,7 @@ void time_to_solution_for_given_simulation_results(const sidb::simulation::resul
 
     for (const auto& heuristic : results_heuristic)
     {
-        if (sidb::simulation::utils::is_ground_state(heuristic, results_exact))
+        if (is_ground_state(heuristic, results_exact))
         {
             ++gs_count;
         }
@@ -238,5 +238,5 @@ void time_to_solution_for_given_simulation_results(const sidb::simulation::resul
     }
 }
 
-}  // namespace fiction::sidb::simulation::utils
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_TIME_TO_SOLUTION_HPP
+}  // namespace fiction::sidb::simulation::analysis
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_TIME_TO_SOLUTION_HPP

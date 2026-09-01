@@ -9,8 +9,8 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/is_ground_state.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/simulation/utils/is_ground_state.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
@@ -48,7 +48,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
         {
             sidb::simulation::result<TestType> simulation_result_heuristic{};
             simulation_result_heuristic.charge_distributions = {{charge_layout_first}};
-            CHECK(!sidb::simulation::utils::is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
+            CHECK(!sidb::simulation::is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
 
         SECTION("two identical ground states are stored in the simulation results")
@@ -56,7 +56,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
             simulation_result_exhaustive.charge_distributions = {{charge_layout_first, charge_layout_first}};
             sidb::simulation::result<TestType> simulation_result_heuristic{};
             simulation_result_heuristic.charge_distributions = {{charge_layout_first}};
-            CHECK(sidb::simulation::utils::is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
+            CHECK(sidb::simulation::is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
 
         SECTION("heuristic finds both ground states")
@@ -67,7 +67,7 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
                 0, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
             simulation_result_heuristic.charge_distributions[1].assign_charge_index(
                 1, sidb::surfaces::charge_distribution_mode::KEEP_CHARGE_DISTRIBUTION);
-            CHECK(sidb::simulation::utils::is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
+            CHECK(sidb::simulation::is_ground_state(simulation_result_heuristic, simulation_result_exhaustive));
         }
     }
 
@@ -133,6 +133,6 @@ TEMPLATE_TEST_CASE("check if ground state is found", "[is-ground-state]", sidb_1
             CHECK(cds.get_charge_index_and_base().first == 0);
         }
 
-        CHECK(sidb::simulation::utils::is_ground_state(simulation_results_exgs, quicksim_res));
+        CHECK(sidb::simulation::is_ground_state(simulation_results_exgs, quicksim_res));
     }
 }

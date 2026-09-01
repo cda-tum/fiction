@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 10.11.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
+#define FICTION_TECHNOLOGY_SIDB_MODEL_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
 
 #include "fiction/technology/sidb/model/physical_constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -11,7 +11,7 @@
 #include <cmath>
 #include <cstdint>
 
-namespace fiction::sidb::simulation::utils
+namespace fiction::sidb::model
 {
 
 /**
@@ -56,5 +56,5 @@ namespace fiction::sidb::simulation::utils
     return distance;
 }
 
-}  // namespace fiction::sidb::simulation::utils
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
+}  // namespace fiction::sidb::model
+#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_POTENTIAL_TO_DISTANCE_CONVERSION_HPP

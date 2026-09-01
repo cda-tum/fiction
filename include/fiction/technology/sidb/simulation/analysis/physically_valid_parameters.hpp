@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 03.05.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_PHYSICALLY_VALID_PARAMETERS_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_PHYSICALLY_VALID_PARAMETERS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICALLY_VALID_PARAMETERS_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICALLY_VALID_PARAMETERS_HPP
 
 #include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
@@ -11,7 +11,7 @@
 
 #include <cstdint>
 
-namespace fiction::sidb::simulation::utils
+namespace fiction::sidb::simulation::analysis
 {
 
 /**
@@ -52,5 +52,5 @@ physically_valid_parameters(Lyt& cds, const sidb::simulation::logic::operational
     return result;
 }
 
-}  // namespace fiction::sidb::simulation::utils
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_PHYSICALLY_VALID_PARAMETERS_HPP
+}  // namespace fiction::sidb::simulation::analysis
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICALLY_VALID_PARAMETERS_HPP

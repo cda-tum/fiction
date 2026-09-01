@@ -6,10 +6,10 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICAL_POPULATION_STABILITY_HPP
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/potential_to_distance_conversion.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 
@@ -207,9 +207,8 @@ class physical_population_stability_impl
             for (const auto& transition : population_stability_info.transition_potentials)
             {
                 population_stability_info.distance_corresponding_to_potential[transition.first] =
-                    sidb::simulation::utils::potential_to_distance_conversion(
-                        transition.second.second, params.sim_params,
-                        params.precision_for_distance_corresponding_to_potential);
+                    model::potential_to_distance_conversion(transition.second.second, params.sim_params,
+                                                            params.precision_for_distance_corresponding_to_potential);
                 if (transition.second.second < minimum_potential_difference)
                 {
                     population_stability_info.critical_cell = transition.second.first;

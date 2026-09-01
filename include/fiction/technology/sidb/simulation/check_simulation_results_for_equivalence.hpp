@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
 
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -13,7 +13,7 @@
 #include <cstdint>
 #include <set>
 
-namespace fiction::sidb::simulation::utils
+namespace fiction::sidb::simulation
 {
 
 /**
@@ -103,5 +103,5 @@ template <typename Lyt>
     return true;
 }
 
-}  // namespace fiction::sidb::simulation::utils
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_EQUIVALENCE_CHECK_FOR_SIMULATION_RESULTS_HPP
+}  // namespace fiction::sidb::simulation
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP

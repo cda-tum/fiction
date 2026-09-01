@@ -6,8 +6,8 @@
 #define FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 #include "fmt/format.h"
@@ -41,8 +41,8 @@ class write_location_and_ground_state_impl
     {
         // this part searches for the ground state(s) among all physically valid charge distributions
         const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
-            sidb::simulation::utils::minimum_energy(sim_result.charge_distributions.cbegin(),
-                                                    sim_result.charge_distributions.cend()),
+            simulation::analysis::minimum_energy(sim_result.charge_distributions.cbegin(),
+                                                 sim_result.charge_distributions.cend()),
             6);
 
         std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> ground_state_layouts{};

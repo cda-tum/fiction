@@ -6,7 +6,7 @@
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_RESULT_HPP
 
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/simulation/utils/minimum_energy.hpp"
+#include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -90,8 +90,7 @@ struct result
         double min_energy = std::numeric_limits<double>::infinity();
         if (!charge_distributions.empty())
         {
-            min_energy =
-                sidb::simulation::utils::minimum_energy(charge_distributions.cbegin(), charge_distributions.cend());
+            min_energy = analysis::minimum_energy(charge_distributions.cbegin(), charge_distributions.cend());
         }
 
         for (const auto charge_index : charge_indices)

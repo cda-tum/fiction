@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp>
+#include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -22,8 +22,8 @@ void can_positive_charges_occur_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("can_positive_charges_occur", &fiction::sidb::simulation::utils::can_positive_charges_occur<Lyt>,
-          py::arg("lyt"), py::arg("sim_params"), DOC(fiction_sidb_simulation_utils_can_positive_charges_occur));
+    m.def("can_positive_charges_occur", &fiction::sidb::simulation::analysis::can_positive_charges_occur<Lyt>,
+          py::arg("lyt"), py::arg("sim_params"), DOC(fiction_sidb_simulation_analysis_can_positive_charges_occur));
 }
 
 }  // namespace detail

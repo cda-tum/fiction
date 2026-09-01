@@ -1,7 +1,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp>
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
@@ -20,8 +20,8 @@ void check_for_equivalence_impl(nanobind::module_& m)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     m.def("check_simulation_results_for_equivalence",
-          &fiction::sidb::simulation::utils::check_simulation_results_for_equivalence<Lyt>, py::arg("result1"),
-          py::arg("result2"), DOC(fiction_sidb_simulation_utils_check_simulation_results_for_equivalence));
+          &fiction::sidb::simulation::check_simulation_results_for_equivalence<Lyt>, py::arg("result1"),
+          py::arg("result2"), DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
 }
 
 }  // namespace detail

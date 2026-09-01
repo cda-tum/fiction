@@ -8,9 +8,9 @@
 
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
@@ -61,16 +61,17 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.assign_charge_state({6, 7, 1}, sidb::model::charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
-        const auto valid_parameters = sidb::simulation::utils::physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = sidb::simulation::analysis::physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.size() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb::simulation::engine::EXGS;
-        const auto valid_parameters_exgs = sidb::simulation::utils::physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters_exgs =
+            sidb::simulation::analysis::physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_exgs.size() == 43);
 
         op_domain_params.operational_params.sim_engine = sidb::simulation::engine::QUICKSIM;
         const auto valid_parameters_quicksim =
-            sidb::simulation::utils::physically_valid_parameters(cds, op_domain_params);
+            sidb::simulation::analysis::physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters_quicksim.size() == 43);
     }
 
@@ -86,7 +87,7 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
         cds.assign_charge_state({6, 7, 1}, sidb::model::charge_state::NEGATIVE);
         cds.update_after_charge_change();
 
-        const auto valid_parameters = sidb::simulation::utils::physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = sidb::simulation::analysis::physically_valid_parameters(cds, op_domain_params);
         CHECK(valid_parameters.size() == 98);
 
         const auto p1 = valid_parameters.contains(sidb::simulation::logic::parameter_point{{5.9, 5.5}});
@@ -162,7 +163,7 @@ TEST_CASE(
 
         cds.update_after_charge_change();
 
-        const auto valid_parameters = sidb::simulation::utils::physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = sidb::simulation::analysis::physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.size() == 100);
 
         const auto p1 = valid_parameters.contains(sidb::simulation::logic::parameter_point{{5.6, 5.0}});
@@ -223,7 +224,7 @@ TEST_CASE(
 
         cds.update_after_charge_change();
 
-        const auto valid_parameters = sidb::simulation::utils::physically_valid_parameters(cds, op_domain_params);
+        const auto valid_parameters = sidb::simulation::analysis::physically_valid_parameters(cds, op_domain_params);
         REQUIRE(valid_parameters.size() == 27);
         const auto p1 = valid_parameters.contains(sidb::simulation::logic::parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());

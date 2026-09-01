@@ -6,8 +6,8 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
-#include <fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp>
 
 #include <cstdint>
 #include <limits>
@@ -23,7 +23,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         constexpr uint64_t precision         = 1;
         constexpr double   potential_value   = 5.0;
         constexpr double   expected_distance = 0.1;
-        REQUIRE_THAT(sidb::simulation::utils::potential_to_distance_conversion(potential_value, params, precision),
+        REQUIRE_THAT(sidb::model::potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -34,7 +34,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         constexpr uint64_t precision         = 1;
         constexpr double   potential_value   = 0.01;
         constexpr double   expected_distance = 3.2;
-        REQUIRE_THAT(sidb::simulation::utils::potential_to_distance_conversion(potential_value, params, precision),
+        REQUIRE_THAT(sidb::model::potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -45,7 +45,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         constexpr uint64_t precision         = 2;
         constexpr double   potential_value   = 0.01;
         constexpr double   expected_distance = 3.14;
-        REQUIRE_THAT(sidb::simulation::utils::potential_to_distance_conversion(potential_value, params, precision),
+        REQUIRE_THAT(sidb::model::potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -56,7 +56,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         constexpr uint64_t precision         = 3;
         constexpr double   potential_value   = 0.01;
         constexpr double   expected_distance = 3.135;
-        REQUIRE_THAT(sidb::simulation::utils::potential_to_distance_conversion(potential_value, params, precision),
+        REQUIRE_THAT(sidb::model::potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -65,7 +65,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         constexpr uint64_t precision         = 0;
         constexpr double   potential_value   = 0.03;
         constexpr double   expected_distance = 4;
-        REQUIRE_THAT(sidb::simulation::utils::potential_to_distance_conversion(potential_value, params, precision),
+        REQUIRE_THAT(sidb::model::potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 
@@ -74,7 +74,7 @@ TEST_CASE("Conversion of potential to distance", "[potential_to_distance_convers
         constexpr uint64_t precision         = 3;
         constexpr double   potential_value   = std::numeric_limits<double>::infinity();
         constexpr double   expected_distance = 0.001;
-        REQUIRE_THAT(sidb::simulation::utils::potential_to_distance_conversion(potential_value, params, precision),
+        REQUIRE_THAT(sidb::model::potential_to_distance_conversion(potential_value, params, precision),
                      Catch::Matchers::WithinAbs(expected_distance, 1e-5));
     }
 }

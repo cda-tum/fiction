@@ -128,15 +128,15 @@ Energy Calculation
         .. doxygenfunction:: fiction::sidb::simulation::analysis::calculate_energy_distribution
 
 
-        **Header:** ``fiction/technology/sidb/simulation/utils/minimum_energy.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/minimum_energy.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::utils::minimum_energy
-        .. doxygenfunction:: fiction::sidb::simulation::utils::minimum_energy_distribution
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::minimum_energy
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::minimum_energy_distribution
 
 
-        **Header:** ``fiction/technology/sidb/simulation/utils/is_ground_state.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/is_ground_state.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::utils::is_ground_state
+        .. doxygenfunction:: fiction::sidb::simulation::is_ground_state
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.calculate_energy_distribution
@@ -208,14 +208,14 @@ Time-to-Solution (TTS) Statistics
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/utils/time_to_solution.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/time_to_solution.hpp``
 
-        .. doxygenstruct:: fiction::sidb::simulation::utils::time_to_solution_params
+        .. doxygenstruct:: fiction::sidb::simulation::analysis::time_to_solution_params
            :members:
-        .. doxygenstruct:: fiction::sidb::simulation::utils::time_to_solution_stats
+        .. doxygenstruct:: fiction::sidb::simulation::analysis::time_to_solution_stats
            :members:
-        .. doxygenfunction:: fiction::sidb::simulation::utils::time_to_solution
-        .. doxygenfunction:: fiction::sidb::simulation::utils::time_to_solution_for_given_simulation_results
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::time_to_solution
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::time_to_solution_for_given_simulation_results
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.time_to_solution_params
@@ -386,9 +386,9 @@ Physically Valid Parameters
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::utils::physically_valid_parameters
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::physically_valid_parameters
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
@@ -432,9 +432,9 @@ Simulation Equivalence Checking
 
 .. tabs::
     .. tab:: C++
-       **Header:** ``fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp``
+       **Header:** ``fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::utils::check_simulation_results_for_equivalence
+        .. doxygenfunction:: fiction::sidb::simulation::check_simulation_results_for_equivalence
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
@@ -445,9 +445,9 @@ Charge Detection
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::utils::can_positive_charges_occur
+        .. doxygenfunction:: fiction::sidb::simulation::analysis::can_positive_charges_occur
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.can_positive_charges_occur
@@ -545,9 +545,9 @@ Convert Potential to Distance
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp``
+        **Header:** ``fiction/technology/sidb/model/potential_to_distance_conversion.hpp``
 
-        .. doxygenfunction:: fiction::sidb::simulation::utils::potential_to_distance_conversion
+        .. doxygenfunction:: fiction::sidb::model::potential_to_distance_conversion
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.potential_to_distance_conversion

@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 18.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_MINIMUM_ENERGY_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_MINIMUM_ENERGY_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_MINIMUM_ENERGY_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_MINIMUM_ENERGY_HPP
 
 #include "fiction/traits.hpp"
 
@@ -11,7 +11,7 @@
 #include <iterator>
 #include <limits>
 
-namespace fiction::sidb::simulation::utils
+namespace fiction::sidb::simulation::analysis
 {
 
 /**
@@ -56,12 +56,11 @@ template <typename InputIt>
 
     if (first != last)
     {
-        return fiction::sidb::simulation::utils::minimum_energy_distribution(first, last)
-            ->get_electrostatic_potential_energy();
+        return minimum_energy_distribution(first, last)->get_electrostatic_potential_energy();
     }
 
     return std::numeric_limits<double>::infinity();
 }
 
-}  // namespace fiction::sidb::simulation::utils
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_UTILS_MINIMUM_ENERGY_HPP
+}  // namespace fiction::sidb::simulation::analysis
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_MINIMUM_ENERGY_HPP

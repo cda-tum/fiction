@@ -1,9 +1,9 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
-#include <fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp>
 
 #include <cstdint>
 
@@ -30,9 +30,9 @@ void physically_valid_parameters_impl(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
-    m.def("physically_valid_parameters", &fiction::sidb::simulation::utils::physically_valid_parameters<Lyt>,
+    m.def("physically_valid_parameters", &fiction::sidb::simulation::analysis::physically_valid_parameters<Lyt>,
           py::arg("cds"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          DOC(fiction_sidb_simulation_utils_physically_valid_parameters));
+          DOC(fiction_sidb_simulation_analysis_physically_valid_parameters));
 }
 
 }  // namespace detail

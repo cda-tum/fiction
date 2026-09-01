@@ -5,10 +5,10 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
-#include <fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -89,8 +89,7 @@ int main()  // NOLINT
                         lyt, sidb::simulation::engines::quickexact_params<cell<sidb_100_cell_clk_lyt>>{.sim_params =
                                                                                                            params});
 
-                    if (!sidb::simulation::utils::check_simulation_results_for_equivalence(result_exgs,
-                                                                                           result_quickexact))
+                    if (!sidb::simulation::check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
                         const std::scoped_lock lock{mutex_qe};
                         quickexact_non_equivalence_counter++;
@@ -103,8 +102,8 @@ int main()  // NOLINT
 
                     auto result_clustercomplete = sidb::simulation::engines::clustercomplete(lyt, cc_params);
 
-                    if (!sidb::simulation::utils::check_simulation_results_for_equivalence(result_exgs,
-                                                                                           result_clustercomplete))
+                    if (!sidb::simulation::check_simulation_results_for_equivalence(result_exgs,
+                                                                                    result_clustercomplete))
                     {
                         const std::scoped_lock lock{mutex_cc};
                         clustercomplete_non_equivalence_counter++;

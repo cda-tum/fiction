@@ -7,6 +7,7 @@
 
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
+#include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
 #include "fiction/technology/sidb/simulation/analysis/occupation_probability_of_excited_states.hpp"
 #include "fiction/technology/sidb/simulation/engine.hpp"
@@ -18,7 +19,6 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -231,8 +231,7 @@ class critical_temperature_impl
                 const auto& lyt_with_input_pattern = layout_with_input_pattern(i);
 
                 // if positively charged SiDBs can occur, the SiDB layout is considered as non-operational
-                if (sidb::simulation::utils::can_positive_charges_occur(lyt_with_input_pattern,
-                                                                        params.operational_params.sim_params))
+                if (can_positive_charges_occur(lyt_with_input_pattern, params.operational_params.sim_params))
                 {
                     critical_temperature = 0.0;
                     return;

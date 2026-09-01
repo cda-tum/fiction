@@ -8,11 +8,11 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/simulation/utils/time_to_solution.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
@@ -32,13 +32,13 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 
     SECTION("layout with no SiDB placed")
     {
-        constexpr sidb::model::simulation_parameters               params{2, -0.30};
-        const sidb::simulation::engines::quicksim_params           qs_params{params};
-        sidb::simulation::utils::time_to_solution_stats            tts_stat_quickexact{};
-        constexpr sidb::simulation::utils::time_to_solution_params tts_params_quickexact{
+        constexpr sidb::model::simulation_parameters                  params{2, -0.30};
+        const sidb::simulation::engines::quicksim_params              qs_params{params};
+        sidb::simulation::analysis::time_to_solution_stats            tts_stat_quickexact{};
+        constexpr sidb::simulation::analysis::time_to_solution_params tts_params_quickexact{
             sidb::simulation::exact_engine::QUICKEXACT};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params_quickexact,
-                                                            &tts_stat_quickexact);
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params_quickexact,
+                                                               &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.algorithm == "QuickExact");
         CHECK_THAT(tts_stat_quickexact.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -47,11 +47,11 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        sidb::simulation::utils::time_to_solution_stats            tts_stat_clustercomplete{};
-        constexpr sidb::simulation::utils::time_to_solution_params tts_params_clustercomplete{
+        sidb::simulation::analysis::time_to_solution_stats            tts_stat_clustercomplete{};
+        constexpr sidb::simulation::analysis::time_to_solution_params tts_params_clustercomplete{
             sidb::simulation::exact_engine::CLUSTERCOMPLETE};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params_clustercomplete,
-                                                            &tts_stat_clustercomplete);
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params_clustercomplete,
+                                                               &tts_stat_clustercomplete);
 
         CHECK(tts_stat_clustercomplete.algorithm == "ClusterComplete");
         CHECK_THAT(tts_stat_clustercomplete.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -60,9 +60,9 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 
 #endif  // FICTION_ALGLIB_ENABLED
 
-        sidb::simulation::utils::time_to_solution_stats        tts_stat_exgs{};
-        const sidb::simulation::utils::time_to_solution_params tts_params_exgs{sidb::simulation::exact_engine::EXGS};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
+        sidb::simulation::analysis::time_to_solution_stats        tts_stat_exgs{};
+        const sidb::simulation::analysis::time_to_solution_params tts_params_exgs{sidb::simulation::exact_engine::EXGS};
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.algorithm == "ExGS");
         CHECK_THAT(tts_stat_exgs.acc, Catch::Matchers::WithinAbs(0.0, 0.00001));
@@ -82,18 +82,19 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
         constexpr sidb::model::simulation_parameters     params{2, -0.30};
         const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        constexpr sidb::simulation::utils::time_to_solution_params tts_params_exgs{
+        constexpr sidb::simulation::analysis::time_to_solution_params tts_params_exgs{
             sidb::simulation::exact_engine::EXGS};
-        sidb::simulation::utils::time_to_solution_stats tts_stat_exgs{};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
+        sidb::simulation::analysis::time_to_solution_stats tts_stat_exgs{};
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.acc == 100.0);
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
-        sidb::simulation::utils::time_to_solution_stats        tts_stat_quickexact{};
-        const sidb::simulation::utils::time_to_solution_params tts_params{sidb::simulation::exact_engine::QUICKEXACT};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params, &tts_stat_quickexact);
+        sidb::simulation::analysis::time_to_solution_stats        tts_stat_quickexact{};
+        const sidb::simulation::analysis::time_to_solution_params tts_params{
+            sidb::simulation::exact_engine::QUICKEXACT};
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params, &tts_stat_quickexact);
 
         REQUIRE(tts_stat_quickexact.acc == 100.0);
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
@@ -110,11 +111,11 @@ TEMPLATE_TEST_CASE("Basic time-to-solution test with varying layouts", "[time-to
 
 #if (FICTION_ALGLIB_ENABLED)
 
-        sidb::simulation::utils::time_to_solution_stats            tts_stat_clustercomplete{};
-        constexpr sidb::simulation::utils::time_to_solution_params tts_params_clustercomplete{
+        sidb::simulation::analysis::time_to_solution_stats            tts_stat_clustercomplete{};
+        constexpr sidb::simulation::analysis::time_to_solution_params tts_params_clustercomplete{
             sidb::simulation::exact_engine::CLUSTERCOMPLETE};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params_clustercomplete,
-                                                            &tts_stat_clustercomplete);
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params_clustercomplete,
+                                                               &tts_stat_clustercomplete);
 
         REQUIRE(tts_stat_clustercomplete.acc == 100);
         CHECK(tts_stat_clustercomplete.time_to_solution > 0.0);
@@ -158,18 +159,18 @@ TEMPLATE_TEST_CASE("time-to-solution test with offset coordinates", "[time-to-so
         sidb::simulation::engines::quicksim_params qs_params{params};
         qs_params.iteration_steps = 10;
 
-        constexpr sidb::simulation::utils::time_to_solution_params tts_params_exgs{
+        constexpr sidb::simulation::analysis::time_to_solution_params tts_params_exgs{
             sidb::simulation::exact_engine::EXGS};
-        sidb::simulation::utils::time_to_solution_stats tts_stat_exgs{};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
+        sidb::simulation::analysis::time_to_solution_stats tts_stat_exgs{};
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params_exgs, &tts_stat_exgs);
 
         CHECK(tts_stat_exgs.time_to_solution > 0.0);
         CHECK(tts_stat_exgs.mean_single_runtime > 0.0);
 
-        sidb::simulation::utils::time_to_solution_stats            tts_stat_quickexact{};
-        constexpr sidb::simulation::utils::time_to_solution_params tts_params{
+        sidb::simulation::analysis::time_to_solution_stats            tts_stat_quickexact{};
+        constexpr sidb::simulation::analysis::time_to_solution_params tts_params{
             sidb::simulation::exact_engine::QUICKEXACT};
-        sidb::simulation::utils::time_to_solution<TestType>(lyt, qs_params, tts_params, &tts_stat_quickexact);
+        sidb::simulation::analysis::time_to_solution<TestType>(lyt, qs_params, tts_params, &tts_stat_quickexact);
 
         CHECK(tts_stat_quickexact.time_to_solution > 0.0);
         CHECK(tts_stat_quickexact.mean_single_runtime > 0.0);
@@ -225,9 +226,9 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         const auto simulation_results_quickexact = sidb::simulation::engines::quickexact(
             lyt, sidb::simulation::engines::quickexact_params<cell<TestType>>{qs_params.sim_params});
 
-        sidb::simulation::utils::time_to_solution_stats st{};
-        sidb::simulation::utils::time_to_solution_for_given_simulation_results(simulation_results_quickexact,
-                                                                               simulation_results_quicksim, 0.997, &st);
+        sidb::simulation::analysis::time_to_solution_stats st{};
+        sidb::simulation::analysis::time_to_solution_for_given_simulation_results(
+            simulation_results_quickexact, simulation_results_quicksim, 0.997, &st);
 
         REQUIRE(st.acc == 100);
         CHECK(st.time_to_solution > 0.0);
@@ -258,10 +259,10 @@ TEMPLATE_TEST_CASE("time-to-solution test with fewer negatively charged SiDBs in
         constexpr sidb::model::simulation_parameters     params{2, -0.05};
         const sidb::simulation::engines::quicksim_params qs_params{params};
 
-        auto tts_stats_quicksim = sidb::simulation::utils::time_to_solution_stats{};
+        auto tts_stats_quicksim = sidb::simulation::analysis::time_to_solution_stats{};
 
-        sidb::simulation::utils::time_to_solution(lyt, qs_params, sidb::simulation::utils::time_to_solution_params{},
-                                                  &tts_stats_quicksim);
+        sidb::simulation::analysis::time_to_solution(
+            lyt, qs_params, sidb::simulation::analysis::time_to_solution_params{}, &tts_stats_quicksim);
 
         CHECK(tts_stats_quicksim.time_to_solution < 10.0);
     }

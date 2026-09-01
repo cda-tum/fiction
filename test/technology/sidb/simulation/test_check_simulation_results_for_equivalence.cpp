@@ -6,8 +6,8 @@
 
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/types.hpp>
 
@@ -33,27 +33,27 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
 
     SECTION("equivalence")
     {
-        CHECK(sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence with respect to cds with different charge states")
     {
         cds1.assign_charge_state({0, 0}, sidb::model::charge_state::POSITIVE);
         results1.charge_distributions = {cds1, cds2};
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence with respect to cds with same charge state but different energy")
     {
         cds1.assign_electrostatic_potential_energy_to_zero();
         results1.charge_distributions = {cds1, cds2};
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence due to different number of solutions")
     {
         results1.charge_distributions = {cds1};
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence due to different number of SiDBs")
@@ -65,20 +65,20 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
             sidb::surfaces::charge_distribution_surface{lyt2, sidb::model::simulation_parameters{},
                                                         sidb::model::charge_state::NEUTRAL},
             sidb::surfaces::charge_distribution_surface{lyt2}};
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
 
     SECTION("non-equivalence due to duplication in first solution")
     {
         results1.charge_distributions = {sidb::surfaces::charge_distribution_surface{lyt1},
                                          sidb::surfaces::charge_distribution_surface{lyt1}};
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
     SECTION("non-equivalence due to duplication in second solution")
     {
         results2.charge_distributions = {sidb::surfaces::charge_distribution_surface{lyt1},
                                          sidb::surfaces::charge_distribution_surface{lyt1}};
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
     SECTION("non-equivalence due to different charge states of the first and the second solution")
     {
@@ -87,6 +87,6 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
         results2.charge_distributions.at(0).assign_charge_state({0, 0}, sidb::model::charge_state::POSITIVE);
         results2.charge_distributions.at(0).assign_electrostatic_potential_energy_to_zero();
         results1.charge_distributions.at(0).assign_electrostatic_potential_energy_to_zero();
-        CHECK(!sidb::simulation::utils::check_simulation_results_for_equivalence(results1, results2));
+        CHECK(!sidb::simulation::check_simulation_results_for_equivalence(results1, results2));
     }
 }

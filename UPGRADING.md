@@ -208,11 +208,11 @@ module whose data they serialize.
 | `fiction/algorithms/simulation/sidb/ground_state_space.hpp`                       | `fiction/technology/sidb/simulation/engines/ground_state_space.hpp`                                                                   |
 | `fiction/algorithms/simulation/sidb/quickexact.hpp`                               | `fiction/technology/sidb/simulation/engines/quickexact.hpp`                                                                           |
 | `fiction/algorithms/simulation/sidb/quicksim.hpp`                                 | `fiction/technology/sidb/simulation/engines/quicksim.hpp`                                                                             |
-| `fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp`               | `fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp`                                                             |
-| `fiction/algorithms/simulation/sidb/is_ground_state.hpp`                          | `fiction/technology/sidb/simulation/utils/is_ground_state.hpp`                                                                        |
-| `fiction/algorithms/simulation/sidb/minimum_energy.hpp`                           | `fiction/technology/sidb/simulation/utils/minimum_energy.hpp`                                                                         |
-| `fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp`              | `fiction/technology/sidb/simulation/utils/physically_valid_parameters.hpp`                                                            |
-| `fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp`         | `fiction/technology/sidb/simulation/utils/potential_to_distance_conversion.hpp`                                                       |
+| `fiction/algorithms/simulation/sidb/can_positive_charges_occur.hpp`               | `fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp`                                                          |
+| `fiction/algorithms/simulation/sidb/is_ground_state.hpp`                          | `fiction/technology/sidb/simulation/is_ground_state.hpp`                                                                              |
+| `fiction/algorithms/simulation/sidb/minimum_energy.hpp`                           | `fiction/technology/sidb/simulation/analysis/minimum_energy.hpp`                                                                      |
+| `fiction/algorithms/simulation/sidb/physically_valid_parameters.hpp`              | `fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp`                                                         |
+| `fiction/algorithms/simulation/sidb/potential_to_distance_conversion.hpp`         | `fiction/technology/sidb/model/potential_to_distance_conversion.hpp`                                                                  |
 | `fiction/algorithms/iter/bdl_input_iterator.hpp`                                  | `fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp`                                                                     |
 | `fiction/algorithms/simulation/sidb/detect_bdl_pairs.hpp`                         | `fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp`                                                                       |
 | `fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp`                         | `fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp`                                                                       |
@@ -221,8 +221,8 @@ module whose data they serialize.
 | `fiction/algorithms/simulation/sidb/operational_domain_ratio.hpp`                 | `fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp`                                                               |
 | `fiction/algorithms/simulation/sidb/verify_logic_match.hpp`                       | `fiction/technology/sidb/simulation/logic/verify_logic_match.hpp`                                                                     |
 | `fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp`                   | `fiction/technology/sidb/simulation/result.hpp`                                                                                       |
-| `fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp` | `fiction/technology/sidb/simulation/utils/equivalence_check_for_simulation_results.hpp`                                               |
-| `fiction/algorithms/simulation/sidb/time_to_solution.hpp`                         | `fiction/technology/sidb/simulation/utils/time_to_solution.hpp`                                                                       |
+| `fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp` | `fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp`                                                     |
+| `fiction/algorithms/simulation/sidb/time_to_solution.hpp`                         | `fiction/technology/sidb/simulation/analysis/time_to_solution.hpp`                                                                    |
 
 #### `utils`
 
@@ -415,11 +415,11 @@ them: nothing said why `is_ground_state` was generic while
 `utils` is the name, because `generic` described nothing.
 
 ```text
-fiction::can_positive_charges_occur      ->  fiction::sidb::simulation::utils::can_positive_charges_occur
-fiction::is_ground_state                 ->  fiction::sidb::simulation::utils::is_ground_state
-fiction::minimum_energy                  ->  fiction::sidb::simulation::utils::minimum_energy
-fiction::physically_valid_parameters     ->  fiction::sidb::simulation::utils::physically_valid_parameters
-fiction::potential_to_distance_conversion -> fiction::sidb::simulation::utils::potential_to_distance_conversion
+fiction::can_positive_charges_occur      ->  fiction::sidb::simulation::analysis::can_positive_charges_occur
+fiction::is_ground_state                 ->  fiction::sidb::simulation::is_ground_state
+fiction::minimum_energy                  ->  fiction::sidb::simulation::analysis::minimum_energy
+fiction::physically_valid_parameters     ->  fiction::sidb::simulation::analysis::physically_valid_parameters
+fiction::potential_to_distance_conversion -> fiction::sidb::model::potential_to_distance_conversion
 ```
 
 ### The gate libraries

@@ -10,7 +10,7 @@
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp>
+#include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -158,8 +158,8 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!sidb::simulation::utils::can_positive_charges_occur(result_lyt.value(),
-                                                                   sidb::model::simulation_parameters{}));
+        CHECK(!sidb::simulation::analysis::can_positive_charges_occur(result_lyt.value(),
+                                                                      sidb::model::simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
@@ -259,7 +259,7 @@ TEST_CASE("Random coords::cube layout generation", "[random-sidb-layout-generato
 
         for (const auto& lyt : result_lyts.value())
         {
-            CHECK(!sidb::simulation::utils::can_positive_charges_occur(lyt, sidb::model::simulation_parameters{}));
+            CHECK(!sidb::simulation::analysis::can_positive_charges_occur(lyt, sidb::model::simulation_parameters{}));
         }
     }
 }
@@ -387,8 +387,8 @@ TEST_CASE("Random coords::offset layout generation", "[random-sidb-layout-genera
                 CHECK(cell.y <= 200);
             });
 
-        CHECK(!sidb::simulation::utils::can_positive_charges_occur(result_lyt.value(),
-                                                                   sidb::model::simulation_parameters{}));
+        CHECK(!sidb::simulation::analysis::can_positive_charges_occur(result_lyt.value(),
+                                                                      sidb::model::simulation_parameters{}));
     }
 
     SECTION("given previous layouts")
