@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/utils/stl/csv_writer.hpp>
+#include <fiction/utils/io/csv_writer.hpp>
 
 #include <sstream>
 #include <string>
@@ -16,7 +16,7 @@ TEST_CASE("CSV writer", "[csv-writer]")
 {
     std::stringstream ss{};
 
-    fiction::utils::stl::csv_writer writer(ss);
+    utils::io::csv_writer writer(ss);
 
     SECTION("writing single integer value")
     {

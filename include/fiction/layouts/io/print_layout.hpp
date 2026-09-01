@@ -558,5 +558,79 @@ void print_layout(const Lyt& lyt, std::ostream& os = std::cout)
     }
 }
 
+/**
+ * Prints every node of a gate-level layout with the tile it occupies and the tiles of its fanins and
+ * fanouts. This is a debugging aid; the output format is not stable.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to print.
+ * @param os Output stream. Defaults to `std::cout`.
+ */
+template <typename Lyt>
+void print_node_to_tile_assignments(const Lyt& lyt, std::ostream& os = std::cout)
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    os << "\n---- NODE TO TILE ----\n";
+
+    lyt.foreach_node(
+        [&lyt, &os](const auto& n)
+        {
+            os << fmt::format("node {} @ {}\n", n, lyt.get_tile(n));
+            os << "\t with fanins:\n";
+            lyt.foreach_fanin(n,
+                              [&lyt, &os](const auto& f)
+                              {
+                                  const auto fn = lyt.get_node(f);
+                                  os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn));
+                              });
+            os << "\n\t with fanouts:\n";
+            lyt.foreach_fanout(n, [&lyt, &os](const auto& fn)
+                               { os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn)); });
+        });
+
+    os << "\n----------------------\n";
+}
+/**
+ * Prints every tile of a gate-level layout with the node it holds, if any, and the tiles of that node's
+ * fanins and fanouts. This is a debugging aid; the output format is not stable.
+ *
+ * @tparam Lyt Gate-level layout type.
+ * @param lyt Layout to print.
+ * @param os Output stream. Defaults to `std::cout`.
+ */
+template <typename Lyt>
+void print_tile_to_node_assignments(const Lyt& lyt, std::ostream& os = std::cout)
+{
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+
+    os << "\n---- TILE TO NODE ----\n";
+
+    lyt.foreach_tile(
+        [&lyt, &os](const auto& t)
+        {
+            os << fmt::format("tile {}\n", t);
+
+            if (const auto n = lyt.get_node(t); n != 0)
+            {
+                os << fmt::format("node {} @ {}\n", n, lyt.get_tile(n));
+                os << "\t with fanins:\n";
+                lyt.foreach_fanin(n,
+                                  [&lyt, &os](const auto& f)
+                                  {
+                                      const auto fn = lyt.get_node(f);
+                                      os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn));
+                                  });
+                os << "\n\t with fanouts:\n";
+                lyt.foreach_fanout(n, [&lyt, &os](const auto& fn)
+                                   { os << fmt::format("\t   {} @ {}\n", fn, lyt.get_tile(fn)); });
+                os << '\n';
+            }
+        });
+
+    os << "\n----------------------\n";
+}
+
 }  // namespace fiction::layouts::io
+
 #endif  // FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP

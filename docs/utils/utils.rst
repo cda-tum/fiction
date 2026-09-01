@@ -65,9 +65,9 @@ Map utils
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/utils/stl/map_utils.hpp``
+        **Header:** ``fiction/utils/math/map_utils.hpp``
 
-        .. doxygenfunction:: fiction::utils::stl::find_key_with_tolerance
+        .. doxygenfunction:: fiction::utils::math::find_key_with_tolerance
 
 
 Placement Utils

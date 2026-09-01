@@ -13,7 +13,7 @@
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/stl/gray_code_iterator.hpp"
+#include "fiction/utils/math/gray_code_iterator.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
@@ -309,7 +309,7 @@ class quickexact_impl
         charge_layout.assign_base_number(2);
         uint64_t previous_charge_index = 0;
 
-        fiction::utils::stl::gray_code_iterator gci{0};
+        fiction::utils::math::gray_code_iterator gci{0};
 
         for (gci = 0; gci <= charge_layout.get_max_charge_index(); ++gci)
         {

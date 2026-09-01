@@ -2,13 +2,13 @@
 // Created by marcel on 06.05.20.
 //
 
-#ifndef FICTION_UTILS_STL_CSV_WRITER_HPP
-#define FICTION_UTILS_STL_CSV_WRITER_HPP
+#ifndef FICTION_UTILS_IO_CSV_WRITER_HPP
+#define FICTION_UTILS_IO_CSV_WRITER_HPP
 
 #include <ostream>
 #include <utility>
 
-namespace fiction::utils::stl
+namespace fiction::utils::io
 {
 
 /**
@@ -87,5 +87,5 @@ class csv_writer
     static constexpr char DELIMITER = ',';
 };
 
-}  // namespace fiction::utils::stl
-#endif  // FICTION_UTILS_STL_CSV_WRITER_HPP
+}  // namespace fiction::utils::io
+#endif  // FICTION_UTILS_IO_CSV_WRITER_HPP

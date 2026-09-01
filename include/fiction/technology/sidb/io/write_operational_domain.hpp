@@ -7,7 +7,7 @@
 
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
-#include "fiction/utils/stl/csv_writer.hpp"
+#include "fiction/utils/io/csv_writer.hpp"
 
 #include <cstdint>
 #include <fstream>
@@ -118,7 +118,7 @@ template <typename OpDomain>
 void write_operational_domain(const OpDomain& opdom, std::ostream& os,
                               const write_operational_domain_params& params = {})
 {
-    fiction::utils::stl::csv_writer writer{os};
+    utils::io::csv_writer writer{os};
 
     const auto num_dimensions = opdom.get_number_of_dimensions();
 

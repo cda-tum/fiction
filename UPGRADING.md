@@ -226,18 +226,18 @@ module whose data they serialize.
 
 #### `utils`
 
-| old                                              | new                                        |
-| ------------------------------------------------ | ------------------------------------------ |
-| `fiction/utils/combination_utils.hpp`            | `fiction/utils/math/combination_utils.hpp` |
-| `fiction/utils/math_utils.hpp`                   | `fiction/utils/math/math_utils.hpp`        |
-| `fiction/utils/array_utils.hpp`                  | `fiction/utils/stl/array_utils.hpp`        |
-| `fiction/io/csv_writer.hpp`                      | `fiction/utils/stl/csv_writer.hpp`         |
-| `fiction/utils/execution_utils.hpp`              | `fiction/utils/stl/execution_utils.hpp`    |
-| `fiction/algorithms/iter/gray_code_iterator.hpp` | `fiction/utils/stl/gray_code_iterator.hpp` |
-| `fiction/utils/hash.hpp`                         | `fiction/utils/stl/hash.hpp`               |
-| `fiction/utils/map_utils.hpp`                    | `fiction/utils/stl/map_utils.hpp`          |
-| `fiction/utils/phmap_utils.hpp`                  | `fiction/utils/stl/phmap_utils.hpp`        |
-| `fiction/utils/stl_utils.hpp`                    | `fiction/utils/stl/stl_utils.hpp`          |
+| old                                              | new                                         |
+| ------------------------------------------------ | ------------------------------------------- |
+| `fiction/utils/combination_utils.hpp`            | `fiction/utils/math/combination_utils.hpp`  |
+| `fiction/utils/math_utils.hpp`                   | `fiction/utils/math/math_utils.hpp`         |
+| `fiction/utils/array_utils.hpp`                  | `fiction/utils/stl/array_utils.hpp`         |
+| `fiction/io/csv_writer.hpp`                      | `fiction/utils/io/csv_writer.hpp`           |
+| `fiction/utils/execution_utils.hpp`              | `fiction/utils/stl/execution_utils.hpp`     |
+| `fiction/algorithms/iter/gray_code_iterator.hpp` | `fiction/utils/math/gray_code_iterator.hpp` |
+| `fiction/utils/hash.hpp`                         | `fiction/utils/stl/hash.hpp`                |
+| `fiction/utils/map_utils.hpp`                    | `fiction/utils/math/map_utils.hpp`          |
+| `fiction/utils/phmap_utils.hpp`                  | `fiction/utils/stl/phmap_utils.hpp`         |
+| `fiction/utils/stl_utils.hpp`                    | `fiction/utils/stl/stl_utils.hpp`           |
 
 ### Headers that kept their path
 

@@ -8,9 +8,10 @@
 #include <fiction/layouts/cell_level_layout.hpp>            // cell-level abstraction of layouts
 #include <fiction/layouts/coordinates.hpp>                  // coordinate systems
 #include <fiction/layouts/gate_level_layout.hpp>            // gate-level abstraction of layouts
-#include <fiction/layouts/io/layout_drawers.hpp>            // DOT drawers for logic networks and layouts
+#include <fiction/layouts/io/layout_drawers.hpp>            // DOT drawers and writer for layouts
 #include <fiction/layouts/io/write_svg_layout.hpp>          // SVG writer for cell-level layout representation
 #include <fiction/layouts/tile_based_layout.hpp>            // tile-based abstraction of layouts
+#include <fiction/networks/io/dot_drawers.hpp>              // DOT drawers and writer for logic networks
 #include <fiction/physical_design/apply_gate_library.hpp>   // layout conversion to cell-level
 #include <fiction/physical_design/exact.hpp>                // SMT-based physical design of FCN layouts
 #include <fiction/physical_design/orthogonal.hpp>           // scalable physical design of FCN layouts
@@ -21,7 +22,6 @@
 #include <fiction/technology/qca/qca_one_library.hpp>       // a pre-defined QCA gate library
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
 #include <fiction/types.hpp>                                // pre-defined types suitable for the FCN domain
-#include <fiction/utils/debug/network_writer.hpp>           // DOT writer for logic networks and layouts
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -139,7 +139,7 @@ int main(int argc, char* argv[])  // NOLINT
     // first, print some properties
     print_network_properties(ntk);
     // and draw the network
-    fiction::utils::debug::write_dot_network(ntk, "ntk", designs);
+    fiction::networks::io::write_dot_network(ntk, designs + "ntk.dot");
 
     std::cout << std::endl;
 
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])  // NOLINT
     // print network properties again
     print_network_properties(ntk);
     // draw the network again
-    fiction::utils::debug::write_dot_network(ntk, "cut_ntk", designs);
+    fiction::networks::io::write_dot_network(ntk, designs + "cut_ntk.dot");
 
     std::cout << std::endl;
 
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])  // NOLINT
     // print network properties again
     print_network_properties(top_ntk);
     // draw network again
-    fiction::utils::debug::write_dot_network(top_ntk, "top_ntk", designs);
+    fiction::networks::io::write_dot_network(top_ntk, designs + "top_ntk.dot");
 
     std::cout << std::endl;
 
@@ -219,9 +219,9 @@ int main(int argc, char* argv[])  // NOLINT
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
     // draw the layout
-    fiction::utils::debug::write_dot_layout<fcn_gate_level_layout,
-                                            fiction::layouts::io::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
-        ortho_gate_lyt, designs + "ortho_lyt");
+    fiction::layouts::io::write_dot_layout<fcn_gate_level_layout,
+                                           fiction::layouts::io::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
+        ortho_gate_lyt, designs + "ortho_lyt.dot");
 
     // apply the QCA ONE gate library to retrieve a cell-level layout
     auto ortho_cell_layout =
@@ -267,9 +267,9 @@ int main(int argc, char* argv[])  // NOLINT
             // print layout properties
             print_gate_layout_properties(*exact_gate_lyt);
             // draw the layout
-            fiction::utils::debug::write_dot_layout<
+            fiction::layouts::io::write_dot_layout<
                 fcn_gate_level_layout, fiction::layouts::io::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
-                *exact_gate_lyt, designs + "exact_lyt");
+                *exact_gate_lyt, designs + "exact_lyt.dot");
 
             // apply the QCA ONE gate library to retrieve a cell-level layout
             auto exact_cell_layout =

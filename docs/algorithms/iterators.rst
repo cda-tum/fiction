@@ -10,9 +10,9 @@ Aspect Ratio Iterator
 Gray Code Iterator
 ------------------
 
-**Header:** ``fiction/utils/stl/gray_code_iterator.hpp``
+**Header:** ``fiction/utils/math/gray_code_iterator.hpp``
 
-.. doxygenclass:: fiction::utils::stl::gray_code_iterator
+.. doxygenclass:: fiction::utils::math::gray_code_iterator
    :members:
 
 

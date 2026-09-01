@@ -405,6 +405,44 @@ class edge_color_view_drawer : public color_view_drawer<Ntk, DrawIndexes>
     using base_drawer = color_view_drawer<Ntk, DrawIndexes>;
 };
 
+/**
+ * Writes a logic network in DOT format into an output stream, using one of the drawers above.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam Drawer DOT drawer type.
+ * @param ntk Network to write.
+ * @param os Output stream.
+ * @param drawer Drawer that decides the node labels, colors, and styles.
+ */
+template <typename Ntk, typename Drawer = technology_dot_drawer<Ntk, true>>
+void write_dot_network(const Ntk& ntk, std::ostream& os, const Drawer& drawer = {})
+{
+    mockturtle::write_dot(ntk, os, drawer);
+}
+/**
+ * Writes a logic network in DOT format into a file, using one of the drawers above.
+ *
+ * @tparam Ntk Logic network type.
+ * @tparam Drawer DOT drawer type.
+ * @param ntk Network to write.
+ * @param filename Path of the file to write.
+ * @param drawer Drawer that decides the node labels, colors, and styles.
+ * @throws std::ofstream::failure if the file cannot be opened.
+ */
+template <typename Ntk, typename Drawer = technology_dot_drawer<Ntk, true>>
+void write_dot_network(const Ntk& ntk, const std::string_view& filename, const Drawer& drawer = {})
+{
+    std::ofstream os{std::string{filename}, std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_dot_network(ntk, os, drawer);
+    os.close();
+}
+
 }  // namespace fiction::networks::io
 
 #endif  // FICTION_NETWORKS_IO_DOT_DRAWERS_HPP
