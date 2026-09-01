@@ -4,11 +4,11 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/synthesis/truth_tables.hpp>                               // truth tables helper functions
-#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                   // reader for SiDB layouts
-#include <fiction/technology/sidb/io/write_operational_domain.hpp>          // writer for operational domains
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>          // SiDB simulation parameters
-#include <fiction/technology/sidb/simulation/engine.hpp>                    // SiDB simulation engines
+#include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
+#include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
@@ -135,11 +135,12 @@ int main()  // NOLINT
 
         total_runtime_sketch_flood_fill += mockturtle::to_seconds(op_domain_stats_sketch_flood_fill.time_total);
 
-        sidb::io::write_operational_domain(op_domain_grid_search,
-                                           fmt::format("{}/3d_grid_search_{}.csv", folder, gate));
-        sidb::io::write_operational_domain(op_domain_sketch, fmt::format("{}/3d_sketch_{}.csv", folder, gate));
-        sidb::io::write_operational_domain(op_domain_sketch_flood_fill,
-                                           fmt::format("{}/3d_sketch_flood_fill_{}.csv", folder, gate));
+        sidb::simulation::io::write_operational_domain(op_domain_grid_search,
+                                                       fmt::format("{}/3d_grid_search_{}.csv", folder, gate));
+        sidb::simulation::io::write_operational_domain(op_domain_sketch,
+                                                       fmt::format("{}/3d_sketch_{}.csv", folder, gate));
+        sidb::simulation::io::write_operational_domain(op_domain_sketch_flood_fill,
+                                                       fmt::format("{}/3d_sketch_flood_fill_{}.csv", folder, gate));
 
         // a gate without a single operational point in the swept range would turn the ratio into a NaN, which would
         // then propagate into the mean and corrupt the "Total" row for every other gate

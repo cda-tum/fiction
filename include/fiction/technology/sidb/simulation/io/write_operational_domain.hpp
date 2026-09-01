@@ -2,8 +2,8 @@
 // Created by marcel on 02.08.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_IO_WRITE_OPERATIONAL_DOMAIN_HPP
-#define FICTION_TECHNOLOGY_SIDB_IO_WRITE_OPERATIONAL_DOMAIN_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_OPERATIONAL_DOMAIN_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_OPERATIONAL_DOMAIN_HPP
 
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
@@ -16,7 +16,7 @@
 #include <string>
 #include <string_view>
 
-namespace fiction::sidb::io
+namespace fiction::sidb::simulation::io
 {
 
 /**
@@ -274,5 +274,5 @@ void write_operational_domain(const OpDomain& opdom, const std::string_view& fil
     os.close();
 }
 
-}  // namespace fiction::sidb::io
-#endif  // FICTION_TECHNOLOGY_SIDB_IO_WRITE_OPERATIONAL_DOMAIN_HPP
+}  // namespace fiction::sidb::simulation::io
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_OPERATIONAL_DOMAIN_HPP

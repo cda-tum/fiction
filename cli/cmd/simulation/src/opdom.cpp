@@ -7,8 +7,8 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/networks/name_utils.hpp>
-#include <fiction/technology/sidb/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/traits.hpp>
@@ -358,17 +358,17 @@ void opdom_command::write_op_domain()
     }
 
     // set up parameters
-    fiction::sidb::io::write_operational_domain_params write_opdom_params{};
+    fiction::sidb::simulation::io::write_operational_domain_params write_opdom_params{};
     write_opdom_params.non_operational_tag = "0";
     write_opdom_params.operational_tag     = "1";
     write_opdom_params.writing_mode =
         omit_non_operational_samples ?
-            fiction::sidb::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY :
-            fiction::sidb::io::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
+            fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY :
+            fiction::sidb::simulation::io::write_operational_domain_params::sample_writing_mode::ALL_SAMPLES;
 
     try
     {
-        fiction::sidb::io::write_operational_domain(op_domain, filename, write_opdom_params);
+        fiction::sidb::simulation::io::write_operational_domain(op_domain, filename, write_opdom_params);
     }
     catch (const std::exception& e)
     {

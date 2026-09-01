@@ -3,9 +3,9 @@
 //
 
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
-#include "fiction/technology/sidb/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
+#include "fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp"
 #include "fiction/technology/sidb/surfaces/lattice.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/types.hpp"
@@ -123,7 +123,7 @@ int main(int argc, const char* argv[])  // NOLINT
                             // reliably only for layouts with neutrally and negatively charged SiDBs.
                             if (!simulation_results.charge_distributions.empty())
                             {
-                                sidb::io::write_location_and_ground_state(simulation_results, file_path);
+                                sidb::simulation::io::write_location_and_ground_state(simulation_results, file_path);
                             }
                         }
                         else if (orientation == "111")
@@ -141,7 +141,7 @@ int main(int argc, const char* argv[])  // NOLINT
                             // reliably only for layouts with neutrally and negatively charged SiDBs.
                             if (!simulation_results.charge_distributions.empty())
                             {
-                                sidb::io::write_location_and_ground_state(simulation_results, file_path);
+                                sidb::simulation::io::write_location_and_ground_state(simulation_results, file_path);
                             }
                         }
                         else

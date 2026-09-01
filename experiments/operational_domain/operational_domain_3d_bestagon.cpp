@@ -4,11 +4,11 @@
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/synthesis/truth_tables.hpp>                               // truth tables helper functions
-#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                   // reader for SiDB layouts
-#include <fiction/technology/sidb/io/write_operational_domain.hpp>          // writer for operational domains
-#include <fiction/technology/sidb/model/simulation_parameters.hpp>          // SiDB simulation parameters
-#include <fiction/technology/sidb/simulation/engine.hpp>                    // SiDB simulation engines
+#include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
+#include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
 #include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
@@ -69,11 +69,11 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[2].step      = 0.0025;
 
     // write operational domain parameters
-    sidb::io::write_operational_domain_params write_op_domain_params{};
+    sidb::simulation::io::write_operational_domain_params write_op_domain_params{};
     write_op_domain_params.non_operational_tag = "0";
     write_op_domain_params.operational_tag     = "1";
     write_op_domain_params.writing_mode =
-        sidb::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
+        sidb::simulation::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY;
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
@@ -122,13 +122,13 @@ int main()  // NOLINT
             lyt, truth_table, 2000, op_domain_params, &op_domain_stats_ff);
 
         // write the operational domains to a CSV file
-        sidb::io::write_operational_domain(
+        sidb::simulation::io::write_operational_domain(
             op_domain_gs, fmt::format("{}operational_domain_grid_search_3d_bestagon_{}.csv", folder, gate),
             write_op_domain_params);
-        sidb::io::write_operational_domain(
+        sidb::simulation::io::write_operational_domain(
             op_domain_rs, fmt::format("{}operational_domain_random_sampling_3d_bestagon_{}.csv", folder, gate),
             write_op_domain_params);
-        sidb::io::write_operational_domain(
+        sidb::simulation::io::write_operational_domain(
             op_domain_ff, fmt::format("{}operational_domain_flood_fill_3d_bestagon_{}.csv", folder, gate),
             write_op_domain_params);
 

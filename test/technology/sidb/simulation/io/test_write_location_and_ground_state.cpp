@@ -9,9 +9,9 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/sidb/io/write_location_and_ground_state.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
@@ -61,7 +61,7 @@ TEMPLATE_TEST_CASE(
             sidb::simulation::engines::exhaustive_ground_state_simulation<lattice>(lyt, params);
 
         std::stringstream ss;
-        sidb::io::write_location_and_ground_state(simulation_results, ss);
+        sidb::simulation::io::write_location_and_ground_state(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;GS_1;
                                                 0.000;0.000;-1;-1;
@@ -89,7 +89,7 @@ TEMPLATE_TEST_CASE(
             sidb::simulation::engines::exhaustive_ground_state_simulation<lattice>(lyt, params);
 
         std::stringstream ss;
-        sidb::io::write_location_and_ground_state(simulation_results, ss);
+        sidb::simulation::io::write_location_and_ground_state(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;
                                                 0.000;0.000;-1;

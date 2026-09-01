@@ -111,15 +111,15 @@ SiQAD
         .. doxygenfunction:: fiction::sidb::io::write_sqd_layout(const Lyt& lyt, std::ostream& os)
         .. doxygenfunction:: fiction::sidb::io::write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 
-        **Header:** ``fiction/technology/sidb/io/write_sqd_sim_result.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp``
 
-        .. doxygenfunction:: fiction::sidb::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
-        .. doxygenfunction:: fiction::sidb::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::simulation::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+        .. doxygenfunction:: fiction::sidb::simulation::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
 
-        **Header:** ``fiction/technology/sidb/io/write_location_and_ground_state.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp``
 
-        .. doxygenfunction:: fiction::sidb::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
-        .. doxygenfunction:: fiction::sidb::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
+        .. doxygenfunction:: fiction::sidb::simulation::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+        .. doxygenfunction:: fiction::sidb::simulation::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
 
         **Header:** ``fiction/technology/sidb/io/read_sqd_layout.hpp``
 
@@ -145,12 +145,12 @@ SiDB Operational Domain
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/sidb/io/write_operational_domain.hpp``
+        **Header:** ``fiction/technology/sidb/simulation/io/write_operational_domain.hpp``
 
-        .. doxygenstruct:: fiction::sidb::io::write_operational_domain_params
+        .. doxygenstruct:: fiction::sidb::simulation::io::write_operational_domain_params
            :members:
-        .. doxygenfunction:: fiction::sidb::io::write_operational_domain(const OpDomain&, std::ostream&, const write_operational_domain_params&)
-        .. doxygenfunction:: fiction::sidb::io::write_operational_domain(const OpDomain&, const std::string_view&, const write_operational_domain_params&)
+        .. doxygenfunction:: fiction::sidb::simulation::io::write_operational_domain(const OpDomain&, std::ostream&, const write_operational_domain_params&)
+        .. doxygenfunction:: fiction::sidb::simulation::io::write_operational_domain(const OpDomain&, const std::string_view&, const write_operational_domain_params&)
 
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.write_operational_domain_params

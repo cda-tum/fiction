@@ -4,7 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/technology/sidb/io/write_operational_domain.hpp>
+#include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
@@ -28,7 +28,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         static constexpr const char* expected = "epsilon_r,lambda_tf,operational status\n";
 
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         CHECK(os.str() == expected);
     }
@@ -40,7 +40,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         static constexpr const char* expected = "lambda_tf,operational status\n";
 
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         CHECK(os.str() == expected);
     }
@@ -53,7 +53,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         static constexpr const char* expected = "lambda_tf,mu_minus,operational status\n";
 
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         CHECK(os.str() == expected);
     }
@@ -67,7 +67,7 @@ TEST_CASE("Write empty operational domain", "[write-operational-domain]")
 
         static constexpr const char* expected = "lambda_tf,mu_minus,epsilon_r,operational status\n";
 
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         CHECK(os.str() == expected);
     }
@@ -91,7 +91,7 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
     {
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1", "0,1,0"};
 
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
         const auto os_str = os.str();
 
         std::istringstream is{os_str};
@@ -104,12 +104,12 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("custom operational tags")
     {
-        const sidb::io::write_operational_domain_params params{.operational_tag     = "True",
-                                                               .non_operational_tag = "False"};
+        const sidb::simulation::io::write_operational_domain_params params{.operational_tag     = "True",
+                                                                           .non_operational_tag = "False"};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,True", "0,1,False"};
 
-        sidb::io::write_operational_domain(opdom, os, params);
+        sidb::simulation::io::write_operational_domain(opdom, os, params);
         const auto os_str = os.str();
 
         std::istringstream is{os_str};
@@ -122,12 +122,13 @@ TEST_CASE("Write simple operational domain", "[write-operational-domain]")
 
     SECTION("skip non-operational samples")
     {
-        sidb::io::write_operational_domain_params const params{
-            .writing_mode = sidb::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
+        sidb::simulation::io::write_operational_domain_params const params{
+            .writing_mode =
+                sidb::simulation::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0,0,1"};
 
-        sidb::io::write_operational_domain(opdom, os, params);
+        sidb::simulation::io::write_operational_domain(opdom, os, params);
         const auto os_str = os.str();
 
         std::istringstream is{os_str};
@@ -155,7 +156,7 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
         const std::set<std::string> expected{"epsilon_r,operational status", "0.1,1", "0.3,0"};
 
         std::ostringstream os{};
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         std::istringstream is{os.str()};
 
@@ -191,7 +192,7 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
                                              "0.4,0.5,-0.6,0"};
 
         std::ostringstream os{};
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         std::istringstream is{os.str()};
 
@@ -227,7 +228,7 @@ TEST_CASE("Write operational domain with one and three sweep dimensions", "[writ
                                              "0.1,0.2,-0.3,1,50.3", "0.4,0.5,-0.6,0,0"};
 
         std::ostringstream os{};
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
 
         std::istringstream is{os.str()};
 
@@ -270,7 +271,7 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "0.3,0.4,0",
                                              "1.2,1.4,1", "2.4,5.75,0"};
 
-        sidb::io::write_operational_domain(opdom, os);
+        sidb::simulation::io::write_operational_domain(opdom, os);
         const auto os_str = os.str();
 
         std::istringstream is{os_str};
@@ -282,14 +283,14 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
     }
     SECTION("custom operational tags")
     {
-        const sidb::io::write_operational_domain_params params{.operational_tag     = "operational",
-                                                               .non_operational_tag = "non-operational"};
+        const sidb::simulation::io::write_operational_domain_params params{.operational_tag     = "operational",
+                                                                           .non_operational_tag = "non-operational"};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,operational",
                                              "0.3,0.4,non-operational", "1.2,1.4,operational",
                                              "2.4,5.75,non-operational"};
 
-        sidb::io::write_operational_domain(opdom, os, params);
+        sidb::simulation::io::write_operational_domain(opdom, os, params);
         const auto os_str = os.str();
 
         std::istringstream is{os_str};
@@ -302,12 +303,13 @@ TEST_CASE("Write operational domain with floating-point parameter values", "[wri
 
     SECTION("skip non-operational samples")
     {
-        sidb::io::write_operational_domain_params const params{
-            .writing_mode = sidb::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
+        sidb::simulation::io::write_operational_domain_params const params{
+            .writing_mode =
+                sidb::simulation::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
         const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status", "0.1,0.2,1", "1.2,1.4,1"};
 
-        sidb::io::write_operational_domain(opdom, os, params);
+        sidb::simulation::io::write_operational_domain(opdom, os, params);
         const auto os_str = os.str();
 
         std::istringstream is{os_str};
@@ -343,7 +345,7 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
             const std::set<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
                                                  "0.3,0,0", "1.2,1,400", "2.4,0,0"};
 
-            sidb::io::write_operational_domain(opdom, os);
+            sidb::simulation::io::write_operational_domain(opdom, os);
             const auto os_str = os.str();
 
             std::istringstream is{os_str};
@@ -355,14 +357,15 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
         }
         SECTION("custom operational tags")
         {
-            const sidb::io::write_operational_domain_params params{.operational_tag     = "operational",
-                                                                   .non_operational_tag = "non-operational"};
+            const sidb::simulation::io::write_operational_domain_params params{.operational_tag = "operational",
+                                                                               .non_operational_tag =
+                                                                                   "non-operational"};
 
             const std::set<std::string> expected{"epsilon_r,operational status,critical temperature",
                                                  "0.1,operational,50.3", "0.3,non-operational,0", "1.2,operational,400",
                                                  "2.4,non-operational,0"};
 
-            sidb::io::write_operational_domain(opdom, os, params);
+            sidb::simulation::io::write_operational_domain(opdom, os, params);
             const auto os_str = os.str();
 
             std::istringstream is{os_str};
@@ -375,13 +378,14 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 
         SECTION("skip non-operational samples")
         {
-            sidb::io::write_operational_domain_params const params{
-                .writing_mode = sidb::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
+            sidb::simulation::io::write_operational_domain_params const params{
+                .writing_mode =
+                    sidb::simulation::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
             const std::set<std::string> expected{"epsilon_r,operational status,critical temperature", "0.1,1,50.3",
                                                  "1.2,1,400"};
 
-            sidb::io::write_operational_domain(opdom, os, params);
+            sidb::simulation::io::write_operational_domain(opdom, os, params);
             const auto os_str = os.str();
 
             std::istringstream is{os_str};
@@ -415,7 +419,7 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
             const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
                                                  "0.1,0.2,1,50.3", "0.3,0.4,0,0", "1.2,1.4,1,400", "2.4,5.75,0,0"};
 
-            sidb::io::write_operational_domain(opdom, os);
+            sidb::simulation::io::write_operational_domain(opdom, os);
             const auto os_str = os.str();
 
             std::istringstream is{os_str};
@@ -427,14 +431,15 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
         }
         SECTION("custom operational tags")
         {
-            const sidb::io::write_operational_domain_params params{.operational_tag     = "operational",
-                                                                   .non_operational_tag = "non-operational"};
+            const sidb::simulation::io::write_operational_domain_params params{.operational_tag = "operational",
+                                                                               .non_operational_tag =
+                                                                                   "non-operational"};
 
             const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
                                                  "0.1,0.2,operational,50.3", "0.3,0.4,non-operational,0",
                                                  "1.2,1.4,operational,400", "2.4,5.75,non-operational,0"};
 
-            sidb::io::write_operational_domain(opdom, os, params);
+            sidb::simulation::io::write_operational_domain(opdom, os, params);
             const auto os_str = os.str();
 
             std::istringstream is{os_str};
@@ -447,13 +452,14 @@ TEST_CASE("Write operational domain with floating-point parameter and temperatur
 
         SECTION("skip non-operational samples")
         {
-            sidb::io::write_operational_domain_params const params{
-                .writing_mode = sidb::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
+            sidb::simulation::io::write_operational_domain_params const params{
+                .writing_mode =
+                    sidb::simulation::io::write_operational_domain_params::sample_writing_mode::OPERATIONAL_ONLY};
 
             const std::set<std::string> expected{"epsilon_r,lambda_tf,operational status,critical temperature",
                                                  "0.1,0.2,1,50.3", "1.2,1.4,1,400"};
 
-            sidb::io::write_operational_domain(opdom, os, params);
+            sidb::simulation::io::write_operational_domain(opdom, os, params);
             const auto os_str = os.str();
 
             std::istringstream is{os_str};

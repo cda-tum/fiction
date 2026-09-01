@@ -4,9 +4,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/technology/sidb/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
@@ -29,126 +29,126 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     SECTION("Empty std::any")
     {
         const std::any value{};
-        const auto     result = fiction::sidb::io::detail::any_to_string(value);
+        const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result.empty());
     }
     SECTION("int8_t")
     {
         constexpr int8_t value  = -42;
-        const auto       result = fiction::sidb::io::detail::any_to_string(value);
+        const auto       result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-42");
     }
     SECTION("uint8_t")
     {
         constexpr uint8_t value  = 42;
-        const auto        result = fiction::sidb::io::detail::any_to_string(value);
+        const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "42");
     }
     SECTION("int16_t")
     {
         constexpr int16_t value  = -32768;
-        const auto        result = fiction::sidb::io::detail::any_to_string(value);
+        const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-32768");
     }
     SECTION("uint16_t")
     {
         constexpr uint16_t value  = 65535;
-        const auto         result = fiction::sidb::io::detail::any_to_string(value);
+        const auto         result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "65535");
     }
     SECTION("int32_t")
     {
         constexpr int32_t value  = -2'147'483'648;
-        const auto        result = fiction::sidb::io::detail::any_to_string(value);
+        const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-2147483648");
     }
     SECTION("uint32_t")
     {
         constexpr uint32_t value  = 4'294'967'295ul;
-        const auto         result = fiction::sidb::io::detail::any_to_string(value);
+        const auto         result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "4294967295");
     }
     SECTION("int64_t")
     {
         constexpr int64_t value  = -9'223'372'036'854'775'807;
-        const auto        result = fiction::sidb::io::detail::any_to_string(value);
+        const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-9223372036854775807");
     }
     SECTION("uint64_t")
     {
         constexpr uint64_t value  = 18'446'744'073'709'551'615ull;
-        const auto         result = fiction::sidb::io::detail::any_to_string(value);
+        const auto         result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "18446744073709551615");
     }
     SECTION("float")
     {
         constexpr float value  = -3.141593f;
-        const auto      result = fiction::sidb::io::detail::any_to_string(value);
+        const auto      result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-3.141593");
     }
     SECTION("double")
     {
         constexpr double value  = 3.14159265359;
-        const auto       result = fiction::sidb::io::detail::any_to_string(value);
+        const auto       result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "3.141593");  // will be rounded by std::to_string
     }
     SECTION("long double")
     {
         constexpr long double value  = 2.7182818284590452353602874l;
-        const auto            result = fiction::sidb::io::detail::any_to_string(value);
+        const auto            result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "2.718282");  // will be rounded by std::to_string
     }
     SECTION("std::string")
     {
         const std::string value  = "hello, world!";
-        const auto        result = fiction::sidb::io::detail::any_to_string(value);
+        const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
     SECTION("const char*")
     {
         const char* value  = "hello, world!";
-        const auto  result = fiction::sidb::io::detail::any_to_string(value);
+        const auto  result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
     SECTION("char")
     {
         constexpr char value  = 'X';
-        const auto     result = fiction::sidb::io::detail::any_to_string(value);
+        const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "X");
     }
     SECTION("unsupported type")
     {
         const std::vector value{1, 2, 3};
-        const auto        result = fiction::sidb::io::detail::any_to_string(value);
+        const auto        result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result.empty());
     }
     SECTION("std::string in std::any")
     {
         const std::any value  = std::string{"hello, world!"};
-        const auto     result = fiction::sidb::io::detail::any_to_string(value);
+        const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
     SECTION("const char* in std::any")
     {
         const std::any value  = "hello, world!";
-        const auto     result = fiction::sidb::io::detail::any_to_string(value);
+        const auto     result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "hello, world!");
     }
@@ -195,7 +195,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
             sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-        sidb::io::write_sqd_sim_result(sim_result, simulation_stream);
+        sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -230,7 +230,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
 
-        sidb::io::write_sqd_sim_result(sim_result, simulation_stream);
+        sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -266,7 +266,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
 
-        sidb::io::write_sqd_sim_result(sim_result, simulation_stream);
+        sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -336,7 +336,7 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf,
                     sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-    sidb::io::write_sqd_sim_result(sim_result, simulation_stream);
+    sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
 
     CHECK(simulation_stream.str() == sim_result_str);
 }
@@ -394,7 +394,7 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r,
         sim_result.sim_params.mu_minus);
 
-    sidb::io::write_sqd_sim_result(sim_result, simulation_stream);
+    sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
 
     CHECK(simulation_stream.str() == sim_result_str);
 }

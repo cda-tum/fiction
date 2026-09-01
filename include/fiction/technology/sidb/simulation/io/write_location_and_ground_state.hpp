@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 09.06.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
-#define FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
+#define FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
@@ -22,7 +22,7 @@
 #include <string_view>
 #include <vector>
 
-namespace fiction::sidb::io
+namespace fiction::sidb::simulation::io
 {
 
 namespace detail
@@ -146,5 +146,5 @@ void write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_re
     os.close();
 }
 
-}  // namespace fiction::sidb::io
-#endif  // FICTION_TECHNOLOGY_SIDB_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP
+}  // namespace fiction::sidb::simulation::io
+#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_LOCATION_AND_GROUND_STATE_HPP

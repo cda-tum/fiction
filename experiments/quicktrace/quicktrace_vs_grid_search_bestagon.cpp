@@ -4,11 +4,11 @@
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
-#include "fiction/technology/sidb/io/write_defect_influence_domain.hpp"
 #include "fiction/technology/sidb/io/write_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
+#include "fiction/technology/sidb/simulation/io/write_defect_influence_domain.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
@@ -90,7 +90,7 @@ int main()  // NOLINT
         total_number_of_samples_grid += grid_stats.num_evaluated_defect_positions;
 
         // Write the defect influence domain to a CSV file
-        sidb::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        sidb::simulation::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_grid, fmt::format("{}{}_grid.csv", plot_folder_for_given_gate, gate));
         const auto clearance_grid_search =
             sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_grid);
@@ -100,7 +100,7 @@ int main()  // NOLINT
         const auto defect_inf_random = sidb::simulation::defects::defect_influence_random_sampling(
             layout, truth_table, 100, params, &random_stats);
         const auto clearance_random = sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_random);
-        sidb::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        sidb::simulation::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_random, fmt::format("{}{}_random.csv", plot_folder_for_given_gate, gate));
 
         // quicktrace
@@ -110,7 +110,7 @@ int main()  // NOLINT
         total_number_of_samples_quicktrace += quicktrace_stats.num_evaluated_defect_positions;
         const auto clearance_quicktrace =
             sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_quicktrace);
-        sidb::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        sidb::simulation::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_quicktrace, fmt::format("{}{}_quicktrace.csv", plot_folder_for_given_gate, gate));
 
         // Log the simulation results
