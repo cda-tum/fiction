@@ -7,7 +7,7 @@
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
 #include <fiction/networks/name_utils.hpp>
-#include <fiction/technology/inml/io/write_qll_layout.hpp>
+#include <fiction/technology/fcn/io/write_qll_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -53,7 +53,7 @@ void qll_command::execute()
         if constexpr (fiction::has_inml_technology_v<Lyt> || fiction::has_qca_technology_v<Lyt> ||
                       fiction::has_mol_qca_technology_v<Lyt>)
         {
-            fiction::inml::io::write_qll_layout(*lyt_ptr, filename);
+            fiction::fcn::io::write_qll_layout(*lyt_ptr, filename);
         }
         else
         {

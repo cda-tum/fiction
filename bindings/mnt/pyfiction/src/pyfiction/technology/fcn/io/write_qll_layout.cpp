@@ -5,7 +5,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/inml/io/write_qll_layout.hpp>
+#include <fiction/technology/fcn/io/write_qll_layout.hpp>
 
 #include <string_view>
 
@@ -30,10 +30,10 @@ void write_qll_layout(nanobind::module_& m)
 
     // NOLINTNEXTLINE(misc-const-correctness)
     void (*const write_qll_layout_function_pointer)(const Lyt&, const std::string_view&) =
-        &fiction::inml::io::write_qll_layout<Lyt>;
+        &fiction::fcn::io::write_qll_layout<Lyt>;
 
     m.def("write_qll_layout", write_qll_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          DOC(fiction_inml_io_write_qll_layout));
+          DOC(fiction_fcn_io_write_qll_layout));
 }
 
 }  // namespace detail

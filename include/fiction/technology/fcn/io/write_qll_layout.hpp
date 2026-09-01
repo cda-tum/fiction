@@ -2,8 +2,8 @@
 // Created by marcel on 17.01.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_INML_IO_WRITE_QLL_LAYOUT_HPP
-#define FICTION_TECHNOLOGY_INML_IO_WRITE_QLL_LAYOUT_HPP
+#ifndef FICTION_TECHNOLOGY_FCN_IO_WRITE_QLL_LAYOUT_HPP
+#define FICTION_TECHNOLOGY_FCN_IO_WRITE_QLL_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/inml/technology.hpp"
@@ -26,7 +26,7 @@
 #include <unordered_set>
 #include <vector>
 
-namespace fiction::inml::io
+namespace fiction::fcn::io
 {
 
 namespace detail
@@ -478,5 +478,5 @@ void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
     os.close();
 }
 
-}  // namespace fiction::inml::io
-#endif  // FICTION_TECHNOLOGY_INML_IO_WRITE_QLL_LAYOUT_HPP
+}  // namespace fiction::fcn::io
+#endif  // FICTION_TECHNOLOGY_FCN_IO_WRITE_QLL_LAYOUT_HPP

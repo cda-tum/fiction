@@ -159,7 +159,7 @@ module whose data they serialize.
 | `fiction/technology/constants.hpp`                                                | `fiction/utils/math/math_utils.hpp` (`ERROR_MARGIN`), `fiction/technology/sidb/model/physical_constants.hpp` (the physical constants) |
 | `fiction/technology/fcn_gate_library.hpp`                                         | `fiction/technology/fcn/gate_library.hpp`                                                                                             |
 | `fiction/io/write_qcc_layout.hpp`                                                 | `fiction/technology/inml/io/write_qcc_layout.hpp`                                                                                     |
-| `fiction/io/write_qll_layout.hpp`                                                 | `fiction/technology/inml/io/write_qll_layout.hpp`                                                                                     |
+| `fiction/io/write_qll_layout.hpp`                                                 | `fiction/technology/fcn/io/write_qll_layout.hpp`                                                                                      |
 | `fiction/technology/magcad_magnet_count.hpp`                                      | `fiction/technology/inml/magcad_magnet_count.hpp`                                                                                     |
 | `fiction/technology/inml_topolinano_library.hpp`                                  | `fiction/technology/inml/topolinano_library.hpp`                                                                                      |
 | `fiction/io/read_fqca_layout.hpp`                                                 | `fiction/technology/qca/io/read_fqca_layout.hpp`                                                                                      |
@@ -271,13 +271,12 @@ Their namespace still changed — see the tree above.
 
 ### New files
 
-| path                                             | namespace              | why                                                                       |
-| ------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------- |
-| `fiction/layouts/io/layout_drawers.hpp`          | `fiction::layouts::io` | gate-layout drawers split out of io/dot_drawers.hpp                       |
-| `fiction/technology/inml/technology.hpp`         | `fiction::inml`        | inml_technology, split out of cell_technologies.hpp                       |
-| `fiction/technology/qca/io/write_qll_layout.hpp` | `fiction::qca::io`     | re-export of inml::io::write_qll_layout; QLL serves QCA, molQCA and iNML  |
-| `fiction/technology/qca/technology.hpp`          | `fiction::qca`         | qca_technology and mol_qca_technology, split out of cell_technologies.hpp |
-| `fiction/technology/sidb/technology.hpp`         | `fiction::sidb`        | sidb_technology, split out of cell_technologies.hpp                       |
+| path                                     | namespace              | why                                                                       |
+| ---------------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
+| `fiction/layouts/io/layout_drawers.hpp`  | `fiction::layouts::io` | gate-layout drawers split out of io/dot_drawers.hpp                       |
+| `fiction/technology/inml/technology.hpp` | `fiction::inml`        | inml_technology, split out of cell_technologies.hpp                       |
+| `fiction/technology/qca/technology.hpp`  | `fiction::qca`         | qca_technology and mol_qca_technology, split out of cell_technologies.hpp |
+| `fiction/technology/sidb/technology.hpp` | `fiction::sidb`        | sidb_technology, split out of cell_technologies.hpp                       |
 
 ### Renamed symbols
 
@@ -641,8 +640,7 @@ need two includes.
   `fiction/technology/inml/technology.hpp`, `sidb_technology` to
   `fiction/technology/sidb/technology.hpp`. There is no umbrella header; include the
   technologies you use.
-- **`fiction/io/write_qll_layout.hpp`** → defined at
-  `fiction/technology/inml/io/write_qll_layout.hpp`, because QLL is the ToPoliNano and
-  MagCAD format and that is the iNML toolchain. The format also serves QCA and molQCA,
-  so `fiction/technology/qca/io/write_qll_layout.hpp` re-exports it into
-  `fiction::qca::io`. Either include works.
+- **`fiction/io/write_qll_layout.hpp`** → `fiction/technology/fcn/io/write_qll_layout.hpp`,
+  as `fiction::fcn::io::write_qll_layout`. QLL is the ToPoliNano and MagCAD file format and
+  the writer handles iNML, QCA, and molQCA layouts alike, so it belongs to no single
+  technology.

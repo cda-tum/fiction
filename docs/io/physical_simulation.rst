@@ -92,10 +92,10 @@ MagCAD & SCERPA
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/technology/inml/io/write_qll_layout.hpp``
+        **Header:** ``fiction/technology/fcn/io/write_qll_layout.hpp``
 
-        .. doxygenfunction:: fiction::inml::io::write_qll_layout(const Lyt& lyt, std::ostream& os)
-        .. doxygenfunction:: fiction::inml::io::write_qll_layout(const Lyt& lyt, const std::string_view& filename)
+        .. doxygenfunction:: fiction::fcn::io::write_qll_layout(const Lyt& lyt, std::ostream& os)
+        .. doxygenfunction:: fiction::fcn::io::write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.write_qll_layout
