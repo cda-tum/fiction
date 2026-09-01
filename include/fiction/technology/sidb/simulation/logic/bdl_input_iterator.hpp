@@ -5,9 +5,9 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_BDL_INPUT_ITERATOR_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_BDL_INPUT_ITERATOR_HPP
 
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>

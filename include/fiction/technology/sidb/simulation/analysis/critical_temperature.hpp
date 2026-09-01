@@ -5,7 +5,6 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CRITICAL_TEMPERATURE_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CRITICAL_TEMPERATURE_HPP
 
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
@@ -20,6 +19,7 @@
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/simulation/utils/can_positive_charges_occur.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 

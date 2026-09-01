@@ -8,7 +8,8 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/clocking_scheme.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/inml/technology.hpp>
+#include <fiction/technology/qca/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>

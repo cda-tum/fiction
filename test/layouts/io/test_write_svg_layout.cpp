@@ -9,9 +9,10 @@
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/write_svg_layout.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/qca/technology.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>

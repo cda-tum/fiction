@@ -17,9 +17,9 @@
 #include <fiction/physical_design/orthogonal.hpp>           // scalable physical design of FCN layouts
 #include <fiction/synthesis/fanout_substitution.hpp>        // substitute multi-output gates with fan-out cascades
 #include <fiction/technology/fcn/area.hpp>                  // area requirement calculations
-#include <fiction/technology/fcn/cell_technologies.hpp>     // pre-defined cell implementations
 #include <fiction/technology/qca/io/write_qca_layout.hpp>   // writer for QCADesigner files (physical simulation)
 #include <fiction/technology/qca/qca_one_library.hpp>       // a pre-defined QCA gate library
+#include <fiction/technology/qca/technology.hpp>            // pre-defined cell implementations
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
 #include <fiction/types.hpp>                                // pre-defined types suitable for the FCN domain
 

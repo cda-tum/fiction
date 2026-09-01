@@ -7,8 +7,8 @@
 
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>

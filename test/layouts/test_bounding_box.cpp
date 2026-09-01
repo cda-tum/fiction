@@ -7,7 +7,7 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/qca/technology.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

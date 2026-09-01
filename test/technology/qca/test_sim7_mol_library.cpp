@@ -13,9 +13,9 @@
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/qca/sim7_mol_library.hpp>
+#include <fiction/technology/qca/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 

@@ -8,7 +8,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>

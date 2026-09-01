@@ -8,8 +8,8 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 
 #include <sstream>
 #include <string>

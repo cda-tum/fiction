@@ -9,10 +9,12 @@
 #include "fiction/layouts/hexagonal_layout.hpp"
 #include "fiction/layouts/shifted_cartesian_layout.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/inml/technology.hpp"
+#include "fiction/technology/qca/technology.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 
 #include <mockturtle/traits.hpp>
 

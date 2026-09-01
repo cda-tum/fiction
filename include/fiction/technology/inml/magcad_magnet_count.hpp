@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP
 #define FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP
 
-#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/inml/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <cstdint>

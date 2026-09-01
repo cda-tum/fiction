@@ -5,8 +5,8 @@
 #include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
 #include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
-#include <fiction/technology/fcn/cell_technologies.hpp>      // cell implementations
 #include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
+#include <fiction/technology/sidb/technology.hpp>            // cell implementations
 #include <fiction/traits.hpp>                                // traits for type-checking
 #include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations

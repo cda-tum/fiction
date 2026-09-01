@@ -9,12 +9,12 @@
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
 #include "fiction/technology/sidb/generators/design_sidb_gates.hpp"
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 

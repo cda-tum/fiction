@@ -6,8 +6,8 @@
 #define FICTION_TECHNOLOGY_INML_IO_WRITE_QCC_LAYOUT_HPP
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/inml/magcad_magnet_count.hpp"
+#include "fiction/technology/inml/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction/utils/version_info.hpp"

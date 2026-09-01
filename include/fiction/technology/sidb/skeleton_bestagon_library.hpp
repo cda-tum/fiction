@@ -7,8 +7,8 @@
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 namespace fiction::sidb

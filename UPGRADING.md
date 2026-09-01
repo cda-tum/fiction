@@ -155,7 +155,7 @@ module whose data they serialize.
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `fiction/technology/area.hpp`                                                     | `fiction/technology/fcn/area.hpp`                                                                                                     |
 | `fiction/technology/cell_ports.hpp`                                               | `fiction/technology/fcn/cell_ports.hpp`                                                                                               |
-| `fiction/technology/cell_technologies.hpp`                                        | `fiction/technology/fcn/cell_technologies.hpp`                                                                                        |
+| `fiction/technology/cell_technologies.hpp`                                        | `fiction/technology/{qca,inml,sidb}/technology.hpp`, one per technology tag                                                           |
 | `fiction/technology/constants.hpp`                                                | `fiction/utils/math/math_utils.hpp` (`ERROR_MARGIN`), `fiction/technology/sidb/model/physical_constants.hpp` (the physical constants) |
 | `fiction/technology/fcn_gate_library.hpp`                                         | `fiction/technology/fcn/gate_library.hpp`                                                                                             |
 | `fiction/io/write_qcc_layout.hpp`                                                 | `fiction/technology/inml/io/write_qcc_layout.hpp`                                                                                     |
@@ -636,9 +636,11 @@ need two includes.
   `gate_layout_cartesian_drawer`, `gate_layout_shifted_cartesian_drawer`,
   `gate_layout_hexagonal_drawer`) move to `fiction/layouts/io/layout_drawers.hpp`.
 - **`fiction/technology/cell_technologies.hpp`** → the four technology tags each move
-  to their own technology directory. `fiction/technology/fcn/cell_technologies.hpp`
-  remains as an umbrella header that includes all of them, so existing code that wants
-  every tag needs only the new path.
+  to their own technology directory: `qca_technology` and `mol_qca_technology` to
+  `fiction/technology/qca/technology.hpp`, `inml_technology` to
+  `fiction/technology/inml/technology.hpp`, `sidb_technology` to
+  `fiction/technology/sidb/technology.hpp`. There is no umbrella header; include the
+  technologies you use.
 - **`fiction/io/write_qll_layout.hpp`** → defined at
   `fiction/technology/inml/io/write_qll_layout.hpp`, because QLL is the ToPoliNano and
   MagCAD format and that is the iNML toolchain. The format also serves QCA and molQCA,

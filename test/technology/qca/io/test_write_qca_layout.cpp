@@ -10,8 +10,8 @@
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/qca/io/write_qca_layout.hpp>
+#include <fiction/technology/qca/technology.hpp>
 
 #include <fmt/format.h>
 

@@ -5,7 +5,7 @@
 #ifndef FICTION_TECHNOLOGY_QCA_IO_WRITE_FQCA_LAYOUT_HPP
 #define FICTION_TECHNOLOGY_QCA_IO_WRITE_FQCA_LAYOUT_HPP
 
-#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 

@@ -7,8 +7,9 @@
 #include "fiction/utils/version_info.hpp"
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/inml/io/write_qll_layout.hpp>
+#include <fiction/technology/inml/technology.hpp>
+#include <fiction/technology/qca/technology.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>

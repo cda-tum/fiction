@@ -5,13 +5,13 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP
 #define FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP
 
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <cassert>

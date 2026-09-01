@@ -7,11 +7,11 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/lattice.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/color.h>

@@ -12,7 +12,9 @@
 #include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/tile_based_layout.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/inml/technology.hpp>
+#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <fmt/format.h>

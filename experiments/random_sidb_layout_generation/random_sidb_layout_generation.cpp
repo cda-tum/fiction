@@ -2,7 +2,6 @@
 // Created by Jan Drewniok on 04.05.23.
 //
 
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/types.hpp>

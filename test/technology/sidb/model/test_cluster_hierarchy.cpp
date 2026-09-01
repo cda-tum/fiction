@@ -6,9 +6,9 @@
 
 #include <catch2/catch_template_test_macros.hpp>
 
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/cluster_hierarchy.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY

@@ -6,7 +6,6 @@
 #define FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
 
 #include "fiction/layouts/layout_utils.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -15,6 +14,7 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/combination_utils.hpp"
 

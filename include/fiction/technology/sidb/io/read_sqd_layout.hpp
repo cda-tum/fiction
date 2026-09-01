@@ -6,9 +6,9 @@
 #define FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
 
 #include "fiction/networks/name_utils.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <tinyxml2.h>

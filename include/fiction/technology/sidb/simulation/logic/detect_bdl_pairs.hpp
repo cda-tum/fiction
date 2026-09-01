@@ -5,8 +5,8 @@
 #ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_PAIRS_HPP
 #define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_PAIRS_HPP
 
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/sidb/model/nm_distance.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>

@@ -7,7 +7,9 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
+#include <fiction/technology/inml/technology.hpp>
+#include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 

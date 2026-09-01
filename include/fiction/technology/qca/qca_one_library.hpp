@@ -6,8 +6,8 @@
 #define FICTION_TECHNOLOGY_QCA_QCA_ONE_LIBRARY_HPP
 
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
+#include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>

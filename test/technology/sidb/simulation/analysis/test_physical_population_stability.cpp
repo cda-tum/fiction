@@ -8,11 +8,11 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 #include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
 #include <cmath>

@@ -2,8 +2,8 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 
 #include <fmt/format.h>
 

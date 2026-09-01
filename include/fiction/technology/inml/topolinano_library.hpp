@@ -6,8 +6,8 @@
 #define FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP
 
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
+#include "fiction/technology/inml/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/format.h>

@@ -5,11 +5,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/fcn/cell_technologies.hpp>
 #include <fiction/technology/fcn/gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/surface_analysis.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 

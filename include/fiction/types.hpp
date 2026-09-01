@@ -15,11 +15,13 @@
 #include "fiction/layouts/synchronization_element_layout.hpp"
 #include "fiction/layouts/tile_based_layout.hpp"
 #include "fiction/networks/technology_network.hpp"
-#include "fiction/technology/fcn/cell_technologies.hpp"
+#include "fiction/technology/inml/technology.hpp"
+#include "fiction/technology/qca/technology.hpp"
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "fiction/technology/sidb/surfaces/lattice.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/networks/aig.hpp>
