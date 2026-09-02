@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
 //
 // Pre-compiled header for the fiction test suite
 // Included automatically in every test translation unit when FICTION_ENABLE_PCH is on

@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
