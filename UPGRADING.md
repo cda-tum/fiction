@@ -24,21 +24,20 @@ Every change is listed below.
 include/fiction/
 ├── traits.hpp  types.hpp          fiction::
 ├── layouts/                       fiction::layouts::
-│   ├── io/                        fiction::layouts::io::
-│   └── utils/                     fiction::layouts::utils::
+│   └── io/                        fiction::layouts::io::
 │                                  (coordinates.hpp adds fiction::layouts::coords::,
 │                                   clocking_scheme.hpp adds fiction::layouts::clocking::)
 ├── networks/                      fiction::networks::
 │   ├── views/                     fiction::networks::views::
-│   ├── io/                        fiction::networks::io::
-│   └── utils/                     fiction::networks::utils::
+│   └── io/                        fiction::networks::io::
 ├── synthesis/                     fiction::synthesis::
+│   └── io/                        fiction::synthesis::io::
 ├── physical_design/               fiction::physical_design::
-│   ├── path_finding/              fiction::physical_design::path_finding::
-│   └── utils/                     fiction::physical_design::utils::
+│   └── path_finding/              fiction::physical_design::path_finding::
 ├── verification/                  fiction::verification::
 ├── technology/                    (adds no namespace level of its own)
 │   ├── fcn/                       fiction::fcn::
+│   │   └── io/                    fiction::fcn::io::
 │   ├── qca/                       fiction::qca::
 │   │   └── io/                    fiction::qca::io::
 │   ├── inml/                      fiction::inml::
@@ -51,29 +50,43 @@ include/fiction/
 │       │   ├── analysis/          fiction::sidb::simulation::analysis::
 │       │   ├── defects/           fiction::sidb::simulation::defects::
 │       │   ├── logic/             fiction::sidb::simulation::logic::
-│       │   ├── generic/           fiction::sidb::simulation::utils::
-│       │   └── utils/             fiction::sidb::simulation::utils::
+│       │   └── io/                fiction::sidb::simulation::io::
 │       ├── generators/            fiction::sidb::generators::
 │       └── io/                    fiction::sidb::io::
 └── utils/                         fiction::utils::
     ├── math/                      fiction::utils::math::
     ├── stl/                       fiction::utils::stl::
-    └── debug/                     fiction::utils::debug::
+    ├── graph/                     fiction::utils::graph::
+    ├── optimization/              fiction::utils::optimization::
+    └── io/                        fiction::utils::io::
 ```
 
-Two rules explain the whole table:
+Four rules explain the whole table:
 
 1. **Namespaces mirror directories.** Each directory level below `include/fiction/`
    adds one namespace level. `technology/` is the single exception: it groups the
    technology directories on disk but adds no namespace, so `technology/sidb/model/`
-   is `fiction::sidb::model`, not `fiction::technology::sidb::model`.
+   is `fiction::sidb::model`, not `fiction::technology::sidb::model`. Two headers add
+   one level of their own for the closed family of alternatives they define:
+   `coordinates.hpp` opens `layouts::coords` for the three coordinate kinds, and
+   `clocking_scheme.hpp` opens `layouts::clocking` for the clocking schemes.
 2. **Redundant identifier prefixes are dropped.** Once the namespace carries the
    domain, `sidb_simulation_parameters` becomes `sidb::model::simulation_parameters`.
-   The prefix is kept where it is part of a published proper name (`qca_one_library`)
-   or where the enclosing scope does not imply it.
+   The prefix is kept where it is part of a published proper name (`qca_one_library`,
+   `bestagon_library`), where it names a file format (`qca::io::write_qca_layout`), and
+   on the technology tags (`qca::qca_technology`), which would otherwise shadow the
+   `fiction::technology<Lyt>` trait inside their own namespace.
+3. **`utils/` exists once, at the top.** It holds what is domain-agnostic: `math/`, `stl/`,
+   `graph/`, `optimization/`, and `io/`. A module's own helpers sit directly in the module
+   (`layouts/layout_utils.hpp`, `physical_design/routing_utils.hpp`), never in a nested
+   `utils/`, so `utils::` means the same thing everywhere.
+4. **Readers and writers live with the module whose data they serialize.** The old flat
+   `io/` directory is gone; each module has its own `io/`, and a writer for simulation
+   results sits in `sidb/simulation/io/`, not beside the layout readers in `sidb/io/`.
 
-The old flat `io/` directory is gone. File readers and writers now live with the
-module whose data they serialize.
+Include guards are `FICTION_<PATH>_HPP`, the path relative to `include/fiction/` in upper
+case, so `technology/sidb/model/defect.hpp` guards with
+`FICTION_TECHNOLOGY_SIDB_MODEL_DEFECT_HPP`.
 
 ### Moved headers
 
@@ -265,111 +278,96 @@ Their namespace still changed — see the tree above.
 | `fiction/networks/virtual_pi_network.hpp`            | `fiction::networks`        |
 | `fiction/traits.hpp`                                 | `fiction`                  |
 | `fiction/types.hpp`                                  | `fiction`                  |
-| `fiction/utils/debug/layout_printer.hpp`             | `fiction::utils::debug`    |
-| `fiction/utils/debug/network_writer.hpp`             | `fiction::utils::debug`    |
 | `fiction/utils/version_info.hpp.in`                  | `fiction`                  |
 
 ### New files
 
-| path                                     | namespace              | why                                                                       |
-| ---------------------------------------- | ---------------------- | ------------------------------------------------------------------------- |
-| `fiction/layouts/io/layout_drawers.hpp`  | `fiction::layouts::io` | gate-layout drawers split out of io/dot_drawers.hpp                       |
-| `fiction/technology/inml/technology.hpp` | `fiction::inml`        | inml_technology, split out of cell_technologies.hpp                       |
-| `fiction/technology/qca/technology.hpp`  | `fiction::qca`         | qca_technology and mol_qca_technology, split out of cell_technologies.hpp |
-| `fiction/technology/sidb/technology.hpp` | `fiction::sidb`        | sidb_technology, split out of cell_technologies.hpp                       |
+| path                                                   | namespace              | why                                                                       |
+| ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------- |
+| `fiction/layouts/io/layout_drawers.hpp`                | `fiction::layouts::io` | gate-layout drawers split out of io/dot_drawers.hpp                       |
+| `fiction/technology/inml/technology.hpp`               | `fiction::inml`        | inml_technology, split out of cell_technologies.hpp                       |
+| `fiction/technology/qca/technology.hpp`                | `fiction::qca`         | qca_technology and mol_qca_technology, split out of cell_technologies.hpp |
+| `fiction/technology/sidb/technology.hpp`               | `fiction::sidb`        | sidb_technology, split out of cell_technologies.hpp                       |
+| `fiction/technology/sidb/model/physical_constants.hpp` | `fiction::sidb::model` | the physical constants, out of technology/constants.hpp                   |
+| `fiction/technology/qca/io/write_qca_layout_svg.hpp`   | `fiction::qca::io`     | the QCA and molQCA half of io/write_svg_layout.hpp                        |
+| `fiction/technology/sidb/io/write_sidb_layout_svg.hpp` | `fiction::sidb::io`    | the SiDB half of io/write_svg_layout.hpp                                  |
 
 ### Renamed symbols
 
-84 public symbols changed name as well as namespace. Everything not listed
+69 public symbols changed name as well as namespace. Everything not listed
 here kept its identifier and only gained a namespace.
 
-| old                                                            | new                                                                             |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `fiction::area`                                                | `fiction::layouts::coords::area`                                                |
-| `fiction::bancs_clocking`                                      | `fiction::layouts::clocking::bancs`                                             |
-| `fiction::cfe_clocking`                                        | `fiction::layouts::clocking::cfe`                                               |
-| `fiction::clock_name::<SCHEME>`                                | `fiction::layouts::clocking::<SCHEME>_NAME`                                     |
-| `fiction::clocking_scheme`                                     | `fiction::layouts::clocking::scheme`                                            |
-| `fiction::columnar_clocking`                                   | `fiction::layouts::clocking::columnar`                                          |
-| `fiction::constants::ERROR_MARGIN`                             | `fiction::utils::math::ERROR_MARGIN`                                            |
-| `fiction::constants::physical::<NAME>`                         | `fiction::sidb::model::<NAME>`                                                  |
-| `fiction::coord_iterator`                                      | `fiction::layouts::coords::iterator`                                            |
-| `fiction::cube::coord_t`                                       | `fiction::layouts::coords::cube`                                                |
-| `fiction::esr_clocking`                                        | `fiction::layouts::clocking::esr`                                               |
-| `fiction::exact_sidb_simulation_engine`                        | `fiction::sidb::simulation::exact_engine`                                       |
-| `fiction::fcn_gate_library`                                    | `fiction::fcn::gate_library`                                                    |
-| `fiction::generate_multiple_random_sidb_layouts`               | `fiction::sidb::generators::generate_multiple_random_layouts`                   |
-| `fiction::generate_random_sidb_layout`                         | `fiction::sidb::generators::generate_random_layout`                             |
-| `fiction::generate_random_sidb_layout_params`                  | `fiction::sidb::generators::generate_random_layout_params`                      |
-| `fiction::get_clocking_scheme`                                 | `fiction::layouts::clocking::get_scheme`                                        |
-| `fiction::get_sidb_simulation_engine`                          | `fiction::sidb::simulation::get_engine`                                         |
-| `fiction::has_offset_ucoord_v`                                 | `fiction::has_offset_coord_v`                                                   |
-| `fiction::heuristic_sidb_simulation_engine`                    | `fiction::sidb::simulation::heuristic_engine`                                   |
-| `fiction::inml_topolinano_library`                             | `fiction::inml::topolinano_library`                                             |
-| `fiction::is_linear_scheme`                                    | `fiction::layouts::clocking::is_linear`                                         |
-| `fiction::is_offset_ucoord_v`                                  | `fiction::is_offset_coord_v`                                                    |
-| `fiction::is_sidb_gate_design_impossible`                      | `fiction::sidb::generators::is_gate_design_impossible`                          |
-| `fiction::num_clks`                                            | `fiction::layouts::clocking::num_clks`                                          |
-| `fiction::offset::ucoord_t`                                    | `fiction::layouts::coords::offset`                                              |
-| `fiction::offset_to_cube_coord`                                | `fiction::layouts::coords::offset_to_cube`                                      |
-| `fiction::on_the_fly_sidb_circuit_design`                      | `fiction::sidb::generators::on_the_fly_circuit_design`                          |
-| `fiction::on_the_fly_sidb_circuit_design_on_defective_surface` | `fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface`     |
-| `fiction::on_the_fly_sidb_circuit_design_params`               | `fiction::sidb::generators::on_the_fly_circuit_design_params`                   |
-| `fiction::open_clocking`                                       | `fiction::layouts::clocking::open`                                              |
-| `fiction::ptr`                                                 | `fiction::layouts::clocking::ptr`                                               |
-| `fiction::qca_one_library`                                     | `fiction::qca::qca_one_library`                                                 |
-| `fiction::read_sidb_surface_defects`                           | `fiction::sidb::io::read_surface_defects`                                       |
-| `fiction::res_clocking`                                        | `fiction::layouts::clocking::res`                                               |
-| `fiction::ripple_clocking`                                     | `fiction::layouts::clocking::ripple`                                            |
-| `fiction::row_clocking`                                        | `fiction::layouts::clocking::row`                                               |
-| `fiction::sidb_100_lattice`                                    | `fiction::sidb::surfaces::lattice_100`                                          |
-| `fiction::sidb_111_lattice`                                    | `fiction::sidb::surfaces::lattice_111`                                          |
-| `fiction::sidb_bestagon_library`                               | `fiction::sidb::bestagon_library`                                               |
-| `fiction::sidb_binary_cluster_hierarchy_node`                  | `fiction::sidb::simulation::engines::detail::binary_cluster_hierarchy_node`     |
-| `fiction::sidb_binary_cluster_hierarchy_node_ptr`              | `fiction::sidb::simulation::engines::detail::binary_cluster_hierarchy_node_ptr` |
-| `fiction::sidb_charge_space_composition`                       | `fiction::sidb::simulation::engines::detail::charge_space_composition`          |
-| `fiction::sidb_charge_state`                                   | `fiction::sidb::model::charge_state`                                            |
-| `fiction::sidb_charge_states_for_base_number`                  | `fiction::sidb::model::charge_states_for_base_number`                           |
-| `fiction::sidb_cluster`                                        | `fiction::sidb::simulation::engines::detail::cluster`                           |
-| `fiction::sidb_cluster_charge_state`                           | `fiction::sidb::simulation::engines::detail::cluster_charge_state`              |
-| `fiction::sidb_cluster_charge_state_space`                     | `fiction::sidb::simulation::engines::detail::cluster_charge_state_space`        |
-| `fiction::sidb_cluster_hierarchy`                              | `fiction::sidb::simulation::engines::detail::cluster_hierarchy`                 |
-| `fiction::sidb_cluster_hierarchy_linkage_method`               | `fiction::sidb::simulation::engines::detail::cluster_hierarchy_linkage_method`  |
-| `fiction::sidb_cluster_projector_state`                        | `fiction::sidb::simulation::engines::detail::cluster_projector_state`           |
-| `fiction::sidb_cluster_projector_state_ptr`                    | `fiction::sidb::simulation::engines::detail::cluster_projector_state_ptr`       |
-| `fiction::sidb_cluster_ptr`                                    | `fiction::sidb::simulation::engines::detail::cluster_ptr`                       |
-| `fiction::sidb_cluster_ptr_hash`                               | `fiction::sidb::simulation::engines::detail::cluster_ptr_hash`                  |
-| `fiction::sidb_cluster_receptor_state`                         | `fiction::sidb::simulation::engines::detail::cluster_receptor_state`            |
-| `fiction::sidb_clustering`                                     | `fiction::sidb::simulation::engines::detail::clustering`                        |
-| `fiction::sidb_clustering_state`                               | `fiction::sidb::simulation::engines::detail::clustering_state`                  |
-| `fiction::sidb_defect`                                         | `fiction::sidb::model::defect`                                                  |
-| `fiction::sidb_defect_surface`                                 | `fiction::sidb::surfaces::defect_surface`                                       |
-| `fiction::sidb_defect_surface_params`                          | `fiction::sidb::surfaces::defect_surface_params`                                |
-| `fiction::sidb_defect_type`                                    | `fiction::sidb::model::defect_type`                                             |
-| `fiction::sidb_energy_and_state_type`                          | `fiction::sidb::simulation::analysis::energy_and_state_type`                    |
-| `fiction::sidb_lattice`                                        | `fiction::sidb::surfaces::lattice`                                              |
-| `fiction::sidb_nm_distance`                                    | `fiction::sidb::model::nm_distance`                                             |
-| `fiction::sidb_nm_position`                                    | `fiction::sidb::model::nm_position`                                             |
-| `fiction::sidb_on_the_fly_gate_library`                        | `fiction::sidb::on_the_fly_gate_library`                                        |
-| `fiction::sidb_on_the_fly_gate_library_params`                 | `fiction::sidb::on_the_fly_gate_library_params`                                 |
-| `fiction::sidb_simulation_domain`                              | `fiction::sidb::simulation::domain`                                             |
-| `fiction::sidb_simulation_engine`                              | `fiction::sidb::simulation::engine`                                             |
-| `fiction::sidb_simulation_engine_name`                         | `fiction::sidb::simulation::engine_name`                                        |
-| `fiction::sidb_simulation_parameters`                          | `fiction::sidb::model::simulation_parameters`                                   |
-| `fiction::sidb_simulation_result`                              | `fiction::sidb::simulation::result`                                             |
-| `fiction::sidb_skeleton_bestagon_library`                      | `fiction::sidb::skeleton_bestagon_library`                                      |
-| `fiction::sidb_surface_analysis`                               | `fiction::sidb::surface_analysis`                                               |
-| `fiction::sim7_mol_library`                                    | `fiction::qca::sim7_mol_library`                                                |
-| `fiction::siqad::coord_t`                                      | `fiction::layouts::coords::siqad`                                               |
-| `fiction::siqad::to_fiction_coord`                             | `fiction::layouts::coords::to_fiction_coord`                                    |
-| `fiction::siqad::to_siqad_coord`                               | `fiction::layouts::coords::to_siqad_coord`                                      |
-| `fiction::srs_clocking`                                        | `fiction::layouts::clocking::srs`                                               |
-| `fiction::surface_black_list`                                  | `fiction::sidb::surface_black_list`                                             |
-| `fiction::twoddwave_clocking`                                  | `fiction::layouts::clocking::twoddwave`                                         |
-| `fiction::twoddwave_hex_clocking`                              | `fiction::layouts::clocking::twoddwave_hex`                                     |
-| `fiction::unsupported_clocking_scheme_exception`               | `fiction::layouts::clocking::unsupported_scheme_exception`                      |
-| `fiction::use_clocking`                                        | `fiction::layouts::clocking::use`                                               |
-| `fiction::volume`                                              | `fiction::layouts::coords::volume`                                              |
+| old                                                            | new                                                                         |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `fiction::area`                                                | `fiction::layouts::coords::area`                                            |
+| `fiction::bancs_clocking`                                      | `fiction::layouts::clocking::bancs`                                         |
+| `fiction::cfe_clocking`                                        | `fiction::layouts::clocking::cfe`                                           |
+| `fiction::clock_name::<SCHEME>`                                | `fiction::layouts::clocking::<SCHEME>_NAME`                                 |
+| `fiction::clocking_scheme`                                     | `fiction::layouts::clocking::scheme`                                        |
+| `fiction::columnar_clocking`                                   | `fiction::layouts::clocking::columnar`                                      |
+| `fiction::constants::ERROR_MARGIN`                             | `fiction::utils::math::ERROR_MARGIN`                                        |
+| `fiction::constants::physical::<NAME>`                         | `fiction::sidb::model::<NAME>`                                              |
+| `fiction::coord_iterator`                                      | `fiction::layouts::coords::iterator`                                        |
+| `fiction::cube::coord_t`                                       | `fiction::layouts::coords::cube`                                            |
+| `fiction::esr_clocking`                                        | `fiction::layouts::clocking::esr`                                           |
+| `fiction::exact_sidb_simulation_engine`                        | `fiction::sidb::simulation::exact_engine`                                   |
+| `fiction::fcn_gate_library`                                    | `fiction::fcn::gate_library`                                                |
+| `fiction::generate_multiple_random_sidb_layouts`               | `fiction::sidb::generators::generate_multiple_random_layouts`               |
+| `fiction::generate_random_sidb_layout`                         | `fiction::sidb::generators::generate_random_layout`                         |
+| `fiction::generate_random_sidb_layout_params`                  | `fiction::sidb::generators::generate_random_layout_params`                  |
+| `fiction::get_clocking_scheme`                                 | `fiction::layouts::clocking::get_scheme`                                    |
+| `fiction::get_sidb_simulation_engine`                          | `fiction::sidb::simulation::get_engine`                                     |
+| `fiction::has_offset_ucoord_v`                                 | `fiction::has_offset_coord_v`                                               |
+| `fiction::heuristic_sidb_simulation_engine`                    | `fiction::sidb::simulation::heuristic_engine`                               |
+| `fiction::inml_topolinano_library`                             | `fiction::inml::topolinano_library`                                         |
+| `fiction::is_linear_scheme`                                    | `fiction::layouts::clocking::is_linear`                                     |
+| `fiction::is_offset_ucoord_v`                                  | `fiction::is_offset_coord_v`                                                |
+| `fiction::is_sidb_gate_design_impossible`                      | `fiction::sidb::generators::is_gate_design_impossible`                      |
+| `fiction::num_clks`                                            | `fiction::layouts::clocking::num_clks`                                      |
+| `fiction::offset::ucoord_t`                                    | `fiction::layouts::coords::offset`                                          |
+| `fiction::offset_to_cube_coord`                                | `fiction::layouts::coords::offset_to_cube`                                  |
+| `fiction::on_the_fly_sidb_circuit_design`                      | `fiction::sidb::generators::on_the_fly_circuit_design`                      |
+| `fiction::on_the_fly_sidb_circuit_design_on_defective_surface` | `fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface` |
+| `fiction::on_the_fly_sidb_circuit_design_params`               | `fiction::sidb::generators::on_the_fly_circuit_design_params`               |
+| `fiction::open_clocking`                                       | `fiction::layouts::clocking::open`                                          |
+| `fiction::qca_one_library`                                     | `fiction::qca::qca_one_library`                                             |
+| `fiction::read_sidb_surface_defects`                           | `fiction::sidb::io::read_surface_defects`                                   |
+| `fiction::res_clocking`                                        | `fiction::layouts::clocking::res`                                           |
+| `fiction::ripple_clocking`                                     | `fiction::layouts::clocking::ripple`                                        |
+| `fiction::row_clocking`                                        | `fiction::layouts::clocking::row`                                           |
+| `fiction::sidb_100_lattice`                                    | `fiction::sidb::surfaces::lattice_100`                                      |
+| `fiction::sidb_111_lattice`                                    | `fiction::sidb::surfaces::lattice_111`                                      |
+| `fiction::sidb_bestagon_library`                               | `fiction::sidb::bestagon_library`                                           |
+| `fiction::sidb_charge_state`                                   | `fiction::sidb::model::charge_state`                                        |
+| `fiction::sidb_charge_states_for_base_number`                  | `fiction::sidb::model::charge_states_for_base_number`                       |
+| `fiction::sidb_defect`                                         | `fiction::sidb::model::defect`                                              |
+| `fiction::sidb_defect_surface`                                 | `fiction::sidb::surfaces::defect_surface`                                   |
+| `fiction::sidb_defect_surface_params`                          | `fiction::sidb::surfaces::defect_surface_params`                            |
+| `fiction::sidb_defect_type`                                    | `fiction::sidb::model::defect_type`                                         |
+| `fiction::sidb_energy_and_state_type`                          | `fiction::sidb::simulation::analysis::energy_and_state_type`                |
+| `fiction::sidb_lattice`                                        | `fiction::sidb::surfaces::lattice`                                          |
+| `fiction::sidb_nm_distance`                                    | `fiction::sidb::model::nm_distance`                                         |
+| `fiction::sidb_nm_position`                                    | `fiction::sidb::model::nm_position`                                         |
+| `fiction::sidb_on_the_fly_gate_library`                        | `fiction::sidb::on_the_fly_gate_library`                                    |
+| `fiction::sidb_on_the_fly_gate_library_params`                 | `fiction::sidb::on_the_fly_gate_library_params`                             |
+| `fiction::sidb_simulation_domain`                              | `fiction::sidb::simulation::domain`                                         |
+| `fiction::sidb_simulation_engine`                              | `fiction::sidb::simulation::engine`                                         |
+| `fiction::sidb_simulation_engine_name`                         | `fiction::sidb::simulation::engine_name`                                    |
+| `fiction::sidb_simulation_parameters`                          | `fiction::sidb::model::simulation_parameters`                               |
+| `fiction::sidb_simulation_result`                              | `fiction::sidb::simulation::result`                                         |
+| `fiction::sidb_skeleton_bestagon_library`                      | `fiction::sidb::skeleton_bestagon_library`                                  |
+| `fiction::sidb_surface_analysis`                               | `fiction::sidb::surface_analysis`                                           |
+| `fiction::sim7_mol_library`                                    | `fiction::qca::sim7_mol_library`                                            |
+| `fiction::siqad::coord_t`                                      | `fiction::layouts::coords::siqad`                                           |
+| `fiction::siqad::to_fiction_coord`                             | `fiction::layouts::coords::to_fiction_coord`                                |
+| `fiction::siqad::to_siqad_coord`                               | `fiction::layouts::coords::to_siqad_coord`                                  |
+| `fiction::srs_clocking`                                        | `fiction::layouts::clocking::srs`                                           |
+| `fiction::surface_black_list`                                  | `fiction::sidb::surface_black_list`                                         |
+| `fiction::twoddwave_clocking`                                  | `fiction::layouts::clocking::twoddwave`                                     |
+| `fiction::twoddwave_hex_clocking`                              | `fiction::layouts::clocking::twoddwave_hex`                                 |
+| `fiction::unsupported_clocking_scheme_exception`               | `fiction::layouts::clocking::unsupported_scheme_exception`                  |
+| `fiction::use_clocking`                                        | `fiction::layouts::clocking::use`                                           |
+| `fiction::volume`                                              | `fiction::layouts::coords::volume`                                          |
 
 ### The coordinate namespaces
 
@@ -406,12 +404,16 @@ rest of the code base, and the three conversions -- which spelled themselves
 now share one. `from_siqad` keeps its target as a template parameter because callers pass
 a dependent type; `to_siqad` and `to_cube` deduce theirs.
 
-### One `utils` for the simulation helpers
+### The simulation helpers have directories that say what they are
 
-`simulation::generic` and `simulation::utils` were two catch-alls with no boundary between
-them: nothing said why `is_ground_state` was generic while
-`equivalence_check_for_simulation_results` was a utility. They are one namespace now, and
-`utils` is the name, because `generic` described nothing.
+`algorithms/simulation/sidb/` held helpers that were neither engines nor logic analyses,
+and there is no `sidb/simulation/utils/` to collect them: `minimum_energy`,
+`time_to_solution`, `can_positive_charges_occur`, and `physically_valid_parameters`
+analyse a layout or a result and sit in `simulation/analysis/`;
+`potential_to_distance_conversion` converts one physical quantity into another and sits
+in `sidb/model/`; `is_ground_state` and `check_simulation_results_for_equivalence` compare
+results and sit beside `result.hpp` in `simulation/` itself. The header of the latter is
+named after the function it defines.
 
 ```text
 fiction::can_positive_charges_occur      ->  fiction::sidb::simulation::analysis::can_positive_charges_occur
@@ -420,6 +422,45 @@ fiction::minimum_energy                  ->  fiction::sidb::simulation::analysis
 fiction::physically_valid_parameters     ->  fiction::sidb::simulation::analysis::physically_valid_parameters
 fiction::potential_to_distance_conversion -> fiction::sidb::model::potential_to_distance_conversion
 ```
+
+### The cluster hierarchy is implementation detail
+
+`sidb_cluster_hierarchy.hpp` and everything it declared -- `sidb_cluster`,
+`sidb_cluster_charge_state`, `sidb_clustering_state`, `sidb_binary_cluster_hierarchy_node`,
+the potential bound stores, and the rest, 15 names in all -- served exactly two callers,
+`clustercomplete` and `ground_state_space`. The header is
+`fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp` and its contents are
+`fiction::sidb::simulation::engines::detail`. `ground_state_space_results::top_cluster`
+keeps its type and is the handle into that decomposition; nothing else about it is API.
+
+### The physical constants
+
+`fiction::constants` is gone. `ERROR_MARGIN`, the floating-point comparison tolerance, is
+`fiction::utils::math::ERROR_MARGIN` in `fiction/utils/math/math_utils.hpp`. The physical
+constants `ELEMENTARY_CHARGE`, `K_E`, `BOLTZMANN_CONSTANT`, and `EV_TO_JOULE` are bare
+members of `fiction::sidb::model` in `fiction/technology/sidb/model/physical_constants.hpp`.
+
+### The SVG writers
+
+`fiction/io/write_svg_layout.hpp` is split by the technology it draws:
+`write_qca_layout_svg` and `write_mol_qca_layout_svg` are in
+`fiction/technology/qca/io/write_qca_layout_svg.hpp` as `fiction::qca::io`, and
+`write_sidb_layout_svg` is in `fiction/technology/sidb/io/write_sidb_layout_svg.hpp` as
+`fiction::sidb::io`. The functions and their parameter structs keep their names.
+
+### Headers that are gone
+
+- `fiction/technology/cell_technologies.hpp`: include the `technology.hpp` of the
+  technology you use.
+- `fiction/technology/constants.hpp`: see above.
+- `fiction/utils/debug/layout_printer.hpp`: `print_node_to_tile_assignments` and
+  `print_tile_to_node_assignments` are in `fiction/layouts/io/print_layout.hpp` as
+  `fiction::layouts::io` and take an output stream.
+- `fiction/utils/debug/network_writer.hpp`: `write_dot_network(ntk, os | filename, drawer)`
+  is in `fiction/networks/io/dot_drawers.hpp` as `fiction::networks::io`; its
+  `write_dot_layout(lyt, name, directory)` wrapper is gone, use
+  `fiction::layouts::io::write_dot_layout(lyt, filename, drawer)`.
+- `fiction::ptr` (the clocking scheme pointer helper) had no caller; use `std::make_shared`.
 
 ### The gate libraries
 
@@ -495,7 +536,7 @@ fiction::num_clks                               ->  fiction::layouts::clocking::
 fiction::clock_name::TWODDWAVE                  ->  fiction::layouts::clocking::TWODDWAVE_NAME
 fiction::get_clocking_scheme                    ->  fiction::layouts::clocking::get_scheme
 fiction::is_linear_scheme                       ->  fiction::layouts::clocking::is_linear
-fiction::ptr                                    ->  fiction::layouts::clocking::ptr
+fiction::ptr                                    ->  removed (use std::make_shared)
 fiction::unsupported_clocking_scheme_exception  ->  fiction::layouts::clocking::unsupported_scheme_exception
 ```
 

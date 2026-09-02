@@ -51,6 +51,7 @@ Added
       molecular QCA standard-cell library to gate-level layouts, including QLL/SVG export support,
       Python bindings, and tests
 - Python bindings:
+    - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
       ``critical_temperature_gate_based`` overloads
     - Exposed ``number_of_threads`` on ``operational_domain_params`` and
@@ -75,28 +76,46 @@ Changed
     - ``algorithms/`` is dissolved. The design-flow stages sit directly under ``fiction/`` as
       ``synthesis/``, ``physical_design/``, and ``verification/``
     - The flat ``io/`` directory is dissolved. Readers and writers live with the module whose
-      data they serialize, as ``layouts/io/``, ``networks/io/``, and ``technology/<tech>/io/``
+      data they serialize: ``layouts/io/``, ``networks/io/``, ``synthesis/io/``,
+      ``technology/<tech>/io/``, and ``technology/sidb/simulation/io/`` for the writers of
+      simulation results. The SVG writer is split by the technology it draws into
+      ``qca/io/write_qca_layout_svg.hpp`` and ``sidb/io/write_sidb_layout_svg.hpp``; the QLL
+      writer, which serves iNML, QCA, and molQCA alike, sits in ``fcn/io/``
     - ``technology/`` is split by technology into ``fcn/``, ``qca/``, ``inml/``, and ``sidb/``.
-      The SiDB subtree gains ``primitives/``, ``model/``, ``simulation/`` (with ``engines/``,
-      ``analysis/``, ``defects/``, ``logic/``, ``generic/``, ``utils/``), ``libraries/``,
-      ``generators/``, and ``io/``
+      The SiDB subtree gains ``surfaces/``, ``model/``, ``simulation/`` (with ``engines/``,
+      ``analysis/``, ``defects/``, ``logic/``, and ``io/``), ``generators/``, and ``io/``. The
+      ``cell_technologies.hpp`` umbrella is gone; each technology's tag is in its own
+      ``technology.hpp``
+    - ``utils/`` exists once, at the top, and holds what is domain-agnostic: ``math/``, ``stl/``,
+      ``graph/`` (``graph_coloring``, ``mincross``), ``optimization/`` (``simulated_annealing``),
+      and ``io/`` (``csv_writer``). A module's own helpers sit directly in the module, so
+      ``layout_utils.hpp`` is in ``layouts/`` and ``routing_utils.hpp`` in ``physical_design/``.
+      The ``utils/debug/`` printers join ``layouts/io/print_layout.hpp`` and
+      ``networks/io/dot_drawers.hpp``
     - Namespaces mirror the directories, so ``fiction::quickexact`` becomes
       ``fiction::sidb::simulation::engines::quickexact``. ``technology/`` itself adds no
-      namespace level
+      namespace level; ``coordinates.hpp`` and ``clocking_scheme.hpp`` add ``layouts::coords``
+      and ``layouts::clocking`` for the families they define
     - Identifiers shed prefixes the namespace now carries, so ``sidb_simulation_parameters``
-      becomes ``fiction::sidb::model::simulation_parameters``. Published names are kept, so
-      ``qca_one_library`` stays ``fiction::qca::qca_one_library``, and so do the technology
-      tags ``qca_technology``, ``mol_qca_technology``, ``inml_technology`` and
-      ``sidb_technology``: bare ``technology`` reads as nothing in a ``Technology`` template
-      argument and would shadow the ``fiction::technology<Lyt>`` trait in its own namespace
+      becomes ``fiction::sidb::model::simulation_parameters``, ``design_sidb_gates`` becomes
+      ``fiction::sidb::generators::design_gates``, and ``gate_library::fcn_gate`` becomes
+      ``gate``. Published names are kept, so ``qca_one_library`` stays
+      ``fiction::qca::qca_one_library``, and so do the technology tags ``qca_technology``,
+      ``mol_qca_technology``, ``inml_technology`` and ``sidb_technology``: bare ``technology``
+      reads as nothing in a ``Technology`` template argument and would shadow the
+      ``fiction::technology<Lyt>`` trait in its own namespace
     - The coordinate types are renamed: ``fiction::offset::ucoord_t`` becomes
       ``fiction::layouts::coords::offset``, and likewise for ``cube`` and ``siqad``
+    - The cluster hierarchy that ``clustercomplete`` and ``ground_state_space`` build is
+      implementation detail, ``fiction::sidb::simulation::engines::detail``, and leaves the
+      documented API; ``ground_state_space_results::top_cluster`` stays as the handle into it
+    - Include guards are ``FICTION_<PATH>_HPP``, the header path relative to ``include/fiction/``
 
   *fiction* is header-only, so an include path is public API. This is a clean break: no
   forwarding headers are left behind and no deprecated ``using`` declarations.
   `UPGRADING.md <https://github.com/cda-tum/fiction/blob/main/UPGRADING.md>`_ is the migration
   guide: it lists every moved header, every renamed symbol, every renamed struct member and
-  member function, and the three headers that were split rather than moved.
+  member function, and the headers that were split rather than moved
 - **Breaking:** ``quickexact_params``, ``quicksim_params``, ``clustercomplete_params``,
   ``is_operational_params``, ``critical_temperature_params``,
   ``physical_population_stability_params``, ``generate_random_sidb_layout_params``,
@@ -118,8 +137,9 @@ Changed
   ``clocking::TWODDWAVE_NAME``, ``get_clocking_scheme`` becomes ``clocking::get_scheme``, and
   ``is_linear_scheme`` becomes ``clocking::is_linear``. ``clocking_scheme.hpp`` keeps its
   path, the scheme name strings are unchanged, and the ``clocked_layout`` members that
-  mention clocking keep their names
-- **Breaking:** The truth table helpers move from ``networks`` to ``synthesis``, where the gate
+  mention clocking keep their names. ``fiction::ptr``, which wrapped a scheme in a
+  ``std::shared_ptr`` and had no caller, is removed
+- **Breaking:** The truth table helpers move from ``utils`` to ``synthesis``, where the gate
   libraries and technology mapping that specify functions with them live:
   ``fiction::create_and_tt`` becomes ``fiction::synthesis::create_and_tt``, and
   ``fiction::tt_reader`` becomes ``fiction::synthesis::io::tt_reader``. The header sheds its
@@ -132,28 +152,19 @@ Changed
   three conversions unify from ``to_fiction_coord``, ``to_siqad_coord`` and ``offset_to_cube``
   into ``from_siqad``, ``to_siqad`` and ``to_cube``. The coordinate types ``offset``, ``cube``
   and ``siqad`` keep their names
-- **Breaking:** Removed ``fiction::constants::PI``, which duplicated ``std::numbers::pi`` at
-  lower precision and was unused, and ``fiction::constants::physical::EPSILON``, which was
-  unused for the same reason: the electrostatics use the Coulomb constant ``K_E``, which folds
-  in the ``1 / (4 * pi * epsilon_0)`` the two of them spelled out. ``ELEMENTARY_CHARGE``,
-  ``K_E``, ``BOLTZMANN_CONSTANT``, ``EV_TO_JOULE`` and ``ERROR_MARGIN`` stay
-- **Breaking:** ``fiction::sidb::libraries`` is dissolved. The SiDB gate libraries sit beside
-  ``technology.hpp`` in ``fiction::sidb``, as QCA's and iNML's libraries do in theirs, so
-  ``fiction::sidb_bestagon_library`` becomes ``fiction::sidb::bestagon_library``. A gate
-  library's name already ends in ``_library``, and ``surface_analysis`` -- which produces a port
-  blacklist rather than being a library -- no longer sits among them
-- **Breaking:** ``fiction::sidb::simulation::generic`` is merged into
-  ``fiction::sidb::simulation::utils``. The two were catch-alls with no boundary between them,
-  and ``generic`` described nothing
-- **Breaking:** ``fiction::sidb::primitives`` is renamed ``fiction::sidb::surfaces``. The four
-  headers each wrap a cell-level layout and add a surface's worth of SiDB state, stacking as
-  ``lattice``, ``defect_surface``, ``charge_distribution_surface``; "primitive" suggested
-  something atomic, which the heaviest type in the subtree is not
+- **Breaking:** ``fiction::constants`` is gone. ``ERROR_MARGIN``, the floating-point comparison
+  tolerance, is ``fiction::utils::math::ERROR_MARGIN``; ``ELEMENTARY_CHARGE``, ``K_E``,
+  ``BOLTZMANN_CONSTANT`` and ``EV_TO_JOULE`` are ``fiction::sidb::model`` constants in
+  ``technology/sidb/model/physical_constants.hpp``. ``PI``, which duplicated ``std::numbers::pi``
+  at lower precision, and ``physical::EPSILON``, which the electrostatics never used because the
+  Coulomb constant ``K_E`` folds in the ``1 / (4 * pi * epsilon_0)`` the two spelled out, are
+  removed
 - **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
   ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
 - The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each
-  binding sits in the directory of the header it wraps, and the flat ``inout/`` and
-  ``algorithms/`` registries dissolve into one registry per module. The Python API is unchanged
+  binding sits in the directory of the header it wraps under the header's name, and every
+  directory that holds binding sources has exactly one registry. The Python API is unchanged,
+  except for the two attributes listed under *Python bindings*
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
@@ -279,6 +290,9 @@ Changed
       and the ``aarch64`` image moves to ``manylinux_2_34``. The published ``aarch64`` wheel
       therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
 - Documentation:
+    - The ``docs/`` tree mirrors ``include/fiction/``: every page sits in the directory of the
+      headers it documents, and every directory with more than one page has a page named after
+      it that carries the toctree
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain
     - ``docs/contributing.rst`` describes the checks a pull request now reports and what
@@ -291,6 +305,8 @@ Changed
     - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
       discarded, and takes the parameters it used to hard-code as command-line arguments
 - Python bindings:
+    - **Breaking:** ``critical_temperature_stats.is_ground_state_transparent`` is renamed
+      ``energy_between_ground_state_and_first_erroneous``, the member it always exposed
     - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
       ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
       directly must be renamed
@@ -328,6 +344,9 @@ Removed
 
 Fixed
 #####
+- ``types.hpp``: ``sidb_111_cell_clk_lyt_siqad_ptr``, ``cds_sidb_cell_clk_lyt_cube``,
+  ``cds_sidb_111_cell_clk_lyt_siqad_ptr``, and ``cds_sidb_111_cell_clk_lyt_cube_ptr`` pointed at
+  the wrong type; a ``static_assert`` per ``*_ptr`` alias pins each to the type its name says
 - Algorithms:
     - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a layout
       without ``LOGIC`` cells now throws instead of silently falling back to a full simulation of the
@@ -392,12 +411,17 @@ Fixed
     - Fixed ``write_qca_layout_svg``'s simple-mode output emitting malformed ``fill:##000000`` for
       constant-0/1 QCA cells instead of ``fill:#000000``
 - Python bindings:
+    - ``parameter_point.__getitem__`` raises ``IndexError`` for an out-of-range index instead of
+      reading past the parameter vector
+    - ``write_sqd_sim_result`` accepts the ``sidb_simulation_result_100`` and ``_111`` results
+      Python produces; it was bound for a result type Python cannot construct
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
     - Fixed nine ``DOC(...)`` references that named symbols the broken parse had invented; the
       ``*_stats`` runtime members are now documented under their real names
     - Fixed ``bdl_input_iterator.py`` never being collected, as its name did not match pytest's
       ``python_files`` pattern, so its five tests had never run
+
 v0.7.0 - 2026-07-31
 -------------------
 

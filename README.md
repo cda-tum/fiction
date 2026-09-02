@@ -253,10 +253,10 @@ and multiple algorithms to optimize gate-level layouts post-placement:
 
 ### Verification
 
-Layout correctness can be [validated](https://fiction.readthedocs.io/en/latest/algorithms/algorithms.html#verification)
+Layout correctness can be [validated](https://fiction.readthedocs.io/en/latest/verification/verification.html)
 using
 
-- [Design Rule Violation (DRV)](https://fiction.readthedocs.io/en/latest/algorithms/verification.html#design-rule-violations-drvs)
+- [Design Rule Violation (DRV)](https://fiction.readthedocs.io/en/latest/verification/verification.html#design-rule-violations-drvs)
   checking
 - SAT-based [formal verification](https://ieeexplore.ieee.org/document/9218641) (equivalence checking)
 
@@ -269,7 +269,7 @@ simulated using a physical model. Currently, the following simulation algorithms
 
 - Silicon Dangling Bonds (SiDBs)
   - Electrostatic Ground State Simulation
-    - [_ClusterComplete_](https://fiction.readthedocs.io/en/latest/algorithms/sidb_simulation.html#_CPPv4I0EN7fiction15clustercompleteE22sidb_simulation_resultI3LytERK3LytRK22clustercomplete_paramsI4cellI3LytEE)
+    - [_ClusterComplete_](https://fiction.readthedocs.io/en/latest/technology/sidb/simulation/engines/engines.html#clustercomplete)
     - [_QuickExact_](https://dl.acm.org/doi/10.1109/ASP-DAC58780.2024.10473946)
     - [_QuickSim_](https://ieeexplore.ieee.org/document/10231266)
     - [Exhaustive _(ExGS)_](https://open.library.ubc.ca/soa/cIRcle/collections/ubctheses/24/items/1.0392909)
