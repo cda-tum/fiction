@@ -4,24 +4,24 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#include <fiction/layouts/cartesian_layout.hpp>             // Cartesian grid layouts
-#include <fiction/layouts/cell_level_layout.hpp>            // cell-level abstraction of layouts
-#include <fiction/layouts/coordinates.hpp>                  // coordinate systems
-#include <fiction/layouts/gate_level_layout.hpp>            // gate-level abstraction of layouts
-#include <fiction/layouts/io/layout_drawers.hpp>            // DOT drawers and writer for layouts
-#include <fiction/layouts/io/write_svg_layout.hpp>          // SVG writer for cell-level layout representation
-#include <fiction/layouts/tile_based_layout.hpp>            // tile-based abstraction of layouts
-#include <fiction/networks/io/dot_drawers.hpp>              // DOT drawers and writer for logic networks
-#include <fiction/physical_design/apply_gate_library.hpp>   // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                // SMT-based physical design of FCN layouts
-#include <fiction/physical_design/orthogonal.hpp>           // scalable physical design of FCN layouts
-#include <fiction/synthesis/fanout_substitution.hpp>        // substitute multi-output gates with fan-out cascades
-#include <fiction/technology/fcn/area.hpp>                  // area requirement calculations
-#include <fiction/technology/qca/io/write_qca_layout.hpp>   // writer for QCADesigner files (physical simulation)
-#include <fiction/technology/qca/qca_one_library.hpp>       // a pre-defined QCA gate library
-#include <fiction/technology/qca/technology.hpp>            // pre-defined cell implementations
-#include <fiction/technology/sidb/io/write_sqd_layout.hpp>  // writer for SiQAD files (physical simulation)
-#include <fiction/types.hpp>                                // pre-defined types suitable for the FCN domain
+#include <fiction/layouts/cartesian_layout.hpp>                // Cartesian grid layouts
+#include <fiction/layouts/cell_level_layout.hpp>               // cell-level abstraction of layouts
+#include <fiction/layouts/coordinates.hpp>                     // coordinate systems
+#include <fiction/layouts/gate_level_layout.hpp>               // gate-level abstraction of layouts
+#include <fiction/layouts/io/layout_drawers.hpp>               // DOT drawers and writer for layouts
+#include <fiction/layouts/tile_based_layout.hpp>               // tile-based abstraction of layouts
+#include <fiction/networks/io/dot_drawers.hpp>                 // DOT drawers and writer for logic networks
+#include <fiction/physical_design/apply_gate_library.hpp>      // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                   // SMT-based physical design of FCN layouts
+#include <fiction/physical_design/orthogonal.hpp>              // scalable physical design of FCN layouts
+#include <fiction/synthesis/fanout_substitution.hpp>           // substitute multi-output gates with fan-out cascades
+#include <fiction/technology/fcn/area.hpp>                     // area requirement calculations
+#include <fiction/technology/qca/io/write_qca_layout.hpp>      // writer for QCADesigner files (physical simulation)
+#include <fiction/technology/qca/io/write_qca_layout_svg.hpp>  // SVG writer for cell-level layout representation
+#include <fiction/technology/qca/qca_one_library.hpp>          // a pre-defined QCA gate library
+#include <fiction/technology/qca/technology.hpp>               // pre-defined cell implementations
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>     // writer for SiQAD files (physical simulation)
+#include <fiction/types.hpp>                                   // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
@@ -232,7 +232,7 @@ int main(int argc, char* argv[])  // NOLINT
     print_cell_layout_properties(ortho_cell_layout);
 
     // write an SVG image of the layout
-    fiction::layouts::io::write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
+    fiction::qca::io::write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
     // write a QCADesigner simulation file
     fiction::qca::io::write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
     // write a SiQAD simulation file
@@ -280,7 +280,7 @@ int main(int argc, char* argv[])  // NOLINT
             print_cell_layout_properties(exact_cell_layout);
 
             // write an SVG image of the layout
-            fiction::layouts::io::write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
+            fiction::qca::io::write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
             // write a QCADesigner simulation file
             fiction::qca::io::write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
             // write a SiQAD simulation file

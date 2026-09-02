@@ -40,24 +40,27 @@ SVG Images
 
 .. tabs::
     .. tab:: C++
-        **Header:** ``fiction/layouts/io/write_svg_layout.hpp``
+        **Header:** ``fiction/technology/qca/io/write_qca_layout_svg.hpp``
 
-        .. doxygenstruct:: fiction::layouts::io::write_qca_layout_svg_params
+        .. doxygenstruct:: fiction::qca::io::write_qca_layout_svg_params
            :members:
 
-        .. doxygenfunction:: fiction::layouts::io::write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
-        .. doxygenfunction:: fiction::layouts::io::write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 
-        .. doxygenclass:: fiction::layouts::io::unsupported_cell_type_exception
+        .. doxygenclass:: fiction::qca::io::unsupported_cell_type_exception
 
-        .. doxygenstruct:: fiction::layouts::io::write_sidb_layout_svg_params
+        .. doxygenfunction:: fiction::qca::io::write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::qca::io::write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
+
+        **Header:** ``fiction/technology/sidb/io/write_sidb_layout_svg.hpp``
+
+        .. doxygenstruct:: fiction::sidb::io::write_sidb_layout_svg_params
            :members:
 
-        .. doxygenfunction:: fiction::layouts::io::write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
-        .. doxygenfunction:: fiction::layouts::io::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::sidb::io::write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
+        .. doxygenfunction:: fiction::sidb::io::write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
 
-        .. doxygenfunction:: fiction::layouts::io::write_mol_qca_layout_svg(const Lyt& lyt, std::ostream& os, const write_qca_layout_svg_params& ps = {})
-        .. doxygenfunction:: fiction::layouts::io::write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename, const write_qca_layout_svg_params& ps = {})
 
 
     .. tab:: Python

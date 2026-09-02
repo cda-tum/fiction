@@ -81,13 +81,13 @@ module whose data they serialize.
 
 #### `layouts`
 
-| old                               | new                                       |
-| --------------------------------- | ----------------------------------------- |
-| `fiction/io/print_layout.hpp`     | `fiction/layouts/io/print_layout.hpp`     |
-| `fiction/io/read_fgl_layout.hpp`  | `fiction/layouts/io/read_fgl_layout.hpp`  |
-| `fiction/io/write_fgl_layout.hpp` | `fiction/layouts/io/write_fgl_layout.hpp` |
-| `fiction/io/write_svg_layout.hpp` | `fiction/layouts/io/write_svg_layout.hpp` |
-| `fiction/utils/layout_utils.hpp`  | `fiction/layouts/layout_utils.hpp`        |
+| old                               | new                                                                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `fiction/io/print_layout.hpp`     | `fiction/layouts/io/print_layout.hpp`                                                                                                |
+| `fiction/io/read_fgl_layout.hpp`  | `fiction/layouts/io/read_fgl_layout.hpp`                                                                                             |
+| `fiction/io/write_fgl_layout.hpp` | `fiction/layouts/io/write_fgl_layout.hpp`                                                                                            |
+| `fiction/io/write_svg_layout.hpp` | `fiction/technology/qca/io/write_qca_layout_svg.hpp` (QCA and molQCA), `fiction/technology/sidb/io/write_sidb_layout_svg.hpp` (SiDB) |
+| `fiction/utils/layout_utils.hpp`  | `fiction/layouts/layout_utils.hpp`                                                                                                   |
 
 #### `networks`
 

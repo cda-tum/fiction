@@ -8,8 +8,9 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
 #include <fiction/layouts/io/print_layout.hpp>
-#include <fiction/layouts/io/write_svg_layout.hpp>
 #include <fiction/networks/io/dot_drawers.hpp>
+#include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
+#include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
@@ -489,18 +490,18 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
             {
                 if constexpr (fiction::has_qca_technology_v<Lyt>)
                 {
-                    fiction::layouts::io::write_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
+                    fiction::qca::io::write_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
                 }
                 else if constexpr (fiction::has_mol_qca_technology_v<Lyt>)
                 {
-                    fiction::layouts::io::write_mol_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
+                    fiction::qca::io::write_mol_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
                 }
                 else if constexpr (fiction::has_sidb_technology_v<Lyt>)
                 {
-                    fiction::layouts::io::write_sidb_layout_svg(*lyt_ptr, os, {});
+                    fiction::sidb::io::write_sidb_layout_svg(*lyt_ptr, os, {});
                 }
             }
-            catch (const fiction::layouts::io::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
+            catch (const fiction::qca::io::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
             {
                 cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}\n", e.where());
             }
