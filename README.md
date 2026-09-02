@@ -133,10 +133,6 @@ Then include what you need:
 #include <fiction/...>
 ```
 
-Upgrading from an earlier version? [`UPGRADING.md`](UPGRADING.md) records the breaking changes and
-what to replace them with. _fiction_ is header-only, so an include path is part of the public API,
-and the current release moves most of them.
-
 ### 🐍 Python Bindings
 
 Ideal for notebooks, exploratory scripts, and integration with Python tooling.

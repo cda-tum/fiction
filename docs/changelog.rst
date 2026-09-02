@@ -109,13 +109,9 @@ Changed
     - The cluster hierarchy that ``clustercomplete`` and ``ground_state_space`` build is
       implementation detail, ``fiction::sidb::simulation::engines::detail``, and leaves the
       documented API; ``ground_state_space_results::top_cluster`` stays as the handle into it
-    - Include guards are ``FICTION_<PATH>_HPP``, the header path relative to ``include/fiction/``
 
   *fiction* is header-only, so an include path is public API. This is a clean break: no
-  forwarding headers are left behind and no deprecated ``using`` declarations.
-  `UPGRADING.md <https://github.com/cda-tum/fiction/blob/main/UPGRADING.md>`_ is the migration
-  guide: it lists every moved header, every renamed symbol, every renamed struct member and
-  member function, and the headers that were split rather than moved
+  forwarding headers are left behind and no deprecated ``using`` declarations
 - **Breaking:** ``quickexact_params``, ``quicksim_params``, ``clustercomplete_params``,
   ``is_operational_params``, ``critical_temperature_params``,
   ``physical_population_stability_params``, ``generate_random_sidb_layout_params``,
