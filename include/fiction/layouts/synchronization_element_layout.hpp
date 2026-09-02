@@ -2,8 +2,8 @@
 // Created by marcel on 30.08.21.
 //
 
-#ifndef FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
-#define FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
+#define FICTION_LAYOUTS_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
 
@@ -351,4 +351,4 @@ class synchronization_element_layout : public ClockedLayout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP

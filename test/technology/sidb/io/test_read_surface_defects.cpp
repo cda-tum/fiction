@@ -168,8 +168,7 @@ TEMPLATE_TEST_CASE(
 
         std::istringstream surface_stream{sidb_surface};
 
-        CHECK_THROWS_AS(sidb::io::read_surface_defects<TestType>(surface_stream),
-                        sidb::io::missing_sidb_position_exception);
+        CHECK_THROWS_AS(sidb::io::read_surface_defects<TestType>(surface_stream), sidb::io::missing_position_exception);
     }
 }
 

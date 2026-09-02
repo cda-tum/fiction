@@ -2,8 +2,8 @@
 // Created by marcel on 02.02.22.
 //
 
-#ifndef FICTION_OBSTRUCTION_LAYOUT_HPP
-#define FICTION_OBSTRUCTION_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_OBSTRUCTION_LAYOUT_HPP
+#define FICTION_LAYOUTS_OBSTRUCTION_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/hash.hpp"  // IWYU pragma: keep, specializes std::hash for the std::pair the phmap set below instantiates
@@ -183,4 +183,4 @@ template <class T>
 obstruction_layout(const T&) -> obstruction_layout<T>;
 
 }  // namespace fiction::layouts
-#endif  // FICTION_OBSTRUCTION_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_OBSTRUCTION_LAYOUT_HPP

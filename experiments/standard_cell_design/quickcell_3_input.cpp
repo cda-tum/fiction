@@ -5,7 +5,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
+#include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
@@ -71,7 +71,7 @@ int main()  // NOLINT
     const auto skeleton_two = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
-    const sidb::generators::design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const sidb::generators::design_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
             sidb::simulation::logic::is_operational_params{
                 .sim_params = sidb::model::simulation_parameters{2, -0.31},
@@ -81,25 +81,23 @@ int main()  // NOLINT
                         .bdl_wire_params =
                             sidb::simulation::logic::detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
                 .op_condition = sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-        .design_mode = sidb::generators::design_sidb_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+        .design_mode = sidb::generators::design_gates_params<
+            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
         .canvas                 = {{22, 6, 0}, {32, 12, 0}},
         .number_of_canvas_sidbs = 4};
 
     for (const auto& [truth_tables, gate_names] : truth_tables_and_names)
     {
-        std::vector<sidb_100_cell_clk_lyt_siqad>  quickcell_design{};
-        sidb::generators::design_sidb_gates_stats stats_quickcell{};
+        std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
+        sidb::generators::design_gates_stats     stats_quickcell{};
 
         if (gate_names == "and3" || gate_names == "gamble")
         {
-            quickcell_design =
-                sidb::generators::design_sidb_gates(skeleton_one, truth_tables, params, &stats_quickcell);
+            quickcell_design = sidb::generators::design_gates(skeleton_one, truth_tables, params, &stats_quickcell);
         }
         else
         {
-            quickcell_design =
-                sidb::generators::design_sidb_gates(skeleton_two, truth_tables, params, &stats_quickcell);
+            quickcell_design = sidb::generators::design_gates(skeleton_two, truth_tables, params, &stats_quickcell);
         }
 
         const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);

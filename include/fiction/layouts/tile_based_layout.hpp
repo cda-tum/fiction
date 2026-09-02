@@ -2,8 +2,8 @@
 // Created by marcel on 21.07.21.
 //
 
-#ifndef FICTION_TILE_BASED_LAYOUT_HPP
-#define FICTION_TILE_BASED_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_TILE_BASED_LAYOUT_HPP
+#define FICTION_LAYOUTS_TILE_BASED_LAYOUT_HPP
 
 #include "fiction/traits.hpp"
 
@@ -106,4 +106,4 @@ class tile_based_layout : public CoordinateLayout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_TILE_BASED_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_TILE_BASED_LAYOUT_HPP

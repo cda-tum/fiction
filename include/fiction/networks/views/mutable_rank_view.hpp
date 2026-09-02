@@ -2,8 +2,8 @@
 // Created by benjamin on 18.06.24.
 //
 
-#ifndef FICTION_MUTABLE_RANK_VIEW_HPP
-#define FICTION_MUTABLE_RANK_VIEW_HPP
+#ifndef FICTION_NETWORKS_VIEWS_MUTABLE_RANK_VIEW_HPP
+#define FICTION_NETWORKS_VIEWS_MUTABLE_RANK_VIEW_HPP
 
 #include "fiction/networks/views/static_depth_view.hpp"
 
@@ -666,4 +666,4 @@ template <class T>
 mutable_rank_view(const T&, std::vector<std::vector<typename T::node>>) -> mutable_rank_view<T>;
 
 }  // namespace fiction::networks::views
-#endif  // FICTION_MUTABLE_RANK_VIEW_HPP
+#endif  // FICTION_NETWORKS_VIEWS_MUTABLE_RANK_VIEW_HPP

@@ -2,8 +2,8 @@
 // Created by marcel on 14.05.21.
 //
 
-#ifndef FICTION_CLOCKED_LAYOUT_HPP
-#define FICTION_CLOCKED_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_CLOCKED_LAYOUT_HPP
+#define FICTION_LAYOUTS_CLOCKED_LAYOUT_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
@@ -346,4 +346,4 @@ class clocked_layout : public CoordinateLayout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_CLOCKED_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_CLOCKED_LAYOUT_HPP

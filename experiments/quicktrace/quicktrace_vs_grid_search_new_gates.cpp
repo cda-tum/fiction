@@ -1,5 +1,5 @@
 #include "fiction/synthesis/truth_tables.hpp"
-#include "fiction/technology/sidb/generators/design_sidb_gates.hpp"
+#include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
@@ -42,10 +42,10 @@ int main()  // NOLINT
     auto lyt = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_cube>(
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", folder));
 
-    const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_cube>> params_2_in_1_out{
+    const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_cube>> params_2_in_1_out{
         sidb::simulation::logic::is_operational_params{sidb::model::simulation_parameters{2, -0.32}},
-        sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_cube>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        sidb::generators::design_gates_params<
+            cell<sidb_100_cell_clk_lyt_cube>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         {{14, 12, 0}, {24, 23, 0}},
         3};
 
@@ -63,7 +63,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto exhaustive_design = sidb::generators::design_sidb_gates(lyt, truth_table, params_2_in_1_out);
+        const auto exhaustive_design = sidb::generators::design_gates(lyt, truth_table, params_2_in_1_out);
 
         // Create gate directory for plots
         const std::string gate_folder = fmt::format("{}{}/", output_folder, gate);

@@ -41,7 +41,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
      * @brief Maps a gate-level tile to its MolQCA standard-cell implementation.
      *
      * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
-     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @tparam GateLyt Cartesian gate-level layout type.
@@ -50,7 +50,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
      * @return molQCA gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
@@ -216,7 +216,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
      * @return 1-to-3 fan-out gate matching `p`'s missing outgoing connector.
      * @throws std::out_of_range If `p` does not describe a supported 1-to-3 fan-out orientation.
      */
-    [[nodiscard]] static fcn_gate set_up_1_to_3_fanout(const fcn::port_list<fcn::port_position>& p)
+    [[nodiscard]] static gate set_up_1_to_3_fanout(const fcn::port_list<fcn::port_position>& p)
     {
         if (p.inp.size() != 1u || p.out.size() != 3u)
         {
@@ -254,7 +254,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate STRAIGHT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -268,7 +268,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BENT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -282,7 +282,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BENT_INVERTER_R{cell_list_to_gate<char>(
+    static constexpr const gate BENT_INVERTER_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
         {' ', ' ', ' ', 'd', 'c', 'c', 'd', ' ', ' ', ' '},
@@ -296,7 +296,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
+    static constexpr const gate CONJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -310,7 +310,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CONJUNCTION_D{cell_list_to_gate<char>(
+    static constexpr const gate CONJUNCTION_D{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -324,7 +324,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CONJUNCTION_R{cell_list_to_gate<char>(
+    static constexpr const gate CONJUNCTION_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -338,7 +338,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate DISJUNCTION{cell_list_to_gate<char>(
+    static constexpr const gate DISJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -352,7 +352,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate DISJUNCTION_D{cell_list_to_gate<char>(
+    static constexpr const gate DISJUNCTION_D{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -366,7 +366,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate DISJUNCTION_R{cell_list_to_gate<char>(
+    static constexpr const gate DISJUNCTION_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -380,7 +380,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate MAJORITY{cell_list_to_gate<char>(
+    static constexpr const gate MAJORITY{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -394,7 +394,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate FAN_OUT_1_2{cell_list_to_gate<char>(
+    static constexpr const gate FAN_OUT_1_2{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -408,7 +408,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate FAN_OUT_1_2_R{cell_list_to_gate<char>(
+    static constexpr const gate FAN_OUT_1_2_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -422,7 +422,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate FAN_OUT_1_2_D{cell_list_to_gate<char>(
+    static constexpr const gate FAN_OUT_1_2_D{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -436,7 +436,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate FAN_OUT_1_3{cell_list_to_gate<char>(
+    static constexpr const gate FAN_OUT_1_3{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -454,7 +454,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
     // ************************** Wires ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate PRIMARY_INPUT_PORT{cell_list_to_gate<char>(
+    static constexpr const gate PRIMARY_INPUT_PORT{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -468,7 +468,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate PRIMARY_OUTPUT_PORT{cell_list_to_gate<char>(
+    static constexpr const gate PRIMARY_OUTPUT_PORT{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -482,7 +482,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate CENTER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -496,7 +496,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CENTER_BENT_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate CENTER_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -510,7 +510,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CENTER_BENT_WIRE_R{cell_list_to_gate<char>(
+    static constexpr const gate CENTER_BENT_WIRE_R{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
@@ -526,7 +526,7 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
 
     // clang-format on
 
-    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, gate>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */

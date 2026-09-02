@@ -31,7 +31,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
 
     // clang-format off
 
-    static constexpr const inml::topolinano_library::fcn_gate lower_pi{
+    static constexpr const inml::topolinano_library::gate lower_pi{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
@@ -40,7 +40,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate upper_pi{
+    static constexpr const inml::topolinano_library::gate upper_pi{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {'i', 'x', 'x', 'x'},
@@ -49,7 +49,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate conjunction{
+    static constexpr const inml::topolinano_library::gate conjunction{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {'d', ' ', ' ', ' '},
@@ -58,7 +58,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate disjunction{
+    static constexpr const inml::topolinano_library::gate disjunction{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {'u', ' ', ' ', ' '},
@@ -67,7 +67,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate bottom_up_bent_wire{
+    static constexpr const inml::topolinano_library::gate bottom_up_bent_wire{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'x'},
@@ -76,7 +76,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate bottom_up_bent_inverter{
+    static constexpr const inml::topolinano_library::gate bottom_up_bent_inverter{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
@@ -85,7 +85,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate lower_wire{
+    static constexpr const inml::topolinano_library::gate lower_wire{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
@@ -94,7 +94,7 @@ TEST_CASE("Setting up input ports, gates, and wires", "[inml-topolinano-library]
         {'x', ' ', ' ', ' '}
     }})};
 
-    static constexpr const inml::topolinano_library::fcn_gate lower_po{
+    static constexpr const inml::topolinano_library::gate lower_po{
         inml::topolinano_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},

@@ -2,8 +2,8 @@
 // Created by marcel on 31.03.21.
 //
 
-#ifndef FICTION_CARTESIAN_LAYOUT_HPP
-#define FICTION_CARTESIAN_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_CARTESIAN_LAYOUT_HPP
+#define FICTION_LAYOUTS_CARTESIAN_LAYOUT_HPP
 
 #include "fiction/layouts/coordinates.hpp"
 
@@ -832,4 +832,4 @@ class cartesian_layout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_CARTESIAN_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_CARTESIAN_LAYOUT_HPP

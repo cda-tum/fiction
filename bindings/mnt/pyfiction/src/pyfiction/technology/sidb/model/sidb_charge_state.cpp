@@ -23,8 +23,8 @@ void sidb_charge_state(nanobind::module_& m)
         .value("NONE", fiction::sidb::model::charge_state::NONE, DOC(fiction_sidb_model_charge_state_NONE))
 
         ;
-    m.attr("SIDB_CHARGE_STATES_BASE_2") = py::cast(fiction::sidb::model::SIDB_CHARGE_STATES_BASE_2);
-    m.attr("SIDB_CHARGE_STATES_BASE_3") = py::cast(fiction::sidb::model::SIDB_CHARGE_STATES_BASE_3);
+    m.attr("SIDB_CHARGE_STATES_BASE_2") = py::cast(fiction::sidb::model::CHARGE_STATES_BASE_2);
+    m.attr("SIDB_CHARGE_STATES_BASE_3") = py::cast(fiction::sidb::model::CHARGE_STATES_BASE_3);
 
     m.def("sidb_charge_states_for_base_number", &fiction::sidb::model::charge_states_for_base_number, py::arg("base"),
           DOC(fiction_sidb_model_charge_states_for_base_number));

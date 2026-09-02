@@ -25,22 +25,22 @@ TEST_CASE("Gate rotation", "[fcn-gate-library]")
 
     // clang-format off
 
-    constexpr const typename lib_t::fcn_gate wire{
+    constexpr const typename lib_t::gate wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {' ', 'x', 'x'},
                                          {' ', ' ', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire_rotated_90{
+    constexpr const typename lib_t::gate wire_rotated_90{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {' ', 'x', 'x'},
                                          {' ', 'x', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire_rotated_180{
+    constexpr const typename lib_t::gate wire_rotated_180{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {'x', 'x', ' '},
                                          {' ', 'x', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire_rotated_270{
+    constexpr const typename lib_t::gate wire_rotated_270{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {'x', 'x', ' '},
                                          {' ', ' ', ' '}}})};
@@ -65,27 +65,27 @@ TEST_CASE("Gate merging", "[fcn-gate-library]")
 
     // clang-format off
 
-    constexpr const typename lib_t::fcn_gate wire{
+    constexpr const typename lib_t::gate wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {' ', 'x', 'x'},
                                          {' ', ' ', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire_rotated_90{
+    constexpr const typename lib_t::gate wire_rotated_90{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {' ', 'x', 'x'},
                                          {' ', 'x', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire_rotated_180{
+    constexpr const typename lib_t::gate wire_rotated_180{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {'x', 'x', ' '},
                                          {' ', 'x', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire_rotated_270{
+    constexpr const typename lib_t::gate wire_rotated_270{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {'x', 'x', ' '},
                                          {' ', ' ', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate merged_wire{
+    constexpr const typename lib_t::gate merged_wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {'x', 'x', 'x'},
                                          {' ', 'x', ' '}}})};
@@ -96,17 +96,17 @@ TEST_CASE("Gate merging", "[fcn-gate-library]")
 
     // clang-format off
 
-    constexpr const typename lib_t::fcn_gate pi_pin{
+    constexpr const typename lib_t::gate pi_pin{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {'i', 'x', ' '},
                                          {' ', ' ', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate po_pin{
+    constexpr const typename lib_t::gate po_pin{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {' ', 'x', 'o'},
                                          {' ', ' ', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate io_pin{
+    constexpr const typename lib_t::gate io_pin{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {'i', 'x', 'o'},
                                          {' ', ' ', ' '}}})};
@@ -122,22 +122,22 @@ TEST_CASE("Cell marking", "[fcn-gate-library]")
 
     // clang-format off
 
-    constexpr const typename lib_t::fcn_gate empty{
+    constexpr const typename lib_t::gate empty{
         lib_t::cell_list_to_gate<char>({{{' ', ' ', ' '},
                                          {' ', ' ', ' '},
                                          {' ', ' ', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate wire{
+    constexpr const typename lib_t::gate wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'x', ' '},
                                          {' ', 'x', ' '},
                                          {' ', 'x', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate pi_wire{
+    constexpr const typename lib_t::gate pi_wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'i', ' '},
                                          {' ', 'x', ' '},
                                          {' ', 'x', ' '}}})};
 
-    constexpr const typename lib_t::fcn_gate io_wire{
+    constexpr const typename lib_t::gate io_wire{
         lib_t::cell_list_to_gate<char>({{{' ', 'i', ' '},
                                          {' ', 'x', ' '},
                                          {' ', 'o', ' '}}})};

@@ -43,13 +43,13 @@ class dummy_gate_library : public fcn::gate_library<sidb::sidb_technology, 3, 3>
     }
 
   private:
-    static constexpr const fcn_gate LINE{cell_list_to_gate<char>({{
+    static constexpr const gate LINE{cell_list_to_gate<char>({{
         {' ', 'x', ' '},
         {' ', 'x', ' '},
         {' ', 'x', ' '},
     }})};
 
-    static constexpr const fcn_gate Y{cell_list_to_gate<char>({{
+    static constexpr const gate Y{cell_list_to_gate<char>({{
         {'x', ' ', 'x'},
         {' ', 'x', ' '},
         {' ', 'x', ' '},

@@ -33,7 +33,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
     explicit topolinano_library() = delete;
     /**
      * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
-     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @tparam GateLyt Shifted Cartesian gate-level layout type.
@@ -42,7 +42,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
      * @return ToPoliNano gate representation of `t` including I/Os, rotation, etc.
      */
     template <typename GateLyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
         static_assert(is_shifted_cartesian_layout_v<GateLyt>, "GateLyt must be a shifted Cartesian layout");
@@ -591,7 +591,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
+    static constexpr const gate CONJUNCTION{cell_list_to_gate<char>(
     {{
         {'d', ' ', ' ', ' '},
         {'d', 'x', 'x', 'x'},
@@ -599,7 +599,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate DISJUNCTION{cell_list_to_gate<char>(
+    static constexpr const gate DISJUNCTION{cell_list_to_gate<char>(
     {{
         {'u', ' ', ' ', ' '},
         {'u', 'x', 'x', 'x'},
@@ -607,7 +607,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate MAJORITY{cell_list_to_gate<char>(
+    static constexpr const gate MAJORITY{cell_list_to_gate<char>(
     {{
         {'x', 'x', ' ', ' '},
         {' ', 'x', ' ', ' '},
@@ -615,7 +615,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate LOWER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate LOWER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -623,7 +623,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BOTTOM_LOWER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate BOTTOM_LOWER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -631,7 +631,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {'x', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate UPPER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate UPPER_STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
         {' ', ' ', ' ', ' '},
@@ -639,7 +639,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate TOP_DOWN_BENT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate TOP_DOWN_BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {'x', ' ', ' ', ' '},
         {'x', ' ', ' ', ' '},
@@ -647,7 +647,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BOTTOM_UP_BENT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate BOTTOM_UP_BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
         {'x', ' ', ' ', ' '},
@@ -655,7 +655,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BOTTOM_LOWER_UP_BENT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate BOTTOM_LOWER_UP_BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {'n', 'n', 'n', 'n'},
         {'x', ' ', ' ', ' '},
@@ -667,7 +667,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
     // ************************** Wires ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate CROSSWIRE{cell_list_to_gate<char>(
+    static constexpr const gate CROSSWIRE{cell_list_to_gate<char>(
     {{
         {'c', ' ', 'c', 'x'},
         {' ', 'c', ' ', ' '},
@@ -675,7 +675,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate COUPLER{cell_list_to_gate<char>(
+    static constexpr const gate COUPLER{cell_list_to_gate<char>(
     {{
         {'f', 'f', 'x', 'x'},
         {'f', ' ', ' ', ' '},
@@ -683,7 +683,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate LOWER_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate LOWER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -691,7 +691,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate UPPER_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate UPPER_WIRE{cell_list_to_gate<char>(
     {{
         {'x', 'x', 'x', 'x'},
         {' ', ' ', ' ', ' '},
@@ -699,7 +699,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate TOP_DOWN_BENT_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate TOP_DOWN_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {'x', ' ', ' ', ' '},
         {'x', 'x', 'x', ' '},
@@ -707,7 +707,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BOTTOM_UP_BENT_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate BOTTOM_UP_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'x'},
         {'x', 'x', 'x', 'x'},
@@ -715,7 +715,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate TOP_DOWN_STAIRCASE_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate TOP_DOWN_STAIRCASE_WIRE{cell_list_to_gate<char>(
     {{
         {'x', ' ', ' ', ' '},
         {'x', 'x', 'x', ' '},
@@ -723,7 +723,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', 'x', 'x'}
     }})};
 
-    static constexpr const fcn_gate BOTTOM_UP_STAIRCASE_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate BOTTOM_UP_STAIRCASE_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', 'x'},
         {' ', ' ', 'x', ' '},
@@ -731,7 +731,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {'x', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BOTTOM_DOWN_BENT_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate BOTTOM_DOWN_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -739,7 +739,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', 'x', 'x'}
     }})};
 
-    static constexpr const fcn_gate MAJORITY_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate MAJORITY_WIRE{cell_list_to_gate<char>(
     {{
         {'x', 'x', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -747,7 +747,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate COUPLER_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate COUPLER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' '},
@@ -757,7 +757,7 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
 
     // clang-format on
 
-    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, gate>;
 
     static inline const port_gate_map WIRE_MAP = {
         // straight wires

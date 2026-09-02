@@ -306,7 +306,9 @@ imitate.
 
 ### C++
 
-- **Headers**: `.hpp` extension. Use `#ifndef FICTION_FILENAME_HPP` include guards.
+- **Headers**: `.hpp` extension. The include guard is `FICTION_<PATH>_HPP`, the path relative
+  to `include/fiction/` in upper case with `/` and `.` as `_`, so
+  `technology/sidb/model/defect.hpp` guards with `FICTION_TECHNOLOGY_SIDB_MODEL_DEFECT_HPP`.
 - **Documentation**:
   - Apply to **ALL** new and edited code.
   - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions,

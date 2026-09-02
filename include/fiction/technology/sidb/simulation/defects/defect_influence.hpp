@@ -857,7 +857,7 @@ class defect_influence_impl
     }
 };
 
-};  // namespace detail
+}  // namespace detail
 
 /**
  * This algorithm uses a grid search to determine the defect influence domain. The grid search is performed

@@ -2,8 +2,8 @@
 // Created by benjamin on 08.04.24.
 //
 
-#ifndef FICTION_BFS_TOPO_VIEW_HPP
-#define FICTION_BFS_TOPO_VIEW_HPP
+#ifndef FICTION_NETWORKS_VIEWS_BFS_TOPO_VIEW_HPP
+#define FICTION_NETWORKS_VIEWS_BFS_TOPO_VIEW_HPP
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -294,4 +294,4 @@ template <class T>
 bfs_topo_view(const T&, const typename T::signal&) -> bfs_topo_view<T>;
 
 }  // namespace fiction::networks::views
-#endif  // FICTION_BFS_TOPO_VIEW_HPP
+#endif  // FICTION_NETWORKS_VIEWS_BFS_TOPO_VIEW_HPP

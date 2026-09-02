@@ -48,10 +48,10 @@ TEST_CASE("Charged and uncharged defect types", "[sidb-defects]")
 TEST_CASE("Defect extent", "[sidb-defects]")
 {
     static constexpr std::pair<uint16_t, uint16_t> no_spacing{0, 0};
-    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing{sidb::model::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING,
-                                                                   sidb::model::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
-    static constexpr std::pair<uint16_t, uint16_t> charged_spacing{sidb::model::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING,
-                                                                   sidb::model::SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
+    static constexpr std::pair<uint16_t, uint16_t> neutral_spacing{sidb::model::NEUTRAL_DEFECT_HORIZONTAL_SPACING,
+                                                                   sidb::model::NEUTRAL_DEFECT_VERTICAL_SPACING};
+    static constexpr std::pair<uint16_t, uint16_t> charged_spacing{sidb::model::CHARGED_DEFECT_HORIZONTAL_SPACING,
+                                                                   sidb::model::CHARGED_DEFECT_VERTICAL_SPACING};
 
     static constexpr std::pair<uint16_t, uint16_t> neutral_spacing_overwrite{1, 0};
     static constexpr std::pair<uint16_t, uint16_t> charged_spacing_overwrite{1, 1};

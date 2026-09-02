@@ -22,10 +22,10 @@ SiDB Defect Types
         .. doxygenfunction:: fiction::sidb::model::is_negatively_charged_defect
         .. doxygenfunction:: fiction::sidb::model::is_neutrally_charged_defect
 
-        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGED_DEFECT_VERTICAL_SPACING
-        .. doxygenvariable:: fiction::sidb::model::SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING
-        .. doxygenvariable:: fiction::sidb::model::SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::CHARGED_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::CHARGED_DEFECT_VERTICAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::NEUTRAL_DEFECT_HORIZONTAL_SPACING
+        .. doxygenvariable:: fiction::sidb::model::NEUTRAL_DEFECT_VERTICAL_SPACING
 
         .. doxygenfunction:: fiction::sidb::model::defect_extent
 

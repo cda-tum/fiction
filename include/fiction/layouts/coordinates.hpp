@@ -2,8 +2,8 @@
 // Created by marcel on 01.05.21.
 //
 
-#ifndef FICTION_COORDINATES_HPP
-#define FICTION_COORDINATES_HPP
+#ifndef FICTION_LAYOUTS_COORDINATES_HPP
+#define FICTION_LAYOUTS_COORDINATES_HPP
 
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -1135,4 +1135,4 @@ struct formatter<fiction::layouts::coords::siqad>
 
 #pragma GCC diagnostic pop
 
-#endif  // FICTION_COORDINATES_HPP
+#endif  // FICTION_LAYOUTS_COORDINATES_HPP

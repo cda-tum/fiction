@@ -44,10 +44,10 @@ class unsupported_defect_index_exception : public std::exception
 /**
  * Exception thrown when a missing SiDB position is encountered in the parsed file.
  */
-class missing_sidb_position_exception : public std::exception
+class missing_position_exception : public std::exception
 {
   public:
-    explicit missing_sidb_position_exception(const uint32_t n) noexcept : line{n} {}
+    explicit missing_position_exception(const uint32_t n) noexcept : line{n} {}
 
     [[nodiscard]] uint32_t where() const noexcept
     {
@@ -61,7 +61,7 @@ class missing_sidb_position_exception : public std::exception
 namespace detail
 {
 
-namespace sidb_defects
+namespace defects
 {
 
 /* Regex */
@@ -78,7 +78,7 @@ inline constexpr std::array<sidb::model::defect_type, 11> INDEX_TO_DEFECT{
      sidb::model::defect_type::ONE_BY_ONE, sidb::model::defect_type::THREE_BY_ONE, sidb::model::defect_type::SILOXANE,
      sidb::model::defect_type::RAISED_SI, sidb::model::defect_type::ETCH_PIT, sidb::model::defect_type::MISSING_DIMER}};
 
-}  // namespace sidb_defects
+}  // namespace defects
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push
@@ -88,10 +88,10 @@ inline constexpr std::array<sidb::model::defect_type, 11> INDEX_TO_DEFECT{
 #pragma GCC diagnostic ignored "-Wconversion"
 
 template <typename Lyt>
-class read_sidb_surface_defects_impl
+class read_surface_defects_impl
 {
   public:
-    explicit read_sidb_surface_defects_impl(std::istream& s, const std::string_view& name) :
+    explicit read_surface_defects_impl(std::istream& s, const std::string_view& name) :
             lyt{sidb::surfaces::defect_surface{Lyt{{}, name.data()}}},
             defect_matrix{std::istreambuf_iterator<char>(s), {}}  // read the stream into a string to perform regex
     {}
@@ -100,7 +100,7 @@ class read_sidb_surface_defects_impl
     {
         // each match is one row
         const std::vector<std::smatch> matrix_matches{
-            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), sidb_defects::RE_DEFECT_MATRIX),
+            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX),
             std::sregex_iterator()};
 
         // iterate over the row matches
@@ -111,7 +111,7 @@ class read_sidb_surface_defects_impl
 
             // each match is a defect index
             const std::vector<std::smatch> row_matches{
-                std::sregex_iterator(std::cbegin(row_str), std::cend(row_str), sidb_defects::RE_ROW_INDICES),
+                std::sregex_iterator(std::cbegin(row_str), std::cend(row_str), defects::RE_ROW_INDICES),
                 std::sregex_iterator()};
 
             // track x-dimension of the surface
@@ -122,7 +122,7 @@ class read_sidb_surface_defects_impl
             else if (static_cast<decltype(max_cell_pos.x)>(row_matches.size() - 1) < max_cell_pos.x)
             {
                 // row y has fewer SiDBs than previous rows
-                throw missing_sidb_position_exception(y);
+                throw missing_position_exception(y);
             }
 
             // iterate over the index matches
@@ -133,8 +133,8 @@ class read_sidb_surface_defects_impl
                 try
                 {
                     // assign the defect
-                    lyt.assign_defect({x, y}, sidb::model::defect{sidb_defects::INDEX_TO_DEFECT.at(
-                                                  static_cast<std::size_t>(defect_index))});
+                    lyt.assign_defect({x, y}, sidb::model::defect{
+                                                  defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});
                 }
                 catch (const std::out_of_range&)
                 {
@@ -184,7 +184,7 @@ sidb::surfaces::defect_surface<Lyt> read_surface_defects(std::istream& is, const
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
-    detail::read_sidb_surface_defects_impl<Lyt> p{is, name};
+    detail::read_surface_defects_impl<Lyt> p{is, name};
 
     const auto lyt = p.run();
 

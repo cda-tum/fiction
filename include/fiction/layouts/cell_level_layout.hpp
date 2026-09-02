@@ -2,8 +2,8 @@
 // Created by marcel on 23.06.21.
 //
 
-#ifndef FICTION_CELL_LEVEL_LAYOUT_HPP
-#define FICTION_CELL_LEVEL_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_CELL_LEVEL_LAYOUT_HPP
+#define FICTION_LAYOUTS_CELL_LEVEL_LAYOUT_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
@@ -527,4 +527,4 @@ class cell_level_layout : public ClockedLayout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_CELL_LEVEL_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_CELL_LEVEL_LAYOUT_HPP

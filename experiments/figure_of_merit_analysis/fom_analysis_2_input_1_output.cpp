@@ -7,7 +7,7 @@
 #include "fiction_experiments.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
+#include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -58,15 +58,15 @@ int main()  // NOLINT
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
     const auto op_params = sidb::simulation::logic::is_operational_params{sidb::model::simulation_parameters{2, -0.32}};
-    auto       design_params = sidb::generators::design_sidb_gates_params<cell<Lyt>>{};
+    auto       design_params = sidb::generators::design_gates_params<cell<Lyt>>{};
 
     design_params.operational_params = op_params;
-    design_params.design_mode        = sidb::generators::design_sidb_gates_params<
-        cell<Lyt>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_params.design_mode =
+        sidb::generators::design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
     design_params.canvas                 = {{17, 14, 0}, {21, 22, 0}};
     design_params.number_of_canvas_sidbs = 2;
     design_params.termination_cond =
-        sidb::generators::design_sidb_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+        sidb::generators::design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
     design_params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
@@ -137,10 +137,10 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy      = {};
             std::vector<double> bbr_all                       = {};
 
-            std::vector<Lyt>                          all_gates{};
-            sidb::generators::design_sidb_gates_stats efficient_stats{};
+            std::vector<Lyt>                     all_gates{};
+            sidb::generators::design_gates_stats efficient_stats{};
 
-            all_gates = sidb::generators::design_sidb_gates(skeleton, truth_table, design_params, &efficient_stats);
+            all_gates = sidb::generators::design_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {

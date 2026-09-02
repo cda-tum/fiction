@@ -8,7 +8,7 @@
 
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/synthesis/technology_mapping.hpp>
-#include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
+#include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
@@ -47,14 +47,14 @@ int main()  // NOLINT
     using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
     using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
 
-    fiction::sidb::generators::design_sidb_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
+    fiction::sidb::generators::design_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
     design_gate_params.operational_params.sim_params = fiction::sidb::model::simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
     design_gate_params.number_of_canvas_sidbs        = 3;
     design_gate_params.operational_params.sim_engine = fiction::sidb::simulation::engine::QUICKEXACT;
-    design_gate_params.termination_cond              = fiction::sidb::generators::design_sidb_gates_params<
+    design_gate_params.termination_cond              = fiction::sidb::generators::design_gates_params<
         fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.

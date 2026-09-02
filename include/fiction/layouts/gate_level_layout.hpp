@@ -2,8 +2,8 @@
 // Created by marcel on 14.05.21.
 //
 
-#ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
-#define FICTION_GATE_LEVEL_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_GATE_LEVEL_LAYOUT_HPP
+#define FICTION_LAYOUTS_GATE_LEVEL_LAYOUT_HPP
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/mockturtle_utils.hpp"
@@ -1847,4 +1847,4 @@ class gate_level_layout : public ClockedLayout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_GATE_LEVEL_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_GATE_LEVEL_LAYOUT_HPP

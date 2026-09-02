@@ -2,8 +2,8 @@
 // Created by marcel on 11.01.22.
 //
 
-#ifndef FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
-#define FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
+#ifndef FICTION_LAYOUTS_SHIFTED_CARTESIAN_LAYOUT_HPP
+#define FICTION_LAYOUTS_SHIFTED_CARTESIAN_LAYOUT_HPP
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
@@ -193,4 +193,4 @@ class shifted_cartesian_layout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
+#endif  // FICTION_LAYOUTS_SHIFTED_CARTESIAN_LAYOUT_HPP

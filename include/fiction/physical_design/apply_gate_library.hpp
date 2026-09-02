@@ -220,8 +220,7 @@ class apply_gate_library_impl
      * @param g Gate implementation.
      * @param n Corresponding node in the gate-level layout.
      */
-    void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::fcn_gate& g,
-                     const mockturtle::node<GateLyt>& n)
+    void assign_gate(const cell<CellLyt>& c, const typename GateLibrary::gate& g, const mockturtle::node<GateLyt>& n)
     {
         const auto start_x = c.x;
         const auto start_y = c.y;

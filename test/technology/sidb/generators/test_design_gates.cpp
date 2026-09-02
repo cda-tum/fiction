@@ -10,7 +10,7 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/generators/design_sidb_gates.hpp>
+#include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -34,25 +34,25 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 {
     const auto lyt = blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>();
 
-    sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+    sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
             sidb::simulation::logic::is_operational_params{
                 .sim_params                = sidb::model::simulation_parameters{2, -0.31},
                 .sim_engine                = sidb::simulation::engine::QUICKEXACT,
                 .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{},
                 .op_condition = sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-        .design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+        .design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
         .canvas                 = {{27, 6, 0}, {30, 8, 0}},
         .number_of_canvas_sidbs = 3,
-        .termination_cond       = sidb::generators::design_sidb_gates_params<
+        .termination_cond       = sidb::generators::design_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     SECTION("QuickCell")
     {
-        sidb::generators::design_sidb_gates_stats design_gates_stats{};
-        const auto                                found_gate_layouts = sidb::generators::design_sidb_gates(
-            lyt, std::vector<tt>{synthesis::create_and_tt()}, params, &design_gates_stats);
+        sidb::generators::design_gates_stats design_gates_stats{};
+        const auto found_gate_layouts = sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()},
+                                                                       params, &design_gates_stats);
         REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
         CHECK(sidb::simulation::logic::is_operational(first_gate, std::vector<tt>{synthesis::create_and_tt()},
@@ -68,13 +68,13 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
     SECTION("Automatic Exhaustive Gate Designer")
     {
-        params.design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-        params.termination_cond = sidb::generators::design_sidb_gates_params<
+        params.design_mode = sidb::generators::design_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.termination_cond = sidb::generators::design_gates_params<
             cell<sidb_100_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 10);
         const auto& first_gate = found_gate_layouts.front();
         CHECK(sidb::simulation::logic::is_operational(first_gate, std::vector<tt>{synthesis::create_and_tt()},
@@ -115,20 +115,20 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
     SECTION("One cell in canvas")
     {
-        const auto params = sidb::generators::design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = sidb::generators::design_gates_params<cell<siqad_layout>>{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<siqad_layout>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<siqad_layout>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
@@ -136,18 +136,18 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         // using cube coordinates
         const auto lyt_in_cube_coord = layouts::convert_layout_to_fiction_coordinates<cube_layout>(lyt);
-        const sidb::generators::design_sidb_gates_params<cell<cube_layout>> params_cube{
+        const sidb::generators::design_gates_params<cell<cube_layout>> params_cube{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<cube_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<cube_layout>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas = {layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 4, 0}),
                        layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 4, 0})},
             .number_of_canvas_sidbs = 1};
 
-        const auto found_gate_layouts_cube = sidb::generators::design_sidb_gates(
+        const auto found_gate_layouts_cube = sidb::generators::design_gates(
             lyt_in_cube_coord, std::vector<tt>{synthesis::create_xnor_tt()}, params_cube);
 
         REQUIRE(found_gate_layouts_cube.size() == 1);
@@ -157,18 +157,18 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         // using offset coordinates
         const auto lyt_in_offset_coord = layouts::convert_layout_to_fiction_coordinates<offset_layout>(lyt);
-        const sidb::generators::design_sidb_gates_params<cell<offset_layout>> params_offset{
+        const sidb::generators::design_gates_params<cell<offset_layout>> params_offset{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<offset_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<offset_layout>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas = {layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 4, 0}),
                        layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 4, 0})},
             .number_of_canvas_sidbs = 1};
 
-        const auto found_gate_layouts_offset = sidb::generators::design_sidb_gates(
+        const auto found_gate_layouts_offset = sidb::generators::design_gates(
             lyt_in_offset_coord, std::vector<tt>{synthesis::create_xnor_tt()}, params_offset);
 
         REQUIRE(found_gate_layouts_offset.size() == 1);
@@ -178,41 +178,41 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     }
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
-        const auto params = sidb::generators::design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = sidb::generators::design_gates_params<cell<siqad_layout>>{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<siqad_layout>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {13, 4, 0}},
             .number_of_canvas_sidbs = 1,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<siqad_layout>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 4);
     }
     SECTION("one SiDB in the canvas, terminate after first solution is found, QuickExact")
     {
-        const auto params = sidb::generators::design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = sidb::generators::design_gates_params<cell<siqad_layout>>{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<siqad_layout>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
-                cell<siqad_layout>>::termination_condition::AFTER_FIRST_SOLUTION};
+            .termination_cond =
+                sidb::generators::design_gates_params<cell<siqad_layout>>::termination_condition::AFTER_FIRST_SOLUTION};
 
-        sidb::generators::design_sidb_gates_stats stats{};
+        sidb::generators::design_gates_stats stats{};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params, &stats);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params, &stats);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
@@ -222,22 +222,22 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
     }
     SECTION("one SiDB in the canvas, terminate after first solution is found, QuickSim")
     {
-        const auto params = sidb::generators::design_sidb_gates_params<cell<siqad_layout>>{
+        const auto params = sidb::generators::design_gates_params<cell<siqad_layout>>{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKSIM},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<siqad_layout>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<siqad_layout>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 4, 0}, {10, 4, 0}},
             .number_of_canvas_sidbs = 1,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
-                cell<siqad_layout>>::termination_condition::AFTER_FIRST_SOLUTION};
+            .termination_cond =
+                sidb::generators::design_gates_params<cell<siqad_layout>>::termination_condition::AFTER_FIRST_SOLUTION};
 
-        sidb::generators::design_sidb_gates_stats stats{};
+        sidb::generators::design_gates_stats stats{};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params, &stats);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_xnor_tt()}, params, &stats);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
@@ -268,7 +268,7 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
 
     lyt.assign_cell_type({10, 9, 1}, sidb::sidb_technology::cell_type::NORMAL);
 
-    sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+    sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
             sidb::simulation::logic::is_operational_params{
                 .sim_params                = sidb::model::simulation_parameters{2, -0.28},
@@ -276,24 +276,24 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
                 .input_bdl_iterator_params = {.bdl_wire_params =
                                                   sidb::simulation::logic::detect_bdl_wires_params{
                                                       .threshold_bdl_interdistance = 2.0}}},
-        .design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .design_mode = sidb::generators::design_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
         .canvas                 = {{4, 4, 0}, {14, 5, 1}},
         .number_of_canvas_sidbs = 1};
 
     SECTION("Exhaustive Generation")
     {
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
 
     SECTION("Random Generation")
     {
-        params.design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM;
+        params.design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::RANDOM;
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         CHECK(!found_gate_layouts.empty());
     }
 
@@ -301,15 +301,15 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     {
         params.canvas                 = {{4, 4, 0}, {4, 4, 0}};
         params.number_of_canvas_sidbs = 0;
-        params.design_mode            = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.design_mode            = sidb::generators::design_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
         const auto found_gate_layouts_exhaustive =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         CHECK(found_gate_layouts_exhaustive.empty());
-        params.design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+        params.design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         CHECK(found_gate_layouts_quickcell.empty());
     }
 
@@ -317,8 +317,8 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
     {
         params.canvas                 = {{4, 2, 0}, {14, 8, 1}};
         params.number_of_canvas_sidbs = 2;
-        params.design_mode            = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+        params.design_mode            = sidb::generators::design_gates_params<
+            cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
 
         sidb::surfaces::defect_surface defect_layout{lyt};
         defect_layout.assign_defect({10, 6, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1,
@@ -326,12 +326,12 @@ TEST_CASE("Use SiQAD's AND gate skeleton to generate all possible AND gates", "[
                                                                     params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
-            sidb::generators::design_sidb_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
         CHECK(!found_gate_layouts_exhaustive.empty());
-        params.design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+        params.design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         CHECK(!found_gate_layouts_quickcell.empty());
     }
 }
@@ -374,13 +374,13 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
     SECTION("generate original FO2")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{17, 11, 0}, {17, 11, 0}},
             .number_of_canvas_sidbs = 1};
 
@@ -388,7 +388,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
         // generate gate by placing one SiDB
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_fan_out_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_fan_out_tt()}, params);
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 21);
@@ -399,13 +399,13 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 #if (FICTION_ALGLIB_ENABLED)
     SECTION("replace the output perturbers by equivalent negatively charged defects")
     {
-        sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{17, 11, 0}, {17, 11, 0}},
             .number_of_canvas_sidbs = 1};
 
@@ -423,18 +423,18 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
                                                                     params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts_exhaustive =
-            sidb::generators::design_sidb_gates(defect_layout, std::vector<tt>{synthesis::create_fan_out_tt()}, params);
+            sidb::generators::design_gates(defect_layout, std::vector<tt>{synthesis::create_fan_out_tt()}, params);
 
         REQUIRE(found_gate_layouts_exhaustive.size() == 1);
         CHECK(found_gate_layouts_exhaustive[0].num_cells() == 19);
         CHECK(found_gate_layouts_exhaustive[0].get_cell_type({17, 11, 0}) ==
               sidb_100_cell_clk_lyt_siqad::cell_type::LOGIC);
 
-        params.design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+        params.design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL;
 
         const auto found_gate_layouts_quickcell =
-            sidb::generators::design_sidb_gates(defect_layout, std::vector<tt>{synthesis::create_fan_out_tt()}, params);
+            sidb::generators::design_gates(defect_layout, std::vector<tt>{synthesis::create_fan_out_tt()}, params);
         REQUIRE(found_gate_layouts_quickcell.size() == 1);
         CHECK(found_gate_layouts_quickcell[0].num_cells() == 19);
         CHECK(found_gate_layouts_quickcell[0].get_cell_type({17, 11, 0}) ==
@@ -449,7 +449,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
     SECTION("Random Generation")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
@@ -457,13 +457,13 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{},
                     .op_condition =
                         sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::RANDOM,
             .canvas                 = {{14, 6, 0}, {24, 12, 0}},
             .number_of_canvas_sidbs = 3};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -472,7 +472,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         sidb::surfaces::defect_surface defect_layout{lyt};
 
-        sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
@@ -480,8 +480,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{},
                     .op_condition =
                         sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::RANDOM,
             .canvas                 = {{18, 8, 1}, {22, 12, 0}},
             .number_of_canvas_sidbs = 2};
 
@@ -490,7 +490,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                                                                      params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_defects() == 1);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 2);
@@ -498,10 +498,10 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
         found_gate_layouts.front().foreach_cell([](const auto& cell)
                                                 { CHECK(cell != layouts::coords::siqad{14, 10, 0}); });
 
-        params.design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL;
+        params.design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL;
         const auto found_gate_layouts_quickcell =
-            sidb::generators::design_sidb_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
         REQUIRE(!found_gate_layouts_quickcell.empty());
         CHECK(found_gate_layouts_quickcell.front().num_defects() == 1);
         CHECK(found_gate_layouts_quickcell.front().num_cells() == lyt.num_cells() + 2);
@@ -514,7 +514,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
     {
         sidb::surfaces::defect_surface defect_layout{lyt};
 
-        const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
@@ -522,8 +522,8 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{},
                     .op_condition =
                         sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::RANDOM,
             .canvas                 = {{14, 10, 0}, {14, 10, 0}},
             .number_of_canvas_sidbs = 1};
 
@@ -532,7 +532,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
                                                                      params.operational_params.sim_params.lambda_tf});
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(defect_layout, std::vector<tt>{synthesis::create_and_tt()}, params);
         REQUIRE(found_gate_layouts.empty());
     }
 }
@@ -553,41 +553,41 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
     SECTION("Random Generation")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::RANDOM,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_gates_mode::RANDOM,
             .canvas                 = {{10, 11, 0}, {14, 15, 0}},
             .number_of_canvas_sidbs = 3};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
         REQUIRE(!found_gate_layouts.empty());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
 
     SECTION("Exhaustive Generation, allowing kinks")
     {
-        sidb::generators::design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+        sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{.sim_params =
                                                                    sidb::model::simulation_parameters{2, -0.32},
                                                                .sim_engine = sidb::simulation::engine::QUICKEXACT},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<sidb_111_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 13, 0}, {14, 17, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 // to save runtime in the CI, this test is only run in RELEASE mode
 #ifdef NDEBUG
         SECTION("all design")
         {
             const auto found_gate_layouts =
-                sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
+                sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() == 14);
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
@@ -595,10 +595,10 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
         SECTION("terminate after first solution is found")
         {
-            params.termination_cond = sidb::generators::design_sidb_gates_params<
+            params.termination_cond = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::AFTER_FIRST_SOLUTION;
             const auto found_gate_layouts =
-                sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
+                sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
             REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
             CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
         }
@@ -608,7 +608,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 #ifdef NDEBUG
     SECTION("Exhaustive Generation, forbidding kinks")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
@@ -616,15 +616,15 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{},
                     .op_condition =
                         sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+            .design_mode = sidb::generators::design_gates_params<
+                cell<sidb_111_cell_clk_lyt_siqad>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
             .canvas                 = {{10, 13, 0}, {15, 17, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -632,41 +632,41 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
     SECTION("Exhaustive Generation, QuickCell")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
                     .sim_engine                = sidb::simulation::engine::QUICKEXACT,
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{}},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
             .canvas                 = {{10, 13, 0}, {15, 17, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
     SECTION("Stop after first gate design is finished, QuickCell")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
                     .sim_engine                = sidb::simulation::engine::QUICKEXACT,
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{}},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_111_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_111_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
             .canvas                 = {{8, 13, 0}, {17, 17, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::AFTER_FIRST_SOLUTION};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_nor_tt()}, params);
         REQUIRE(found_gate_layouts.size() <= std::thread::hardware_concurrency());
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -676,19 +676,19 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
 {
     const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>();
 
-    const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
             sidb::simulation::logic::is_operational_params{.sim_params = sidb::model::simulation_parameters{2, -0.32},
                                                            .sim_engine = sidb::simulation::engine::QUICKEXACT,
                                                            .input_bdl_iterator_params =
                                                                sidb::simulation::logic::bdl_input_iterator_params{}},
-        .design_mode = sidb::generators::design_sidb_gates_params<
-            cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::PRUNING_ONLY,
+        .design_mode =
+            sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::PRUNING_ONLY,
         .canvas                 = {{16, 8, 0}, {22, 14, 0}},
         .number_of_canvas_sidbs = 3};
 
     const auto found_gate_layouts =
-        sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_crossing_wire_tt()}, params);
+        sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_crossing_wire_tt()}, params);
     REQUIRE(found_gate_layouts.size() == 3);
     CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
 }
@@ -701,21 +701,21 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
 
     SECTION("Exhaustive Generation, QuickCell")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
                     .sim_engine                = sidb::simulation::engine::QUICKEXACT,
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{}},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
             .canvas                 = {{16, 8, 0}, {22, 14, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_crossing_wire_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_crossing_wire_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -728,21 +728,21 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
 
     SECTION("Exhaustive Generation, QuickCell")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
                     .sim_engine                = sidb::simulation::engine::QUICKEXACT,
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{}},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
             .canvas                 = {{16, 7, 0}, {22, 15, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, synthesis::create_crossing_wire_tt(), params);
+            sidb::generators::design_gates(lyt, synthesis::create_crossing_wire_tt(), params);
         REQUIRE(found_gate_layouts.size() == 3);
         CHECK(found_gate_layouts.front().num_cells() == lyt.num_cells() + 3);
     }
@@ -754,7 +754,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
 
     SECTION("Exhaustive Generation, QuickCell")
     {
-        const sidb::generators::design_sidb_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
+        const sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
             .operational_params =
                 sidb::simulation::logic::is_operational_params{
                     .sim_params                = sidb::model::simulation_parameters{2, -0.32},
@@ -762,15 +762,15 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
                     .input_bdl_iterator_params = sidb::simulation::logic::bdl_input_iterator_params{},
                     .op_condition =
                         sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-            .design_mode = sidb::generators::design_sidb_gates_params<
-                cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+            .design_mode =
+                sidb::generators::design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
             .canvas                 = {{17, 5, 0}, {24, 8, 0}},
             .number_of_canvas_sidbs = 3,
-            .termination_cond       = sidb::generators::design_sidb_gates_params<
+            .termination_cond       = sidb::generators::design_gates_params<
                 cell<sidb_111_cell_clk_lyt_siqad>>::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
         const auto found_gate_layouts =
-            sidb::generators::design_sidb_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
+            sidb::generators::design_gates(lyt, std::vector<tt>{synthesis::create_and_tt()}, params);
         REQUIRE(found_gate_layouts.size() == 234);
         const auto& first_gate = found_gate_layouts.front();
         CHECK(sidb::simulation::logic::is_operational(first_gate, std::vector<tt>{synthesis::create_and_tt()},

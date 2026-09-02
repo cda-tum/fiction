@@ -2,8 +2,8 @@
 // Created by marcel on 12.05.21.
 //
 
-#ifndef FICTION_CLOCKING_SCHEME_HPP
-#define FICTION_CLOCKING_SCHEME_HPP
+#ifndef FICTION_LAYOUTS_CLOCKING_SCHEME_HPP
+#define FICTION_LAYOUTS_CLOCKING_SCHEME_HPP
 
 #include "fiction/traits.hpp"
 
@@ -734,18 +734,6 @@ static auto bancs() noexcept
 }
 #pragma GCC diagnostic pop
 /**
- * Returns a smart pointer to the given scheme.
- *
- * @tparam Lyt Layout type.
- * @param scheme Universal reference to a clocking scheme.
- * @return A shared pointer to the given `scm`.
- */
-template <typename Lyt>
-std::shared_ptr<scheme<clock_zone<Lyt>>> ptr(scheme<clock_zone<Lyt>>&& scm) noexcept
-{
-    return std::make_shared<scheme<clock_zone<Lyt>>>(std::move(scm));
-}
-/**
  * Checks whether a given clocking scheme is registered as a cycle-free one. These currently are
  *
  * - COLUMNAR
@@ -831,4 +819,4 @@ std::optional<scheme<clock_zone<Lyt>>> get_scheme(const std::string_view& scheme
 }
 
 }  // namespace fiction::layouts::clocking
-#endif  // FICTION_CLOCKING_SCHEME_HPP
+#endif  // FICTION_LAYOUTS_CLOCKING_SCHEME_HPP

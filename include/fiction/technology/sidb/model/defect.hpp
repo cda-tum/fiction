@@ -198,22 +198,22 @@ struct defect
  * Horizontal distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-inline constexpr const uint16_t SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING = 26u;
+inline constexpr const uint16_t CHARGED_DEFECT_HORIZONTAL_SPACING = 26u;
 /**
  * Vertical distance to keep from charged SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-inline constexpr const uint16_t SIDB_CHARGED_DEFECT_VERTICAL_SPACING = 13u;
+inline constexpr const uint16_t CHARGED_DEFECT_VERTICAL_SPACING = 13u;
 /**
  * Horizontal distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
+inline constexpr const uint16_t NEUTRAL_DEFECT_HORIZONTAL_SPACING = 1u;
 /**
  * Vertical distance to keep from neutral SiDB defects. The value is to be understood as the number of DB positions
  * rather than the number of dimers. This is true even though each defect always affects the entire dimer.
  */
-inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
+inline constexpr const uint16_t NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
 /**
  * Returns the extent of a defect as a pair of SiDB distances in the horizontal and vertical directions.
  * If the defect type is `NONE`, `{0, 0}` is returned.
@@ -237,7 +237,7 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
         {
             return *charged_defect_spacing_overwrite;
         }
-        return {SIDB_CHARGED_DEFECT_HORIZONTAL_SPACING, SIDB_CHARGED_DEFECT_VERTICAL_SPACING};
+        return {CHARGED_DEFECT_HORIZONTAL_SPACING, CHARGED_DEFECT_VERTICAL_SPACING};
     }
     if (is_neutral_defect_type(defect))
     {
@@ -245,7 +245,7 @@ inline constexpr const uint16_t SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING = 0u;
         {
             return *neutral_defect_spacing_overwrite;
         }
-        return {SIDB_NEUTRAL_DEFECT_HORIZONTAL_SPACING, SIDB_NEUTRAL_DEFECT_VERTICAL_SPACING};
+        return {NEUTRAL_DEFECT_HORIZONTAL_SPACING, NEUTRAL_DEFECT_VERTICAL_SPACING};
     }
 
     return {};

@@ -98,4 +98,4 @@ SiDB Surface Defects
 .. doxygenfunction:: fiction::sidb::io::read_surface_defects(const std::string_view& filename, const std::string_view& name = "")
 
 .. doxygenclass:: fiction::sidb::io::unsupported_defect_index_exception
-.. doxygenclass:: fiction::sidb::io::missing_sidb_position_exception
+.. doxygenclass:: fiction::sidb::io::missing_position_exception

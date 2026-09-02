@@ -26,12 +26,12 @@ enum class charge_state : int8_t
 /**
  * Charge states of SiDBs for the context of base 2 simulation.
  */
-static inline const std::vector<charge_state> SIDB_CHARGE_STATES_BASE_2{charge_state::NEGATIVE, charge_state::NEUTRAL};
+static inline const std::vector<charge_state> CHARGE_STATES_BASE_2{charge_state::NEGATIVE, charge_state::NEUTRAL};
 /**
  * Charge states of SiDBs for the context of base-3 (full base) simulation.
  */
-static inline const std::vector<charge_state> SIDB_CHARGE_STATES_BASE_3{charge_state::NEGATIVE, charge_state::NEUTRAL,
-                                                                        charge_state::POSITIVE};
+static inline const std::vector<charge_state> CHARGE_STATES_BASE_3{charge_state::NEGATIVE, charge_state::NEUTRAL,
+                                                                   charge_state::POSITIVE};
 /**
  * Charge states of SiDBs for a given simulation base number. The full base states are returned for an invalid
  * simulation base.
@@ -41,7 +41,7 @@ static inline const std::vector<charge_state> SIDB_CHARGE_STATES_BASE_3{charge_s
  */
 [[nodiscard]] inline std::vector<charge_state> charge_states_for_base_number(const uint8_t base) noexcept
 {
-    return base == 2 ? SIDB_CHARGE_STATES_BASE_2 : SIDB_CHARGE_STATES_BASE_3;
+    return base == 2 ? CHARGE_STATES_BASE_2 : CHARGE_STATES_BASE_3;
 }
 /**
  * Converts the charge state into an integer (`-1`, `0`, `1`).

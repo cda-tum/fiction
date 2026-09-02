@@ -2,8 +2,8 @@
 // Created by marcel on 20.05.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_NETWORK_HPP
-#define FICTION_TECHNOLOGY_NETWORK_HPP
+#ifndef FICTION_NETWORKS_TECHNOLOGY_NETWORK_HPP
+#define FICTION_NETWORKS_TECHNOLOGY_NETWORK_HPP
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -461,4 +461,4 @@ class technology_network : public mockturtle::klut_network
 };
 
 }  // namespace fiction::networks
-#endif  // FICTION_TECHNOLOGY_NETWORK_HPP
+#endif  // FICTION_NETWORKS_TECHNOLOGY_NETWORK_HPP

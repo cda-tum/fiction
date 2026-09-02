@@ -13,8 +13,8 @@ Possible charge states of SiDBs.
         **Header:** ``fiction/technology/sidb/model/charge_state.hpp``
 
         .. doxygenenum:: fiction::sidb::model::charge_state
-        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGE_STATES_BASE_2
-        .. doxygenvariable:: fiction::sidb::model::SIDB_CHARGE_STATES_BASE_3
+        .. doxygenvariable:: fiction::sidb::model::CHARGE_STATES_BASE_2
+        .. doxygenvariable:: fiction::sidb::model::CHARGE_STATES_BASE_3
         .. doxygenfunction:: fiction::sidb::model::charge_states_for_base_number
         .. doxygenfunction:: fiction::sidb::model::charge_state_to_sign
         .. doxygenfunction:: fiction::sidb::model::sign_to_charge_state

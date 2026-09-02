@@ -2,8 +2,8 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
-#define FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
+#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_GATES_HPP
+#define FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_GATES_HPP
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
@@ -44,7 +44,7 @@ namespace fiction::sidb::generators
  * @tparam CellType Cell type.
  */
 template <typename CellType>
-struct design_sidb_gates_params
+struct design_gates_params
 {
     /**
      * Selector for the different termination conditions for the SiDB gate design process.
@@ -63,7 +63,7 @@ struct design_sidb_gates_params
     /**
      * Selector for the available design approaches.
      */
-    enum class design_sidb_gates_mode : uint8_t
+    enum class design_gates_mode : uint8_t
     {
         /**
          * Gates are designed by using *QuickCell*.
@@ -93,7 +93,7 @@ struct design_sidb_gates_params
     /**
      * Gate design mode.
      */
-    design_sidb_gates_mode design_mode = design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_gates_mode design_mode = design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
     /**
      * Canvas spanned by the northwest and southeast cell.
      */
@@ -113,7 +113,7 @@ struct design_sidb_gates_params
 /**
  * Statistics for the design of SiDB gates.
  */
-struct design_sidb_gates_stats
+struct design_gates_stats
 {
     /**
      * The total runtime of SiDB gate design process.
@@ -160,7 +160,7 @@ namespace detail
 {
 
 template <typename Lyt, typename TT>
-class design_sidb_gates_impl
+class design_gates_impl
 {
   public:
     /**
@@ -172,8 +172,8 @@ class design_sidb_gates_impl
      * @param ps Parameters and settings for the gate designer.
      * @param st Statistics for the gate design process.
      */
-    design_sidb_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec,
-                           const design_sidb_gates_params<cell<Lyt>>& ps, design_sidb_gates_stats& st) :
+    design_gates_impl(const Lyt& skeleton, const std::vector<TT>& spec, const design_gates_params<cell<Lyt>>& ps,
+                      design_gates_stats& st) :
             skeleton_layout{skeleton},
             truth_table{spec},
             params{ps},
@@ -246,7 +246,7 @@ class design_sidb_gates_impl
             }
 
             if (solution_found && (params.termination_cond ==
-                                   design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                                   design_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
             {
                 return;
             }
@@ -272,7 +272,7 @@ class design_sidb_gates_impl
                     {
                         if (solution_found &&
                             (params.termination_cond ==
-                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                             design_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
                         {
                             return;
                         }
@@ -416,7 +416,7 @@ class design_sidb_gates_impl
             return gate_layouts;
         }
 
-        if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::PRUNING_ONLY)
+        if (params.design_mode == design_gates_params<cell<Lyt>>::design_gates_mode::PRUNING_ONLY)
         {
             // If the design mode is PRUNING_ONLY, we only need to return the gate candidates that passed the pruning
             // steps.
@@ -441,7 +441,7 @@ class design_sidb_gates_impl
         {
             // Early exit if a solution is found and only the first solution is required
             if (gate_design_found && (params.termination_cond ==
-                                      design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                                      design_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
             {
                 return;
             }
@@ -475,7 +475,7 @@ class design_sidb_gates_impl
                     {
                         if (gate_design_found &&
                             (params.termination_cond ==
-                             design_sidb_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
+                             design_gates_params<cell<Lyt>>::termination_condition::AFTER_FIRST_SOLUTION))
                         {
                             return;
                         }
@@ -509,7 +509,7 @@ class design_sidb_gates_impl
     /**
      * Parameters for the *SiDB Gate Designer*.
      */
-    design_sidb_gates_params<cell<Lyt>> params;
+    design_gates_params<cell<Lyt>> params;
     /**
      * All cells within the canvas.
      */
@@ -517,7 +517,7 @@ class design_sidb_gates_impl
     /**
      * The statistics of the gate design.
      */
-    design_sidb_gates_stats& stats;
+    design_gates_stats& stats;
     /**
      * Input BDL wires.
      */
@@ -830,9 +830,9 @@ class design_sidb_gates_impl
  * @return A vector of designed SiDB gate layouts.
  */
 template <typename Lyt, typename TT>
-[[nodiscard]] std::vector<Lyt> design_sidb_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                                 const design_sidb_gates_params<cell<Lyt>>& params = {},
-                                                 design_sidb_gates_stats*                   stats  = nullptr) noexcept
+[[nodiscard]] std::vector<Lyt> design_gates(const Lyt& skeleton, const std::vector<TT>& spec,
+                                            const design_gates_params<cell<Lyt>>& params = {},
+                                            design_gates_stats*                   stats  = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -847,17 +847,16 @@ template <typename Lyt, typename TT>
     assert(std::ranges::adjacent_find(spec, [](const auto& a, const auto& b)
                                       { return a.num_vars() != b.num_vars(); }) == spec.end());
 
-    design_sidb_gates_stats                 st{};
-    detail::design_sidb_gates_impl<Lyt, TT> p{skeleton, spec, params, st};
+    design_gates_stats                 st{};
+    detail::design_gates_impl<Lyt, TT> p{skeleton, spec, params, st};
 
     std::vector<Lyt> result{};
 
-    if (params.design_mode ==
-        design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
+    if (params.design_mode == design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER)
     {
         result = p.run_automatic_exhaustive_gate_designer();
     }
-    else if (params.design_mode == design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::RANDOM)
+    else if (params.design_mode == design_gates_params<cell<Lyt>>::design_gates_mode::RANDOM)
     {
         result = p.run_random_design();
     }
@@ -875,4 +874,4 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::generators
-#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_SIDB_GATES_HPP
+#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_GATES_HPP

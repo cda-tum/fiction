@@ -69,7 +69,7 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_input_port{
+    static constexpr const qca::sim7_mol_library::gate primary_input_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
@@ -84,7 +84,7 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_output_port{
+    static constexpr const qca::sim7_mol_library::gate primary_output_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
@@ -99,7 +99,7 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate disjunction{
+    static constexpr const qca::sim7_mol_library::gate disjunction{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
@@ -114,7 +114,7 @@ TEST_CASE("Setting up input ports and gates", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate bent_inverter{
+    static constexpr const qca::sim7_mol_library::gate bent_inverter{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -147,7 +147,7 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_input_port{
+    static constexpr const qca::sim7_mol_library::gate primary_input_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
@@ -162,7 +162,7 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_output_port{
+    static constexpr const qca::sim7_mol_library::gate primary_output_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
@@ -177,7 +177,7 @@ TEST_CASE("Setting up wires", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate wire{
+    static constexpr const qca::sim7_mol_library::gate wire{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -220,7 +220,7 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_input_port{
+    static constexpr const qca::sim7_mol_library::gate primary_input_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
@@ -235,7 +235,7 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_output_port{
+    static constexpr const qca::sim7_mol_library::gate primary_output_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
@@ -250,7 +250,7 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate fanout{
+    static constexpr const qca::sim7_mol_library::gate fanout{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -265,7 +265,7 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate fanout_d{
+    static constexpr const qca::sim7_mol_library::gate fanout_d{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -280,7 +280,7 @@ TEST_CASE("Setting up fanouts", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate bent_wire{
+    static constexpr const qca::sim7_mol_library::gate bent_wire{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '},
@@ -320,7 +320,7 @@ TEST_CASE("Setting up fanout-3 rotations", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const qca::sim7_mol_library::fcn_gate fanout_1_3{
+    static constexpr const qca::sim7_mol_library::gate fanout_1_3{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -429,7 +429,7 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
 
     // clang-format off
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_input_port{
+    static constexpr const qca::sim7_mol_library::gate primary_input_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
@@ -444,7 +444,7 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_output_port{
+    static constexpr const qca::sim7_mol_library::gate primary_output_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
@@ -459,7 +459,7 @@ TEST_CASE("Setting up majority gate", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate majority{
+    static constexpr const qca::sim7_mol_library::gate majority{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -494,7 +494,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     // clang-format off
 
     // Boundary tiles are represented by dedicated primary input and output port templates.
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_input_port{
+    static constexpr const qca::sim7_mol_library::gate primary_input_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'i', 'i', ' ', ' ', ' ', ' '},
@@ -509,7 +509,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate primary_output_port{
+    static constexpr const qca::sim7_mol_library::gate primary_output_port{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'o', 'o', ' ', ' ', ' ', ' '},
@@ -525,7 +525,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     }})};
 
     // Inverters can appear in straight and bent forms depending on the local tile neighborhood.
-    static constexpr const qca::sim7_mol_library::fcn_gate straight_inverter{
+    static constexpr const qca::sim7_mol_library::gate straight_inverter{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},
@@ -540,7 +540,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate bent_inverter_r{
+    static constexpr const qca::sim7_mol_library::gate bent_inverter_r{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'd', 'd', 'd', 'd', ' ', ' ', ' '},
@@ -556,7 +556,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     }})};
 
     // AND and OR gates are encoded as majority gates with fixed 0 and 1 polarization inputs, respectively.
-    static constexpr const qca::sim7_mol_library::fcn_gate conjunction{
+    static constexpr const qca::sim7_mol_library::gate conjunction{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
@@ -571,7 +571,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate conjunction_r{
+    static constexpr const qca::sim7_mol_library::gate conjunction_r{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '0', '0', ' ', ' ', ' ', ' '},
@@ -586,7 +586,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate disjunction{
+    static constexpr const qca::sim7_mol_library::gate disjunction{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', '1', '1', ' ', ' ', ' ', ' '},
@@ -602,7 +602,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
     }})};
 
     // Fanout and bent-wire templates cover the remaining internal routing cases in this blueprint.
-    static constexpr const qca::sim7_mol_library::fcn_gate fanout{
+    static constexpr const qca::sim7_mol_library::gate fanout{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '},
@@ -617,7 +617,7 @@ TEST_CASE("Setting up and or inv", "[molecular-qca-library]")
         {' ', ' ', ' ', ' ', 'd', 'd', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const qca::sim7_mol_library::fcn_gate bent_wire{
+    static constexpr const qca::sim7_mol_library::gate bent_wire{
     qca::sim7_mol_library::cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'a', 'a', ' ', ' ', ' ', ' '},

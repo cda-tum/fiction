@@ -34,7 +34,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
     explicit qca_one_library() = delete;
     /**
      * Overrides the corresponding function in gate_library. Given a tile `t`, this function takes all necessary
-     * information from the stored grid into account to choose the correct fcn_gate representation for that tile. May it
+     * information from the stored grid into account to choose the correct gate representation for that tile. May it
      * be a gate or wires. Rotation and special marks like input and output, const cells etc. are computed additionally.
      *
      * @tparam GateLyt Cartesian gate-level layout type.
@@ -43,7 +43,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
      * @return QCA ONE gate representation of `t` including I/Os, rotation, const cells, etc.
      */
     template <typename GateLyt>
-    [[nodiscard]] static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+    [[nodiscard]] static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
     {
         static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt must be a gate-level layout");
 
@@ -209,7 +209,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
     // ************************** Gates ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate STRAIGHT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate STRAIGHT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', 'x', 'x', 'x', ' '},
@@ -218,7 +218,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate BENT_INVERTER{cell_list_to_gate<char>(
+    static constexpr const gate BENT_INVERTER{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -227,7 +227,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CONJUNCTION{cell_list_to_gate<char>(
+    static constexpr const gate CONJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', '0', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -236,7 +236,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate DISJUNCTION{cell_list_to_gate<char>(
+    static constexpr const gate DISJUNCTION{cell_list_to_gate<char>(
     {{
         {' ', ' ', '1', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -245,7 +245,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate MAJORITY{cell_list_to_gate<char>(
+    static constexpr const gate MAJORITY{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -254,7 +254,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate FAN_OUT_1_2{cell_list_to_gate<char>(
+    static constexpr const gate FAN_OUT_1_2{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', ' '},
         {' ', ' ', ' ', ' ', ' '},
@@ -263,7 +263,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate FAN_OUT_1_3{cell_list_to_gate<char>(
+    static constexpr const gate FAN_OUT_1_3{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -276,7 +276,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
     // ************************** Wires ***************************
     // ************************************************************
 
-    static constexpr const fcn_gate PRIMARY_INPUT_PORT{cell_list_to_gate<char>(
+    static constexpr const gate PRIMARY_INPUT_PORT{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -285,7 +285,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate PRIMARY_OUTPUT_PORT{cell_list_to_gate<char>(
+    static constexpr const gate PRIMARY_OUTPUT_PORT{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -294,7 +294,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate CENTER_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate CENTER_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -303,7 +303,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', 'x', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate INNER_SIDE_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate INNER_SIDE_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', 'x', ' '},
         {' ', ' ', ' ', 'x', ' '},
@@ -312,7 +312,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', ' ', 'x', ' '}
     }})};
 
-    static constexpr const fcn_gate OUTER_SIDE_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate OUTER_SIDE_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', ' ', ' ', 'x'},
         {' ', ' ', ' ', ' ', 'x'},
@@ -321,7 +321,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', 'x'}
     }})};
 
-    static constexpr const fcn_gate CENTER_BENT_WIRE{cell_list_to_gate<char>(
+    static constexpr const gate CENTER_BENT_WIRE{cell_list_to_gate<char>(
     {{
         {' ', ' ', 'x', ' ', ' '},
         {' ', ' ', 'x', ' ', ' '},
@@ -330,56 +330,56 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
         {' ', ' ', ' ', ' ', ' '}
     }})};
 
-    static constexpr const fcn_gate INNER_CENTER_TO_INNER_CENTER_BENT_WIRE{
+    static constexpr const gate INNER_CENTER_TO_INNER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate INNER_CENTER_TO_CENTER_BENT_WIRE{
+    static constexpr const gate INNER_CENTER_TO_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate INNER_CENTER_TO_OUTER_CENTER_BENT_WIRE{
+    static constexpr const gate INNER_CENTER_TO_OUTER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate INNER_CENTER_TO_OUTER_SIDE_BENT_WIRE{
+    static constexpr const gate INNER_CENTER_TO_OUTER_SIDE_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', ' '},
                                   {' ', ' ', ' ', 'x', 'x'}}})};
 
-    static constexpr const fcn_gate CENTER_TO_INNER_CENTER_BENT_WIRE{
+    static constexpr const gate CENTER_TO_INNER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', ' ', 'x', ' ', ' '},
                                   {' ', ' ', 'x', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate OUTER_CENTER_TO_CENTER_BENT_WIRE{
+    static constexpr const gate OUTER_CENTER_TO_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', 'x', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate OUTER_CENTER_TO_OUTER_CENTER_BENT_WIRE{
+    static constexpr const gate OUTER_CENTER_TO_OUTER_CENTER_BENT_WIRE{
         cell_list_to_gate<char>({{{' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', ' ', ' ', ' '},
                                   {' ', 'x', 'x', 'x', 'x'},
                                   {' ', ' ', ' ', ' ', ' '}}})};
 
-    static constexpr const fcn_gate OUTER_SIDE_TO_OUTER_SIDE_BENT_WIRE{
+    static constexpr const gate OUTER_SIDE_TO_OUTER_SIDE_BENT_WIRE{
         cell_list_to_gate<char>({{{'x', ' ', ' ', ' ', ' '},
                                   {'x', ' ', ' ', ' ', ' '},
                                   {'x', ' ', ' ', ' ', ' '},
@@ -388,7 +388,7 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
 
     // clang-format on
 
-    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, fcn_gate>;
+    using port_gate_map = phmap::flat_hash_map<fcn::port_list<fcn::port_position>, gate>;
     /**
      * Lookup table for wire rotations. Maps ports to corresponding wires.
      */
