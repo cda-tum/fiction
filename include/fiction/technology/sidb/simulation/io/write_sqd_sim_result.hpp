@@ -123,8 +123,8 @@ template <typename Lyt>
 class write_sqd_sim_result_impl
 {
   public:
-    write_sqd_sim_result_impl(const sidb::simulation::result<Lyt>& sim_result, std::ostream& s) :
-            sim_result{sim_result},
+    write_sqd_sim_result_impl(const sidb::simulation::result<Lyt>& src, std::ostream& s) :
+            sim_result{src},
             os{s},
             ordered_cells{obtain_ordered_cells()}
     {}

@@ -16198,9 +16198,9 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_state_energy_
 R"doc(Default constructor.
 
 Args:
-    electrostatic_potential_energy: The electrostatic potential energy
-                                    of the charge distribution (eV).
-    degeneracy: The degeneracy of the state.
+    energy: The electrostatic potential energy of the charge
+            distribution (eV).
+    state_degeneracy: The degeneracy of the state.
 
 )doc";
 

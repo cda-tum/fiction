@@ -234,8 +234,8 @@ TEMPLATE_TEST_CASE("Defect influence when considering the change of the ground s
 
             CHECK_THAT(fiction::utils::math::round_to_n_decimal_places(clearance_result.defect_clearance_distance, 6),
                        Catch::Matchers::WithinAbs(0.665060, utils::math::ERROR_MARGIN));
-            CHECK((((clearance_result.defect_position.x == -1) && (clearance_result.defect_position.y == -1) ||
-                    ((clearance_result.defect_position.x == 1) && (clearance_result.defect_position.y == -1)))));
+            CHECK((((clearance_result.defect_position.x == -1) && (clearance_result.defect_position.y == -1)) ||
+                   ((clearance_result.defect_position.x == 1) && (clearance_result.defect_position.y == -1))));
         }
     }
 

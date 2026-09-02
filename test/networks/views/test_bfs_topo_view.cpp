@@ -108,12 +108,16 @@ TEST_CASE("Create a bfs_topo_view on an AIG without bfs topo order", "[bfs-topo-
     const auto gate1 = aig.create_and(x1, x2);
     const auto gate2 = aig.create_and(x3, gate1);
 
-    /* switch gate order on storage */
+    /* switch gate order on storage. `node_pointer::index` is a `uint64_t : 63` bitfield, so
+     * assigning a node to it trips -Wconversion and no cast to a nameable type can silence it */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
     aig._storage->nodes[aig.get_node(gate2)].children[0].index = aig.get_node(x1);
     aig._storage->nodes[aig.get_node(gate2)].children[1].index = aig.get_node(x2);
 
     aig._storage->nodes[aig.get_node(gate1)].children[0].index = aig.get_node(x3);
     aig._storage->nodes[aig.get_node(gate1)].children[1].index = aig.get_node(gate2);
+#pragma GCC diagnostic pop
 
     aig.create_po(gate1);
 
@@ -151,12 +155,16 @@ TEST_CASE("Test reverse bfs topo order", "[bfs-topo-view]")
     const auto gate1 = aig.create_and(x1, x2);
     const auto gate2 = aig.create_and(x3, gate1);
 
-    /* switch gate order on storage */
+    /* switch gate order on storage. `node_pointer::index` is a `uint64_t : 63` bitfield, so
+     * assigning a node to it trips -Wconversion and no cast to a nameable type can silence it */
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
     aig._storage->nodes[aig.get_node(gate2)].children[0].index = aig.get_node(x1);
     aig._storage->nodes[aig.get_node(gate2)].children[1].index = aig.get_node(x2);
 
     aig._storage->nodes[aig.get_node(gate1)].children[0].index = aig.get_node(x3);
     aig._storage->nodes[aig.get_node(gate1)].children[1].index = aig.get_node(gate2);
+#pragma GCC diagnostic pop
 
     aig.create_po(gate1);
 

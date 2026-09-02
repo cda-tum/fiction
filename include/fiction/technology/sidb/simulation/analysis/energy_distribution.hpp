@@ -44,12 +44,12 @@ struct energy_state
     /**
      * Default constructor.
      *
-     * @param electrostatic_potential_energy The electrostatic potential energy of the charge distribution (eV).
-     * @param degeneracy The degeneracy of the state.
+     * @param energy The electrostatic potential energy of the charge distribution (eV).
+     * @param state_degeneracy The degeneracy of the state.
      */
-    energy_state(const double electrostatic_potential_energy, const uint64_t degeneracy) :
-            electrostatic_potential_energy{electrostatic_potential_energy},
-            degeneracy{degeneracy}
+    energy_state(const double energy, const uint64_t state_degeneracy) :
+            electrostatic_potential_energy{energy},
+            degeneracy{state_degeneracy}
     {}
     /**
      * The electrostatic potential energy of the charge distribution (eV).

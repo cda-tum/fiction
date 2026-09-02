@@ -44,8 +44,8 @@ template <typename Lyt>
 class write_location_and_ground_state_impl
 {
   public:
-    write_location_and_ground_state_impl(const sidb::simulation::result<Lyt>& sim_result, std::ostream& s) :
-            sim_result{sim_result},
+    write_location_and_ground_state_impl(const sidb::simulation::result<Lyt>& src, std::ostream& s) :
+            sim_result{src},
             os{s}
     {}
 

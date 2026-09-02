@@ -249,6 +249,9 @@ Changed
     - **Breaking for forks:** the ``#ifndef FICTION_..._HPP`` include guards are replaced by
       ``#pragma once``, so a patch that touches the top or the bottom of a header will not apply
       as-is. ``portability-avoid-pragma-once`` is switched off in ``.clang-tidy`` accordingly
+    - The Debug build no longer emits compiler warnings. Cleared ``-Wshadow`` in ``energy_state``
+      and the two SiDB writer implementations, ``-Wswitch`` in ``write_sqd_layout``, and
+      ``-Wparentheses`` and ``-Wconversion`` in two tests
 - Continuous integration:
     - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
       paths and defines of a configured build. Parse errors drop from about 180 to zero, so a

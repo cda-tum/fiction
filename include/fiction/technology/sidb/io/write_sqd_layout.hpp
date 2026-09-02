@@ -343,6 +343,12 @@ class write_sqd_layout_impl
                             color = siqad::CONST_COLOR;
                             break;
                         }
+                        case (qca::qca_technology::cell_type::EMPTY):
+                        case (qca::qca_technology::cell_type::NORMAL):
+                        {
+                            // both keep the `NORMAL_COLOR` the variable was initialized with
+                            break;
+                        }
                     }
 
                     if (!qca::qca_technology::is_const_1_cell(type))
