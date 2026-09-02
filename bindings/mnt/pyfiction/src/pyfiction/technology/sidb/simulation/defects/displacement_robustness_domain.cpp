@@ -38,7 +38,7 @@ void determine_displacement_robustness_domain_impl(nanobind::module_& m, const s
 
 }  // namespace detail
 
-void determine_displacement_robustness_domain(nanobind::module_& m)
+void displacement_robustness_domain(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

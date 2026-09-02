@@ -238,7 +238,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
 }  // namespace detail
 
-void cell_level_layouts(nanobind::module_& m)
+void cell_level_layout(nanobind::module_& m)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology>(m);

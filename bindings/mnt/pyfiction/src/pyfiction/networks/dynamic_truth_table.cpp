@@ -11,7 +11,7 @@
 namespace pyfiction
 {
 
-void truth_tables(nanobind::module_& m)
+void dynamic_truth_table(nanobind::module_& m)
 {
     namespace py = nanobind;
 

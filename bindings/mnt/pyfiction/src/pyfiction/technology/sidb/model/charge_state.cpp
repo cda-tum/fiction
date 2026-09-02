@@ -12,7 +12,7 @@
 namespace pyfiction
 {
 
-void sidb_charge_state(nanobind::module_& m)
+void charge_state(nanobind::module_& m)
 {
     namespace py = nanobind;
 

@@ -41,7 +41,7 @@ void obstruction_layout(nanobind::module_& m, const std::string& topology)
 
 }  // namespace detail
 
-void obstruction_layouts(nanobind::module_& m)
+void obstruction_layout(nanobind::module_& m)
 {
     /**
      * Cartesian obstruction layout.

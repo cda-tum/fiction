@@ -27,7 +27,7 @@ void compute_operational_ratio_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void compute_operational_ratio(nanobind::module_& m)
+void operational_domain_ratio(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

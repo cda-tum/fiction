@@ -27,7 +27,7 @@ void sidb_simulation_engine_name_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void sidb_simulation_engine(nanobind::module_& m)
+void engine(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

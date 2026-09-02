@@ -37,7 +37,7 @@ void random_layout_generator_impl(nanobind::module_& m)
 
 }  // namespace detail
 
-void random_sidb_layout_generator(nanobind::module_& m)
+void random_layout_generator(nanobind::module_& m)
 {
     namespace py = nanobind;
 

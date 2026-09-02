@@ -16,7 +16,7 @@
 namespace pyfiction
 {
 
-void sidb_defects(nanobind::module_& m)
+void defect(nanobind::module_& m)
 {
     namespace py = nanobind;
 

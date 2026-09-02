@@ -108,7 +108,7 @@ void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattic
 
 }  // namespace detail
 
-void sidb_simulation_result(nanobind::module_& m)
+void result(nanobind::module_& m)
 {
     // Define simulation result for specific lattices
     detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");

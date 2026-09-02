@@ -220,7 +220,7 @@ void charge_distribution_surface_layout(nanobind::module_& m, const std::string&
 
 }  // namespace detail
 
-void charge_distribution_surfaces(nanobind::module_& m)
+void charge_distribution_surface(nanobind::module_& m)
 {
     namespace py = nanobind;
 

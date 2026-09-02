@@ -101,7 +101,7 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
 
 }  // namespace detail
 
-void clocked_layouts(nanobind::module_& m)
+void clocked_layout(nanobind::module_& m)
 {
     detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
     detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");

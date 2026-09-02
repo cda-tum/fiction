@@ -327,7 +327,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
 
 }  // namespace detail
 
-void gate_level_layouts(nanobind::module_& m)
+void gate_level_layout(nanobind::module_& m)
 {
     /**
      * Gate-level clocked Cartesian layout.
