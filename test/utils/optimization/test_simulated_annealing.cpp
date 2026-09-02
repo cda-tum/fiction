@@ -26,6 +26,7 @@
 #include <random>
 
 using namespace fiction;
+using namespace fiction::utils::optimization;
 
 /**
  * The 1D Schwefel function is a non-convex function with many local minima. It is used to test optimization algorithms.
@@ -137,13 +138,13 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
 
     SECTION("Linear temperature schedule")
     {
-        const auto [single_result, single_cost] = utils::optimization::simulated_annealing(
-            init_state, init_temp, final_temp, cycles, schwefel_function_1d,
-            utils::optimization::linear_temperature_schedule, random_next_schwefel);
+        const auto [single_result, single_cost] =
+            simulated_annealing(init_state, init_temp, final_temp, cycles, schwefel_function_1d,
+                                linear_temperature_schedule, random_next_schwefel);
 
-        const auto [multi_result, multi_cost] = utils::optimization::multi_simulated_annealing(
-            init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator, schwefel_function_1d,
-            utils::optimization::linear_temperature_schedule, random_next_schwefel);
+        const auto [multi_result, multi_cost] =
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator,
+                                      schwefel_function_1d, linear_temperature_schedule, random_next_schwefel);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
@@ -160,13 +161,13 @@ TEST_CASE("Simulated Annealing for optimizing the 1D Schwefel function", "[sim-a
     }
     SECTION("Geometric temperature schedule")
     {
-        const auto [single_result, single_cost] = utils::optimization::simulated_annealing(
-            init_state, init_temp, final_temp, cycles, schwefel_function_1d,
-            utils::optimization::geometric_temperature_schedule, random_next_schwefel);
+        const auto [single_result, single_cost] =
+            simulated_annealing(init_state, init_temp, final_temp, cycles, schwefel_function_1d,
+                                geometric_temperature_schedule, random_next_schwefel);
 
-        const auto [multi_result, multi_cost] = utils::optimization::multi_simulated_annealing(
-            init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator, schwefel_function_1d,
-            utils::optimization::geometric_temperature_schedule, random_next_schwefel);
+        const auto [multi_result, multi_cost] =
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, schwefel_1d_init_state_generator,
+                                      schwefel_function_1d, geometric_temperature_schedule, random_next_schwefel);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
@@ -195,13 +196,13 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
 
     SECTION("Linear temperature schedule")
     {
-        const auto [single_result, single_cost] = utils::optimization::simulated_annealing(
-            init_state, init_temp, final_temp, cycles, drop_wave_function_2d,
-            utils::optimization::linear_temperature_schedule, random_next_drop_wave);
+        const auto [single_result, single_cost] =
+            simulated_annealing(init_state, init_temp, final_temp, cycles, drop_wave_function_2d,
+                                linear_temperature_schedule, random_next_drop_wave);
 
-        const auto [multi_result, multi_cost] = utils::optimization::multi_simulated_annealing(
-            init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator, drop_wave_function_2d,
-            utils::optimization::linear_temperature_schedule, random_next_drop_wave);
+        const auto [multi_result, multi_cost] =
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator,
+                                      drop_wave_function_2d, linear_temperature_schedule, random_next_drop_wave);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);
@@ -219,13 +220,13 @@ TEST_CASE("Simulated Annealing for optimizing the 2D Drop-Wave function", "[sim-
     }
     SECTION("Geometric temperature schedule")
     {
-        const auto [single_result, single_cost] = utils::optimization::simulated_annealing(
-            init_state, init_temp, final_temp, cycles, drop_wave_function_2d,
-            utils::optimization::geometric_temperature_schedule, random_next_drop_wave);
+        const auto [single_result, single_cost] =
+            simulated_annealing(init_state, init_temp, final_temp, cycles, drop_wave_function_2d,
+                                geometric_temperature_schedule, random_next_drop_wave);
 
-        const auto [multi_result, multi_cost] = utils::optimization::multi_simulated_annealing(
-            init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator, drop_wave_function_2d,
-            utils::optimization::geometric_temperature_schedule, random_next_drop_wave);
+        const auto [multi_result, multi_cost] =
+            multi_simulated_annealing(init_temp, final_temp, cycles, instances, drop_wave_2d_init_state_generator,
+                                      drop_wave_function_2d, geometric_temperature_schedule, random_next_drop_wave);
 
         CHECK(single_cost < init_cost);
         CHECK(multi_cost < init_cost);

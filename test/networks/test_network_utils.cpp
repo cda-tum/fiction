@@ -28,32 +28,33 @@
 #include <type_traits>
 
 using namespace fiction;
+using namespace fiction::networks;
 
 TEST_CASE("Number of constant fanins", "[network-utils]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
-    maj4.foreach_node([&maj4](const auto& n) { CHECK(networks::num_constant_fanins(maj4, n) == 0ul); });
+    maj4.foreach_node([&maj4](const auto& n) { CHECK(num_constant_fanins(maj4, n) == 0ul); });
 
     const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
 
-    CHECK(networks::num_constant_fanins(and_inv, 3) == 1ul);
+    CHECK(num_constant_fanins(and_inv, 3) == 1ul);
 }
 
 TEST_CASE("High-degree fanin nodes", "[network-utils]")
 {
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
-    CHECK(networks::has_high_degree_fanin_nodes(maj4, 2));
-    CHECK(!networks::has_high_degree_fanin_nodes(maj4, 3));
+    CHECK(has_high_degree_fanin_nodes(maj4, 2));
+    CHECK(!has_high_degree_fanin_nodes(maj4, 3));
 
     const auto and_inv = blueprints::unbalanced_and_inv_network<mockturtle::mig_network>();
 
-    CHECK(networks::has_high_degree_fanin_nodes(and_inv, 1));
-    CHECK(!networks::has_high_degree_fanin_nodes(and_inv, 2));
-    CHECK(!networks::has_high_degree_fanin_nodes(and_inv, 3));
+    CHECK(has_high_degree_fanin_nodes(and_inv, 1));
+    CHECK(!has_high_degree_fanin_nodes(and_inv, 2));
+    CHECK(!has_high_degree_fanin_nodes(and_inv, 3));
 
-    CHECK(networks::high_degree_fanin_exception{}.what() ==
+    CHECK(high_degree_fanin_exception{}.what() ==
           std::string{"network contains nodes that exceed the supported fanin size"});
 }
 
@@ -62,30 +63,29 @@ TEST_CASE("Incoming primary input", "[network-utils]")
     const auto maj4 = blueprints::maj4_network<mockturtle::mig_network>();
 
     // constant node
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{0}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{0}));
 
     // PI nodes
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{1}));
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{2}));
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{3}));
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{4}));
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{5}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{1}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{2}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{3}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{4}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{5}));
 
     // MAJ nodes with incoming PIs
-    CHECK(networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{6}));
-    CHECK(networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{7}));
-    CHECK(networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{8}));
+    CHECK(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{6}));
+    CHECK(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{7}));
+    CHECK(has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{8}));
 
     // MAJ node without incoming PIs
-    CHECK(!networks::has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{9}));
+    CHECK(!has_incoming_primary_input(maj4, mockturtle::node<mockturtle::mig_network>{9}));
 }
 
 TEST_CASE("Inverse levels", "[network-utils]")
 {
-    const auto tec =
-        blueprints::one_to_five_path_difference_network<mockturtle::fanout_view<networks::technology_network>>();
+    const auto tec = blueprints::one_to_five_path_difference_network<mockturtle::fanout_view<technology_network>>();
 
-    const auto inv_levels = networks::inverse_levels(tec);
+    const auto inv_levels = inverse_levels(tec);
 
     // there should be 11 nodes in the technology network (2 constants, 2 PIs, 6 BUFs, 1 AND)
     REQUIRE(inv_levels.size() == 11);

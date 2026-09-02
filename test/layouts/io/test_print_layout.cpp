@@ -45,37 +45,40 @@
 #include <sstream>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::layouts::io;
+using namespace fiction::physical_design;
+using namespace fiction::qca;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::surfaces;
 
 TEST_CASE("Print empty gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
-    const gate_layout layout{gate_layout::aspect_ratio{2, 2},
-                             layouts::clocking::open<gate_layout>(layouts::clocking::num_clks::FOUR)};
+    const gate_layout layout{gate_layout::aspect_ratio{2, 2}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 
-    layouts::io::print_gate_level_layout(print_stream, layout, false, false);
+    print_gate_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
 
     print_stream = {};
 
-    layouts::io::print_layout(layout, print_stream);
+    print_layout(layout, print_stream);
 
     CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
-    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0},
-                       layouts::clocking::open<gate_layout>(layouts::clocking::num_clks::FOUR)};
+    gate_layout layout{gate_layout::aspect_ratio{3, 1, 0}, clocking::open<gate_layout>(clocking::num_clks::FOUR)};
 
     const auto x1 = layout.create_pi("x1", {2, 0});
     const auto x2 = layout.create_pi("x2", {1, 1});
@@ -94,7 +97,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
         std::stringstream print_stream{};
 
-        layouts::io::print_gate_level_layout(print_stream, layout, false, false);
+        print_gate_level_layout(print_stream, layout, false, false);
 
         CHECK(print_stream.str() == layout_print);
     }
@@ -116,7 +119,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
         std::stringstream print_stream{};
 
-        layouts::io::print_gate_level_layout(print_stream, layout, false, false);
+        print_gate_level_layout(print_stream, layout, false, false);
 
         CHECK(print_stream.str() == layout_print);
     }
@@ -124,8 +127,7 @@ TEST_CASE("Print simple gate-level layout", "[print-gate-level-layout]")
 
 TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     auto layout = blueprints::crossing_layout<gate_layout>();
 
@@ -139,16 +141,14 @@ TEST_CASE("Print crossing gate-level layout", "[print-gate-level-layout]")
 
     std::stringstream print_stream{};
 
-    layouts::io::print_gate_level_layout(print_stream, layout, false, false);
+    print_gate_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::qca_technology,
-        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
 
     const cell_layout layout{cell_layout::aspect_ratio{2, 2}, "Empty"};
 
@@ -156,34 +156,32 @@ TEST_CASE("Print empty cell-level layout", "[print-cell-level-layout]")
 
     std::stringstream print_stream{};
 
-    layouts::io::print_cell_level_layout(print_stream, layout, false, false);
+    print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
 
     print_stream = {};
 
-    layouts::io::print_layout(layout, print_stream);
+    print_layout(layout, print_stream);
 
     CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::qca_technology,
-        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4}, "AND"};
 
-    layout.assign_cell_type({0, 2}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 4}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0}, fiction::qca::qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({4, 2}, fiction::qca::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2}, qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 4}, qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0}, qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({2, 1}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 2}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({4, 2}, qca_technology::cell_type::OUTPUT);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 4}, "b");
@@ -198,33 +196,31 @@ TEST_CASE("Print AND gate cell-level layout", "[print-cell-level-layout]")
 
     std::stringstream print_stream{};
 
-    layouts::io::print_cell_level_layout(print_stream, layout, false, false);
+    print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 {
-    using cell_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::qca_technology,
-        fiction::layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
 
     cell_layout layout{cell_layout::aspect_ratio{4, 4, 1}, "Crossover"};
 
-    layout.assign_cell_type({0, 2, 0}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, fiction::qca::qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({1, 2, 0}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 0}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 2, 0}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 1, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 2, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 3, 1}, fiction::qca::qca_technology::cell_type::NORMAL);
-    layout.assign_cell_type({2, 4, 0}, fiction::qca::qca_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({4, 2, 0}, fiction::qca::qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({0, 2, 0}, qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({1, 2, 0}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 0}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 2, 0}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 1, 1}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 2, 1}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 3, 1}, qca_technology::cell_type::NORMAL);
+    layout.assign_cell_type({2, 4, 0}, qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({4, 2, 0}, qca_technology::cell_type::OUTPUT);
 
-    layout.assign_cell_mode({2, 1, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 2, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
-    layout.assign_cell_mode({2, 3, 1}, fiction::qca::qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 1, 1}, qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 2, 1}, qca_technology::cell_mode::CROSSOVER);
+    layout.assign_cell_mode({2, 3, 1}, qca_technology::cell_mode::CROSSOVER);
 
     layout.assign_cell_name({0, 2}, "a");
     layout.assign_cell_name({2, 0}, "b");
@@ -240,7 +236,7 @@ TEST_CASE("Print wire crossing cell-level layout", "[print-cell-level-layout]")
 
     std::stringstream print_stream{};
 
-    layouts::io::print_cell_level_layout(print_stream, layout, false, false);
+    print_cell_level_layout(print_stream, layout, false, false);
 
     CHECK(print_stream.str() == layout_print);
 }
@@ -250,43 +246,42 @@ TEST_CASE("Print empty charge layout", "[print-charge-layout]")
     const sidb_cell_clk_lyt_siqad     lyt{{2, 2}, "Empty"};
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    const sidb::surfaces::charge_distribution_surface layout{lat};
+    const charge_distribution_surface layout{lat};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 
-    layouts::io::print_sidb_layout(print_stream, layout, false);
+    print_sidb_layout(print_stream, layout, false);
 
     CHECK(print_stream.str() == layout_print);
 
     print_stream = {};
 
-    layouts::io::print_layout(layout, print_stream);
+    print_layout(layout, print_stream);
 
     CHECK(print_stream.str() == layout_print);
 }
 
 TEST_CASE("layout which is sidb_defect_surface and charge distribution surface but empty", "[print-charge-layout]")
 {
-    const sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
+    const defect_surface<sidb_cell_clk_lyt_siqad> sidb_layout{{2, 2}};
 
-    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>
-        lat{sidb_layout};
+    const lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>> lat{sidb_layout};
 
-    const sidb::surfaces::charge_distribution_surface layout{lat};
+    const charge_distribution_surface layout{lat};
 
     constexpr const char* layout_print = "[i] empty layout\n";
 
     std::stringstream print_stream{};
 
-    layouts::io::print_sidb_layout(print_stream, layout, false);
+    print_sidb_layout(print_stream, layout, false);
 
     CHECK(print_stream.str() == layout_print);
 
     print_stream = {};
 
-    layouts::io::print_layout(layout, print_stream);
+    print_layout(layout, print_stream);
 
     CHECK(print_stream.str() == layout_print);
 }
@@ -299,36 +294,35 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    const auto lyt = layouts::convert_layout_to_siqad_coordinates(
-        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library>(layout));
+    const auto lyt =
+        convert_layout_to_siqad_coordinates(apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library>(layout));
 
-    sidb::surfaces::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
-                                                   sidb::model::charge_state::NEGATIVE};
+    charge_distribution_surface cl{lyt, simulation_parameters{3, -0.32}, charge_state::NEGATIVE};
 
-    cl.assign_charge_state({16, 3, 0}, sidb::model::charge_state::NEUTRAL);
-    cl.assign_charge_state({42, 3, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({18, 4, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({40, 4, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({22, 5, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({36, 5, 0}, sidb::model::charge_state::NEUTRAL);
-    cl.assign_charge_state({24, 6, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({34, 6, 0}, sidb::model::charge_state::POSITIVE);
-    cl.assign_charge_state({27, 9, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({32, 10, 0}, sidb::model::charge_state::POSITIVE);
-    cl.assign_charge_state({27, 10, 1}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({29, 11, 1}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({29, 14, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({30, 15, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({34, 16, 0}, sidb::model::charge_state::POSITIVE);
-    cl.assign_charge_state({36, 17, 0}, sidb::model::charge_state::NEUTRAL);
-    cl.assign_charge_state({40, 18, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({42, 19, 0}, sidb::model::charge_state::NEGATIVE);
+    cl.assign_charge_state({16, 3, 0}, charge_state::NEUTRAL);
+    cl.assign_charge_state({42, 3, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({18, 4, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({40, 4, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({22, 5, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({36, 5, 0}, charge_state::NEUTRAL);
+    cl.assign_charge_state({24, 6, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({34, 6, 0}, charge_state::POSITIVE);
+    cl.assign_charge_state({27, 9, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({32, 10, 0}, charge_state::POSITIVE);
+    cl.assign_charge_state({27, 10, 1}, charge_state::NEGATIVE);
+    cl.assign_charge_state({29, 11, 1}, charge_state::NEGATIVE);
+    cl.assign_charge_state({29, 14, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({30, 15, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({34, 16, 0}, charge_state::POSITIVE);
+    cl.assign_charge_state({36, 17, 0}, charge_state::NEUTRAL);
+    cl.assign_charge_state({40, 18, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({42, 19, 0}, charge_state::NEGATIVE);
 
     std::stringstream print_stream{};
 
     SECTION("Cropped")
     {
-        layouts::io::print_sidb_layout(print_stream, cl, false, true, true);
+        print_sidb_layout(print_stream, cl, false, true, true);
 
         constexpr const char* layout_print =
             " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -395,7 +389,7 @@ TEST_CASE("Print Bestagon OR-gate without defect", "[print-charge-layout]")
     {
         print_stream.clear();
 
-        layouts::io::print_sidb_layout(print_stream, cl, false);
+        print_sidb_layout(print_stream, cl, false);
 
         constexpr const char* layout_print =
             " ◯  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ● \n"
@@ -459,41 +453,40 @@ TEST_CASE("Print Bestagon OR-gate with defect", "[print-charge-layout]")
 
     layout.create_or({}, {}, {0, 0});
 
-    const auto lyt = sidb::surfaces::defect_surface{layouts::convert_layout_to_siqad_coordinates(
-        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library>(layout))};
+    const auto lyt = defect_surface{
+        convert_layout_to_siqad_coordinates(apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library>(layout))};
 
-    sidb::surfaces::charge_distribution_surface cl{lyt, sidb::model::simulation_parameters{3, -0.32},
-                                                   sidb::model::charge_state::NEGATIVE};
+    charge_distribution_surface cl{lyt, simulation_parameters{3, -0.32}, charge_state::NEGATIVE};
 
-    cl.assign_defect({18, 3, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-    cl.assign_defect({44, 2, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
-    cl.assign_defect({40, 5, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 0});
-    cl.assign_defect({42, 20, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
+    cl.assign_defect({18, 3, 0}, defect{defect_type::UNKNOWN, 1});
+    cl.assign_defect({44, 2, 0}, defect{defect_type::UNKNOWN, -1});
+    cl.assign_defect({40, 5, 1}, defect{defect_type::UNKNOWN, 0});
+    cl.assign_defect({42, 20, 0}, defect{defect_type::UNKNOWN, 1});
 
-    cl.assign_charge_state({42, 3, 0}, sidb::model::charge_state::NEGATIVE);
+    cl.assign_charge_state({42, 3, 0}, charge_state::NEGATIVE);
 
-    cl.assign_charge_state({16, 3, 0}, sidb::model::charge_state::NEUTRAL);
-    cl.assign_charge_state({42, 3, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({18, 4, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({40, 4, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({22, 5, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({36, 5, 0}, sidb::model::charge_state::NEUTRAL);
-    cl.assign_charge_state({24, 6, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({34, 6, 0}, sidb::model::charge_state::POSITIVE);
-    cl.assign_charge_state({27, 9, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({32, 10, 0}, sidb::model::charge_state::POSITIVE);
-    cl.assign_charge_state({27, 10, 1}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({29, 11, 1}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({29, 14, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({30, 15, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({34, 16, 0}, sidb::model::charge_state::POSITIVE);
-    cl.assign_charge_state({36, 17, 0}, sidb::model::charge_state::NEUTRAL);
-    cl.assign_charge_state({40, 18, 0}, sidb::model::charge_state::NEGATIVE);
-    cl.assign_charge_state({42, 19, 0}, sidb::model::charge_state::NEGATIVE);
+    cl.assign_charge_state({16, 3, 0}, charge_state::NEUTRAL);
+    cl.assign_charge_state({42, 3, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({18, 4, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({40, 4, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({22, 5, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({36, 5, 0}, charge_state::NEUTRAL);
+    cl.assign_charge_state({24, 6, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({34, 6, 0}, charge_state::POSITIVE);
+    cl.assign_charge_state({27, 9, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({32, 10, 0}, charge_state::POSITIVE);
+    cl.assign_charge_state({27, 10, 1}, charge_state::NEGATIVE);
+    cl.assign_charge_state({29, 11, 1}, charge_state::NEGATIVE);
+    cl.assign_charge_state({29, 14, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({30, 15, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({34, 16, 0}, charge_state::POSITIVE);
+    cl.assign_charge_state({36, 17, 0}, charge_state::NEUTRAL);
+    cl.assign_charge_state({40, 18, 0}, charge_state::NEGATIVE);
+    cl.assign_charge_state({42, 19, 0}, charge_state::NEGATIVE);
 
     std::stringstream print_stream{};
 
-    layouts::io::print_sidb_layout(print_stream, cl, false, true, true);
+    print_sidb_layout(print_stream, cl, false, true, true);
 
     constexpr const char* layout_print =
         " ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -566,25 +559,22 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 {
     const sidb_100_cell_clk_lyt layout{};
 
-    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad> cl{layouts::convert_layout_to_siqad_coordinates(layout)};
+    defect_surface<sidb_cell_clk_lyt_siqad> cl{convert_layout_to_siqad_coordinates(layout)};
 
     cl.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
     cl.assign_cell_type({1, 0, 1}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
     cl.assign_cell_type({4, 0, 1}, sidb_cell_clk_lyt_siqad::technology::cell_type::NORMAL);
 
-    cl.assign_defect({0, 0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-    cl.assign_defect({1, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 0});
-    cl.assign_defect({4, 0, 1}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
+    cl.assign_defect({0, 0, 0}, defect{defect_type::UNKNOWN, 1});
+    cl.assign_defect({1, 0, 1}, defect{defect_type::UNKNOWN, 0});
+    cl.assign_defect({4, 0, 1}, defect{defect_type::UNKNOWN, -1});
 
     std::stringstream print_stream{};
 
     SECTION("crop_layout option activated")
     {
-        layouts::io::print_sidb_layout(
-            print_stream,
-            sidb::surfaces::lattice<sidb::surfaces::lattice_100,
-                                    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
-            false, true, true);
+        print_sidb_layout(print_stream, lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>{cl}, false, true,
+                          true);
 
         constexpr const char* layout_print = " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
                                              " ·  ·  ·  ·  ·  ·  ·  ·  · \n"
@@ -600,11 +590,8 @@ TEST_CASE("Print layout without charges but defects", "[print-charge-layout]")
 
     SECTION("crop_layout option deactivated")
     {
-        layouts::io::print_sidb_layout(
-            print_stream,
-            sidb::surfaces::lattice<sidb::surfaces::lattice_100,
-                                    sidb::surfaces::defect_surface<sidb_cell_clk_lyt_siqad>>{cl},
-            false, false, true);
+        print_sidb_layout(print_stream, lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>{cl}, false, false,
+                          true);
 
         constexpr const char* layout_print = " ⊞  ·  ·  ·  · \n"
                                              " ·  ⊡  ·  ·  ⊟ \n";
@@ -681,13 +668,12 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
     {
         layout.create_or({}, {}, {0, 0});
 
-        const auto cell_layout_or =
-            physical_design::apply_gate_library<sidb_cell_clk_lyt, sidb::bestagon_library>(layout);
-        const auto cell_layout_or_siqad = layouts::convert_layout_to_siqad_coordinates(cell_layout_or);
+        const auto cell_layout_or       = apply_gate_library<sidb_cell_clk_lyt, bestagon_library>(layout);
+        const auto cell_layout_or_siqad = convert_layout_to_siqad_coordinates(cell_layout_or);
 
         std::stringstream print_stream{};
 
-        layouts::io::print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+        print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
         CHECK(layout_print == print_stream.str());
     }
 
@@ -695,13 +681,12 @@ TEST_CASE("Print Bestagon OR-gate", "[print-charge-layout]")
     {
         layout.create_or({}, {}, {0, 0});
 
-        const auto cell_layout_or =
-            physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library>(layout);
-        const auto cell_layout_or_siqad = layouts::convert_layout_to_siqad_coordinates(cell_layout_or);
+        const auto cell_layout_or       = apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library>(layout);
+        const auto cell_layout_or_siqad = convert_layout_to_siqad_coordinates(cell_layout_or);
 
         std::stringstream print_stream{};
 
-        layouts::io::print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
+        print_sidb_layout(print_stream, cell_layout_or_siqad, false, true, true);
         CHECK(layout_print == print_stream.str());
     }
 }
@@ -733,11 +718,11 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "
                                              "\n"
                                              "\n";
 
-        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
-        layouts::io::print_sidb_layout(print_stream, lattice_lyt, false, true, true);
+        print_sidb_layout(print_stream, lattice_lyt, false, true, true);
         CHECK(layout_print == print_stream.str());
     }
 
@@ -756,13 +741,13 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::siqad", "
                                              "\n"
                                              "\n";
 
-        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
-        const auto cds = sidb::surfaces::charge_distribution_surface{lattice_lyt};
+        const auto cds = charge_distribution_surface{lattice_lyt};
 
-        layouts::io::print_sidb_layout(print_stream, cds, false, true, true);
+        print_sidb_layout(print_stream, cds, false, true, true);
         CHECK(layout_print == print_stream.str());
     }
 }
@@ -794,11 +779,11 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset co
                                              "\n"
                                              "\n";
 
-        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
-        layouts::io::print_sidb_layout(print_stream, lattice_lyt, false, true);
+        print_sidb_layout(print_stream, lattice_lyt, false, true);
         CHECK(layout_print == print_stream.str());
     }
 
@@ -817,13 +802,13 @@ TEST_CASE("Print H-Si 111 surface with six cells, defined with coords::offset co
                                              "\n"
                                              "\n";
 
-        const sidb::surfaces::lattice<sidb::surfaces::lattice_111, decltype(lyt)> lattice_lyt{lyt};
+        const lattice<lattice_111, decltype(lyt)> lattice_lyt{lyt};
 
         std::stringstream print_stream{};
 
-        const auto cds = sidb::surfaces::charge_distribution_surface{lattice_lyt};
+        const auto cds = charge_distribution_surface{lattice_lyt};
 
-        layouts::io::print_sidb_layout(print_stream, cds, false, true);
+        print_sidb_layout(print_stream, cds, false, true);
         CHECK(layout_print == print_stream.str());
     }
 }

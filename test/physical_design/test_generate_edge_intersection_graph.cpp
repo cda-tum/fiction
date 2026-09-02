@@ -26,24 +26,24 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
 
 TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    physical_design::generate_edge_intersection_graph_stats st{};
+    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{1, 1}, layouts::clocking::twoddwave<gate_lyt>()};
+        const gate_lyt layout{{1, 1}, clocking::twoddwave<gate_lyt>()};
 
         SECTION("Disjoint paths")
         {
             // (0,0) --> (0,1), (1,0) --> (1,1)
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {0, 1}},
-                                                                                       {{1, 0}, {1, 1}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {0, 1}}, {{1, 0}, {1, 1}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
@@ -51,16 +51,15 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 0);
 
-            CHECK(graph.at_vertex(0) == physical_design::layout_coordinate_path<gate_lyt>{{{0, 0}, {0, 1}}});
-            CHECK(graph.at_vertex(1) == physical_design::layout_coordinate_path<gate_lyt>{{{1, 0}, {1, 1}}});
+            CHECK(graph.at_vertex(0) == layout_coordinate_path<gate_lyt>{{{0, 0}, {0, 1}}});
+            CHECK(graph.at_vertex(1) == layout_coordinate_path<gate_lyt>{{{1, 0}, {1, 1}}});
         }
         SECTION("Non-disjoint paths")
         {
             // (0,0) --> (1,1), (1,0) --> (1,1)
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 1}},
-                                                                                       {{1, 0}, {1, 1}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 1}}, {{1, 0}, {1, 1}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
@@ -71,10 +70,9 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         SECTION("Unsatisfiable objective")
         {
             // (0,0) --> (1,1), (1,1) --> (0,0)
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 1}},
-                                                                                       {{1, 1}, {0, 0}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 1}}, {{1, 1}, {0, 0}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 1);
             CHECK(st.cliques.size() == 1);
@@ -85,15 +83,14 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        gate_lyt layout{{1, 1}, layouts::clocking::use<gate_lyt>()};
+        gate_lyt layout{{1, 1}, clocking::use<gate_lyt>()};
 
         SECTION("Disjoint paths")
         {
             // (0,0) --> (1,0), (1,1) --> (0,1)
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 0}},
-                                                                                       {{1, 1}, {0, 1}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {1, 0}}, {{1, 1}, {0, 1}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
@@ -101,16 +98,15 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
             CHECK(graph.size_vertices() == 2);
             CHECK(graph.size_edges() == 0);
 
-            CHECK(graph.at_vertex(0) == physical_design::layout_coordinate_path<gate_lyt>{{{0, 0}, {1, 0}}});
-            CHECK(graph.at_vertex(1) == physical_design::layout_coordinate_path<gate_lyt>{{{1, 1}, {0, 1}}});
+            CHECK(graph.at_vertex(0) == layout_coordinate_path<gate_lyt>{{{0, 0}, {1, 0}}});
+            CHECK(graph.at_vertex(1) == layout_coordinate_path<gate_lyt>{{{1, 1}, {0, 1}}});
         }
         SECTION("Non-disjoint paths")
         {
             // (0,0) --> (0,1), (1,0) --> (1,1)
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {0, 1}},
-                                                                                       {{1, 0}, {1, 1}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {0, 1}}, {{1, 0}, {1, 1}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 2);
@@ -122,10 +118,9 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
         {
             layout.resize({0, 2});
             // (0,2) --> (0,0), (0,0) --> (0,2)
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 2}, {0, 0}},
-                                                                                       {{0, 0}, {0, 2}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 2}, {0, 0}}, {{0, 0}, {0, 2}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 1);
             CHECK(st.cliques.size() == 1);
@@ -138,25 +133,23 @@ TEST_CASE("EPG on 2x2 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    physical_design::generate_edge_intersection_graph_stats st{};
+    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{2, 2}, layouts::clocking::twoddwave<gate_lyt>()};
+        const gate_lyt layout{{2, 2}, clocking::twoddwave<gate_lyt>()};
 
         SECTION("(0,1) to (2,1) and (1,0) to (1,2)")
         {
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 1}, {2, 1}},
-                                                                                       {{1, 0}, {1, 2}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 1}, {2, 1}}, {{1, 0}, {1, 2}}};
 
             SECTION("without crossings")
             {
                 // disable crossings
-                const physical_design::generate_edge_intersection_graph_params ps{false};
+                const generate_edge_intersection_graph_params ps{false};
 
-                const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, ps, &st);
+                const auto graph = generate_edge_intersection_graph(layout, objectives, ps, &st);
 
                 CHECK(st.cliques.size() == 2);
                 CHECK(st.cliques.front().size() == 1);
@@ -168,9 +161,9 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
             SECTION("with crossings")
             {
                 // enable crossings
-                const physical_design::generate_edge_intersection_graph_params ps{true};
+                const generate_edge_intersection_graph_params ps{true};
 
-                const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, ps, &st);
+                const auto graph = generate_edge_intersection_graph(layout, objectives, ps, &st);
 
                 CHECK(st.cliques.size() == 2);
                 CHECK(st.cliques.front().size() == 1);
@@ -185,19 +178,18 @@ TEST_CASE("EPG on 3x3 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    physical_design::generate_edge_intersection_graph_stats st{};
+    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        const gate_lyt layout{{3, 3}, layouts::clocking::twoddwave<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, clocking::twoddwave<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
@@ -209,13 +201,13 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
     }
     SECTION("USE")
     {
-        const gate_lyt layout{{3, 3}, layouts::clocking::use<gate_lyt>()};
+        const gate_lyt layout{{3, 3}, clocking::use<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) without obstruction")
         {
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
@@ -229,22 +221,21 @@ TEST_CASE("EPG on 4x4 layouts", "[generate-edge-intersection-graph]")
 
 TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-graph]")
 {
-    using gate_lyt =
-        layouts::gate_level_layout<layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
-    physical_design::generate_edge_intersection_graph_stats st{};
+    using gate_lyt = gate_level_layout<clocked_layout<cartesian_layout<coords::offset>>>;
+    generate_edge_intersection_graph_stats st{};
 
     SECTION("2DDWave")
     {
-        gate_lyt layout{{3, 3}, layouts::clocking::twoddwave<gate_lyt>()};
+        gate_lyt layout{{3, 3}, clocking::twoddwave<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 19 valid paths
         {
             // create a PI as obstruction
             layout.create_pi("obstruction", {3, 0});  // blocks 1 path
 
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);
@@ -256,16 +247,16 @@ TEST_CASE("EPG on 4x4 layouts with obstruction", "[generate-edge-intersection-gr
     }
     SECTION("USE")
     {
-        gate_lyt layout{{3, 3}, layouts::clocking::use<gate_lyt>()};
+        gate_lyt layout{{3, 3}, clocking::use<gate_lyt>()};
 
         SECTION("(0,0) to (3,3) with obstruction")  // 1 valid path
         {
             // create a PI as obstruction
             layout.create_pi("obstruction", {3, 0});  // blocks 3 paths
 
-            const std::vector<physical_design::routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
+            const std::vector<routing_objective<gate_lyt>> objectives{{{0, 0}, {3, 3}}};
 
-            const auto graph = physical_design::generate_edge_intersection_graph(layout, objectives, {}, &st);
+            const auto graph = generate_edge_intersection_graph(layout, objectives, {}, &st);
 
             CHECK(st.number_of_unroutable_objectives == 0);
             CHECK(st.cliques.size() == 1);

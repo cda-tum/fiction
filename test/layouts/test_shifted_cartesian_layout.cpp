@@ -23,6 +23,7 @@
 #include <iostream>
 
 using namespace fiction;
+using namespace fiction::layouts;
 
 template <typename Lyt>
 void check_common_traits()
@@ -57,7 +58,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 {
     SECTION("odd row")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_row_cartesian>;
+        using layout = shifted_cartesian_layout<coords::offset, odd_row_cartesian>;
 
         CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -70,7 +71,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("even row")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_row_cartesian>;
+        using layout = shifted_cartesian_layout<coords::offset, even_row_cartesian>;
 
         CHECK(has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(!has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -83,7 +84,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("odd column")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::odd_column_cartesian>;
+        using layout = shifted_cartesian_layout<coords::offset, odd_column_cartesian>;
 
         CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -96,7 +97,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
     }
     SECTION("even column")
     {
-        using layout = layouts::shifted_cartesian_layout<layouts::coords::offset, layouts::even_column_cartesian>;
+        using layout = shifted_cartesian_layout<coords::offset, even_column_cartesian>;
 
         CHECK(!has_horizontally_shifted_cartesian_orientation_v<layout>);
         CHECK(has_vertically_shifted_cartesian_orientation_v<layout>);
@@ -111,7 +112,7 @@ TEST_CASE("Shifted Cartesian layout traits", "[shifted-cartesian-layout]")
 
 TEST_CASE("Deep copy shifted Cartesian layout", "[shifted-cartesian-layout]")
 {
-    const layouts::shifted_cartesian_layout original{{5, 5, 0}};
+    const shifted_cartesian_layout original{{5, 5, 0}};
 
     auto copy = original.clone();
 

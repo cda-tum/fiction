@@ -22,97 +22,97 @@
 #include <limits>
 
 using namespace fiction;
+using namespace fiction::sidb::model;
 
 TEST_CASE("charge_state_to_sign returns the correct sign for each charge state", "[sidb-charge-state]")
 {
-    CHECK(sidb::model::charge_state_to_sign(sidb::model::charge_state::POSITIVE) == 1);
-    CHECK(sidb::model::charge_state_to_sign(sidb::model::charge_state::NEUTRAL) == 0);
-    CHECK(sidb::model::charge_state_to_sign(sidb::model::charge_state::NEGATIVE) == -1);
-    CHECK(sidb::model::charge_state_to_sign(sidb::model::charge_state::NONE) == 0);
+    CHECK(charge_state_to_sign(charge_state::POSITIVE) == 1);
+    CHECK(charge_state_to_sign(charge_state::NEUTRAL) == 0);
+    CHECK(charge_state_to_sign(charge_state::NEGATIVE) == -1);
+    CHECK(charge_state_to_sign(charge_state::NONE) == 0);
 }
 
 TEST_CASE("charge_state_to_sign is noexcept", "[sidb-charge-state]")
 {
-    CHECK(noexcept(sidb::model::charge_state_to_sign(sidb::model::charge_state::NEUTRAL)));
+    CHECK(noexcept(charge_state_to_sign(charge_state::NEUTRAL)));
 }
 
 TEST_CASE("sign_to_charge_state returns the correct charge state for each sign", "[sidb-charge-state]")
 {
     SECTION("sg is -1")
     {
-        CHECK(sidb::model::sign_to_charge_state(-1) == sidb::model::charge_state::NEGATIVE);
+        CHECK(sign_to_charge_state(-1) == charge_state::NEGATIVE);
     }
 
     SECTION("sg is 0")
     {
-        CHECK(sidb::model::sign_to_charge_state(0) == sidb::model::charge_state::NEUTRAL);
+        CHECK(sign_to_charge_state(0) == charge_state::NEUTRAL);
     }
 
     SECTION("sg is +1")
     {
-        CHECK(sidb::model::sign_to_charge_state(1) == sidb::model::charge_state::POSITIVE);
+        CHECK(sign_to_charge_state(1) == charge_state::POSITIVE);
     }
 
     SECTION("sg is invalid")
     {
-        CHECK(sidb::model::sign_to_charge_state(2) == sidb::model::charge_state::NONE);
-        CHECK(sidb::model::sign_to_charge_state(3) == sidb::model::charge_state::NONE);
-        CHECK(sidb::model::sign_to_charge_state(4) == sidb::model::charge_state::NONE);
-        CHECK(sidb::model::sign_to_charge_state(std::numeric_limits<int8_t>::max()) == sidb::model::charge_state::NONE);
+        CHECK(sign_to_charge_state(2) == charge_state::NONE);
+        CHECK(sign_to_charge_state(3) == charge_state::NONE);
+        CHECK(sign_to_charge_state(4) == charge_state::NONE);
+        CHECK(sign_to_charge_state(std::numeric_limits<int8_t>::max()) == charge_state::NONE);
 
-        CHECK(sidb::model::sign_to_charge_state(-2) == sidb::model::charge_state::NONE);
-        CHECK(sidb::model::sign_to_charge_state(-3) == sidb::model::charge_state::NONE);
-        CHECK(sidb::model::sign_to_charge_state(-4) == sidb::model::charge_state::NONE);
-        CHECK(sidb::model::sign_to_charge_state(std::numeric_limits<int8_t>::min()) == sidb::model::charge_state::NONE);
+        CHECK(sign_to_charge_state(-2) == charge_state::NONE);
+        CHECK(sign_to_charge_state(-3) == charge_state::NONE);
+        CHECK(sign_to_charge_state(-4) == charge_state::NONE);
+        CHECK(sign_to_charge_state(std::numeric_limits<int8_t>::min()) == charge_state::NONE);
     }
 }
 
 TEST_CASE("sign_to_charge_state is noexcept", "[sidb-charge-state]")
 {
-    CHECK(noexcept(sidb::model::sign_to_charge_state(0)));
+    CHECK(noexcept(sign_to_charge_state(0)));
 }
 
 TEST_CASE("charge_configuration_to_string builds correct strings", "[sidb-charge-state]")
 {
     SECTION("empty charge configuration")
     {
-        const std::vector<sidb::model::charge_state> charge_distribution{};
+        const std::vector<charge_state> charge_distribution{};
 
-        CHECK(sidb::model::charge_configuration_to_string(charge_distribution).empty());
+        CHECK(charge_configuration_to_string(charge_distribution).empty());
     }
 
     SECTION("charge configuration with one negative charge")
     {
-        const std::vector<sidb::model::charge_state> charge_distribution{sidb::model::charge_state::NEGATIVE};
+        const std::vector<charge_state> charge_distribution{charge_state::NEGATIVE};
 
-        CHECK(sidb::model::charge_configuration_to_string(charge_distribution) == "-");
+        CHECK(charge_configuration_to_string(charge_distribution) == "-");
     }
 
     SECTION("charge configuration with one neutral charge")
     {
-        const std::vector<sidb::model::charge_state> charge_distribution{sidb::model::charge_state::NEUTRAL};
+        const std::vector<charge_state> charge_distribution{charge_state::NEUTRAL};
 
-        CHECK(sidb::model::charge_configuration_to_string(charge_distribution) == "0");
+        CHECK(charge_configuration_to_string(charge_distribution) == "0");
     }
 
     SECTION("charge configuration with one positive charge")
     {
-        const std::vector<sidb::model::charge_state> charge_distribution{sidb::model::charge_state::POSITIVE};
+        const std::vector<charge_state> charge_distribution{charge_state::POSITIVE};
 
-        CHECK(sidb::model::charge_configuration_to_string(charge_distribution) == "+");
+        CHECK(charge_configuration_to_string(charge_distribution) == "+");
     }
 
     SECTION("charge configuration with multiple charges")
     {
-        const std::vector<sidb::model::charge_state> charge_distribution{sidb::model::charge_state::POSITIVE,
-                                                                         sidb::model::charge_state::NEGATIVE,
-                                                                         sidb::model::charge_state::NEUTRAL};
+        const std::vector<charge_state> charge_distribution{charge_state::POSITIVE, charge_state::NEGATIVE,
+                                                            charge_state::NEUTRAL};
 
-        CHECK(sidb::model::charge_configuration_to_string(charge_distribution) == "+-0");
+        CHECK(charge_configuration_to_string(charge_distribution) == "+-0");
     }
 }
 
 TEST_CASE("charge_configuration_to_string is noexcept", "[sidb-charge-state]")
 {
-    CHECK(noexcept(sidb::model::charge_configuration_to_string({})));
+    CHECK(noexcept(charge_configuration_to_string({})));
 }

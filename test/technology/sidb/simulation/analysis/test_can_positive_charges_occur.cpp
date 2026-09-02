@@ -24,6 +24,9 @@
 #include <fiction/types.hpp>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::analysis;
 
 TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
 {
@@ -35,20 +38,20 @@ TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
 
     SECTION("Default values")
     {
-        const sidb::model::simulation_parameters params{2, -0.32};
-        CHECK(!sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32};
+        CHECK(!can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 1};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 10};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 }
 
@@ -69,20 +72,20 @@ TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[can-
 
     SECTION("Default values")
     {
-        const sidb::model::simulation_parameters params{2, -0.32};
-        CHECK(!sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32};
+        CHECK(!can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 1};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 10};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 }
 
@@ -90,41 +93,41 @@ TEST_CASE("Y-shapedd SiDB OR gate with input 01, using cube coordinates", "[can-
 {
     sidb_100_cell_clk_lyt_cube lyt{};
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{6, 2, 0}),
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{6, 2, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{8, 3, 0}),
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{8, 3, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{12, 3, 0}),
-                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{14, 2, 0}),
-                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 5, 0}),
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{12, 3, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 6, 1}),
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{14, 2, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 8, 1}),
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 5, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{16, 1, 0}),
+
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 6, 1}),
+                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 8, 1}),
+                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{16, 1, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
 
     SECTION("Default values")
     {
-        const sidb::model::simulation_parameters params{2, -0.32};
-        CHECK(!sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32};
+        CHECK(!can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 1};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 10};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 }
 
@@ -133,40 +136,40 @@ TEMPLATE_TEST_CASE("Y-shapedd SiDB OR gate with input 01, using offset coordinat
 {
     TestType lyt{};
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{6, 2, 0}),
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{6, 2, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{8, 3, 0}),
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{8, 3, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{12, 3, 0}),
-                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{14, 2, 0}),
-                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 5, 0}),
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{12, 3, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 6, 1}),
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{14, 2, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{10, 8, 1}),
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{10, 5, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::offset>(layouts::coords::siqad{16, 1, 0}),
+
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{10, 6, 1}),
+                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{10, 8, 1}),
+                         sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::offset>(coords::siqad{16, 1, 0}),
                          sidb_100_cell_clk_lyt_cube::cell_type::NORMAL);
 
     SECTION("Default values")
     {
-        const sidb::model::simulation_parameters params{2, -0.32};
-        CHECK(!sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32};
+        CHECK(!can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 1")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 1};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 1};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 
     SECTION("epsilon = 1, lambda = 10")
     {
-        const sidb::model::simulation_parameters params{2, -0.32, 1, 10};
-        CHECK(sidb::simulation::analysis::can_positive_charges_occur(lyt, params));
+        const simulation_parameters params{2, -0.32, 1, 10};
+        CHECK(can_positive_charges_occur(lyt, params));
     }
 }

@@ -28,23 +28,18 @@
 #include <type_traits>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
 
 TEMPLATE_TEST_CASE(
     "Read empty surface", "[read-sidb-surface-defects]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     static constexpr const char* empty_sidb_surface               = "[]";
     static constexpr const char* sidb_surface_of_one_empty_row    = "[[]]";
@@ -60,36 +55,27 @@ TEMPLATE_TEST_CASE(
         CHECK(lyt.y() == 0);
         CHECK(lyt.area() == 1);
         CHECK(lyt.is_empty_cell({0, 0}));
-        CHECK(lyt.get_defect({0, 0}).type == sidb::model::defect_type::NONE);
+        CHECK(lyt.get_defect({0, 0}).type == defect_type::NONE);
     };
 
-    check(sidb::io::read_surface_defects<TestType>(empty_surface_stream));
-    check(sidb::io::read_surface_defects<TestType>(empty_row_surface_stream));
-    check(sidb::io::read_surface_defects<TestType>(three_empty_rows_surface_stream));
+    check(read_surface_defects<TestType>(empty_surface_stream));
+    check(read_surface_defects<TestType>(empty_row_surface_stream));
+    check(read_surface_defects<TestType>(three_empty_rows_surface_stream));
 }
 
 TEMPLATE_TEST_CASE(
     "Read non-defective surface", "[read-sidb-surface-defects]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     static constexpr const char* sidb_surface = "[[0 0 0 0] [0 0 0 0] [0 0 0 0]]";
 
     std::istringstream surface_stream{sidb_surface};
 
-    const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
+    const auto lyt = read_surface_defects<TestType>(surface_stream);
 
     CHECK(lyt.x() == 3);
     CHECK(lyt.y() == 2);
@@ -98,26 +84,17 @@ TEMPLATE_TEST_CASE(
         [&lyt](const auto& c)
         {
             CHECK(lyt.is_empty_cell(c));
-            CHECK(lyt.get_defect(c).type == sidb::model::defect_type::NONE);
+            CHECK(lyt.get_defect(c).type == defect_type::NONE);
         });
 }
 
 TEMPLATE_TEST_CASE(
     "Read defective surface", "[read-sidb-surface-defects]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     static constexpr const char* sidb_surface = "[[0 1 2 3]"
                                                 " [4 5 6 7]"
@@ -125,41 +102,32 @@ TEMPLATE_TEST_CASE(
 
     std::istringstream surface_stream{sidb_surface};
 
-    const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
+    const auto lyt = read_surface_defects<TestType>(surface_stream);
 
     CHECK(lyt.x() == 3);
     CHECK(lyt.y() == 2);
 
-    CHECK(lyt.get_defect({0, 0}).type == sidb::model::defect_type::NONE);
-    CHECK(lyt.get_defect({1, 0}).type == sidb::model::defect_type::DB);
-    CHECK(lyt.get_defect({2, 0}).type == sidb::model::defect_type::SI_VACANCY);
-    CHECK(lyt.get_defect({3, 0}).type == sidb::model::defect_type::DIHYDRIDE_PAIR);
-    CHECK(lyt.get_defect({0, 1}).type == sidb::model::defect_type::SINGLE_DIHYDRIDE);
-    CHECK(lyt.get_defect({1, 1}).type == sidb::model::defect_type::ONE_BY_ONE);
-    CHECK(lyt.get_defect({2, 1}).type == sidb::model::defect_type::THREE_BY_ONE);
-    CHECK(lyt.get_defect({3, 1}).type == sidb::model::defect_type::SILOXANE);
-    CHECK(lyt.get_defect({0, 2}).type == sidb::model::defect_type::RAISED_SI);
-    CHECK(lyt.get_defect({1, 2}).type == sidb::model::defect_type::ETCH_PIT);
-    CHECK(lyt.get_defect({2, 2}).type == sidb::model::defect_type::MISSING_DIMER);
-    CHECK(lyt.get_defect({3, 2}).type == sidb::model::defect_type::NONE);
+    CHECK(lyt.get_defect({0, 0}).type == defect_type::NONE);
+    CHECK(lyt.get_defect({1, 0}).type == defect_type::DB);
+    CHECK(lyt.get_defect({2, 0}).type == defect_type::SI_VACANCY);
+    CHECK(lyt.get_defect({3, 0}).type == defect_type::DIHYDRIDE_PAIR);
+    CHECK(lyt.get_defect({0, 1}).type == defect_type::SINGLE_DIHYDRIDE);
+    CHECK(lyt.get_defect({1, 1}).type == defect_type::ONE_BY_ONE);
+    CHECK(lyt.get_defect({2, 1}).type == defect_type::THREE_BY_ONE);
+    CHECK(lyt.get_defect({3, 1}).type == defect_type::SILOXANE);
+    CHECK(lyt.get_defect({0, 2}).type == defect_type::RAISED_SI);
+    CHECK(lyt.get_defect({1, 2}).type == defect_type::ETCH_PIT);
+    CHECK(lyt.get_defect({2, 2}).type == defect_type::MISSING_DIMER);
+    CHECK(lyt.get_defect({3, 2}).type == defect_type::NONE);
 }
 
 TEMPLATE_TEST_CASE(
     "Exceptions", "[read-sidb-surface-defects]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     SECTION("unsupported_defect_index_exception")
     {
@@ -169,8 +137,7 @@ TEMPLATE_TEST_CASE(
 
         std::istringstream surface_stream{sidb_surface};
 
-        CHECK_THROWS_AS(sidb::io::read_surface_defects<TestType>(surface_stream),
-                        sidb::io::unsupported_defect_index_exception);
+        CHECK_THROWS_AS(read_surface_defects<TestType>(surface_stream), unsupported_defect_index_exception);
     }
     SECTION("missing_sidb_position_exception")
     {
@@ -180,26 +147,17 @@ TEMPLATE_TEST_CASE(
 
         std::istringstream surface_stream{sidb_surface};
 
-        CHECK_THROWS_AS(sidb::io::read_surface_defects<TestType>(surface_stream), sidb::io::missing_position_exception);
+        CHECK_THROWS_AS(read_surface_defects<TestType>(surface_stream), missing_position_exception);
     }
 }
 
 TEMPLATE_TEST_CASE(
     "Edge cases", "[read-sidb-surface-defects]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     SECTION("ignore lines")
     {
@@ -211,7 +169,7 @@ TEMPLATE_TEST_CASE(
 
             std::istringstream surface_stream{sidb_surface};
 
-            const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
+            const auto lyt = read_surface_defects<TestType>(surface_stream);
 
             CHECK(lyt.x() == 3);
             CHECK(lyt.y() == 1);  // only 2 rows are being parsed
@@ -224,7 +182,7 @@ TEMPLATE_TEST_CASE(
 
             std::istringstream surface_stream{sidb_surface};
 
-            const auto lyt = sidb::io::read_surface_defects<TestType>(surface_stream);
+            const auto lyt = read_surface_defects<TestType>(surface_stream);
 
             CHECK(lyt.x() == 3);
             CHECK(lyt.y() == 1);  // only two rows are being parsed

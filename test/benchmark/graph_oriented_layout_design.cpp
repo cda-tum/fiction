@@ -31,56 +31,57 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Graph-Oriented Layout Design", "[benchmark]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     auto ntk    = blueprints::mux21_network<mockturtle::aig_network>();
-    auto params = fiction::physical_design::graph_oriented_layout_design_params{};
+    auto params = graph_oriented_layout_design_params{};
 
     BENCHMARK("graph_oriented_layout_design: high-efficiency")
     {
-        params.mode = physical_design::graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
+        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFICIENCY;
 
-        return physical_design::graph_oriented_layout_design<gate_layout>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: high-effort")
     {
-        params.mode = physical_design::graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
+        params.mode = graph_oriented_layout_design_params::effort_mode::HIGH_EFFORT;
 
-        return physical_design::graph_oriented_layout_design<gate_layout>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: highest-effort")
     {
-        params.mode = physical_design::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+        params.mode = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
 
-        return physical_design::graph_oriented_layout_design<gate_layout>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: maximum-effort")
     {
-        params.mode = physical_design::graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
+        params.mode = graph_oriented_layout_design_params::effort_mode::MAXIMUM_EFFORT;
         params.seed = 12345;
 
-        return physical_design::graph_oriented_layout_design<gate_layout>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     ntk                 = blueprints::parity_network<mockturtle::aig_network>();
     params.return_first = true;
-    params.mode         = physical_design::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     BENCHMARK("graph_oriented_layout_design: single-threading")
     {
-        return physical_design::graph_oriented_layout_design<gate_layout>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 
     BENCHMARK("graph_oriented_layout_design: multi-threading")
     {
         params.enable_multithreading = true;
-        return physical_design::graph_oriented_layout_design<gate_layout>(ntk, params);
+        return graph_oriented_layout_design<gate_layout>(ntk, params);
     };
 }
 

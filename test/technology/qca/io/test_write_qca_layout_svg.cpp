@@ -35,6 +35,9 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::qca;
+using namespace fiction::qca::io;
 
 /**
  * This function takes an SVG string as input and returns a new string with all
@@ -318,33 +321,33 @@ style="fill:#000000;stroke:#000000;" />
 TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-svg]")
 {
     mol_qca_cell_clk_lyt layout{{0, 0, 1}, "unsupported molQCA crossing"};
-    layout.assign_cell_type({0, 0, 0}, qca::mol_qca_technology::cell_type::NORMAL1);
-    layout.assign_cell_type({0, 0, 1}, qca::mol_qca_technology::cell_type::NORMAL2);
+    layout.assign_cell_type({0, 0, 0}, mol_qca_technology::cell_type::NORMAL1);
+    layout.assign_cell_type({0, 0, 1}, mol_qca_technology::cell_type::NORMAL2);
 
-    std::ostringstream                         layout_stream{};
-    const qca::io::write_qca_layout_svg_params params{.simple = true};
+    std::ostringstream                layout_stream{};
+    const write_qca_layout_svg_params params{.simple = true};
 
-    CHECK_THROWS_AS(qca::io::write_mol_qca_layout_svg(layout, layout_stream, params),
-                    qca::io::unsupported_cell_type_exception<layouts::coords::offset>);
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, layout_stream, params),
+                    unsupported_cell_type_exception<coords::offset>);
 }
 
 TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
 {
     mol_qca_cell_clk_lyt layout{{6, 0, 1}, "molQCA SVG"};
-    layout.assign_cell_type({0, 0, 0}, qca::mol_qca_technology::cell_type::NORMAL1);
-    layout.assign_cell_type({1, 0, 0}, qca::mol_qca_technology::cell_type::INPUT);
-    layout.assign_cell_type({2, 0, 0}, qca::mol_qca_technology::cell_type::OUTPUT);
-    layout.assign_cell_type({3, 0, 0}, qca::mol_qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({4, 0, 0}, qca::mol_qca_technology::cell_type::CONST_1);
-    layout.assign_cell_type({5, 0, 1}, qca::mol_qca_technology::cell_type::NORMAL4);
-    layout.assign_cell_mode({5, 0, 1}, qca::mol_qca_technology::cell_mode::VERTICAL);
-    layout.assign_cell_type({6, 0, 1}, qca::mol_qca_technology::cell_type::NORMAL2);
+    layout.assign_cell_type({0, 0, 0}, mol_qca_technology::cell_type::NORMAL1);
+    layout.assign_cell_type({1, 0, 0}, mol_qca_technology::cell_type::INPUT);
+    layout.assign_cell_type({2, 0, 0}, mol_qca_technology::cell_type::OUTPUT);
+    layout.assign_cell_type({3, 0, 0}, mol_qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({4, 0, 0}, mol_qca_technology::cell_type::CONST_1);
+    layout.assign_cell_type({5, 0, 1}, mol_qca_technology::cell_type::NORMAL4);
+    layout.assign_cell_mode({5, 0, 1}, mol_qca_technology::cell_mode::VERTICAL);
+    layout.assign_cell_type({6, 0, 1}, mol_qca_technology::cell_type::NORMAL2);
 
     SECTION("detailed mode")
     {
         std::ostringstream layout_stream{};
 
-        qca::io::write_mol_qca_layout_svg(layout, layout_stream);
+        write_mol_qca_layout_svg(layout, layout_stream);
 
         const auto svg = layout_stream.str();
 
@@ -353,10 +356,10 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
 
     SECTION("simple mode")
     {
-        std::ostringstream                         layout_stream{};
-        const qca::io::write_qca_layout_svg_params params{.simple = true};
+        std::ostringstream                layout_stream{};
+        const write_qca_layout_svg_params params{.simple = true};
 
-        qca::io::write_mol_qca_layout_svg(layout, layout_stream, params);
+        write_mol_qca_layout_svg(layout, layout_stream, params);
 
         const auto svg = layout_stream.str();
 
@@ -367,7 +370,7 @@ TEST_CASE("Generate MolQCA layout in SVG", "[write-mol-qca-layout-svg]")
     {
         const auto filename = std::filesystem::temp_directory_path() / "fiction_mol_qca_layout.svg";
 
-        qca::io::write_mol_qca_layout_svg(layout, filename.string());
+        write_mol_qca_layout_svg(layout, filename.string());
 
         std::ifstream file{filename};
         REQUIRE(file.is_open());
@@ -386,20 +389,19 @@ TEST_CASE("Reject invalid MolQCA SVG output files", "[write-mol-qca-layout-svg]"
 {
     const mol_qca_cell_clk_lyt layout{{0, 0}, "molQCA SVG"};
 
-    CHECK_THROWS_AS(qca::io::write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"),
-                    std::ofstream::failure);
+    CHECK_THROWS_AS(write_mol_qca_layout_svg(layout, "/this/path/does/not/exist/mol_qca.svg"), std::ofstream::failure);
 }
 
 TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-qca-layout-svg]")
 {
     qca_cell_clk_lyt layout{{1, 0}, "QCA constant cells"};
-    layout.assign_cell_type({0, 0}, qca::qca_technology::cell_type::CONST_0);
-    layout.assign_cell_type({1, 0}, qca::qca_technology::cell_type::CONST_1);
+    layout.assign_cell_type({0, 0}, qca_technology::cell_type::CONST_0);
+    layout.assign_cell_type({1, 0}, qca_technology::cell_type::CONST_1);
 
-    std::ostringstream                         layout_stream{};
-    const qca::io::write_qca_layout_svg_params params{.simple = true};
+    std::ostringstream                layout_stream{};
+    const write_qca_layout_svg_params params{.simple = true};
 
-    qca::io::write_qca_layout_svg(layout, layout_stream, params);
+    write_qca_layout_svg(layout, layout_stream, params);
 
     const auto svg = layout_stream.str();
 

@@ -24,18 +24,19 @@
 #include <sstream>
 
 using namespace fiction;
+using namespace fiction::verification;
 
 template <typename Lyt>
-verification::gate_level_drv_stats get_drvs(const Lyt& lyt)
+gate_level_drv_stats get_drvs(const Lyt& lyt)
 {
-    verification::gate_level_drv_params ps{};
-    verification::gate_level_drv_stats  st{};
+    gate_level_drv_params ps{};
+    gate_level_drv_stats  st{};
 
     // suppress standard output
     std::stringstream ss{};
     ps.out = &ss;
 
-    verification::gate_level_drvs(lyt, ps, &st);
+    gate_level_drvs(lyt, ps, &st);
 
     return st;
 }

@@ -32,6 +32,10 @@
 #include <cstdint>
 
 using namespace fiction;
+using namespace fiction::physical_design;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::engines;
 
 using lattice       = sidb_100_cell_clk_lyt;
 using lattice_siqad = sidb_100_cell_clk_lyt_siqad;
@@ -41,72 +45,69 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
     // crossing bestagon gate
     lattice_siqad lyt{};
 
-    lyt.assign_cell_type({36, 1, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 12, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 11, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 12, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 11, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 9, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 9, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 13, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 9, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 13, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({24, 5, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 13, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 13, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({32, 2, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 8, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 8, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({32, 18, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 17, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
     BENCHMARK("QuickExact")
     {
-        const sidb::simulation::engines::quickexact_params<cell<lattice_siqad>> sim_params{
-            sidb::model::simulation_parameters{2, -0.32}};
-        return sidb::simulation::engines::quickexact<lattice_siqad>(lyt, sim_params);
+        const quickexact_params<cell<lattice_siqad>> sim_params{simulation_parameters{2, -0.32}};
+        return quickexact<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("QuickSim")
     {
-        const sidb::simulation::engines::quicksim_params qs_params{sidb::model::simulation_parameters{2, -0.32}};
-        return sidb::simulation::engines::quicksim<lattice_siqad>(lyt, qs_params);
+        const quicksim_params qs_params{simulation_parameters{2, -0.32}};
+        return quicksim<lattice_siqad>(lyt, qs_params);
     };
 
 #if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete (multi-threaded)")
     {
-        const sidb::simulation::engines::clustercomplete_params<cell<lattice_siqad>> sim_params{
-            sidb::model::simulation_parameters{3, -0.32}};
-        return sidb::simulation::engines::clustercomplete<lattice_siqad>(lyt, sim_params);
+        const clustercomplete_params<cell<lattice_siqad>> sim_params{simulation_parameters{3, -0.32}};
+        return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("ClusterComplete (single-threaded)")
     {
-        const sidb::simulation::engines::clustercomplete_params<cell<lattice_siqad>> sim_params{
-            sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
-        return sidb::simulation::engines::clustercomplete<lattice_siqad>(lyt, sim_params);
+        const clustercomplete_params<cell<lattice_siqad>> sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
 }
@@ -302,26 +303,22 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return lyt;
     };
 
-    const lattice cl_4_seg{
-        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library, hex_odd_row_gate_clk_lyt>(
-            create_diagonal_wire_with_n_non_terminating_segments(2))};
+    const lattice cl_4_seg{apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
+        create_diagonal_wire_with_n_non_terminating_segments(2))};
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
-        const sidb::simulation::engines::clustercomplete_params<> sim_params{
-            sidb::model::simulation_parameters{3, -0.32}};
-        return sidb::simulation::engines::clustercomplete<lattice>(cl_4_seg, sim_params);
+        const clustercomplete_params<> sim_params{simulation_parameters{3, -0.32}};
+        return clustercomplete<lattice>(cl_4_seg, sim_params);
     };
 
-    const lattice cl_3_seg{
-        physical_design::apply_gate_library<sidb_100_cell_clk_lyt, sidb::bestagon_library, hex_odd_row_gate_clk_lyt>(
-            create_diagonal_wire_with_n_non_terminating_segments(1))};
+    const lattice cl_3_seg{apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
+        create_diagonal_wire_with_n_non_terminating_segments(1))};
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {
-        const sidb::simulation::engines::clustercomplete_params<> sim_params{
-            sidb::model::simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
-        return sidb::simulation::engines::clustercomplete<lattice>(cl_3_seg, sim_params);
+        const clustercomplete_params<> sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        return clustercomplete<lattice>(cl_3_seg, sim_params);
     };
 }
 #endif  // FICTION_ALGLIB_ENABLED

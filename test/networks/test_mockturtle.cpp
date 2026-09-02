@@ -40,13 +40,15 @@
 #include <mockturtle/utils/tech_library.hpp>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks;
+using namespace fiction::synthesis;
 
 TEST_CASE("Simulation", "[mockturtle]")
 {
     // adapted from mockturtle/test/networks/klut.cpp
 
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     REQUIRE(mockturtle::has_compute_v<gate_layout, kitty::dynamic_truth_table>);
 
@@ -93,8 +95,8 @@ TEST_CASE("Simulation", "[mockturtle]")
 
     SECTION("Synchronization elements")
     {
-        using se_layout = layouts::gate_level_layout<layouts::synchronization_element_layout<
-            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>>;
+        using se_layout = gate_level_layout<
+            synchronization_element_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>>;
 
         REQUIRE(mockturtle::has_compute_v<se_layout, kitty::dynamic_truth_table>);
 
@@ -110,9 +112,9 @@ TEST_CASE("Simulation", "[mockturtle]")
 }
 
 template <typename Ntk, typename Lib>
-networks::technology_network map(const Ntk& ntk, const Lib& lib)
+technology_network map(const Ntk& ntk, const Lib& lib)
 {
-    return mockturtle::map<networks::technology_network>(ntk, lib);
+    return mockturtle::map<technology_network>(ntk, lib);
 }
 
 template <typename Ntk, typename Lib>
@@ -138,9 +140,8 @@ TEST_CASE("Technology mapping", "[mockturtle]")
 
     SECTION("QCA ONE library")
     {
-        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
-                       << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2 << fiction::synthesis::GATE_OR2
-                       << fiction::synthesis::GATE_MAJ3 << fiction::synthesis::DECAY_MAJ3;
+        library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND2 << GATE_OR2 << GATE_MAJ3
+                       << DECAY_MAJ3;
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
@@ -150,11 +151,8 @@ TEST_CASE("Technology mapping", "[mockturtle]")
     }
     SECTION("Bestagon library")
     {
-        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
-                       << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2
-                       << fiction::synthesis::GATE_NAND2 << fiction::synthesis::GATE_OR2
-                       << fiction::synthesis::GATE_NOR2 << fiction::synthesis::GATE_XOR2
-                       << fiction::synthesis::GATE_XNOR2;
+        library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND2 << GATE_NAND2 << GATE_OR2
+                       << GATE_NOR2 << GATE_XOR2 << GATE_XNOR2;
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);
@@ -164,17 +162,10 @@ TEST_CASE("Technology mapping", "[mockturtle]")
     }
     SECTION("Marakkalage 3-input library")
     {
-        library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
-                       << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND3
-                       << fiction::synthesis::GATE_XOR_AND << fiction::synthesis::GATE_OR_AND
-                       << fiction::synthesis::GATE_ONEHOT << fiction::synthesis::GATE_MAJ3
-                       << fiction::synthesis::GATE_GAMBLE << fiction::synthesis::GATE_DOT
-                       << fiction::synthesis::GATE_MUX << fiction::synthesis::GATE_AND_XOR
-                       << fiction::synthesis::DECAY_AND3 << fiction::synthesis::DECAY_XOR_AND
-                       << fiction::synthesis::DECAY_OR_AND << fiction::synthesis::DECAY_ONEHOT
-                       << fiction::synthesis::DECAY_MAJ3 << fiction::synthesis::DECAY_GAMBLE
-                       << fiction::synthesis::DECAY_DOT << fiction::synthesis::DECAY_MUX
-                       << fiction::synthesis::DECAY_AND_XOR;
+        library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND3 << GATE_XOR_AND << GATE_OR_AND
+                       << GATE_ONEHOT << GATE_MAJ3 << GATE_GAMBLE << GATE_DOT << GATE_MUX << GATE_AND_XOR << DECAY_AND3
+                       << DECAY_XOR_AND << DECAY_OR_AND << DECAY_ONEHOT << DECAY_MAJ3 << DECAY_GAMBLE << DECAY_DOT
+                       << DECAY_MUX << DECAY_AND_XOR;
 
         const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
         REQUIRE(read_genlib_result == lorina::return_code::success);

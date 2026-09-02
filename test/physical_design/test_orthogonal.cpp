@@ -38,36 +38,40 @@
 #include <type_traits>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks;
+using namespace fiction::physical_design;
+using namespace fiction::qca;
+using namespace fiction::synthesis;
 
 TEST_CASE("East-south coloring", "[orthogonal]")
 {
     const auto check = [](const auto& ntk)
     {
-        auto container = fiction::physical_design::detail::east_south_edge_coloring(ntk);
-        CHECK(fiction::physical_design::detail::is_east_south_colored(container.color_ntk));
+        auto container = physical_design::detail::east_south_edge_coloring(ntk);
+        CHECK(physical_design::detail::is_east_south_colored(container.color_ntk));
     };
 
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::maj1_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::maj4_network<mockturtle::aig_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::se_coloring_corner_case_network<networks::technology_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::fanout_substitution_corner_case_network<networks::technology_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::nary_operation_network<networks::technology_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::clpl<networks::technology_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::half_adder_network<mockturtle::mig_network>())});
-    check(mockturtle::fanout_view{synthesis::fanout_substitution<networks::technology_network>(
-        blueprints::full_adder_network<mockturtle::mig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::maj1_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::maj4_network<mockturtle::aig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::se_coloring_corner_case_network<technology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<technology_network>(
+        blueprints::fanout_substitution_corner_case_network<technology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::nary_operation_network<technology_network>())});
+    check(mockturtle::fanout_view{fanout_substitution<technology_network>(blueprints::clpl<technology_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::half_adder_network<mockturtle::mig_network>())});
+    check(mockturtle::fanout_view{
+        fanout_substitution<technology_network>(blueprints::full_adder_network<mockturtle::mig_network>())});
 }
 
-void check_stats(const physical_design::orthogonal_physical_design_stats& st) noexcept
+void check_stats(const orthogonal_physical_design_stats& st) noexcept
 {
     CHECK(st.x_size > 0);
     CHECK(st.y_size > 0);
@@ -78,9 +82,9 @@ void check_stats(const physical_design::orthogonal_physical_design_stats& st) no
 template <typename Lyt, typename Ntk>
 void check_ortho_equiv(const Ntk& ntk)
 {
-    physical_design::orthogonal_physical_design_stats stats{};
+    orthogonal_physical_design_stats stats{};
 
-    auto layout = physical_design::orthogonal<Lyt>(ntk, {}, &stats);
+    auto layout = orthogonal<Lyt>(ntk, {}, &stats);
 
     check_stats(stats);
     check_eq(ntk, layout);
@@ -92,24 +96,23 @@ void check_ortho_equiv_all()
     check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check_ortho_equiv<Lyt>(blueprints::maj1_network<mockturtle::aig_network>());
     check_ortho_equiv<Lyt>(blueprints::maj4_network<mockturtle::aig_network>());
-    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<networks::technology_network>());
-    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
-    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<networks::technology_network>());
-    check_ortho_equiv<Lyt>(blueprints::clpl<networks::technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::se_coloring_corner_case_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::nary_operation_network<technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::clpl<technology_network>());
 
     // constant input network
     check_ortho_equiv<Lyt>(blueprints::unbalanced_and_inv_network<mockturtle::mig_network>());
 
     // multi-output network
-    check_ortho_equiv<Lyt>(blueprints::multi_output_network<networks::technology_network>());
+    check_ortho_equiv<Lyt>(blueprints::multi_output_network<technology_network>());
 }
 
 TEST_CASE("Layout equivalence", "[algorithms]")
 {
     SECTION("Cartesian layouts")
     {
-        using gate_layout = layouts::gate_level_layout<
-            layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+        using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
         check_ortho_equiv_all<gate_layout>();
     }
@@ -117,29 +120,29 @@ TEST_CASE("Layout equivalence", "[algorithms]")
     {
         SECTION("odd row")
         {
-            using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-                layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>;
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_row_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even row")
         {
-            using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-                layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>;
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_row_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("odd column")
         {
-            using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-                layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>>;
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
         SECTION("even column")
         {
-            using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<layouts::tile_based_layout<
-                layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>>;
+            using gate_layout =
+                gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_column_hex>>>>;
 
             check_ortho_equiv_all<gate_layout>();
         }
@@ -148,27 +151,24 @@ TEST_CASE("Layout equivalence", "[algorithms]")
 
 TEST_CASE("Gate library application", "[orthogonal]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
-    using cell_layout =
-        layouts::cell_level_layout<qca::qca_technology,
-                                   layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using cell_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
 
     const auto check = [](const auto& ntk)
     {
-        physical_design::orthogonal_physical_design_stats stats{};
+        orthogonal_physical_design_stats stats{};
 
-        auto layout = physical_design::orthogonal<gate_layout>(ntk, {}, &stats);
+        auto layout = orthogonal<gate_layout>(ntk, {}, &stats);
 
-        CHECK_NOTHROW(physical_design::apply_gate_library<cell_layout, qca::qca_one_library>(layout));
+        CHECK_NOTHROW(apply_gate_library<cell_layout, qca_one_library>(layout));
     };
 
     check(blueprints::unbalanced_and_inv_network<mockturtle::aig_network>());
     check(blueprints::maj1_network<mockturtle::aig_network>());
     check(blueprints::maj4_network<mockturtle::aig_network>());
-    check(blueprints::se_coloring_corner_case_network<networks::technology_network>());
-    check(blueprints::fanout_substitution_corner_case_network<networks::technology_network>());
-    check(blueprints::clpl<networks::technology_network>());
+    check(blueprints::se_coloring_corner_case_network<technology_network>());
+    check(blueprints::fanout_substitution_corner_case_network<technology_network>());
+    check(blueprints::clpl<technology_network>());
     check(blueprints::half_adder_network<mockturtle::mig_network>());
 
     // constant input network
@@ -177,13 +177,12 @@ TEST_CASE("Gate library application", "[orthogonal]")
 
 TEST_CASE("Name conservation after orthogonal physical design", "[orthogonal]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     auto maj = blueprints::maj1_network<mockturtle::names_view<mockturtle::aig_network>>();
     maj.set_network_name("maj");
 
-    const auto layout = physical_design::orthogonal<gate_layout>(maj);
+    const auto layout = orthogonal<gate_layout>(maj);
 
     // network name
     CHECK(layout.get_layout_name() == "maj");

@@ -32,6 +32,7 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
 
 #pragma GCC diagnostic push
 #if defined(__GNUC__)
@@ -41,7 +42,7 @@ using namespace fiction;
 
 TEST_CASE("Unsigned offset coordinates", "[coordinates]")
 {
-    using coordinate = layouts::coords::offset;
+    using coordinate = coords::offset;
 
     auto td = coordinate{};
     CHECK(td.is_dead());
@@ -107,106 +108,105 @@ TEST_CASE("Unsigned offset coordinates", "[coordinates]")
 
 TEST_CASE("SiQAD coordinate conversion", "[coordinates]")
 {
-    using coordinate         = layouts::coords::siqad;
-    using coordinate_fiction = layouts::coords::cube;
+    using coordinate         = coords::siqad;
+    using coordinate_fiction = coords::cube;
 
     auto t = coordinate{};
     CHECK(t.is_dead());
-    auto fiction_d = layouts::coords::from_siqad<coordinate_fiction>(t);
+    auto fiction_d = coords::from_siqad<coordinate_fiction>(t);
     CHECK(fiction_d.is_dead());
 
     auto t0        = coordinate{0, 0, 0};
-    auto fiction_0 = layouts::coords::from_siqad<coordinate_fiction>(t0);
+    auto fiction_0 = coords::from_siqad<coordinate_fiction>(t0);
     CHECK(!fiction_0.is_dead());
 
     auto t1         = coordinate{1, 3, 1};
-    auto t1_fiction = layouts::coords::from_siqad<coordinate_fiction>(t1);
+    auto t1_fiction = coords::from_siqad<coordinate_fiction>(t1);
     CHECK(t1_fiction.x == t1.x);
     CHECK(t1_fiction.y == 7);
-    auto t2 = layouts::coords::to_siqad<coordinate_fiction>(t1_fiction);
+    auto t2 = coords::to_siqad<coordinate_fiction>(t1_fiction);
     CHECK(t1 == t2);
 
     auto t3_fiction = coordinate_fiction{1, 2};
-    auto t3_siqad   = layouts::coords::to_siqad<coordinate_fiction>(t3_fiction);
+    auto t3_siqad   = coords::to_siqad<coordinate_fiction>(t3_fiction);
     CHECK(t3_siqad.x == t3_fiction.x);
     CHECK(t3_siqad.y == 1);
     CHECK(t3_siqad.z == 0);
-    CHECK(t3_fiction == layouts::coords::from_siqad<coordinate_fiction>(t3_siqad));
+    CHECK(t3_fiction == coords::from_siqad<coordinate_fiction>(t3_siqad));
 
     auto t4_fiction = coordinate_fiction{-1, -2};
-    auto t4_siqad   = layouts::coords::to_siqad<coordinate_fiction>(t4_fiction);
+    auto t4_siqad   = coords::to_siqad<coordinate_fiction>(t4_fiction);
     CHECK(t4_siqad.x == t4_fiction.x);
     CHECK(t4_siqad.y == -1);
     CHECK(t4_siqad.z == 0);
-    CHECK(t4_fiction == layouts::coords::from_siqad<coordinate_fiction>(t4_siqad));
+    CHECK(t4_fiction == coords::from_siqad<coordinate_fiction>(t4_siqad));
 
     auto t5_siqad   = coordinate{-1, -2, 1};
-    auto t5_fiction = layouts::coords::from_siqad<coordinate_fiction>(t5_siqad);
+    auto t5_fiction = coords::from_siqad<coordinate_fiction>(t5_siqad);
     CHECK(t5_fiction.x == -1);
     CHECK(t5_fiction.y == -3);
-    CHECK(t5_fiction == layouts::coords::from_siqad<coordinate_fiction>(t5_siqad));
+    CHECK(t5_fiction == coords::from_siqad<coordinate_fiction>(t5_siqad));
 
     auto t6_fiction = coordinate_fiction{-1, -1};
-    auto t6_siqad   = layouts::coords::to_siqad<coordinate_fiction>(t6_fiction);
+    auto t6_siqad   = coords::to_siqad<coordinate_fiction>(t6_fiction);
     CHECK(t6_siqad.x == t6_fiction.x);
     CHECK(t6_siqad.y == -1);
     CHECK(t6_siqad.z == 1);
-    CHECK(t6_fiction == layouts::coords::from_siqad<coordinate_fiction>(t6_siqad));
+    CHECK(t6_fiction == coords::from_siqad<coordinate_fiction>(t6_siqad));
 
     auto t7_fiction = coordinate_fiction{-1, -3};
-    auto t7_siqad   = layouts::coords::to_siqad<coordinate_fiction>(t7_fiction);
+    auto t7_siqad   = coords::to_siqad<coordinate_fiction>(t7_fiction);
     CHECK(t7_siqad.x == t7_fiction.x);
     CHECK(t7_siqad.y == -2);
     CHECK(t7_siqad.z == 1);
-    CHECK(t7_fiction == layouts::coords::from_siqad<coordinate_fiction>(t7_siqad));
+    CHECK(t7_fiction == coords::from_siqad<coordinate_fiction>(t7_siqad));
 
     auto t8_fiction = coordinate_fiction{-1, -4};
-    auto t8_siqad   = layouts::coords::to_siqad<coordinate_fiction>(t8_fiction);
+    auto t8_siqad   = coords::to_siqad<coordinate_fiction>(t8_fiction);
     CHECK(t8_siqad.x == t8_fiction.x);
     CHECK(t8_siqad.y == -2);
     CHECK(t8_siqad.z == 0);
-    CHECK(t8_fiction == layouts::coords::from_siqad<coordinate_fiction>(t8_siqad));
+    CHECK(t8_fiction == coords::from_siqad<coordinate_fiction>(t8_siqad));
 
     // Test for overflow scenario
     auto t9        = coordinate{1, (std::numeric_limits<int32_t>::max() - 1) / 2, 1};
-    auto fiction_9 = layouts::coords::from_siqad<coordinate_fiction>(t9);
+    auto fiction_9 = coords::from_siqad<coordinate_fiction>(t9);
     CHECK(fiction_9.x == t9.x);
     CHECK(fiction_9.y == std::numeric_limits<int32_t>::max());
 
     // Test for underflow scenario
     auto t10        = coordinate{1, (std::numeric_limits<int32_t>::min() + 1) / 2};
-    auto fiction_10 = layouts::coords::from_siqad<coordinate_fiction>(t10);
+    auto fiction_10 = coords::from_siqad<coordinate_fiction>(t10);
     CHECK(fiction_10.x == t10.x);
     CHECK(fiction_10.y == std::numeric_limits<int32_t>::min() + 2);
 }
 
 TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
 {
-    auto t = layouts::coords::offset{};
+    auto t = coords::offset{};
     CHECK(t.is_dead());
-    auto fiction_d = layouts::coords::to_cube(t);
+    auto fiction_d = coords::to_cube(t);
     CHECK(fiction_d.is_dead());
 
-    auto t0        = layouts::coords::offset{0, 0, 0};
-    auto fiction_0 = layouts::coords::to_cube(t0);
+    auto t0        = coords::offset{0, 0, 0};
+    auto fiction_0 = coords::to_cube(t0);
     CHECK(!fiction_0.is_dead());
 
-    auto t1      = layouts::coords::offset{1, 3, 1};
-    auto t1_cube = layouts::coords::to_cube(t1);
+    auto t1      = coords::offset{1, 3, 1};
+    auto t1_cube = coords::to_cube(t1);
     CHECK(t1_cube.x == t1.x);
     CHECK(t1_cube.y == 3);
 
-    auto t2      = layouts::coords::offset{1, 2};
-    auto t2_cube = layouts::coords::to_cube(t2);
+    auto t2      = coords::offset{1, 2};
+    auto t2_cube = coords::to_cube(t2);
     CHECK(t2_cube.x == t2.x);
     CHECK(t2_cube.y == 2);
     CHECK(t2_cube.z == 0);
 }
 
-TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", layouts::coords::offset, layouts::coords::cube,
-                   layouts::coords::siqad)
+TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", coords::offset, coords::cube, coords::siqad)
 {
-    using lyt_t = layouts::cartesian_layout<TestType>;
+    using lyt_t = cartesian_layout<TestType>;
 
     std::vector<TestType> coord_vector{};
     coord_vector.reserve(7);
@@ -223,7 +223,7 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", layouts::coords::off
 
         CHECK(coord_vector[0] == TestType{1, 0, 0});
 
-        if constexpr (std::is_same_v<TestType, layouts::coords::siqad>)
+        if constexpr (std::is_same_v<TestType, coords::siqad>)
         {
             CHECK(coord_vector[1] == TestType{0, 0, 1});
             CHECK(coord_vector[2] == TestType{1, 0, 1});
@@ -276,19 +276,19 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", layouts::coords::off
         test_bounds_equal(lyt, {9, 9, 9}, {});
         test_bounds_equal(lyt, {0, 2, 1}, {});
 
-        if constexpr (std::is_same_v<TestType, layouts::coords::cube>)
+        if constexpr (std::is_same_v<TestType, coords::cube>)
         {
             test_bounds_equal(lyt, {0, 0, 9}, {});
         }
 
-        if constexpr (std::is_same_v<TestType, layouts::coords::siqad>)
+        if constexpr (std::is_same_v<TestType, coords::siqad>)
         {
             test_bounds_equal(lyt, {2, 0, 0}, {0, 0, 1});
             test_bounds_equal(lyt, {2, 0, 1}, {0, 1, 0});
             test_bounds_equal(lyt, {2, 1, 0}, {0, 1, 1});
             test_bounds_equal(lyt, {0, 2, 0}, {});
 
-            using h_lyt = layouts::hexagonal_layout<TestType, layouts::even_row_hex>;
+            using h_lyt = hexagonal_layout<TestType, even_row_hex>;
 
             test_bounds_equal(h_lyt{aspect_ratio<h_lyt>{0, 1, 0}}, {0, 1, 1}, {});
         }
@@ -308,31 +308,31 @@ TEMPLATE_TEST_CASE("Coordinate iteration", "[coordinates]", layouts::coords::off
 
 TEST_CASE("Computing area and volume of offset coordinates", "[coordinates]")
 {
-    CHECK(layouts::coords::area_of(layouts::coords::offset{1, 1, 1}) == 4);
-    CHECK(layouts::coords::volume_of(layouts::coords::offset{1, 1, 1}) == 8);
+    CHECK(coords::area_of(coords::offset{1, 1, 1}) == 4);
+    CHECK(coords::volume_of(coords::offset{1, 1, 1}) == 8);
 }
 
 TEST_CASE("Computing area and volume of cube coordinates", "[coordinates]")
 {
-    CHECK(layouts::coords::area_of(layouts::coords::cube{1, 1, 1}) == 4);
-    CHECK(layouts::coords::area_of(layouts::coords::cube{-1, -1, -1}) == 4);
+    CHECK(coords::area_of(coords::cube{1, 1, 1}) == 4);
+    CHECK(coords::area_of(coords::cube{-1, -1, -1}) == 4);
 
-    CHECK(layouts::coords::volume_of(layouts::coords::cube{-1, -1, -1}) == 8);
-    CHECK(layouts::coords::volume_of(layouts::coords::cube{1, 1, 1}) == 8);
+    CHECK(coords::volume_of(coords::cube{-1, -1, -1}) == 8);
+    CHECK(coords::volume_of(coords::cube{1, 1, 1}) == 8);
 }
 
 TEST_CASE("Computing area and volume of SiQAD coordinates", "[coordinates]")
 {
-    CHECK(layouts::coords::area_of(layouts::coords::siqad{1, 1, 1}) == 8);
-    CHECK(layouts::coords::area_of(layouts::coords::siqad{-1, -1, 1}) == 8);
+    CHECK(coords::area_of(coords::siqad{1, 1, 1}) == 8);
+    CHECK(coords::area_of(coords::siqad{-1, -1, 1}) == 8);
 
-    CHECK(layouts::coords::volume_of(layouts::coords::siqad{1, 1, 1}) == 8);
-    CHECK(layouts::coords::volume_of(layouts::coords::siqad{-1, -1, 1}) == 8);
+    CHECK(coords::volume_of(coords::siqad{1, 1, 1}) == 8);
+    CHECK(coords::volume_of(coords::siqad{-1, -1, 1}) == 8);
 }
 
 TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")
 {
-    using coord = layouts::coords::siqad;
+    using coord = coords::siqad;
 
     CHECK(coord{-4, 4, 1} + coord{1, -7, 1} == coord{-3, -2, 0});
     CHECK(coord{-4, 4, 1} + coord{1, -7, 0} == coord{-3, -3, 1});
@@ -343,7 +343,7 @@ TEST_CASE("Addition / subtraction of SiQAD coordinates", "[coordinates]")
 
 TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
 {
-    using coord = layouts::coords::cube;
+    using coord = coords::cube;
 
     CHECK(coord{-4, 4, -43} + coord{1, -7, 27} == coord{-3, -3, -16});
     CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});

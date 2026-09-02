@@ -31,6 +31,8 @@
 #include <memory>
 
 using namespace fiction;
+using namespace fiction::networks;
+using namespace fiction::networks::views;
 
 template <typename Ntk>
 void test_depth_view()
@@ -39,13 +41,13 @@ void test_depth_view()
     CHECK(!mockturtle::has_depth_v<Ntk>);
     CHECK(!mockturtle::has_level_v<Ntk>);
 
-    using depth_ntk = networks::views::static_depth_view<Ntk>;
+    using depth_ntk = static_depth_view<Ntk>;
 
     CHECK(mockturtle::is_network_type_v<depth_ntk>);
     CHECK(mockturtle::has_depth_v<depth_ntk>);
     CHECK(mockturtle::has_level_v<depth_ntk>);
 
-    using depth_depth_ntk = networks::views::static_depth_view<depth_ntk>;
+    using depth_depth_ntk = static_depth_view<depth_ntk>;
 
     CHECK(mockturtle::is_network_type_v<depth_depth_ntk>);
     CHECK(mockturtle::has_depth_v<depth_depth_ntk>);
@@ -59,12 +61,12 @@ TEST_CASE("Create different depth views", "[static-depth-view]")
     test_depth_view<mockturtle::mig_network>();
     test_depth_view<mockturtle::xmg_network>();
     test_depth_view<mockturtle::klut_network>();
-    test_depth_view<networks::technology_network>();
+    test_depth_view<technology_network>();
 }
 
 TEST_CASE("Update Levels Technology Network", "[static-depth-view]")
 {
-    networks::views::static_depth_view<networks::technology_network> tec_d;
+    static_depth_view<technology_network> tec_d;
 
     const auto x1_r = tec_d.create_pi();
     const auto x2_r = tec_d.create_pi();
@@ -89,7 +91,7 @@ TEST_CASE("Compute depth and levels for AIG", "[static-depth-view]")
     const auto              f4 = aig.create_nand(f2, f3);
     aig.create_po(f4);
 
-    const networks::views::static_depth_view depth_aig{aig};
+    const static_depth_view depth_aig{aig};
     CHECK(depth_aig.depth() == 3);
     CHECK(depth_aig.level(aig.get_node(a)) == 0);
     CHECK(depth_aig.level(aig.get_node(b)) == 0);
@@ -110,8 +112,8 @@ TEST_CASE("Compute depth and levels for AIG with inverter costs", "[static-depth
     const auto              f4 = aig.create_nand(f2, f3);
     aig.create_po(f4);
 
-    const networks::views::depth_view_params ps{.count_complements = true};
-    const networks::views::static_depth_view depth_aig{aig, {}, ps};
+    const depth_view_params ps{.count_complements = true};
+    const static_depth_view depth_aig{aig, {}, ps};
     CHECK(depth_aig.depth() == 6);
     CHECK(depth_aig.level(aig.get_node(a)) == 0);
     CHECK(depth_aig.level(aig.get_node(b)) == 0);
@@ -136,7 +138,7 @@ TEST_CASE("Compute critical path information", "[static-depth-view]")
     const auto f  = aig.create_and(f2, f3);
     aig.create_po(f);
 
-    const networks::views::static_depth_view depth_aig{aig};
+    const static_depth_view depth_aig{aig};
     CHECK(!mockturtle::has_is_on_critical_path_v<decltype(aig)>);
     CHECK(mockturtle::has_is_on_critical_path_v<decltype(depth_aig)>);
     CHECK(depth_aig.is_on_critical_path(aig.get_node(a)));
@@ -152,7 +154,7 @@ TEST_CASE("Compute critical path information", "[static-depth-view]")
 
 TEST_CASE("Compute levels during node construction", "[static-depth-view]")
 {
-    networks::views::static_depth_view<mockturtle::xag_network> dxag;
+    static_depth_view<mockturtle::xag_network> dxag;
 
     const auto a = dxag.create_pi();
     const auto b = dxag.create_pi();
@@ -167,8 +169,8 @@ TEST_CASE("Compute levels during node construction", "[static-depth-view]")
 
 TEST_CASE("Compute levels during node construction with cost function", "[static-depth-view]")
 {
-    const mockturtle::xag_network                                                                             xag;
-    networks::views::static_depth_view<mockturtle::xag_network, mockturtle::mc_cost<mockturtle::xag_network>> dxag{xag};
+    const mockturtle::xag_network                                                            xag;
+    static_depth_view<mockturtle::xag_network, mockturtle::mc_cost<mockturtle::xag_network>> dxag{xag};
 
     const auto a = dxag.create_pi();
     const auto b = dxag.create_pi();
@@ -183,10 +185,10 @@ TEST_CASE("Compute levels during node construction with cost function", "[static
 
 TEST_CASE("Compute levels during node construction after copy assignment", "[static-depth-view]")
 {
-    const mockturtle::xag_network                               xag{};
-    networks::views::static_depth_view<mockturtle::xag_network> dxag;
+    const mockturtle::xag_network              xag{};
+    static_depth_view<mockturtle::xag_network> dxag;
     {
-        auto tmp = std::make_unique<networks::views::static_depth_view<mockturtle::xag_network>>(xag);
+        auto tmp = std::make_unique<static_depth_view<mockturtle::xag_network>>(xag);
         dxag     = *tmp;  // copy assignment
     }
 
@@ -202,11 +204,11 @@ TEST_CASE("Compute levels during node construction after copy assignment", "[sta
 
 TEST_CASE("Compute levels during node construction after move assignment", "[static-depth-view]")
 {
-    const mockturtle::xag_network                               xag{};
-    networks::views::static_depth_view<mockturtle::xag_network> dxag;
+    const mockturtle::xag_network              xag{};
+    static_depth_view<mockturtle::xag_network> dxag;
     {
-        const std::unique_ptr<networks::views::static_depth_view<mockturtle::xag_network>> tmp =
-            std::make_unique<networks::views::static_depth_view<mockturtle::xag_network>>(xag);
+        const std::unique_ptr<static_depth_view<mockturtle::xag_network>> tmp =
+            std::make_unique<static_depth_view<mockturtle::xag_network>>(xag);
         dxag = *tmp;  // copy assignment
     }
 

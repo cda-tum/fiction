@@ -30,49 +30,51 @@
 #include <limits>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design::path_finding;
 
 TEST_CASE("Manhattan distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 8);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(manhattan_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(manhattan_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(manhattan_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 8);
 
         // ignore z-axis
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 8);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(manhattan_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(manhattan_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(manhattan_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 8);
 
         // ignore z-axis
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
 
         // negative coordinates
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == 2);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
-        CHECK(physical_design::path_finding::manhattan_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == 8);
+        CHECK(manhattan_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == 2);
+        CHECK(manhattan_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
+        CHECK(manhattan_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == 8);
     }
 }
 
@@ -80,11 +82,11 @@ TEST_CASE("Manhattan distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::manhattan_distance_functor<cart_lyt> distance{};
+        const manhattan_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -100,11 +102,11 @@ TEST_CASE("Manhattan distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::manhattan_distance_functor<cart_lyt> distance{};
+        const manhattan_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -131,69 +133,46 @@ TEST_CASE("Euclidean distance", "[distance]")
 
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}),
-                   WithinAbs(0.0, 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}),
-                   WithinAbs(0.0, 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}),
-                   WithinAbs(1.0, 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}),
-                   WithinAbs(std::sqrt(2), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}),
-                   WithinAbs(std::sqrt(10), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}),
-                   WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}),
-                   WithinAbs(std::sqrt(90), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}), WithinAbs(std::sqrt(2), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}), WithinAbs(std::sqrt(10), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}), WithinAbs(std::sqrt(90), 0.00001));
 
         // ignore z-axis
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}),
-                   WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}),
-                   WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}),
-                   WithinAbs(std::sqrt(90), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}), WithinAbs(std::sqrt(90), 0.00001));
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}),
-                   WithinAbs(0.0, 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}),
-                   WithinAbs(0.0, 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}),
-                   WithinAbs(1.0, 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}),
-                   WithinAbs(std::sqrt(2), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}),
-                   WithinAbs(std::sqrt(10), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}),
-                   WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}),
-                   WithinAbs(std::sqrt(90), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}), WithinAbs(1.0, 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}), WithinAbs(std::sqrt(2), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}), WithinAbs(std::sqrt(10), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}), WithinAbs(std::sqrt(90), 0.00001));
 
         // ignore z-axis
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}),
-                   WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}),
-                   WithinAbs(std::sqrt(40), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}),
-                   WithinAbs(std::sqrt(90), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}), WithinAbs(std::sqrt(40), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}), WithinAbs(std::sqrt(90), 0.00001));
 
         // negative coordinates
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {0, 0}, {-1, -1}),
-                   WithinAbs(std::sqrt(2), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {-4, -3}, {1, -1}),
-                   WithinAbs(std::sqrt(29), 0.00001));
-        CHECK_THAT(physical_design::path_finding::euclidean_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}),
-                   WithinAbs(std::sqrt(32), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {0, 0}, {-1, -1}), WithinAbs(std::sqrt(2), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {-4, -3}, {1, -1}), WithinAbs(std::sqrt(29), 0.00001));
+        CHECK_THAT(euclidean_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}), WithinAbs(std::sqrt(32), 0.00001));
     }
 }
 
@@ -203,11 +182,11 @@ TEST_CASE("Euclidean distance functor", "[distance]")
 
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::euclidean_distance_functor<cart_lyt> distance{};
+        const euclidean_distance_functor<cart_lyt> distance{};
 
         CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
         CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
@@ -224,11 +203,11 @@ TEST_CASE("Euclidean distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::euclidean_distance_functor<cart_lyt> distance{};
+        const euclidean_distance_functor<cart_lyt> distance{};
 
         CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
         CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));
@@ -254,36 +233,36 @@ TEST_CASE("Squared Euclidean distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}) == 10);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}) == 40);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}) == 90);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}) == 10);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}) == 40);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}) == 90);
 
         // ignore z-axis
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}) == 40);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == 40);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == 90);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {6, 2, 1}, {0, 4, 0}) == 40);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {6, 2, 0}, {0, 4, 1}) == 40);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 4, 1}, {9, 1, 1}) == 90);
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}) == 10);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}) == 40);
-        CHECK(physical_design::path_finding::squared_euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}) == 90);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {9, 1}, {6, 2}) == 10);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {6, 2}, {0, 4}) == 40);
+        CHECK(squared_euclidean_distance<cart_lyt>(layout, {0, 4}, {9, 1}) == 90);
     }
 }
 
@@ -291,11 +270,11 @@ TEST_CASE("Squared Euclidean distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::squared_euclidean_distance_functor<cart_lyt> distance{};
+        const squared_euclidean_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -312,11 +291,11 @@ TEST_CASE("Squared Euclidean distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::squared_euclidean_distance_functor<cart_lyt> distance{};
+        const squared_euclidean_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -332,58 +311,49 @@ TEST_CASE("2DDWave distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) ==
-              std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
 
         // ignore z-axis
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) ==
-              std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 2);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 3);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 8);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == std::numeric_limits<uint32_t>::max());
 
         // ignore z-axis
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 17);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 17);
 
         // negative coordinates
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {-6, -4}, {-2, -8}) ==
-              std::numeric_limits<uint32_t>::max());
-        CHECK(physical_design::path_finding::twoddwave_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
+        CHECK(twoddwave_distance<cart_lyt>(layout, {0, 0}, {-1, -1}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-2, -8}, {-6, -4}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-6, -4}, {-2, -8}) == std::numeric_limits<uint32_t>::max());
+        CHECK(twoddwave_distance<cart_lyt>(layout, {-4, -3}, {1, -1}) == 7);
     }
 }
 
@@ -391,11 +361,11 @@ TEST_CASE("2DDWave distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::twoddwave_distance_functor<cart_lyt> distance{};
+        const twoddwave_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -411,11 +381,11 @@ TEST_CASE("2DDWave distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::twoddwave_distance_functor<cart_lyt> distance{};
+        const twoddwave_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -441,39 +411,39 @@ TEST_CASE("Chebyshev distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 1);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 2);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 4);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 4);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == 2);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == 1);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 1);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 2);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 4);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 4);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == 2);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == 1);
 
         // ignore z-axis
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 9);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 9);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 0}) == 9);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0, 1}, {8, 9, 1}) == 9);
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 1);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 2);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 4);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 4);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == 2);
-        CHECK(physical_design::path_finding::chebyshev_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == 1);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 0}) == 0);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 1}, {1, 1}) == 0);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {0, 1}) == 1);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {1, 1}) == 1);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 2}, {3, 3}) == 2);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {0, 0}, {4, 4}) == 4);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {4, 4}, {0, 0}) == 4);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {2, 1}, {0, 2}) == 2);
+        CHECK(chebyshev_distance<cart_lyt>(layout, {1, 0}, {0, 1}) == 1);
     }
 }
 
@@ -481,11 +451,11 @@ TEST_CASE("Chebyshev distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using cart_lyt = cartesian_layout<coords::offset>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::chebyshev_distance_functor<cart_lyt> distance{};
+        const chebyshev_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -503,11 +473,11 @@ TEST_CASE("Chebyshev distance functor", "[distance]")
     }
     SECTION("Signed Cartesian layout")
     {
-        using cart_lyt = layouts::cartesian_layout<layouts::coords::cube>;
+        using cart_lyt = cartesian_layout<coords::cube>;
 
         const cart_lyt layout{};
 
-        const physical_design::path_finding::chebyshev_distance_functor<cart_lyt> distance{};
+        const chebyshev_distance_functor<cart_lyt> distance{};
 
         CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
         CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -525,7 +495,7 @@ TEST_CASE("A* distance", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using lyt = cartesian_layout<coords::offset>;
 
         SECTION("coordinate path distance")
         {
@@ -533,79 +503,60 @@ TEST_CASE("A* distance", "[distance]")
 
             SECTION("Default distance type (uint64_t)")
             {
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {0, 0}, {0, 0}) == 0);
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {1, 1}, {1, 1}) == 0);
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {0, 0}, {0, 1}) == 1);
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {0, 0}, {1, 1}) == 2);
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {9, 1}, {6, 2}) == 4);
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {6, 2}, {0, 4}) == 8);
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {0, 4}, {9, 1}) == 12);
+                CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 0}) == 0);
+                CHECK(a_star_distance<lyt>(layout, {1, 1}, {1, 1}) == 0);
+                CHECK(a_star_distance<lyt>(layout, {0, 0}, {0, 1}) == 1);
+                CHECK(a_star_distance<lyt>(layout, {0, 0}, {1, 1}) == 2);
+                CHECK(a_star_distance<lyt>(layout, {9, 1}, {6, 2}) == 4);
+                CHECK(a_star_distance<lyt>(layout, {6, 2}, {0, 4}) == 8);
+                CHECK(a_star_distance<lyt>(layout, {0, 4}, {9, 1}) == 12);
 
                 // A* is not meant for routing to the z-layer
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {6, 2, 0}, {0, 4, 1}) ==
-                      std::numeric_limits<uint64_t>::max());
-                CHECK(physical_design::path_finding::a_star_distance<lyt>(layout, {0, 4, 1}, {9, 1, 1}) ==
-                      std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<lyt>(layout, {6, 2, 0}, {0, 4, 1}) == std::numeric_limits<uint64_t>::max());
+                CHECK(a_star_distance<lyt>(layout, {0, 4, 1}, {9, 1, 1}) == std::numeric_limits<uint64_t>::max());
             }
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = layouts::clocked_layout<lyt>;
+            using clk_lyt = clocked_layout<lyt>;
 
             SECTION("2DDWave")
             {
-                const clk_lyt layout{{9, 4, 1}, layouts::clocking::twoddwave<clk_lyt>()};
+                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave<clk_lyt>()};
 
                 SECTION("Default distance type (uint64_t)")
                 {
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) ==
-                          std::numeric_limits<uint64_t>::max());
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) ==
-                          std::numeric_limits<uint64_t>::max());
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) ==
-                          std::numeric_limits<uint64_t>::max());
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 0}) == 0);
+                    CHECK(a_star_distance<clk_lyt>(layout, {1, 1}, {1, 1}) == 0);
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {0, 1}) == 1);
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 0}, {1, 1}) == 2);
+                    CHECK(a_star_distance<clk_lyt>(layout, {9, 1}, {6, 2}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(a_star_distance<clk_lyt>(layout, {6, 2}, {0, 4}) == std::numeric_limits<uint64_t>::max());
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 4}, {9, 1}) == std::numeric_limits<uint64_t>::max());
 
                     // A* is not meant for routing to the z-layer
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) ==
+                    CHECK(a_star_distance<clk_lyt>(layout, {6, 2, 0}, {0, 4, 1}) ==
                           std::numeric_limits<uint64_t>::max());
-                    CHECK(physical_design::path_finding::a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) ==
+                    CHECK(a_star_distance<clk_lyt>(layout, {0, 4, 1}, {9, 1, 1}) ==
                           std::numeric_limits<uint64_t>::max());
                 }
                 SECTION("Floating-point distance type (double)")
                 {
                     using namespace Catch::Matchers;
 
-                    CHECK_THAT(
-                        (physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 0})),
-                        WithinAbs(0.0, 0.00001));
-                    CHECK_THAT(
-                        (physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {1, 1}, {1, 1})),
-                        WithinAbs(0.0, 0.00001));
-                    CHECK_THAT(
-                        (physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 1})),
-                        WithinAbs(1.0, 0.00001));
-                    CHECK_THAT(
-                        (physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {0, 0}, {1, 1})),
-                        WithinAbs(2.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 0})), WithinAbs(0.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {1, 1}, {1, 1})), WithinAbs(0.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {0, 1})), WithinAbs(1.0, 0.00001));
+                    CHECK_THAT((a_star_distance<clk_lyt, double>(layout, {0, 0}, {1, 1})), WithinAbs(2.0, 0.00001));
 
-                    CHECK(std::isinf(
-                        physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})));
-                    CHECK(std::isinf(
-                        physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})));
-                    CHECK(std::isinf(
-                        physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {9, 1}, {6, 2})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2}, {0, 4})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4}, {9, 1})));
 
                     // A* is not meant for routing in the z-layer
-                    CHECK(std::isinf(
-                        physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})));
-                    CHECK(std::isinf(
-                        physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})));
-                    CHECK(std::isinf(
-                        physical_design::path_finding::a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 1}, {0, 4, 0})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {6, 2, 0}, {0, 4, 1})));
+                    CHECK(std::isinf(a_star_distance<clk_lyt, double>(layout, {0, 4, 1}, {9, 1, 1})));
                 }
             }
         }
@@ -616,13 +567,13 @@ TEST_CASE("A* distance functor", "[distance]")
 {
     SECTION("Unsigned Cartesian layout")
     {
-        using lyt = layouts::cartesian_layout<layouts::coords::offset>;
+        using lyt = cartesian_layout<coords::offset>;
 
         SECTION("coordinate path distance")
         {
             const lyt layout{{9, 4, 1}};
 
-            const physical_design::path_finding::a_star_distance_functor<lyt> distance{};
+            const a_star_distance_functor<lyt> distance{};
 
             CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
             CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -638,15 +589,15 @@ TEST_CASE("A* distance functor", "[distance]")
         }
         SECTION("clocking path distance")
         {
-            using clk_lyt = layouts::clocked_layout<lyt>;
+            using clk_lyt = clocked_layout<lyt>;
 
             SECTION("2DDWave")
             {
-                const clk_lyt layout{{9, 4, 1}, layouts::clocking::twoddwave<clk_lyt>()};
+                const clk_lyt layout{{9, 4, 1}, clocking::twoddwave<clk_lyt>()};
 
                 SECTION("Default distance type (uint64_t)")
                 {
-                    const physical_design::path_finding::a_star_distance_functor<clk_lyt> distance{};
+                    const a_star_distance_functor<clk_lyt> distance{};
 
                     CHECK(distance(layout, {0, 0}, {0, 0}) == 0);
                     CHECK(distance(layout, {1, 1}, {1, 1}) == 0);
@@ -664,7 +615,7 @@ TEST_CASE("A* distance functor", "[distance]")
                 {
                     using namespace Catch::Matchers;
 
-                    const physical_design::path_finding::a_star_distance_functor<clk_lyt, double> distance{};
+                    const a_star_distance_functor<clk_lyt, double> distance{};
 
                     CHECK_THAT(distance(layout, {0, 0}, {0, 0}), WithinAbs(0.0, 0.00001));
                     CHECK_THAT(distance(layout, {1, 1}, {1, 1}), WithinAbs(0.0, 0.00001));

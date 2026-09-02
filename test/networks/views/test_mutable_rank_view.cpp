@@ -40,6 +40,10 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::networks;
+using namespace fiction::networks::views;
+using namespace fiction::synthesis;
+using namespace fiction::verification;
 
 TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, mockturtle::mig_network,
                    mockturtle::xag_network, mockturtle::xmg_network, mockturtle::klut_network,
@@ -55,7 +59,7 @@ TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, moc
     CHECK(!mockturtle::has_foreach_gate_in_rank_v<TestType>);
     CHECK(!mockturtle::is_topologically_sorted_v<TestType>);
 
-    using rank_ntk = networks::views::mutable_rank_view<TestType>;
+    using rank_ntk = mutable_rank_view<TestType>;
 
     CHECK(mockturtle::is_network_type_v<rank_ntk>);
     CHECK(mockturtle::has_rank_position_v<rank_ntk>);
@@ -66,7 +70,7 @@ TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, moc
     CHECK(mockturtle::has_foreach_gate_in_rank_v<rank_ntk>);
     CHECK(mockturtle::is_topologically_sorted_v<rank_ntk>);
 
-    using rank_rank_ntk = networks::views::mutable_rank_view<rank_ntk>;
+    using rank_rank_ntk = mutable_rank_view<rank_ntk>;
 
     CHECK(mockturtle::is_network_type_v<rank_rank_ntk>);
     CHECK(mockturtle::has_rank_position_v<rank_rank_ntk>);
@@ -80,8 +84,8 @@ TEMPLATE_TEST_CASE("Traits", "[mutable-rank-view]", mockturtle::aig_network, moc
 
 TEST_CASE("Test constructors", "[mutable-rank-view]")
 {
-    networks::technology_network                                     tec{};
-    networks::views::mutable_rank_view<networks::technology_network> tec_r;
+    technology_network                    tec{};
+    mutable_rank_view<technology_network> tec_r;
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -94,11 +98,11 @@ TEST_CASE("Test constructors", "[mutable-rank-view]")
     tec_r.create_po(a1_r);
     tec_r.update_ranks();
 
-    const auto tec_r_cpy(tec_r);
-    const auto tec_r_eq     = tec_r;
-    const auto tec_r_create = networks::views::mutable_rank_view(tec);
-    const std::vector<std::vector<mockturtle::node<networks::technology_network>>> ranks = {{2, 3}, {4}};
-    const auto tec_r_vector = networks::views::mutable_rank_view(tec, ranks);
+    const auto                                                           tec_r_cpy(tec_r);
+    const auto                                                           tec_r_eq     = tec_r;
+    const auto                                                           tec_r_create = mutable_rank_view(tec);
+    const std::vector<std::vector<mockturtle::node<technology_network>>> ranks        = {{2, 3}, {4}};
+    const auto                                                           tec_r_vector = mutable_rank_view(tec, ranks);
     CHECK(tec_r_vector.rank_position(2) == tec_r.rank_position(2));
     CHECK(tec_r_vector.rank_position(3) == tec_r.rank_position(3));
     CHECK(tec_r_vector.rank_position(4) == tec_r.rank_position(4));
@@ -112,7 +116,7 @@ TEST_CASE("Test constructors", "[mutable-rank-view]")
 
 TEST_CASE("Foreach", "[mutable-rank-view]")
 {
-    networks::views::mutable_rank_view<networks::technology_network> tec_r;
+    mutable_rank_view<technology_network> tec_r;
 
     const auto x1_r = tec_r.create_pi();
     const auto x2_r = tec_r.create_pi();
@@ -121,8 +125,8 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
     CHECK(has_update_ranks_v<decltype(tec_r)>);
     tec_r.update_ranks();
 
-    std::vector<mockturtle::node<networks::technology_network>> pis{};
-    std::vector<mockturtle::node<networks::technology_network>> cis{};
+    std::vector<mockturtle::node<technology_network>> pis{};
+    std::vector<mockturtle::node<technology_network>> cis{};
     tec_r.foreach_pi([&pis](const auto& n) { pis.push_back(n); });
 
     tec_r.foreach_ci([&cis](const auto& n) { cis.push_back(n); });
@@ -132,7 +136,7 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
     tec_r.foreach_node_in_rank(0, [&cis](const auto& n) { cis.push_back(n); });
     CHECK(pis == cis);
 
-    std::vector<mockturtle::node<networks::technology_network>> node_vector{};
+    std::vector<mockturtle::node<technology_network>> node_vector{};
     tec_r.foreach_node([&node_vector](const auto& n) { node_vector.push_back(n); });
     CHECK(node_vector.size() == tec_r.size() - 2);
 
@@ -147,11 +151,11 @@ TEST_CASE("Foreach", "[mutable-rank-view]")
 
 TEST_CASE("Construct mutable_rank_view with given rank order", "[mutable-rank-view]")
 {
-    networks::technology_network tec{};
+    technology_network tec{};
 
-    CHECK(mockturtle::has_clear_visited_v<networks::technology_network>);
-    CHECK(mockturtle::has_visited_v<networks::technology_network>);
-    CHECK(mockturtle::has_set_visited_v<networks::technology_network>);
+    CHECK(mockturtle::has_clear_visited_v<technology_network>);
+    CHECK(mockturtle::has_visited_v<technology_network>);
+    CHECK(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -165,11 +169,9 @@ TEST_CASE("Construct mutable_rank_view with given rank order", "[mutable-rank-vi
     tec.create_po(f2);
     tec.create_po(f3);
 
-    const std::vector<std::vector<networks::technology_network::node>> rank_array = {{2, 4, 3, 5, 6},
-                                                                                     {7, 8, 9, 11},
-                                                                                     {10, 12}};
+    const std::vector<std::vector<technology_network::node>> rank_array = {{2, 4, 3, 5, 6}, {7, 8, 9, 11}, {10, 12}};
 
-    auto vpi_r = networks::views::mutable_rank_view(tec, rank_array);
+    auto vpi_r = mutable_rank_view(tec, rank_array);
 
     CHECK(vpi_r.rank_width(0) == 5);
     CHECK(vpi_r.rank_width(1) == 4);
@@ -182,17 +184,17 @@ TEST_CASE("Construct mutable_rank_view with given rank order", "[mutable-rank-vi
 
     vpi_r.swap(3, 4);
     CHECK(vpi_r.at_rank_position(0, 2) == 3);
-    vpi_r.sort_rank(0u, std::greater<mockturtle::node<networks::technology_network>>{});
+    vpi_r.sort_rank(0u, std::greater<mockturtle::node<technology_network>>{});
     CHECK(vpi_r.at_rank_position(0, 2) == 4);
 }
 
 TEST_CASE("Check modify ranks", "[mutable-rank-view]")
 {
-    networks::technology_network tec{};
+    technology_network tec{};
 
-    CHECK(mockturtle::has_clear_visited_v<networks::technology_network>);
-    CHECK(mockturtle::has_visited_v<networks::technology_network>);
-    CHECK(mockturtle::has_set_visited_v<networks::technology_network>);
+    CHECK(mockturtle::has_clear_visited_v<technology_network>);
+    CHECK(mockturtle::has_visited_v<technology_network>);
+    CHECK(mockturtle::has_set_visited_v<technology_network>);
 
     const auto x1 = tec.create_pi();
     const auto x2 = tec.create_pi();
@@ -206,14 +208,14 @@ TEST_CASE("Check modify ranks", "[mutable-rank-view]")
     tec.create_po(f2);
     tec.create_po(f3);
 
-    synthesis::network_balancing_params ps;
+    network_balancing_params ps;
     ps.unify_outputs = true;
 
-    const auto tec_balanced = synthesis::network_balancing<networks::technology_network>(tec, ps);
+    const auto tec_balanced = network_balancing<technology_network>(tec, ps);
 
-    auto vpi_r = networks::views::mutable_rank_view(tec_balanced);
+    auto vpi_r = mutable_rank_view(tec_balanced);
 
-    const std::vector<networks::technology_network::node> nodes = {13, 10, 14};
+    const std::vector<technology_network::node> nodes = {13, 10, 14};
     vpi_r.set_ranks(2, nodes);
 
     CHECK(vpi_r.check_validity() == 1);
@@ -244,14 +246,13 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
     ntk.create_po(f2_t);
     ntk.create_po(f3_t);
 
-    synthesis::network_balancing_params ps;
+    network_balancing_params ps;
     ps.unify_outputs = true;
 
-    const auto ntk_r = networks::views::mutable_rank_view(ntk);
+    const auto ntk_r = mutable_rank_view(ntk);
 
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::verification::virtual_miter<networks::technology_network>(ntk, ntk_r), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(ntk, ntk_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
@@ -260,8 +261,8 @@ TEMPLATE_TEST_CASE("Check equivalence checking", "[mutable-rank-view]", mockturt
 
 TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
 {
-    networks::technology_network                               tec{};
-    networks::virtual_pi_network<networks::technology_network> vpi{};
+    technology_network                     tec{};
+    virtual_pi_network<technology_network> vpi{};
 
     const auto a = vpi.create_pi();
     const auto b = vpi.create_pi();
@@ -288,11 +289,10 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
     tec.create_po(f2_t);
     tec.create_po(f3_t);
 
-    auto vpi_r = networks::views::mutable_rank_view(vpi);
+    auto vpi_r = mutable_rank_view(vpi);
 
     mockturtle::equivalence_checking_stats st;
-    const auto                             maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::verification::virtual_miter<networks::technology_network>(tec, vpi_r), {}, &st);
+    const auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     const bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);
@@ -301,7 +301,7 @@ TEST_CASE("Check equivalence checking for virtual PIs", "[mutable-rank-view]")
 
 TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
 {
-    networks::technology_network tec{};
+    technology_network tec{};
 
     const auto a = tec.create_pi();
     const auto b = tec.create_pi();
@@ -313,14 +313,13 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     tec.create_po(n1);
     tec.create_po(n2);
 
-    auto vpi_r = networks::views::mutable_rank_view(tec);
+    auto vpi_r = mutable_rank_view(tec);
 
     // after the swap no equivalence is giving due to different ordering of the pi when calling `foreach_pi`
     vpi_r.swap(2, 3);
 
     mockturtle::equivalence_checking_stats st;
-    auto                                   maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::verification::virtual_miter<networks::technology_network>(tec, vpi_r), {}, &st);
+    auto maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     bool cec_m = *maybe_cec_m;
     CHECK(cec_m == 0);
@@ -329,8 +328,7 @@ TEST_CASE("Check PI order for equivalence checking", "[mutable-rank-view]")
     // _storage)
     vpi_r.rearrange_pis();
 
-    maybe_cec_m = mockturtle::equivalence_checking(
-        *fiction::verification::virtual_miter<networks::technology_network>(tec, vpi_r), {}, &st);
+    maybe_cec_m = mockturtle::equivalence_checking(*virtual_miter<technology_network>(tec, vpi_r), {}, &st);
     REQUIRE(maybe_cec_m.has_value());
     cec_m = *maybe_cec_m;
     CHECK(cec_m == 1);

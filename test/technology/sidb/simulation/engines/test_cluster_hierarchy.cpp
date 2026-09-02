@@ -33,6 +33,8 @@
 #include <cstdint>
 
 using namespace fiction;
+using namespace fiction::sidb;
+using namespace fiction::sidb::surfaces;
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 using set_container = std::set<uint64>;
@@ -41,7 +43,7 @@ using set_container = phmap::flat_hash_set<uint64_t>;
 #endif
 
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 01", "[sidb-cluster-hierarchy]",
-                   sidb_cell_clk_lyt_siqad, sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
@@ -86,21 +88,21 @@ TEMPLATE_TEST_CASE("SiDB cluster hierarchy of a Y-shape SiDB OR gate with input 
 
 TEMPLATE_TEST_CASE("SiDB cluster hierarchy of an 8 DB layout with separated groups of SiDBs",
                    "[sidb-cluster-hierarchy]", sidb_cell_clk_lyt_siqad,
-                   sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
 {
     TestType lyt{};
 
-    lyt.assign_cell_type({50, -11, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({54, -9, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({50, -11, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({54, -9, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, -5, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, -3, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, -5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, -3, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({-2, -2, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({2, -2, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({-2, -2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, -2, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({53, 10, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({48, 13, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({53, 10, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({48, 13, 1}, sidb_technology::cell_type::NORMAL);
 
     const sidb::simulation::engines::detail::binary_cluster_hierarchy_node& h =
         sidb::simulation::engines::detail::cluster_hierarchy(lyt);

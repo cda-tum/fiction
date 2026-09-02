@@ -24,10 +24,11 @@
 #include <set>
 
 using namespace fiction;
+using namespace fiction::layouts;
 
 TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
 {
-    using layout = layouts::cartesian_layout<layouts::coords::offset>;
+    using layout = cartesian_layout<coords::offset>;
 
     CHECK(has_north_v<layout>);
     CHECK(has_east_v<layout>);
@@ -54,22 +55,22 @@ TEST_CASE("Cartesian layout traits", "[cartesian-layout]")
 
 TEST_CASE("Coordinate creation", "[cartesian-layout]")
 {
-    using layout = layouts::cartesian_layout<layouts::coords::offset>;
+    using layout = cartesian_layout<coords::offset>;
 
     const layout lyt{{3, 3}};
 
-    CHECK(lyt.coord(0, 0, 0) == layouts::coords::offset{0, 0, 0});
-    CHECK(lyt.coord(0, 0, 1) == layouts::coords::offset{0, 0, 1});
-    CHECK(lyt.coord(1, 0) == layouts::coords::offset{1, 0});
-    CHECK(lyt.coord(2, 0) == layouts::coords::offset{2, 0});
-    CHECK(lyt.coord(0, 1) == layouts::coords::offset{0, 1});
-    CHECK(lyt.coord(1, 1) == layouts::coords::offset{1, 1});
-    CHECK(lyt.coord(2, 1) == layouts::coords::offset{2, 1});
+    CHECK(lyt.coord(0, 0, 0) == coords::offset{0, 0, 0});
+    CHECK(lyt.coord(0, 0, 1) == coords::offset{0, 0, 1});
+    CHECK(lyt.coord(1, 0) == coords::offset{1, 0});
+    CHECK(lyt.coord(2, 0) == coords::offset{2, 0});
+    CHECK(lyt.coord(0, 1) == coords::offset{0, 1});
+    CHECK(lyt.coord(1, 1) == coords::offset{1, 1});
+    CHECK(lyt.coord(2, 1) == coords::offset{2, 1});
 }
 
 TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 {
-    const layouts::cartesian_layout original{{5, 5, 0}};
+    const cartesian_layout original{{5, 5, 0}};
 
     auto copy = original.clone();
 
@@ -86,11 +87,11 @@ TEST_CASE("Deep copy Cartesian layout", "[cartesian-layout]")
 
 TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 {
-    layouts::cartesian_layout<layouts::coords::offset>::aspect_ratio ar{9, 9, 1};
+    cartesian_layout<coords::offset>::aspect_ratio ar{9, 9, 1};
 
-    layouts::cartesian_layout layout{ar};
+    cartesian_layout layout{ar};
 
-    std::set<layouts::cartesian_layout<layouts::coords::offset>::coordinate> visited{};
+    std::set<cartesian_layout<coords::offset>::coordinate> visited{};
 
     const auto check1 = [&visited, &ar, &layout](const auto& t)
     {
@@ -117,7 +118,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    layouts::cartesian_layout<layouts::coords::offset>::aspect_ratio ar_ground{ar.x, ar.y, 0};
+    cartesian_layout<coords::offset>::aspect_ratio ar_ground{ar.x, ar.y, 0};
 
     const auto check2 = [&visited, &ar_ground, &layout](const auto& t)
     {
@@ -146,7 +147,7 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
     visited.clear();
 
-    layouts::cartesian_layout<layouts::coords::offset>::coordinate start{2, 2}, stop{5, 4};
+    cartesian_layout<coords::offset>::coordinate start{2, 2}, stop{5, 4};
 
     const auto check3 = [&visited, &start, &stop, &layout](const auto& t)
     {
@@ -177,9 +178,9 @@ TEST_CASE("Cartesian coordinate iteration", "[cartesian-layout]")
 
 TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
 {
-    const layouts::cartesian_layout<layouts::coords::offset>::aspect_ratio ar{10, 10, 1};
+    const cartesian_layout<coords::offset>::aspect_ratio ar{10, 10, 1};
 
-    layouts::cartesian_layout layout{ar};
+    cartesian_layout layout{ar};
 
     const auto check = [&](const auto& t, const auto& at1, const auto& at2, const auto& b, const auto& bt)
     {
@@ -197,11 +198,11 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
         CHECK(layout.is_at_any_border(bt));
     };
 
-    auto t = layouts::cartesian_layout<layouts::coords::offset>::coordinate{5, 5};
+    auto t = cartesian_layout<coords::offset>::coordinate{5, 5};
 
-    auto nt  = layouts::cartesian_layout<layouts::coords::offset>::coordinate{5, 4};
-    auto net = layouts::cartesian_layout<layouts::coords::offset>::coordinate{6, 4};
-    auto bnt = layouts::cartesian_layout<layouts::coords::offset>::coordinate{5, 0};
+    auto nt  = cartesian_layout<coords::offset>::coordinate{5, 4};
+    auto net = cartesian_layout<coords::offset>::coordinate{6, 4};
+    auto bnt = cartesian_layout<coords::offset>::coordinate{5, 0};
 
     check(t, layout.north(t), nt, bnt, layout.north(bnt));
     CHECK(layout.is_north_of(t, nt));
@@ -213,9 +214,9 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(layout.north_east(t) == net);
     CHECK(layout.north_east(bnt) == bnt);
 
-    auto et  = layouts::cartesian_layout<layouts::coords::offset>::coordinate{6, 5};
-    auto set = layouts::cartesian_layout<layouts::coords::offset>::coordinate{6, 6};
-    auto bet = layouts::cartesian_layout<layouts::coords::offset>::coordinate{10, 5};
+    auto et  = cartesian_layout<coords::offset>::coordinate{6, 5};
+    auto set = cartesian_layout<coords::offset>::coordinate{6, 6};
+    auto bet = cartesian_layout<coords::offset>::coordinate{10, 5};
 
     check(t, layout.east(t), et, bet, layout.east(bet));
     CHECK(layout.is_east_of(t, et));
@@ -227,9 +228,9 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(layout.south_east(t) == set);
     CHECK(layout.south_east(bet) == bet);
 
-    auto st  = layouts::cartesian_layout<layouts::coords::offset>::coordinate{5, 6};
-    auto swt = layouts::cartesian_layout<layouts::coords::offset>::coordinate{4, 6};
-    auto bst = layouts::cartesian_layout<layouts::coords::offset>::coordinate{5, 10};
+    auto st  = cartesian_layout<coords::offset>::coordinate{5, 6};
+    auto swt = cartesian_layout<coords::offset>::coordinate{4, 6};
+    auto bst = cartesian_layout<coords::offset>::coordinate{5, 10};
 
     check(t, layout.south(t), st, bst, layout.south(bst));
     CHECK(layout.is_south_of(t, st));
@@ -241,9 +242,9 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(layout.south_west(t) == swt);
     CHECK(layout.south_west(bst) == bst);
 
-    auto wt  = layouts::cartesian_layout<layouts::coords::offset>::coordinate{4, 5};
-    auto nwt = layouts::cartesian_layout<layouts::coords::offset>::coordinate{4, 4};
-    auto bwt = layouts::cartesian_layout<layouts::coords::offset>::coordinate{0, 5};
+    auto wt  = cartesian_layout<coords::offset>::coordinate{4, 5};
+    auto nwt = cartesian_layout<coords::offset>::coordinate{4, 4};
+    auto bwt = cartesian_layout<coords::offset>::coordinate{0, 5};
 
     check(t, layout.west(t), wt, bwt, layout.west(bwt));
     CHECK(layout.is_west_of(t, wt));
@@ -255,7 +256,7 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(layout.north_west(t) == nwt);
     CHECK(layout.north_west(bwt) == bwt);
 
-    auto at  = layouts::cartesian_layout<layouts::coords::offset>::coordinate{5, 5, 1};
+    auto at  = cartesian_layout<coords::offset>::coordinate{5, 5, 1};
     auto bat = layout.above(at);
 
     CHECK(!at.is_dead());
@@ -265,7 +266,7 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(!layout.is_at_any_border(at));
 
     // cover corner case
-    const layouts::cartesian_layout<layouts::coords::offset> planar_layout{{1, 1, 0}};
+    const cartesian_layout<coords::offset> planar_layout{{1, 1, 0}};
 
     auto dat = planar_layout.above({1, 1, 1});
     CHECK(dat.is_dead());
@@ -281,25 +282,22 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
     CHECK(layout.is_ground_layer(bbt));
 
     const auto v1 = layout.adjacent_coordinates({5, 5});
-    const auto s1 = std::set<layouts::cartesian_layout<layouts::coords::offset>::coordinate>{v1.cbegin(), v1.cend()};
-    const auto s2 =
-        std::set<layouts::cartesian_layout<layouts::coords::offset>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
+    const auto s1 = std::set<cartesian_layout<coords::offset>::coordinate>{v1.cbegin(), v1.cend()};
+    const auto s2 = std::set<cartesian_layout<coords::offset>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}};
 
     CHECK(s1 == s2);
 
-    layout.foreach_adjacent_coordinate({5, 5},
-                                       [](const auto& adj)
-                                       {
-                                           CHECK(
-                                               std::set<layouts::cartesian_layout<layouts::coords::offset>::coordinate>{
-                                                   {{4, 5}, {5, 4}, {6, 5}, {5, 6}}}
-                                                   .count(adj));
-                                       });
+    layout.foreach_adjacent_coordinate(
+        {5, 5},
+        [](const auto& adj)
+        {
+            CHECK(std::set<cartesian_layout<coords::offset>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
+        });
 }
 
 TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
 {
-    using lyt = layouts::cartesian_layout<layouts::coords::siqad>;
+    using lyt = cartesian_layout<coords::siqad>;
 
     CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
     CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);

@@ -26,6 +26,7 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::networks::io;
 
 // adapted from https://stackoverflow.com/questions/44508228/c-how-to-check-if-ostringstream-is-empty
 template <typename Stream>
@@ -46,7 +47,7 @@ TEST_CASE("Read Verilog", "[network-reader]")
 
     std::ostringstream os{};
 
-    networks::io::network_reader<aig_ptr> reader{mux21_file_name, os};
+    network_reader<aig_ptr> reader{mux21_file_name, os};
 
     // no error messages
     REQUIRE(is_stream_empty(os));

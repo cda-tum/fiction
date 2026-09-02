@@ -34,6 +34,8 @@
 #include <string_view>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::layouts::io;
 
 namespace
 {
@@ -43,7 +45,7 @@ void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
 {
     std::stringstream dot_stream{};
 
-    layouts::io::write_dot_layout<Lyt, Drawer>(lyt, dot_stream);
+    write_dot_layout<Lyt, Drawer>(lyt, dot_stream);
 
     CHECK(dot_stream.str() == layout_print);
 }
@@ -52,8 +54,7 @@ void compare_dot_layout(const Lyt& lyt, const std::string_view& layout_print)
 
 TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     const gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -87,14 +88,12 @@ TEST_CASE("Draw empty Cartesian layout", "[dot-drawers]")
                     "}}\n",
                     FICTION_VERSION, FICTION_REPO);
 
-    compare_dot_layout<gate_layout, layouts::io::gate_layout_cartesian_drawer<gate_layout, false, false>>(layout,
-                                                                                                          layout_print);
+    compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
 }
 
 TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     SECTION("AND-OR Layout")
     {
@@ -135,8 +134,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_cartesian_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("XOR-MAJ Layout")
     {
@@ -183,8 +181,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_cartesian_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("Crossing Layout")
     {
@@ -233,8 +230,7 @@ TEST_CASE("Draw Cartesian layout blueprints", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_cartesian_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_cartesian_drawer<gate_layout, false, false>>(layout, layout_print);
     }
 }
 
@@ -242,8 +238,8 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
 {
     SECTION("odd row")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_row_hex>>>>;
 
         const gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -288,13 +284,12 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("even row")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_row_hex>>>>;
 
         const gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -340,13 +335,12 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("odd column")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_column_hex>>>>;
 
         const gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -391,13 +385,12 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
     SECTION("even column")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_column_hex>>>>;
 
         const gate_layout layout{gate_layout::aspect_ratio{2, 2}};
 
@@ -443,8 +436,7 @@ TEST_CASE("Draw empty hexagonal layouts", "[dot-drawers]")
                         "}}\n",
                         FICTION_VERSION, FICTION_REPO);
 
-        compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-            layout, layout_print);
+        compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout, layout_print);
     }
 }
 
@@ -452,8 +444,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
 {
     SECTION("odd row")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_row_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -500,8 +492,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "}}\n",
                 FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -564,14 +556,14 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "}}\n",
                 FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
     SECTION("even row")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_row_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -618,8 +610,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "}}\n",
                 FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -683,14 +675,14 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                 "}}\n",
                 FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
     SECTION("odd column")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, odd_column_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -744,8 +736,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                             "}}\n",
                             FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -812,14 +804,14 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                             "}}\n",
                             FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
     SECTION("even column")
     {
-        using gate_layout = layouts::gate_level_layout<layouts::clocked_layout<
-            layouts::tile_based_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>>;
+        using gate_layout =
+            gate_level_layout<clocked_layout<tile_based_layout<hexagonal_layout<coords::offset, even_column_hex>>>>;
 
         SECTION("AND-OR Layout")
         {
@@ -873,8 +865,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                             "}}\n",
                             FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
         SECTION("Crossing Layout")
         {
@@ -941,8 +933,8 @@ TEST_CASE("Draw hexagonal layout blueprints", "[dot-drawers]")
                             "}}\n",
                             FICTION_VERSION, FICTION_REPO);
 
-            compare_dot_layout<gate_layout, layouts::io::gate_layout_hexagonal_drawer<gate_layout, false, false>>(
-                layout, layout_print);
+            compare_dot_layout<gate_layout, gate_layout_hexagonal_drawer<gate_layout, false, false>>(layout,
+                                                                                                     layout_print);
         }
     }
 }

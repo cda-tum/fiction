@@ -30,10 +30,11 @@
 #include <cstdint>
 
 using namespace fiction;
+using namespace fiction::networks;
 
 TEST_CASE("Check loops", "[virtual-pi-network]")
 {
-    networks::virtual_pi_network<networks::technology_network> vpi{};
+    virtual_pi_network<technology_network> vpi{};
 
     CHECK(is_virtual_network_type_v<decltype(vpi)>);
 
@@ -93,7 +94,7 @@ TEST_CASE("Check loops", "[virtual-pi-network]")
 
 TEST_CASE("Copy technology network and size consistency", "[virtual-pi-network]")
 {
-    networks::virtual_pi_network<networks::technology_network> vpi{};
+    virtual_pi_network<technology_network> vpi{};
 
     const auto a = vpi.create_pi();
     const auto b = vpi.create_pi();
@@ -124,7 +125,7 @@ TEST_CASE("Copy technology network and size consistency", "[virtual-pi-network]"
 TEMPLATE_TEST_CASE("Copy networks and size consistency", "[virtual-pi-network]", mockturtle::aig_network,
                    mockturtle::xag_network, mockturtle::mig_network, mockturtle::xmg_network)
 {
-    networks::virtual_pi_network<TestType> vpi{};
+    virtual_pi_network<TestType> vpi{};
 
     const auto a  = vpi.create_pi();
     const auto b  = vpi.create_pi();

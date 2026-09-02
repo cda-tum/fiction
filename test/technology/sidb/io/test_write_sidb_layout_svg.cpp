@@ -38,6 +38,10 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::sidb;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::surfaces;
 
 /**
  * This function takes an SVG string as input and returns a new string with all
@@ -377,10 +381,10 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 {
     TestType layout{{4, 4}};
 
-    layout.assign_cell_type({0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 3}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 3}, sidb_technology::cell_type::NORMAL);
 
     SECTION("cell-level layout")
     {
@@ -388,9 +392,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -407,9 +411,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::DARK};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -426,10 +430,10 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::DARK,
-                .lattice_mode     = sidb::io::write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{
+                .color_background = write_sidb_layout_svg_params::color_mode::DARK,
+                .lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -444,20 +448,20 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
     }
     SECTION("charge distribution")
     {
-        sidb::surfaces::charge_distribution_surface cds{layout};
-        cds.assign_charge_state({0, 0}, sidb::model::charge_state::POSITIVE);
-        cds.assign_charge_state({1, 1}, sidb::model::charge_state::NEGATIVE);
-        cds.assign_charge_state({1, 0}, sidb::model::charge_state::NEUTRAL);
-        cds.assign_charge_state({3, 3}, sidb::model::charge_state::NEUTRAL);
+        charge_distribution_surface cds{layout};
+        cds.assign_charge_state({0, 0}, charge_state::POSITIVE);
+        cds.assign_charge_state({1, 1}, charge_state::NEGATIVE);
+        cds.assign_charge_state({1, 0}, charge_state::NEUTRAL);
+        cds.assign_charge_state({3, 3}, charge_state::NEUTRAL);
 
         SECTION("light mode")
         {
 
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT};
-            sidb::io::write_sidb_layout_svg(cds, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
+            write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -475,9 +479,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge
 
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::DARK};
-            sidb::io::write_sidb_layout_svg(cds, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
+            write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -498,10 +502,10 @@ TEMPLATE_TEST_CASE(
 {
     TestType layout{{4, 4}};
 
-    layout.assign_cell_type({0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 1, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
 
     SECTION("cell-level layout")
     {
@@ -509,9 +513,9 @@ TEMPLATE_TEST_CASE(
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -528,9 +532,9 @@ TEMPLATE_TEST_CASE(
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::DARK};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -545,20 +549,20 @@ TEMPLATE_TEST_CASE(
     }
     SECTION("charge distribution")
     {
-        sidb::surfaces::charge_distribution_surface cds{layout};
-        cds.assign_charge_state({0, 0}, sidb::model::charge_state::POSITIVE);
-        cds.assign_charge_state({1, 0, 1}, sidb::model::charge_state::NEGATIVE);
-        cds.assign_charge_state({1, 0}, sidb::model::charge_state::NEUTRAL);
-        cds.assign_charge_state({3, 1, 1}, sidb::model::charge_state::NEUTRAL);
+        charge_distribution_surface cds{layout};
+        cds.assign_charge_state({0, 0}, charge_state::POSITIVE);
+        cds.assign_charge_state({1, 0, 1}, charge_state::NEGATIVE);
+        cds.assign_charge_state({1, 0}, charge_state::NEUTRAL);
+        cds.assign_charge_state({3, 1, 1}, charge_state::NEUTRAL);
 
         SECTION("light mode")
         {
 
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT};
-            sidb::io::write_sidb_layout_svg(cds, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
+            write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -576,9 +580,9 @@ TEMPLATE_TEST_CASE(
 
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::DARK};
-            sidb::io::write_sidb_layout_svg(cds, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
+            write_sidb_layout_svg(cds, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -598,10 +602,10 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
 {
     TestType layout{{4, 4}};
 
-    layout.assign_cell_type({0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 3}, sidb::sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({1, 0}, sidb_technology::cell_type::NORMAL);
+    layout.assign_cell_type({3, 3}, sidb_technology::cell_type::NORMAL);
 
     SECTION("cell-level layout")
     {
@@ -609,9 +613,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::LIGHT};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();
@@ -628,9 +632,9 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         {
             std::stringstream os_light_cds;
 
-            sidb::io::write_sidb_layout_svg_params const params{
-                .color_background = sidb::io::write_sidb_layout_svg_params::color_mode::DARK};
-            sidb::io::write_sidb_layout_svg(layout, os_light_cds, params);
+            write_sidb_layout_svg_params const params{.color_background =
+                                                          write_sidb_layout_svg_params::color_mode::DARK};
+            write_sidb_layout_svg(layout, os_light_cds, params);
 
             // Retrieve the SVG content
             const auto generated_svg = os_light_cds.str();

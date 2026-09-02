@@ -23,12 +23,13 @@
 #include <string_view>
 
 using namespace fiction;
+using namespace fiction::utils::io;
 
 TEST_CASE("CSV writer", "[csv-writer]")
 {
     std::stringstream ss{};
 
-    utils::io::csv_writer writer(ss);
+    csv_writer writer(ss);
 
     SECTION("writing single integer value")
     {

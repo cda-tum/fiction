@@ -26,10 +26,11 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::physical_design;
 
 template <typename Lyt>
-void check_containing_objectives(const std::vector<physical_design::routing_objective<Lyt>>& objectives,
-                                 const std::vector<physical_design::routing_objective<Lyt>>& expected_objectives)
+void check_containing_objectives(const std::vector<routing_objective<Lyt>>& objectives,
+                                 const std::vector<routing_objective<Lyt>>& expected_objectives)
 {
     CHECK(objectives.size() == expected_objectives.size());
 
@@ -42,14 +43,14 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     SECTION("Simple wire connection")
     {
         const auto layout     = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
-        const auto objectives = physical_design::extract_routing_objectives(layout);
+        const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 1}, .target = {2, 1}}});
     }
     SECTION("Two paths wire connections")
     {
         const auto layout     = blueprints::unbalanced_and_layout<cart_gate_clk_lyt>();
-        const auto objectives = physical_design::extract_routing_objectives(layout);
+        const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 2}, .target = {2, 0}},
                                                  {.source = {1, 0}, .target = {2, 0}},
@@ -58,7 +59,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     SECTION("Three paths wire connections")
     {
         const auto layout     = blueprints::three_wire_paths_gate_layout<cart_gate_clk_lyt>();
-        const auto objectives = physical_design::extract_routing_objectives(layout);
+        const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 0}, .target = {4, 0}},
                                                  {.source = {0, 2}, .target = {4, 2}},
@@ -67,7 +68,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     SECTION("Direct gate connections")
     {
         const auto layout     = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
-        const auto objectives = physical_design::extract_routing_objectives(layout);
+        const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {1, 1}, .target = {2, 1}},
                                                  {.source = {2, 0}, .target = {2, 1}},
@@ -80,7 +81,7 @@ TEST_CASE("Extract routing objectives", "[routing-utils]")
     SECTION("Two incoming gate wires")
     {
         const auto layout     = blueprints::use_and_gate_layout<cart_gate_clk_lyt>();
-        const auto objectives = physical_design::extract_routing_objectives(layout);
+        const auto objectives = extract_routing_objectives(layout);
 
         check_containing_objectives(objectives, {{.source = {0, 1}, .target = {1, 2}},
                                                  {.source = {3, 3}, .target = {1, 2}},
@@ -102,7 +103,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     {
         auto layout = blueprints::straight_wire_gate_layout<cart_gate_clk_lyt>();
 
-        physical_design::clear_routing(layout);
+        clear_routing(layout);
 
         CHECK(layout.is_empty_tile({1, 1}));
         check_non_empty_tile(layout, {0, 1});
@@ -112,7 +113,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     {
         auto layout = blueprints::xor_maj_gate_layout<cart_gate_clk_lyt>();
 
-        physical_design::clear_routing(layout);
+        clear_routing(layout);
 
         check_non_empty_tile(layout, {1, 1});
         check_non_empty_tile(layout, {2, 0});
@@ -126,7 +127,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     {
         auto layout = blueprints::crossing_layout<cart_gate_clk_lyt>();
 
-        physical_design::clear_routing(layout);
+        clear_routing(layout);
 
         check_non_empty_tile(layout, {1, 0});
         check_non_empty_tile(layout, {0, 1});
@@ -145,7 +146,7 @@ TEST_CASE("Clear routing", "[routing-utils]")
     {
         auto layout = blueprints::fanout_layout<cart_gate_clk_lyt>();
 
-        physical_design::clear_routing(layout);
+        clear_routing(layout);
 
         check_non_empty_tile(layout, {0, 1});
         check_non_empty_tile(layout, {1, 1});

@@ -36,6 +36,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::surfaces;
+using namespace fiction::utils::stl;
 
 TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
 {
@@ -171,9 +177,9 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using lattice = sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_cell_clk_lyt_siqad>;
+    using lattice = lattice<lattice_100, sidb_cell_clk_lyt_siqad>;
 
-    sidb::simulation::result<lattice> sim_result{};
+    result<lattice> sim_result{};
 
     sim_result.algorithm_name     = "TestSim";
     sim_result.simulation_runtime = 42s;  // NOLINT(misc-include-cleaner)
@@ -204,11 +210,10 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    <elec_dist>\n"
             "    </elec_dist>\n"
             "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO,
-            fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
             sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-        sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
+        write_sqd_sim_result(sim_result, simulation_stream);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -237,13 +242,12 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    <elec_dist>\n"
             "    </elec_dist>\n"
             "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO,
-            fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
             sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param1", "value1");
 
-        sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
+        write_sqd_sim_result(sim_result, simulation_stream);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -273,13 +277,12 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
             "    <elec_dist>\n"
             "    </elec_dist>\n"
             "</sim_out>\n",
-            FICTION_VERSION, FICTION_REPO,
-            fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+            FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
             sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
         sim_result.additional_simulation_parameters.emplace("param3", 3.14);
 
-        sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
+        write_sqd_sim_result(sim_result, simulation_stream);
 
         CHECK(simulation_stream.str() == sim_result_str);
     }
@@ -303,11 +306,11 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
     lyt.assign_cell_type({17, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb::model::simulation_parameters params{2, -0.32};
+    const simulation_parameters params{2, -0.32};
 
-    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lat{lyt};
+    const lattice<lattice_100, sidb_layout> lat{lyt};
 
-    auto sim_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lat, params);
+    auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
     sim_result.algorithm_name = "ExGS";
 
@@ -344,12 +347,11 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
                     "state_count=\"3\">-0-0-0-</dist>\n"
                     "    </elec_dist>\n"
                     "</sim_out>\n",
-                    FICTION_VERSION, FICTION_REPO,
-                    fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+                    FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
                     sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf,
                     sim_result.sim_params.epsilon_r, sim_result.sim_params.mu_minus);
 
-    sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
+    write_sqd_sim_result(sim_result, simulation_stream);
 
     CHECK(simulation_stream.str() == sim_result_str);
 }
@@ -366,11 +368,11 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
     lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
 
-    const sidb::model::simulation_parameters params{3, -0.32};
+    const simulation_parameters params{3, -0.32};
 
-    const sidb::surfaces::lattice<sidb::surfaces::lattice_100, sidb_layout> lat{lyt};
+    const lattice<lattice_100, sidb_layout> lat{lyt};
 
-    auto sim_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lat, params);
+    auto sim_result = exhaustive_ground_state_simulation(lat, params);
 
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};
@@ -402,12 +404,11 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
         "        <dist energy=\"0.000000\" count=\"1\" physically_valid=\"1\" state_count=\"3\">0-0</dist>\n"
         "    </elec_dist>\n"
         "</sim_out>\n",
-        FICTION_VERSION, FICTION_REPO,
-        fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+        FICTION_VERSION, FICTION_REPO, fmt::format("{:%Y-%m-%d %H:%M:%S}", safe_localtime(current_time)),
         sim_result.simulation_runtime.count(), sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r,
         sim_result.sim_params.mu_minus);
 
-    sidb::simulation::io::write_sqd_sim_result(sim_result, simulation_stream);
+    write_sqd_sim_result(sim_result, simulation_stream);
 
     CHECK(simulation_stream.str() == sim_result_str);
 }

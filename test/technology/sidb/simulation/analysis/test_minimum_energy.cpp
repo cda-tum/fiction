@@ -29,67 +29,68 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::sidb::surfaces;
 
-using lattice = sidb_100_cell_clk_lyt_siqad;
+using layout = sidb_100_cell_clk_lyt_siqad;
 
 TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {
-    lattice lyt{};
+    layout lyt{};
 
     SECTION("layout with no SiDB placed")
     {
-        const sidb::surfaces::charge_distribution_surface                 charge_layout{lyt};
-        std::vector<sidb::surfaces::charge_distribution_surface<lattice>> all_lyts{};
+        const charge_distribution_surface                charge_layout{lyt};
+        std::vector<charge_distribution_surface<layout>> all_lyts{};
 
-        CHECK(std::isinf(sidb::simulation::analysis::minimum_energy(all_lyts.begin(), all_lyts.end())));
+        CHECK(std::isinf(minimum_energy(all_lyts.begin(), all_lyts.end())));
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(std::abs(sidb::simulation::analysis::minimum_energy(all_lyts.begin(), all_lyts.end()) - 0) < 0.00000001);
+        CHECK(std::abs(minimum_energy(all_lyts.begin(), all_lyts.end()) - 0) < 0.00000001);
     }
 
     SECTION("layout with one SiDB placed")
     {
-        lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, layout::cell_type::NORMAL);
 
-        const sidb::surfaces::charge_distribution_surface                 charge_layout{lyt};
-        std::vector<sidb::surfaces::charge_distribution_surface<lattice>> all_lyts{};
+        const charge_distribution_surface                charge_layout{lyt};
+        std::vector<charge_distribution_surface<layout>> all_lyts{};
 
-        CHECK(std::isinf(sidb::simulation::analysis::minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
+        CHECK(std::isinf(minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
 
         all_lyts.push_back(charge_layout);
 
-        CHECK(std::abs(sidb::simulation::analysis::minimum_energy(all_lyts.cbegin(), all_lyts.cend()) - 0) <
-              0.00000001);
+        CHECK(std::abs(minimum_energy(all_lyts.cbegin(), all_lyts.cend()) - 0) < 0.00000001);
     }
 
     SECTION("layout with three SiDBs placed")
     {
-        lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 10}, lattice::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 9}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 10}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 9}, layout::cell_type::NORMAL);
 
-        sidb::surfaces::charge_distribution_surface                       charge_layout_first{lyt};
-        std::vector<sidb::surfaces::charge_distribution_surface<lattice>> all_lyts{};
+        charge_distribution_surface                      charge_layout_first{lyt};
+        std::vector<charge_distribution_surface<layout>> all_lyts{};
 
-        CHECK(std::isinf(sidb::simulation::analysis::minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
+        CHECK(std::isinf(minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
 
-        charge_layout_first.assign_charge_state({0, 0}, sidb::model::charge_state::NEUTRAL);
+        charge_layout_first.assign_charge_state({0, 0}, charge_state::NEUTRAL);
 
         charge_layout_first.update_local_internal_potential();
         charge_layout_first.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_first);
 
-        sidb::surfaces::charge_distribution_surface charge_layout_second{lyt};
+        charge_distribution_surface charge_layout_second{lyt};
 
-        charge_layout_second.assign_charge_state({10, 10}, sidb::model::charge_state::NEUTRAL);
-        charge_layout_second.assign_charge_state({9, 9}, sidb::model::charge_state::NEUTRAL);
+        charge_layout_second.assign_charge_state({10, 10}, charge_state::NEUTRAL);
+        charge_layout_second.assign_charge_state({9, 9}, charge_state::NEUTRAL);
 
         charge_layout_second.update_local_internal_potential();
         charge_layout_second.recompute_electrostatic_potential_energy();
         all_lyts.push_back(charge_layout_second);
 
-        CHECK_THAT(sidb::simulation::analysis::minimum_energy(all_lyts.cbegin(), all_lyts.cend()),
-                   Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
     }
 }

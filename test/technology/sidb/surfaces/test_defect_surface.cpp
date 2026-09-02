@@ -34,23 +34,18 @@
 #include <utility>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::surfaces;
 
 TEMPLATE_TEST_CASE(
     "SiDB surface traits and construction", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     SECTION("Without SiDB lattice")
     {
@@ -62,7 +57,7 @@ TEMPLATE_TEST_CASE(
 
         TestType lyt{};
 
-        using defect_layout = sidb::surfaces::defect_surface<TestType>;
+        using defect_layout = defect_surface<TestType>;
         CHECK(is_cell_level_layout_v<defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_layout>);
@@ -72,7 +67,7 @@ TEMPLATE_TEST_CASE(
         const defect_layout defect_lyt{};
         const defect_layout defect_lyt_from_lyt{defect_lyt};
 
-        using defect_defect_layout = sidb::surfaces::defect_surface<defect_layout>;
+        using defect_defect_layout = defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
@@ -81,7 +76,7 @@ TEMPLATE_TEST_CASE(
     }
     SECTION("With SiDB lattice")
     {
-        using lattice = sidb::surfaces::lattice<sidb::surfaces::lattice_100, TestType>;
+        using lattice = lattice<lattice_100, TestType>;
         REQUIRE(is_cell_level_layout_v<lattice>);
         CHECK(!has_assign_sidb_defect_v<lattice>);
         CHECK(!has_get_sidb_defect_v<lattice>);
@@ -89,7 +84,7 @@ TEMPLATE_TEST_CASE(
         CHECK(!is_sidb_defect_surface_v<lattice>);
         CHECK(is_sidb_lattice_100_v<lattice>);
 
-        using defect_layout = sidb::surfaces::defect_surface<lattice>;
+        using defect_layout = defect_surface<lattice>;
         CHECK(is_cell_level_layout_v<defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_layout>);
@@ -97,7 +92,7 @@ TEMPLATE_TEST_CASE(
         CHECK(is_sidb_defect_surface_v<defect_layout>);
         CHECK(is_sidb_lattice_100_v<lattice>);
 
-        using defect_defect_layout = sidb::surfaces::defect_surface<defect_layout>;
+        using defect_defect_layout = defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
@@ -108,7 +103,7 @@ TEMPLATE_TEST_CASE(
 
     SECTION("With SiDB lattice, Si-111")
     {
-        using lattice = sidb::surfaces::lattice<sidb::surfaces::lattice_111, TestType>;
+        using lattice = lattice<lattice_111, TestType>;
         REQUIRE(is_cell_level_layout_v<lattice>);
         CHECK(!has_assign_sidb_defect_v<lattice>);
         CHECK(!has_get_sidb_defect_v<lattice>);
@@ -116,7 +111,7 @@ TEMPLATE_TEST_CASE(
         CHECK(!is_sidb_defect_surface_v<lattice>);
         CHECK(is_sidb_lattice_111_v<lattice>);
 
-        using defect_layout = sidb::surfaces::defect_surface<lattice>;
+        using defect_layout = defect_surface<lattice>;
         CHECK(is_cell_level_layout_v<defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_layout>);
@@ -124,7 +119,7 @@ TEMPLATE_TEST_CASE(
         CHECK(is_sidb_defect_surface_v<defect_layout>);
         CHECK(is_sidb_lattice_111_v<lattice>);
 
-        using defect_defect_layout = sidb::surfaces::defect_surface<defect_layout>;
+        using defect_defect_layout = defect_surface<defect_layout>;
         CHECK(is_cell_level_layout_v<defect_defect_layout>);
         CHECK(has_assign_sidb_defect_v<defect_defect_layout>);
         CHECK(has_get_sidb_defect_v<defect_defect_layout>);
@@ -136,42 +131,35 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "SiDB surface construction with aspect ratio as input", "[sidb-surface]",
-    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
-         sidb::sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>),
-    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
-         sidb::sidb_technology,
-         layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>>),
-    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
-         sidb::sidb_technology,
-         layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>>),
-    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
-         sidb::sidb_technology,
-         layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>>),
-    (sidb::surfaces::defect_surface<layouts::cell_level_layout<
-         sidb::sidb_technology,
-         layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>>))
+    (defect_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>>),
+    (defect_surface<cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>>),
+    (defect_surface<
+        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>>),
+    (defect_surface<
+        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>>),
+    (defect_surface<
+        cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>>))
 {
     TestType defect_layout{{4, 4}};
 
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
-                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
+                                     { CHECK(defect_layout.get_defect(c).type == defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
-    static const std::map<cell<TestType>, sidb::model::defect> defect_map{
-        {{{0, 0}, sidb::model::defect{sidb::model::defect_type::NONE}},
-         {{0, 1}, sidb::model::defect{sidb::model::defect_type::DB}},
-         {{0, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY}},
-         {{0, 3}, sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE}},
-         {{0, 4}, sidb::model::defect{sidb::model::defect_type::DIHYDRIDE_PAIR}},
-         {{0, 5}, sidb::model::defect{sidb::model::defect_type::ONE_BY_ONE}},
-         {{0, 6}, sidb::model::defect{sidb::model::defect_type::THREE_BY_ONE}},
-         {{0, 7}, sidb::model::defect{sidb::model::defect_type::SILOXANE}},
-         {{0, 8}, sidb::model::defect{sidb::model::defect_type::RAISED_SI}},
-         {{0, 9}, sidb::model::defect{sidb::model::defect_type::MISSING_DIMER}},
-         {{0, 10}, sidb::model::defect{sidb::model::defect_type::ETCH_PIT}},
-         {{0, 11}, sidb::model::defect{sidb::model::defect_type::STEP_EDGE}},
-         {{0, 12}, sidb::model::defect{sidb::model::defect_type::GUNK}},
-         {{0, 13}, sidb::model::defect{sidb::model::defect_type::UNKNOWN}}}};
+    static const std::map<cell<TestType>, defect> defect_map{{{{0, 0}, defect{defect_type::NONE}},
+                                                              {{0, 1}, defect{defect_type::DB}},
+                                                              {{0, 2}, defect{defect_type::SI_VACANCY}},
+                                                              {{0, 3}, defect{defect_type::SINGLE_DIHYDRIDE}},
+                                                              {{0, 4}, defect{defect_type::DIHYDRIDE_PAIR}},
+                                                              {{0, 5}, defect{defect_type::ONE_BY_ONE}},
+                                                              {{0, 6}, defect{defect_type::THREE_BY_ONE}},
+                                                              {{0, 7}, defect{defect_type::SILOXANE}},
+                                                              {{0, 8}, defect{defect_type::RAISED_SI}},
+                                                              {{0, 9}, defect{defect_type::MISSING_DIMER}},
+                                                              {{0, 10}, defect{defect_type::ETCH_PIT}},
+                                                              {{0, 11}, defect{defect_type::STEP_EDGE}},
+                                                              {{0, 12}, defect{defect_type::GUNK}},
+                                                              {{0, 13}, defect{defect_type::UNKNOWN}}}};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
@@ -188,112 +176,83 @@ TEMPLATE_TEST_CASE(
     CHECK(defect_layout.num_defects() == defect_map.size() - 1);  // NONE is not a defect
 
     // erase defects
-    defect_layout.foreach_sidb_defect(
-        [&defect_layout](const auto& cd)
-        { defect_layout.assign_defect(cd.first, sidb::model::defect{sidb::model::defect_type::NONE}); });
+    defect_layout.foreach_sidb_defect([&defect_layout](const auto& cd)
+                                      { defect_layout.assign_defect(cd.first, defect{defect_type::NONE}); });
 
     // read defects
     defect_layout.foreach_sidb_defect([](const auto&) { CHECK(false); });
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
-                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
+                                     { CHECK(defect_layout.get_defect(c).type == defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
 }
 
 TEMPLATE_TEST_CASE(
     "Overwrite SiDB defect", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     TestType lyt{{1, 1}};
 
-    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
+    defect_surface<TestType> defect_layout{lyt};
 
-    defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-    CHECK(defect_layout.get_defect({0, 0}).type == sidb::model::defect_type::UNKNOWN);
+    defect_layout.assign_defect({0, 0}, defect{defect_type::UNKNOWN, 1});
+    CHECK(defect_layout.get_defect({0, 0}).type == defect_type::UNKNOWN);
     CHECK(defect_layout.get_defect({0, 0}).charge == 1);
     CHECK(defect_layout.num_defects() == 1);
 
-    defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::DB, -1});
+    defect_layout.assign_defect({0, 0}, defect{defect_type::DB, -1});
     CHECK(defect_layout.get_defect({0, 0}).charge == -1);
     CHECK(defect_layout.num_defects() == 1);
 }
 
 TEMPLATE_TEST_CASE(
     "Non-defective SiDB surface", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     TestType lyt{{4, 4}};
 
-    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
+    defect_surface<TestType> defect_layout{lyt};
 
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
-                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
+                                     { CHECK(defect_layout.get_defect(c).type == defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
 }
 
 TEMPLATE_TEST_CASE(
     "Assigning SiDB surface defects", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
-    static const std::map<cell<TestType>, sidb::model::defect> defect_map{
-        {{{0, 0}, sidb::model::defect{sidb::model::defect_type::NONE}},
-         {{0, 1}, sidb::model::defect{sidb::model::defect_type::DB}},
-         {{0, 2}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY}},
-         {{0, 3}, sidb::model::defect{sidb::model::defect_type::SINGLE_DIHYDRIDE}},
-         {{0, 4}, sidb::model::defect{sidb::model::defect_type::DIHYDRIDE_PAIR}},
-         {{0, 5}, sidb::model::defect{sidb::model::defect_type::ONE_BY_ONE}},
-         {{0, 6}, sidb::model::defect{sidb::model::defect_type::THREE_BY_ONE}},
-         {{0, 7}, sidb::model::defect{sidb::model::defect_type::SILOXANE}},
-         {{0, 8}, sidb::model::defect{sidb::model::defect_type::RAISED_SI}},
-         {{0, 9}, sidb::model::defect{sidb::model::defect_type::MISSING_DIMER}},
-         {{0, 10}, sidb::model::defect{sidb::model::defect_type::ETCH_PIT}},
-         {{0, 11}, sidb::model::defect{sidb::model::defect_type::STEP_EDGE}},
-         {{0, 12}, sidb::model::defect{sidb::model::defect_type::GUNK}},
-         {{0, 13}, sidb::model::defect{sidb::model::defect_type::UNKNOWN}}}};
+    static const std::map<cell<TestType>, defect> defect_map{{{{0, 0}, defect{defect_type::NONE}},
+                                                              {{0, 1}, defect{defect_type::DB}},
+                                                              {{0, 2}, defect{defect_type::SI_VACANCY}},
+                                                              {{0, 3}, defect{defect_type::SINGLE_DIHYDRIDE}},
+                                                              {{0, 4}, defect{defect_type::DIHYDRIDE_PAIR}},
+                                                              {{0, 5}, defect{defect_type::ONE_BY_ONE}},
+                                                              {{0, 6}, defect{defect_type::THREE_BY_ONE}},
+                                                              {{0, 7}, defect{defect_type::SILOXANE}},
+                                                              {{0, 8}, defect{defect_type::RAISED_SI}},
+                                                              {{0, 9}, defect{defect_type::MISSING_DIMER}},
+                                                              {{0, 10}, defect{defect_type::ETCH_PIT}},
+                                                              {{0, 11}, defect{defect_type::STEP_EDGE}},
+                                                              {{0, 12}, defect{defect_type::GUNK}},
+                                                              {{0, 13}, defect{defect_type::UNKNOWN}}}};
 
     TestType lyt{aspect_ratio<TestType>{0, defect_map.size() - 1}};
 
-    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
+    defect_surface<TestType> defect_layout{lyt};
 
     // assign defects
     for (const auto& [c, d] : defect_map)
@@ -310,44 +269,34 @@ TEMPLATE_TEST_CASE(
     CHECK(defect_layout.num_defects() == defect_map.size() - 1);  // NONE is not a defect
 
     // erase defects
-    defect_layout.foreach_sidb_defect(
-        [&defect_layout](const auto& cd)
-        { defect_layout.assign_defect(cd.first, sidb::model::defect{sidb::model::defect_type::NONE}); });
+    defect_layout.foreach_sidb_defect([&defect_layout](const auto& cd)
+                                      { defect_layout.assign_defect(cd.first, defect{defect_type::NONE}); });
 
     // read defects
     defect_layout.foreach_sidb_defect([](const auto&) { CHECK(false); });
     defect_layout.foreach_coordinate([&defect_layout](const auto& c)
-                                     { CHECK(defect_layout.get_defect(c).type == sidb::model::defect_type::NONE); });
+                                     { CHECK(defect_layout.get_defect(c).type == defect_type::NONE); });
 
     CHECK(defect_layout.num_defects() == 0);
 }
 
 TEMPLATE_TEST_CASE(
     "Charged and neutral SiDB defect extent", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     TestType lyt{aspect_ratio<TestType>{11, 9}};
 
-    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
+    defect_surface<TestType> defect_layout{lyt};
 
     SECTION("charged defects")
     {
         // assign defects
-        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 4}, defect{defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 5}, defect{defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -394,8 +343,8 @@ TEMPLATE_TEST_CASE(
     SECTION("charged defects, user_defined_spacing_charged_defects is true, (26,13) as charged_defect_spacing")
     {
         // assign defects
-        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 4}, defect{defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 5}, defect{defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -442,8 +391,8 @@ TEMPLATE_TEST_CASE(
     SECTION("charged defects, user_defined_spacing_charged_defects is true, (0,0) as charged_defect_spacing")
     {
         // assign defects
-        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 4}, defect{defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 5}, defect{defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -470,8 +419,8 @@ TEMPLATE_TEST_CASE(
     SECTION("neutral defects")
     {
         // assign defects
-        defect_layout.assign_defect({5, 4}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
-        defect_layout.assign_defect({5, 5}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({5, 4}, defect{defect_type::SILOXANE});
+        defect_layout.assign_defect({5, 5}, defect{defect_type::SILOXANE});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -488,30 +437,21 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Charged and neutral SiDB defect extent at layout edges", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     TestType lyt{aspect_ratio<TestType>{11, 9}};
 
-    sidb::surfaces::defect_surface<TestType> defect_layout{lyt};
+    defect_surface<TestType> defect_layout{lyt};
 
     SECTION("charged defects")
     {
         // assign defects
-        defect_layout.assign_defect({5, 0}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
-        defect_layout.assign_defect({0, 5}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({5, 0}, defect{defect_type::SI_VACANCY});
+        defect_layout.assign_defect({0, 5}, defect{defect_type::SI_VACANCY});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -557,8 +497,8 @@ TEMPLATE_TEST_CASE(
     SECTION("neutral defects")
     {
         // assign defects
-        defect_layout.assign_defect({5, 0}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
-        defect_layout.assign_defect({0, 5}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
+        defect_layout.assign_defect({5, 0}, defect{defect_type::SILOXANE});
+        defect_layout.assign_defect({0, 5}, defect{defect_type::SILOXANE});
 
         CHECK(defect_layout.num_defects() == 2);
 
@@ -574,49 +514,39 @@ TEMPLATE_TEST_CASE(
 
 TEMPLATE_TEST_CASE(
     "Ignore SiDB defect types", "[sidb-surface]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_row_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::odd_column_hex>>>),
-    (layouts::cell_level_layout<
-        sidb::sidb_technology,
-        layouts::clocked_layout<layouts::hexagonal_layout<layouts::coords::offset, layouts::even_column_hex>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_row_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, odd_column_hex>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<hexagonal_layout<coords::offset, even_column_hex>>>))
 {
     TestType lyt{aspect_ratio<TestType>{4, 4}};
 
     SECTION("DB")
     {
-        const sidb::surfaces::defect_surface_params params{
-            std::unordered_set<sidb::model::defect_type>{sidb::model::defect_type::DB}};
-        sidb::surfaces::defect_surface<TestType> defect_layout{lyt, params};
+        const defect_surface_params params{std::unordered_set<defect_type>{defect_type::DB}};
+        defect_surface<TestType>    defect_layout{lyt, params};
 
-        defect_layout.assign_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::DB});
+        defect_layout.assign_defect({2, 2}, defect{defect_type::DB});
 
         // number of defects should not count the ignored defect
         CHECK(defect_layout.num_defects() == 0);
     }
     SECTION("Siloxane + Silicon Vacancy")
     {
-        const sidb::surfaces::defect_surface_params params{std::unordered_set<sidb::model::defect_type>{
-            {sidb::model::defect_type::SILOXANE, sidb::model::defect_type::SI_VACANCY}}};
-        sidb::surfaces::defect_surface<TestType>    defect_layout{lyt, params};
+        const defect_surface_params params{
+            std::unordered_set<defect_type>{{defect_type::SILOXANE, defect_type::SI_VACANCY}}};
+        defect_surface<TestType> defect_layout{lyt, params};
 
-        defect_layout.assign_defect({2, 2}, sidb::model::defect{sidb::model::defect_type::SILOXANE});
-        defect_layout.assign_defect({2, 3}, sidb::model::defect{sidb::model::defect_type::SI_VACANCY});
+        defect_layout.assign_defect({2, 2}, defect{defect_type::SILOXANE});
+        defect_layout.assign_defect({2, 3}, defect{defect_type::SI_VACANCY});
 
         // number of defects should not count the ignored defect
         CHECK(defect_layout.num_defects() == 0);
 
-        defect_layout.assign_defect({0, 0}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, -1});
-        defect_layout.assign_defect({3, 3}, sidb::model::defect{sidb::model::defect_type::UNKNOWN, 1});
-        defect_layout.assign_defect({1, 1}, sidb::model::defect{sidb::model::defect_type::STEP_EDGE});
+        defect_layout.assign_defect({0, 0}, defect{defect_type::UNKNOWN, -1});
+        defect_layout.assign_defect({3, 3}, defect{defect_type::UNKNOWN, 1});
+        defect_layout.assign_defect({1, 1}, defect{defect_type::STEP_EDGE});
 
         CHECK(defect_layout.num_charged_defects() == 2);
         CHECK(defect_layout.num_neutral_defects() == 1);

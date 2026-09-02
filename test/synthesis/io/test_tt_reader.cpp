@@ -25,6 +25,7 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::synthesis::io;
 
 TEST_CASE("Read truth tables", "[tt-reader]")
 {
@@ -36,7 +37,7 @@ TEST_CASE("Read truth tables", "[tt-reader]")
 
     std::stringstream stream{std::string{file}};
 
-    synthesis::io::tt_reader<kitty::dynamic_truth_table> reader{stream};
+    tt_reader<kitty::dynamic_truth_table> reader{stream};
 
     const auto check = [&reader](const auto num_vars, const std::string& hex)
     {

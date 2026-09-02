@@ -31,16 +31,17 @@
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
-    using gate_layout = layouts::gate_level_layout<
-        layouts::clocked_layout<layouts::tile_based_layout<layouts::cartesian_layout<layouts::coords::offset>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
-    const auto layout = physical_design::orthogonal<gate_layout>(ntk);
+    const auto layout = orthogonal<gate_layout>(ntk);
 
-    physical_design::post_layout_optimization_params full_optimization_params{};
+    post_layout_optimization_params full_optimization_params{};
 
     full_optimization_params.max_gate_relocations = (layout.x() + 1) * (layout.y() + 1);
     full_optimization_params.optimize_pos_only    = false;
@@ -49,10 +50,10 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     BENCHMARK("post_layout_optimization: full optimization")
     {
-        physical_design::post_layout_optimization<gate_layout>(layout.clone(), full_optimization_params);
+        post_layout_optimization<gate_layout>(layout.clone(), full_optimization_params);
     };
 
-    physical_design::post_layout_optimization_params wiring_reduction_only_params{};
+    post_layout_optimization_params wiring_reduction_only_params{};
 
     wiring_reduction_only_params.max_gate_relocations = 0;
     wiring_reduction_only_params.optimize_pos_only    = false;
@@ -61,7 +62,7 @@ TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 
     BENCHMARK("post_layout_optimization: wiring reduction only")
     {
-        physical_design::post_layout_optimization<gate_layout>(layout.clone(), wiring_reduction_only_params);
+        post_layout_optimization<gate_layout>(layout.clone(), wiring_reduction_only_params);
     };
 }
 

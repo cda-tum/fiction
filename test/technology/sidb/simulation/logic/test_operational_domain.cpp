@@ -45,12 +45,18 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
+using namespace fiction::utils::math;
 
 template <typename OpDomain>
-static void
-check_op_domain_params_and_operational_status(const OpDomain&                                           op_domain,
-                                              const sidb::simulation::logic::operational_domain_params& params,
-                                              const std::optional<sidb::simulation::logic::operational_status>& status)
+static void check_op_domain_params_and_operational_status(const OpDomain&                          op_domain,
+                                                          const operational_domain_params&         params,
+                                                          const std::optional<operational_status>& status)
 {
     REQUIRE(params.sweep_dimensions.size() == op_domain.get_number_of_dimensions());
 
@@ -69,16 +75,16 @@ check_op_domain_params_and_operational_status(const OpDomain&                   
                 const auto& sweep_param = params.sweep_dimensions[d];
                 const auto& coord_value = coord.get_parameters()[d];
 
-                CHECK(sweep_param.min <= (coord_value + utils::math::ERROR_MARGIN));
-                CHECK(sweep_param.max >= (coord_value - utils::math::ERROR_MARGIN));
+                CHECK(sweep_param.min <= (coord_value + ERROR_MARGIN));
+                CHECK(sweep_param.max >= (coord_value - ERROR_MARGIN));
                 CHECK(sweep_param.step > 0.0);
             }
 
             if (status.has_value())
             {
-                if (status.value() == sidb::simulation::logic::operational_status::OPERATIONAL)
+                if (status.value() == operational_status::OPERATIONAL)
                 {
-                    if constexpr (std::is_same_v<OpDomain, sidb::simulation::logic::critical_temperature_domain>)
+                    if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
                     {
                         REQUIRE(op_domain.contains(coord).has_value());
                         CHECK(std::get<1>(op_domain.contains(coord).value()) > 0.0);
@@ -90,7 +96,7 @@ check_op_domain_params_and_operational_status(const OpDomain&                   
                 }
                 else
                 {
-                    if constexpr (std::is_same_v<OpDomain, sidb::simulation::logic::critical_temperature_domain>)
+                    if constexpr (std::is_same_v<OpDomain, critical_temperature_domain>)
                     {
                         REQUIRE(op_domain.contains(coord).has_value());
                         CHECK_THAT(std::get<1>(op_domain.contains(coord).value()),
@@ -108,18 +114,18 @@ check_op_domain_params_and_operational_status(const OpDomain&                   
 TEST_CASE("Test parameter point", "[operational-domain]")
 {
     // Test default constructor
-    const sidb::simulation::logic::parameter_point p_default;
+    const parameter_point p_default;
     REQUIRE(p_default.get_parameters().empty());
 
     // Test parameterized constructor
-    const std::vector<double>                      values = {1.0, 2.0, 3.0};
-    const sidb::simulation::logic::parameter_point p_param(values);
+    const std::vector<double> values = {1.0, 2.0, 3.0};
+    const parameter_point     p_param(values);
     REQUIRE(p_param.get_parameters() == values);
 
     // Test equality operator
-    const sidb::simulation::logic::parameter_point p1({1.0, 2.0, 3.0});
-    const sidb::simulation::logic::parameter_point p2({1.0, 2.0, 3.0});
-    const sidb::simulation::logic::parameter_point p3({1.0, 2.0, 3.0000001});
+    const parameter_point p1({1.0, 2.0, 3.0});
+    const parameter_point p2({1.0, 2.0, 3.0});
+    const parameter_point p3({1.0, 2.0, 3.0000001});
 
     SECTION("Equality operator - exact equality")
     {
@@ -132,7 +138,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     }
 
     // Test inequality operator
-    const sidb::simulation::logic::parameter_point p4({1.0, 2.0, 3.1});
+    const parameter_point p4({1.0, 2.0, 3.1});
     REQUIRE(p1 != p4);
 
     // Test structured bindings (get<I>() method)
@@ -152,7 +158,7 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     {
         // every hash-based container relies on this invariant. Comparing with a tolerance does not establish it on
         // its own, since two values within the tolerance can still fall either side of a cell boundary
-        const std::hash<sidb::simulation::logic::parameter_point> hash{};
+        const std::hash<parameter_point> hash{};
 
         REQUIRE(p1 == p3);
         CHECK(hash(p1) == hash(p3));
@@ -163,16 +169,15 @@ TEST_CASE("Test parameter point", "[operational-domain]")
     {
         // a `MU_MINUS` sweep produces negative values throughout. Casting them straight to an unsigned type is
         // undefined behavior
-        const sidb::simulation::logic::parameter_point negative({-0.32, -0.5, -1.0});
+        const parameter_point negative({-0.32, -0.5, -1.0});
 
-        const std::hash<sidb::simulation::logic::parameter_point> hash{};
+        const std::hash<parameter_point> hash{};
 
-        CHECK(hash(negative) == hash(sidb::simulation::logic::parameter_point{{-0.32, -0.5, -1.0}}));
-        CHECK(hash(negative) != hash(sidb::simulation::logic::parameter_point{{0.32, 0.5, 1.0}}));
+        CHECK(hash(negative) == hash(parameter_point{{-0.32, -0.5, -1.0}}));
+        CHECK(hash(negative) != hash(parameter_point{{0.32, 0.5, 1.0}}));
 
         // and they must survive a round trip through a hash-based container
-        const std::unordered_set<sidb::simulation::logic::parameter_point> points{
-            negative, sidb::simulation::logic::parameter_point{{-0.28, -0.5, -1.0}}};
+        const std::unordered_set<parameter_point> points{negative, parameter_point{{-0.28, -0.5, -1.0}}};
 
         CHECK(points.size() == 2);
         CHECK(points.count(negative) == 1);
@@ -181,23 +186,22 @@ TEST_CASE("Test parameter point", "[operational-domain]")
 
 TEST_CASE("operational_domain class member functions", "[operational-domain]")
 {
-    sidb::simulation::logic::operational_domain opdom{};
+    operational_domain opdom{};
 
     CHECK(opdom.empty());
     CHECK(opdom.get_number_of_dimensions() == 0);
     REQUIRE_THROWS_AS(opdom.get_dimension(0), std::out_of_range);
     REQUIRE_THROWS_AS(opdom.get_dimension(1), std::out_of_range);
 
-    opdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+    opdom.add_dimension(sweep_parameter::EPSILON_R);
     CHECK(opdom.get_number_of_dimensions() == 1);
-    CHECK(opdom.get_dimension(0) == sidb::simulation::logic::sweep_parameter::EPSILON_R);
+    CHECK(opdom.get_dimension(0) == sweep_parameter::EPSILON_R);
     REQUIRE_THROWS_AS(opdom.get_dimension(1), std::out_of_range);
 
-    opdom = sidb::simulation::logic::operational_domain(
-        {sidb::simulation::logic::sweep_parameter::LAMBDA_TF, sidb::simulation::logic::sweep_parameter::MU_MINUS});
+    opdom = operational_domain({sweep_parameter::LAMBDA_TF, sweep_parameter::MU_MINUS});
     CHECK(opdom.get_number_of_dimensions() == 2);
-    CHECK(opdom.get_dimension(0) == sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
-    CHECK(opdom.get_dimension(1) == sidb::simulation::logic::sweep_parameter::MU_MINUS);
+    CHECK(opdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(opdom.get_dimension(1) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Error handling of operational domain algorithms", "[operational-domain]")
@@ -206,14 +210,14 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
     SECTION("invalid number of dimensions")
     {
-        sidb::simulation::logic::operational_domain_params zero_dimensional_params{};
-        sidb::simulation::logic::operational_domain_params one_dimensional_params{};
+        operational_domain_params zero_dimensional_params{};
+        operational_domain_params one_dimensional_params{};
 
         // 0-dimensional
         zero_dimensional_params.sweep_dimensions = {};
 
         // 1-dimensional
-        one_dimensional_params.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R}};
+        one_dimensional_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R}};
 
         SECTION("flood_fill")
         {
@@ -221,8 +225,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
             // are supported; the three-dimensional cases are covered on an actual gate below
             for (const auto& params : {zero_dimensional_params, one_dimensional_params})
             {
-                CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_flood_fill(
-                                    lat, std::vector{synthesis::create_id_tt()}, 1, params),
+                CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
             }
         }
@@ -231,8 +234,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
             // contour tracing needs a boundary to trace, so it requires at least two dimensions
             for (const auto& params : {zero_dimensional_params, one_dimensional_params})
             {
-                CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_contour_tracing(
-                                    lat, std::vector{synthesis::create_id_tt()}, 1, params),
+                CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
                                 std::invalid_argument);
             }
         }
@@ -248,77 +250,72 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
         const sidb_100_cell_clk_lyt_siqad and_lat{and_gate};
 
-        REQUIRE(and_lat.num_cells_of_given_type(sidb::sidb_technology::cell_type::LOGIC) > 0);
+        REQUIRE(and_lat.num_cells_of_given_type(sidb_technology::cell_type::LOGIC) > 0);
 
-        sidb::simulation::logic::operational_domain_params sketch_params{};
+        operational_domain_params sketch_params{};
         sketch_params.operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
-        sketch_params.operational_params.op_condition =
-            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
-        sketch_params.sweep_dimensions = {
-            {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.6, .step = 0.1},
-            {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.1, .step = 0.1}};
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+        sketch_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+        sketch_params.sweep_dimensions                = {
+            {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.6, .step = 0.1},
+            {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.1, .step = 0.1}};
 
         SECTION("kinks must be rejected")
         {
             auto tolerating_params = sketch_params;
             tolerating_params.operational_params.op_condition =
-                sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS;
+                is_operational_params::operational_condition::TOLERATE_KINKS;
 
-            CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_grid_search(
-                                and_lat, std::vector{synthesis::create_and_tt()}, tolerating_params),
+            CHECK_THROWS_AS(operational_domain_grid_search(and_lat, std::vector{create_and_tt()}, tolerating_params),
                             std::invalid_argument);
-            CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_random_sampling(
-                                and_lat, std::vector{synthesis::create_and_tt()}, 1, tolerating_params),
+            CHECK_THROWS_AS(
+                operational_domain_random_sampling(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
+                std::invalid_argument);
+            CHECK_THROWS_AS(operational_domain_flood_fill(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
                             std::invalid_argument);
-            CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_flood_fill(
-                                and_lat, std::vector{synthesis::create_and_tt()}, 1, tolerating_params),
-                            std::invalid_argument);
-            CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_contour_tracing(
-                                and_lat, std::vector{synthesis::create_and_tt()}, 1, tolerating_params),
-                            std::invalid_argument);
+            CHECK_THROWS_AS(
+                operational_domain_contour_tracing(and_lat, std::vector{create_and_tt()}, 1, tolerating_params),
+                std::invalid_argument);
         }
 
         SECTION("the layout must have canvas cells")
         {
             // `lat` is the empty layout declared above and therefore has no `LOGIC` cells
-            CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_grid_search(
-                                lat, std::vector{synthesis::create_id_tt()}, sketch_params),
+            CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, sketch_params),
                             std::invalid_argument);
         }
 
         SECTION("both preconditions met")
         {
-            CHECK_NOTHROW(sidb::simulation::logic::operational_domain_grid_search(
-                and_lat, std::vector{synthesis::create_and_tt()}, sketch_params));
+            CHECK_NOTHROW(operational_domain_grid_search(and_lat, std::vector{create_and_tt()}, sketch_params));
         }
     }
 
     SECTION("invalid sweep dimensions")
     {
-        sidb::simulation::logic::operational_domain_params invalid_params_1{};
-        sidb::simulation::logic::operational_domain_params invalid_params_2{};
-        sidb::simulation::logic::operational_domain_params invalid_params_3{};
+        operational_domain_params invalid_params_1{};
+        operational_domain_params invalid_params_2{};
+        operational_domain_params invalid_params_3{};
 
         SECTION("min/max mismatch")
         {
             // 1-dimensional with invalid min/max on 1st dimension
-            invalid_params_1.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R}};
+            invalid_params_1.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R}};
             invalid_params_1.sweep_dimensions[0].min  = 10.0;
             invalid_params_1.sweep_dimensions[0].max  = 1.0;
             invalid_params_1.sweep_dimensions[0].step = 0.1;
 
             // 2-dimensional with invalid min/max on 2nd dimension
-            invalid_params_2.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                                 {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
+            invalid_params_2.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                         {.dimension = sweep_parameter::LAMBDA_TF}};
             invalid_params_2.sweep_dimensions[1].min  = 5.5;
             invalid_params_2.sweep_dimensions[1].max  = 5.4;
             invalid_params_2.sweep_dimensions[1].step = 0.1;
 
             // 3-dimensional with invalid min/max on 3rd dimension
-            invalid_params_3.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                                 {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF},
-                                                 {.dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS}};
+            invalid_params_3.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                         {.dimension = sweep_parameter::LAMBDA_TF},
+                                                         {.dimension = sweep_parameter::MU_MINUS}};
             invalid_params_3.sweep_dimensions[2].min  = -0.4;
             invalid_params_3.sweep_dimensions[2].max  = -0.5;
             invalid_params_3.sweep_dimensions[2].step = 0.01;
@@ -327,26 +324,22 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
             {
                 SECTION("grid_search")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_grid_search(
-                                        lat, std::vector{synthesis::create_id_tt()}, params),
+                    CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
                                     std::invalid_argument);
                 }
                 SECTION("random_sampling")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_random_sampling(
-                                        lat, std::vector{synthesis::create_id_tt()}, 100, params),
+                    CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
                                     std::invalid_argument);
                 }
                 SECTION("flood_fill")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_flood_fill(
-                                        lat, std::vector{synthesis::create_id_tt()}, 1, params),
+                    CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
                                     std::invalid_argument);
                 }
                 SECTION("contour_tracing")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_contour_tracing(
-                                        lat, std::vector{synthesis::create_id_tt()}, 1, params),
+                    CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
                                     std::invalid_argument);
                 }
             }
@@ -355,22 +348,22 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         SECTION("negative step size")
         {
             // 1-dimensional with negative step size on 1st dimension
-            invalid_params_1.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R}};
+            invalid_params_1.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R}};
             invalid_params_1.sweep_dimensions[0].min  = 1.0;
             invalid_params_1.sweep_dimensions[0].max  = 10.0;
             invalid_params_1.sweep_dimensions[0].step = -0.5;
 
             // 2-dimensional with negative step size on 2nd dimension
-            invalid_params_2.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                                 {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
+            invalid_params_2.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                         {.dimension = sweep_parameter::LAMBDA_TF}};
             invalid_params_2.sweep_dimensions[1].min  = 5.5;
             invalid_params_2.sweep_dimensions[1].max  = 5.6;
             invalid_params_2.sweep_dimensions[1].step = -0.1;
 
             // 3-dimensional with negative step size on 3rd dimension
-            invalid_params_3.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                                 {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF},
-                                                 {.dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS}};
+            invalid_params_3.sweep_dimensions         = {{.dimension = sweep_parameter::EPSILON_R},
+                                                         {.dimension = sweep_parameter::LAMBDA_TF},
+                                                         {.dimension = sweep_parameter::MU_MINUS}};
             invalid_params_3.sweep_dimensions[2].min  = -0.4;
             invalid_params_3.sweep_dimensions[2].max  = -0.5;
             invalid_params_3.sweep_dimensions[2].step = -0.01;
@@ -379,26 +372,22 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
             {
                 SECTION("grid_search")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_grid_search(
-                                        lat, std::vector{synthesis::create_id_tt()}, params),
+                    CHECK_THROWS_AS(operational_domain_grid_search(lat, std::vector{create_id_tt()}, params),
                                     std::invalid_argument);
                 }
                 SECTION("random_sampling")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_random_sampling(
-                                        lat, std::vector{synthesis::create_id_tt()}, 100, params),
+                    CHECK_THROWS_AS(operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100, params),
                                     std::invalid_argument);
                 }
                 SECTION("flood_fill")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_flood_fill(
-                                        lat, std::vector{synthesis::create_id_tt()}, 1, params),
+                    CHECK_THROWS_AS(operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, params),
                                     std::invalid_argument);
                 }
                 SECTION("contour_tracing")
                 {
-                    CHECK_THROWS_AS(sidb::simulation::logic::operational_domain_contour_tracing(
-                                        lat, std::vector{synthesis::create_id_tt()}, 1, params),
+                    CHECK_THROWS_AS(operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1, params),
                                     std::invalid_argument);
                 }
             }
@@ -410,25 +399,22 @@ TEST_CASE("SiQAD OR gate", "[operational-domain]")
 {
     const auto lyt = blueprints::siqad_or_gate<sidb_100_cell_clk_lyt_siqad>();
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
 
-    op_domain_params.sweep_dimensions = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 7, .max = 8, .step = 0.01},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 5.5, .max = 6, .step = 0.01}};
+    op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 7, .max = 8, .step = 0.01},
+                                         {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.5, .max = 6, .step = 0.01}};
 
     op_domain_params.operational_params.sim_params.mu_minus                                                   = -0.28;
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
 
-    op_domain_params.operational_params.op_condition =
-        sidb::simulation::logic::is_operational_params::operational_condition::TOLERATE_KINKS;
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
 
-    const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-        lyt, std::vector{synthesis::create_or_tt()}, op_domain_params, &op_domain_stats);
+    const auto op_domain =
+        operational_domain_grid_search(lyt, std::vector{create_or_tt()}, op_domain_params, &op_domain_stats);
 
-    check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                  sidb::simulation::logic::operational_status::OPERATIONAL);
+    check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 }
 
 TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
@@ -438,29 +424,26 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
     // dimensions, where the third dimension is the only remaining sweep parameter, `MU_MINUS`
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-    sidb::simulation::logic::operational_domain_params params{};
-    params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
-    params.operational_params.op_condition =
-        sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
-    params.sweep_dimensions = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
+    operational_domain_params params{};
+    params.operational_params.sim_params   = simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine   = engine::QUICKEXACT;
+    params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
 
     // 3 x 3 x 2 parameter points
     constexpr std::size_t num_parameter_points = 18;
 
     auto simulation_params = params;
     simulation_params.operational_params.strategy_to_analyze_operational_status =
-        sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+        is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
     auto sketch_params = params;
     sketch_params.operational_params.strategy_to_analyze_operational_status =
-        sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-    const auto simulated = sidb::simulation::logic::operational_domain_grid_search(
-        lat, std::vector{synthesis::create_and_tt()}, simulation_params);
+    const auto simulated = operational_domain_grid_search(lat, std::vector{create_and_tt()}, simulation_params);
 
     REQUIRE(simulated.size() == num_parameter_points);
 
@@ -470,10 +453,9 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
         // point that is operational under simulation must be operational in the sketch. This is the sketch's actual
         // guarantee; the number of points it marks operational depends on how well the filters bite and is not a
         // contract
-        sidb::simulation::logic::operational_domain_stats stats{};
+        operational_domain_stats stats{};
 
-        const auto sketch = sidb::simulation::logic::operational_domain_grid_search(
-            lat, std::vector{synthesis::create_and_tt()}, sketch_params, &stats);
+        const auto sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params, &stats);
 
         CHECK(sketch.size() == num_parameter_points);
         CHECK(stats.num_evaluated_parameter_combinations == num_parameter_points);
@@ -481,29 +463,27 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
         simulated.for_each(
             [&sketch](const auto& parameter_point, const auto& status)
             {
-                if (std::get<0>(status) == sidb::simulation::logic::operational_status::OPERATIONAL)
+                if (std::get<0>(status) == operational_status::OPERATIONAL)
                 {
                     const auto sketched = sketch.contains(parameter_point);
 
                     REQUIRE(sketched.has_value());
-                    CHECK(std::get<0>(sketched.value()) == sidb::simulation::logic::operational_status::OPERATIONAL);
+                    CHECK(std::get<0>(sketched.value()) == operational_status::OPERATIONAL);
                 }
             });
     }
 
     SECTION("random sampling agrees with a direct operational check")
     {
-        const auto sketch = sidb::simulation::logic::operational_domain_random_sampling(
-            lat, std::vector{synthesis::create_and_tt()}, 8, sketch_params);
+        const auto sketch = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 8, sketch_params);
 
         CHECK(sketch.size() <= 8);
 
-        const auto input_wires = sidb::simulation::logic::detect_bdl_wires(
-            lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-            sidb::simulation::logic::bdl_wire_selection::INPUT);
-        const auto output_wires = sidb::simulation::logic::detect_bdl_wires(
-            lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params,
-            sidb::simulation::logic::bdl_wire_selection::OUTPUT);
+        const auto input_wires = detect_bdl_wires(
+            lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params, bdl_wire_selection::INPUT);
+        const auto output_wires =
+            detect_bdl_wires(lat, sketch_params.operational_params.input_bdl_iterator_params.bdl_wire_params,
+                             bdl_wire_selection::OUTPUT);
 
         sketch.for_each(
             [&](const auto& parameter_point, const auto& status)
@@ -514,8 +494,8 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
                 point_params.sim_params.lambda_tf = parameter_point.get_parameters().at(1);
                 point_params.sim_params.mu_minus  = parameter_point.get_parameters().at(2);
 
-                const auto [expected, _] = sidb::simulation::logic::is_operational(
-                    lat, std::vector{synthesis::create_and_tt()}, point_params, input_wires, output_wires);
+                const auto [expected, _] =
+                    is_operational(lat, std::vector{create_and_tt()}, point_params, input_wires, output_wires);
 
                 CHECK(std::get<0>(status) == expected);
             });
@@ -526,10 +506,8 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
         // flood fill traces the boundary of the sketch region rather than of the operational region, which is sound
         // because the sketch region is a superset of the operational one. It can only miss a component that no
         // random sample landed in, which is the failure mode it already has under simulation
-        const auto grid_sketch = sidb::simulation::logic::operational_domain_grid_search(
-            lat, std::vector{synthesis::create_and_tt()}, sketch_params);
-        const auto flood_sketch = sidb::simulation::logic::operational_domain_flood_fill(
-            lat, std::vector{synthesis::create_and_tt()}, 4, sketch_params);
+        const auto grid_sketch  = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
+        const auto flood_sketch = operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 4, sketch_params);
 
         CHECK(flood_sketch.size() <= num_parameter_points);
 
@@ -552,25 +530,22 @@ TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
     // enclosed by the traced boundary
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-    sidb::simulation::logic::operational_domain_params params{};
-    params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
-    params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
-    params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
+    operational_domain_params params{};
+    params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    params.operational_params.sim_engine = engine::QUICKEXACT;
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.4, .max = 5.8, .step = 0.1},
+                               {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.3, .step = 0.1},
+                               {.dimension = sweep_parameter::MU_MINUS, .min = -0.32, .max = -0.30, .step = 0.02}};
 
-    const auto exhaustive =
-        sidb::simulation::logic::operational_domain_grid_search(lat, std::vector{synthesis::create_and_tt()}, params);
+    const auto exhaustive = operational_domain_grid_search(lat, std::vector{create_and_tt()}, params);
 
     REQUIRE(exhaustive.size() == 50);
 
     SECTION("agrees with the grid search on every point it reports")
     {
-        sidb::simulation::logic::operational_domain_stats stats{};
+        operational_domain_stats stats{};
 
-        const auto traced = sidb::simulation::logic::operational_domain_contour_tracing(
-            lat, std::vector{synthesis::create_and_tt()}, 8, params, &stats);
+        const auto traced = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, params, &stats);
 
         // tracing only samples the boundary and its surroundings, so it must not cover the whole space
         CHECK(traced.size() <= exhaustive.size());
@@ -588,16 +563,14 @@ TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
 
     SECTION("carries the operational domain sketch")
     {
-        auto sketch_params = params;
-        sketch_params.operational_params.op_condition =
-            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+        auto sketch_params                            = params;
+        sketch_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
         sketch_params.operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const auto grid_sketch = sidb::simulation::logic::operational_domain_grid_search(
-            lat, std::vector{synthesis::create_and_tt()}, sketch_params);
-        const auto traced_sketch = sidb::simulation::logic::operational_domain_contour_tracing(
-            lat, std::vector{synthesis::create_and_tt()}, 8, sketch_params);
+        const auto grid_sketch = operational_domain_grid_search(lat, std::vector{create_and_tt()}, sketch_params);
+        const auto traced_sketch =
+            operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 8, sketch_params);
 
         traced_sketch.for_each(
             [&grid_sketch](const auto& parameter_point, const auto& status)
@@ -617,17 +590,17 @@ TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]"
     // public API
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
-    op_domain_params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
-    const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-        lat, std::vector{synthesis::create_and_tt()}, 0, op_domain_params, &op_domain_stats);
+    const auto op_domain =
+        operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 0, op_domain_params, &op_domain_stats);
 
     CHECK(op_domain.empty());
     CHECK(op_domain_stats.num_evaluated_parameter_combinations == 0);
@@ -637,25 +610,25 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
 {
     const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sidb::model::simulation_parameters{2, -0.32};
-    op_domain_params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
+    operational_domain_params op_domain_params{};
+    op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.5, .max = 5.7, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.2, .step = 0.1}};
 
-    sidb::simulation::logic::operational_domain_stats default_stats{};
+    operational_domain_stats default_stats{};
 
-    const auto default_domain = sidb::simulation::logic::operational_domain_grid_search(
-        lat, std::vector{synthesis::create_and_tt()}, op_domain_params, &default_stats);
+    const auto default_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &default_stats);
 
     // one worker thread must produce exactly the same domain as the hardware-thread default
     op_domain_params.number_of_threads = 1;
 
-    sidb::simulation::logic::operational_domain_stats single_threaded_stats{};
+    operational_domain_stats single_threaded_stats{};
 
-    const auto single_threaded_domain = sidb::simulation::logic::operational_domain_grid_search(
-        lat, std::vector{synthesis::create_and_tt()}, op_domain_params, &single_threaded_stats);
+    const auto single_threaded_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &single_threaded_stats);
 
     CHECK(single_threaded_domain.size() == default_domain.size());
     CHECK(single_threaded_stats.num_simulator_invocations == default_stats.num_simulator_invocations);
@@ -669,10 +642,10 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
     // a thread count of zero is treated as one rather than dividing by zero
     op_domain_params.number_of_threads = 0;
 
-    sidb::simulation::logic::operational_domain_stats zero_stats{};
+    operational_domain_stats zero_stats{};
 
-    const auto zero_domain = sidb::simulation::logic::operational_domain_grid_search(
-        lat, std::vector{synthesis::create_and_tt()}, op_domain_params, &zero_stats);
+    const auto zero_domain =
+        operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &zero_stats);
 
     CHECK(zero_domain.size() == default_domain.size());
     CHECK(zero_stats.num_evaluated_parameter_combinations == default_stats.num_evaluated_parameter_combinations);
@@ -685,35 +658,35 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions = {{.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                         {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions              = {{.dimension = sweep_parameter::EPSILON_R},
+                                                      {.dimension = sweep_parameter::LAMBDA_TF}};
 
-    CHECK(op_domain_params.sweep_dimensions[0].dimension == sidb::simulation::logic::sweep_parameter::EPSILON_R);
-    CHECK(op_domain_params.sweep_dimensions[1].dimension == sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
+    CHECK(op_domain_params.sweep_dimensions[0].dimension == sweep_parameter::EPSILON_R);
+    CHECK(op_domain_params.sweep_dimensions[1].dimension == sweep_parameter::LAMBDA_TF);
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("operational area, only one parameter point")
     {
@@ -737,15 +710,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("grid_search")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-                lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 2);
@@ -756,17 +728,17 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
             SECTION("reject kinks")
             {
                 op_domain_params.operational_params.op_condition =
-                    sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+                    is_operational_params::operational_condition::REJECT_KINKS;
 
-                const auto op_domain_kinks = sidb::simulation::logic::operational_domain_grid_search(
-                    lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+                const auto op_domain_kinks = operational_domain_grid_search(lat, std::vector{create_id_tt()},
+                                                                            op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain_kinks.size() == 1);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_kinks, op_domain_params,
-                                                              sidb::simulation::logic::operational_status::OPERATIONAL);
+                                                              operational_status::OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations == 2);
@@ -777,23 +749,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.32,
-                    .max       = -0.32,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.32,
+                                                                            .max       = -0.32,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_grid_search(
-                    lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_grid_search(lat, std::vector{create_id_tt()},
+                                                                         op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain_3d.size() == 1);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
-                                                              sidb::simulation::logic::operational_status::OPERATIONAL);
+                                                              operational_status::OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations == 2);
@@ -804,15 +775,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("random_sampling")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-                lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -823,23 +793,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.32,
-                    .max       = -0.32,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.32,
+                                                                            .max       = -0.32,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_random_sampling(
-                    lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100,
+                                                                             op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain_3d.size() == 1);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
-                                                              sidb::simulation::logic::operational_status::OPERATIONAL);
+                                                              operational_status::OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -851,15 +820,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("flood_fill")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 2);
@@ -869,25 +837,24 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.32,
-                    .max       = -0.32,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.32,
+                                                                            .max       = -0.32,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
                 SECTION("one random sample")
                 {
-                    const auto op_domain_3d = sidb::simulation::logic::operational_domain_flood_fill(
-                        lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+                    const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1,
+                                                                            op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
                     CHECK(op_domain_3d.size() == 1);
 
                     // for the selected range, all samples should be within the parameters and operational
-                    check_op_domain_params_and_operational_status(
-                        op_domain_3d, op_domain_params, sidb::simulation::logic::operational_status::OPERATIONAL);
+                    check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                                  operational_status::OPERATIONAL);
 
                     CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                     CHECK(op_domain_stats.num_simulator_invocations == 2);
@@ -899,15 +866,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("contour_tracing")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-                lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 1);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 2);
@@ -931,15 +897,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("grid_search")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-                lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 200);
@@ -949,15 +914,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("random_sampling")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-                lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -968,15 +932,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("flood_fill")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 200);
@@ -986,15 +949,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("contour_tracing")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-                lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -1018,15 +980,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("grid_search")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-                lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 50);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 100);
@@ -1036,23 +997,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.35,
-                    .max       = -0.29,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.35,
+                                                                            .max       = -0.29,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_grid_search(
-                    lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_grid_search(lat, std::vector{create_id_tt()},
+                                                                         op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain_3d.size() == 350);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
-                                                              sidb::simulation::logic::operational_status::OPERATIONAL);
+                                                              operational_status::OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations == 700);
@@ -1063,15 +1023,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("random_sampling")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-                lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -1082,23 +1041,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.35,
-                    .max       = -0.29,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.35,
+                                                                            .max       = -0.29,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_random_sampling(
-                    lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100,
+                                                                             op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain_3d.size() <= 350);
 
                 // for the selected range, all samples should be within the parameters and operational
                 check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
-                                                              sidb::simulation::logic::operational_status::OPERATIONAL);
+                                                              operational_status::OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations <= 700);
@@ -1110,15 +1068,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("flood_fill")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 1, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 50);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 100);
@@ -1128,25 +1085,24 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.35,
-                    .max       = -0.29,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.35,
+                                                                            .max       = -0.29,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
                 SECTION("one random sample")
                 {
-                    const auto op_domain_3d = sidb::simulation::logic::operational_domain_flood_fill(
-                        lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+                    const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 100,
+                                                                            op_domain_params, &op_domain_stats);
 
                     // check if the operational domain has the correct size
                     CHECK(op_domain_3d.size() == 350);
 
                     // for the selected range, all samples should be within the parameters and operational
-                    check_op_domain_params_and_operational_status(
-                        op_domain_3d, op_domain_params, sidb::simulation::logic::operational_status::OPERATIONAL);
+                    check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                                  operational_status::OPERATIONAL);
 
                     CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                     CHECK(op_domain_stats.num_simulator_invocations == 700);
@@ -1158,15 +1114,14 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("contour_tracing")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-                lat, std::vector{synthesis::create_id_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 1,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() <= 50);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 100);
@@ -1190,15 +1145,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("grid_search")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-                lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.size() == 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -1208,23 +1163,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.14,
-                    .max       = -0.10,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.14,
+                                                                            .max       = -0.10,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_grid_search(
-                    lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_grid_search(lat, std::vector{create_id_tt()},
+                                                                         op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain_3d.size() == 500);
 
                 // for the selected range, all samples should be within the parameters and non-operational
-                check_op_domain_params_and_operational_status(
-                    op_domain_3d, op_domain_params, sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::NON_OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations <= 1000);
@@ -1235,15 +1189,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("random_sampling")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-                lat, std::vector{synthesis::create_id_tt()}, 5000, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 5000,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.size() <= 5000);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations < 10000);
@@ -1253,23 +1207,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.14,
-                    .max       = -0.10,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.14,
+                                                                            .max       = -0.10,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_random_sampling(
-                    lat, std::vector{synthesis::create_id_tt()}, 5000, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 5000,
+                                                                             op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct maximum size
                 CHECK(op_domain_3d.size() <= 5000);
 
                 // for the selected range, all samples should be within the parameters and non-operational
-                check_op_domain_params_and_operational_status(
-                    op_domain_3d, op_domain_params, sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::NON_OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations < 10000);
@@ -1280,15 +1233,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("flood_fill")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                lat, std::vector{synthesis::create_id_tt()}, 25, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 25, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.size() <= 100);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 200);
@@ -1298,23 +1251,22 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
             SECTION("3-dimensional")
             {
-                constexpr auto z_dimension = sidb::simulation::logic::operational_domain_value_range{
-                    .dimension = sidb::simulation::logic::sweep_parameter::MU_MINUS,
-                    .min       = -0.14,
-                    .max       = -0.10,
-                    .step      = 0.01};
+                constexpr auto z_dimension = operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.14,
+                                                                            .max       = -0.10,
+                                                                            .step      = 0.01};
 
                 op_domain_params.sweep_dimensions.push_back(z_dimension);
 
-                const auto op_domain_3d = sidb::simulation::logic::operational_domain_flood_fill(
-                    lat, std::vector{synthesis::create_id_tt()}, 25, op_domain_params, &op_domain_stats);
+                const auto op_domain_3d = operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 25,
+                                                                        op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct maximum size
                 CHECK(op_domain_3d.size() <= 500);
 
                 // for the selected range, all samples should be within the parameters and non-operational
-                check_op_domain_params_and_operational_status(
-                    op_domain_3d, op_domain_params, sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                check_op_domain_params_and_operational_status(op_domain_3d, op_domain_params,
+                                                              operational_status::NON_OPERATIONAL);
 
                 CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
                 CHECK(op_domain_stats.num_simulator_invocations <= 1000);
@@ -1325,15 +1277,15 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("contour_tracing")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-                lat, std::vector{synthesis::create_id_tt()}, 25, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 25,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.size() <= 25);
 
             // for the selected range, all samples should be within the parameters and non-operational
             check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+                                                          operational_status::NON_OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations <= 50);
@@ -1356,8 +1308,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("flood_fill")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                lat, std::vector{synthesis::create_id_tt()}, 10000, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 10000,
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size
             CHECK(op_domain.size() == 3);
@@ -1380,8 +1332,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("grid_search")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-                lat, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+            const auto op_domain =
+                operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (16 steps in each dimension)
             CHECK(op_domain.size() == 256);
@@ -1398,8 +1350,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
         SECTION("random_sampling")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-                lat, std::vector{synthesis::create_id_tt()}, 100, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_id_tt()}, 100,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct maximum size
             CHECK(op_domain.size() <= 100);
@@ -1418,8 +1370,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         {
             SECTION("random sample to find operational parameter points")
             {
-                const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                    lat, std::vector{synthesis::create_id_tt()}, 50, op_domain_params, &op_domain_stats);
+                const auto op_domain = operational_domain_flood_fill(lat, std::vector{create_id_tt()}, 50,
+                                                                     op_domain_params, &op_domain_stats);
 
                 // check if the operational domain has the correct size
                 CHECK(op_domain.size() <= 256);
@@ -1436,8 +1388,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
         }
         SECTION("contour_tracing")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-                lat, std::vector{synthesis::create_id_tt()}, 50, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_id_tt()}, 50,
+                                                                      op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (max 10 steps in each dimension)
             CHECK(op_domain.size() <= 256);
@@ -1460,45 +1412,43 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
     op_domain_params.sweep_dimensions = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
 
     // ground truth to compare the contour tracing results against
-    const auto grid_search_domain = sidb::simulation::logic::operational_domain_grid_search(
-        lat, std::vector{synthesis::create_id_tt()}, op_domain_params);
+    const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
 
     // the random samples are drawn from an unseeded generator; repeat to make the assertions meaningful
     for (auto i = 0; i < 5; ++i)
     {
-        sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+        operational_domain_stats op_domain_stats{};
 
-        fiction::sidb::simulation::logic::detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt,
-                                                                          sidb::simulation::logic::operational_domain>
-            impl{lat, std::vector{synthesis::create_id_tt()}, op_domain_params, op_domain_stats};
+        sidb::simulation::logic::detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt, operational_domain>
+            impl{lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
 
         const auto op_domain = impl.contour_tracing(50);
 
@@ -1522,7 +1472,7 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
             // the `REQUIRE` above already aborts on an empty optional, but the static analyzer cannot see that
             if (ground_truth.has_value())
             {
-                CHECK(std::get<0>(*ground_truth) == sidb::simulation::logic::operational_status::OPERATIONAL);
+                CHECK(std::get<0>(*ground_truth) == operational_status::OPERATIONAL);
             }
         }
 
@@ -1545,44 +1495,43 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     layout lyt{{24, 0}, "BDL wire"};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base = 2;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     // 16 x 16 steps; the operational area is a single connected island of 80 parameter points
     op_domain_params.sweep_dimensions = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 0.5, .max = 4.25, .step = 0.25},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 0.5, .max = 4.25, .step = 0.25}};
 
     // ground truth to compare the flood fill results against
-    const auto grid_search_domain = sidb::simulation::logic::operational_domain_grid_search(
-        lat, std::vector{synthesis::create_id_tt()}, op_domain_params);
+    const auto grid_search_domain = operational_domain_grid_search(lat, std::vector{create_id_tt()}, op_domain_params);
 
     // collect all operational parameter points of the ground truth in a deterministic order
-    std::vector<sidb::simulation::logic::parameter_point> operational_points{};
+    std::vector<parameter_point> operational_points{};
 
     grid_search_domain.for_each(
         [&operational_points](const auto& coord, const auto& op_value)
         {
-            if (std::get<0>(op_value) == sidb::simulation::logic::operational_status::OPERATIONAL)
+            if (std::get<0>(op_value) == operational_status::OPERATIONAL)
             {
                 operational_points.push_back(coord);
             }
@@ -1590,29 +1539,24 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
     REQUIRE(operational_points.size() == 80);
 
-    std::ranges::sort(operational_points, std::ranges::less{},
-                      &sidb::simulation::logic::parameter_point::get_parameters);
+    std::ranges::sort(operational_points, std::ranges::less{}, &parameter_point::get_parameters);
 
     // seeding the flood fill with a known operational point and taking no random samples makes it fully
     // deterministic, so any run-to-run difference can only stem from the parallelization
     const auto& seed_point = operational_points.front();
 
-    std::optional<
-        std::vector<std::pair<sidb::simulation::logic::parameter_point, sidb::simulation::logic::operational_status>>>
-        reference{};
+    std::optional<std::vector<std::pair<parameter_point, operational_status>>> reference{};
 
     for (auto i = 0; i < 10; ++i)
     {
-        sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+        operational_domain_stats op_domain_stats{};
 
-        fiction::sidb::simulation::logic::detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt,
-                                                                          sidb::simulation::logic::operational_domain>
-            impl{lat, std::vector{synthesis::create_id_tt()}, op_domain_params, op_domain_stats};
+        sidb::simulation::logic::detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt, operational_domain>
+            impl{lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
 
         const auto op_domain = impl.flood_fill(0, seed_point);
 
-        std::vector<std::pair<sidb::simulation::logic::parameter_point, sidb::simulation::logic::operational_status>>
-            result{};
+        std::vector<std::pair<parameter_point, operational_status>> result{};
 
         op_domain.for_each([&result](const auto& coord, const auto& op_value)
                            { result.emplace_back(coord, std::get<0>(op_value)); });
@@ -1658,48 +1602,47 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     layout lyt{{20, 10}, "AND gate"};
 
-    lyt.assign_cell_type({0, 0, 1}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 1}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({4, 2, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 2, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({10, 6, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 6, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 9, 1}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_siqad lat{lyt};
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("grid_search")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            lat, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -1709,15 +1652,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     }
     SECTION("random_sampling")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-            lat, std::vector{synthesis::create_and_tt()}, 100, op_domain_params, &op_domain_stats);
+        const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 100,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
@@ -1727,15 +1669,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     }
     SECTION("flood_fill")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-            lat, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -1745,15 +1686,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     }
     SECTION("contour_tracing")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-            lat, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+        const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 1,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
@@ -1769,59 +1709,47 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
 
     layout lyt{{20, 10}, "AND gate"};
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{0, 0, 1}),
-                         sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{2, 1, 1}),
-                         sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{0, 0, 1}), sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{2, 1, 1}), sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{20, 0, 1}),
-                         sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{18, 1, 1}),
-                         sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{20, 0, 1}), sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{18, 1, 1}), sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{4, 2, 1}),
-                         sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{6, 3, 1}),
-                         sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{4, 2, 1}), sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{6, 3, 1}), sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{14, 3, 1}),
-                         sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{16, 2, 1}),
-                         sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{14, 3, 1}), sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{16, 2, 1}), sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 6, 0}),
-                         sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 7, 0}),
-                         sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 6, 0}), sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 7, 0}), sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type(layouts::coords::from_siqad<layouts::coords::cube>(layouts::coords::siqad{10, 9, 1}),
-                         sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 9, 1}), sidb_technology::cell_type::NORMAL);
 
     const sidb_100_cell_clk_lyt_cube lat{lyt};
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("grid_search")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            lat, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -1831,15 +1759,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
     SECTION("random_sampling")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-            lat, std::vector{synthesis::create_and_tt()}, 100, op_domain_params, &op_domain_stats);
+        const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 100,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
@@ -1849,15 +1776,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
     SECTION("flood_fill")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-            lat, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 400);
@@ -1867,15 +1793,14 @@ TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinat
     }
     SECTION("contour_tracing")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-            lat, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+        const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 1,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 400);
@@ -1889,29 +1814,28 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
 {
     const auto layout = blueprints::and_gate_111<TestType>();
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.60, .max = 5.61, .step = 0.01},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.01, .step = 0.01}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.60, .max = 5.61, .step = 0.01},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 5.0, .max = 5.01, .step = 0.01}};
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("grid_search")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            layout, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 4);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 16);
@@ -1921,15 +1845,14 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     }
     SECTION("random_sampling")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_random_sampling(
-            layout, std::vector{synthesis::create_and_tt()}, 100, op_domain_params, &op_domain_stats);
+        const auto op_domain = operational_domain_random_sampling(layout, std::vector{create_and_tt()}, 100,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 100);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 16);
@@ -1941,15 +1864,14 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     {
         SECTION("one random sample")
         {
-            const auto op_domain = sidb::simulation::logic::operational_domain_flood_fill(
-                layout, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+            const auto op_domain = operational_domain_flood_fill(layout, std::vector{create_and_tt()}, 1,
+                                                                 op_domain_params, &op_domain_stats);
 
             // check if the operational domain has the correct size (10 steps in each dimension)
             CHECK(op_domain.size() == 4);
 
             // for the selected range, all samples should be within the parameters and operational
-            check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                          sidb::simulation::logic::operational_status::OPERATIONAL);
+            check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
             CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
             CHECK(op_domain_stats.num_simulator_invocations == 16);
@@ -1960,15 +1882,14 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     }
     SECTION("contour_tracing")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_contour_tracing(
-            layout, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+        const auto op_domain = operational_domain_contour_tracing(layout, std::vector{create_and_tt()}, 1,
+                                                                  op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 4);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 16);
@@ -1983,22 +1904,22 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 {
     const auto layout = blueprints::and_gate_with_kink_states<TestType>();
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 4.0, .max = 6.0, .step = 0.4},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.0, .max = 6.0, .step = 0.4}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 4.0, .max = 6.0, .step = 0.4},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.0, .max = 6.0, .step = 0.4}};
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("grid_search, allow kinks")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            layout, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -2010,11 +1931,10 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
 
     SECTION("grid_search, reject kinks")
     {
-        op_domain_params.operational_params.op_condition =
-            sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+        op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            layout, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -2031,25 +1951,24 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
 {
     const auto layout = blueprints::bestagon_and<TestType>();
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 4.0, .max = 6.0, .step = 0.4},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.0, .max = 6.0, .step = 0.4}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 4.0, .max = 6.0, .step = 0.4},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.0, .max = 6.0, .step = 0.4}};
 
-    op_domain_params.operational_params.op_condition =
-        sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("grid search, determine operational status with physical simulation")
     {
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            layout, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -2062,10 +1981,10 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
     SECTION("grid search, determine operational status with only pruning")
     {
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            layout, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(layout, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 36);
@@ -2087,31 +2006,29 @@ TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operati
 
 TEST_CASE("critical_temperature_domain class member functions", "[operational-domain]")
 {
-    sidb::simulation::logic::critical_temperature_domain ctdom{};
+    critical_temperature_domain ctdom{};
 
     CHECK(ctdom.empty());
     CHECK(ctdom.get_number_of_dimensions() == 0);
     REQUIRE_THROWS_AS(ctdom.get_dimension(0), std::out_of_range);
     REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
 
-    ctdom.add_dimension(sidb::simulation::logic::sweep_parameter::EPSILON_R);
+    ctdom.add_dimension(sweep_parameter::EPSILON_R);
     CHECK(ctdom.get_number_of_dimensions() == 1);
-    CHECK(ctdom.get_dimension(0) == sidb::simulation::logic::sweep_parameter::EPSILON_R);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::EPSILON_R);
     REQUIRE_THROWS_AS(ctdom.get_dimension(1), std::out_of_range);
 
-    ctdom = sidb::simulation::logic::critical_temperature_domain(
-        {sidb::simulation::logic::sweep_parameter::LAMBDA_TF, sidb::simulation::logic::sweep_parameter::MU_MINUS});
+    ctdom = critical_temperature_domain({sweep_parameter::LAMBDA_TF, sweep_parameter::MU_MINUS});
     CHECK(ctdom.get_number_of_dimensions() == 2);
-    CHECK(ctdom.get_dimension(0) == sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
-    CHECK(ctdom.get_dimension(1) == sidb::simulation::logic::sweep_parameter::MU_MINUS);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(ctdom.get_dimension(1) == sweep_parameter::MU_MINUS);
 
-    ctdom = sidb::simulation::logic::critical_temperature_domain({sidb::simulation::logic::sweep_parameter::LAMBDA_TF,
-                                                                  sidb::simulation::logic::sweep_parameter::EPSILON_R,
-                                                                  sidb::simulation::logic::sweep_parameter::MU_MINUS});
+    ctdom = critical_temperature_domain(
+        {sweep_parameter::LAMBDA_TF, sweep_parameter::EPSILON_R, sweep_parameter::MU_MINUS});
     CHECK(ctdom.get_number_of_dimensions() == 3);
-    CHECK(ctdom.get_dimension(0) == sidb::simulation::logic::sweep_parameter::LAMBDA_TF);
-    CHECK(ctdom.get_dimension(1) == sidb::simulation::logic::sweep_parameter::EPSILON_R);
-    CHECK(ctdom.get_dimension(2) == sidb::simulation::logic::sweep_parameter::MU_MINUS);
+    CHECK(ctdom.get_dimension(0) == sweep_parameter::LAMBDA_TF);
+    CHECK(ctdom.get_dimension(1) == sweep_parameter::EPSILON_R);
+    CHECK(ctdom.get_dimension(2) == sweep_parameter::MU_MINUS);
 }
 
 TEST_CASE("Bestagon AND gate operational domain and temperature computation, using siqad coordinates",
@@ -2119,29 +2036,28 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
 {
     const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
     op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.8, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
+        {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.8, .step = 0.1},
+        {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
 
-    sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+    operational_domain_stats op_domain_stats{};
 
     SECTION("grid_search")
     {
-        const auto op_domain = sidb::simulation::logic::critical_temperature_domain_grid_search(
-            lyt, std::vector{synthesis::create_and_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain = critical_temperature_domain_grid_search(lyt, std::vector{create_and_tt()},
+                                                                       op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 9);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 36);
@@ -2154,18 +2070,17 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
     SECTION("random_sampling in non-operational regime")
     {
         op_domain_params.sweep_dimensions = {
-            {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.2, .step = 0.1},
-            {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
+            {.dimension = sweep_parameter::EPSILON_R, .min = 5.0, .max = 5.2, .step = 0.1},
+            {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
 
-        const auto op_domain = sidb::simulation::logic::critical_temperature_domain_random_sampling(
-            lyt, std::vector{synthesis::create_and_tt()}, 10, op_domain_params, &op_domain_stats);
+        const auto op_domain = critical_temperature_domain_random_sampling(lyt, std::vector{create_and_tt()}, 10,
+                                                                           op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (max 10 steps in each dimension)
         CHECK(op_domain.size() <= 9);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 36);
@@ -2176,18 +2091,17 @@ TEST_CASE("Bestagon AND gate operational domain and temperature computation, usi
     SECTION("flood_fill")
     {
         op_domain_params.sweep_dimensions = {
-            {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.8, .step = 0.1},
-            {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
+            {.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.8, .step = 0.1},
+            {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.9, .max = 5.1, .step = 0.1}};
 
-        const auto op_domain = sidb::simulation::logic::critical_temperature_domain_flood_fill(
-            lyt, std::vector{synthesis::create_and_tt()}, 1, op_domain_params, &op_domain_stats);
+        const auto op_domain = critical_temperature_domain_flood_fill(lyt, std::vector{create_and_tt()}, 1,
+                                                                      op_domain_params, &op_domain_stats);
 
         // check if the operational domain has the correct size (10 steps in each dimension)
         CHECK(op_domain.size() == 9);
 
         // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations <= 36);
@@ -2201,37 +2115,35 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
 {
     auto lyt = sidb_cell_clk_lyt_siqad{};
 
-    lyt.assign_cell_type({0, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({2, 0, 0}, sidb::sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type({6, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type({14, 0, 0}, sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions              = {
-        {.dimension = sidb::simulation::logic::sweep_parameter::EPSILON_R, .min = 1, .max = 10, .step = 0.1},
-        {.dimension = sidb::simulation::logic::sweep_parameter::LAMBDA_TF, .min = 1, .max = 10, .step = 0.1}};
+    op_domain_params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 1, .max = 10, .step = 0.1},
+                                         {.dimension = sweep_parameter::LAMBDA_TF, .min = 1, .max = 10, .step = 0.1}};
 
     SECTION("grid search, input is set via the distance of the perturbers")
     {
-        sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+        operational_domain_stats op_domain_stats{};
 
         op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-            sidb::simulation::logic::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED;
+            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED;
 
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            lyt, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(lyt, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 10034);
@@ -2241,16 +2153,15 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
     }
     SECTION("grid search, input is set via the absence of perturbers")
     {
-        sidb::simulation::logic::operational_domain_stats op_domain_stats{};
+        operational_domain_stats op_domain_stats{};
 
         op_domain_params.operational_params.input_bdl_iterator_params.input_bdl_config =
-            sidb::simulation::logic::bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
+            bdl_input_iterator_params::input_bdl_configuration::PERTURBER_ABSENCE_ENCODED;
 
-        const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-            lyt, std::vector{synthesis::create_id_tt()}, op_domain_params, &op_domain_stats);
+        const auto op_domain =
+            operational_domain_grid_search(lyt, std::vector{create_id_tt()}, op_domain_params, &op_domain_stats);
 
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params,
-                                                      sidb::simulation::logic::operational_status::NON_OPERATIONAL);
+        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::NON_OPERATIONAL);
 
         CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
         CHECK(op_domain_stats.num_simulator_invocations == 9828);

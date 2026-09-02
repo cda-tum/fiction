@@ -34,8 +34,14 @@
 #include <string>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::surfaces;
 
-using lattice = sidb_100_cell_clk_lyt_siqad;
+using layout = sidb_100_cell_clk_lyt_siqad;
 
 // Helper function to compare string output with expected string
 bool compare_output(const std::string& output, const std::string& expected)
@@ -51,30 +57,25 @@ bool compare_output(const std::string& output, const std::string& expected)
 
 TEMPLATE_TEST_CASE(
     "writes expected output", "[write_txt_sim_result]",
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>),
-    (layouts::cell_level_layout<sidb::sidb_technology,
-                                layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>),
-    (sidb::surfaces::charge_distribution_surface<layouts::cell_level_layout<
-         sidb::sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::siqad>>>>),
-    (sidb::surfaces::charge_distribution_surface<layouts::cell_level_layout<
-         sidb::sidb_technology, layouts::clocked_layout<layouts::cartesian_layout<layouts::coords::offset>>>>))
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
+    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::siqad>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::siqad>>>>),
+    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>>))
 {
-    lattice lyt{};
+    layout lyt{};
 
     SECTION("Output is written to ostream correctly, degenerated GS")
     {
-        lyt.assign_cell_type({0, 0}, lattice::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, lattice::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 0}, lattice::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 0}, lattice::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 0}, layout::cell_type::NORMAL);
 
-        const sidb::model::simulation_parameters params{2, -0.32};
-        const auto                               simulation_results =
-            sidb::simulation::engines::exhaustive_ground_state_simulation<lattice>(lyt, params);
+        const simulation_parameters params{2, -0.32};
+        const auto                  simulation_results = exhaustive_ground_state_simulation<layout>(lyt, params);
 
         std::stringstream ss;
-        sidb::simulation::io::write_location_and_ground_state(simulation_results, ss);
+        write_location_and_ground_state(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;GS_1;
                                                 0.000;0.000;-1;-1;
@@ -97,12 +98,11 @@ TEMPLATE_TEST_CASE(
         lyt.assign_cell_type({3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
         lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
 
-        const sidb::model::simulation_parameters params{2, -0.32};
-        const auto                               simulation_results =
-            sidb::simulation::engines::exhaustive_ground_state_simulation<lattice>(lyt, params);
+        const simulation_parameters params{2, -0.32};
+        const auto                  simulation_results = exhaustive_ground_state_simulation<layout>(lyt, params);
 
         std::stringstream ss;
-        sidb::simulation::io::write_location_and_ground_state(simulation_results, ss);
+        write_location_and_ground_state(simulation_results, ss);
 
         const std::string expected_output = R"(x [nm];y [nm];GS_0;
                                                 0.000;0.000;-1;

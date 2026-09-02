@@ -22,13 +22,14 @@
 #include <fiction/types.hpp>
 
 using namespace fiction;
+using namespace fiction::sidb;
 
 TEST_CASE("Bestagon traits", "[sidb-dynamic-gate-library]")
 {
-    CHECK(!has_post_layout_optimization_v<sidb::skeleton_bestagon_library, qca_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sidb::skeleton_bestagon_library, inml_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sidb::skeleton_bestagon_library, sidb_cell_clk_lyt>);
-    CHECK(!has_post_layout_optimization_v<sidb::skeleton_bestagon_library, cart_gate_clk_lyt>);
-    CHECK(has_get_functional_implementations_v<sidb::skeleton_bestagon_library>);
-    CHECK(has_get_gate_ports_v<sidb::skeleton_bestagon_library>);
+    CHECK(!has_post_layout_optimization_v<skeleton_bestagon_library, qca_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<skeleton_bestagon_library, inml_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<skeleton_bestagon_library, sidb_cell_clk_lyt>);
+    CHECK(!has_post_layout_optimization_v<skeleton_bestagon_library, cart_gate_clk_lyt>);
+    CHECK(has_get_functional_implementations_v<skeleton_bestagon_library>);
+    CHECK(has_get_gate_ports_v<skeleton_bestagon_library>);
 }
