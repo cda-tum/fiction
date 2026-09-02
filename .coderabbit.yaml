@@ -10,8 +10,8 @@ reviews:
     enabled: true
     drafts: false
 
-  # Keep in sync with `exclude:` in .pre-commit-config.yaml and `IGNORE` in
-  # .github/scripts/clang_tidy_changed_lines.py
+  # Keep in sync with `exclude:` in .pre-commit-config.yaml and the `ignore:` input of
+  # cpp-linter-action in .github/workflows/cpp-linter.yml
   path_filters:
     - "!vendors/**"
     - "!benchmarks/**"

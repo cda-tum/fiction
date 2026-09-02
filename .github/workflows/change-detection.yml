@@ -129,7 +129,6 @@ jobs:
             .github/workflows/ci.yml
             .github/workflows/change-detection.yml
             .github/workflows/cpp-linter.yml
-            .github/scripts/clang_tidy_changed_lines.py
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
             !bindings/mnt/pyfiction/include/pyfiction/documentation.hpp
       - name: Set a flag for running Clang-Tidy

@@ -22,8 +22,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read # required to check out the repository
-      # the thread comment went with `cpp-linter-action`; the findings land in the step
-      # summary now, which needs no write access at all
+      pull-requests: write # required to post/update the clang-tidy thread comment on the PR
 
     steps:
       - name: Clone Repository
@@ -39,8 +38,7 @@ jobs:
         # bound the wait instead, and retry the transient failures that bounding surfaces
         run: |
           timeout 10m sudo -E apt-get update -o Acquire::Retries=3
-          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 \
-            cmake libreadline-dev libtbb-dev python3-dev clang-tidy-18
+          timeout 10m sudo -E apt-get install -yq -o Acquire::Retries=3 cmake libreadline-dev libtbb-dev python3-dev
 
       - name: Install nanobind
         # the ci-tidy preset builds the Python bindings, which need nanobind's CMake package
@@ -64,74 +62,19 @@ jobs:
         # translation unit, and a unity build collapses them
         run: cmake -S . --preset ci-tidy
 
-      # The diff is restricted to `include/fiction` for the same window. Line-scoping does not
-      # bound the work here the way it usually does: the restructure rewrites every include
-      # line in the repository, so "the changed lines" is very nearly "every include", and a
-      # run over all 464 changed C++ files takes three to five hours against GitHub's six-hour
-      # ceiling -- `--line-filter` trims which diagnostics are reported, not how much gets
-      # parsed. The library is where a bad include or a mistranslated namespace would actually
-      # matter; the call-site updates under `test/`, `cli/`, `experiments/`, and `bindings/`
-      # are mechanical and already covered by compiling them and running their suites.
-      #
-      # `misc-include-cleaner` is switched off for the same window, and only here -- `.clang-tidy`
-      # still applies it to every other pull request. Line-scoping makes it meaningless on this
-      # branch rather than merely noisy: the restructure rewrites every include line, so the check
-      # re-flags include hygiene that predates the branch, and *fixing* a finding shifts the lines
-      # below it and re-flags those in turn (one header went from one finding to four that way).
-      # Removals also cascade -- dropping an unused include from a header makes its consumers stop
-      # compiling, since they had been reaching declarations through it. That sweep is worth doing;
-      # it is not this pull request, where it would be driven by line-number churn rather than by
-      # anything the change actually did.
-      #
-      # TEMPORARY, for the include/ restructure (#1096, #1097). `cpp-linter-action` scopes
-      # itself by asking the REST API for the pull request's diff, and the API refuses to
-      # produce one for more than 300 files:
-      #
-      #   response returned 406 ... "the diff exceeded the maximum number of files (300)"
-      #
-      # so the action fails before Clang-Tidy runs at all. The restructure also touches
-      # nearly every file in the repository, which is why the check has to stay scoped to
-      # the changed lines rather than surface the whole pre-existing backlog at once.
-      # Computing the diff locally satisfies both and has no such ceiling. Revert to the
-      # action, linting whole files, once the restructure has landed.
-      # Clang-Tidy comes from the distribution, matched with its own resource directory. The
-      # standalone binaries `cpp-linter-action` fetched ship no builtin headers at all, so
-      # clang-tidy cannot find `stddef.h` and every translation unit that reaches libc fails to
-      # parse. Pointing those binaries at another version's resource directory does not fix
-      # that, it only moves it: clang-18's `mmintrin.h` uses MMX builtins that clang 21 has
-      # since removed, so a 21 binary reading 18's headers produced 1720 `clang-diagnostic-error`s
-      # of its own. An apt-installed `clang-tidy-18` finds the headers it was built against and
-      # needs no `--resource-dir`. It carries a slightly smaller check set than the 21 the action
-      # used, which is the safe direction for a temporary, deliberately narrowed run.
-      - name: Run clang-tidy over the changed lines
+      - name: Run clang-tidy
+        id: linter
+        uses: cpp-linter/cpp-linter-action@cab1143a2c149bc41e85b070a9de81716974c18f # v2.21.0
         env:
-          # One per event shape that reaches this workflow. `pull_request` is the only one
-          # `cpp-linter-action` used to handle by itself, but `ci.yml` also calls in on
-          # `push`, `merge_group`, and `workflow_dispatch`, and on those the pull request
-          # context is empty.
-          BASE_SHA: >-
-            ${{ github.event.pull_request.base.sha
-            || github.event.merge_group.base_sha
-            || github.event.before }}
-        # `fetch-depth: 0` above is what makes the base commit available to diff against
-        run: |
-          set -euo pipefail
-          # `git diff` answers an unresolvable revision with a message on stderr and exit 0,
-          # so an empty or stale BASE_SHA would hand the linter an empty diff and pass the
-          # check having linted nothing. Resolve it first and fail loudly when it does not.
-          # `workflow_dispatch` carries no base of any kind; the previous commit is the only
-          # honest answer there, and the all-zero SHA `github.event.before` reports for a new
-          # branch means the same thing.
-          if [[ -z "${BASE_SHA}" || "${BASE_SHA}" =~ ^0+$ ]]; then
-            BASE_SHA="HEAD^"
-          fi
-          if ! BASE_SHA="$(git rev-parse --verify --quiet "${BASE_SHA}^{commit}")"; then
-            echo "::error::cannot resolve a base commit to diff against on ${GITHUB_EVENT_NAME}"
-            exit 1
-          fi
-          echo "Diffing against ${BASE_SHA}"
-          git diff -U0 "${BASE_SHA}...HEAD" -- include/fiction | python3 .github/scripts/clang_tidy_changed_lines.py \
-            --build-dir build-ci-tidy \
-            --clang-tidy clang-tidy-18 \
-            --disable-check misc-include-cleaner \
-            --jobs "$(nproc)"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: ""
+          tidy-checks: ""
+          database: "build-ci-tidy"
+          step-summary: true
+          thread-comments: ${{ ((github.event_name == 'pull_request' && !github.event.pull_request.head.repo.fork) && 'update') || 'false' }}
+          ignore: "build-*|libs/*|vendors/*|docs/*|benchmarks/*|bib/*|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp|bindings/mnt/pyfiction/include/pyfiction/documentation.hpp"
+          version: "21"
+
+      - if: steps.linter.outputs.checks-failed > 0
+        run: exit 1
