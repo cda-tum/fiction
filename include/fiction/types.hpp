@@ -293,7 +293,7 @@ using sidb_111_cell_clk_lyt     = sidb::surfaces::lattice<sidb::surfaces::lattic
 using sidb_111_cell_clk_lyt_ptr = std::shared_ptr<sidb_111_cell_clk_lyt>;
 
 using sidb_111_cell_clk_lyt_siqad     = sidb::surfaces::lattice<sidb::surfaces::lattice_111, sidb_cell_clk_lyt_siqad>;
-using sidb_111_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_111_cell_clk_lyt>;
+using sidb_111_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_siqad>;
 
 using sidb_111_cell_clk_lyt_cube     = sidb::surfaces::lattice<sidb::surfaces::lattice_111, sidb_cell_clk_lyt_cube>;
 using sidb_111_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_cube>;
@@ -307,7 +307,7 @@ using cds_sidb_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt>;
 using cds_sidb_cell_clk_lyt_siqad     = sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>;
 using cds_sidb_cell_clk_lyt_siqad_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt_siqad>;
 
-using cds_sidb_cell_clk_lyt_cube     = sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_siqad>;
+using cds_sidb_cell_clk_lyt_cube     = sidb::surfaces::charge_distribution_surface<sidb_cell_clk_lyt_cube>;
 using cds_sidb_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_cell_clk_lyt_cube>;
 
 using cds_sidb_100_cell_clk_lyt_siqad     = sidb::surfaces::charge_distribution_surface<sidb_100_cell_clk_lyt_siqad>;
@@ -320,10 +320,10 @@ using cds_sidb_111_cell_clk_lyt     = sidb::surfaces::charge_distribution_surfac
 using cds_sidb_111_cell_clk_lyt_ptr = std::shared_ptr<cds_sidb_111_cell_clk_lyt>;
 
 using cds_sidb_111_cell_clk_lyt_siqad     = sidb::surfaces::charge_distribution_surface<sidb_111_cell_clk_lyt_siqad>;
-using cds_sidb_111_cell_clk_lyt_siqad_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_siqad>;
+using cds_sidb_111_cell_clk_lyt_siqad_ptr = std::shared_ptr<cds_sidb_111_cell_clk_lyt_siqad>;
 
 using cds_sidb_111_cell_clk_lyt_cube     = sidb::surfaces::charge_distribution_surface<sidb_111_cell_clk_lyt_cube>;
-using cds_sidb_111_cell_clk_lyt_cube_ptr = std::shared_ptr<sidb_111_cell_clk_lyt_cube>;
+using cds_sidb_111_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_111_cell_clk_lyt_cube>;
 
 using sidb_defect_cell_clk_lyt     = sidb::surfaces::defect_surface<sidb_cell_clk_lyt>;
 using sidb_defect_cell_clk_lyt_ptr = std::shared_ptr<sidb_defect_cell_clk_lyt>;
@@ -358,6 +358,58 @@ using cds_sidb_defect_100_cell_clk_lyt_cube_ptr = std::shared_ptr<cds_sidb_defec
 using cell_layout_t = std::variant<qca_cell_clk_lyt_ptr, stacked_qca_cell_clk_lyt_ptr, mol_qca_cell_clk_lyt_ptr,
                                    inml_cell_clk_lyt_ptr, sidb_100_cell_clk_lyt_ptr, sidb_111_cell_clk_lyt_ptr,
                                    cds_sidb_100_cell_clk_lyt_ptr, cds_sidb_111_cell_clk_lyt_ptr>;
+
+/**
+ * Every `*_ptr` alias points at the type its name says (`aig_ptr` at `aig_nt`, and so on). The
+ * aliases above are written by hand, so this pins each pair.
+ */
+static_assert(std::is_same_v<tt_ptr::element_type, tt>);
+static_assert(std::is_same_v<aig_ptr::element_type, aig_nt>);
+static_assert(std::is_same_v<xag_ptr::element_type, xag_nt>);
+static_assert(std::is_same_v<mig_ptr::element_type, mig_nt>);
+static_assert(std::is_same_v<tec_ptr::element_type, tec_nt>);
+static_assert(std::is_same_v<cart_gate_clk_lyt_ptr::element_type, cart_gate_clk_lyt>);
+static_assert(std::is_same_v<cart_odd_row_gate_clk_lyt_ptr::element_type, cart_odd_row_gate_clk_lyt>);
+static_assert(std::is_same_v<cart_even_row_gate_clk_lyt_ptr::element_type, cart_even_row_gate_clk_lyt>);
+static_assert(std::is_same_v<cart_odd_col_gate_clk_lyt_ptr::element_type, cart_odd_col_gate_clk_lyt>);
+static_assert(std::is_same_v<cart_even_col_gate_clk_lyt_ptr::element_type, cart_even_col_gate_clk_lyt>);
+static_assert(std::is_same_v<hex_odd_row_gate_clk_lyt_ptr::element_type, hex_odd_row_gate_clk_lyt>);
+static_assert(std::is_same_v<hex_even_row_gate_clk_lyt_ptr::element_type, hex_even_row_gate_clk_lyt>);
+static_assert(std::is_same_v<hex_odd_col_gate_clk_lyt_ptr::element_type, hex_odd_col_gate_clk_lyt>);
+static_assert(std::is_same_v<hex_even_col_gate_clk_lyt_ptr::element_type, hex_even_col_gate_clk_lyt>);
+static_assert(std::is_same_v<qca_cell_clk_lyt_ptr::element_type, qca_cell_clk_lyt>);
+static_assert(std::is_same_v<stacked_qca_cell_clk_lyt_ptr::element_type, stacked_qca_cell_clk_lyt>);
+static_assert(std::is_same_v<mol_qca_cell_clk_lyt_ptr::element_type, mol_qca_cell_clk_lyt>);
+static_assert(std::is_same_v<inml_cell_clk_lyt_ptr::element_type, inml_cell_clk_lyt>);
+static_assert(std::is_same_v<sidb_cell_clk_lyt_ptr::element_type, sidb_cell_clk_lyt>);
+static_assert(std::is_same_v<sidb_cell_clk_lyt_siqad_ptr::element_type, sidb_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<sidb_cell_clk_lyt_cube_ptr::element_type, sidb_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<sidb_100_cell_clk_lyt_ptr::element_type, sidb_100_cell_clk_lyt>);
+static_assert(std::is_same_v<sidb_100_cell_clk_lyt_siqad_ptr::element_type, sidb_100_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<sidb_100_cell_clk_lyt_cube_ptr::element_type, sidb_100_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<sidb_111_cell_clk_lyt_ptr::element_type, sidb_111_cell_clk_lyt>);
+static_assert(std::is_same_v<sidb_111_cell_clk_lyt_siqad_ptr::element_type, sidb_111_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<sidb_111_cell_clk_lyt_cube_ptr::element_type, sidb_111_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<cds_sidb_100_cell_clk_lyt_ptr::element_type, cds_sidb_100_cell_clk_lyt>);
+static_assert(std::is_same_v<cds_sidb_cell_clk_lyt_ptr::element_type, cds_sidb_cell_clk_lyt>);
+static_assert(std::is_same_v<cds_sidb_cell_clk_lyt_siqad_ptr::element_type, cds_sidb_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<cds_sidb_cell_clk_lyt_cube_ptr::element_type, cds_sidb_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<cds_sidb_100_cell_clk_lyt_siqad_ptr::element_type, cds_sidb_100_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<cds_sidb_100_cell_clk_lyt_cube_ptr::element_type, cds_sidb_100_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<cds_sidb_111_cell_clk_lyt_ptr::element_type, cds_sidb_111_cell_clk_lyt>);
+static_assert(std::is_same_v<cds_sidb_111_cell_clk_lyt_siqad_ptr::element_type, cds_sidb_111_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<cds_sidb_111_cell_clk_lyt_cube_ptr::element_type, cds_sidb_111_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<sidb_defect_cell_clk_lyt_ptr::element_type, sidb_defect_cell_clk_lyt>);
+static_assert(std::is_same_v<sidb_defect_cell_clk_lyt_siqad_ptr::element_type, sidb_defect_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<sidb_defect_cell_clk_lyt_cube_ptr::element_type, sidb_defect_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<sidb_defect_100_cell_clk_lyt_ptr::element_type, sidb_defect_100_cell_clk_lyt>);
+static_assert(std::is_same_v<sidb_defect_100_cell_clk_lyt_siqad_ptr::element_type, sidb_defect_100_cell_clk_lyt_siqad>);
+static_assert(std::is_same_v<sidb_defect_100_cell_clk_lyt_cube_ptr::element_type, sidb_defect_100_cell_clk_lyt_cube>);
+static_assert(std::is_same_v<cds_sidb_defect_100_cell_clk_lyt_ptr::element_type, cds_sidb_defect_100_cell_clk_lyt>);
+static_assert(
+    std::is_same_v<cds_sidb_defect_100_cell_clk_lyt_siqad_ptr::element_type, cds_sidb_defect_100_cell_clk_lyt_siqad>);
+static_assert(
+    std::is_same_v<cds_sidb_defect_100_cell_clk_lyt_cube_ptr::element_type, cds_sidb_defect_100_cell_clk_lyt_cube>);
 
 }  // namespace fiction
 
