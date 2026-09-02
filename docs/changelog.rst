@@ -212,6 +212,9 @@ Changed
     - Adopted nanobind's split mode, so one ``abi3`` wheel per platform now covers Python 3.10 and
       up instead of four. ``mnt.pyfiction`` gains ``nanobind-backend`` as a runtime dependency,
       which ``pip`` installs along with it
+    - The ``pyfiction`` extension no longer re-exports the internals of the static libraries it
+      embeds. ``tinyxml2``, ``graph-coloring``, and ALGLIB are built with default visibility, so
+      the dynamic linker was free to interpose them
 
 Removed
 #######
