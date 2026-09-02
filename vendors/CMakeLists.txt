@@ -5,6 +5,14 @@ set(CMAKE_DISABLE_FIND_PACKAGE_fmt TRUE)
 # Include Dependencies (FetchContent) configuration
 include(${PROJECT_SOURCE_DIR}/cmake/Dependencies.cmake)
 
+# The static archives below are compiled per-function and per-data so that `--gc-sections` has
+# something to discard. Only the archives need this: they are separate targets that consume
+# neither `fiction_options` nor anything the consuming target sets, and they are where the
+# unreferenced code is. Dropping it costs `pyfiction` 2.4 MB of the 9.1 MB it ships.
+set(FICTION_SECTION_FLAGS
+    "$<$<AND:$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>,$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>>:-ffunction-sections;-fdata-sections>"
+)
+
 ################################################################################
 # Fetched Dependencies (Managed via FetchContent in Dependencies.cmake)
 ################################################################################
@@ -38,6 +46,7 @@ install(DIRECTORY ${parallel-hashmap_SOURCE_DIR}/parallel_hashmap DESTINATION in
 
 # tinyxml2
 set_property(TARGET tinyxml2 PROPERTY POSITION_INDEPENDENT_CODE ON)
+target_compile_options(tinyxml2 PRIVATE "${FICTION_SECTION_FLAGS}")
 target_link_system_libraries(libfiction INTERFACE
     $<BUILD_INTERFACE:tinyxml2::tinyxml2>
     $<INSTALL_INTERFACE:fiction::tinyxml2>
@@ -55,6 +64,7 @@ if (FICTION_ALGLIB)
         $<BUILD_INTERFACE:ALGLIB>
         $<INSTALL_INTERFACE:fiction::alglib>
     )
+    target_compile_options(ALGLIB PRIVATE "${FICTION_SECTION_FLAGS}")
     install(DIRECTORY ${alglib-cmake_SOURCE_DIR}/src/cpp/src/headers/ DESTINATION include/alglib)
 endif ()
 
@@ -83,6 +93,7 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/combinations/ DESTINATION include/
 
 # Graph Coloring
 add_subdirectory(graph-coloring EXCLUDE_FROM_ALL)
+target_compile_options(graph-coloring PRIVATE "${FICTION_SECTION_FLAGS}")
 target_include_directories(libfiction SYSTEM INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/graph-coloring/Header>
 )

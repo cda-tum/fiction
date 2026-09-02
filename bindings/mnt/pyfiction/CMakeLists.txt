@@ -67,10 +67,11 @@ if(APPLE)
 elseif(UNIX)
   target_link_options(pyfiction PRIVATE "LINKER:--exclude-libs,ALL")
 
-  # `--gc-sections` has little to collect without these: nanobind's own size
-  # tuning stops at `-Os`, and neither the bindings nor the vendored archives
-  # emit per-function sections. A linked build inherited both from
-  # `nanobind-static`; split mode links no nanobind target.
+  # `--gc-sections` collects nothing that was not compiled per-function and
+  # per-data, and nanobind's own size tuning stops at `-Os`. These cover the
+  # bindings; `vendors/CMakeLists.txt` covers the static archives, which is
+  # where most of the collectable code turns out to be. A linked build inherited
+  # both flags from `nanobind-static`; split mode links no nanobind target.
   target_compile_options(
     pyfiction
     PRIVATE

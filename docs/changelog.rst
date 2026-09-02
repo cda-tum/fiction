@@ -214,7 +214,9 @@ Changed
       which ``pip`` installs along with it
     - The ``pyfiction`` extension no longer re-exports the internals of the static libraries it
       embeds. ``tinyxml2``, ``graph-coloring``, and ALGLIB are built with default visibility, so
-      the dynamic linker was free to interpose them
+      the dynamic linker was free to interpose all 4539 of their symbols. The extension also
+      collects unreferenced sections again, which it stopped doing when it dropped its nanobind
+      link, and now ships 9.1 MB instead of 12.0 MB
 
 Removed
 #######
