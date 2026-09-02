@@ -97,7 +97,7 @@ TEST_CASE("Gate-level layout with AND gate", "[apply-gate-library]")
 
             check_equivalence(
                 bestagon_and,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
+                fmt::format("{}/resources/on_the_fly_gate_library/single_tile_layout/AND_gate.sqd", TEST_PATH));
 
             CHECK(sidb::simulation::logic::is_operational(bestagon_and, std::vector<tt>{synthesis::create_and_tt()},
                                                           design_gate_params.operational_params)
@@ -160,9 +160,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
         const auto double_wire =
             physical_design::apply_gate_library<cell_lyt, sidb::bestagon_library, hex_even_row_gate_clk_lyt>(layout);
 
-        check_equivalence(
-            double_wire,
-            fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
+        check_equivalence(double_wire,
+                          fmt::format("{}/resources/bestagon_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
     }
 
     SECTION("Use parameterized gate library")
@@ -188,7 +187,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
             check_equivalence(
                 bestagon_double_wire,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/predefined_double_wire.sqd",
+                fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/predefined_double_wire.sqd",
                             TEST_PATH));
         }
         SECTION("Design all gates of the layout on-the-fly")
@@ -209,7 +208,7 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
             check_equivalence(
                 bestagon_double_wire,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
+                fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/double_wire.sqd", TEST_PATH));
 
             SECTION("with defects")
             {
@@ -231,9 +230,8 @@ TEST_CASE("Gate-level layout with two input wires, one double wire, and two outp
 
                 check_equivalence(
                     bestagon_double_wire,
-                    fmt::format(
-                        "{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/double_wire_and_defects.sqd",
-                        TEST_PATH));
+                    fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/double_wire_and_defects.sqd",
+                                TEST_PATH));
             }
         }
     }
@@ -256,7 +254,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     layout);
 
             check_equivalence(inverter,
-                              fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/INV.sqd", TEST_PATH));
+                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/INV.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
@@ -276,9 +274,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 physical_design::apply_parameterized_gate_library<cell_lyt, sidb::on_the_fly_gate_library,
                                                                   hex_even_row_gate_clk_lyt>(layout, params);
 
-            check_equivalence(
-                inverter,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/INV.sqd", TEST_PATH));
+            check_equivalence(inverter,
+                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/INV.sqd", TEST_PATH));
 
             SECTION("with defects")
             {
@@ -297,7 +294,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
                 check_equivalence(
                     inverter_with_defects,
-                    fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/INV_and_defects.sqd",
+                    fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/INV_and_defects.sqd",
                                 TEST_PATH));
             }
         }
@@ -319,7 +316,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     layout);
 
             check_equivalence(or_layout,
-                              fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/OR.sqd", TEST_PATH));
+                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/OR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
@@ -339,9 +336,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 physical_design::apply_parameterized_gate_library<cell_lyt, sidb::on_the_fly_gate_library,
                                                                   hex_even_row_gate_clk_lyt>(layout, params);
 
-            check_equivalence(
-                or_layout,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/OR.sqd", TEST_PATH));
+            check_equivalence(or_layout,
+                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/OR.sqd", TEST_PATH));
 
             SECTION("with defects")
             {
@@ -360,7 +356,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
                 check_equivalence(
                     or_layout_with_defects,
-                    fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/OR_and_defects.sqd",
+                    fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/OR_and_defects.sqd",
                                 TEST_PATH));
             }
         }
@@ -382,7 +378,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     layout);
 
             check_equivalence(nand_layout,
-                              fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/NAND.sqd", TEST_PATH));
+                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/NAND.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
@@ -403,8 +399,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                                                   hex_even_row_gate_clk_lyt>(layout, params);
 
             check_equivalence(
-                nand_layout,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/NAND.sqd", TEST_PATH));
+                nand_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NAND.sqd", TEST_PATH));
 
             SECTION("with defects")
             {
@@ -428,7 +423,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
                 check_equivalence(
                     nand_layout_with_defects,
-                    fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/NAND_and_defects.sqd",
+                    fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NAND_and_defects.sqd",
                                 TEST_PATH));
             }
         }
@@ -450,7 +445,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     layout);
 
             check_equivalence(nor_layout,
-                              fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/NOR.sqd", TEST_PATH));
+                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/NOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
@@ -470,9 +465,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 physical_design::apply_parameterized_gate_library<cell_lyt, sidb::on_the_fly_gate_library,
                                                                   hex_even_row_gate_clk_lyt>(layout, params);
 
-            check_equivalence(
-                nor_layout,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/NOR.sqd", TEST_PATH));
+            check_equivalence(nor_layout,
+                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/NOR.sqd", TEST_PATH));
         }
     }
 
@@ -492,7 +486,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     layout);
 
             check_equivalence(xor_layout,
-                              fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/XOR.sqd", TEST_PATH));
+                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/XOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
@@ -512,9 +506,8 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                 physical_design::apply_parameterized_gate_library<cell_lyt, sidb::on_the_fly_gate_library,
                                                                   hex_even_row_gate_clk_lyt>(layout, params);
 
-            check_equivalence(
-                xor_layout,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/XOR.sqd", TEST_PATH));
+            check_equivalence(xor_layout,
+                              fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library, reject kinks")
@@ -538,7 +531,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
 
             check_equivalence(
                 xor_layout,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/XOR_rejecting_kinks.sqd",
+                fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XOR_rejecting_kinks.sqd",
                             TEST_PATH));
         }
     }
@@ -559,7 +552,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                     layout);
 
             check_equivalence(xnor_layout,
-                              fmt::format("{}/resources/sidb_bestagon_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
+                              fmt::format("{}/resources/bestagon_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
         }
 
         SECTION("Use parameterized gate library")
@@ -580,8 +573,7 @@ TEST_CASE("Gate-level layout with with different gates", "[apply-gate-library]")
                                                                   hex_even_row_gate_clk_lyt>(layout, params);
 
             check_equivalence(
-                xnor_layout,
-                fmt::format("{}/resources/sidb_on_the_fly_gate_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
+                xnor_layout, fmt::format("{}/resources/on_the_fly_gate_library/multi_tile_layout/XNOR.sqd", TEST_PATH));
         }
     }
 }

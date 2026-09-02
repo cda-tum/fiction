@@ -5,7 +5,7 @@ Catch2 tests. The tree mirrors `include/fiction/` exactly: `layouts/`, `networks
 `inml/`, and the `sidb/` subtree), and `utils/`, plus `benchmark/`, shared `resources/`,
 and the blueprints under `utils/blueprints/`. A test lives at the path its header does,
 so `technology/sidb/model/charge_state.hpp` is tested by
-`test/technology/sidb/model/charge_state.cpp`.
+`test/technology/sidb/model/test_charge_state.cpp`.
 
 ## Wiring
 
@@ -26,7 +26,8 @@ so `technology/sidb/model/charge_state.hpp` is tested by
   and do need `../`, because `add_subdirectory(benchmark)` runs before that
   `include_directories(.)` call.
 - Benchmarks go in `test/benchmark/` and use `BENCHMARK`. They are excluded from the test
-  glob and do not run in CI.
+  glob; `test/benchmark/CMakeLists.txt` registers them with CTest only when
+  `FICTION_BENCHMARK` is on, which the CI presets leave off.
 
 ## Writing tests
 
