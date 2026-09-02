@@ -42,7 +42,8 @@ void write_sqd_sim_result(nanobind::module_& m)
 
 void write_sqd_sim_result(nanobind::module_& m)
 {
-    detail::write_sqd_sim_result<py_sidb_layout>(m);
+    detail::write_sqd_sim_result<py_sidb_100_lattice>(m);
+    detail::write_sqd_sim_result<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

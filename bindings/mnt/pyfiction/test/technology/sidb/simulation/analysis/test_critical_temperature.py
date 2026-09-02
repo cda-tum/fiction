@@ -90,6 +90,7 @@ def test_bestagon_inv(resources_dir):
     params = critical_temperature_params()
 
     params.operational_params.sim_engine = sidb_simulation_engine.QUICKSIM
+    params.operational_params.simulation_parameters.base = 2  # QuickSim simulates two charge states only
 
     stats = critical_temperature_stats()
 

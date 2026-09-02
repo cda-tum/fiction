@@ -121,8 +121,17 @@ void operational_domain(nanobind::module_& m)
             { return fmt::format("{}", self.get_parameters()); },
             "Returns a string representation of the parameter point.")
         .def(
-            "__getitem__", [](const fiction::sidb::simulation::logic::parameter_point& self, const std::size_t index)
-            { return self.get_parameters()[index]; }, "Returns the value of the parameter at the given index.")
+            "__getitem__",
+            [](const fiction::sidb::simulation::logic::parameter_point& self, const std::size_t index)
+            {
+                const auto& parameters = self.get_parameters();
+                if (index >= parameters.size())
+                {
+                    throw py::index_error("parameter index out of range");
+                }
+                return parameters[index];
+            },
+            "Returns the value of the parameter at the given index. Raises `IndexError` if the index is out of range.")
 
         ;
 

@@ -42,7 +42,8 @@ void write_location_and_ground_state(nanobind::module_& m)
 
 void write_location_and_ground_state(nanobind::module_& m)
 {
-    detail::write_location_and_ground_state<py_sidb_layout>(m);
+    detail::write_location_and_ground_state<py_sidb_100_lattice>(m);
+    detail::write_location_and_ground_state<py_sidb_111_lattice>(m);
 }
 
 }  // namespace pyfiction

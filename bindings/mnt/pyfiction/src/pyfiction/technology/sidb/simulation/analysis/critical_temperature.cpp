@@ -85,7 +85,7 @@ void critical_temperature(nanobind::module_& m)
         .def_ro("num_valid_lyt", &fiction::sidb::simulation::analysis::critical_temperature_stats::num_valid_lyt,
                 DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_num_valid_lyt))
         .def_ro(
-            "is_ground_state_transparent",
+            "energy_between_ground_state_and_first_erroneous",
             &fiction::sidb::simulation::analysis::critical_temperature_stats::
                 energy_between_ground_state_and_first_erroneous,
             DOC(fiction_sidb_simulation_analysis_critical_temperature_stats_energy_between_ground_state_and_first_erroneous))
