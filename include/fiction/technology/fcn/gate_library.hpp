@@ -171,7 +171,7 @@ class gate_library
      */
     explicit gate_library() = delete;
     /**
-     * Converts a `cell_list` of type `T` to an `gate` at compile time. This function allows to conveniently
+     * Converts a `cell_list` of type `T` to a `gate` at compile time. This function allows to conveniently
      * specify `gate` instances in a semi-readable way in code. For examples usages see `qca_one_library.hpp`.
      *
      * @tparam T Element type of given `cell_list`.

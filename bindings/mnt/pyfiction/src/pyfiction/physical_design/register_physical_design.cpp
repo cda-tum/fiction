@@ -3,15 +3,16 @@
 namespace pyfiction
 {
 
-// Forward declarations
+void exact(nanobind::module_& m);
+void orthogonal(nanobind::module_& m);
+void graph_oriented_layout_design(nanobind::module_& m);
 void apply_gate_library(nanobind::module_& m);
 void color_routing(nanobind::module_& m);
-void exact(nanobind::module_& m);
-void graph_oriented_layout_design(nanobind::module_& m);
 void hexagonalization(nanobind::module_& m);
-void orthogonal(nanobind::module_& m);
 void post_layout_optimization(nanobind::module_& m);
 void wiring_reduction(nanobind::module_& m);
+void routing_utils(nanobind::module_& m);
+void placement_utils(nanobind::module_& m);
 
 void register_physical_design(nanobind::module_& m)
 {
@@ -23,6 +24,8 @@ void register_physical_design(nanobind::module_& m)
     hexagonalization(m);
     post_layout_optimization(m);
     wiring_reduction(m);
+    routing_utils(m);
+    placement_utils(m);
 }
 
 }  // namespace pyfiction

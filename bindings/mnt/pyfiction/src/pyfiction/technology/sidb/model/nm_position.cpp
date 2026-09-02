@@ -30,10 +30,10 @@ void nm_position(nanobind::module_& m)
 
 void nm_position(nanobind::module_& m)
 {
-    detail::sidb_nm_position<py_charge_distribution_surface>(m);
-    detail::sidb_nm_position<py_sidb_layout>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::surfaces::lattice_100>>(m);
-    detail::sidb_nm_position<py_sidb_lattice<fiction::sidb::surfaces::lattice_111>>(m);
+    detail::nm_position<py_charge_distribution_surface>(m);
+    detail::nm_position<py_sidb_layout>(m);
+    detail::nm_position<py_sidb_lattice<fiction::sidb::surfaces::lattice_100>>(m);
+    detail::nm_position<py_sidb_lattice<fiction::sidb::surfaces::lattice_111>>(m);
 }
 
 }  // namespace pyfiction

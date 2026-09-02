@@ -6,16 +6,19 @@ Architecture" describes the layout in full; read it before adding a binding.
 
 The short version: a new Python-exposed feature gets its own `.cpp` file under
 `src/pyfiction/<module>/<submodule>/` defining a single
-`void xxx(nanobind::module_& m)`. Forward-declare that function in the enclosing
-`register_<name>.cpp` and call it from `register_<name>(m)`, which the
+`void xxx(nanobind::module_& m)`, named after the file. Forward-declare that function in
+the directory's `register_<path>.cpp` and call it from `register_<path>(m)`, which the
 `NB_MODULE(pyfiction, m)` block in `pyfiction.cpp` calls in turn.
 
 **The tree mirrors `include/fiction/`,** so a binding lives beside the header it wraps:
 `quickexact.cpp` under `technology/sidb/simulation/engines/`, `write_qca_layout.cpp` under
-`technology/qca/io/`. Registries are flat — one per module, all called from `pyfiction.cpp`,
-none nested inside another. That call order is load-bearing: a type has to be registered
-before anything names it in a signature or a default argument, which is why the block runs
-types, then readers and writers, then utilities, then the algorithms built on them.
+`technology/qca/io/`. Every directory that holds binding sources has exactly one registry,
+named after the directory (`register_sidb_simulation_engines.cpp`), that declares and calls
+the registration functions of that directory and nothing else. `pyfiction.cpp` calls every
+registry; none is nested inside another. That call order is load-bearing: a type has to be
+registered before anything names it in a signature or a default argument, which is why the
+block runs the type-defining directories first, then readers and writers, then the
+algorithms built on them.
 
 Never:
 

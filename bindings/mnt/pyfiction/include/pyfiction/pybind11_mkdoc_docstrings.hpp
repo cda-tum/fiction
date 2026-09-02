@@ -109,7 +109,7 @@ embed:rst
 .. code-block:: c++
 
 template <typename GateLyt>
-static fcn_gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
+static gate set_up_gate(const GateLyt& lyt, const tile<GateLyt>& t)
 ```
 
 
@@ -170,10 +170,9 @@ Template Args:
     GateSizeY: Tile size in y-dimension.)doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_cell_list_to_gate =
-R"doc(Converts a `cell_list` of type `T` to an `fcn_gate` at compile time.
-This function allows to conveniently specify `fcn_gate` instances in a
-semi-readable way in code. For examples usages see
-`qca_one_library.hpp`.
+R"doc(Converts a `cell_list` of type `T` to a `gate` at compile time. This
+function allows to conveniently specify `gate` instances in a semi-
+readable way in code. For examples usages see `qca_one_library.hpp`.
 
 Args:
     c: Cell list to convert.
@@ -182,7 +181,7 @@ Template Args:
     T: Element type of given `cell_list`.
 
 Returns:
-    An `fcn_gate` created from the representation provided in `c`.
+    An `gate` created from the representation provided in `c`.
 
 )doc";
 
@@ -205,8 +204,8 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_mark_cell =
-R"doc(Applies given mark to given `fcn_gate` `g` at given port `p` at
-compile time.
+R"doc(Applies given mark to given `gate` `g` at given port `p` at compile
+time.
 
 Args:
     g: Gate to apply mark to.
@@ -214,86 +213,161 @@ Args:
     mark: Mark to be applied
 
 Returns:
-    Marked `fcn_gate`.
+    Marked `gate`.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_merge =
-R"doc(Merges multiple `fcn_gate`s into one at compile time. This is intended
-to be used for wires. Unexpected behavior can be caused, if more than
-one `fcn_gate` has a cell at the same position.
+R"doc(Merges multiple `gate`s into one at compile time. This is intended to
+be used for wires. Unexpected behavior can be caused, if more than one
+`gate` has a cell at the same position.
 
 Args:
     gates: Vector of gates to be merged.
 
 Returns:
-    Merged `fcn_gate`.
+    Merged `gate`.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_reverse_columns =
-R"doc(Reverses the columns of the given `fcn_gate` at compile time.
+R"doc(Reverses the columns of the given `gate` at compile time.
 
 Args:
-    g: `fcn_gate` whose columns are to be reversed.
+    g: `gate` whose columns are to be reversed.
 
 Returns:
-    `fcn_gate` with reversed columns.
+    `gate` with reversed columns.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_reverse_rows =
-R"doc(Reverses the rows of the given `fcn_gate` at compile time.
+R"doc(Reverses the rows of the given `gate` at compile time.
 
 Args:
-    g: `fcn_gate` whose rows are to be reversed.
+    g: `gate` whose rows are to be reversed.
 
 Returns:
-    `fcn_gate` with reversed rows.
+    `gate` with reversed rows.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_180 =
-R"doc(Rotates the given `fcn_gate` by 180° at compile time.
+R"doc(Rotates the given `gate` by 180° at compile time.
 
 Args:
-    g: `fcn_gate` to rotate.
+    g: `gate` to rotate.
 
 Returns:
-    Rotated `fcn_gate`.
+    Rotated `gate`.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_270 =
-R"doc(Rotates the given `fcn_gate` by 270° clockwise at compile time.
+R"doc(Rotates the given `gate` by 270° clockwise at compile time.
 
 Args:
-    g: `fcn_gate` to rotate.
+    g: `gate` to rotate.
 
 Returns:
-    Rotated `fcn_gate`.
+    Rotated `gate`.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_rotate_90 =
-R"doc(Rotates the given `fcn_gate` by 90° clockwise at compile time.
+R"doc(Rotates the given `gate` by 90° clockwise at compile time.
 
 Args:
-    g: `fcn_gate` to rotate.
+    g: `gate` to rotate.
 
 Returns:
-    Rotated `fcn_gate`.
+    Rotated `gate`.
 
 )doc";
 
 static const char *mkd_doc_fiction_fcn_gate_library_transpose =
-R"doc(Transposes the given `fcn_gate` at compile time.
+R"doc(Transposes the given `gate` at compile time.
 
 Args:
-    g: `fcn_gate` to transpose.
+    g: `gate` to transpose.
 
 Returns:
-    Transposed `fcn_gate`.
+    Transposed `gate`.
+
+)doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb_x = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_bb_y = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_cell_id = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_has_border_io_pins = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_lyt = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_os = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pi_list = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pis = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_po_list = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_components = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_header = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_layout = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_pins = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_qll_layout_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_detail_write_qll_layout_impl_write_technology_settings = R"doc()doc";
+
+static const char *mkd_doc_fiction_fcn_io_write_qll_layout =
+R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
+used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
+tool and a physical simulator for the iNML technology platform as well
+as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
+simulator for the molQCA (mQCA) technology platform.
+
+This overload uses an output stream to write into.
+
+Args:
+    lyt: The layout to be written.
+    os: The output stream to write into.
+
+Template Args:
+    Lyt: Cell-level QCA, molQCA, or iNML layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_fcn_io_write_qll_layout_2 =
+R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
+used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
+tool and a physical simulator for the iNML technology platform as well
+as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
+simulator for the molQCA (mQCA) technology platform.
+
+This overload uses a file name to create and write into.
+
+Args:
+    lyt: The layout to be written.
+    filename: The file name to create and write into. Should
+              preferably use the `.qll` extension.
+
+Template Args:
+    Lyt: Cell-level QCA, molQCA, or iNML layout type.
 
 )doc";
 
@@ -816,44 +890,6 @@ static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_la
 
 static const char *mkd_doc_fiction_inml_io_detail_write_qcc_layout_impl_write_qcc_layout_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_bb = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_bb_x = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_bb_y = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_cell_id = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_has_border_io_pins = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_os = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_sorted_pi_list = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_sorted_pis = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_sorted_po_list = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_sorted_pos = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_write_components = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_write_header = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_write_layout = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_write_pins = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_write_qll_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_inml_io_detail_write_qll_layout_impl_write_technology_settings = R"doc()doc";
-
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout =
 R"doc(Writes a cell-level iNML layout to a qcc file that is used by
 ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA tool and a
@@ -894,43 +930,6 @@ static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params = R"doc(Param
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_filename = R"doc(Filename of the QCC file.)doc";
 
 static const char *mkd_doc_fiction_inml_io_write_qcc_layout_params_use_filename_as_component_name = R"doc(Use the given filename as the component name inside the QCC file.)doc";
-
-static const char *mkd_doc_fiction_inml_io_write_qll_layout =
-R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
-used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
-tool and a physical simulator for the iNML technology platform as well
-as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
-simulator for the molQCA (mQCA) technology platform.
-
-This overload uses an output stream to write into.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-
-Template Args:
-    Lyt: Cell-level QCA, molQCA, or iNML layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_inml_io_write_qll_layout_2 =
-R"doc(Writes a cell-level QCA, molQCA or iNML layout to a qll file that is
-used by ToPoliNano & MagCAD (https://topolinano.polito.it/), an EDA
-tool and a physical simulator for the iNML technology platform as well
-as SCERPA (https://ieeexplore.ieee.org/document/8935211), a physical
-simulator for the molQCA (mQCA) technology platform.
-
-This overload uses a file name to create and write into.
-
-Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into. Should
-              preferably use the `.qll` extension.
-
-Template Args:
-    Lyt: Cell-level QCA, molQCA, or iNML layout type.
-
-)doc";
 
 static const char *mkd_doc_fiction_inml_magcad_magnet_count =
 R"doc(Calculates the number of magnets for an iNML layout the way MagCAD
@@ -1007,9 +1006,9 @@ Template Args:
 static const char *mkd_doc_fiction_inml_topolinano_library_set_up_gate =
 R"doc(Overrides the corresponding function in gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
+grid into account to choose the correct gate representation for that
+tile. May it be a gate or wires. Rotation and special marks like input
+and output, const cells etc. are computed additionally.
 
 Args:
     lyt: Layout that hosts tile `t`.
@@ -1055,6 +1054,51 @@ static const char *mkd_doc_fiction_is_tile_based_layout = R"doc()doc";
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_all_coordinates_in_spanned_area =
+R"doc(Generates a vector of all coordinates within an area spanned by two
+coordinates.
+
+This function calculates and returns a list of all coordinates within
+a rectangular area defined by two corner coordinates, inclusive of the
+boundaries. The coordinates are generated in a top-to-bottom, left-to-
+right order, covering the entire area between the two specified
+corners.
+
+Args:
+    cell_first_corner: The cell defining the first corner of the area.
+    cell_second_corner: The cell defining the second corner of the
+                        area.
+
+Template Args:
+    CoordinateType: Coordinate Type.
+
+Returns:
+    A vector containing all cells within the specified area.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_are_cell_layouts_identical =
+R"doc(This function checks whether the given layouts `first_lyt` and
+`second_lyt` are identical by comparing various properties such as the
+number of cells, the types of cells, defects (if applicable), and
+charge states (if applicable). The comparison is done in a detailed
+manner depending on the specific layout type.
+
+Args:
+    first_lyt: The first layout to compare.
+    second_lyt: The second layout to compare.
+
+Template Args:
+    Lyt: The layout type. Must be a cell-level layout.
+
+Returns:
+    `true` if the layouts are identical, `false` otherwise.
+
+Note:
+    The aspect ratios of the cell-level layouts are not compared.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_bounding_box_2d =
 R"doc(A 2D bounding box object that computes a minimum-sized box around all
@@ -1861,6 +1905,33 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cell_layout_digest =
+R"doc(Computes a digest of the given cell-level layout that respects the
+equality `are_cell_layouts_identical` implements.
+
+Identical layouts always share a digest, so layouts with different
+digests are never identical. That makes the digest a cheap filter in
+front of `are_cell_layouts_identical`. Different layouts may share a
+digest, so a digest match still has to be confirmed with
+`are_cell_layouts_identical`.
+
+The digest covers the cells and their types, the defects of an
+`sidb::surfaces::defect_surface`, and the charge states of a
+`charge_distribution_surface`. Following `are_cell_layouts_identical`,
+it ignores the layout's aspect ratio.
+
+Args:
+    lyt: The layout to digest.
+
+Template Args:
+    Lyt: The layout type. Must be a cell-level layout.
+
+Returns:
+    Hash value that identifies `lyt` up to
+    `are_cell_layouts_identical`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cell_level_layout =
 R"doc(A layout type to layer on top of a clocked layout that allows the
 assignment of individual cells to clock zones in accordance with an
@@ -2619,20 +2690,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_clocking_ptr =
-R"doc(Returns a smart pointer to the given scheme.
-
-Args:
-    scheme: Universal reference to a clocking scheme.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    A shared pointer to the given `scm`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_clocking_res =
 R"doc(Returns the RES clocking as defined in \"An efficient clocking scheme
 for quantum-dot cellular automata\" by Mrinal Goswami, Anindan Mondal,
@@ -2838,6 +2895,43 @@ Template Args:
 
 Returns:
     USE clocking scheme.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_convert_layout_to_fiction_coordinates =
+R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
+defect surface can be layered on top) to alternative coordinates, such
+as `coords::offset` or `coords::cube`. Returns a new layout equivalent
+to the original layout but based on the specified coordinate system.
+
+Args:
+    lyt: The layout that is to be converted to a new layout based on
+         fiction coordinates.
+
+Template Args:
+    LytDest: Source SiDB cell-level layout type.
+    LytSrc: Target SiDB cell-level layout type.
+
+Returns:
+    A new equivalent layout based on fiction coordinates.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_convert_layout_to_siqad_coordinates =
+R"doc(Converts the coordinates of a given cell-level layout (cds and defect
+surface can be layered on top) to SiQAD coordinates. A new equivalent
+layout based on SiQAD coordinates is returned.
+
+Args:
+    lyt: The layout that is to be converted to a new layout based on
+         SiQAD coordinates.
+
+Template Args:
+    Lyt: SiDB cell-level layout type based on fiction coordinates,
+         e.g., `coords::offset` or `coords::cube`.
+
+Returns:
+    A new equivalent layout based on SiQAD coordinates.
 
 )doc";
 
@@ -5715,122 +5809,6 @@ static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_run =
 
 static const char *mkd_doc_fiction_layouts_io_detail_write_fgl_layout_impl_write_fgl_layout_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Generates an SVG string representing the cell-based clocked cell
-layout and appends it to the output stream.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_generate_description_color =
-R"doc(Generates and returns a pair of strings representing the description
-and color of the given cell.
-
-Args:
-    c: The cell for which to generate the description and color.
-
-Returns:
-    A pair of strings representing the description and color of the
-    given cell `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl = R"doc(Default constructor.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
-R"doc(Generates an SVG string representing the cell-based clocked cell
-layout and appends it to the output stream.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_generate_description_color =
-R"doc(Generates and returns a pair of strings representing the description
-and color of the given cell.
-
-Args:
-    c: The cell for which to generate the description and color.
-
-Returns:
-    A pair of strings representing the description and color of the
-    given cell `c`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_generate_tile_based_svg =
-R"doc(Generates an SVG string representing the tile-based clocked cell
-layout and appends it to the output stream.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_os = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_ps = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_background_color = R"doc(The color mode for the SVG output.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_generate_lattice_point =
-R"doc(Generates an SVG string representing an H-Si lattice point.
-
-Args:
-    x: The x-coordinate of the lattice point.
-    y: The y-coordinate of the lattice point.
-    fill_color: The fill color of the lattice point.
-
-Returns:
-    The SVG string representing the lattice point.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_generate_sidb =
-R"doc(Generates an SVG string representing an SiDB.
-
-Args:
-    x: The x-coordinate of the SiDB.
-    y: The y-coordinate of the SiDB.
-    charge_state: The charge state of the SiDB.
-
-Returns:
-    The SVG string representing the SiDB.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_generate_svg = R"doc(Generates the SVG layout with both H-Si lattice points and SiDBs.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_lyt = R"doc(The SiDB layout to be written.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_os = R"doc(The output stream to write into.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_ps = R"doc(Parameters for the SVG generation.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_run = R"doc(Runs the SVG generation process.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_set_colors = R"doc(Sets the colors based on the color mode.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_sidb_color = R"doc(The color of the SiDB without charge information.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_sidb_edge_color = R"doc(The edge color of the SiDB without charge information.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_detail_write_sidb_layout_svg_impl_write_sidb_layout_svg_impl = R"doc(Constructor.)doc";
-
 static const char *mkd_doc_fiction_layouts_io_fgl_parsing_error =
 R"doc(Exception thrown when an error occurs during parsing of a .fgl file
 containing a gate-level layout.)doc";
@@ -5958,6 +5936,20 @@ Note:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_io_print_node_to_tile_assignments =
+R"doc(Prints every node of a gate-level layout with the tile it occupies and
+the tiles of its fanins and fanouts. This is a debugging aid; the
+output format is not stable.
+
+Args:
+    lyt: Layout to print.
+    os: Output stream. Defaults to `std::cout`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_io_print_sidb_layout =
 R"doc(Writes a simplified 2D representation of an SiDB layout (SiDB and
 defect charges are supported) to an output stream.
@@ -5977,6 +5969,20 @@ Template Args:
          coordinates or defect-information, e.g., a
          `charge_distribution_surface` or
          `sidb::surfaces::defect_surface`.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_io_print_tile_to_node_assignments =
+R"doc(Prints every tile of a gate-level layout with the node it holds, if
+any, and the tiles of that node's fanins and fanouts. This is a
+debugging aid; the output format is not stable.
+
+Args:
+    lyt: Layout to print.
+    os: Output stream. Defaults to `std::cout`.
+
+Template Args:
+    Lyt: Gate-level layout type.
 
 )doc";
 
@@ -6071,14 +6077,6 @@ static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_til
 
 static const char *mkd_doc_fiction_layouts_io_simple_gate_layout_tile_drawer_tile_label = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_io_unsupported_cell_type_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_unsupported_cell_type_exception_coord = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_unsupported_cell_type_exception_unsupported_cell_type_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_layouts_io_unsupported_cell_type_exception_where = R"doc()doc";
-
 static const char *mkd_doc_fiction_layouts_io_write_dot_layout =
 R"doc(Writes layout in DOT format into output stream
 
@@ -6134,155 +6132,38 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_write_mol_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
-output stream. Only cell-based layouts are supported, since the
-clocking scheme is not uniform at the gate level. Currently, only a
-uniform gate size of :math:`10 \times 10` is supported.
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout.
+static const char *mkd_doc_fiction_layouts_normalize_layout_coordinates =
+R"doc(A new layout is constructed and returned that is equivalent to the
+given cell-level layout. However, its coordinates are normalized,
+i.e., start at `(0, 0)` and are all positive. To this end, all
+existing coordinates are shifted by an x and y offset.
 
 Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-    ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level molQCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_mol_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level MolQCA layout to a file.
-Only cell-based layouts are supported, since the clocking scheme is
-not uniform at the gate level. Currently, only a uniform gate size of
-:math:`10 \times 10` is supported.
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout. May throw an
-`std::ofstream::failure` if it cannot open the file.
-
-Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into. Should
-              preferably use the `.svg` extension.
-    ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level molQCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_qca_layout_svg =
-R"doc(Writes an SVG representation of a cell-level QCA layout into an output
-stream. Both tile- and cell-based layouts are supported. For tile-
-based layouts, QCA layouts of tile size :math:`5 \times 5` are
-supported exclusively so far.
-
-The utilized color scheme is based on the standard scheme used in
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-    ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level QCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_qca_layout_svg_2 =
-R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
-Both tile- and cell-based layouts are supported. For tile-based
-layouts, QCA layouts of tile size :math:`5 \times 5` are supported
-exclusively so far.
-
-The utilized color scheme is based on the standard scheme used in
-QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
-
-May throw an `unsupported_cell_type_exception` if it encounters
-unsupported cell types in the layout. May throw an
-`std::ofstream::failure` if it cannot open the file.
-
-Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into. Should
-              preferably use the `.svg` extension.
-    ps: Parameters.
-
-Template Args:
-    Lyt: Cell-level QCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_qca_layout_svg_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_qca_layout_svg_params_simple = R"doc(Limit details to create smaller file sizes.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg =
-R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
-output stream.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-    ps: Parameters.
+    lyt: The layout which is to be normalized.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
 
-Note:
-    SiDB defects are not supported yet.
+Returns:
+    New normalized equivalent layout.
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_2 =
-R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into a
-file.
+static const char *mkd_doc_fiction_layouts_num_adjacent_coordinates =
+R"doc(Returns the number of adjacent coordinates of a given one. This is not
+a constant value because `c` could be located at a layout border.
 
 Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into.
-    ps: Parameters.
+    lyt: Layout.
+    c: Coordinate whose number of adjacencies are required.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
+    Lyt: Layout type.
 
-Note:
-    SiDB defects are not supported yet.
+Returns:
+    Number of `c`'s adjacent coordinates.
 
 )doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params = R"doc(Parameters for writing SiDB layouts to SVG format.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_color_background = R"doc(The color mode of the background for the SVG output.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_color_mode = R"doc(Enumeration to specify the color mode for the SVG output.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_color_mode_DARK = R"doc(Dark mode.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_color_mode_LIGHT = R"doc(Light mode.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_lattice_mode = R"doc(The lattice mode of the SiDB layout.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_lattice_mode =
-R"doc(Enumeration to specify if the H-Si lattice is plotted in addition to
-SiDBs.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE = R"doc(Lattice is hidden. Only SiDBs are shown.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_lattice_mode_SHOW_LATTICE = R"doc(Lattice is shown.)doc";
-
-static const char *mkd_doc_fiction_layouts_io_write_sidb_layout_svg_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
 static const char *mkd_doc_fiction_layouts_obstruction_layout =
 R"doc(A layout type to layer on top of any coordinate layout. It implements
@@ -6383,6 +6264,67 @@ R"doc(
 \     /
 \ /
 ```)doc";
+
+static const char *mkd_doc_fiction_layouts_port_direction_to_coordinate =
+R"doc(Port directions address coordinates relative to each other by
+specifying cardinal directions. This function converts such a relative
+direction to an absolute coordinate when given a layout and a
+coordinate therein to consider. That is, when presented with, e.g., a
+`NORTH_EAST` direction, it will return the coordinate that is to the
+`NORTH_EAST` of the given coordinate `c` in the layout `lyt`.
+
+Args:
+    lyt: Coordinate layout.
+    c: Coordinate to consider.
+    port: Port direction.
+
+Template Args:
+    Lyt: Coordinate layout type.
+
+Returns:
+    Absolute coordinate specified by a coordinate `c` in layout `lyt`
+    and a port direction.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_random_coordinate =
+R"doc(Generates a random coordinate within the region spanned by two given
+coordinates. The two given coordinates form the top left corner and
+the bottom right corner of the spanned region.
+
+Args:
+    coordinate1: Top left Coordinate.
+    coordinate2: Bottom right Coordinate (coordinate order is not
+                 important, automatically swapped if necessary).
+
+Template Args:
+    CoordinateType: The coordinate implementation to be used.
+
+Returns:
+    Randomly generated coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_relative_to_absolute_cell_position =
+R"doc(Converts a relative cell position within a tile to an absolute cell
+position within a layout. To compute the absolute position, the layout
+topology is taken into account.
+
+Args:
+    gate_lyt: The gate-level layout whose tiles are to be considered.
+    t: Tile within gate_lyt.
+    relative_c: Relative cell position within t.
+
+Template Args:
+    GateSizeX: Horizontal tile size.
+    GateSizeY: Vertical tile size.
+    GateLyt: Gate-level layout type.
+    CellLyt: Cell-level layout type.
+
+Returns:
+    Absolute cell position in a layout.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_shifted_cartesian_layout =
 R"doc(A layout type that utilizes offset coordinates to represent a
@@ -6708,209 +6650,6 @@ static const char *mkd_doc_fiction_layouts_tile_based_layout_tile_based_layout_3
 
 static const char *mkd_doc_fiction_layouts_tile_based_layout_tiles = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_utils_all_coordinates_in_spanned_area =
-R"doc(Generates a vector of all coordinates within an area spanned by two
-coordinates.
-
-This function calculates and returns a list of all coordinates within
-a rectangular area defined by two corner coordinates, inclusive of the
-boundaries. The coordinates are generated in a top-to-bottom, left-to-
-right order, covering the entire area between the two specified
-corners.
-
-Args:
-    cell_first_corner: The cell defining the first corner of the area.
-    cell_second_corner: The cell defining the second corner of the
-                        area.
-
-Template Args:
-    CoordinateType: Coordinate Type.
-
-Returns:
-    A vector containing all cells within the specified area.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_are_cell_layouts_identical =
-R"doc(This function checks whether the given layouts `first_lyt` and
-`second_lyt` are identical by comparing various properties such as the
-number of cells, the types of cells, defects (if applicable), and
-charge states (if applicable). The comparison is done in a detailed
-manner depending on the specific layout type.
-
-Args:
-    first_lyt: The first layout to compare.
-    second_lyt: The second layout to compare.
-
-Template Args:
-    Lyt: The layout type. Must be a cell-level layout.
-
-Returns:
-    `true` if the layouts are identical, `false` otherwise.
-
-Note:
-    The aspect ratios of the cell-level layouts are not compared.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_cell_layout_digest =
-R"doc(Computes a digest of the given cell-level layout that respects the
-equality `are_cell_layouts_identical` implements.
-
-Identical layouts always share a digest, so layouts with different
-digests are never identical. That makes the digest a cheap filter in
-front of `are_cell_layouts_identical`. Different layouts may share a
-digest, so a digest match still has to be confirmed with
-`are_cell_layouts_identical`.
-
-The digest covers the cells and their types, the defects of an
-`sidb::surfaces::defect_surface`, and the charge states of a
-`charge_distribution_surface`. Following `are_cell_layouts_identical`,
-it ignores the layout's aspect ratio.
-
-Args:
-    lyt: The layout to digest.
-
-Template Args:
-    Lyt: The layout type. Must be a cell-level layout.
-
-Returns:
-    Hash value that identifies `lyt` up to
-    `are_cell_layouts_identical`.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_convert_layout_to_fiction_coordinates =
-R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
-defect surface can be layered on top) to alternative coordinates, such
-as `coords::offset` or `coords::cube`. Returns a new layout equivalent
-to the original layout but based on the specified coordinate system.
-
-Args:
-    lyt: The layout that is to be converted to a new layout based on
-         fiction coordinates.
-
-Template Args:
-    LytDest: Source SiDB cell-level layout type.
-    LytSrc: Target SiDB cell-level layout type.
-
-Returns:
-    A new equivalent layout based on fiction coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_convert_layout_to_siqad_coordinates =
-R"doc(Converts the coordinates of a given cell-level layout (cds and defect
-surface can be layered on top) to SiQAD coordinates. A new equivalent
-layout based on SiQAD coordinates is returned.
-
-Args:
-    lyt: The layout that is to be converted to a new layout based on
-         SiQAD coordinates.
-
-Template Args:
-    Lyt: SiDB cell-level layout type based on fiction coordinates,
-         e.g., `coords::offset` or `coords::cube`.
-
-Returns:
-    A new equivalent layout based on SiQAD coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_normalize_layout_coordinates =
-R"doc(A new layout is constructed and returned that is equivalent to the
-given cell-level layout. However, its coordinates are normalized,
-i.e., start at `(0, 0)` and are all positive. To this end, all
-existing coordinates are shifted by an x and y offset.
-
-Args:
-    lyt: The layout which is to be normalized.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    New normalized equivalent layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_num_adjacent_coordinates =
-R"doc(Returns the number of adjacent coordinates of a given one. This is not
-a constant value because `c` could be located at a layout border.
-
-Args:
-    lyt: Layout.
-    c: Coordinate whose number of adjacencies are required.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    Number of `c`'s adjacent coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_port_direction_to_coordinate =
-R"doc(Port directions address coordinates relative to each other by
-specifying cardinal directions. This function converts such a relative
-direction to an absolute coordinate when given a layout and a
-coordinate therein to consider. That is, when presented with, e.g., a
-`NORTH_EAST` direction, it will return the coordinate that is to the
-`NORTH_EAST` of the given coordinate `c` in the layout `lyt`.
-
-Args:
-    lyt: Coordinate layout.
-    c: Coordinate to consider.
-    port: Port direction.
-
-Template Args:
-    Lyt: Coordinate layout type.
-
-Returns:
-    Absolute coordinate specified by a coordinate `c` in layout `lyt`
-    and a port direction.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_random_coordinate =
-R"doc(Generates a random coordinate within the region spanned by two given
-coordinates. The two given coordinates form the top left corner and
-the bottom right corner of the spanned region.
-
-Args:
-    coordinate1: Top left Coordinate.
-    coordinate2: Bottom right Coordinate (coordinate order is not
-                 important, automatically swapped if necessary).
-
-Template Args:
-    CoordinateType: The coordinate implementation to be used.
-
-Returns:
-    Randomly generated coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_utils_relative_to_absolute_cell_position =
-R"doc(Converts a relative cell position within a tile to an absolute cell
-position within a layout. To compute the absolute position, the layout
-topology is taken into account.
-
-Args:
-    gate_lyt: The gate-level layout whose tiles are to be considered.
-    t: Tile within gate_lyt.
-    relative_c: Relative cell position within t.
-
-Template Args:
-    GateSizeX: Horizontal tile size.
-    GateSizeY: Vertical tile size.
-    GateLyt: Gate-level layout type.
-    CellLyt: Cell-level layout type.
-
-Returns:
-    Absolute cell position in a layout.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_vertical_shift_cartesian =
 R"doc( 
 ```
@@ -6922,6 +6661,218 @@ R"doc(
 |       |
 +-------+
 ```)doc";
+
+static const char *mkd_doc_fiction_networks_all_incoming_edge_paths =
+R"doc(Returns a vector of all possible paths to reach the given node from
+the primary inputs within the given network.
+
+Each node without predecessors is considered a terminal and a path is
+defined as a sequence of edges.
+
+Args:
+    n: Node whose paths are desired.
+
+Returns:
+    A vector of all possible edge paths leading from terminals to `v`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_fanin_container =
+R"doc(Container that stores fanins of a node in a network, including whether
+one of them is a constant.
+
+Note that this container assumes that each node has a maximum of one
+constant fanin.
+
+Template Args:
+    Ntk: `mockturtle` network type.)doc";
+
+static const char *mkd_doc_fiction_networks_fanin_container_constant_fanin =
+R"doc(Has a value if a fanin node is constant. In that case, it represents
+the constant value.)doc";
+
+static const char *mkd_doc_fiction_networks_fanin_container_fanin_nodes = R"doc(A vector of all fanin nodes except for constants.)doc";
+
+static const char *mkd_doc_fiction_networks_fanin_edge_container =
+R"doc(Container that stores fanin edges of a node in a network, including
+whether one of them is a constant.
+
+Template Args:
+    Ntk: `mockturtle` network type.)doc";
+
+static const char *mkd_doc_fiction_networks_fanin_edge_container_fanin_edges = R"doc(A vector of all fanin edges excluding for constants.)doc";
+
+static const char *mkd_doc_fiction_networks_fanin_edges =
+R"doc(Returns a fanin edge container filled with all fanin edges `(fanin,
+node)` of some given network node.
+
+Args:
+    ntk: Network in which the fanin edges are to be gathered.
+    n: Node whose fanins are desired.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    A container of all incoming edges `(fanin, n)` in `ntk`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_fanins =
+R"doc(Returns a fanin container filled with all fanin nodes of some given
+network node.
+
+Note that this function assumes that each node has a maximum of one
+constant fanin.
+
+Args:
+    ntk: Network in which the fanins are to be gathered.
+    n: Node whose fanins are desired.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    A container of all incoming nodes directly adjacent to `n` in
+    `ntk`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_fanouts =
+R"doc(Returns a vector of all fanout nodes of some given network node.
+
+Args:
+    ntk: Network in which the fanouts are to be gathered.
+    n: Node whose fanouts are desired.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    A vector of all outgoing nodes directly adjacent to `n` in `ntk`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_foreach_edge =
+R"doc(Applies a function to all edges in a `mockturtle` network.
+
+Args:
+    ntk: Network to iterate over.
+    fn: Function object to apply to each edge in `ntk`.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+    Fn: Unary function type that takes a `mockturtle::edge<Ntk>`
+        object as parameter.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_foreach_incoming_edge =
+R"doc(Applies a function to all incoming edges in a `mockturtle` network.
+
+Args:
+    ntk: Network to iterate over.
+    n: Node of `ntk` whose incoming edges are to be considered.
+    fn: Function object to apply to each incoming edge of `n` in
+        `ntk`.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+    Fn: Unary function type that takes a `mockturtle::edge<Ntk>`
+        object as parameter.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_foreach_outgoing_edge =
+R"doc(Applies a function to all outgoing edges in a `mockturtle` network.
+
+Args:
+    ntk: Network to iterate over.
+    n: Node of `ntk` whose outgoing edges are to be considered.
+    fn: Function object to apply to each outgoing edge of `n` in
+        `ntk`.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+    Fn: Unary function type that takes a `mockturtle::edge<Ntk>`
+        object as parameter.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_get_name =
+R"doc(Helper function to conveniently fetch the name from a layout or
+network as they use different function names for the same purpose.
+
+Args:
+    ntk_or_lyt: Network or layout object.
+
+Template Args:
+    NtkOrLyt: Network or layout type.
+
+Returns:
+    Name of given network or layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_has_high_degree_fanin_nodes =
+R"doc(Checks if a given network exceeds a given fanin threshold in any of
+its nodes.
+
+Args:
+    ntk: Network to check.
+    threshold: Maximum number of legal fanins.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    `true` iff any node in `ntk` exceeds `threshold` fanins.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_has_incoming_primary_input =
+R"doc(Checks if a given node in a given network has fanins that are primary
+inputs.
+
+Args:
+    ntk: Network to check in.
+    n: Node to check.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    `true` iff any of `n`'s fanins are primary inputs.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_high_degree_fanin_exception =
+R"doc(Exception class that can be thrown if some network exceeds a legal
+number of fanins.)doc";
+
+static const char *mkd_doc_fiction_networks_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
+
+static const char *mkd_doc_fiction_networks_inverse_levels =
+R"doc(A clumsy implementation that returns the inverse level of each node in
+a given network. Its behavior is similar to `mockturtle::depth_view`
+but starting from the primary outputs instead of the primary inputs.
+An implementation along the lines of `inv_depth_view` would be a lot
+more sophisticated and desirable, but this quick hack does the job
+well so far. If anyone wants to build an `inv_depth_view`, please be
+my guest.
+
+Args:
+    ntk: The network whose inverse levels are desired.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    A vector of inverse levels for each node where
+    `ntk.node_to_index(n)` is the position where `n`'s inverse level
+    is stored.
+
+)doc";
 
 static const char *mkd_doc_fiction_networks_io_color_view_drawer =
 R"doc(A DOT drawer for networks with colored nodes. Node colors represent
@@ -7028,6 +6979,202 @@ static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_fillco
 static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label = R"doc()doc";
 
 static const char *mkd_doc_fiction_networks_io_technology_dot_drawer_node_label_callback = R"doc()doc";
+
+static const char *mkd_doc_fiction_networks_io_write_dot_network =
+R"doc(Writes a logic network in DOT format into an output stream, using one
+of the drawers above.
+
+Args:
+    ntk: Network to write.
+    os: Output stream.
+    drawer: Drawer that decides the node labels, colors, and styles.
+
+Template Args:
+    Ntk: Logic network type.
+    Drawer: DOT drawer type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_io_write_dot_network_2 =
+R"doc(Writes a logic network in DOT format into a file, using one of the
+drawers above.
+
+Args:
+    ntk: Network to write.
+    filename: Path of the file to write.
+    drawer: Drawer that decides the node labels, colors, and styles.
+
+Template Args:
+    Ntk: Logic network type.
+    Drawer: DOT drawer type.
+
+Raises:
+    std::ofstream::failure: if the file cannot be opened.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_num_constant_fanins =
+R"doc(Computes the number of constant fanin nodes of some network node `n`.
+
+Args:
+    ntk: Network in which the constant fanins are to be counted.
+    n: Node whose constant fanins are to be counted.
+
+Template Args:
+    Ntk: `mockturtle` network type.
+
+Returns:
+    Number of constant fanins to `n` in `ntk`.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_input_names =
+R"doc(Assigns input names from one network to another. Matching inputs are
+identified by their index. Since gate-level layout's are network types
+as well, this function naturally works for them, too.
+
+Args:
+    ntk_src: Source logic network whose input names are to be
+             transferred to `ntk_dest`.
+    ntk_dest: Target logic network whose inputs are to be assigned
+              `ntk_src`'s names.
+
+Template Args:
+    NtkSrc: Source network type.
+    NtkDest: Target network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_names =
+R"doc(Transfers all input and output names as well as the network/layout
+name from one network to another. This function calls
+`restore_network_name`, `restore_input_names`, and
+`restore_output_names`.
+
+Args:
+    ntk_src: Source logic network whose I/O names are to be
+             transferred to `ntk_dest`.
+    ntk_dest: Target logic network whose I/O names are to be assigned
+              `ntk_src`'s names.
+
+Template Args:
+    NtkSrc: Source network type.
+    NtkDest: Target network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_names_2 =
+R"doc(Transfers all signal and output names as well as the network/layout
+name from one network to another. This function calls
+`restore_network_name`, `restore_signal_names`, and
+`restore_output_names`.
+
+Args:
+    ntk_src: Source logic network whose signal names are to be
+             transferred to `ntk_dest`.
+    ntk_dest: Target logic network whose signal names are to be
+              assigned `ntk_src`'s names.
+    old2new: Mapping of signals from `ntk_src` to `ntk_dest` using a
+             signal identifier.
+
+Template Args:
+    NtkSrc: Source network type.
+    NtkDest: Target network type.
+    T: Mapping type to identify signals by. Currently,
+       `mockturtle::signal<NtkDest>` and
+       `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
+       supported.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_network_name =
+R"doc(Helper function to conveniently assign the name of a source network or
+layout to a target network or layout as they use different function
+names for the same purpose. This function comes in handy when networks
+are translated or layouts are being created from networks that are
+supposed to have the same name.
+
+Args:
+    ntk_or_lyt_src: Source network or layout whose name is to be
+                    assigned to `ntk_or_lyt_dest`.
+    ntk_or_lyt_dest: Target network or layout that is to be assigned
+                     `ntk_or_lyt_src`'s name.
+
+Template Args:
+    NtkOrLytSrc: Source network or layout type.
+    NtkOrLytDest: Target network or layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_output_names =
+R"doc(Assigns output names from one network to another. Matching outputs are
+identified by their order. Since gate-level layout's are network types
+as well, this function naturally works for them, too.
+
+Args:
+    ntk_src: Source logic network whose output names are to be
+             transferred to `ntk_dest`.
+    ntk_dest: Target logic network whose outputs are to be assigned
+              `ntk_src`'s names.
+
+Template Args:
+    NtkSrc: Source network type.
+    NtkDest: Target network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_signal_names =
+R"doc(Assigns all signal names from one network to another. For this
+purpose, a mapping between signals is needed in terms of a
+`mockturtle::node_map`. Since gate-level layout's are network types as
+well, this function naturally works for them, too.
+
+Args:
+    ntk_src: Source logic network whose signal names are to be
+             transferred to `ntk_dest`.
+    ntk_dest: Target logic network whose signal names are to be
+              assigned `ntk_src`'s names.
+    old2new: Mapping of signals from `ntk_src` to `ntk_dest`.
+
+Template Args:
+    NtkSrc: Source network type.
+    NtkDest: Target network type.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_restore_signal_names_2 =
+R"doc(Same as the other restore_signal_names function but this overload uses
+a `mockturtle::node_map` with a branching_signal_container that is
+specifically used for networks or layouts that allow branches to be
+distinct, e.g., by their position on the layout.
+
+Args:
+    ntk_src: Source logic network whose signal names are to be
+             transferred to `ntk_dest`.
+    ntk_dest: Target logic network whose signal names are to be
+              assigned `ntk_src`'s names.
+    old2new: Mapping of signals from `ntk_src` to `ntk_dest` using a
+             branching_signal_container.
+
+Template Args:
+    NtkSrc: Source network type.
+    NtkDest: Target network type.
+    fanout_size: Maximum fanout size in the network.
+
+)doc";
+
+static const char *mkd_doc_fiction_networks_set_name =
+R"doc(Helper function to conveniently assign a name to a layout or network
+as they use different function names for the same purpose.
+
+Args:
+    ntk_or_lyt: Network or layout object.
+    name: Name to assign to given network or layout.
+
+Template Args:
+    NtkOrLyt: Network or layout type.
+
+)doc";
 
 static const char *mkd_doc_fiction_networks_technology_network =
 R"doc(A `mockturtle` logic network type that extends `klut_network`. It
@@ -7210,381 +7357,6 @@ already point to a buffer.
 static const char *mkd_doc_fiction_networks_technology_network_technology_network = R"doc()doc";
 
 static const char *mkd_doc_fiction_networks_technology_network_technology_network_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_networks_utils_all_incoming_edge_paths =
-R"doc(Returns a vector of all possible paths to reach the given node from
-the primary inputs within the given network.
-
-Each node without predecessors is considered a terminal and a path is
-defined as a sequence of edges.
-
-Args:
-    n: Node whose paths are desired.
-
-Returns:
-    A vector of all possible edge paths leading from terminals to `v`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanin_container =
-R"doc(Container that stores fanins of a node in a network, including whether
-one of them is a constant.
-
-Note that this container assumes that each node has a maximum of one
-constant fanin.
-
-Template Args:
-    Ntk: `mockturtle` network type.)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanin_container_constant_fanin =
-R"doc(Has a value if a fanin node is constant. In that case, it represents
-the constant value.)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanin_container_fanin_nodes = R"doc(A vector of all fanin nodes except for constants.)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanin_edge_container =
-R"doc(Container that stores fanin edges of a node in a network, including
-whether one of them is a constant.
-
-Template Args:
-    Ntk: `mockturtle` network type.)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanin_edge_container_fanin_edges = R"doc(A vector of all fanin edges excluding for constants.)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanin_edges =
-R"doc(Returns a fanin edge container filled with all fanin edges `(fanin,
-node)` of some given network node.
-
-Args:
-    ntk: Network in which the fanin edges are to be gathered.
-    n: Node whose fanins are desired.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    A container of all incoming edges `(fanin, n)` in `ntk`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanins =
-R"doc(Returns a fanin container filled with all fanin nodes of some given
-network node.
-
-Note that this function assumes that each node has a maximum of one
-constant fanin.
-
-Args:
-    ntk: Network in which the fanins are to be gathered.
-    n: Node whose fanins are desired.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    A container of all incoming nodes directly adjacent to `n` in
-    `ntk`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_fanouts =
-R"doc(Returns a vector of all fanout nodes of some given network node.
-
-Args:
-    ntk: Network in which the fanouts are to be gathered.
-    n: Node whose fanouts are desired.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    A vector of all outgoing nodes directly adjacent to `n` in `ntk`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_foreach_edge =
-R"doc(Applies a function to all edges in a `mockturtle` network.
-
-Args:
-    ntk: Network to iterate over.
-    fn: Function object to apply to each edge in `ntk`.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-    Fn: Unary function type that takes a `mockturtle::edge<Ntk>`
-        object as parameter.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_foreach_incoming_edge =
-R"doc(Applies a function to all incoming edges in a `mockturtle` network.
-
-Args:
-    ntk: Network to iterate over.
-    n: Node of `ntk` whose incoming edges are to be considered.
-    fn: Function object to apply to each incoming edge of `n` in
-        `ntk`.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-    Fn: Unary function type that takes a `mockturtle::edge<Ntk>`
-        object as parameter.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_foreach_outgoing_edge =
-R"doc(Applies a function to all outgoing edges in a `mockturtle` network.
-
-Args:
-    ntk: Network to iterate over.
-    n: Node of `ntk` whose outgoing edges are to be considered.
-    fn: Function object to apply to each outgoing edge of `n` in
-        `ntk`.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-    Fn: Unary function type that takes a `mockturtle::edge<Ntk>`
-        object as parameter.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_get_name =
-R"doc(Helper function to conveniently fetch the name from a layout or
-network as they use different function names for the same purpose.
-
-Args:
-    ntk_or_lyt: Network or layout object.
-
-Template Args:
-    NtkOrLyt: Network or layout type.
-
-Returns:
-    Name of given network or layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_has_high_degree_fanin_nodes =
-R"doc(Checks if a given network exceeds a given fanin threshold in any of
-its nodes.
-
-Args:
-    ntk: Network to check.
-    threshold: Maximum number of legal fanins.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    `true` iff any node in `ntk` exceeds `threshold` fanins.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_has_incoming_primary_input =
-R"doc(Checks if a given node in a given network has fanins that are primary
-inputs.
-
-Args:
-    ntk: Network to check in.
-    n: Node to check.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    `true` iff any of `n`'s fanins are primary inputs.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_high_degree_fanin_exception =
-R"doc(Exception class that can be thrown if some network exceeds a legal
-number of fanins.)doc";
-
-static const char *mkd_doc_fiction_networks_utils_high_degree_fanin_exception_high_degree_fanin_exception = R"doc()doc";
-
-static const char *mkd_doc_fiction_networks_utils_inverse_levels =
-R"doc(A clumsy implementation that returns the inverse level of each node in
-a given network. Its behavior is similar to `mockturtle::depth_view`
-but starting from the primary outputs instead of the primary inputs.
-An implementation along the lines of `inv_depth_view` would be a lot
-more sophisticated and desirable, but this quick hack does the job
-well so far. If anyone wants to build an `inv_depth_view`, please be
-my guest.
-
-Args:
-    ntk: The network whose inverse levels are desired.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    A vector of inverse levels for each node where
-    `ntk.node_to_index(n)` is the position where `n`'s inverse level
-    is stored.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_num_constant_fanins =
-R"doc(Computes the number of constant fanin nodes of some network node `n`.
-
-Args:
-    ntk: Network in which the constant fanins are to be counted.
-    n: Node whose constant fanins are to be counted.
-
-Template Args:
-    Ntk: `mockturtle` network type.
-
-Returns:
-    Number of constant fanins to `n` in `ntk`.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_input_names =
-R"doc(Assigns input names from one network to another. Matching inputs are
-identified by their index. Since gate-level layout's are network types
-as well, this function naturally works for them, too.
-
-Args:
-    ntk_src: Source logic network whose input names are to be
-             transferred to `ntk_dest`.
-    ntk_dest: Target logic network whose inputs are to be assigned
-              `ntk_src`'s names.
-
-Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_names =
-R"doc(Transfers all input and output names as well as the network/layout
-name from one network to another. This function calls
-`restore_network_name`, `restore_input_names`, and
-`restore_output_names`.
-
-Args:
-    ntk_src: Source logic network whose I/O names are to be
-             transferred to `ntk_dest`.
-    ntk_dest: Target logic network whose I/O names are to be assigned
-              `ntk_src`'s names.
-
-Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_names_2 =
-R"doc(Transfers all signal and output names as well as the network/layout
-name from one network to another. This function calls
-`restore_network_name`, `restore_signal_names`, and
-`restore_output_names`.
-
-Args:
-    ntk_src: Source logic network whose signal names are to be
-             transferred to `ntk_dest`.
-    ntk_dest: Target logic network whose signal names are to be
-              assigned `ntk_src`'s names.
-    old2new: Mapping of signals from `ntk_src` to `ntk_dest` using a
-             signal identifier.
-
-Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
-    T: Mapping type to identify signals by. Currently,
-       `mockturtle::signal<NtkDest>` and
-       `branching_signal_container<NtkDest, NtkSrc, fanout_size>` are
-       supported.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_network_name =
-R"doc(Helper function to conveniently assign the name of a source network or
-layout to a target network or layout as they use different function
-names for the same purpose. This function comes in handy when networks
-are translated or layouts are being created from networks that are
-supposed to have the same name.
-
-Args:
-    ntk_or_lyt_src: Source network or layout whose name is to be
-                    assigned to `ntk_or_lyt_dest`.
-    ntk_or_lyt_dest: Target network or layout that is to be assigned
-                     `ntk_or_lyt_src`'s name.
-
-Template Args:
-    NtkOrLytSrc: Source network or layout type.
-    NtkOrLytDest: Target network or layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_output_names =
-R"doc(Assigns output names from one network to another. Matching outputs are
-identified by their order. Since gate-level layout's are network types
-as well, this function naturally works for them, too.
-
-Args:
-    ntk_src: Source logic network whose output names are to be
-             transferred to `ntk_dest`.
-    ntk_dest: Target logic network whose outputs are to be assigned
-              `ntk_src`'s names.
-
-Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_signal_names =
-R"doc(Assigns all signal names from one network to another. For this
-purpose, a mapping between signals is needed in terms of a
-`mockturtle::node_map`. Since gate-level layout's are network types as
-well, this function naturally works for them, too.
-
-Args:
-    ntk_src: Source logic network whose signal names are to be
-             transferred to `ntk_dest`.
-    ntk_dest: Target logic network whose signal names are to be
-              assigned `ntk_src`'s names.
-    old2new: Mapping of signals from `ntk_src` to `ntk_dest`.
-
-Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_restore_signal_names_2 =
-R"doc(Same as the other restore_signal_names function but this overload uses
-a `mockturtle::node_map` with a branching_signal_container that is
-specifically used for networks or layouts that allow branches to be
-distinct, e.g., by their position on the layout.
-
-Args:
-    ntk_src: Source logic network whose signal names are to be
-             transferred to `ntk_dest`.
-    ntk_dest: Target logic network whose signal names are to be
-              assigned `ntk_src`'s names.
-    old2new: Mapping of signals from `ntk_src` to `ntk_dest` using a
-             branching_signal_container.
-
-Template Args:
-    NtkSrc: Source network type.
-    NtkDest: Target network type.
-    fanout_size: Maximum fanout size in the network.
-
-)doc";
-
-static const char *mkd_doc_fiction_networks_utils_set_name =
-R"doc(Helper function to conveniently assign a name to a layout or network
-as they use different function names for the same purpose.
-
-Args:
-    ntk_or_lyt: Network or layout object.
-    name: Name to assign to given network or layout.
-
-Template Args:
-    NtkOrLyt: Network or layout type.
-
-)doc";
 
 static const char *mkd_doc_fiction_networks_views =
 R"doc(Deduction guide for bfs_topo_view.
@@ -8103,6 +7875,158 @@ Template Args:
 Returns:
     A cell-level layout that implements `lyt`'s gate types with
     building blocks defined in `GateLibrary`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator =
+R"doc(An iterator type that iterates over increasingly larger 2D aspect
+ratios via factorization, starting from a number of faces :math:`n`.
+After iterating over all possible factorizations of n, the next step
+increases :math:`n` and continues with the factorization. Thereby, a
+sequence of aspect ratios starting from :math:`n = 4` faces looks like
+this: :math:`1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times
+      1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2,
+\dots`
+
+Template Args:
+    AspectRatio: Aspect ratio type.)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_aspect_ratio_iterator =
+R"doc(Standard constructor. Takes a starting value and computes an initial
+factorization. The value `n` represents the amount of faces in the
+desired aspect ratios. For example, :math:`n = 1` will yield aspect
+ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
+equal to `coords::offset{0, 0}`. If :math:`n = 2`, the aspect ratios
+:math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
+to `coords::offset{0, 1}` and `coords::offset{1, 0}`. Both examples
+with `AspectRatio == coords::offset`.
+
+Args:
+    n: Starting value of the aspect ratio iteration.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_factorize =
+R"doc(Factorizes the current `num` into all possible factors :math:`(x, y)`
+with :math:`x \cdot y = num`. The result is stored as a vector of
+`AspectRatio` objects in the attribute factors.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_factors = R"doc(Factors of num.)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_it = R"doc(Iterator pointing to current factor.)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_next =
+R"doc(Computes the next possible `num` where a factorization :math:`(x, y)`
+with :math:`x \cdot y = num` exists.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_num = R"doc(Number to factorize into dimensions.)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_eq = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_eq_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_inc =
+R"doc(Lets the iterator point to the next dimension of the current
+factorization. If there are no next factors, `num` is incremented and
+the next factors are computed.
+
+Prefix version.
+
+Returns:
+    Reference to this.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_inc_2 =
+R"doc(Creates a new iterator that points to the next dimension of the
+current factorization. If there are no next factors, `num` is
+incremented and the next factors are computed.
+
+Postfix version. Less performance than the prefix version due to copy
+construction.
+
+Returns:
+    Resulting iterator.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_le = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_le_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_lt = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_lt_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_mul = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_ne = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container =
+R"doc(A container class to help identify layout locations of branching nodes
+like fanouts. When a node from a network is to placed in a layout,
+fetching the node's fanins and looking for their locations in the
+layout does not work properly when branching nodes like fanouts are
+involved that got extended by wire nodes. This container solves that
+issue.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+    fanout_size: Maximum fanout size possible in the layout and/or the
+                 network.)doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_operator_array =
+R"doc(Accesses the branching container to find the location of a given node
+`n`. Returns the signal to that location if it was already stored or
+the default signal, otherwise.
+
+Args:
+    n: Node whose branching position is desired.
+
+Returns:
+    Signal to `n`'s layout location or the default signal if it wasn't
+    found.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_branching_signal_container_update_branch =
+R"doc(Updates the given node's branch by another layout signal, thereby,
+creating a new branch or updating the position of an existing one,
+e.g., if further wire segments were moving the head of the branch.
+
+Args:
+    ntk_node: Node whose branch is to be updated.
+    lyt_signal: New signal pointing to the end of the branch.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_clear_routing =
+R"doc(Removes the entire wire routing from the passed layout. This involves
+deleting all wire segments that have been placed on any tile as well
+as removing stored connections (children pointers) from all gates.
+
+Args:
+    lyt: The layout whose routing is to be deleted.
+
+Template Args:
+    Lyt: Gate-level Layout type.
 
 )doc";
 
@@ -9474,6 +9398,133 @@ signals from the gate to the second fan-out within the layout.)doc";
 static const char *mkd_doc_fiction_physical_design_detail_fanin_fanout_data_to_clear =
 R"doc(During the gate relocation process, this vector holds temporary layout
 coordinates that need to be cleared or reset.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_all_paths =
+R"doc(Stores a collection of all annotated paths
+(labeled_layout_coordinate_lookup_path objects) computed thus far to
+find intersections with new ones. The edge intersection graph stores
+plain paths without the extra set and label. Therefore, after the
+generate_edge_intersection_graph function terminates, the extra memory
+overhead is being released again.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_connect_clique =
+R"doc(Given a collection of paths belonging to the same objective, this
+function creates edges in the edge intersection graph between each
+pair of corresponding nodes, thus, forming a clique (complete sub-
+graph).
+
+Args:
+    objective_paths: Collection of paths belonging to the same
+                     objective.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_create_intersection_edges =
+R"doc(Given a collection of paths belonging to the same objective, this
+function creates edges in the edge intersection graph between each
+corresponding node and all of the already existing nodes that
+represent paths that intersect with it, i.e., that share at least one
+coordinate.
+
+Args:
+    objective_paths: Collection of paths belonging to the same
+                     objective.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_edge_id = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_generate_edge_intersection_graph_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_graph = R"doc(The edge intersection graph to be created.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_initiate_objective_nodes =
+R"doc(Given a collection of paths belonging to the same objective, this
+function assigns them unique labels and generates corresponding nodes
+in the edge intersection graph.
+
+Since each path of the same objective objective belongs to a clique in
+the final graph, this function additionally stores their node IDs in
+the statistics.
+
+Args:
+    objective_paths: Collection of paths belonging to the same
+                     objective.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path =
+R"doc(Extends the layout_coordinate_path to additionally to the vector
+representation of the path also hold a set that allows fast lookup
+needed to find intersections (O(log n)). Additionally, a label is
+assigned to each path to identify it in the edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_append =
+R"doc(Overwrites the append function to additionally store the given
+coordinate in a set.
+
+Args:
+    c: Coordinate to append to the path.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_intersection_with =
+R"doc(Given another path, this function checks if they are not disjoint,
+i.e., it looks for at least one coordinate that both paths share.
+
+If, at some point, the set approach is not to be used anymore,
+std::find_first_of offers the same functionality on any kind of range.
+
+Args:
+    other: The other path.
+
+Template Args:
+    Path: Type of other path.
+
+Returns:
+    `true` iff this path and the given one are not disjoint, i.e.,
+    share at least one coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_overlap_with =
+R"doc(Like has_intersection_with but allows paths to share crossings, i.e.,
+single-tile intersections.
+
+Similar to has_intersection_with, this function also returns `true` if
+source and target are matching in both paths.
+
+Args:
+    other: The other path.
+
+Template Args:
+    Path: Type of other path.
+
+Returns:
+    `true` iff this path and the given one are overlapping, i.e.,
+    share at least one coordinate segment of size 2.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_path_elements =
+R"doc(Uniquely identify path elements in a set to make them searchable in
+O(1).)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_layout = R"doc(Reference to the layout.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_node_id = R"doc(IDs for nodes and edges.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_objectives = R"doc(The routing objectives.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_physical_design_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_detail_get_offset =
 R"doc(Utility function to calculate the offset that has to be subtracted
@@ -10955,6 +11006,88 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_physical_design_extract_routing_objectives =
+R"doc(Extracts all routing objectives from the given layout. To this end,
+all routing paths in the layout are traversed, starting at each PI.
+Whenever the next regular node (non-IO, non-constant, non-wire) is
+encountered, this connection is added to the list of all objectives.
+
+Example: Let a layout have connections from `(0,0)` to `(2,3)` via a
+         cascade of wires and a direct connection from
+`(2,2)` to `(2,3)`. The list of routing objectives extracted from that
+layout would contain `{(0,0), (2,3)}` and `{(2,2), (2,3)}`.
+
+In other words, if all wires were removed from the layout and all
+connections ripped-up, an equivalent layout could be recreated from
+the list of routing objectives.
+
+Args:
+    lyt: Layout whose routing objectives are to be extracted.
+
+Template Args:
+    Lyt: Gate-level layout type.
+
+Returns:
+    List of all routing objectives in the given layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph =
+R"doc(Creates an edge intersection graph of all paths that satisfy a given
+list of routing objectives. That is, this function generates an
+undirected graph whose nodes represent paths in the given layout and
+whose edges represent intersections of these paths. An intersection is
+understood as the non-disjunction of paths, i.e., they share at least
+one coordinate. To generate the paths for the routing objectives, all
+possible paths from source to target in the layout are enumerated
+while taking obstructions into consideration. The given layout must be
+clocked.
+
+Args:
+    lyt: The layout to generate the edge intersection graph for.
+    objectives: A list of routing objectives given as source-target
+                pairs.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Lyt: Type of the clocked layout.
+
+Returns:
+    An edge intersection graph of paths satisfying the given routing
+    objectives in `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_params = R"doc(Parameters for the edge intersection graph generation algorithm.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_params_crossings =
+R"doc(Allow crossings by not creating edges between paths that only share
+single-coordinate sub-paths.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_params_path_limit =
+R"doc(If a value is given, for each objective, only up to the `path_limit`
+shortest paths will be enumerated (using Yen's algorithm) instead of
+all paths.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_cliques =
+R"doc(Stores all cliques in the resulting graph that were created during
+path enumeration. There might be more cliques in the overall graph but
+these ones correspond to one routing objective each, which could be
+useful information to have in certain algorithms.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_num_edges = R"doc(Stores the size of the generated edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_num_vertices = R"doc(Stores the size of the generated edge intersection graph.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_number_of_unroutable_objectives =
+R"doc(For each routing objective that cannot be fulfilled in the given
+layout, this counter is incremented.)doc";
+
+static const char *mkd_doc_fiction_physical_design_generate_edge_intersection_graph_stats_time_total = R"doc(Runtime measurement.)doc";
+
 static const char *mkd_doc_fiction_physical_design_graph_oriented_layout_design =
 R"doc(A scalable and efficient placement & routing approach based on
 spanning a search space graph of partial layouts and finding a path to
@@ -11248,6 +11381,47 @@ static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_x_size
 
 static const char *mkd_doc_fiction_physical_design_hexagonalization_stats_y_size = R"doc(Layout height.)doc";
 
+static const char *mkd_doc_fiction_physical_design_is_crossable_wire =
+R"doc(Checks whether a given coordinate `successor` hosts a crossable wire
+when coming from coordinate `src` in a given layout. A wire is said to
+be crossable if a potential cross-over would not result in running
+along the same information flow direction. For example, a wire segment
+hosted by `successor` that is horizontal and runs from west to east is
+crossable by a wire segment coming from `src` that is vertical and
+runs from north to south. However, if the wire segment coming from
+`src` were also horizontal and ran from west to east, the cross-over
+would be prohibited.
+
+Args:
+    lyt: The layout.
+    src: Source coordinate in `lyt`.
+    successor: Successor coordinate in lyt reachable from `src`.
+
+Template Args:
+    Lyt: Layout type.
+
+Returns:
+    `true` iff `successor` hosts a wire that is crossable from `src`.
+
+Note:
+    This function can be called on layout types other than gate-level
+    layouts, but will then always return `false`. This is helpful for
+    general routing in, e.g., clocked layouts.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path =
+R"doc(A path in a layout defined as an ordered sequence of coordinates.
+
+Template Args:
+    Lyt: Coordinate layout type.)doc";
+
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_append = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_source = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_layout_coordinate_path_target = R"doc()doc";
+
 static const char *mkd_doc_fiction_physical_design_operator_lshift =
 R"doc(Streams an effort mode to an output stream.
 
@@ -11344,6 +11518,25 @@ static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_st
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_x_size = R"doc()doc";
 
 static const char *mkd_doc_fiction_physical_design_orthogonal_physical_design_stats_y_size = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_path_collection =
+R"doc(An ordered collection of multiple paths in a layout.
+
+Template Args:
+    Path: Path type.)doc";
+
+static const char *mkd_doc_fiction_physical_design_path_collection_add = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_path_collection_contains =
+R"doc(Checks whether a given path is contained in the collection.
+
+Args:
+    p: Path to search for.
+
+Returns:
+    `true` iff `p` is contained in the collection.
+
+)doc";
 
 static const char *mkd_doc_fiction_physical_design_path_finding_a_star =
 R"doc(The A* path finding algorithm for shortest loop-less paths between a
@@ -12319,6 +12512,148 @@ static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_p
 
 static const char *mkd_doc_fiction_physical_design_path_finding_yen_k_shortest_paths_params_astar_params = R"doc(Parameters for the internal A* algorithm.)doc";
 
+static const char *mkd_doc_fiction_physical_design_path_set =
+R"doc(A set of multiple paths in a layout.
+
+Template Args:
+    Path: Path type.)doc";
+
+static const char *mkd_doc_fiction_physical_design_path_set_add = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_path_set_contains = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_place =
+R"doc(Place 0-input gates.
+
+Args:
+    lyt: Gate-level layout in which to place a 0-input gate.
+    t: Tile in `lyt` to place the gate onto.
+    ntk: Network whose node is to be placed.
+    n: Node in `ntk` to place onto `t` in `lyt`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_place_2 =
+R"doc(Place 1-input gates.
+
+Args:
+    lyt: Gate-level layout in which to place a 1-input gate.
+    t: Tile in `lyt` to place the gate onto.
+    ntk: Network whose node is to be placed.
+    n: Node in `ntk` to place onto `t` in `lyt`.
+    a: Incoming signal to the newly placed gate in `lyt`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_place_3 =
+R"doc(Place 2-input gates.
+
+Args:
+    lyt: Gate-level layout in which to place a 2-input gate.
+    t: Tile in `lyt` to place the gate onto.
+    ntk: Network whose node is to be placed.
+    n: Node in `ntk` to place onto `t` in `lyt`.
+    a: First incoming signal to the newly placed gate in `lyt`.
+    b: Second incoming signal to the newly placed gate in `lyt`.
+    c: Third optional incoming constant value signal to the newly
+       placed gate in `lyt`. Might change the gate function when set,
+       e.g., from a MAJ to an AND if `c == false`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_place_4 =
+R"doc(Place 3-input gates.
+
+Args:
+    lyt: Gate-level layout in which to place a 3-input gate.
+    t: Tile in `lyt` to place the gate onto.
+    ntk: Network whose node is to be placed.
+    n: Node in `ntk` to place onto `t` in `lyt`.
+    a: First incoming signal to the newly placed gate in `lyt`.
+    b: Second incoming signal to the newly placed gate in `lyt`.
+    c: Third incoming signal to the newly placed gate in `lyt`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    Signal pointing to the placed gate in `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_place_5 =
+R"doc(Place any gate from a network. This function automatically identifies
+the arity of the passed node and fetches its incoming signals from the
+given network and a provided `mockturtle::node_map`. This function
+does not update the `mockturtle::node_map`.
+
+Args:
+    lyt: Gate-level layout in which to place any gate.
+    t: Tile in `lyt` to place the gate onto.
+    ntk: Network whose node is to be placed.
+    n: Node in `ntk` to place onto `t` in `lyt`.
+    node2pos: Mapping from network nodes to layout signals, i.e., a
+              pointer to their position in the layout. The map is used
+              to fetch location of the fanins. The
+              `mockturtle::node_map` is not updated by this function.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    Signal to the newly placed gate in `lyt`.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_place_6 =
+R"doc(Place any gate from a network. This function automatically identifies
+the arity of the passed node and fetches its incoming signals from the
+given network and a provided branching_signal_container
+`mockturtle::node_map`. This function does not update the
+`mockturtle::node_map`.
+
+Args:
+    lyt: Gate-level layout in which to place any gate.
+    t: Tile in `lyt` to place the gate onto.
+    ntk: Network whose node is to be placed.
+    n: Node in `ntk` to place onto `t` in `lyt`.
+    node2pos: Mapping from network nodes to layout signals, i.e., a
+              pointer to their position in the layout via branches.
+              The map is used to fetch location of the fanins. The
+              `mockturtle::node_map` is not updated by this function.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    Signal to the newly placed gate in `lyt`.
+
+)doc";
+
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization =
 R"doc(A post-layout optimization algorithm as originally proposed in \"Post-
 Layout Optimization for Field-coupled Nanotechnologies\" by S.
@@ -12413,6 +12748,75 @@ static const char *mkd_doc_fiction_physical_design_post_layout_optimization_stat
 
 static const char *mkd_doc_fiction_physical_design_post_layout_optimization_stats_y_size_before = R"doc(Layout height before the post-layout optimization process.)doc";
 
+static const char *mkd_doc_fiction_physical_design_reserve_input_nodes =
+R"doc(Reserve primary input nodes in a layout in the same order as they
+appear in a network. This is a useful function to call first when a
+layout is to be created from a network. The primary input nodes then
+exist in the layout, but are not placed anywhere and also do not have
+names. They are just registered to preserve their order.
+
+This function can be seen as an equivalent to
+`mockturtle::initialize_copy_network`, but for layouts.
+
+Args:
+    lyt: Gate-level layout where primary input nodes are to be
+         reserved.
+    ntk: Network whose primary inputs are to be reserved in `lyt`.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Ntk: Logic network type.
+
+Returns:
+    A `mockturtle::node_map` that maps from network nodes to layout
+    nodes to be able to address the created nodes.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_route_path =
+R"doc(Establishes a wire routing along the given path in the given layout.
+To this end, the given path's source and target coordinates are
+assumed to be populated by other gates or wires that the new path
+shall connect to.
+
+If `path` contains a tile that is allocated already, it will instead
+switch to the crossing layer. If path contains exactly source and
+target, no wires are created, but the source and target are connected.
+
+Args:
+    lyt: Gate-level layout in which a wire path is to be established.
+    path: Path to route wires along.
+
+Template Args:
+    Lyt: Gate-level layout type.
+    Path: Path type.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_routing_objective =
+R"doc(Routing objectives are source-target pairs.
+
+Template Args:
+    Lyt: Layout type whose coordinates are to be used.)doc";
+
+static const char *mkd_doc_fiction_physical_design_routing_objective_operator_eq =
+R"doc(Equality operator.
+
+Args:
+    other: Routing objective to compare to.
+
+Template Args:
+    OtherLyt: Type of other layout.
+
+Returns:
+    `true` iff the given objective is equal to this one.
+
+)doc";
+
+static const char *mkd_doc_fiction_physical_design_routing_objective_source = R"doc()doc";
+
+static const char *mkd_doc_fiction_physical_design_routing_objective_target = R"doc()doc";
+
 static const char *mkd_doc_fiction_physical_design_technology_constraints = R"doc(Target technologies.)doc";
 
 static const char *mkd_doc_fiction_physical_design_technology_constraints_NONE = R"doc(No technology-specific constraints.)doc";
@@ -12440,1309 +12844,6 @@ Returns:
     String representation of the cost objective.
 
 )doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator =
-R"doc(An iterator type that iterates over increasingly larger 2D aspect
-ratios via factorization, starting from a number of faces :math:`n`.
-After iterating over all possible factorizations of n, the next step
-increases :math:`n` and continues with the factorization. Thereby, a
-sequence of aspect ratios starting from :math:`n = 4` faces looks like
-this: :math:`1 \times 4, 4 \times 1, 2 \times 2, 1 \times 5, 5 \times
-      1, 1 \times 6, 6 \times 1, 2 \times 3, 3 \times 2,
-\dots`
-
-Template Args:
-    AspectRatio: Aspect ratio type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_aspect_ratio_iterator =
-R"doc(Standard constructor. Takes a starting value and computes an initial
-factorization. The value `n` represents the amount of faces in the
-desired aspect ratios. For example, :math:`n = 1` will yield aspect
-ratios with exactly :math:`1` face, i.e. :math:`1 \times 1` which is
-equal to `coords::offset{0, 0}`. If :math:`n = 2`, the aspect ratios
-:math:`1 \times 2` and :math:`2 \times 1` will result, which are equal
-to `coords::offset{0, 1}` and `coords::offset{1, 0}`. Both examples
-with `AspectRatio == coords::offset`.
-
-Args:
-    n: Starting value of the aspect ratio iteration.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_factorize =
-R"doc(Factorizes the current `num` into all possible factors :math:`(x, y)`
-with :math:`x \cdot y = num`. The result is stored as a vector of
-`AspectRatio` objects in the attribute factors.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_factors = R"doc(Factors of num.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_it = R"doc(Iterator pointing to current factor.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_next =
-R"doc(Computes the next possible `num` where a factorization :math:`(x, y)`
-with :math:`x \cdot y = num` exists.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_num = R"doc(Number to factorize into dimensions.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_eq = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_eq_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_inc =
-R"doc(Lets the iterator point to the next dimension of the current
-factorization. If there are no next factors, `num` is incremented and
-the next factors are computed.
-
-Prefix version.
-
-Returns:
-    Reference to this.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_inc_2 =
-R"doc(Creates a new iterator that points to the next dimension of the
-current factorization. If there are no next factors, `num` is
-incremented and the next factors are computed.
-
-Postfix version. Less performance than the prefix version due to copy
-construction.
-
-Returns:
-    Resulting iterator.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_le = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_le_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_lt = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_lt_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_mul = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_ne = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_aspect_ratio_iterator_operator_ne_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container =
-R"doc(A container class to help identify layout locations of branching nodes
-like fanouts. When a node from a network is to placed in a layout,
-fetching the node's fanins and looking for their locations in the
-layout does not work properly when branching nodes like fanouts are
-involved that got extended by wire nodes. This container solves that
-issue.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-    fanout_size: Maximum fanout size possible in the layout and/or the
-                 network.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_branches = R"doc(Storage for all branches.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_branching_signal = R"doc(Branch type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_branching_signal_branching_signal = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_branching_signal_lyt_signal = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_branching_signal_ntk_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_operator_array =
-R"doc(Accesses the branching container to find the location of a given node
-`n`. Returns the signal to that location if it was already stored or
-the default signal, otherwise.
-
-Args:
-    n: Node whose branching position is desired.
-
-Returns:
-    Signal to `n`'s layout location or the default signal if it wasn't
-    found.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_branching_signal_container_update_branch =
-R"doc(Updates the given node's branch by another layout signal, thereby,
-creating a new branch or updating the position of an existing one,
-e.g., if further wire segments were moving the head of the branch.
-
-Args:
-    ntk_node: Node whose branch is to be updated.
-    lyt_signal: New signal pointing to the end of the branch.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_clear_routing =
-R"doc(Removes the entire wire routing from the passed layout. This involves
-deleting all wire segments that have been placed on any tile as well
-as removing stored connections (children pointers) from all gates.
-
-Args:
-    lyt: The layout whose routing is to be deleted.
-
-Template Args:
-    Lyt: Gate-level Layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_all_paths =
-R"doc(Stores a collection of all annotated paths
-(labeled_layout_coordinate_lookup_path objects) computed thus far to
-find intersections with new ones. The edge intersection graph stores
-plain paths without the extra set and label. Therefore, after the
-generate_edge_intersection_graph function terminates, the extra memory
-overhead is being released again.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_connect_clique =
-R"doc(Given a collection of paths belonging to the same objective, this
-function creates edges in the edge intersection graph between each
-pair of corresponding nodes, thus, forming a clique (complete sub-
-graph).
-
-Args:
-    objective_paths: Collection of paths belonging to the same
-                     objective.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_create_intersection_edges =
-R"doc(Given a collection of paths belonging to the same objective, this
-function creates edges in the edge intersection graph between each
-corresponding node and all of the already existing nodes that
-represent paths that intersect with it, i.e., that share at least one
-coordinate.
-
-Args:
-    objective_paths: Collection of paths belonging to the same
-                     objective.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_edge_id = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_generate_edge_intersection_graph_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_graph = R"doc(The edge intersection graph to be created.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_initiate_objective_nodes =
-R"doc(Given a collection of paths belonging to the same objective, this
-function assigns them unique labels and generates corresponding nodes
-in the edge intersection graph.
-
-Since each path of the same objective objective belongs to a clique in
-the final graph, this function additionally stores their node IDs in
-the statistics.
-
-Args:
-    objective_paths: Collection of paths belonging to the same
-                     objective.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path =
-R"doc(Extends the layout_coordinate_path to additionally to the vector
-representation of the path also hold a set that allows fast lookup
-needed to find intersections (O(log n)). Additionally, a label is
-assigned to each path to identify it in the edge intersection graph.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_append =
-R"doc(Overwrites the append function to additionally store the given
-coordinate in a set.
-
-Args:
-    c: Coordinate to append to the path.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_intersection_with =
-R"doc(Given another path, this function checks if they are not disjoint,
-i.e., it looks for at least one coordinate that both paths share.
-
-If, at some point, the set approach is not to be used anymore,
-std::find_first_of offers the same functionality on any kind of range.
-
-Args:
-    other: The other path.
-
-Template Args:
-    Path: Type of other path.
-
-Returns:
-    `true` iff this path and the given one are not disjoint, i.e.,
-    share at least one coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_has_overlap_with =
-R"doc(Like has_intersection_with but allows paths to share crossings, i.e.,
-single-tile intersections.
-
-Similar to has_intersection_with, this function also returns `true` if
-source and target are matching in both paths.
-
-Args:
-    other: The other path.
-
-Template Args:
-    Path: Type of other path.
-
-Returns:
-    `true` iff this path and the given one are overlapping, i.e.,
-    share at least one coordinate segment of size 2.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_label = R"doc(Label to identify the path in the edge intersection graph.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_labeled_layout_coordinate_lookup_path_path_elements =
-R"doc(Uniquely identify path elements in a set to make them searchable in
-O(1).)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_layout = R"doc(Reference to the layout.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_node_id = R"doc(IDs for nodes and edges.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_objectives = R"doc(The routing objectives.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_ps = R"doc(Parameters.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_pst = R"doc(Statistics.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_generate_edge_intersection_graph_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_convert_node_index =
-R"doc(Converts the given node ID of a Brian Crites graph to the
-corresponding one used in Graph.
-
-Args:
-    node: Node ID to convert between graph structures.
-
-Returns:
-    Corresponding node ID in Graph.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_convert_node_index_2 =
-R"doc(Converts the given node ID of a Graph to the corresponding one used in
-Brian Crites' graph structure. This function is automatically removed
-from overload resolution if both graphs use std::string because it
-would clash with the function above.
-
-Args:
-    node: Node ID to convert between graph structures.
-
-Returns:
-    Corresponding node ID in the Brian Crites graph.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_graph = R"doc(The graph to be colored.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_graph_coloring_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_is_brian_crites_engine =
-R"doc(Checks whether the given engine points towards the usage of an
-algorithm from the graph-coloring library by Brian Crites.
-
-Args:
-    engine: Graph coloring engine to check.
-
-Returns:
-    `true` iff the given engine is DSATUR, MCS, LMXRLF, or TABUCOL.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_is_valid_vertex_coloring =
-R"doc(Checks whether the given coloring is valid, i.e., if no two adjacent
-vertices have the same color assigned.
-
-Args:
-    v_coloring: Vertex coloring to check.
-
-Returns:
-    `true` iff no two adjacent vertices in the stored graph have the
-    same color assigned according to the given coloring.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_ps = R"doc(Parameters.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_pst = R"doc(Statistics.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_translate_to_brian_crites_graph =
-R"doc(Translates the given graph to a equivalent Brian Crites graph data
-structure.
-
-Args:
-    g: Graph to translate.
-
-Returns:
-    Translated graph.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_graph_coloring_impl_translate_to_vertex_coloring =
-R"doc(Translates the given Brian Crites coloring to the corresponding vertex
-coloring used here.
-
-Args:
-    bc_coloring: Brian Crites coloring to translate.
-
-Returns:
-    Translated vertex coloring.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_at_least_one_color_per_vertex = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_at_most_one_color_per_vertex = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_check_k_coloring = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_check_sat = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_color = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_color_frequency_equal_to_largest_clique_size = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_determine_min_coloring_with_binary_search = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_determine_min_coloring_with_linearly_ascending_search = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_determine_min_coloring_with_linearly_descending_search = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_exclude_identical_adjacent_colors = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_extract_vertex_coloring = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_get_model = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_graph = R"doc(A reference to the graph to be colored.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_largest_clique = R"doc(Iterator to the largest given clique.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_pre_assign_largest_clique =
-R"doc(Reduce the search space by symmetry breaking. To this end, each vertex
-in the provided clique gets a different color assigned from the
-beginning.
-
-Args:
-    instance: Pointer to the solver instance.
-
-Returns:
-    A clique-first ordering of the vertices that assigns the clique
-    vertices the lowest indices.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_ps = R"doc(Parameters.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_pst = R"doc(Statistics.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_q = R"doc(Largest clique size.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_sat_coloring_handler = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance_k = R"doc(Number of colors.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance_solver = R"doc(SAT solver.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance_solver_instance =
-R"doc(Standard constructor. Initialize one variable for each vertex-color
-pair.
-
-Args:
-    graph: The graph to color.
-    num_colors: Number of colors to attempt the coloring with.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance_solver_instance_2 = R"doc(Default constructor is not available.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_solver_instance_variables = R"doc(Stores all variables.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_symmetry_breaking =
-R"doc(Reduce the search space by symmetry breaking. Two tactics are
-implemented:
-
- - pre-assigning different colors to the largest given clique, and -
-   transforming the coloring solution to be lexicographically minimal
-
-Args:
-    instance: Pointer to the solver instance.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_detail_sat_coloring_handler_transform_solution_to_lexicographical_minimum =
-R"doc(Reduce the search space by symmetry breaking. To this end, the
-solution is transformed to be lexicographical minimal, i.e., no vertex
-is assigned color c unless color c - 1 has been assigned to any vertex
-of lower index.
-
-Args:
-    instance: Pointer to the solver instance.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring =
-R"doc(This function provides an interface to call various vertex coloring
-algorithms on the given graph. A vertex coloring is the assignment of
-colors to graph vertices such that no two vertices that share an edge
-receive the same color. If a graph is colorable with :math:`k` colors,
-the graph is said to be :math:`k`-colorable. The minimum value of
-:math:`k` for a graph is called its chromatic number. To determine the
-chromatic number of a graph is :math:`NP`-complete in general. The
-provided algorithms attempt to get as close to the optimum coloring as
-possible. However, no heuristic can give an optimality guarantee. If
-the exact chromatic number is required, the SAT-based engine must be
-used. This may require exponential runtime in the worst case but is,
-on average, a lot faster due to the smart traversal of search spaces
-that SAT solvers provide.
-
-See graph_coloring_engine for a list of all supported engines.
-
-Args:
-    graph: The graph whose vertices are to be colored.
-    ps: Parameters.
-    pst: Statistics.
-
-Template Args:
-    Graph: Graph type to color.
-    Color: Color type to use.
-
-Returns:
-    An assignment of graph vertices to colors such that no two
-    adjacent vertices share the same color.
-
-Note:
-    If the `clique_size_color_frequency` parameter is set together
-    with the SAT engine, there is no guarantee that the SAT solver is
-    able to find a valid coloring. In that case, this algorithm falls
-    back to MCS.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_heuristic_params = R"doc(Parameters for heuristic graph coloring.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_heuristic_params_k_color_value =
-R"doc(:math:`k`-color value for :math:`k`-coloring algorithms, e.g.,
-TABUCOL.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_params =
-R"doc(Common parameters for the graph coloring algorithm.
-
-Template Args:
-    Graph: Type of the graph to color.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_params_engine = R"doc(The engine to use.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_params_heuristic_params = R"doc(Parameters for `engine != SAT`.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_params_sat_params = R"doc(Parameters for `engine == SAT`.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_params_verify_coloring_after_computation = R"doc(Verify that the found coloring is valid.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_sat_params =
-R"doc(Parameters for SAT-based graph coloring.
-
-Template Args:
-    Graph: Type of the graph to color.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_sat_params_clique_size_color_frequency =
-R"doc(Tries to establish the color frequency of color 0 such that it equals
-the largest clique size.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_sat_params_cliques =
-R"doc(If cliques in the passed graph are known, they can be used for
-symmetry breaking in the SAT engine which significantly speeds up
-runtime. The bigger the cliques, the better.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_sat_params_sat_engine = R"doc(The SAT solver to use.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_sat_params_sat_search_tactic = R"doc(The search tactic to apply.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_stats = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_stats_chromatic_number =
-R"doc(The determined chromatic number (could be non-optimal depending on the
-applied engine).)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_stats_color_frequency = R"doc(The frequency of the most used color.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_stats_coloring_verified =
-R"doc(Validation result of the coloring (std::nullopt = none attempted, true
-= valid, false = invalid).)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_stats_most_frequent_color = R"doc(The color that appeared the most.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_determine_vertex_coloring_stats_time_total = R"doc(Runtime measurement.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_extract_routing_objectives =
-R"doc(Extracts all routing objectives from the given layout. To this end,
-all routing paths in the layout are traversed, starting at each PI.
-Whenever the next regular node (non-IO, non-constant, non-wire) is
-encountered, this connection is added to the list of all objectives.
-
-Example: Let a layout have connections from `(0,0)` to `(2,3)` via a
-         cascade of wires and a direct connection from
-`(2,2)` to `(2,3)`. The list of routing objectives extracted from that
-layout would contain `{(0,0), (2,3)}` and `{(2,2), (2,3)}`.
-
-In other words, if all wires were removed from the layout and all
-connections ripped-up, an equivalent layout could be recreated from
-the list of routing objectives.
-
-Args:
-    lyt: Layout whose routing objectives are to be extracted.
-
-Template Args:
-    Lyt: Gate-level layout type.
-
-Returns:
-    List of all routing objectives in the given layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph =
-R"doc(Creates an edge intersection graph of all paths that satisfy a given
-list of routing objectives. That is, this function generates an
-undirected graph whose nodes represent paths in the given layout and
-whose edges represent intersections of these paths. An intersection is
-understood as the non-disjunction of paths, i.e., they share at least
-one coordinate. To generate the paths for the routing objectives, all
-possible paths from source to target in the layout are enumerated
-while taking obstructions into consideration. The given layout must be
-clocked.
-
-Args:
-    lyt: The layout to generate the edge intersection graph for.
-    objectives: A list of routing objectives given as source-target
-                pairs.
-    ps: Parameters.
-    pst: Statistics.
-
-Template Args:
-    Lyt: Type of the clocked layout.
-
-Returns:
-    An edge intersection graph of paths satisfying the given routing
-    objectives in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_params = R"doc(Parameters for the edge intersection graph generation algorithm.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_params_crossings =
-R"doc(Allow crossings by not creating edges between paths that only share
-single-coordinate sub-paths.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_params_path_limit =
-R"doc(If a value is given, for each objective, only up to the `path_limit`
-shortest paths will be enumerated (using Yen's algorithm) instead of
-all paths.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_stats = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_stats_cliques =
-R"doc(Stores all cliques in the resulting graph that were created during
-path enumeration. There might be more cliques in the overall graph but
-these ones correspond to one routing objective each, which could be
-useful information to have in certain algorithms.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_stats_num_edges = R"doc(Stores the size of the generated edge intersection graph.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_stats_num_vertices = R"doc(Stores the size of the generated edge intersection graph.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_stats_number_of_unroutable_objectives =
-R"doc(For each routing objective that cannot be fulfilled in the given
-layout, this counter is incremented.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_generate_edge_intersection_graph_stats_time_total = R"doc(Runtime measurement.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_geometric_temperature_schedule =
-R"doc(A logarithmically decreasing temperature schedule. The temperature is
-altered by multiplying it with `0.99`.
-
-Args:
-    t: The current temperature.
-
-Returns:
-    The next temperature, i.e. :math:`\texttt{t} \cdot 0.99`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_engine =
-R"doc(An enumeration of coloring engines to use for the graph coloring. All
-but SAT are using the graph-coloring library by Brian Crites.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_engine_DSATUR =
-R"doc(Saturation degree algorithm proposed in \"New Methods to Color the
-Vertices of a Graph\" by Daniel Brélaz in Communications of the ACM,
-1979. This algorithm is a heuristic but is exact for bipartite graphs.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_engine_LMXRLF =
-R"doc(A randomized heuristic algorithm that combines various paradigms like
-divide-and-conquer, objective functions, reuse of intermediate
-solutions etc. It was proposed in \"Efficient Coloring of a Large
-Spectrum of Graphs\" by Darko Kirovski and Miodrag Potkonjak in DAC
-1998. While this algorithm is really performant, it tends to find non-
-optimal solutions even for small instances.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_engine_MCS =
-R"doc(Optimal coloring for chordal graphs proposed in \"Register Allocation
-via Coloring of Chordal Graphs\" by Jens Palsberg in CATS 2007.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_engine_SAT = R"doc(Custom iterative SAT-based encoding that finds optimal colorings.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_engine_TABUCOL =
-R"doc(A :math:`k`-coloring algorithm using tabu search proposed in \"Using
-Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
-Werra in Computing 1987. The authors claim that it significantly
-outperforms simulated annealing. However, since it is a
-:math:`k`-coloring algorithm, it is required to set `k_color_value` in
-`determine_vertex_coloring_params` to the chromatic number that is to
-be checked for.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_sat_search_tactic =
-R"doc(An enumeration of search tactics to use for the SAT-based graph
-coloring to determine a min-coloring.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_sat_search_tactic_BINARY_SEARCH =
-R"doc(First ascend exponentially by checking for :math:`k = 2^0, 2^1, 2^2,
-\dots` until SAT, then perform binary search in the window
-:math:`[2^{h-1}, 2^h]`, where :math:`2^h` was the first SAT. If at
-least one clique is passed, :math:`k` starts at the largest clique
-size :math:`|C|` instead with :math:`k = 2^0 \cdot |C|, 2^1 \cdot |C|,
-2^2 \cdot |C|, \dots`)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_sat_search_tactic_LINEARLY_ASCENDING =
-R"doc(Ascend linearly by checking for :math:`k = 1, 2, 3, \dots` until SAT.
-If at least one clique is passed, :math:`k` starts at the largest
-clique size :math:`|C|` instead with :math:`k = |C|, |C| + 1, |C| + 2,
-\dots`)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_graph_coloring_sat_search_tactic_LINEARLY_DESCENDING =
-R"doc(Descend linearly by checking for :math:`k = |G|, |G| - 1, |G| - 2,
-\dots` until UNSAT.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_is_crossable_wire =
-R"doc(Checks whether a given coordinate `successor` hosts a crossable wire
-when coming from coordinate `src` in a given layout. A wire is said to
-be crossable if a potential cross-over would not result in running
-along the same information flow direction. For example, a wire segment
-hosted by `successor` that is horizontal and runs from west to east is
-crossable by a wire segment coming from `src` that is vertical and
-runs from north to south. However, if the wire segment coming from
-`src` were also horizontal and ran from west to east, the cross-over
-would be prohibited.
-
-Args:
-    lyt: The layout.
-    src: Source coordinate in `lyt`.
-    successor: Successor coordinate in lyt reachable from `src`.
-
-Template Args:
-    Lyt: Layout type.
-
-Returns:
-    `true` iff `successor` hosts a wire that is crossable from `src`.
-
-Note:
-    This function can be called on layout types other than gate-level
-    layouts, but will then always return `false`. This is helpful for
-    general routing in, e.g., clocked layouts.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_layout_coordinate_path =
-R"doc(A path in a layout defined as an ordered sequence of coordinates.
-
-Template Args:
-    Lyt: Coordinate layout type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_layout_coordinate_path_append = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_layout_coordinate_path_source = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_layout_coordinate_path_target = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_linear_temperature_schedule =
-R"doc(A linearly decreasing temperature schedule. The temperature is altered
-in decrements of `10`.
-
-Args:
-    t: The current temperature.
-
-Returns:
-    The next temperature, i.e. :math:`\texttt{t} - 10`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross =
-R"doc(Reimplementation of Graphviz's `mincross` algorithm for edge crossing
-minimization. This function reorders nodes in a leveled logic network
-to minimize the number of edge crossings using iterative median and
-transpose heuristics.
-
-Reference implementation:
-https://gitlab.com/graphviz/graphviz/-/blob/main/lib/dotgen/mincross.c
-
-For more on Graphviz's `dot` layout generation:
-https://graphviz.org/docs/layouts/dot/
-
-Args:
-    ntk: The input leveled network whose ranks are to be reordered.
-    ps: Configuration parameters for the minimization algorithm.
-    pst: Optional pointer to a statistics structure for storing the
-         resulting number of crossings.
-
-Template Args:
-    Ntk: A logic network type with level and fanout support.
-
-Returns:
-    A copy of the input network with reordered ranks to reduce edge
-    crossings.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl =
-R"doc(Implements the crossing minimization algorithm inspired by Graphviz's
-`mincross`. This algorithm reorders nodes in ranks to reduce edge
-crossings in a leveled graph representation of the logic network.
-
-Template Args:
-    Ntk: Logic network type that models a leveled circuit with rank
-         information.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_count_crossings =
-R"doc(Computes the number of crossings between two sets of ranked positions.
-
-Args:
-    a: Positions from first set of connections.
-    b: Positions from second set of connections.
-
-Returns:
-    Total number of crossings between the sets.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_fanout_ntk =
-R"doc(Fanout-augmented view of the network for efficient traversal and
-connectivity queries.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_in_cross =
-R"doc(Counts the number of edge crossings between fanins of two nodes in the
-previous rank.
-
-Args:
-    left: First node.
-    right: Second node.
-
-Returns:
-    Number of crossings.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_median_map =
-R"doc(Stores median values used to sort nodes within ranks during
-optimization.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_median_sorting = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_median_sorting_ASCENDING = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_median_sorting_DESCENDING = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_medians =
-R"doc(Computes median values for the nodes in rank `r0` based on their
-connections to `r1`.
-
-Args:
-    r0: Current rank.
-    r1: Adjacent rank to which connections are considered.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_mincross_impl =
-R"doc(Constructs the crossing minimization implementation object.
-
-Args:
-    src: The logic network on which to perform crossing minimization.
-    p: Configuration parameters for the algorithm (e.g., `optimize`)
-    st: Statistics object to store the resulting number of crossings.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_mincross_step =
-R"doc(Executes one full up/down pass of median ordering followed by
-transposition to reduce crossings.
-
-Args:
-    pass: The current pass number, determines direction and ordering.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_minimize_crossings =
-R"doc(Performs the main iterative crossing minimization using median and
-transpose heuristics.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_ncross =
-R"doc(Computes the total number of edge crossings in the current network
-state.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_out_cross =
-R"doc(Counts the number of edge crossings between fanouts of two nodes in
-the next rank.
-
-Args:
-    left: First node.
-    right: Second node.
-
-Returns:
-    Number of crossings.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_ps = R"doc(Parameters for crossing minimization.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_pst =
-R"doc(Statistics that store the final number of crossings after
-optimization.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_reorder =
-R"doc(Reorders the nodes in a given rank according to computed medians.
-
-Args:
-    r: The rank index.
-    order: Sorting order of medians.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_run =
-R"doc(Runs the crossing minimization algorithm and returns a reordered
-network.
-
-Returns:
-    A network with reordered nodes in ranks to reduce edge crossings.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_total_crossings = R"doc(Current total number of edge crossings in the network.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_transpose =
-R"doc(Performs pairwise transpositions within ranks to further reduce
-crossings.
-
-Args:
-    order: Sorting heuristic for tie-breaking.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_impl_transpose_step =
-R"doc(Performs a single transposition pass for rank `r`.
-
-Args:
-    r: Rank index.
-    order: Sorting heuristic for tie-breaking.
-
-Returns:
-    The number of crossings reduced.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params = R"doc(Parameters for the `mincross` crossing minimization algorithm.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params_convergence =
-R"doc(Convergence threshold: relative improvement factor required to reset
-the early-quit counter (heuristic from Graphviz). If the current
-crossing count drops below (`convergence` * `best_cross`), where
-`best_cross` is the best/lowest crossing count found so far, the
-process continues. Default is `0.995` (i.e., at least 0.5% improvement
-required).)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params_fixed_pis =
-R"doc(Whether the rank positions of primary inputs (PIs) should remain fixed
-during the minimization process. If set to `true`, PIs will not be
-reordered.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params_init_refine_max_iters =
-R"doc(Maximum number of iterations in the initial (pass 0) and refinement
-(pass 1) phases of the crossing minimization procedure (heuristic from
-Graphviz).
-
-- In these early passes, the algorithm explores simple reorderings to
-  quickly reduce crossings without investing in the full optimization
-  effort.
-- By default, the number of iterations is capped at `4` to prevent
-  excessive runtime during initialization and refinement. This cap can
-  be lifted if a larger global maximum (`ps.max_iter`) is set.
-- In the full optimization pass (pass 2), `ps.max_iter` is always used
-  instead.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params_max_iter =
-R"doc(Maximum number of iterations per optimization pass (heuristic from
-Graphviz). Larger values allow more refinement but increase runtime.
-Default (`24`) works well for small and medium-sized networks.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params_min_quit =
-R"doc(Minimum number of consecutive iterations without sufficient
-improvement before quitting early (heuristic from Graphviz). Prevents
-wasting time when the number of crossings no longer decreases.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_params_optimize =
-R"doc(If `false`, skips optimization and only reports the current number of
-crossings.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_stats = R"doc(Statistics collected during the execution of the `mincross` algorithm.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_mincross_stats_num_crossings = R"doc(The total number of edge crossings after optimization.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_multi_simulated_annealing =
-R"doc(This variation of Simulated Annealing (SA) does not start from just
-one provided initial state, but generates a number of random initial
-states using a provided random state generator. SA as specified above
-is then run on all these random initial states where the best result
-of all generated states is finally returned.
-
-Args:
-    init_temp: The initial temperature.
-    final_temp: The final temperature.
-    cycles: The number of cycles for each temperature value.
-    instances: The number of random initial states to generate.
-    rand_state: The random state generator function.
-    cost: The cost function to minimize.
-    schedule: The temperature schedule.
-    next: The next state function that determines an adjacent state
-          given a current one.
-
-Template Args:
-    RandStateFunc: The random state generator function type (specifies
-                   the State type via its return value).
-    CostFunc: The cost function type (specifies the cost value via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
-
-Returns:
-    A pair of the overall best optimized state and its cost value.
-
-Note:
-    If compiler support for C++17's execution policies is available,
-    the algorithm is parallelized and/or vectorized using
-    `std::execution::par_unseq`.
-
-Note:
-    The State type must be default constructible.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_path_collection =
-R"doc(An ordered collection of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_path_collection_add = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_path_collection_contains =
-R"doc(Checks whether a given path is contained in the collection.
-
-Args:
-    p: Path to search for.
-
-Returns:
-    `true` iff `p` is contained in the collection.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_path_set =
-R"doc(A set of multiple paths in a layout.
-
-Template Args:
-    Path: Path type.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_path_set_add = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_path_set_contains = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_place =
-R"doc(Place 0-input gates.
-
-Args:
-    lyt: Gate-level layout in which to place a 0-input gate.
-    t: Tile in `lyt` to place the gate onto.
-    ntk: Network whose node is to be placed.
-    n: Node in `ntk` to place onto `t` in `lyt`.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_place_2 =
-R"doc(Place 1-input gates.
-
-Args:
-    lyt: Gate-level layout in which to place a 1-input gate.
-    t: Tile in `lyt` to place the gate onto.
-    ntk: Network whose node is to be placed.
-    n: Node in `ntk` to place onto `t` in `lyt`.
-    a: Incoming signal to the newly placed gate in `lyt`.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_place_3 =
-R"doc(Place 2-input gates.
-
-Args:
-    lyt: Gate-level layout in which to place a 2-input gate.
-    t: Tile in `lyt` to place the gate onto.
-    ntk: Network whose node is to be placed.
-    n: Node in `ntk` to place onto `t` in `lyt`.
-    a: First incoming signal to the newly placed gate in `lyt`.
-    b: Second incoming signal to the newly placed gate in `lyt`.
-    c: Third optional incoming constant value signal to the newly
-       placed gate in `lyt`. Might change the gate function when set,
-       e.g., from a MAJ to an AND if `c == false`.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_place_4 =
-R"doc(Place 3-input gates.
-
-Args:
-    lyt: Gate-level layout in which to place a 3-input gate.
-    t: Tile in `lyt` to place the gate onto.
-    ntk: Network whose node is to be placed.
-    n: Node in `ntk` to place onto `t` in `lyt`.
-    a: First incoming signal to the newly placed gate in `lyt`.
-    b: Second incoming signal to the newly placed gate in `lyt`.
-    c: Third incoming signal to the newly placed gate in `lyt`.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    Signal pointing to the placed gate in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_place_5 =
-R"doc(Place any gate from a network. This function automatically identifies
-the arity of the passed node and fetches its incoming signals from the
-given network and a provided `mockturtle::node_map`. This function
-does not update the `mockturtle::node_map`.
-
-Args:
-    lyt: Gate-level layout in which to place any gate.
-    t: Tile in `lyt` to place the gate onto.
-    ntk: Network whose node is to be placed.
-    n: Node in `ntk` to place onto `t` in `lyt`.
-    node2pos: Mapping from network nodes to layout signals, i.e., a
-              pointer to their position in the layout. The map is used
-              to fetch location of the fanins. The
-              `mockturtle::node_map` is not updated by this function.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    Signal to the newly placed gate in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_place_6 =
-R"doc(Place any gate from a network. This function automatically identifies
-the arity of the passed node and fetches its incoming signals from the
-given network and a provided branching_signal_container
-`mockturtle::node_map`. This function does not update the
-`mockturtle::node_map`.
-
-Args:
-    lyt: Gate-level layout in which to place any gate.
-    t: Tile in `lyt` to place the gate onto.
-    ntk: Network whose node is to be placed.
-    n: Node in `ntk` to place onto `t` in `lyt`.
-    node2pos: Mapping from network nodes to layout signals, i.e., a
-              pointer to their position in the layout via branches.
-              The map is used to fetch location of the fanins. The
-              `mockturtle::node_map` is not updated by this function.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    Signal to the newly placed gate in `lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_reserve_input_nodes =
-R"doc(Reserve primary input nodes in a layout in the same order as they
-appear in a network. This is a useful function to call first when a
-layout is to be created from a network. The primary input nodes then
-exist in the layout, but are not placed anywhere and also do not have
-names. They are just registered to preserve their order.
-
-This function can be seen as an equivalent to
-`mockturtle::initialize_copy_network`, but for layouts.
-
-Args:
-    lyt: Gate-level layout where primary input nodes are to be
-         reserved.
-    ntk: Network whose primary inputs are to be reserved in `lyt`.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Ntk: Logic network type.
-
-Returns:
-    A `mockturtle::node_map` that maps from network nodes to layout
-    nodes to be able to address the created nodes.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_route_path =
-R"doc(Establishes a wire routing along the given path in the given layout.
-To this end, the given path's source and target coordinates are
-assumed to be populated by other gates or wires that the new path
-shall connect to.
-
-If `path` contains a tile that is allocated already, it will instead
-switch to the crossing layer. If path contains exactly source and
-target, no wires are created, but the source and target are connected.
-
-Args:
-    lyt: Gate-level layout in which a wire path is to be established.
-    path: Path to route wires along.
-
-Template Args:
-    Lyt: Gate-level layout type.
-    Path: Path type.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_routing_objective =
-R"doc(Routing objectives are source-target pairs.
-
-Template Args:
-    Lyt: Layout type whose coordinates are to be used.)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_routing_objective_operator_eq =
-R"doc(Equality operator.
-
-Args:
-    other: Routing objective to compare to.
-
-Template Args:
-    OtherLyt: Type of other layout.
-
-Returns:
-    `true` iff the given objective is equal to this one.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_routing_objective_source = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_routing_objective_target = R"doc()doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_simulated_annealing =
-R"doc(Simulated Annealing (SA) is a probabilistic optimization algorithm
-that is used to find a local minimum of a given function. SA was first
-proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick,
-C. D. Gelatt Jr, and M. P. Vecchi in Science 1983. It is a
-metaheuristic that is inspired by the annealing process in metallurgy.
-The algorithm starts with a random state and iteratively improves the
-state by randomly selecting a neighboring state. If the neighboring
-state is better than the current state, it is accepted. If the
-neighboring state is worse than the current state, it is accepted with
-a probability that decreases over time. The algorithm stops when the
-temperature reaches a certain threshold.
-
-Some pre-defined temperature schedules are provided in this header
-file.
-
-This implementation is based on:
-https://codereview.stackexchange.com/questions/70310/simple-simulated-
-annealing-template-in-c11
-
-Args:
-    init_state: The initial state to optimize.
-    init_temp: The initial temperature.
-    final_temp: The final temperature.
-    cycles: The number of cycles for each temperature value.
-    cost: The cost function to minimize.
-    schedule: The temperature schedule.
-    next: The next state function that determines an adjacent state
-          given a current one.
-
-Template Args:
-    State: The state type.
-    CostFunc: The cost function type (specifies the cost type via its
-              return value).
-    TempFunc: The temperature schedule function type.
-    NextFunc: The next state function type.
-
-Returns:
-    A pair of the optimized state and its cost value.
-
-)doc";
-
-static const char *mkd_doc_fiction_physical_design_utils_vertex_coloring =
-R"doc(A vertex coloring is simply a hash map from vertex IDs to Color types
-where Color should be constructible/convertible from int.
-
-Template Args:
-    Graph: Graph type to color.
-    Color: Color type to use. Must be convertible from int.)doc";
 
 static const char *mkd_doc_fiction_physical_design_wiring_reduction =
 R"doc(A scalable wiring reduction algorithm for 2DDWave-clocked layouts
@@ -13906,6 +13007,37 @@ static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_la
 
 static const char *mkd_doc_fiction_qca_io_detail_write_fqca_layout_impl_write_via_cell = R"doc()doc";
 
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_generate_cell_based_svg =
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
+
+Args:
+    c: The cell for which to generate the description and color.
+
+Returns:
+    A pair of strings representing the description and color of the
+    given cell `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_lyt = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_os = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_ps = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_mol_qca_layout_svg_impl_write_mol_qca_layout_svg_impl = R"doc(Default constructor.)doc";
+
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_lyt = R"doc()doc";
@@ -13939,6 +13071,43 @@ static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_qca
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_quantum_dots = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_impl_write_via_cells = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_cell_based_svg =
+R"doc(Generates an SVG string representing the cell-based clocked cell
+layout and appends it to the output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_description_color =
+R"doc(Generates and returns a pair of strings representing the description
+and color of the given cell.
+
+Args:
+    c: The cell for which to generate the description and color.
+
+Returns:
+    A pair of strings representing the description and color of the
+    given cell `c`.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_generate_tile_based_svg =
+R"doc(Generates an SVG string representing the tile-based clocked cell
+layout and appends it to the output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_lyt = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_os = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_ps = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_detail_write_qca_layout_svg_impl_write_qca_layout_svg_impl = R"doc(Default constructor.)doc";
 
 static const char *mkd_doc_fiction_qca_io_out_of_cell_names_exception = R"doc()doc";
 
@@ -13998,6 +13167,14 @@ static const char *mkd_doc_fiction_qca_io_unrecognized_cell_definition_exception
 
 static const char *mkd_doc_fiction_qca_io_unrecognized_cell_definition_exception_where = R"doc()doc";
 
+static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_coord = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_unsupported_cell_type_exception = R"doc()doc";
+
+static const char *mkd_doc_fiction_qca_io_unsupported_cell_type_exception_where = R"doc()doc";
+
 static const char *mkd_doc_fiction_qca_io_unsupported_character_exception = R"doc()doc";
 
 static const char *mkd_doc_fiction_qca_io_unsupported_character_exception_unsupported_char = R"doc()doc";
@@ -14051,6 +13228,46 @@ static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params = R"doc(Param
 
 static const char *mkd_doc_fiction_qca_io_write_fqca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
 
+static const char *mkd_doc_fiction_qca_io_write_mol_qca_layout_svg =
+R"doc(Writes an SVG representation of a cell-level MolQCA layout to an
+output stream. Only cell-based layouts are supported, since the
+clocking scheme is not uniform at the gate level. Currently, only a
+uniform gate size of :math:`10 \times 10` is supported.
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
+
+Args:
+    lyt: The layout to be written.
+    os: The output stream to write into.
+    ps: Parameters.
+
+Template Args:
+    Lyt: Cell-level molQCA layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_mol_qca_layout_svg_2 =
+R"doc(Writes an SVG representation of a cell-level MolQCA layout to a file.
+Only cell-based layouts are supported, since the clocking scheme is
+not uniform at the gate level. Currently, only a uniform gate size of
+:math:`10 \times 10` is supported.
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
+
+Args:
+    lyt: The layout to be written.
+    filename: The file name to create and write into. Should
+              preferably use the `.svg` extension.
+    ps: Parameters.
+
+Template Args:
+    Lyt: Cell-level molQCA layout type.
+
+)doc";
+
 static const char *mkd_doc_fiction_qca_io_write_qca_layout =
 R"doc(Writes a cell-level QCA layout to a qca file that is used by
 QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/), a physical
@@ -14089,6 +13306,56 @@ Template Args:
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params = R"doc(Parameters for writing QCADesigner layouts.)doc";
 
 static const char *mkd_doc_fiction_qca_io_write_qca_layout_params_create_inter_layer_via_cells = R"doc(Create via cells in between each layer.)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg =
+R"doc(Writes an SVG representation of a cell-level QCA layout into an output
+stream. Both tile- and cell-based layouts are supported. For tile-
+based layouts, QCA layouts of tile size :math:`5 \times 5` are
+supported exclusively so far.
+
+The utilized color scheme is based on the standard scheme used in
+QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout.
+
+Args:
+    lyt: The layout to be written.
+    os: The output stream to write into.
+    ps: Parameters.
+
+Template Args:
+    Lyt: Cell-level QCA layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_2 =
+R"doc(Writes an SVG representation of a cell-level QCA layout into a file.
+Both tile- and cell-based layouts are supported. For tile-based
+layouts, QCA layouts of tile size :math:`5 \times 5` are supported
+exclusively so far.
+
+The utilized color scheme is based on the standard scheme used in
+QCADesigner (https://waluslab.ece.ubc.ca/qcadesigner/).
+
+May throw an `unsupported_cell_type_exception` if it encounters
+unsupported cell types in the layout. May throw an
+`std::ofstream::failure` if it cannot open the file.
+
+Args:
+    lyt: The layout to be written.
+    filename: The file name to create and write into. Should
+              preferably use the `.svg` extension.
+    ps: Parameters.
+
+Template Args:
+    Lyt: Cell-level QCA layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params = R"doc(Parameters for writing SVG QCA layouts.)doc";
+
+static const char *mkd_doc_fiction_qca_io_write_qca_layout_svg_params_simple = R"doc(Limit details to create smaller file sizes.)doc";
 
 static const char *mkd_doc_fiction_qca_mol_qca_technology =
 R"doc(Molecular Quantum-dot Cellular Automata (molQCA) technology
@@ -14351,9 +13618,9 @@ static const char *mkd_doc_fiction_qca_qca_one_library_qca_one_library = R"doc()
 static const char *mkd_doc_fiction_qca_qca_one_library_set_up_gate =
 R"doc(Overrides the corresponding function in gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
+grid into account to choose the correct gate representation for that
+tile. May it be a gate or wires. Rotation and special marks like input
+and output, const cells etc. are computed additionally.
 
 Args:
     lyt: Layout that hosts tile `t`.
@@ -14591,9 +13858,9 @@ R"doc(Maps a gate-level tile to its MolQCA standard-cell implementation.
 
 Overrides the corresponding function in gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
+grid into account to choose the correct gate representation for that
+tile. May it be a gate or wires. Rotation and special marks like input
+and output, const cells etc. are computed additionally.
 
 Args:
     lyt: Layout that hosts tile `t`.
@@ -14674,9 +13941,9 @@ Returns:
 static const char *mkd_doc_fiction_sidb_bestagon_library_set_up_gate =
 R"doc(Overrides the corresponding function in gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
-grid into account to choose the correct fcn_gate representation for
-that tile. May it be a gate or wires. Rotation and special marks like
-input and output, const cells etc. are computed additionally.
+grid into account to choose the correct gate representation for that
+tile. May it be a gate or wires. Rotation and special marks like input
+and output, const cells etc. are computed additionally.
 
 Args:
     lyt: Layout that hosts tile `t`.
@@ -14721,7 +13988,7 @@ static const char *mkd_doc_fiction_sidb_gate_design_exception_which_tile = R"doc
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception_which_truth_table = R"doc(Get the truth table associated with the exception.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates =
+static const char *mkd_doc_fiction_sidb_generators_design_gates =
 R"doc(The *SiDB Gate Designer* designs SiDB gate implementations based on a
 specified Boolean function, a skeleton layout (can hold defects),
 canvas size, and a predetermined number of canvas SiDBs. Three
@@ -14791,21 +14058,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params =
 R"doc(This struct contains parameters and settings to design SiDB gates.
 
 Template Args:
     CellType: Cell type.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_canvas = R"doc(Canvas spanned by the northwest and southeast cell.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_design_mode = R"doc(Gate design mode.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode = R"doc(Selector for the available design approaches.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_design_sidb_gates_mode = R"doc(Selector for the available design approaches.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_design_sidb_gates_mode_AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER = R"doc(Gates are designed by using the *Automatic Exhaustive Gate Designer*.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_design_sidb_gates_mode_PRUNING_ONLY =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_PRUNING_ONLY =
 R"doc(This design approach adopts the three pruning techniques used by
 *QuickCell* to efficiently filter out non-operational layouts. Unlike
 *QuickCell*, the subsequent physical simulation step is skipped to
@@ -14813,52 +14078,54 @@ enhance efficiency. As a result, the operational validity of the final
 layouts cannot be guaranteed, although a substantial portion of them
 are usually operational.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_design_sidb_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_QUICKCELL = R"doc(Gates are designed by using *QuickCell*.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_design_sidb_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM = R"doc(Gate layouts are designed randomly.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(Gate design mode.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of SiDBs placed in the canvas to create a working gate.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_termination_cond =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_operational_params = R"doc(Parameters for the `is_operational` function.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_cond =
 R"doc(The design process is terminated after a valid SiDB gate design is
 found.
 
 Note:
     This parameter has no effect unless the gate design is exhaustive.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_termination_condition =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition =
 R"doc(Selector for the different termination conditions for the SiDB gate
 design process.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_AFTER_FIRST_SOLUTION =
 R"doc(The design process is terminated as soon as the first valid SiDB gate
 design is found.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_termination_condition_ALL_COMBINATIONS_ENUMERATED =
 R"doc(The design process ends after all possible combinations of SiDBs
 within the canvas are enumerated.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats = R"doc(Statistics for the design of SiDB gates.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts = R"doc(The number of all possible layouts.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_number_of_layouts_after_first_pruning =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_first_pruning =
 R"doc(The number of layouts that remain after first pruning (discarding
 layouts with potential positive SiDBs).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_number_of_layouts_after_second_pruning =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_second_pruning =
 R"doc(The number of layouts that remain after second pruning (discarding
 layouts that fail to satisfy the physical model).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_number_of_layouts_after_third_pruning =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_number_of_layouts_after_third_pruning =
 R"doc(The number of layouts that remain after third pruning (discarding
 layouts with unstable I/O signals).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_pruning_total = R"doc(The runtime of the pruning process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_pruning_total = R"doc(The runtime of the pruning process.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_report =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_report =
 R"doc(This function outputs the total time taken for the SiDB gate design
 process to the provided output stream. If no output stream is
 provided, it defaults to standard output (`std::cout`).
@@ -14868,19 +14135,19 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_sim_engine =
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_sim_engine =
 R"doc(The simulation engine to be used for the operational domain
 computation.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_sidb_gates_stats_time_total = R"doc(The total runtime of SiDB gate design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_stats_time_total = R"doc(The total runtime of SiDB gate design process.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_canvas_layouts = R"doc(All Canvas SiDB layout (without I/O pins).)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_all_sidbs_in_canvas = R"doc(All cells within the canvas.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_design_canvas_layout =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_canvas_layout =
 R"doc(This function designs canvas SiDB layouts based on given indices.
 
 Args:
@@ -14892,7 +14159,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_design_sidb_gates_impl =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_design_gates_impl =
 R"doc(This constructor initializes an instance of the *SiDB Gate Designer*
 implementation with the provided skeleton layout and configuration
 parameters.
@@ -14906,7 +14173,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_determine_all_possible_canvas_layouts =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_determine_all_possible_canvas_layouts =
 R"doc(This function calculates all combinations of distributing a given
 number of SiDBs across a specified number of positions in the canvas.
 Each combination is then used to create a gate layout candidate.
@@ -14917,25 +14184,25 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_input_bdl_wires = R"doc(Input BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_first_pruning = R"doc(Number of discarded layouts at first pruning.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_second_pruning = R"doc(Number of discarded layouts at second pruning.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of discarded layouts at third pruning.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_discarded_layouts_at_third_pruning = R"doc(Number of discarded layouts at third pruning.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_input_wires = R"doc(Number of input BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_output_wires = R"doc(Number of output BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_number_of_threads = R"doc(Number of threads to be used for the design process.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_output_bdl_wires = R"doc(Output BDL wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_params = R"doc(Parameters for the *SiDB Gate Designer*.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_run_automatic_exhaustive_gate_designer =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_automatic_exhaustive_gate_designer =
 R"doc(Design gates by using the *Automatic Exhaustive Gate Designer*. This
 algorithm was proposed in \"Minimal Design of SiDB Gates: An Optimal
 Basis for Circuits Based on Silicon Dangling Bonds\" by J. Drewniok,
@@ -14951,7 +14218,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_run_pruning =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_pruning =
 R"doc(This function processes each layout to determine if it represents a
 valid gate implementation or if it can be pruned by using three
 distinct physically-informed pruning steps. It leverages multi-
@@ -14964,7 +14231,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_run_quickcell =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_quickcell =
 R"doc(Design Standard Cells/gates by using the *QuickCell* algorithm.
 
 Returns:
@@ -14972,7 +14239,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_run_random_design =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_run_random_design =
 R"doc(Design gates randomly and in parallel.
 
 This function adds cells randomly to the given skeleton, and
@@ -14984,12 +14251,12 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_skeleton_layout =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout =
 R"doc(The skeleton layout serves as a starting layout to which SiDBs are
 added to create unique SiDB layouts and, if possible, working gates.
 It defines input and output wires.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_skeleton_layout_with_canvas_sidbs =
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_skeleton_layout_with_canvas_sidbs =
 R"doc(This function adds SiDBs (given by indices) to the skeleton layout
 that is returned afterwards.
 
@@ -15003,9 +14270,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_stats = R"doc(The statistics of the gate design.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_detail_design_sidb_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
+static const char *mkd_doc_fiction_sidb_generators_detail_design_gates_impl_truth_table = R"doc(Truth table of the given gate.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts =
 R"doc(Generates multiple random layouts featuring a random arrangement of
@@ -15252,30 +14519,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_any_to_string =
-R"doc(Converts an `std::any` to a string if it contains an alpha-numerical
-standard data type.
-
-Args:
-    value: The value to convert.
-
-Returns:
-    The string representation of the value.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sidb_surface_defects_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sidb_surface_defects_impl_defect_matrix = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sidb_surface_defects_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sidb_surface_defects_impl_max_cell_pos = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sidb_surface_defects_impl_read_sidb_surface_defects_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sidb_surface_defects_impl_run = R"doc()doc";
-
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_dimer_to_cell =
@@ -15383,27 +14626,65 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sweep_parameter_to_string =
-R"doc(Converts a sweep parameter to a string representation. This is used to
-write the parameter name to the CSV file.
+static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_defect_matrix = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_lyt = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_max_cell_pos = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_read_surface_defects_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_background_color = R"doc(The color mode for the SVG output.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_generate_lattice_point =
+R"doc(Generates an SVG string representing an H-Si lattice point.
 
 Args:
-    param: The sweep parameter to be converted.
+    x: The x-coordinate of the lattice point.
+    y: The y-coordinate of the lattice point.
+    fill_color: The fill color of the lattice point.
 
 Returns:
-    The string representation of the sweep parameter.
+    The SVG string representing the lattice point.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_location_and_ground_state_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_generate_sidb =
+R"doc(Generates an SVG string representing an SiDB.
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_location_and_ground_state_impl_os = R"doc(Output stream used for writing the simulation sim_result.)doc";
+Args:
+    x: The x-coordinate of the SiDB.
+    y: The y-coordinate of the SiDB.
+    charge_state: The charge state of the SiDB.
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_location_and_ground_state_impl_run = R"doc()doc";
+Returns:
+    The SVG string representing the SiDB.
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_location_and_ground_state_impl_sim_result = R"doc(Simulation results.)doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_generate_svg = R"doc(Generates the SVG layout with both H-Si lattice points and SiDBs.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_lyt = R"doc(The SiDB layout to be written.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_os = R"doc(The output stream to write into.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_ps = R"doc(Parameters for the SVG generation.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_run = R"doc(Runs the SVG generation process.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_set_colors = R"doc(Sets the colors based on the color mode.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_sidb_color = R"doc(The color of the SiDB without charge information.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_sidb_edge_color = R"doc(The edge color of the SiDB without charge information.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_write_sidb_layout_svg_impl = R"doc(Constructor.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl = R"doc()doc";
 
@@ -15421,52 +14702,15 @@ static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_run = R"
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_write_sqd_layout_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_obtain_ordered_cells =
-R"doc(Obtains all cells in the surfaces and orders them by their position to
-achieve a reproducible output.
-
-Returns:
-    An ordering of cells.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_ordered_cells = R"doc(A reproducible ordering of cells in the surfaces.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_os = R"doc(The output stream to write to.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_sim_result = R"doc(The simulation sim_result to write.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_write_electron_distributions = R"doc(Writes all charge distributions to the output stream in XML format.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_write_engine_info = R"doc(Writes the engine information to the output stream in XML format.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_write_physical_locations =
-R"doc(Writes the physical locations of all SiDBs to the output stream in XML
-format.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_write_simulation_parameters =
-R"doc(Writes both the `simulation_parameters` as well as the
-`additional_simulation_parameters` to the output stream in XML format.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_sim_result_impl_write_sqd_sim_result_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_missing_sidb_position_exception =
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
 parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_sidb_position_exception_line = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_line = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_sidb_position_exception_missing_sidb_position_exception = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_missing_position_exception = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_missing_sidb_position_exception_where = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_missing_position_exception_where = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_sqd_layout =
 R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
@@ -15619,212 +14863,65 @@ static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_un
 
 static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_defect_influence_domain =
-R"doc(Writes a CSV representation of an defect influence domain to the
-specified output stream. The data are written as rows, each
-corresponding to one set of simulation parameters and their
-corresponding influence status.
-
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-Influence STATUS ... subsequent rows for each set of simulation
-parameters.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg =
+R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
+output stream.
 
 Args:
-    defect_infdom: The defect influence domain to be written. It
-                   contains a mapping from defect positions to their
-                   influence status.
-    os: The output stream where the CSV representation of the defect
-        influence domain is written to.
-    params: The parameters used for writing, including the influential
-            and non-influential tags. Defaults to an empty
-            `write_defect_influence_domain_params` object, which
-            provides standard tags.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_defect_influence_domain_2 =
-R"doc(Writes a CSV representation of an defect influence domain to the
-specified file. The data are written as rows, each corresponding to
-one set of simulation parameters and their corresponding influence
-status.
-
-The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
-Influence STATUS ... subsequent rows for each set of simulation
-parameters.
-
-Args:
-    defect_infdom: The defect influence domain to be written. It
-                   contains a mapping from defect positions to their
-                   influence status.
-    filename: The filename where the CSV representation of the defect
-              influence domain is written to.
-    params: The parameters used for writing, including the influential
-            and non-influential tags. Defaults to an empty
-            `write_defect_influence_domain_params` object, which
-            provides standard tags.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_defect_influence_domain_params = R"doc(Parameters for writing a defect influence domain to a CSV file.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_defect_influence_domain_params_influential_tag = R"doc(The tag used to represent the influential value of a defect position.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_defect_influence_domain_params_non_influential_tag =
-R"doc(The tag used to represent the non-influential value of a defect
-position.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_location_and_ground_state =
-R"doc(Writes the coordinates of all SiDBs of a layout together with the
-charge distribution of the ground state(s) to a file.
-
-This overload uses an output stream to write into.
-
-Args:
-    sim_result: The simulation sim_result to write.
+    lyt: The layout to be written.
     os: The output stream to write into.
+    ps: Parameters.
 
 Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
+    Lyt: SiDB cell-level layout type.
+
+Note:
+    SiDB defects are not supported yet.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_location_and_ground_state_2 =
-R"doc(Writes the coordinates of all SiDBs of a layout together with the
-charge distribution of the ground state(s) to a file.
-
-This overload uses a file name to create and write into.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_2 =
+R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into a
+file.
 
 Args:
+    lyt: The layout to be written.
     filename: The file name to create and write into.
+    ps: Parameters.
 
 Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-    sim_result: The simulation sim_result to write.
+    Lyt: SiDB cell-level layout type.
+
+Note:
+    SiDB defects are not supported yet.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain =
-R"doc( Writes a CSV representation of an operational domain to the specified
- output stream. The data are written as rows, each corresponding to
- one set of simulation parameters and their corresponding operational
- status.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params = R"doc(Parameters for writing SiDB layouts to SVG format.)doc";
 
- The output CSV format is e.g. as follows:
-```
-embed:rst
-.. code-block:: RST
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_color_background = R"doc(The color mode of the background for the SVG output.)doc";
 
-epsilon_r, lambda_tf, operational status
-0.0, 0.0, 0
-0.1, 0.0, 1
-... subsequent rows for each set of simulation parameters
-```
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_color_mode = R"doc(Enumeration to specify the color mode for the SVG output.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_color_mode_DARK = R"doc(Dark mode.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_color_mode_LIGHT = R"doc(Light mode.)doc";
 
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_lattice_mode = R"doc(The lattice mode of the SiDB layout.)doc";
 
- The operational status is a binary value represented by specified
- tags in `params` indicating whether the simulation parameters are
- within the operational domain or not.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_lattice_point_size = R"doc(Size of the H-Si lattice points in SVG units.)doc";
 
-Args:
-    opdom: The operational domain to be written. It represents a
-           mapping between sets of simulation parameters (one to three
-           sweep parameters, written as the X, Y, and Z columns) and a
-           tuple containing detailed information about the SiDB layout
-           associated with those simulation parameters.
-    os: The output stream where the CSV representation of the
-        operational domain is written to.
-    params: The parameters used for writing, including the operational
-            and non-operational tags. Defaults to an empty
-            `write_operational_domain_params` object, which provides
-            standard tags.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_border_width = R"doc(Border width of the SiDB.)doc";
 
-Template Args:
-    OpDomain: The type of the operational domain.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode =
+R"doc(Enumeration to specify if the H-Si lattice is plotted in addition to
+SiDBs.)doc";
 
-Raises:
-    std::invalid_argument: if the number of dimensions in the
-                           operational domain is 0 or greater than 3.
-                           Three is the number of enumerators of
-                           `sweep_parameter`, so a fourth dimension
-                           could only repeat one of them.
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_HIDE_LATTICE = R"doc(Lattice is hidden. Only SiDBs are shown.)doc";
 
-)doc";
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_lattice_mode_SHOW_LATTICE = R"doc(Lattice is shown.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_2 =
-R"doc( Writes a CSV representation of an operational domain to the specified
- file. The data are written as rows, each corresponding to one set of
- simulation parameters and their corresponding operational status.
-
- The output CSV format is e.g. as follows:
-```
-embed:rst
-.. code-block:: RST
-
-epsilon_r, lambda_tf, operational status
-0.0, 0.0, 0
-0.1, 0.0, 1
-... subsequent rows for each set of simulation parameters
-```
-
-
-
-
- The operational status is a binary value represented by specified
- tags in `params` indicating whether the simulation parameters are
- within the operational domain or not.
-
-Args:
-    opdom: The operational domain to be written. It represents a
-           mapping between sets of simulation parameters (one to three
-           sweep parameters, written as the X, Y, and Z columns) and a
-           tuple containing detailed information about the SiDB layout
-           associated with those simulation parameters.
-    filename: The filename where the CSV representation of the
-              operational domain is written to.
-    params: The parameters used for writing, including the operational
-            and non-operational tags. Defaults to an empty
-            `write_operational_domain_params` object, which provides
-            standard tags.
-
-Template Args:
-    OpDomain: The type of the operational domain.
-
-Raises:
-    std::ofstream::failure: if the file could not be opened.
-    std::invalid_argument: if the number of dimensions in the
-                           operational domain is 0 or greater than 3.
-                           Three is the number of enumerators of
-                           `sweep_parameter`, so a fourth dimension
-                           could only repeat one of them.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params = R"doc(Parameters for writing an operational domain to a CSV file.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params_non_operational_tag =
-R"doc(The tag used to represent the non-operational value of a parameter
-set.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params_operational_tag = R"doc(The tag used to represent the operational value of a parameter set.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params_sample_writing_mode = R"doc(Mode selector for writing samples to file.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params_sample_writing_mode_ALL_SAMPLES =
-R"doc(Write all samples, including non-operational ones. This may lead to
-large file sizes.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params_sample_writing_mode_OPERATIONAL_ONLY =
-R"doc(Write operational samples only. This can drastically reduce file size
-and help with visibility in 3D plots.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_operational_domain_params_writing_mode =
-R"doc(Whether to write non-operational samples to the CSV file. If set to
-`OPERATIONAL_ONLY`, operational samples are written exclusively. This
-yields a significantly smaller CSV file. It is recommended to set this
-option for 3D plots because the non-operational samples would shadow
-the operational samples anyway.)doc";
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sqd_layout =
 R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
@@ -15865,72 +14962,6 @@ Template Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_sqd_sim_result =
-R"doc(Writes an SiDB simulation sim_result to an XML file that is used by
-SiQAD (https://github.com/siqad/siqad), a physical simulator for the
-SiDB technology platform.
-
-This overload uses an output stream to write into.
-
-Args:
-    sim_result: The simulation sim_result to write.
-    os: The output stream to write into.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_sqd_sim_result_2 =
-R"doc(Writes an SiDB simulation sim_result to an XML file that is used by
-SiQAD (https://github.com/siqad/siqad), a physical simulator for the
-SiDB technology platform.
-
-This overload uses a file name to create and write into.
-
-Args:
-    sim_result: The simulation sim_result to write.
-    filename: The file name to create and write into. Should
-              preferably use the `.xml` extension.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node_binary_cluster_hierarchy_node = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node_c = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_model_binary_cluster_hierarchy_node_sub = R"doc(The two children of the node.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_bound_direction =
-R"doc(The electrostatic potential bounds required for the *Ground State
-Space* algorithm. As the domain in which our potential bounds live are
-simply the real numbers, we may think of the lower bound and upper
-bound domains to be separate partial order structures on the real
-number line, inverse to each other. The *Ground State Space* algorithm
-requires the properties of a lower semi-lattice for these domains, ie.
-all finite meets must exist. This is implemented for the lower and
-upper bound respectively simply by taking a minimum or a maximum. One
-may think of meets as follows, which is very relevant to intention of
-their application: a meet, or greatest lower bound, is the *maximal
-information* common to a set (of potential bounds). This semantic
-operation is essential to the *Ground State Space* algorithm, which
-thus envelops without loss of accuracy.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_bound_direction_LOWER =
-R"doc(Lower bounds live in the set :math:`(-\infty\f, \infty]` and are
-ordered by >.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_bound_direction_UPPER =
-R"doc(Upper bounds live in the set :math:`[-\infty, \infty)` and are ordered
-by <.)doc";
-
 static const char *mkd_doc_fiction_sidb_model_charge_configuration_to_string =
 R"doc(Converts a vector of charge states to a string representation
 (`"-101..."`).
@@ -15942,26 +14973,6 @@ Returns:
     A string representation of the charge states.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_model_charge_space_composition =
-R"doc(A charge space composition holds a number of projector states of
-sibling clusters. Summing the multiset charge configuration associated
-with each, we obtain an element of the charge space of their parent.
-Additionally, we have a store for the bounds on the partial potential
-sum local to each SiDB contained by the parent, i.e., partial in the
-sense that SiDBs not contained by the parent are not taken into
-account. The potential bounds for each SiDB correspond to the meet on
-the potential bounds for each (sub-)composition of the respective
-cluster charge states associated with the multiset charge
-configuration of each projector state in this composition of siblings.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_charge_space_composition_pot_bounds =
-R"doc(Flattened (hierarchical) potential bounds specific to this
-composition.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_charge_space_composition_proj_states =
-R"doc(Projector states associated with charge space elements that make up
-the composition.)doc";
 
 static const char *mkd_doc_fiction_sidb_model_charge_state = R"doc(Charge states of SiDBs.)doc";
 
@@ -15997,397 +15008,6 @@ Returns:
     associated with base 2 simulation.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster =
-R"doc(Forward declaration of the SiDB cluster hierarchy required for the
-mutual recursive structure in this file. Here we define a pointer to a
-SiDB cluster to be a shared pointer, which enables us to also have
-pointers to parents.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_2 =
-R"doc(Forward declaration of the SiDB cluster hierarchy required for the
-mutual recursive structure in this file. Here we define a pointer to a
-SiDB cluster to be a shared pointer, which enables us to also have
-pointers to parents.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_space = R"doc(The charge state space of the cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state =
-R"doc(A cluster charge state is a multiset charge configuration. We may
-compress it into a 64 bit unsigned integer by putting the number of
-negative and positive charges in the upper and lower 32 bits
-respectively. The number of neutral charges may then be inferred for a
-given cluster by considering its size. Cluster charge states are the
-crucial objects of the state spaces, called charge spaces, since they
-not only hold information of the multiset charge configuration, but
-also the set of compositions, each of which compose into the current
-cluster charge state.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_add_charge =
-R"doc(Modifier of the cluster charge state, adding a single charge state.
-
-Args:
-    cs: The charge state to add.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_cluster_charge_state =
-R"doc(Default constructor, creates a cluster charge state without any
-negative and positive charges.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_cluster_charge_state_2 =
-R"doc(Constructor for a charge space element of a singleton cluster. It has
-a single composition, which is a cluster state of the singleton
-cluster and the singleton multiset charge configuration itself.
-
-Args:
-    singleton: Singleton cluster to put in the compositions of this
-               cluster charge state.
-    cs: Charge state to lift to a singleton multiset charge
-        configuration.
-    loc_ext_pot: The local external potential at the SiDB in the
-                 singleton cluster. Specifically, this is the sum of
-                 the local defect potential and the local external
-                 potential.
-    total_num_sidbs: The total number of SiDBs in the layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_cluster_charge_state_3 =
-R"doc(Constructor for cluster charge state given a multiset charge
-configuration represented in its compressed form. It allows the
-compressed form to be lifted to the full type to facilitate equality
-checks.
-
-Args:
-    m: The multiset charge configuration to create a cluster charge
-       state of.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_cluster_charge_state_4 =
-R"doc(Constructor of a cluster charge state allowing initializer list
-construction.
-
-Args:
-    charge_states: initializer list of charge states to form into a
-                   cluster charge state.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_compositions = R"doc(Stored compositions of this cluster charge state.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_neg_count =
-R"doc(Number of negative charges in the cluster charge state (32 available
-bits).)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_operator_call =
-R"doc(Defined a hashing of a cluster charge state. Since we need only
-separate cluster charge states by their compressed form, we may
-compute a hash over this for optimal performance when used in a hash
-set.
-
-Args:
-    m: Cluster charge state to compute the hash of.
-
-Returns:
-    The hash of the given cluster charge state.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_operator_eq =
-R"doc(Defines the equality operation of cluster charge states, which
-disregards the compositions.
-
-Args:
-    other: Other cluster charge state to test for equality with the
-           current.
-
-Returns:
-    `true` if and only if the compressed forms are equal.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_operator_iadd =
-R"doc(Defines addition of cluster charge states through multiset
-concatenation. Disregards compositions.
-
-Args:
-    other: Other cluster charge state to concatenate with the current.
-
-Returns:
-    The concatenated cluster charge state, which is the modified
-    version of the current.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_operator_isub =
-R"doc(Defines subtraction of cluster charge states through multiset
-difference. Disregards compositions.
-
-Args:
-    other: Other cluster charge state to take the difference of w.r.t.
-           with the current.
-
-Returns:
-    The cluster charge state that is their difference, which is the
-    modified version of the current.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_operator_unsigned_long =
-R"doc(Explicit instructions for the compiler on how to cast a cluster charge
-state to an 64-bit unsigned integer.
-
-Returns:
-    The 64-bit unsigned integer representing the compressed form of
-    the cluster charge state.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_charge_state_pos_count =
-R"doc(Number of positive charges in the cluster charge state (32 available
-bits).)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_children = R"doc(The set of children of a cluster is a clustering.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_cluster =
-R"doc(SiDB cluster hierarchy constructor.
-
-Args:
-    c: Set of SiDB indices for the cluster to contain.
-    other_c: Set of SiDB indices in the layout that the cluster will
-             not contain.
-    x: A set of cluster hierarchies to set as the children of this
-       cluster.
-    unique_id: The unsigned integer to identify the cluster hierarchy
-               uniquely with. For the case of a singleton cluster, the
-               unique identifier is set to be the index of the single
-               SiDB it contains.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_external_sidbs = R"doc(The SiDBs in the layout that are not contained by the cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_get_parent =
-R"doc(This function returns a shared pointer to the parent of this cluster.
-
-Returns:
-    A shared pointer to the parent of this cluster
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy =
-R"doc(This function performs the ALGLIB agglomerative clustering algorithm
-for a given SiDB layout. By default, the cluster are created by a
-minimal positional variance heuristic, also known as Ward's method.
-
-Args:
-    lyt: The layout to create a cluster hierarchy of.
-    linkage_method: The agglomerative clustering linking heuristic
-                    that is used by ALGLIB.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy_linkage_method =
-R"doc(An enumeration of cluster linkage methods. The chosen method defines
-how clusters are merged in the agglomerative clustering procedure, by,
-e.g., defining an inter-cluster distance to minimize for the cluster
-to merge. For more information, visit: https://docs.tibco.com/pub/spot
-fire/6.5.1/doc/html/hc/hc_clustering_methods_overview.htm.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy_linkage_method_COMPLETE =
-R"doc(Complete linkage takes the maximum distance between nodes in a
-cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy_linkage_method_MINIMUM_VARIANCE =
-R"doc(Known as Ward's method, this type of linkage merges clusters based on
-a minimum variance measure.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy_linkage_method_SINGLE = R"doc(Single linkage takes the minimum distance between nodes in a cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy_linkage_method_UNWEIGHTED_AVERAGE =
-R"doc(Unweighted average linkage takes the average distance between nodes in
-a cluster, disregarding the number of elements in a node.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_hierarchy_linkage_method_WEIGHTED_AVERAGE =
-R"doc(Weighted average linkage takes the average distance between nodes in a
-cluster, weighing in the number of elements in a node.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_initialize_singleton_cluster_charge_space =
-R"doc(This function initializes the charge space of a singleton cluster
-corresponding with the given simulation base, and sets the initial
-bounds on the potential received from outside the cluster as the local
-potential bounds. The local potential bounds do not include the local
-external potential at the SiDB in the singleton, as this is passed
-separately.
-
-Args:
-    loc_pot_min: The minimum local potential for the SiDB in the
-                 singleton cluster.
-    loc_pot_max: The maximum local potential for the SiDB in the
-                 singleton cluster.
-    loc_ext_pot: The local external potential at the SiDB in the
-                 singleton cluster. Specifically, this is the sum of
-                 the local defect potential and the local external
-                 potential.
-    base: The simulation base.
-    self_ptr: Shared pointer to itself.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_num_sidbs =
-R"doc(Function to return the number of SiDBs contained in the cluster.
-
-Returns:
-    The number of SiDBs contained in the cluster.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_operator_eq =
-R"doc(Equality operation on cluster hierarchies. Checks the respective
-unique identifiers for equality.
-
-Args:
-    other: Cluster (hierarchy) to compare to.
-
-Returns:
-    `true` if and only if the unique identifiers match.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_parent =
-R"doc(Every cluster carries a pointer to its parent. For the top cluster,
-this is `nullptr`.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_pot_projs = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_pot_projs_complete_store = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_projector_state =
-R"doc(A projector state pairs the potential projecting cluster with the
-associated multiset charge configuration.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_projector_state_cluster = R"doc(Projector cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_projector_state_get_count =
-R"doc(Getter for the number of a given charge state in the multiset
-configuration.
-
-Template Args:
-    cs: Charge state to count the number of occurrences in the
-        projector state of.
-
-Returns:
-    The number of occurrences of the given charge state in the
-    multiset charge configuration. For a neutral charge, the number of
-    occurrences is inferred by considering the size of the cluster in
-    the projector state.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_projector_state_multiset_conf =
-R"doc(Multiset charge configuration. It is an element of the charge space of
-the projector cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_ptr_hash =
-R"doc(This struct defines a hashing of shared pointers to clusters, used to
-facilitate quick access in a clustering.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_ptr_hash_operator_call =
-R"doc(The hashing operation is defined.
-
-Args:
-    c: Shared pointer to a cluster to take the has of.
-
-Returns:
-    The hash computed over the unique id associated with the cluster.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_received_ext_pot_bounds =
-R"doc(The bounds on the electrostatic potential sum of SiDBs external to
-this cluster, local to an SiDB in the cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_receptor_state =
-R"doc(A receptor state pairs the potential receiving cluster with the
-identifier of the SiDB.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_receptor_state_cluster = R"doc(Receptor cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_receptor_state_sidb_ix = R"doc(SiDB index. It is contained in the receptor cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_sidbs = R"doc(The SiDBs contained by the cluster.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_cluster_uid = R"doc(Unique identifier. Equal to the SiDB index for singleton clusters.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state =
-R"doc(A clustering state is very similar to a cluster state composition,
-though it uses unique pointers to the cluster states that may be
-moved. Thereby, this is the essential type of the dynamic objects in
-*ClusterComplete*'s operation, which always represent information of
-the complete layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_clustering_state =
-R"doc(Default constructor.
-
-Args:
-    num_sidbs: Number of SiDBs in the layout that the clustering state
-               should consider.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_clustering_state_2 =
-R"doc(Copy constructor.
-
-Args:
-    other: Other clustering state to copy.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_clustering_state_3 =
-R"doc(Move constructor.
-
-Args:
-    other: Other clustering state to move.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_operator_assign =
-R"doc(Copy assignment operator.
-
-Assigns the contents of another `clustering_state` instance to this
-instance. Performs a deep copy of `proj_states` and a complete copy of
-`pot_bounds`.
-
-Args:
-    other: The `clustering_state` instance to copy from.
-
-Returns:
-    A reference to this `clustering_state` instance after assignment.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_operator_assign_2 =
-R"doc(Move assignment operator.
-
-Args:
-    other: Other clustering state to move.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_pot_bounds =
-R"doc(Flattened (hierarchical) potential bounds specific to this clustering
-state.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_clustering_state_proj_states =
-R"doc(Projector states associated with charge space elements that make up
-the clustering state.)doc";
 
 static const char *mkd_doc_fiction_sidb_model_defect =
 R"doc(In accordance with the paper mentioned above, the `defect` struct is
@@ -16490,58 +15110,6 @@ static const char *mkd_doc_fiction_sidb_model_defect_type_THREE_BY_ONE = R"doc(A
 
 static const char *mkd_doc_fiction_sidb_model_defect_type_UNKNOWN = R"doc(Unknown defect.)doc";
 
-static const char *mkd_doc_fiction_sidb_model_get_cluster_size =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_get_cluster_size_2 =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_get_projector_state_compositions =
-R"doc(This function is used to obtain the cluster charge state compositions
-of the multiset charge configuration in a projector state. The
-corresponding charge space element of the projector is found and its
-compositions are returned.
-
-Args:
-    pst: Projector state of which the corresponding compositions are
-         requested.
-
-Returns:
-    The compositions associated with the multiset charge configuration
-    of the projecting cluster.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_get_singleton_sidb_ix =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_get_singleton_sidb_ix_2 =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_get_unique_cluster_id =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_get_unique_cluster_id_2 =
-R"doc(Forward declaration. Required for compilation due to the mutually
-recursive structure in this file.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_model_is_charged_defect_type =
 R"doc(Checks whether the given defect type is a charged one. `DB`,
 `SI_VACANCY` and `ARSENIC` types are charged. Those charged defects
@@ -16638,320 +15206,29 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_model_potential_bound_top =
-R"doc(The respective *top* elements of the lower semi-lattices in which our
-potential bounds live, ie., the respective elements of *most*
-information. This means that any meet with a top element (weakly)
-reduces the information, and thus any meet computed in iteration
-through binary application may start out with this element.
+static const char *mkd_doc_fiction_sidb_model_potential_to_distance_conversion =
+R"doc(The electrostatic potential on hydrogen-passivated silicon is
+typically modeled using a screened Coulomb potential. This
+electrostatic potential is commonly employed to determine the
+electrostatic potential for a given distance (between SiDB and point
+under consideration) and given physical parameters. However, the
+function provided here serves the inverse purpose by calculating the
+distance for a given potential and given physical parameters.
 
-Template Args:
-    bound: Potential bound domain to return the element of most
-           information of.
+Args:
+    params: The physical parameters for a given hydrogen-passivated
+            silicon surface.
+    potential: The electrostatic potential (unit: V) to be converted
+               to a distance.
+    precision: The precision level for the conversion, specifying the
+               number of decimal places.
 
 Returns:
-    The element of most information respective to the potential bound
-    domain.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store =
-R"doc(This defines a store in which the bounds on the local electrostatic
-potential for an SiDB (index) may be stored. For the *Ground State
-Space* algorithm, this is used to keep track of the respective lower
-and upper bounds on the partial sum of the potential projected from
-SiDBs in a subhierarchy that is local to SiDBs that are also in the
-subhierarchy. During *ClusterComplete* simulation, the stored
-potential bounds represent information of the complete hierarchy, thus
-all SiDB interactions.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_get =
-R"doc(Getter for a (partial) potential sum bound local to an SiDB.
-
-Args:
-    sidb_ix: SiDB (index) to obtain the potential bound of.
-
-Template Args:
-    bound: The potential bound to obtain.
-
-Returns:
-    The potential bound for this SiDB.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_initialize_complete_potential_bounds =
-R"doc(Initialize potential bounds for the given number of SiDBs (applicable
-to a complete potential bounds store only).
-
-Args:
-    num_sidbs: The number of SiDBs in the layout that is simulated.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_num_sidbs =
-R"doc(Getter for the size of the potential bounds store, i.e., the number of
-SiDBs considered in this store.
-
-Returns:
-    The size of the potential bounds store.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_operator_iadd =
-R"doc(Add a complete potential bound store to this (also a complete
-potential bound store) through pointwise updates.
-
-Args:
-    other: Other complete potential bound store.
-
-Returns:
-    Reference to this.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_operator_isub =
-R"doc(Subtract a complete potential bound store to this (also a complete
-potential bound store) through pointwise updates, i.e., updates for
-each SiDB and for each bound (LB, UB).
-
-Args:
-    other: Other complete potential bound store.
-
-Returns:
-    Reference to this.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_set =
-R"doc(Setter for a (partial) potential sum bound local to an SiDB.
-
-Args:
-    sidb_ix: SiDB (index) to set the potential bound for.
-    bound_value: New bound to set.
-
-Template Args:
-    bound: The potential bound to obtain.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_set_2 =
-R"doc(Setter for (partial) potential sum bounds local to an SiDB.
-
-Args:
-    sidb_ix: SiDB (index) to set the potential bounds for.
-    min: New lower bound to set.
-    max: New upper bound to set.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_store =
-R"doc(Potential bounds are a map from SiDB indices to two values
-respectively representing the lower and upper bound.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_update =
-R"doc(Relative setter for a (partial) potential sum bound local to an SiDB.
-
-Args:
-    sidb_ix: SiDB (index) to update the potential bound of.
-    bound_diff: Bound difference to apply.
-
-Template Args:
-    bound: The potential bound to update.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_bounds_store_update_2 =
-R"doc(Relative setter for (partial) potential sum bounds local to an SiDB.
-
-Args:
-    sidb_ix: SiDB (index) to update the potential bounds of.
-    min_diff: Difference in lower bound potential to apply.
-    max_diff: Difference in upper bound potential to apply.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection =
-R"doc(This struct defines the type of an electrostatic potential projection,
-which pairs a multiset charge configuration with the potential value
-(in eV) associated with the potential projection in the given context.
-The context is given by potential projection stores in the decorated
-cluster hierarchies, which links the projecting cluster with SiDB that
-receives this potential projection.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_multiset = R"doc(Associated multiset charge configuration.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_operator_iadd =
-R"doc(Defines summation of potential projections through addition of the
-potential values and concatenation of the associated multiset charge
-configurations. The latter may simply be implemented by addition of
-the compressed forms.
-
-Args:
-    other: Other potential projection to sum with the current.
-
-Returns:
-    The current potential projection to which the other potential
-    projection is now added.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_operator_lt =
-R"doc(Defines an ordering of potential projections through comparison of the
-potential value. To prevent potential projections of equal potential
-value but different associated multiset charge configurations to be
-regarded as equal, a comparison of the latter is used as a "fail-
-safe".
-
-Args:
-    other: Other potential projection to compare with the current.
-
-Returns:
-    `true` if and only if the potential value of the current is lower
-    than that of `other`, or if the potential values are equal and the
-    compressed form of the multiset charge configuration is strictly
-    less than that of `other`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order =
-R"doc(This struct defines the type of potential projection order, along with
-getter and setter operations. Essentially, a potential projection
-order is an ordered collection of potential projections, which allow
-rapid access and modifications of the potential projection bounds by
-relying on the ordering defined on potential projections, and
-canonical operations on ordered set containers. In the decorated
-cluster hierarchy, each cluster has a potential projection order onto
-each SiDB in the layout from which the hierarchy was created.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_add =
-R"doc(Adds a potential projection to the ordering, automatically placing it
-appropriately.
-
-Args:
-    pp: Potential projection to add.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_get_bound =
-R"doc(A getter for a potential projection bound, which is the first or last
-item in the ordered set.
-
-Template Args:
-    bound: The bound to obtain.
-
-Returns:
-    The potential projection that forms the requested bound on the
-    potential projection order.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_get_next_bound =
-R"doc(A getter for the next potential projection bound, which is the first
-potential projection when traversing the ordering either from below or
-from above, that differs in its multiset charge configuration from the
-relevant potential projection bound.
-
-Template Args:
-    bound: The bound to obtain.
-
-Returns:
-    The potential projection that would be the requested bound on the
-    potential projection order if the current relevant bound would be
-    erased.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_get_pot_proj_for_m_conf =
-R"doc(A getter for the potential projection bound given a multiset charge
-configuration specification, which is the first potential projection
-in the ordering when traversing either from below or from above, that
-matches its multiset charge configuration to the argument.
-
-Args:
-    m_conf: The multiset charge configuration to match.
-
-Template Args:
-    bound: The bound to obtain.
-
-Returns:
-    The potential projection that forms the requested bound on the
-    subset of the potential projection order of potential projections
-    that match their multiset charge configuration to the argument.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_order = R"doc(The potential projection ordering.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_potential_projection_order = R"doc(Default constructor, creating the empty potential projection order.)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_potential_projection_order_2 =
-R"doc(Constructor for a potential projection from a singleton cluster onto
-the SiDB contained in it.
-
-Args:
-    loc_ext_pot: The local external potential at the SiDB in the
-                 singleton cluster. Specifically, this is the sum of
-                 the local defect potential and the local external
-                 potential.
-    base: The simulation base. This defines whether positive charges
-          are considered.
-    self_projection: Separates the constructor type from inter-SiDB
-                     potential projections.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_potential_projection_order_3 =
-R"doc(Constructor for a potential projection from a singleton cluster onto
-an SiDB.
-
-Args:
-    inter_sidb_pot: The chargeless potential between the SiDB in the
-                    singleton cluster and the one projected onto, as
-                    found in the potential matrix in an associated
-                    `charge_distribution_surface` object.
-    base: The simulation base. This defines whether positive charges
-          are considered.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_order_remove_m_conf =
-R"doc(Removes all occurrences of potential projections that match their
-multiset charge configuration to the argument.
-
-Args:
-    m_conf: The multiset charge configuration of which all occurrences
-            must be removed.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_pot_val = R"doc(Potential projection value (unit: eV).)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_potential_projection =
-R"doc(Default constructor, used as a starting point for an accumulation of
-potential projections.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_potential_projection_2 =
-R"doc(Trivial copy constructor.
-
-Args:
-    pot: Potential value to copy.
-    mul: Multiset charge configuration to copy.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_potential_projection_potential_projection_3 =
-R"doc(Constructor for a potential projection from a singleton cluster,
-thereby lifting a value in the potential matrix to a potential
-projection.
-
-Args:
-    inter_sidb_pot: Potential value of which the absolute value may be
-                    found in the potential matrix in an associated
-                    `charge_distribution_surface` object.
-    cs: Charge state associated with the singleton cluster projector
-        for this potential projection.
+    The distance (unit: nm) corresponding to the given electrostatic
+    potential.
+
+Note:
+    Runtime depends exponentially on the provided precision.
 
 )doc";
 
@@ -17006,68 +15283,6 @@ Args:
     screening_distance: also known as "Thomas-Fermi screening" and it
                         describes the electric field screening due to
                         free charges in nm.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_singleton_multiset_conf_to_charge_state =
-R"doc(Function to convert a singleton cluster charge state in its compressed
-form to a charge state.
-
-Args:
-    m: A singleton multiset charge configuration.
-
-Returns:
-    The charge state associated with the sole element contained in the
-    given multiset charge configuration.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_take_meet_of_potential_bounds =
-R"doc(This function computes a binary meet, overwriting the first argument
-with the result. It takes the minimum in case of a lower bound, and a
-maximum in case of an upper bound, each corresponding to the minimal
-information common to the arguments.
-
-Args:
-    a: First potential bound which is overwritten with the result of
-       the meet.
-    b: Second potential bound.
-
-Template Args:
-    bound: The potential bound domain which defines the implementation
-           of the meet.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_to_sidb_cluster =
-R"doc(This function initiates the recursive procedure of converting a binary
-cluster hierarchy to our bespoke version.
-
-Args:
-    n: A node from a binary cluster hierarchy, as for instance
-       returned by parsing ALGLIB's result.
-
-Returns:
-    A uniquely identified node in a decorated cluster hierarchy that
-    follows the "general tree" structure.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_to_unique_sidb_cluster =
-R"doc(This recursive function is used to convert a binary cluster hierarchy,
-as for instance returned by `cluster_hierarchy` function that uses
-ALGLIB's `clusterizer`. The returned structure includes parent
-pointers.
-
-Args:
-    n: A node from a binary cluster hierarchy, as for instance
-       returned by parsing ALGLIB's result.
-    uid: Variable reference which is updated in each execution to
-         ensure uniqueness.
-
-Returns:
-    A uniquely identified node in a decorated cluster hierarchy that
-    follows the "general tree" structure.
 
 )doc";
 
@@ -17151,7 +15366,7 @@ Template Args:
     GateLyt: The gate-level layout.
 
 Returns:
-    An `fcn_gate` object.
+    An `gate` object.
 
 )doc";
 
@@ -17226,8 +15441,8 @@ static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_params_using_pre
 static const char *mkd_doc_fiction_sidb_on_the_fly_gate_library_set_up_gate =
 R"doc(Overrides the corresponding function in gate_library. Given a tile
 `t`, this function takes all necessary information from the stored
-grid into account to design the correct fcn_gate representation for
-that tile. In case there is no possible SiDB design, the blacklist is
+grid into account to design the correct gate representation for that
+tile. In case there is no possible SiDB design, the blacklist is
 updated and an error fcn gate is returned.
 
 Args:
@@ -17459,6 +15674,20 @@ Template Args:
 
 Returns:
     Energy distribution.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_can_positive_charges_occur =
+R"doc(This algorithm determines if positively charged SiDBs can occur in a
+given SiDB cell-level layout due to strong electrostatic interaction.
+
+Args:
+    lyt: The layout to be analyzed.
+    sim_params: Physical parameters used to determine whether
+                positively charged SiDBs can occur.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
 
 )doc";
 
@@ -17975,6 +16204,43 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_minimum_energy =
+R"doc(Computes the minimum energy of a range of
+`charge_distribution_surface` objects. If the range is empty, infinity
+is returned to indicate no valid energy value exists.
+
+Args:
+    first: Begin of the range to examine.
+    last: End of the range to examine.
+
+Template Args:
+    InputIt: Must meet the requirements of `LegacyInputIterator`.
+
+Returns:
+    Value of the minimum energy found in the input range (unit: eV),
+    or `std::numeric_limits<double>::infinity()` if the range is
+    empty.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_minimum_energy_distribution =
+R"doc(Returns an iterator to the charge distribution of minimum energy
+contained in a range of `charge_distribution_surface` objects. If the
+range is empty, `last` is returned.
+
+Args:
+    first: Begin of the range to examine.
+    last: End of the range to examine.
+
+Template Args:
+    InputIt: Must meet the requirements of `LegacyInputIterator`.
+
+Returns:
+    Iterator to the minimum energy charge distribution found in the
+    input range, or `last` if the range is empty.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_occupation_probability_gate_based =
 R"doc(This function computes the occupation probability of erroneous charge
 distributions (output charge does not match the expected output
@@ -18038,6 +16304,38 @@ difference to the corresponding distance.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_physical_population_stability_params_sim_params = R"doc(Parameters for the electrostatic potential.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_physically_valid_parameters =
+R"doc(This function computes the physical parameters necessary for ensuring
+the physical validity of a given charge distribution and determines
+the corresponding excited state number. The ground state is denoted by
+zero, with each subsequent excited state incrementally numbered.
+
+This function is designed to derive the physical parameters from
+charge distribution measurements of SiDB layouts, often acquired
+through Atomic Force Microscopy (AFM). Given a specific charge
+distribution, the function typically yields several physically valid
+parameters.
+
+As more SiDB layouts with corresponding charge distributions are
+recorded, the number of physically valid parameters for all layouts
+decreases. Consequently, this enables a more precise determination of
+the physical parameters present on the surface.
+
+Args:
+    cds: The charge distribution surface for which physical parameters
+         are to be determined.
+    params: Operational domain parameters.
+
+Template Args:
+    Lyt: The charge distribution surface type.
+
+Returns:
+    Physically valid parameters with the corresponding excited state
+    number of the given charge distribution surface for each parameter
+    point.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_population_stability_information =
 R"doc(This struct encapsulates information related to the population
 stability of a charge distribution. It includes details about the SiDB
@@ -18075,6 +16373,95 @@ R"doc(A state is rejected if the charge distributiion does not encode the
 desired logic. Moreover, if kinks are rejected, a charge distribution
 that encodes the logic, but does show kinks, is rejected.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution =
+R"doc(This function determines the time-to-solution (TTS) and the accuracy
+(acc) of the *QuickSim* algorithm.
+
+Args:
+    lyt: Layout that is used for the simulation.
+    qs_params: Parameters required for the *QuickSim* algorithm.
+    tts_params: Parameters used for the time-to-solution calculation.
+    ps: Pointer to a struct where the results (time_to_solution, acc,
+        single runtime) are stored.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_for_given_simulation_results =
+R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
+simulation results of a heuristic algorithm in comparison to those of
+an exact algorithm. It provides further statistical metrics, including
+the accuracy of the heuristic algorithm, and individual runtimes.
+
+Args:
+    results_exact: Simulation results of the exact algorithm.
+    results_heuristic: Simulation of the heuristic for which the TTS
+                       is determined.
+    confidence_level: Confidence level for the TTS computation. The
+                      confidence level represents the probability that
+                      the confidence interval calculated from the
+                      simulation contains the true value. For example,
+                      a 95 % (0.95) confidence level means that if the
+                      simulation were repeated many times,
+                      approximately 95 out of 100 of the calculated
+                      confidence intervals would contain the true
+                      value.
+    ps: Pointer to a struct where the statistics of this function call
+        (time_to_solution, acc, single runtime) are to be stored.
+
+Template Args:
+    Lyt: SiDB ell-level layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_confidence_level =
+R"doc(The confidence level represents the probability that the confidence
+interval calculated from the simulation contains the true value. For
+example, a 99.7 % (0.997) confidence level means that if the
+simulation were repeated many times, approximately 997 out of 1000 of
+the calculated confidence intervals would contain the true value.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_engine =
+R"doc(Exhaustive simulation algorithm used to simulate the ground state as
+reference.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_params_repetitions =
+R"doc(Number of iterations of the heuristic algorithm used to determine the
+simulation accuracy (`repetitions = 100` means that accuracy is
+precise to 1 %).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats =
+R"doc(This struct stores the time-to-solution, the simulation accuracy and
+the average single simulation runtime of *QuickSim*, the single
+runtime of the exact simulator used, and the number of valid charge
+configurations found by the exact algorithm.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_acc = R"doc(Accuracy of the simulation in %.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_algorithm =
+R"doc(Exact simulation algorithm used to simulate the ground state as
+reference.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_report =
+R"doc(Print the results to the given output stream.
+
+Args:
+    out: Output stream.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_single_runtime_exact =
+R"doc(Single simulation runtime of the exact ground state simulation
+algorithm.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type =
 R"doc(Possible types of charge transitions that can occur in an SiDB layout.
 These transitions represent changes in the charge state of SiDBs,
@@ -18088,6 +16475,27 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEUT
 static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_NEUTRAL_TO_POSITIVE = R"doc(SiDB is neutrally charged, but is closest to being positively charged.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_transition_type_POSITIVE_TO_NEUTRAL = R"doc(SiDB is positively charged, but is closest to being neutrally charged.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_check_simulation_results_for_equivalence =
+R"doc(This function compares two SiDB simulation results for equivalence.
+Two results are considered equivalent if they have the same number of
+charge distributions and if each corresponding charge distribution has
+the same electrostatic potential energy and charge states for all
+cells.
+
+Args:
+    result1: The first SiDB simulation result to compare.
+    result2: The second SiDB simulation result to compare.
+
+Template Args:
+    Lyt: The SiDB cell-level layout type used in the simulation
+         results.
+
+Returns:
+    `true` if the two simulation results are equivalent, `false`
+    otherwise.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_calculate_defect_clearance =
 R"doc(Computes the defect clearance for a given SiDB layout based on a
@@ -19034,6 +17442,387 @@ required witnesses for each respective charge state is satisfied. If
 no such partition exists, the multiset charge configuration associated
 with the requirements may be rejected.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_2 = R"doc(Forward-declaration of binary_cluster_hierarchy_node.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_binary_cluster_hierarchy_node = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_c = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_binary_cluster_hierarchy_node_sub = R"doc(The two children of the node.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_bound_direction =
+R"doc(The electrostatic potential bounds required for the *Ground State
+Space* algorithm. As the domain in which our potential bounds live are
+simply the real numbers, we may think of the lower bound and upper
+bound domains to be separate partial order structures on the real
+number line, inverse to each other. The *Ground State Space* algorithm
+requires the properties of a lower semi-lattice for these domains, ie.
+all finite meets must exist. This is implemented for the lower and
+upper bound respectively simply by taking a minimum or a maximum. One
+may think of meets as follows, which is very relevant to intention of
+their application: a meet, or greatest lower bound, is the *maximal
+information* common to a set (of potential bounds). This semantic
+operation is essential to the *Ground State Space* algorithm, which
+thus envelops without loss of accuracy.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_bound_direction_LOWER =
+R"doc(Lower bounds live in the set :math:`(-\infty\f, \infty]` and are
+ordered by >.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_bound_direction_UPPER =
+R"doc(Upper bounds live in the set :math:`[-\infty, \infty)` and are ordered
+by <.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_charge_space_composition =
+R"doc(A charge space composition holds a number of projector states of
+sibling clusters. Summing the multiset charge configuration associated
+with each, we obtain an element of the charge space of their parent.
+Additionally, we have a store for the bounds on the partial potential
+sum local to each SiDB contained by the parent, i.e., partial in the
+sense that SiDBs not contained by the parent are not taken into
+account. The potential bounds for each SiDB correspond to the meet on
+the potential bounds for each (sub-)composition of the respective
+cluster charge states associated with the multiset charge
+configuration of each projector state in this composition of siblings.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_charge_space_composition_pot_bounds =
+R"doc(Flattened (hierarchical) potential bounds specific to this
+composition.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_charge_space_composition_proj_states =
+R"doc(Projector states associated with charge space elements that make up
+the composition.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster =
+R"doc(Forward declaration of the SiDB cluster hierarchy required for the
+mutual recursive structure in this file. Here we define a pointer to a
+SiDB cluster to be a shared pointer, which enables us to also have
+pointers to parents.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_2 =
+R"doc(Forward declaration of the SiDB cluster hierarchy required for the
+mutual recursive structure in this file. Here we define a pointer to a
+SiDB cluster to be a shared pointer, which enables us to also have
+pointers to parents.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_space = R"doc(The charge state space of the cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state =
+R"doc(A cluster charge state is a multiset charge configuration. We may
+compress it into a 64 bit unsigned integer by putting the number of
+negative and positive charges in the upper and lower 32 bits
+respectively. The number of neutral charges may then be inferred for a
+given cluster by considering its size. Cluster charge states are the
+crucial objects of the state spaces, called charge spaces, since they
+not only hold information of the multiset charge configuration, but
+also the set of compositions, each of which compose into the current
+cluster charge state.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_add_charge =
+R"doc(Modifier of the cluster charge state, adding a single charge state.
+
+Args:
+    cs: The charge state to add.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_cluster_charge_state =
+R"doc(Default constructor, creates a cluster charge state without any
+negative and positive charges.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_cluster_charge_state_2 =
+R"doc(Constructor for a charge space element of a singleton cluster. It has
+a single composition, which is a cluster state of the singleton
+cluster and the singleton multiset charge configuration itself.
+
+Args:
+    singleton: Singleton cluster to put in the compositions of this
+               cluster charge state.
+    cs: Charge state to lift to a singleton multiset charge
+        configuration.
+    loc_ext_pot: The local external potential at the SiDB in the
+                 singleton cluster. Specifically, this is the sum of
+                 the local defect potential and the local external
+                 potential.
+    total_num_sidbs: The total number of SiDBs in the layout.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_cluster_charge_state_3 =
+R"doc(Constructor for cluster charge state given a multiset charge
+configuration represented in its compressed form. It allows the
+compressed form to be lifted to the full type to facilitate equality
+checks.
+
+Args:
+    m: The multiset charge configuration to create a cluster charge
+       state of.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_cluster_charge_state_4 =
+R"doc(Constructor of a cluster charge state allowing initializer list
+construction.
+
+Args:
+    charge_states: initializer list of charge states to form into a
+                   cluster charge state.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_compositions = R"doc(Stored compositions of this cluster charge state.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_neg_count =
+R"doc(Number of negative charges in the cluster charge state (32 available
+bits).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_call =
+R"doc(Defined a hashing of a cluster charge state. Since we need only
+separate cluster charge states by their compressed form, we may
+compute a hash over this for optimal performance when used in a hash
+set.
+
+Args:
+    m: Cluster charge state to compute the hash of.
+
+Returns:
+    The hash of the given cluster charge state.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_eq =
+R"doc(Defines the equality operation of cluster charge states, which
+disregards the compositions.
+
+Args:
+    other: Other cluster charge state to test for equality with the
+           current.
+
+Returns:
+    `true` if and only if the compressed forms are equal.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_iadd =
+R"doc(Defines addition of cluster charge states through multiset
+concatenation. Disregards compositions.
+
+Args:
+    other: Other cluster charge state to concatenate with the current.
+
+Returns:
+    The concatenated cluster charge state, which is the modified
+    version of the current.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_isub =
+R"doc(Defines subtraction of cluster charge states through multiset
+difference. Disregards compositions.
+
+Args:
+    other: Other cluster charge state to take the difference of w.r.t.
+           with the current.
+
+Returns:
+    The cluster charge state that is their difference, which is the
+    modified version of the current.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_operator_unsigned_long =
+R"doc(Explicit instructions for the compiler on how to cast a cluster charge
+state to an 64-bit unsigned integer.
+
+Returns:
+    The 64-bit unsigned integer representing the compressed form of
+    the cluster charge state.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_charge_state_pos_count =
+R"doc(Number of positive charges in the cluster charge state (32 available
+bits).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_children = R"doc(The set of children of a cluster is a clustering.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_cluster =
+R"doc(SiDB cluster hierarchy constructor.
+
+Args:
+    c: Set of SiDB indices for the cluster to contain.
+    other_c: Set of SiDB indices in the layout that the cluster will
+             not contain.
+    x: A set of cluster hierarchies to set as the children of this
+       cluster.
+    unique_id: The unsigned integer to identify the cluster hierarchy
+               uniquely with. For the case of a singleton cluster, the
+               unique identifier is set to be the index of the single
+               SiDB it contains.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_external_sidbs = R"doc(The SiDBs in the layout that are not contained by the cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_get_parent =
+R"doc(This function returns a shared pointer to the parent of this cluster.
+
+Returns:
+    A shared pointer to the parent of this cluster
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy =
+R"doc(This function performs the ALGLIB agglomerative clustering algorithm
+for a given SiDB layout. By default, the cluster are created by a
+minimal positional variance heuristic, also known as Ward's method.
+
+Args:
+    lyt: The layout to create a cluster hierarchy of.
+    linkage_method: The agglomerative clustering linking heuristic
+                    that is used by ALGLIB.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy_linkage_method =
+R"doc(An enumeration of cluster linkage methods. The chosen method defines
+how clusters are merged in the agglomerative clustering procedure, by,
+e.g., defining an inter-cluster distance to minimize for the cluster
+to merge. For more information, visit: https://docs.tibco.com/pub/spot
+fire/6.5.1/doc/html/hc/hc_clustering_methods_overview.htm.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy_linkage_method_COMPLETE =
+R"doc(Complete linkage takes the maximum distance between nodes in a
+cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy_linkage_method_MINIMUM_VARIANCE =
+R"doc(Known as Ward's method, this type of linkage merges clusters based on
+a minimum variance measure.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy_linkage_method_SINGLE = R"doc(Single linkage takes the minimum distance between nodes in a cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy_linkage_method_UNWEIGHTED_AVERAGE =
+R"doc(Unweighted average linkage takes the average distance between nodes in
+a cluster, disregarding the number of elements in a node.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_hierarchy_linkage_method_WEIGHTED_AVERAGE =
+R"doc(Weighted average linkage takes the average distance between nodes in a
+cluster, weighing in the number of elements in a node.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_initialize_singleton_cluster_charge_space =
+R"doc(This function initializes the charge space of a singleton cluster
+corresponding with the given simulation base, and sets the initial
+bounds on the potential received from outside the cluster as the local
+potential bounds. The local potential bounds do not include the local
+external potential at the SiDB in the singleton, as this is passed
+separately.
+
+Args:
+    loc_pot_min: The minimum local potential for the SiDB in the
+                 singleton cluster.
+    loc_pot_max: The maximum local potential for the SiDB in the
+                 singleton cluster.
+    loc_ext_pot: The local external potential at the SiDB in the
+                 singleton cluster. Specifically, this is the sum of
+                 the local defect potential and the local external
+                 potential.
+    base: The simulation base.
+    self_ptr: Shared pointer to itself.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_num_sidbs =
+R"doc(Function to return the number of SiDBs contained in the cluster.
+
+Returns:
+    The number of SiDBs contained in the cluster.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_operator_eq =
+R"doc(Equality operation on cluster hierarchies. Checks the respective
+unique identifiers for equality.
+
+Args:
+    other: Cluster (hierarchy) to compare to.
+
+Returns:
+    `true` if and only if the unique identifiers match.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_parent =
+R"doc(Every cluster carries a pointer to its parent. For the top cluster,
+this is `nullptr`.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_pot_projs = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_pot_projs_complete_store = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_projector_state =
+R"doc(A projector state pairs the potential projecting cluster with the
+associated multiset charge configuration.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_projector_state_cluster = R"doc(Projector cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_projector_state_get_count =
+R"doc(Getter for the number of a given charge state in the multiset
+configuration.
+
+Template Args:
+    cs: Charge state to count the number of occurrences in the
+        projector state of.
+
+Returns:
+    The number of occurrences of the given charge state in the
+    multiset charge configuration. For a neutral charge, the number of
+    occurrences is inferred by considering the size of the cluster in
+    the projector state.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_projector_state_multiset_conf =
+R"doc(Multiset charge configuration. It is an element of the charge space of
+the projector cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_ptr_hash =
+R"doc(This struct defines a hashing of shared pointers to clusters, used to
+facilitate quick access in a clustering.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_ptr_hash_operator_call =
+R"doc(The hashing operation is defined.
+
+Args:
+    c: Shared pointer to a cluster to take the has of.
+
+Returns:
+    The hash computed over the unique id associated with the cluster.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_received_ext_pot_bounds =
+R"doc(The bounds on the electrostatic potential sum of SiDBs external to
+this cluster, local to an SiDB in the cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_receptor_state =
+R"doc(A receptor state pairs the potential receiving cluster with the
+identifier of the SiDB.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_receptor_state_cluster = R"doc(Receptor cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_receptor_state_sidb_ix = R"doc(SiDB index. It is contained in the receptor cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_sidbs = R"doc(The SiDBs contained by the cluster.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_cluster_uid = R"doc(Unique identifier. Equal to the SiDB index for singleton clusters.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_add_composition =
@@ -19573,6 +18362,121 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustercomplete_impl_workers = R"doc(Vector containing all workers.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state =
+R"doc(A clustering state is very similar to a cluster state composition,
+though it uses unique pointers to the cluster states that may be
+moved. Thereby, this is the essential type of the dynamic objects in
+*ClusterComplete*'s operation, which always represent information of
+the complete layout.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_clustering_state =
+R"doc(Default constructor.
+
+Args:
+    num_sidbs: Number of SiDBs in the layout that the clustering state
+               should consider.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_clustering_state_2 =
+R"doc(Copy constructor.
+
+Args:
+    other: Other clustering state to copy.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_clustering_state_3 =
+R"doc(Move constructor.
+
+Args:
+    other: Other clustering state to move.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_operator_assign =
+R"doc(Copy assignment operator.
+
+Assigns the contents of another `clustering_state` instance to this
+instance. Performs a deep copy of `proj_states` and a complete copy of
+`pot_bounds`.
+
+Args:
+    other: The `clustering_state` instance to copy from.
+
+Returns:
+    A reference to this `clustering_state` instance after assignment.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_operator_assign_2 =
+R"doc(Move assignment operator.
+
+Args:
+    other: Other clustering state to move.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_pot_bounds =
+R"doc(Flattened (hierarchical) potential bounds specific to this clustering
+state.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_clustering_state_proj_states =
+R"doc(Projector states associated with charge space elements that make up
+the clustering state.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_cluster_size =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_cluster_size_2 =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_projector_state_compositions =
+R"doc(This function is used to obtain the cluster charge state compositions
+of the multiset charge configuration in a projector state. The
+corresponding charge space element of the projector is found and its
+compositions are returned.
+
+Args:
+    pst: Projector state of which the corresponding compositions are
+         requested.
+
+Returns:
+    The compositions associated with the multiset charge configuration
+    of the projecting cluster.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_singleton_ix =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_singleton_ix_2 =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_unique_cluster_id =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_get_unique_cluster_id_2 =
+R"doc(Forward declaration. Required for compilation due to the mutually
+recursive structure in this file.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_ground_state_space_impl = R"doc()doc";
 
@@ -20209,6 +19113,323 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bound_top =
+R"doc(The respective *top* elements of the lower semi-lattices in which our
+potential bounds live, ie., the respective elements of *most*
+information. This means that any meet with a top element (weakly)
+reduces the information, and thus any meet computed in iteration
+through binary application may start out with this element.
+
+Template Args:
+    bound: Potential bound domain to return the element of most
+           information of.
+
+Returns:
+    The element of most information respective to the potential bound
+    domain.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store =
+R"doc(This defines a store in which the bounds on the local electrostatic
+potential for an SiDB (index) may be stored. For the *Ground State
+Space* algorithm, this is used to keep track of the respective lower
+and upper bounds on the partial sum of the potential projected from
+SiDBs in a subhierarchy that is local to SiDBs that are also in the
+subhierarchy. During *ClusterComplete* simulation, the stored
+potential bounds represent information of the complete hierarchy, thus
+all SiDB interactions.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_get =
+R"doc(Getter for a (partial) potential sum bound local to an SiDB.
+
+Args:
+    sidb_ix: SiDB (index) to obtain the potential bound of.
+
+Template Args:
+    bound: The potential bound to obtain.
+
+Returns:
+    The potential bound for this SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_initialize_complete_potential_bounds =
+R"doc(Initialize potential bounds for the given number of SiDBs (applicable
+to a complete potential bounds store only).
+
+Args:
+    num_sidbs: The number of SiDBs in the layout that is simulated.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_num_sidbs =
+R"doc(Getter for the size of the potential bounds store, i.e., the number of
+SiDBs considered in this store.
+
+Returns:
+    The size of the potential bounds store.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_operator_iadd =
+R"doc(Add a complete potential bound store to this (also a complete
+potential bound store) through pointwise updates.
+
+Args:
+    other: Other complete potential bound store.
+
+Returns:
+    Reference to this.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_operator_isub =
+R"doc(Subtract a complete potential bound store to this (also a complete
+potential bound store) through pointwise updates, i.e., updates for
+each SiDB and for each bound (LB, UB).
+
+Args:
+    other: Other complete potential bound store.
+
+Returns:
+    Reference to this.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_set =
+R"doc(Setter for a (partial) potential sum bound local to an SiDB.
+
+Args:
+    sidb_ix: SiDB (index) to set the potential bound for.
+    bound_value: New bound to set.
+
+Template Args:
+    bound: The potential bound to obtain.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_set_2 =
+R"doc(Setter for (partial) potential sum bounds local to an SiDB.
+
+Args:
+    sidb_ix: SiDB (index) to set the potential bounds for.
+    min: New lower bound to set.
+    max: New upper bound to set.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_store =
+R"doc(Potential bounds are a map from SiDB indices to two values
+respectively representing the lower and upper bound.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_update =
+R"doc(Relative setter for a (partial) potential sum bound local to an SiDB.
+
+Args:
+    sidb_ix: SiDB (index) to update the potential bound of.
+    bound_diff: Bound difference to apply.
+
+Template Args:
+    bound: The potential bound to update.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_bounds_store_update_2 =
+R"doc(Relative setter for (partial) potential sum bounds local to an SiDB.
+
+Args:
+    sidb_ix: SiDB (index) to update the potential bounds of.
+    min_diff: Difference in lower bound potential to apply.
+    max_diff: Difference in upper bound potential to apply.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection =
+R"doc(This struct defines the type of an electrostatic potential projection,
+which pairs a multiset charge configuration with the potential value
+(in eV) associated with the potential projection in the given context.
+The context is given by potential projection stores in the decorated
+cluster hierarchies, which links the projecting cluster with SiDB that
+receives this potential projection.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_multiset = R"doc(Associated multiset charge configuration.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_operator_iadd =
+R"doc(Defines summation of potential projections through addition of the
+potential values and concatenation of the associated multiset charge
+configurations. The latter may simply be implemented by addition of
+the compressed forms.
+
+Args:
+    other: Other potential projection to sum with the current.
+
+Returns:
+    The current potential projection to which the other potential
+    projection is now added.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_operator_lt =
+R"doc(Defines an ordering of potential projections through comparison of the
+potential value. To prevent potential projections of equal potential
+value but different associated multiset charge configurations to be
+regarded as equal, a comparison of the latter is used as a "fail-
+safe".
+
+Args:
+    other: Other potential projection to compare with the current.
+
+Returns:
+    `true` if and only if the potential value of the current is lower
+    than that of `other`, or if the potential values are equal and the
+    compressed form of the multiset charge configuration is strictly
+    less than that of `other`.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order =
+R"doc(This struct defines the type of potential projection order, along with
+getter and setter operations. Essentially, a potential projection
+order is an ordered collection of potential projections, which allow
+rapid access and modifications of the potential projection bounds by
+relying on the ordering defined on potential projections, and
+canonical operations on ordered set containers. In the decorated
+cluster hierarchy, each cluster has a potential projection order onto
+each SiDB in the layout from which the hierarchy was created.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_add =
+R"doc(Adds a potential projection to the ordering, automatically placing it
+appropriately.
+
+Args:
+    pp: Potential projection to add.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_get_bound =
+R"doc(A getter for a potential projection bound, which is the first or last
+item in the ordered set.
+
+Template Args:
+    bound: The bound to obtain.
+
+Returns:
+    The potential projection that forms the requested bound on the
+    potential projection order.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_get_next_bound =
+R"doc(A getter for the next potential projection bound, which is the first
+potential projection when traversing the ordering either from below or
+from above, that differs in its multiset charge configuration from the
+relevant potential projection bound.
+
+Template Args:
+    bound: The bound to obtain.
+
+Returns:
+    The potential projection that would be the requested bound on the
+    potential projection order if the current relevant bound would be
+    erased.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_get_pot_proj_for_m_conf =
+R"doc(A getter for the potential projection bound given a multiset charge
+configuration specification, which is the first potential projection
+in the ordering when traversing either from below or from above, that
+matches its multiset charge configuration to the argument.
+
+Args:
+    m_conf: The multiset charge configuration to match.
+
+Template Args:
+    bound: The bound to obtain.
+
+Returns:
+    The potential projection that forms the requested bound on the
+    subset of the potential projection order of potential projections
+    that match their multiset charge configuration to the argument.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_order = R"doc(The potential projection ordering.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_potential_projection_order = R"doc(Default constructor, creating the empty potential projection order.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_potential_projection_order_2 =
+R"doc(Constructor for a potential projection from a singleton cluster onto
+the SiDB contained in it.
+
+Args:
+    loc_ext_pot: The local external potential at the SiDB in the
+                 singleton cluster. Specifically, this is the sum of
+                 the local defect potential and the local external
+                 potential.
+    base: The simulation base. This defines whether positive charges
+          are considered.
+    self_projection: Separates the constructor type from inter-SiDB
+                     potential projections.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_potential_projection_order_3 =
+R"doc(Constructor for a potential projection from a singleton cluster onto
+an SiDB.
+
+Args:
+    inter_sidb_pot: The chargeless potential between the SiDB in the
+                    singleton cluster and the one projected onto, as
+                    found in the potential matrix in an associated
+                    `charge_distribution_surface` object.
+    base: The simulation base. This defines whether positive charges
+          are considered.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_order_remove_m_conf =
+R"doc(Removes all occurrences of potential projections that match their
+multiset charge configuration to the argument.
+
+Args:
+    m_conf: The multiset charge configuration of which all occurrences
+            must be removed.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_pot_val = R"doc(Potential projection value (unit: eV).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_potential_projection =
+R"doc(Default constructor, used as a starting point for an accumulation of
+potential projections.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_potential_projection_2 =
+R"doc(Trivial copy constructor.
+
+Args:
+    pot: Potential value to copy.
+    mul: Multiset charge configuration to copy.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_potential_projection_potential_projection_3 =
+R"doc(Constructor for a potential projection from a singleton cluster,
+thereby lifting a value in the potential matrix to a potential
+projection.
+
+Args:
+    inter_sidb_pot: Potential value of which the absolute value may be
+                    found in the potential matrix in an associated
+                    `charge_distribution_surface` object.
+    cs: Charge state associated with the singleton cluster projector
+        for this potential projection.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_quickexact_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_detail_quickexact_impl_all_sidbs_in_lyt_without_negative_preassigned_ones = R"doc(All SiDBs of the layout but without the negatively-charged SiDBs.)doc";
@@ -20303,6 +19524,68 @@ Args:
 
 Template Args:
     ChargeLyt: Type of the charge distribution surface.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_singleton_multiset_conf_to_charge_state =
+R"doc(Function to convert a singleton cluster charge state in its compressed
+form to a charge state.
+
+Args:
+    m: A singleton multiset charge configuration.
+
+Returns:
+    The charge state associated with the sole element contained in the
+    given multiset charge configuration.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_take_meet_of_potential_bounds =
+R"doc(This function computes a binary meet, overwriting the first argument
+with the result. It takes the minimum in case of a lower bound, and a
+maximum in case of an upper bound, each corresponding to the minimal
+information common to the arguments.
+
+Args:
+    a: First potential bound which is overwritten with the result of
+       the meet.
+    b: Second potential bound.
+
+Template Args:
+    bound: The potential bound domain which defines the implementation
+           of the meet.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_to_cluster =
+R"doc(This function initiates the recursive procedure of converting a binary
+cluster hierarchy to our bespoke version.
+
+Args:
+    n: A node from a binary cluster hierarchy, as for instance
+       returned by parsing ALGLIB's result.
+
+Returns:
+    A uniquely identified node in a decorated cluster hierarchy that
+    follows the "general tree" structure.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_engines_detail_to_unique_cluster =
+R"doc(This recursive function is used to convert a binary cluster hierarchy,
+as for instance returned by `cluster_hierarchy` function that uses
+ALGLIB's `clusterizer`. The returned structure includes parent
+pointers.
+
+Args:
+    n: A node from a binary cluster hierarchy, as for instance
+       returned by parsing ALGLIB's result.
+    uid: Variable reference which is updated in each execution to
+         ensure uniqueness.
+
+Returns:
+    A uniquely identified node in a decorated cluster hierarchy that
+    follows the "general tree" structure.
 
 )doc";
 
@@ -20469,9 +19752,10 @@ Returns:
 static const char *mkd_doc_fiction_sidb_simulation_engines_ground_state_space_results_runtime = R"doc(The runtime of the construction is stored.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_ground_state_space_results_top_cluster =
-R"doc(The top cluster is the root of the cluster hierarchy. It therefore
-allows access to the entire cluster hierarchy, including the charge
-spaces of each cluster.)doc";
+R"doc(The root of the cluster hierarchy the construction built, with the
+charge space of every cluster below it. The hierarchy is the engines'
+working state: `detail::cluster` and what it points to are
+implementation, not API, and may change without notice.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact =
 R"doc(*QuickExact* is a quick and exact physical simulation algorithm
@@ -20637,6 +19921,338 @@ static const char *mkd_doc_fiction_sidb_simulation_heuristic_engine = R"doc(Sele
 static const char *mkd_doc_fiction_sidb_simulation_heuristic_engine_QUICKSIM =
 R"doc(*QuickSim* is a heuristic simulation engine that only requires
 polynomial runtime.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_any_to_string =
+R"doc(Converts an `std::any` to a string if it contains an alpha-numerical
+standard data type.
+
+Args:
+    value: The value to convert.
+
+Returns:
+    The string representation of the value.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_sweep_parameter_to_string =
+R"doc(Converts a sweep parameter to a string representation. This is used to
+write the parameter name to the CSV file.
+
+Args:
+    param: The sweep parameter to be converted.
+
+Returns:
+    The string representation of the sweep parameter.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_os = R"doc(Output stream used for writing the simulation sim_result.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_sim_result = R"doc(Simulation results.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_obtain_ordered_cells =
+R"doc(Obtains all cells in the surfaces and orders them by their position to
+achieve a reproducible output.
+
+Returns:
+    An ordering of cells.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_ordered_cells = R"doc(A reproducible ordering of cells in the surfaces.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_os = R"doc(The output stream to write to.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_sim_result = R"doc(The simulation sim_result to write.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_electron_distributions = R"doc(Writes all charge distributions to the output stream in XML format.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_engine_info = R"doc(Writes the engine information to the output stream in XML format.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_physical_locations =
+R"doc(Writes the physical locations of all SiDBs to the output stream in XML
+format.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_simulation_parameters =
+R"doc(Writes both the `simulation_parameters` as well as the
+`additional_simulation_parameters` to the output stream in XML format.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_sqd_sim_result_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain =
+R"doc(Writes a CSV representation of an defect influence domain to the
+specified output stream. The data are written as rows, each
+corresponding to one set of simulation parameters and their
+corresponding influence status.
+
+The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
+Influence STATUS ... subsequent rows for each set of simulation
+parameters.
+
+Args:
+    defect_infdom: The defect influence domain to be written. It
+                   contains a mapping from defect positions to their
+                   influence status.
+    os: The output stream where the CSV representation of the defect
+        influence domain is written to.
+    params: The parameters used for writing, including the influential
+            and non-influential tags. Defaults to an empty
+            `write_defect_influence_domain_params` object, which
+            provides standard tags.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain_2 =
+R"doc(Writes a CSV representation of an defect influence domain to the
+specified file. The data are written as rows, each corresponding to
+one set of simulation parameters and their corresponding influence
+status.
+
+The output CSV format is as follows: X_DIMENSION, Y_DIMENSION,
+Influence STATUS ... subsequent rows for each set of simulation
+parameters.
+
+Args:
+    defect_infdom: The defect influence domain to be written. It
+                   contains a mapping from defect positions to their
+                   influence status.
+    filename: The filename where the CSV representation of the defect
+              influence domain is written to.
+    params: The parameters used for writing, including the influential
+            and non-influential tags. Defaults to an empty
+            `write_defect_influence_domain_params` object, which
+            provides standard tags.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain_params = R"doc(Parameters for writing a defect influence domain to a CSV file.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain_params_influential_tag = R"doc(The tag used to represent the influential value of a defect position.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain_params_non_influential_tag =
+R"doc(The tag used to represent the non-influential value of a defect
+position.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state =
+R"doc(Writes the coordinates of all SiDBs of a layout together with the
+charge distribution of the ground state(s) to a file.
+
+This overload uses an output stream to write into.
+
+Args:
+    sim_result: The simulation sim_result to write.
+    os: The output stream to write into.
+
+Template Args:
+    Lyt: SiDB cell-level SiDB layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_2 =
+R"doc(Writes the coordinates of all SiDBs of a layout together with the
+charge distribution of the ground state(s) to a file.
+
+This overload uses a file name to create and write into.
+
+Args:
+    filename: The file name to create and write into.
+
+Template Args:
+    Lyt: SiDB cell-level SiDB layout type.
+    sim_result: The simulation sim_result to write.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain =
+R"doc( Writes a CSV representation of an operational domain to the specified
+ output stream. The data are written as rows, each corresponding to
+ one set of simulation parameters and their corresponding operational
+ status.
+
+ The output CSV format is e.g. as follows:
+```
+embed:rst
+.. code-block:: RST
+
+epsilon_r, lambda_tf, operational status
+0.0, 0.0, 0
+0.1, 0.0, 1
+... subsequent rows for each set of simulation parameters
+```
+
+
+
+
+ The operational status is a binary value represented by specified
+ tags in `params` indicating whether the simulation parameters are
+ within the operational domain or not.
+
+Args:
+    opdom: The operational domain to be written. It represents a
+           mapping between sets of simulation parameters (one to three
+           sweep parameters, written as the X, Y, and Z columns) and a
+           tuple containing detailed information about the SiDB layout
+           associated with those simulation parameters.
+    os: The output stream where the CSV representation of the
+        operational domain is written to.
+    params: The parameters used for writing, including the operational
+            and non-operational tags. Defaults to an empty
+            `write_operational_domain_params` object, which provides
+            standard tags.
+
+Template Args:
+    OpDomain: The type of the operational domain.
+
+Raises:
+    std::invalid_argument: if the number of dimensions in the
+                           operational domain is 0 or greater than 3.
+                           Three is the number of enumerators of
+                           `sweep_parameter`, so a fourth dimension
+                           could only repeat one of them.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_2 =
+R"doc( Writes a CSV representation of an operational domain to the specified
+ file. The data are written as rows, each corresponding to one set of
+ simulation parameters and their corresponding operational status.
+
+ The output CSV format is e.g. as follows:
+```
+embed:rst
+.. code-block:: RST
+
+epsilon_r, lambda_tf, operational status
+0.0, 0.0, 0
+0.1, 0.0, 1
+... subsequent rows for each set of simulation parameters
+```
+
+
+
+
+ The operational status is a binary value represented by specified
+ tags in `params` indicating whether the simulation parameters are
+ within the operational domain or not.
+
+Args:
+    opdom: The operational domain to be written. It represents a
+           mapping between sets of simulation parameters (one to three
+           sweep parameters, written as the X, Y, and Z columns) and a
+           tuple containing detailed information about the SiDB layout
+           associated with those simulation parameters.
+    filename: The filename where the CSV representation of the
+              operational domain is written to.
+    params: The parameters used for writing, including the operational
+            and non-operational tags. Defaults to an empty
+            `write_operational_domain_params` object, which provides
+            standard tags.
+
+Template Args:
+    OpDomain: The type of the operational domain.
+
+Raises:
+    std::ofstream::failure: if the file could not be opened.
+    std::invalid_argument: if the number of dimensions in the
+                           operational domain is 0 or greater than 3.
+                           Three is the number of enumerators of
+                           `sweep_parameter`, so a fourth dimension
+                           could only repeat one of them.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params = R"doc(Parameters for writing an operational domain to a CSV file.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params_non_operational_tag =
+R"doc(The tag used to represent the non-operational value of a parameter
+set.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params_operational_tag = R"doc(The tag used to represent the operational value of a parameter set.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode = R"doc(Mode selector for writing samples to file.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode_ALL_SAMPLES =
+R"doc(Write all samples, including non-operational ones. This may lead to
+large file sizes.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params_sample_writing_mode_OPERATIONAL_ONLY =
+R"doc(Write operational samples only. This can drastically reduce file size
+and help with visibility in 3D plots.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_operational_domain_params_writing_mode =
+R"doc(Whether to write non-operational samples to the CSV file. If set to
+`OPERATIONAL_ONLY`, operational samples are written exclusively. This
+yields a significantly smaller CSV file. It is recommended to set this
+option for 3D plots because the non-operational samples would shadow
+the operational samples anyway.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result =
+R"doc(Writes an SiDB simulation sim_result to an XML file that is used by
+SiQAD (https://github.com/siqad/siqad), a physical simulator for the
+SiDB technology platform.
+
+This overload uses an output stream to write into.
+
+Args:
+    sim_result: The simulation sim_result to write.
+    os: The output stream to write into.
+
+Template Args:
+    Lyt: SiDB cell-level SiDB layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_2 =
+R"doc(Writes an SiDB simulation sim_result to an XML file that is used by
+SiQAD (https://github.com/siqad/siqad), a physical simulator for the
+SiDB technology platform.
+
+This overload uses a file name to create and write into.
+
+Args:
+    sim_result: The simulation sim_result to write.
+    filename: The file name to create and write into. Should
+              preferably use the `.xml` extension.
+
+Template Args:
+    Lyt: SiDB cell-level SiDB layout type.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_is_ground_state =
+R"doc(This function checks if the elstrostatic ground state of an SiDB
+layout is found by a heuristic for the physical simulation (e.g.,
+*QuickSim* or *SimAnneal*).
+
+Args:
+    heuristic_results: Simulation results obtained from a heuristic
+                       physical simulation.
+    exact_results: Simulation results obtained from an exact physical
+                   simulation.
+
+Template Args:
+    Lyt: SiDB cell-level layout type.
+
+Returns:
+    Returns `true` if the ground state is contained in the simulation
+    result provided by the heuristic physical simulation. `false`
+    otherwise.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator =
 R"doc(Iterator that iterates over all possible input states of a BDL layout.
@@ -23567,246 +23183,6 @@ static const char *mkd_doc_fiction_sidb_simulation_result_sim_params = R"doc(Phy
 
 static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_utils_can_positive_charges_occur =
-R"doc(This algorithm determines if positively charged SiDBs can occur in a
-given SiDB cell-level layout due to strong electrostatic interaction.
-
-Args:
-    lyt: The layout to be analyzed.
-    sim_params: Physical parameters used to determine whether
-                positively charged SiDBs can occur.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_check_simulation_results_for_equivalence =
-R"doc(This function compares two SiDB simulation results for equivalence.
-Two results are considered equivalent if they have the same number of
-charge distributions and if each corresponding charge distribution has
-the same electrostatic potential energy and charge states for all
-cells.
-
-Args:
-    result1: The first SiDB simulation result to compare.
-    result2: The second SiDB simulation result to compare.
-
-Template Args:
-    Lyt: The SiDB cell-level layout type used in the simulation
-         results.
-
-Returns:
-    `true` if the two simulation results are equivalent, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_is_ground_state =
-R"doc(This function checks if the elstrostatic ground state of an SiDB
-layout is found by a heuristic for the physical simulation (e.g.,
-*QuickSim* or *SimAnneal*).
-
-Args:
-    heuristic_results: Simulation results obtained from a heuristic
-                       physical simulation.
-    exact_results: Simulation results obtained from an exact physical
-                   simulation.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Returns `true` if the ground state is contained in the simulation
-    result provided by the heuristic physical simulation. `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_minimum_energy =
-R"doc(Computes the minimum energy of a range of
-`charge_distribution_surface` objects. If the range is empty, infinity
-is returned to indicate no valid energy value exists.
-
-Args:
-    first: Begin of the range to examine.
-    last: End of the range to examine.
-
-Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
-
-Returns:
-    Value of the minimum energy found in the input range (unit: eV),
-    or `std::numeric_limits<double>::infinity()` if the range is
-    empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_minimum_energy_distribution =
-R"doc(Returns an iterator to the charge distribution of minimum energy
-contained in a range of `charge_distribution_surface` objects. If the
-range is empty, `last` is returned.
-
-Args:
-    first: Begin of the range to examine.
-    last: End of the range to examine.
-
-Template Args:
-    InputIt: Must meet the requirements of `LegacyInputIterator`.
-
-Returns:
-    Iterator to the minimum energy charge distribution found in the
-    input range, or `last` if the range is empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_physically_valid_parameters =
-R"doc(This function computes the physical parameters necessary for ensuring
-the physical validity of a given charge distribution and determines
-the corresponding excited state number. The ground state is denoted by
-zero, with each subsequent excited state incrementally numbered.
-
-This function is designed to derive the physical parameters from
-charge distribution measurements of SiDB layouts, often acquired
-through Atomic Force Microscopy (AFM). Given a specific charge
-distribution, the function typically yields several physically valid
-parameters.
-
-As more SiDB layouts with corresponding charge distributions are
-recorded, the number of physically valid parameters for all layouts
-decreases. Consequently, this enables a more precise determination of
-the physical parameters present on the surface.
-
-Args:
-    cds: The charge distribution surface for which physical parameters
-         are to be determined.
-    params: Operational domain parameters.
-
-Template Args:
-    Lyt: The charge distribution surface type.
-
-Returns:
-    Physically valid parameters with the corresponding excited state
-    number of the given charge distribution surface for each parameter
-    point.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_potential_to_distance_conversion =
-R"doc(The electrostatic potential on hydrogen-passivated silicon is
-typically modeled using a screened Coulomb potential. This
-electrostatic potential is commonly employed to determine the
-electrostatic potential for a given distance (between SiDB and point
-under consideration) and given physical parameters. However, the
-function provided here serves the inverse purpose by calculating the
-distance for a given potential and given physical parameters.
-
-Args:
-    params: The physical parameters for a given hydrogen-passivated
-            silicon surface.
-    potential: The electrostatic potential (unit: V) to be converted
-               to a distance.
-    precision: The precision level for the conversion, specifying the
-               number of decimal places.
-
-Returns:
-    The distance (unit: nm) corresponding to the given electrostatic
-    potential.
-
-Note:
-    Runtime depends exponentially on the provided precision.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution =
-R"doc(This function determines the time-to-solution (TTS) and the accuracy
-(acc) of the *QuickSim* algorithm.
-
-Args:
-    lyt: Layout that is used for the simulation.
-    qs_params: Parameters required for the *QuickSim* algorithm.
-    tts_params: Parameters used for the time-to-solution calculation.
-    ps: Pointer to a struct where the results (time_to_solution, acc,
-        single runtime) are stored.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_for_given_simulation_results =
-R"doc(This function calculates the Time-to-Solution (TTS) by analyzing the
-simulation results of a heuristic algorithm in comparison to those of
-an exact algorithm. It provides further statistical metrics, including
-the accuracy of the heuristic algorithm, and individual runtimes.
-
-Args:
-    results_exact: Simulation results of the exact algorithm.
-    results_heuristic: Simulation of the heuristic for which the TTS
-                       is determined.
-    confidence_level: Confidence level for the TTS computation. The
-                      confidence level represents the probability that
-                      the confidence interval calculated from the
-                      simulation contains the true value. For example,
-                      a 95 % (0.95) confidence level means that if the
-                      simulation were repeated many times,
-                      approximately 95 out of 100 of the calculated
-                      confidence intervals would contain the true
-                      value.
-    ps: Pointer to a struct where the statistics of this function call
-        (time_to_solution, acc, single runtime) are to be stored.
-
-Template Args:
-    Lyt: SiDB ell-level layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_params = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_params_confidence_level =
-R"doc(The confidence level represents the probability that the confidence
-interval calculated from the simulation contains the true value. For
-example, a 99.7 % (0.997) confidence level means that if the
-simulation were repeated many times, approximately 997 out of 1000 of
-the calculated confidence intervals would contain the true value.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_params_engine =
-R"doc(Exhaustive simulation algorithm used to simulate the ground state as
-reference.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_params_repetitions =
-R"doc(Number of iterations of the heuristic algorithm used to determine the
-simulation accuracy (`repetitions = 100` means that accuracy is
-precise to 1 %).)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats =
-R"doc(This struct stores the time-to-solution, the simulation accuracy and
-the average single simulation runtime of *QuickSim*, the single
-runtime of the exact simulator used, and the number of valid charge
-configurations found by the exact algorithm.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_acc = R"doc(Accuracy of the simulation in %.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_algorithm =
-R"doc(Exact simulation algorithm used to simulate the ground state as
-reference.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_mean_single_runtime = R"doc(Average single simulation runtime in seconds.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_report =
-R"doc(Print the results to the given output stream.
-
-Args:
-    out: Output stream.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_single_runtime_exact =
-R"doc(Single simulation runtime of the exact ground state simulation
-algorithm.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_utils_time_to_solution_stats_time_to_solution = R"doc(Time-to-solution in seconds.)doc";
-
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library =
 R"doc(This library contains SiDB I/O wires designed for both 1- and 2-input
 functions. Each wire comprises 2 BDL pairs. The library contains all
@@ -24888,13 +24264,631 @@ static const char *mkd_doc_fiction_synthesis_technology_mapping_stats_mapper_sta
 
 static const char *mkd_doc_fiction_synthesis_technology_mapping_stats_report = R"doc(Report statistics.)doc";
 
-static const char *mkd_doc_fiction_utils_debug_print_node_to_tile_assignments = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_utils_debug_print_tile_to_node_assignments = R"doc()doc";
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_convert_node_index =
+R"doc(Converts the given node ID of a Brian Crites graph to the
+corresponding one used in Graph.
 
-static const char *mkd_doc_fiction_utils_debug_write_dot_layout = R"doc()doc";
+Args:
+    node: Node ID to convert between graph structures.
 
-static const char *mkd_doc_fiction_utils_debug_write_dot_network = R"doc()doc";
+Returns:
+    Corresponding node ID in Graph.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_convert_node_index_2 =
+R"doc(Converts the given node ID of a Graph to the corresponding one used in
+Brian Crites' graph structure. This function is automatically removed
+from overload resolution if both graphs use std::string because it
+would clash with the function above.
+
+Args:
+    node: Node ID to convert between graph structures.
+
+Returns:
+    Corresponding node ID in the Brian Crites graph.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph = R"doc(The graph to be colored.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_graph_coloring_impl = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_is_brian_crites_engine =
+R"doc(Checks whether the given engine points towards the usage of an
+algorithm from the graph-coloring library by Brian Crites.
+
+Args:
+    engine: Graph coloring engine to check.
+
+Returns:
+    `true` iff the given engine is DSATUR, MCS, LMXRLF, or TABUCOL.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_is_valid_vertex_coloring =
+R"doc(Checks whether the given coloring is valid, i.e., if no two adjacent
+vertices have the same color assigned.
+
+Args:
+    v_coloring: Vertex coloring to check.
+
+Returns:
+    `true` iff no two adjacent vertices in the stored graph have the
+    same color assigned according to the given coloring.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_run_brian_crites_engine = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_translate_to_brian_crites_graph =
+R"doc(Translates the given graph to a equivalent Brian Crites graph data
+structure.
+
+Args:
+    g: Graph to translate.
+
+Returns:
+    Translated graph.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_graph_coloring_impl_translate_to_vertex_coloring =
+R"doc(Translates the given Brian Crites coloring to the corresponding vertex
+coloring used here.
+
+Args:
+    bc_coloring: Brian Crites coloring to translate.
+
+Returns:
+    Translated vertex coloring.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_at_least_one_color_per_vertex = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_at_most_one_color_per_vertex = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_check_k_coloring = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_check_sat = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_color = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_color_frequency_equal_to_largest_clique_size = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_binary_search = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_linearly_ascending_search = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_determine_min_coloring_with_linearly_descending_search = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_exclude_identical_adjacent_colors = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_extract_vertex_coloring = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_get_model = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_graph = R"doc(A reference to the graph to be colored.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_largest_clique = R"doc(Iterator to the largest given clique.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_pre_assign_largest_clique =
+R"doc(Reduce the search space by symmetry breaking. To this end, each vertex
+in the provided clique gets a different color assigned from the
+beginning.
+
+Args:
+    instance: Pointer to the solver instance.
+
+Returns:
+    A clique-first ordering of the vertices that assigns the clique
+    vertices the lowest indices.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_ps = R"doc(Parameters.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_pst = R"doc(Statistics.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_q = R"doc(Largest clique size.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_sat_coloring_handler = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_2 = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_k = R"doc(Number of colors.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_solver = R"doc(SAT solver.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_solver_instance =
+R"doc(Standard constructor. Initialize one variable for each vertex-color
+pair.
+
+Args:
+    graph: The graph to color.
+    num_colors: Number of colors to attempt the coloring with.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_solver_instance_2 = R"doc(Default constructor is not available.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_solver_instance_variables = R"doc(Stores all variables.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_symmetry_breaking =
+R"doc(Reduce the search space by symmetry breaking. Two tactics are
+implemented:
+
+ - pre-assigning different colors to the largest given clique, and -
+   transforming the coloring solution to be lexicographically minimal
+
+Args:
+    instance: Pointer to the solver instance.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_detail_sat_coloring_handler_transform_solution_to_lexicographical_minimum =
+R"doc(Reduce the search space by symmetry breaking. To this end, the
+solution is transformed to be lexicographical minimal, i.e., no vertex
+is assigned color c unless color c - 1 has been assigned to any vertex
+of lower index.
+
+Args:
+    instance: Pointer to the solver instance.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring =
+R"doc(This function provides an interface to call various vertex coloring
+algorithms on the given graph. A vertex coloring is the assignment of
+colors to graph vertices such that no two vertices that share an edge
+receive the same color. If a graph is colorable with :math:`k` colors,
+the graph is said to be :math:`k`-colorable. The minimum value of
+:math:`k` for a graph is called its chromatic number. To determine the
+chromatic number of a graph is :math:`NP`-complete in general. The
+provided algorithms attempt to get as close to the optimum coloring as
+possible. However, no heuristic can give an optimality guarantee. If
+the exact chromatic number is required, the SAT-based engine must be
+used. This may require exponential runtime in the worst case but is,
+on average, a lot faster due to the smart traversal of search spaces
+that SAT solvers provide.
+
+See graph_coloring_engine for a list of all supported engines.
+
+Args:
+    graph: The graph whose vertices are to be colored.
+    ps: Parameters.
+    pst: Statistics.
+
+Template Args:
+    Graph: Graph type to color.
+    Color: Color type to use.
+
+Returns:
+    An assignment of graph vertices to colors such that no two
+    adjacent vertices share the same color.
+
+Note:
+    If the `clique_size_color_frequency` parameter is set together
+    with the SAT engine, there is no guarantee that the SAT solver is
+    able to find a valid coloring. In that case, this algorithm falls
+    back to MCS.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_heuristic_params = R"doc(Parameters for heuristic graph coloring.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_heuristic_params_k_color_value =
+R"doc(:math:`k`-color value for :math:`k`-coloring algorithms, e.g.,
+TABUCOL.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params =
+R"doc(Common parameters for the graph coloring algorithm.
+
+Template Args:
+    Graph: Type of the graph to color.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params_engine = R"doc(The engine to use.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params_heuristic_params = R"doc(Parameters for `engine != SAT`.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params_sat_params = R"doc(Parameters for `engine == SAT`.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_params_verify_coloring_after_computation = R"doc(Verify that the found coloring is valid.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_params =
+R"doc(Parameters for SAT-based graph coloring.
+
+Template Args:
+    Graph: Type of the graph to color.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_params_clique_size_color_frequency =
+R"doc(Tries to establish the color frequency of color 0 such that it equals
+the largest clique size.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_params_cliques =
+R"doc(If cliques in the passed graph are known, they can be used for
+symmetry breaking in the SAT engine which significantly speeds up
+runtime. The bigger the cliques, the better.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_params_sat_engine = R"doc(The SAT solver to use.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_sat_params_sat_search_tactic = R"doc(The search tactic to apply.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_chromatic_number =
+R"doc(The determined chromatic number (could be non-optimal depending on the
+applied engine).)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_color_frequency = R"doc(The frequency of the most used color.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_coloring_verified =
+R"doc(Validation result of the coloring (std::nullopt = none attempted, true
+= valid, false = invalid).)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_most_frequent_color = R"doc(The color that appeared the most.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_determine_vertex_coloring_stats_time_total = R"doc(Runtime measurement.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine =
+R"doc(An enumeration of coloring engines to use for the graph coloring. All
+but SAT are using the graph-coloring library by Brian Crites.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_DSATUR =
+R"doc(Saturation degree algorithm proposed in \"New Methods to Color the
+Vertices of a Graph\" by Daniel Brélaz in Communications of the ACM,
+1979. This algorithm is a heuristic but is exact for bipartite graphs.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_LMXRLF =
+R"doc(A randomized heuristic algorithm that combines various paradigms like
+divide-and-conquer, objective functions, reuse of intermediate
+solutions etc. It was proposed in \"Efficient Coloring of a Large
+Spectrum of Graphs\" by Darko Kirovski and Miodrag Potkonjak in DAC
+1998. While this algorithm is really performant, it tends to find non-
+optimal solutions even for small instances.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_MCS =
+R"doc(Optimal coloring for chordal graphs proposed in \"Register Allocation
+via Coloring of Chordal Graphs\" by Jens Palsberg in CATS 2007.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_SAT = R"doc(Custom iterative SAT-based encoding that finds optimal colorings.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_engine_TABUCOL =
+R"doc(A :math:`k`-coloring algorithm using tabu search proposed in \"Using
+Tabu Search Techniques for Graph Coloring\" by A. Hertz and D. de
+Werra in Computing 1987. The authors claim that it significantly
+outperforms simulated annealing. However, since it is a
+:math:`k`-coloring algorithm, it is required to set `k_color_value` in
+`determine_vertex_coloring_params` to the chromatic number that is to
+be checked for.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_sat_search_tactic =
+R"doc(An enumeration of search tactics to use for the SAT-based graph
+coloring to determine a min-coloring.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_sat_search_tactic_BINARY_SEARCH =
+R"doc(First ascend exponentially by checking for :math:`k = 2^0, 2^1, 2^2,
+\dots` until SAT, then perform binary search in the window
+:math:`[2^{h-1}, 2^h]`, where :math:`2^h` was the first SAT. If at
+least one clique is passed, :math:`k` starts at the largest clique
+size :math:`|C|` instead with :math:`k = 2^0 \cdot |C|, 2^1 \cdot |C|,
+2^2 \cdot |C|, \dots`)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_sat_search_tactic_LINEARLY_ASCENDING =
+R"doc(Ascend linearly by checking for :math:`k = 1, 2, 3, \dots` until SAT.
+If at least one clique is passed, :math:`k` starts at the largest
+clique size :math:`|C|` instead with :math:`k = |C|, |C| + 1, |C| + 2,
+\dots`)doc";
+
+static const char *mkd_doc_fiction_utils_graph_graph_coloring_sat_search_tactic_LINEARLY_DESCENDING =
+R"doc(Descend linearly by checking for :math:`k = |G|, |G| - 1, |G| - 2,
+\dots` until UNSAT.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross =
+R"doc(Reimplementation of Graphviz's `mincross` algorithm for edge crossing
+minimization. This function reorders nodes in a leveled logic network
+to minimize the number of edge crossings using iterative median and
+transpose heuristics.
+
+Reference implementation:
+https://gitlab.com/graphviz/graphviz/-/blob/main/lib/dotgen/mincross.c
+
+For more on Graphviz's `dot` layout generation:
+https://graphviz.org/docs/layouts/dot/
+
+Args:
+    ntk: The input leveled network whose ranks are to be reordered.
+    ps: Configuration parameters for the minimization algorithm.
+    pst: Optional pointer to a statistics structure for storing the
+         resulting number of crossings.
+
+Template Args:
+    Ntk: A logic network type with level and fanout support.
+
+Returns:
+    A copy of the input network with reordered ranks to reduce edge
+    crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl =
+R"doc(Implements the crossing minimization algorithm inspired by Graphviz's
+`mincross`. This algorithm reorders nodes in ranks to reduce edge
+crossings in a leveled graph representation of the logic network.
+
+Template Args:
+    Ntk: Logic network type that models a leveled circuit with rank
+         information.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_count_crossings =
+R"doc(Computes the number of crossings between two sets of ranked positions.
+
+Args:
+    a: Positions from first set of connections.
+    b: Positions from second set of connections.
+
+Returns:
+    Total number of crossings between the sets.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_fanout_ntk =
+R"doc(Fanout-augmented view of the network for efficient traversal and
+connectivity queries.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_in_cross =
+R"doc(Counts the number of edge crossings between fanins of two nodes in the
+previous rank.
+
+Args:
+    left: First node.
+    right: Second node.
+
+Returns:
+    Number of crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_median_map =
+R"doc(Stores median values used to sort nodes within ranks during
+optimization.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_median_sorting = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_median_sorting_ASCENDING = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_median_sorting_DESCENDING = R"doc()doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_medians =
+R"doc(Computes median values for the nodes in rank `r0` based on their
+connections to `r1`.
+
+Args:
+    r0: Current rank.
+    r1: Adjacent rank to which connections are considered.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_mincross_impl =
+R"doc(Constructs the crossing minimization implementation object.
+
+Args:
+    src: The logic network on which to perform crossing minimization.
+    p: Configuration parameters for the algorithm (e.g., `optimize`)
+    st: Statistics object to store the resulting number of crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_mincross_step =
+R"doc(Executes one full up/down pass of median ordering followed by
+transposition to reduce crossings.
+
+Args:
+    pass: The current pass number, determines direction and ordering.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_minimize_crossings =
+R"doc(Performs the main iterative crossing minimization using median and
+transpose heuristics.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_ncross =
+R"doc(Computes the total number of edge crossings in the current network
+state.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_ntk = R"doc(Logic network being reordered.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_out_cross =
+R"doc(Counts the number of edge crossings between fanouts of two nodes in
+the next rank.
+
+Args:
+    left: First node.
+    right: Second node.
+
+Returns:
+    Number of crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_ps = R"doc(Parameters for crossing minimization.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_pst =
+R"doc(Statistics that store the final number of crossings after
+optimization.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_reorder =
+R"doc(Reorders the nodes in a given rank according to computed medians.
+
+Args:
+    r: The rank index.
+    order: Sorting order of medians.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_run =
+R"doc(Runs the crossing minimization algorithm and returns a reordered
+network.
+
+Returns:
+    A network with reordered nodes in ranks to reduce edge crossings.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_total_crossings = R"doc(Current total number of edge crossings in the network.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_transpose =
+R"doc(Performs pairwise transpositions within ranks to further reduce
+crossings.
+
+Args:
+    order: Sorting heuristic for tie-breaking.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_impl_transpose_step =
+R"doc(Performs a single transposition pass for rank `r`.
+
+Args:
+    r: Rank index.
+    order: Sorting heuristic for tie-breaking.
+
+Returns:
+    The number of crossings reduced.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params = R"doc(Parameters for the `mincross` crossing minimization algorithm.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params_convergence =
+R"doc(Convergence threshold: relative improvement factor required to reset
+the early-quit counter (heuristic from Graphviz). If the current
+crossing count drops below (`convergence` * `best_cross`), where
+`best_cross` is the best/lowest crossing count found so far, the
+process continues. Default is `0.995` (i.e., at least 0.5% improvement
+required).)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params_fixed_pis =
+R"doc(Whether the rank positions of primary inputs (PIs) should remain fixed
+during the minimization process. If set to `true`, PIs will not be
+reordered.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params_init_refine_max_iters =
+R"doc(Maximum number of iterations in the initial (pass 0) and refinement
+(pass 1) phases of the crossing minimization procedure (heuristic from
+Graphviz).
+
+- In these early passes, the algorithm explores simple reorderings to
+  quickly reduce crossings without investing in the full optimization
+  effort.
+- By default, the number of iterations is capped at `4` to prevent
+  excessive runtime during initialization and refinement. This cap can
+  be lifted if a larger global maximum (`ps.max_iter`) is set.
+- In the full optimization pass (pass 2), `ps.max_iter` is always used
+  instead.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params_max_iter =
+R"doc(Maximum number of iterations per optimization pass (heuristic from
+Graphviz). Larger values allow more refinement but increase runtime.
+Default (`24`) works well for small and medium-sized networks.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params_min_quit =
+R"doc(Minimum number of consecutive iterations without sufficient
+improvement before quitting early (heuristic from Graphviz). Prevents
+wasting time when the number of crossings no longer decreases.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_params_optimize =
+R"doc(If `false`, skips optimization and only reports the current number of
+crossings.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_stats = R"doc(Statistics collected during the execution of the `mincross` algorithm.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_mincross_stats_num_crossings = R"doc(The total number of edge crossings after optimization.)doc";
+
+static const char *mkd_doc_fiction_utils_graph_vertex_coloring =
+R"doc(A vertex coloring is simply a hash map from vertex IDs to Color types
+where Color should be constructible/convertible from int.
+
+Template Args:
+    Graph: Graph type to color.
+    Color: Color type to use. Must be convertible from int.)doc";
+
+static const char *mkd_doc_fiction_utils_io_csv_writer =
+R"doc(Utility class for writing delimited (e.g. CSV) data into an output
+stream. It provides a variadic member function, `write_line`, that can
+take an arbitrary number of arguments and write them to the provided
+output stream in a line separated by a specified delimiter.
+
+The csv_writer follows some behavior principles:
+- Any standard data type can be written to the output stream. - Data
+  arguments written will be separated by the specified delimiter. - A
+  newline is written at the end of each line. - If `write_line`
+  receives no arguments, it only writes a newline. - The last value
+  written in a line is not followed by a delimiter. - No checks for
+  escape characters are performed.
+
+Example usage:
+```
+{.cpp}
+  std::ofstream file("output.csv");
+  csv_writer writer(file);
+  writer.write_line("Name", "Age", "City");
+  writer.write_line("Alice", 20, "New York");
+```)doc";
+
+static const char *mkd_doc_fiction_utils_io_csv_writer_csv_writer =
+R"doc(Standard constructor.
+
+Args:
+    os: Output stream to write CSV data into.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_io_csv_writer_stream = R"doc(Output stream to write to.)doc";
+
+static const char *mkd_doc_fiction_utils_io_csv_writer_write_line =
+R"doc(Writes a single line of values to the output stream separated by a
+DELIMITER. No delimiter placed after the last value. Note that no
+escape checks are performed. Upon receiving no arguments, only a
+newline is written. This function uses template recursion to process
+the variadic parameters.
+
+Args:
+    arg: First argument to write to the stream.
+    args: Rest of the arguments to write to the stream if any exist.
+
+Template Args:
+    T: The type of the first argument.
+    Ts: Types of the rest of the variadic parameter pack.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_io_csv_writer_write_line_2 =
+R"doc(Writes a newline to the output stream. This is the base case of the
+variadic template function, and is invoked when there are no
+additional arguments to process.
+
+Template Args:
+    Ts: An empty variadic template argument pack.
+
+)doc";
 
 static const char *mkd_doc_fiction_utils_math_binomial_coefficient =
 R"doc(Calculates the binomial coefficient :math:`\binom{n}{k}`.
@@ -24964,6 +24958,319 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_utils_math_find_key_with_tolerance =
+R"doc(This function searches for a floating-point value specified by the
+`key` in the provided map `map`, applying a tolerance specified by
+`fiction::constants::ERROR_MARGIN`. Each key in the map is compared to
+the specified key within this tolerance.
+
+Args:
+    map: The map containing parameter points as keys and associated
+         values.
+    key: The parameter point to search for in the map.
+
+Template Args:
+    MapType: The type of the map containing parameter points as keys.
+
+Returns:
+    An iterator to the found parameter point in the map, or
+    `map.cend()` if not found.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator =
+R"doc(An iterator type that iterates over Gray code representations for
+decimal numbers.
+
+The `gray_code_iterator` class provides an iterator for generating
+Gray code representations for a range of decimal numbers. It starts
+from a specified number and produces Gray codes in ascending order
+based on bitwise XOR operations.)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_binary_to_gray =
+R"doc(Converts the current decimal number into its corresponding Gray code
+representation.
+
+This function operates on the current decimal number and produces its
+Gray code representation using the bitwise XOR operation. Gray code is
+a binary numeral system in which two successive values differ in only
+one bit.
+
+The result is stored in the 'current_gray_code' variable.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_current_gray_code = R"doc(Current Gray Code.)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_current_iteration = R"doc(Current number (i.e., current iteration number).)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_gray_code_iterator =
+R"doc(Constructs a Gray Code Iterator with a specified starting number.
+
+Constructs a `gray_code_iterator` that generates Gray codes for
+decimal numbers starting from the given `start` number.
+
+Args:
+    start: The starting decimal number for the iterator.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_add =
+R"doc(Addition operator. Computes the Gray code of the current iterator plus
+the given integer.
+
+Args:
+    m: The amount of Gray codes to skip.
+
+Returns:
+    Iterator of the current iterator plus the given integer.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_array =
+R"doc(Subscript operator. Returns the Gray code at a specific position in
+the iteration range.
+
+Args:
+    index: The position in the iteration range.
+
+Returns:
+    The Gray code at the specified position.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_assign =
+R"doc(Assignment operator. Sets the current number to the given integer.
+
+Args:
+    m: The number to set.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_dec =
+R"doc(Prefix decrement operator. Sets the previous Gray code.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_dec_2 =
+R"doc(Postfix decrement operator. Sets the previous Gray Code.
+
+Returns:
+    Copy of `this` before decrementing.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_eq =
+R"doc(Equality comparison operator. Compares the current iterator with
+another iterator.
+
+Args:
+    other: The iterator to compare with.
+
+Returns:
+    `true` if the current iterator is equal to the other iterator,
+    `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_eq_2 =
+R"doc(Equality operator. Compares the current number with the given integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current number is equal to `m`, `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_ge =
+R"doc(Greater-or-equal-than operator. Compares the current number with the
+given integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current number is greater than or equal to `m`,
+    `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_gt =
+R"doc(Greater-than operator. Compares the current number with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current number is greater than `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_iadd =
+R"doc(Addition assignment operator. Iterator is increased by given number.
+
+Args:
+    m: The amount of Gray codes to skip.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_inc =
+R"doc(Prefix increment operator. Sets the number and the corresponding Gray
+code.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_inc_2 =
+R"doc(Postfix increment operator. Sets the next Gray Code.
+
+Returns:
+    Copy of `this` before incrementing.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_isub =
+R"doc(Subtraction assignment operator. Sets a previous Gray code.
+
+Args:
+    m: The amount of Gray codes to skip.
+
+Returns:
+    Reference to `this`.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_le =
+R"doc(Less-than or equal-to comparison operator. Compares the current
+iterator with another iterator.
+
+Args:
+    other: The iterator to compare with.
+
+Returns:
+    `true` if the current iterator is less than or equal to the other
+    iterator, `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_le_2 =
+R"doc(Less-or-equal-than operator. Compares the current number with the
+given integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current number is less than or equal to `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_lt =
+R"doc(Less-than comparison operator. Compares the current iterator with
+another iterator.
+
+Args:
+    other: The iterator to compare with.
+
+Returns:
+    `true` if the current iterator is less than the other iterator,
+    `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_lt_2 =
+R"doc(Less-than operator. Compares the current number with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current number is less than `m`, `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_mul =
+R"doc(Dereference operator. Returns a reference to the Gray code of the
+current iteration.
+
+Returns:
+    Reference to the current Gray code.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_ne =
+R"doc(Inequality comparison operator. Compares the current iterator with
+another iterator.
+
+Args:
+    other: The iterator to compare with.
+
+Returns:
+    `true` if the current iterator is not equal to the other iterator,
+    `false` otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_ne_2 =
+R"doc(Inequality operator. Compares the current number with the given
+integer.
+
+Args:
+    m: Integer to compare with.
+
+Returns:
+    `true` if the current number is not equal to `m`, `false`
+    otherwise.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_sub =
+R"doc(Subtraction operator to calculate the difference between two
+gray_code_iterators.
+
+This operator calculates the difference between the current iterator
+and another gray_code_iterator provided as input. The result is
+returned as an int64_t representing the number of positions between
+the iterators.
+
+Args:
+    other: The gray_code_iterator to subtract from the current
+           iterator.
+
+Returns:
+    The difference between the current iterator and the input iterator
+    as int64_t.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_operator_sub_2 =
+R"doc(Subtraction operator. Computes the Gray code of the current iterator
+minus the given integer.
+
+Args:
+    m: The amount of Gray codes to skip.
+
+Returns:
+    Iterator of the current iterator minus the given integer.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_math_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
+
 static const char *mkd_doc_fiction_utils_math_integral_abs =
 R"doc(Takes the absolute value of an integral number if it is signed, and
 otherwise computes the identity. This avoids a compiler warning when
@@ -24993,6 +25300,111 @@ Template Args:
 
 Returns:
     The number rounded to n decimal places.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_optimization_geometric_temperature_schedule =
+R"doc(A logarithmically decreasing temperature schedule. The temperature is
+altered by multiplying it with `0.99`.
+
+Args:
+    t: The current temperature.
+
+Returns:
+    The next temperature, i.e. :math:`\texttt{t} \cdot 0.99`.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_optimization_linear_temperature_schedule =
+R"doc(A linearly decreasing temperature schedule. The temperature is altered
+in decrements of `10`.
+
+Args:
+    t: The current temperature.
+
+Returns:
+    The next temperature, i.e. :math:`\texttt{t} - 10`.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_optimization_multi_simulated_annealing =
+R"doc(This variation of Simulated Annealing (SA) does not start from just
+one provided initial state, but generates a number of random initial
+states using a provided random state generator. SA as specified above
+is then run on all these random initial states where the best result
+of all generated states is finally returned.
+
+Args:
+    init_temp: The initial temperature.
+    final_temp: The final temperature.
+    cycles: The number of cycles for each temperature value.
+    instances: The number of random initial states to generate.
+    rand_state: The random state generator function.
+    cost: The cost function to minimize.
+    schedule: The temperature schedule.
+    next: The next state function that determines an adjacent state
+          given a current one.
+
+Template Args:
+    RandStateFunc: The random state generator function type (specifies
+                   the State type via its return value).
+    CostFunc: The cost function type (specifies the cost value via its
+              return value).
+    TempFunc: The temperature schedule function type.
+    NextFunc: The next state function type.
+
+Returns:
+    A pair of the overall best optimized state and its cost value.
+
+Note:
+    If compiler support for C++17's execution policies is available,
+    the algorithm is parallelized and/or vectorized using
+    `std::execution::par_unseq`.
+
+Note:
+    The State type must be default constructible.
+
+)doc";
+
+static const char *mkd_doc_fiction_utils_optimization_simulated_annealing =
+R"doc(Simulated Annealing (SA) is a probabilistic optimization algorithm
+that is used to find a local minimum of a given function. SA was first
+proposed in \"Optimization by simulated annealing\" by S. Kirkpatrick,
+C. D. Gelatt Jr, and M. P. Vecchi in Science 1983. It is a
+metaheuristic that is inspired by the annealing process in metallurgy.
+The algorithm starts with a random state and iteratively improves the
+state by randomly selecting a neighboring state. If the neighboring
+state is better than the current state, it is accepted. If the
+neighboring state is worse than the current state, it is accepted with
+a probability that decreases over time. The algorithm stops when the
+temperature reaches a certain threshold.
+
+Some pre-defined temperature schedules are provided in this header
+file.
+
+This implementation is based on:
+https://codereview.stackexchange.com/questions/70310/simple-simulated-
+annealing-template-in-c11
+
+Args:
+    init_state: The initial state to optimize.
+    init_temp: The initial temperature.
+    final_temp: The final temperature.
+    cycles: The number of cycles for each temperature value.
+    cost: The cost function to minimize.
+    schedule: The temperature schedule.
+    next: The next state function that determines an adjacent state
+          given a current one.
+
+Template Args:
+    State: The state type.
+    CostFunc: The cost function type (specifies the cost type via its
+              return value).
+    TempFunc: The temperature schedule function type.
+    NextFunc: The next state function type.
+
+Returns:
+    A pair of the optimized state and its cost value.
 
 )doc";
 
@@ -25050,66 +25462,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_utils_stl_csv_writer =
-R"doc(Utility class for writing delimited (e.g. CSV) data into an output
-stream. It provides a variadic member function, `write_line`, that can
-take an arbitrary number of arguments and write them to the provided
-output stream in a line separated by a specified delimiter.
-
-The csv_writer follows some behavior principles:
-- Any standard data type can be written to the output stream. - Data
-  arguments written will be separated by the specified delimiter. - A
-  newline is written at the end of each line. - If `write_line`
-  receives no arguments, it only writes a newline. - The last value
-  written in a line is not followed by a delimiter. - No checks for
-  escape characters are performed.
-
-Example usage:
-```
-{.cpp}
-  std::ofstream file("output.csv");
-  csv_writer writer(file);
-  writer.write_line("Name", "Age", "City");
-  writer.write_line("Alice", 20, "New York");
-```)doc";
-
-static const char *mkd_doc_fiction_utils_stl_csv_writer_csv_writer =
-R"doc(Standard constructor.
-
-Args:
-    os: Output stream to write CSV data into.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_csv_writer_stream = R"doc(Output stream to write to.)doc";
-
-static const char *mkd_doc_fiction_utils_stl_csv_writer_write_line =
-R"doc(Writes a single line of values to the output stream separated by a
-DELIMITER. No delimiter placed after the last value. Note that no
-escape checks are performed. Upon receiving no arguments, only a
-newline is written. This function uses template recursion to process
-the variadic parameters.
-
-Args:
-    arg: First argument to write to the stream.
-    args: Rest of the arguments to write to the stream if any exist.
-
-Template Args:
-    T: The type of the first argument.
-    Ts: Types of the rest of the variadic parameter pack.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_csv_writer_write_line_2 =
-R"doc(Writes a newline to the output stream. This is the base case of the
-variadic template function, and is invoked when there are no
-additional arguments to process.
-
-Template Args:
-    Ts: An empty variadic template argument pack.
-
-)doc";
-
 static const char *mkd_doc_fiction_utils_stl_detail_convert_array =
 R"doc(Based on https://stackoverflow.com/questions/57756557/initializing-a-
 stdarray-with-a-constant-value
@@ -25162,319 +25514,6 @@ Returns:
     `last` if no such shared sub-sequence exists.
 
 )doc";
-
-static const char *mkd_doc_fiction_utils_stl_find_key_with_tolerance =
-R"doc(This function searches for a floating-point value specified by the
-`key` in the provided map `map`, applying a tolerance specified by
-`fiction::constants::ERROR_MARGIN`. Each key in the map is compared to
-the specified key within this tolerance.
-
-Args:
-    map: The map containing parameter points as keys and associated
-         values.
-    key: The parameter point to search for in the map.
-
-Template Args:
-    MapType: The type of the map containing parameter points as keys.
-
-Returns:
-    An iterator to the found parameter point in the map, or
-    `map.cend()` if not found.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator =
-R"doc(An iterator type that iterates over Gray code representations for
-decimal numbers.
-
-The `gray_code_iterator` class provides an iterator for generating
-Gray code representations for a range of decimal numbers. It starts
-from a specified number and produces Gray codes in ascending order
-based on bitwise XOR operations.)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_binary_to_gray =
-R"doc(Converts the current decimal number into its corresponding Gray code
-representation.
-
-This function operates on the current decimal number and produces its
-Gray code representation using the bitwise XOR operation. Gray code is
-a binary numeral system in which two successive values differ in only
-one bit.
-
-The result is stored in the 'current_gray_code' variable.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_current_gray_code = R"doc(Current Gray Code.)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_current_iteration = R"doc(Current number (i.e., current iteration number).)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_gray_code_iterator =
-R"doc(Constructs a Gray Code Iterator with a specified starting number.
-
-Constructs a `gray_code_iterator` that generates Gray codes for
-decimal numbers starting from the given `start` number.
-
-Args:
-    start: The starting decimal number for the iterator.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_add =
-R"doc(Addition operator. Computes the Gray code of the current iterator plus
-the given integer.
-
-Args:
-    m: The amount of Gray codes to skip.
-
-Returns:
-    Iterator of the current iterator plus the given integer.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_array =
-R"doc(Subscript operator. Returns the Gray code at a specific position in
-the iteration range.
-
-Args:
-    index: The position in the iteration range.
-
-Returns:
-    The Gray code at the specified position.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_assign =
-R"doc(Assignment operator. Sets the current number to the given integer.
-
-Args:
-    m: The number to set.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_dec =
-R"doc(Prefix decrement operator. Sets the previous Gray code.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_dec_2 =
-R"doc(Postfix decrement operator. Sets the previous Gray Code.
-
-Returns:
-    Copy of `this` before decrementing.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_eq =
-R"doc(Equality comparison operator. Compares the current iterator with
-another iterator.
-
-Args:
-    other: The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is equal to the other iterator,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_eq_2 =
-R"doc(Equality operator. Compares the current number with the given integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current number is equal to `m`, `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_ge =
-R"doc(Greater-or-equal-than operator. Compares the current number with the
-given integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current number is greater than or equal to `m`,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_gt =
-R"doc(Greater-than operator. Compares the current number with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current number is greater than `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_iadd =
-R"doc(Addition assignment operator. Iterator is increased by given number.
-
-Args:
-    m: The amount of Gray codes to skip.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_inc =
-R"doc(Prefix increment operator. Sets the number and the corresponding Gray
-code.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_inc_2 =
-R"doc(Postfix increment operator. Sets the next Gray Code.
-
-Returns:
-    Copy of `this` before incrementing.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_isub =
-R"doc(Subtraction assignment operator. Sets a previous Gray code.
-
-Args:
-    m: The amount of Gray codes to skip.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_le =
-R"doc(Less-than or equal-to comparison operator. Compares the current
-iterator with another iterator.
-
-Args:
-    other: The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is less than or equal to the other
-    iterator, `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_le_2 =
-R"doc(Less-or-equal-than operator. Compares the current number with the
-given integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current number is less than or equal to `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_lt =
-R"doc(Less-than comparison operator. Compares the current iterator with
-another iterator.
-
-Args:
-    other: The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is less than the other iterator,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_lt_2 =
-R"doc(Less-than operator. Compares the current number with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current number is less than `m`, `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_mul =
-R"doc(Dereference operator. Returns a reference to the Gray code of the
-current iteration.
-
-Returns:
-    Reference to the current Gray code.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_ne =
-R"doc(Inequality comparison operator. Compares the current iterator with
-another iterator.
-
-Args:
-    other: The iterator to compare with.
-
-Returns:
-    `true` if the current iterator is not equal to the other iterator,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_ne_2 =
-R"doc(Inequality operator. Compares the current number with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current number is not equal to `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_sub =
-R"doc(Subtraction operator to calculate the difference between two
-gray_code_iterators.
-
-This operator calculates the difference between the current iterator
-and another gray_code_iterator provided as input. The result is
-returned as an int64_t representing the number of positions between
-the iterators.
-
-Args:
-    other: The gray_code_iterator to subtract from the current
-           iterator.
-
-Returns:
-    The difference between the current iterator and the input iterator
-    as int64_t.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_operator_sub_2 =
-R"doc(Subtraction operator. Computes the Gray code of the current iterator
-minus the given integer.
-
-Args:
-    m: The amount of Gray codes to skip.
-
-Returns:
-    Iterator of the current iterator minus the given integer.
-
-)doc";
-
-static const char *mkd_doc_fiction_utils_stl_gray_code_iterator_start_number = R"doc(Start number of the iteration.)doc";
 
 static const char *mkd_doc_fiction_utils_stl_hash_combine =
 R"doc(A recursive `hash_combine` implementation from

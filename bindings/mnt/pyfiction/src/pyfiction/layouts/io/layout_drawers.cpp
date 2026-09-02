@@ -32,7 +32,7 @@ namespace detail
 {
 
 template <typename Lyt>
-void layout_drawers(nanobind::module_& m)
+void write_dot_layout(nanobind::module_& m)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 

@@ -282,23 +282,24 @@ bindings grows:
         │       ├── a_star.cpp                         # defines a_star(nanobind::module_&)
         │       └── register_path_finding.cpp          # calls a_star(m), distance(m), ...
         ├── technology/sidb/simulation/engines/
-        │   ├── quickexact.cpp
-        │   └── ...
+        │   ├── quickexact.cpp                         # defines quickexact(nanobind::module_&)
+        │   └── register_sidb_simulation_engines.cpp   # calls quickexact(m), quicksim(m), ...
         └── ...
 
 The tree mirrors ``include/fiction/``: a binding sits in the directory of the header it wraps, so
 ``a_star.cpp`` is under ``physical_design/path_finding/`` because ``a_star.hpp`` is. Each leaf ``.cpp`` file defines
-exactly one binding function (e.g. ``void a_star(nanobind::module_& m)``) that binds a single class, function, or
-closely related group thereof, and each module has a ``register_<name>.cpp`` that forward-declares and calls the
-binding functions beside it.
+exactly one binding function named after the file (e.g. ``void a_star(nanobind::module_& m)``) that binds a
+single class, function, or closely related group thereof. Each directory that holds binding sources has exactly one
+``register_<path>.cpp``, named after the directory, that forward-declares and calls the binding functions beside it
+and nothing else.
 
 The registries are flat: ``pyfiction.cpp`` calls every one of them from its ``NB_MODULE`` block, and none is nested
 inside another. That order is load-bearing — a type has to be registered before anything names it in a signature or
-a default argument — so the block runs the types first, then the readers and writers, then the utilities, then the
+a default argument — so the block runs the type-defining directories first, then the readers and writers, then the
 algorithms built on all of them. New source files do not need to be added anywhere manually: ``CMakeLists.txt``
 collects them automatically via ``file(GLOB_RECURSE FICTION_PYFICTION_SOURCES CONFIGURE_DEPENDS "src/*.cpp")``, so
-re-running ``cmake`` picks up new files on its own — you only need to wire the new function into the relevant
-``register_<name>.cpp`` and, if needed, forward-declare it there.
+re-running ``cmake`` picks up new files on its own — you only need to wire the new function into the directory's
+``register_<path>.cpp`` and forward-declare it there.
 
 .. note::
 
