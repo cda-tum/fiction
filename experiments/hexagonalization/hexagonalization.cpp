@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level

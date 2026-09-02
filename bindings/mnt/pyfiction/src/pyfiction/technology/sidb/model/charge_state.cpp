@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 19.09.23.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ */
 
 #include "pyfiction/documentation.hpp"
 

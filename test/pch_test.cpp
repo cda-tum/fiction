@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 //
 // Carrier translation unit for the test suite's shared pre-compiled header. The 118 test executables
 // reuse the PCH built for this target instead of each building their own.

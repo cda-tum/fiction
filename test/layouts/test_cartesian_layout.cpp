@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 31.03.21.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
+ */
 
 #include <catch2/catch_test_macros.hpp>
 

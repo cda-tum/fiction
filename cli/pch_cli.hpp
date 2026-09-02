@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 //
 // Pre-compiled headers for the fiction CLI
 // This file is automatically included in all CLI command compilation units

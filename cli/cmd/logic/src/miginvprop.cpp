@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 07.06.23.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/logic/include/miginvprop.hpp"
 

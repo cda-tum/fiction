@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Willem Lambooy (wlambooy)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"

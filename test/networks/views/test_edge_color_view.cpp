@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 18.01.22.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 // This file is based on mockturtle/test/views/color_view.cpp
 

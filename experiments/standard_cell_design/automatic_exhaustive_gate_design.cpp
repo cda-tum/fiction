@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok 10.06.25
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 

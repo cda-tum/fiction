@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #pragma once
 
 #include <utility>

@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>

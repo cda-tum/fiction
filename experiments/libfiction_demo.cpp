@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 27.10.21.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 #if (FICTION_Z3_SOLVER)
 

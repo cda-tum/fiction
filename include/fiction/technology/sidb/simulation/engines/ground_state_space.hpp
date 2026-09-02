@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Willem Lambooy on 06.02.2024.
-//
+/**
+ * @file
+ * @author Willem Lambooy (wlambooy)
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #pragma once
 

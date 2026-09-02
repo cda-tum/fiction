@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok on 08.04.24.
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"

@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok on 24.10.23.
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/catch_test_macros.hpp>
 

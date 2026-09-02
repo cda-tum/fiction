@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include <nanobind/nanobind.h>
 
 namespace pyfiction

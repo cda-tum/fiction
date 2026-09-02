@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by benjamin on 08.04.24.
-//
+/**
+ * @file
+ * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/networks/technology_network.hpp"

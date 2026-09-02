@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 31.08.22.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Jan Drewniok (Drewniok)
+ */
 
 #if (FICTION_Z3_SOLVER)
 

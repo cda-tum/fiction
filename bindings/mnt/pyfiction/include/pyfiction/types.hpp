@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 15.12.22.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
+ */
 
 #pragma once
 

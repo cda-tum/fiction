@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok on 30.11.24.
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"

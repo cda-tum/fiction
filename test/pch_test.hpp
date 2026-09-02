@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 //
 // Pre-compiled header for the fiction test suite
 // Included automatically in every test translation unit when FICTION_ENABLE_PCH is on

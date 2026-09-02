@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #if (FICTION_ALGLIB_ENABLED)
 
 #pragma once

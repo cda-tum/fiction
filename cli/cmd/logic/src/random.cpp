@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 08.11.19.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/logic/include/random.hpp"
 

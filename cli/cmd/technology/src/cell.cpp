@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 24.10.19.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
+ */
 
 #include "cmd/technology/include/cell.hpp"
 

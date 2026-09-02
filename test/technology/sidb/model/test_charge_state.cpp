@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 29.03.23.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/catch_test_macros.hpp>
 

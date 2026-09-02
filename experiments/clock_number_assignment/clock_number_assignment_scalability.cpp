@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/networks/io/network_reader.hpp>            // custom reader for folders of networks

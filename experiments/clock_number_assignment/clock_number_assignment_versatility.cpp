@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/io/read_fgl_layout.hpp>          // custom reader for layouts

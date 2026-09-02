@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by sophia on 12/30/18.
-//
+/**
+ * @file
+ * @author Sophia Kuhn
+ * @author Marcel Walter (marcelwa)
+ */
 
 #pragma once
 

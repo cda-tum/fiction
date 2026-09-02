@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
+
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/simulation/analysis/occupation_probability_of_excited_states.hpp>

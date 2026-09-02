@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 15.09.21.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
+ */
 
 #pragma once
 

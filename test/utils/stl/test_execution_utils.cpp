@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 17.08.26.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 // clang-format off
 // execution_utils.hpp has to stay the first include: the guard must not depend on which standard

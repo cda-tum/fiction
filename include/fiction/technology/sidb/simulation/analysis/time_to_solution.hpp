@@ -8,9 +8,13 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok on 23.12.22.
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
+ */
 
 #pragma once
 

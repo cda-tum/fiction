@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #pragma once
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"

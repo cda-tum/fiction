@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 

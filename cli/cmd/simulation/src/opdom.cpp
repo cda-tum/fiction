@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 12.12.23.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/simulation/include/opdom.hpp"
 

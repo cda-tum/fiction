@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 // NOLINTBEGIN(misc-include-cleaner)
 #include "cmd/general/cmd_general.hpp"
 #include "cmd/io/cmd_io.hpp"

@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by benjamin on 18.06.24.
-//
+/**
+ * @file
+ * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>

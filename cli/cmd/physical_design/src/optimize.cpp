@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Simon Hofmann on 02.08.23.
-//
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/physical_design/include/optimize.hpp"
 

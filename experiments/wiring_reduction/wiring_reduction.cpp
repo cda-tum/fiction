@@ -8,6 +8,13 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>                              // bounding box

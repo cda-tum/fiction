@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by simon on 06.10.2023
-//
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/fgl.hpp"
 

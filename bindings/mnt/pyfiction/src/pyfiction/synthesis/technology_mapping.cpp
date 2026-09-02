@@ -8,6 +8,13 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 

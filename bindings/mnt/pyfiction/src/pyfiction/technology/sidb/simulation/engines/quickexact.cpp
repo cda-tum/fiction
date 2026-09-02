@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ */
+
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 

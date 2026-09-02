@@ -8,6 +8,11 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/name_utils.hpp>

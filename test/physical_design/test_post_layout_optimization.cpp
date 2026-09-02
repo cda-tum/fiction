@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Simon Hofmann on 31.07.23.
-//
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
 
 #include <catch2/catch_test_macros.hpp>
 

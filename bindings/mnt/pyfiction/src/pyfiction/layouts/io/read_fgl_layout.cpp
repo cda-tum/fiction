@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by simon on 09.10.22.
-//
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"

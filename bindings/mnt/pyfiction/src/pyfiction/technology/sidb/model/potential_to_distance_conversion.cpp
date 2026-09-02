@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>

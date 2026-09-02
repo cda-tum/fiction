@@ -8,9 +8,10 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by marcel on 04.12.24.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ */
 
 #if (FICTION_ABC)
 

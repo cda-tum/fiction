@@ -8,9 +8,12 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok on 03.03.24.
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ */
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/layout_utils.hpp>

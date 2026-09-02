@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction_experiments.hpp"
 

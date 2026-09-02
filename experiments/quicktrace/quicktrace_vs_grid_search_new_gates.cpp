@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"

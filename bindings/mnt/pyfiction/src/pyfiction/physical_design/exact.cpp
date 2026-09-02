@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
 #if (FICTION_Z3_SOLVER)
 
 #include "pyfiction/documentation.hpp"

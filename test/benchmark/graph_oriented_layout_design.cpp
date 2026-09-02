@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by simon on 19.06.24.
-//
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>

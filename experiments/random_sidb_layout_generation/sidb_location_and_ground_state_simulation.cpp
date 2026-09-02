@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Jan Drewniok on 04.05.23.
-//
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"

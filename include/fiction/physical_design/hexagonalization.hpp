@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// created by simon on 14.04.23.
-//
+/**
+ * @file
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #pragma once
 

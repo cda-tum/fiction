@@ -8,9 +8,11 @@
  * Licensed under the MIT License
  */
 
-//
-// Created by Marcel Walter on 14.08.26.
-//
+/**
+ * @file
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
 
 #include "fiction_experiments.hpp"  // experiment class
 

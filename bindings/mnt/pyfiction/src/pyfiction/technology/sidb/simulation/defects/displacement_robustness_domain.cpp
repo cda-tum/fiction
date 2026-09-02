@@ -8,6 +8,12 @@
  * Licensed under the MIT License
  */
 
+/**
+ * @file
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/coordinates.hpp>
