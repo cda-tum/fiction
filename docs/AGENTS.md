@@ -54,6 +54,7 @@ the code they explain.
 
 Every entry is grouped under a category bullet — `Algorithms`, `Build system`, `CLI`,
 `Code quality`, `Continuous integration`, `Data structures`, `Dependencies`,
-`Documentation`, `Experiments`, `Python bindings`, `Tooling` — with the actual entries as
-nested sub-bullets. Do not add flat top-level bullets. Order the categories alphabetically
-within each of `Added`, `Changed`, `Fixed`, and `Removed`, as listed above.
+`Documentation`, `Experiments`, `Gate libraries`, `I/O`, `Python bindings`, `Tooling` —
+with the actual entries as nested sub-bullets. Do not add flat top-level bullets. Order
+the categories alphabetically within each of `Added`, `Changed`, `Fixed`, and `Removed`,
+as listed above.
