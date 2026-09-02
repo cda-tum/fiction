@@ -59,13 +59,24 @@
 #include <unordered_set>
 #include <vector>
 
+using namespace fiction;
+using namespace fiction::fcn;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
+using namespace fiction::sidb;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::surfaces;
+using namespace fiction::synthesis;
+using namespace fiction::verification;
+
 // NOTE: You can find the surface data in the following repository:
 // https://github.com/cda-tum/sidb-defect-aware-physical-design
 
 int main()  // NOLINT
 {
-    using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt;
+    using gate_lyt = hex_even_row_gate_clk_lyt;
+    using cell_lyt = sidb_cell_clk_lyt;
 
     static const std::string layouts_folder = fmt::format("{}/defect_aware_physical_design/layouts", EXPERIMENTS_PATH);
 
@@ -113,10 +124,8 @@ int main()  // NOLINT
 
     // instantiate a technology mapping library
     std::stringstream library_stream{};
-    library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
-                   << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2 << fiction::synthesis::GATE_NAND2
-                   << fiction::synthesis::GATE_OR2 << fiction::synthesis::GATE_NOR2 << fiction::synthesis::GATE_XOR2
-                   << fiction::synthesis::GATE_XNOR2;
+    library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND2 << GATE_NAND2 << GATE_OR2 << GATE_NOR2
+                   << GATE_XOR2 << GATE_XNOR2;
 
     std::vector<mockturtle::gate> gates{};
 
@@ -129,23 +138,21 @@ int main()  // NOLINT
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameterize the H-Si(100) 2x1 surface to ignore certain defect types
-    const fiction::sidb::surfaces::defect_surface_params surface_params{
-        std::unordered_set<fiction::sidb::model::defect_type>{fiction::sidb::model::defect_type::DB}};
+    const defect_surface_params surface_params{std::unordered_set<defect_type>{defect_type::DB}};
 
-    // fiction::sidb_defect_surface<cell_lyt> surface_lattice{surface_params};
+    // sidb_defect_surface<cell_lyt> surface_lattice{surface_params};
 
     // read surface scan lattice data
-    const auto surface_lattice = fiction::sidb::io::read_surface_defects<cell_lyt>(
+    const auto surface_lattice = read_surface_defects<cell_lyt>(
         "../../experiments/defect_aware_physical_design/py_test_surface.txt", "py_test_surface");
-    // fiction::read_sqd_layout(surface_lattice, surface_data_path);
+    // read_sqd_layout(surface_lattice, surface_data_path);
 
     const auto lattice_tiling = gate_lyt{{11, 30}};  // our surface data is 12 x 31 Bestagon tiles
     //    const auto lattice_tiling = gate_lyt{{12, 17}};  // our surface data is 13 x 18 Bestagon tiles
-    const auto black_list =
-        fiction::sidb::surface_analysis<fiction::sidb::bestagon_library>(lattice_tiling, surface_lattice);
+    const auto black_list = surface_analysis<bestagon_library>(lattice_tiling, surface_lattice);
 
     // parameters for SMT-based physical design
-    fiction::physical_design::exact_physical_design_params exact_params{};
+    exact_physical_design_params exact_params{};
     exact_params.scheme        = "ROW4";
     exact_params.crossings     = true;
     exact_params.border_io     = false;
@@ -155,7 +162,7 @@ int main()  // NOLINT
     // exact_params.upper_bound_x = 12;    // 13 x 18 tiles
     // exact_params.upper_bound_y = 17;    // 13 x 18 tiles
     exact_params.timeout = 3'600'000;  // 1h in ms
-    fiction::physical_design::exact_physical_design_stats exact_stats{};
+    exact_physical_design_stats exact_stats{};
 
     constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::parity &
                                             ~fiction_experiments::two_bit_add_maj & ~fiction_experiments::b1_r2 &
@@ -185,8 +192,8 @@ int main()  // NOLINT
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = fiction::physical_design::exact_with_blacklist<gate_lyt>(
-            mapped_network, black_list, exact_params, &exact_stats);
+        const auto gate_level_layout =
+            exact_with_blacklist<gate_lyt>(mapped_network, black_list, exact_params, &exact_stats);
 
         if (gate_level_layout.has_value())
         {
@@ -196,24 +203,23 @@ int main()  // NOLINT
             assert(eq.has_value());
 
             // compute critical path and throughput
-            const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto dot_accurate_layout = fiction::physical_design::apply_gate_library_to_defective_surface<
-                fiction::sidb::surfaces::defect_surface<cell_lyt>, fiction::sidb::bestagon_library>(*gate_level_layout,
+            const auto dot_accurate_layout =
+                apply_gate_library_to_defective_surface<defect_surface<cell_lyt>, bestagon_library>(*gate_level_layout,
                                                                                                     surface_lattice);
 
             // determine bounding box
-            const auto bb = fiction::layouts::bounding_box_2d<cell_lyt>(dot_accurate_layout);
+            const auto bb = bounding_box_2d<cell_lyt>(dot_accurate_layout);
 
             // compute area
-            fiction::fcn::area_stats                                  area_stats{};
-            fiction::fcn::area_params<fiction::sidb::sidb_technology> area_ps{};
-            fiction::fcn::area(bb, area_ps, &area_stats);
+            area_stats                   area_stats{};
+            area_params<sidb_technology> area_ps{};
+            area(bb, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            fiction::sidb::io::write_sqd_layout(dot_accurate_layout,
-                                                fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            write_sqd_layout(dot_accurate_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             defect_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(), cut_xag.num_gates(),

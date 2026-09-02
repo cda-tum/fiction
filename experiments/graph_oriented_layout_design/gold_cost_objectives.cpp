@@ -38,23 +38,29 @@
 #include <utility>
 #include <vector>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks;
+using namespace fiction::networks::io;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
+
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
 {
     fmt::print("[i] processing {}\n", name);
 
-    std::ostringstream                                      os{};
-    fiction::networks::io::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
-    const auto                                              nets    = reader.get_networks();
-    const auto                                              network = *nets.front();
+    std::ostringstream      os{};
+    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    const auto              nets    = reader.get_networks();
+    const auto              network = *nets.front();
 
     return network;
 }
 
 int main()  // NOLINT
 {
-    using gate_lyt = fiction::layouts::gate_level_layout<
-        fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, double, std::string>
         gold_cost_objectives_exp{"graph_oriented_layout_design_exp",
@@ -67,10 +73,9 @@ int main()  // NOLINT
                                  "runtime (in sec)",
                                  "equivalent"};
 
-    fiction::physical_design::graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
-    fiction::physical_design::graph_oriented_layout_design_params graph_oriented_layout_design_params{};
-    graph_oriented_layout_design_params.mode =
-        fiction::physical_design::graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
+    graph_oriented_layout_design_stats  graph_oriented_layout_design_stats{};
+    graph_oriented_layout_design_params graph_oriented_layout_design_params{};
+    graph_oriented_layout_design_params.mode         = graph_oriented_layout_design_params::effort_mode::HIGHEST_EFFORT;
     graph_oriented_layout_design_params.verbose      = true;
     graph_oriented_layout_design_params.return_first = false;
     graph_oriented_layout_design_params.timeout      = 60000;
@@ -79,39 +84,37 @@ int main()  // NOLINT
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        for (const auto& cost_pair : std::vector<
-                 std::pair<fiction::physical_design::graph_oriented_layout_design_params::cost_objective, std::string>>{
-                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::AREA, "A"},
-                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::WIRES, "|W|"},
-                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::CROSSINGS, "|C|"},
-                 {fiction::physical_design::graph_oriented_layout_design_params::cost_objective::ACP, "ACP"}})
+        for (const auto& cost_pair :
+             std::vector<std::pair<graph_oriented_layout_design_params::cost_objective, std::string>>{
+                 {graph_oriented_layout_design_params::cost_objective::AREA, "A"},
+                 {graph_oriented_layout_design_params::cost_objective::WIRES, "|W|"},
+                 {graph_oriented_layout_design_params::cost_objective::CROSSINGS, "|C|"},
+                 {graph_oriented_layout_design_params::cost_objective::ACP, "ACP"}})
         {
             const auto& [cost, cost_name]            = cost_pair;
             graph_oriented_layout_design_params.cost = cost;
 
-            auto network = read_ntk<fiction::tec_nt>(benchmark);
+            auto network = read_ntk<tec_nt>(benchmark);
 
-            auto gate_level_layout = fiction::physical_design::graph_oriented_layout_design<gate_lyt, fiction::tec_nt>(
+            auto gate_level_layout = graph_oriented_layout_design<gate_lyt, tec_nt>(
                 network, graph_oriented_layout_design_params, &graph_oriented_layout_design_stats);
 
             if (gate_level_layout.has_value())
             {
                 // check equivalence
-                const auto eq_stats =
-                    fiction::verification::equivalence_checking<fiction::networks::technology_network, gate_lyt>(
-                        network, *gate_level_layout);
+                const auto eq_stats = equivalence_checking<technology_network, gate_lyt>(network, *gate_level_layout);
 
                 std::string eq_result = "NO";
-                if (eq_stats == fiction::verification::eq_type::STRONG)
+                if (eq_stats == eq_type::STRONG)
                 {
                     eq_result = "STRONG";
                 }
-                else if (eq_stats == fiction::verification::eq_type::WEAK)
+                else if (eq_stats == eq_type::WEAK)
                 {
                     eq_result = "WEAK";
                 };
                 // calculate bounding box
-                const auto bounding_box = fiction::layouts::bounding_box_2d(*gate_level_layout);
+                const auto bounding_box = bounding_box_2d(*gate_level_layout);
 
                 const auto width  = bounding_box.get_x_size() + 1;
                 const auto height = bounding_box.get_y_size() + 1;

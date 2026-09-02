@@ -38,6 +38,13 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -54,23 +61,23 @@ int main()  // NOLINT
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 12> gates = {
-        std::make_pair("hourglass", synthesis::create_crossing_wire_tt()),
-        std::make_pair("cx", synthesis::create_crossing_wire_tt()),
-        std::make_pair("ha", synthesis::create_half_adder_tt()),
-        std::make_pair("and", std::vector<tt>{synthesis::create_and_tt()}),
-        std::make_pair("xor", std::vector<tt>{synthesis::create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{synthesis::create_or_tt()}),
-        std::make_pair("xnor", std::vector<tt>{synthesis::create_xnor_tt()}),
-        std::make_pair("fo2", std::vector<tt>{synthesis::create_fan_out_tt()}),
-        std::make_pair("nor", std::vector<tt>{synthesis::create_nor_tt()}),
-        std::make_pair("nand", std::vector<tt>{synthesis::create_nand_tt()}),
-        std::make_pair("inv", std::vector<tt>{synthesis::create_not_tt()}),
-        std::make_pair("wire", std::vector<tt>{synthesis::create_id_tt()})};
+        std::make_pair("hourglass", create_crossing_wire_tt()),
+        std::make_pair("cx", create_crossing_wire_tt()),
+        std::make_pair("ha", create_half_adder_tt()),
+        std::make_pair("and", std::vector<tt>{create_and_tt()}),
+        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{create_or_tt()}),
+        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+        std::make_pair("fo2", std::vector<tt>{create_fan_out_tt()}),
+        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
+        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
+        std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
-    const sidb::model::simulation_parameters                                   sim_params{2, -0.32};
-    const sidb::simulation::engines::quicksim_params                           qs_params{sim_params};
-    const sidb::simulation::engines::quickexact_params<layouts::coords::siqad> qe_params{sim_params};
-    const sidb::simulation::analysis::time_to_solution_params                  tts_params{};
+    const simulation_parameters            sim_params{2, -0.32};
+    const quicksim_params                  qs_params{sim_params};
+    const quickexact_params<coords::siqad> qe_params{sim_params};
+    const time_to_solution_params          tts_params{};
 
     double      total_runtime_exhaustive      = 0.0;
     double      total_runtime_quickexact      = 0.0;
@@ -81,8 +88,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto layout =
-            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
+        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
 
         double      runtime_exhaustive      = 0;
         double      runtime_quickexact      = 0;
@@ -92,11 +98,10 @@ int main()  // NOLINT
         double      quicksim_single_runtime = 0.0;
 
         // simulate layout with no input pattern
-        const auto exhaustive_results_layout =
-            sidb::simulation::engines::exhaustive_ground_state_simulation(layout, sim_params);
-        sidb::simulation::analysis::time_to_solution_stats stats{};
-        sidb::simulation::analysis::time_to_solution(layout, qs_params, tts_params, &stats);
-        const auto quickexact_results_layout = sidb::simulation::engines::quickexact(layout, qe_params);
+        const auto             exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
+        time_to_solution_stats stats{};
+        time_to_solution(layout, qs_params, tts_params, &stats);
+        const auto quickexact_results_layout = quickexact(layout, qe_params);
 
         runtime_exhaustive += mockturtle::to_seconds(exhaustive_results_layout.simulation_runtime);
         runtime_quickexact += mockturtle::to_seconds(quickexact_results_layout.simulation_runtime);
@@ -107,16 +112,15 @@ int main()  // NOLINT
         quicksim_single_runtime += stats.mean_single_runtime;
 
         // simulate layout with all input patterns
-        auto       bii = sidb::simulation::logic::bdl_input_iterator<sidb_100_cell_clk_lyt_siqad>{layout};
+        auto       bii                = bdl_input_iterator<sidb_100_cell_clk_lyt_siqad>{layout};
         const auto num_input_patterns = truth_table.front().num_bits();
 
         for (auto i = 0u; i < num_input_patterns; ++i, ++bii)
         {
-            const auto exhaustive_results =
-                sidb::simulation::engines::exhaustive_ground_state_simulation(*bii, sim_params);
-            sidb::simulation::analysis::time_to_solution_stats tts_stats{};
-            sidb::simulation::analysis::time_to_solution(*bii, qs_params, tts_params, &tts_stats);
-            const auto quickexact_results = sidb::simulation::engines::quickexact(*bii, qe_params);
+            const auto             exhaustive_results = exhaustive_ground_state_simulation(*bii, sim_params);
+            time_to_solution_stats tts_stats{};
+            time_to_solution(*bii, qs_params, tts_params, &tts_stats);
+            const auto quickexact_results = quickexact(*bii, qe_params);
 
             runtime_exhaustive += mockturtle::to_seconds(exhaustive_results.simulation_runtime);
             runtime_quickexact += mockturtle::to_seconds(quickexact_results.simulation_runtime);

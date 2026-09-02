@@ -36,8 +36,13 @@
 #include <string>
 #include <string_view>
 
-using gate_lyt = fiction::layouts::gate_level_layout<fiction::layouts::clocked_layout<
-    fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>;
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
+using namespace fiction::utils::graph;
+using namespace fiction::verification;
+
+using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
 using color_routing_experiment =
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, std::string_view, uint64_t, uint64_t, uint64_t,
@@ -45,10 +50,10 @@ using color_routing_experiment =
                             bool>;
 
 // NOLINTBEGIN(cppcoreguidelines-avoid-non-const-global-variables)
-static fiction::physical_design::exact_physical_design_stats      exact_stats{};
-static fiction::physical_design::orthogonal_physical_design_stats ortho_stats{};
-static fiction::physical_design::color_routing_stats              routing_stats{};
-static fiction::verification::equivalence_checking_stats          equiv_stats{};
+static exact_physical_design_stats      exact_stats{};
+static orthogonal_physical_design_stats ortho_stats{};
+static color_routing_stats              routing_stats{};
+static equivalence_checking_stats       equiv_stats{};
 // NOLINTEND(cppcoreguidelines-avoid-non-const-global-variables)
 
 template <typename Ntk>
@@ -67,25 +72,24 @@ Ntk read_ntk(const std::string& name)
 
 template <typename Ntk, typename GateLyt, typename Stats>
 void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt,
-                      const fiction::physical_design::color_routing_params& routing_params, const Stats& stats,
-                      color_routing_experiment& exp)
+                      const color_routing_params& routing_params, const Stats& stats, color_routing_experiment& exp)
 {
     routing_stats = {};
     equiv_stats   = {};
 
     // extract routing objectives
-    const auto objectives = fiction::physical_design::extract_routing_objectives(lyt);
+    const auto objectives = extract_routing_objectives(lyt);
 
     // remove routing
-    fiction::physical_design::clear_routing(lyt);
+    clear_routing(lyt);
 
     // perform routing
-    const auto success = fiction::physical_design::color_routing(lyt, objectives, routing_params, &routing_stats);
+    const auto success = color_routing(lyt, objectives, routing_params, &routing_stats);
 
     if (success)
     {
         // check equivalence
-        fiction::verification::equivalence_checking(ntk, lyt, &equiv_stats);
+        equivalence_checking(ntk, lyt, &equiv_stats);
     }
 
     // log results
@@ -94,8 +98,7 @@ void re_route_and_log(const std::string& benchmark, const Ntk& ntk, GateLyt& lyt
         routing_stats.number_of_unsatisfied_objectives, routing_stats.epg_stats.num_vertices,
         routing_stats.epg_stats.num_edges, mockturtle::to_seconds(stats.time_total),
         mockturtle::to_seconds(routing_stats.time_total), mockturtle::to_seconds(routing_stats.epg_stats.time_total),
-        mockturtle::to_seconds(routing_stats.color_stats.time_total),
-        equiv_stats.eq != fiction::verification::eq_type::NO);
+        mockturtle::to_seconds(routing_stats.color_stats.time_total), equiv_stats.eq != eq_type::NO);
 
     exp.save();
     exp.table();
@@ -129,21 +132,21 @@ void smt_sat_complete()
                                                       "equivalent"};
 
     // parameters for SAT-based color routing
-    fiction::physical_design::color_routing_params routing_params{};
+    color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
-    routing_params.engine                  = fiction::utils::graph::graph_coloring_engine::SAT;
+    routing_params.engine                  = graph_coloring_engine::SAT;
 
     constexpr const uint64_t bench_select = fiction_experiments::all;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto network = read_ntk<tec_nt>(benchmark);
 
         for (const auto& clock : clocking_schemes)
         {
             // parameters for SMT-based physical design
-            fiction::physical_design::exact_physical_design_params exact_params{};
+            exact_physical_design_params exact_params{};
             exact_params.scheme        = clock;
             exact_params.crossings     = true;
             exact_params.border_io     = true;
@@ -151,7 +154,7 @@ void smt_sat_complete()
             exact_params.timeout       = 3'600'000;  // 1h in ms
 
             // perform layout generation with an SMT-based exact algorithm
-            auto gate_level_layout = fiction::physical_design::exact<gate_lyt>(network, exact_params, &exact_stats);
+            auto gate_level_layout = exact<gate_lyt>(network, exact_params, &exact_stats);
 
             if (gate_level_layout.has_value())
             {
@@ -167,11 +170,11 @@ void ortho_sat_complete()
     ortho_stats = {};
 
     // parameters for SAT-based color routing
-    fiction::physical_design::color_routing_params routing_params{};
+    color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
     routing_params.path_limit              = 75;
-    routing_params.engine                  = fiction::utils::graph::graph_coloring_engine::SAT;
+    routing_params.engine                  = graph_coloring_engine::SAT;
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_sat_complete",
                                                       "benchmark",
@@ -200,10 +203,10 @@ void ortho_sat_complete()
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_level_layout = fiction::physical_design::orthogonal<gate_lyt>(network, {}, &ortho_stats);
+        auto gate_level_layout = orthogonal<gate_lyt>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_level_layout, routing_params, ortho_stats, color_routing_exp);
     }
@@ -214,11 +217,11 @@ void ortho_mcs()
     ortho_stats = {};
 
     // parameters for SAT-based color routing
-    fiction::physical_design::color_routing_params routing_params{};
+    color_routing_params routing_params{};
     routing_params.conduct_partial_routing = true;
     routing_params.crossings               = true;
     routing_params.path_limit              = 75;
-    routing_params.engine                  = fiction::utils::graph::graph_coloring_engine::MCS;
+    routing_params.engine                  = graph_coloring_engine::MCS;
 
     static color_routing_experiment color_routing_exp{"color_routing_ortho_mcs",
                                                       "benchmark",
@@ -245,10 +248,10 @@ void ortho_mcs()
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based algorithm
-        auto gate_level_layout = fiction::physical_design::orthogonal<gate_lyt>(network, {}, &ortho_stats);
+        auto gate_level_layout = orthogonal<gate_lyt>(network, {}, &ortho_stats);
 
         re_route_and_log(benchmark, network, gate_level_layout, routing_params, ortho_stats, color_routing_exp);
     }

@@ -36,6 +36,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 // This script is the three-dimensional counterpart of `operational_domain_bestagon_grid_vs_sketch`. It compares the
 // operational domain computation of Bestagon gates using grid search with the "Operational Domain Sketch", which
@@ -67,22 +73,21 @@ int main()  // NOLINT
                      "t in s (grid search) / t in s (sketch)"};
 
     // simulation parameters
-    sidb::model::simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
     // operational domain parameters
-    sidb::simulation::logic::operational_domain_params op_domain_params{};
+    operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.operational_params.sim_engine = sidb::simulation::engine::QUICKEXACT;
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
 
     // the sketch's filtering steps are only defined when kinks are rejected
-    op_domain_params.operational_params.op_condition =
-        sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS;
+    op_domain_params.operational_params.op_condition = is_operational_params::operational_condition::REJECT_KINKS;
 
-    op_domain_params.sweep_dimensions = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                         {sidb::simulation::logic::sweep_parameter::LAMBDA_TF},
-                                         {sidb::simulation::logic::sweep_parameter::MU_MINUS}};
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R},
+                                         {sweep_parameter::LAMBDA_TF},
+                                         {sweep_parameter::MU_MINUS}};
 
     op_domain_params.sweep_dimensions[0].min  = 1.0;
     op_domain_params.sweep_dimensions[0].max  = 10.0;
@@ -96,21 +101,21 @@ int main()  // NOLINT
 
     static const std::string folder = fmt::format("{}sidb_gate_libraries/bestagon_gates/", EXPERIMENTS_PATH);
 
-    const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 14>{
-        {{std::vector<tt>{synthesis::create_id_tt()}, "wire"},
-         {std::vector<tt>{synthesis::create_id_tt()}, "wire_diag"},
-         {std::vector<tt>{synthesis::create_not_tt()}, "inv"},
-         {std::vector<tt>{synthesis::create_not_tt()}, "inv_diag"},
-         {std::vector<tt>{synthesis::create_and_tt()}, "and"},
-         {std::vector<tt>{synthesis::create_nand_tt()}, "nand"},
-         {std::vector<tt>{synthesis::create_or_tt()}, "or"},
-         {std::vector<tt>{synthesis::create_nor_tt()}, "nor"},
-         {std::vector<tt>{synthesis::create_xor_tt()}, "xor"},
-         {std::vector<tt>{synthesis::create_xnor_tt()}, "xnor"},
-         {synthesis::create_fan_out_tt(), "fo2"},
-         {synthesis::create_crossing_wire_tt(), "cx"},
-         {synthesis::create_half_adder_tt(), "ha"},
-         {synthesis::create_double_wire_tt(), "hourglass"}}};
+    const auto truth_tables_and_names =
+        std::array<std::pair<std::vector<tt>, std::string>, 14>{{{std::vector<tt>{create_id_tt()}, "wire"},
+                                                                 {std::vector<tt>{create_id_tt()}, "wire_diag"},
+                                                                 {std::vector<tt>{create_not_tt()}, "inv"},
+                                                                 {std::vector<tt>{create_not_tt()}, "inv_diag"},
+                                                                 {std::vector<tt>{create_and_tt()}, "and"},
+                                                                 {std::vector<tt>{create_nand_tt()}, "nand"},
+                                                                 {std::vector<tt>{create_or_tt()}, "or"},
+                                                                 {std::vector<tt>{create_nor_tt()}, "nor"},
+                                                                 {std::vector<tt>{create_xor_tt()}, "xor"},
+                                                                 {std::vector<tt>{create_xnor_tt()}, "xnor"},
+                                                                 {create_fan_out_tt(), "fo2"},
+                                                                 {create_crossing_wire_tt(), "cx"},
+                                                                 {create_half_adder_tt(), "ha"},
+                                                                 {create_double_wire_tt(), "hourglass"}}};
 
     double mean_ratio_num_op_sketch_to_num_op_grid_search = 0.0;
     double total_runtime_grid_search                      = 0.0;
@@ -119,41 +124,38 @@ int main()  // NOLINT
 
     for (const auto& [truth_table, gate] : truth_tables_and_names)
     {
-        const auto lyt =
-            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        const auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
-        sidb::simulation::logic::operational_domain_stats op_domain_stats_grid_search{};
-        sidb::simulation::logic::operational_domain_stats op_domain_stats_sketch{};
-        sidb::simulation::logic::operational_domain_stats op_domain_stats_sketch_flood_fill{};
+        operational_domain_stats op_domain_stats_grid_search{};
+        operational_domain_stats op_domain_stats_sketch{};
+        operational_domain_stats op_domain_stats_sketch_flood_fill{};
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
-        const auto op_domain_grid_search = sidb::simulation::logic::operational_domain_grid_search(
-            lyt, truth_table, op_domain_params, &op_domain_stats_grid_search);
+        const auto op_domain_grid_search =
+            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_grid_search);
 
         total_runtime_grid_search += mockturtle::to_seconds(op_domain_stats_grid_search.time_total);
 
         op_domain_params.operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
-        const auto op_domain_sketch = sidb::simulation::logic::operational_domain_grid_search(
-            lyt, truth_table, op_domain_params, &op_domain_stats_sketch);
+        const auto op_domain_sketch =
+            operational_domain_grid_search(lyt, truth_table, op_domain_params, &op_domain_stats_sketch);
 
         total_runtime_sketch += mockturtle::to_seconds(op_domain_stats_sketch.time_total);
 
-        const auto op_domain_sketch_flood_fill = sidb::simulation::logic::operational_domain_flood_fill(
-            lyt, truth_table, 100, op_domain_params, &op_domain_stats_sketch_flood_fill);
+        const auto op_domain_sketch_flood_fill =
+            operational_domain_flood_fill(lyt, truth_table, 100, op_domain_params, &op_domain_stats_sketch_flood_fill);
 
         total_runtime_sketch_flood_fill += mockturtle::to_seconds(op_domain_stats_sketch_flood_fill.time_total);
 
-        sidb::simulation::io::write_operational_domain(op_domain_grid_search,
-                                                       fmt::format("{}/3d_grid_search_{}.csv", folder, gate));
-        sidb::simulation::io::write_operational_domain(op_domain_sketch,
-                                                       fmt::format("{}/3d_sketch_{}.csv", folder, gate));
-        sidb::simulation::io::write_operational_domain(op_domain_sketch_flood_fill,
-                                                       fmt::format("{}/3d_sketch_flood_fill_{}.csv", folder, gate));
+        write_operational_domain(op_domain_grid_search, fmt::format("{}/3d_grid_search_{}.csv", folder, gate));
+        write_operational_domain(op_domain_sketch, fmt::format("{}/3d_sketch_{}.csv", folder, gate));
+        write_operational_domain(op_domain_sketch_flood_fill,
+                                 fmt::format("{}/3d_sketch_flood_fill_{}.csv", folder, gate));
 
         // a gate without a single operational point in the swept range would turn the ratio into a NaN, which would
         // then propagate into the mean and corrupt the "Total" row for every other gate

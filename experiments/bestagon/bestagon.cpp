@@ -51,10 +51,19 @@
 #include <string>
 #include <vector>
 
+using namespace fiction;
+using namespace fiction::fcn;
+using namespace fiction::networks;
+using namespace fiction::physical_design;
+using namespace fiction::sidb;
+using namespace fiction::sidb::io;
+using namespace fiction::synthesis;
+using namespace fiction::verification;
+
 int main()  // NOLINT
 {
-    using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt;
+    using gate_lyt = hex_even_row_gate_clk_lyt;
+    using cell_lyt = sidb_cell_clk_lyt;
 
     const std::string layouts_folder = fmt::format("{}/bestagon/layouts", EXPERIMENTS_PATH);
 
@@ -95,10 +104,8 @@ int main()  // NOLINT
 
     // instantiate a technology mapping library
     std::stringstream library_stream{};
-    library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
-                   << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2 << fiction::synthesis::GATE_NAND2
-                   << fiction::synthesis::GATE_OR2 << fiction::synthesis::GATE_NOR2 << fiction::synthesis::GATE_XOR2
-                   << fiction::synthesis::GATE_XNOR2;
+    library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND2 << GATE_NAND2 << GATE_OR2 << GATE_NOR2
+                   << GATE_XOR2 << GATE_XNOR2;
 
     std::vector<mockturtle::gate> gates{};
 
@@ -110,13 +117,13 @@ int main()  // NOLINT
     mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
-    fiction::physical_design::exact_physical_design_params exact_params{};
+    exact_physical_design_params exact_params{};
     exact_params.scheme        = "Row";
     exact_params.crossings     = true;
     exact_params.border_io     = true;
     exact_params.desynchronize = true;
     exact_params.timeout       = 3'600'000;  // 1h in ms
-    fiction::physical_design::exact_physical_design_stats exact_stats{};
+    exact_physical_design_stats exact_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::b1_r2 &
                                                    ~fiction_experiments::clpl & ~fiction_experiments::two_bit_add_maj &
@@ -146,32 +153,28 @@ int main()  // NOLINT
         mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout =
-            fiction::physical_design::exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
+        const auto gate_level_layout = exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
 
         if (gate_level_layout.has_value())
         {
             // check equivalence
-            const auto miter =
-                mockturtle::miter<fiction::networks::technology_network>(mapped_network, *gate_level_layout);
-            const auto eq = mockturtle::equivalence_checking(*miter);
+            const auto miter = mockturtle::miter<technology_network>(mapped_network, *gate_level_layout);
+            const auto eq    = mockturtle::equivalence_checking(*miter);
             assert(eq.has_value());
 
             // compute critical path and throughput
-            const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*gate_level_layout);
+            const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
 
             // apply gate library
-            const auto cell_level_layout =
-                fiction::physical_design::apply_gate_library<cell_lyt, fiction::sidb::bestagon_library>(
-                    *gate_level_layout);
+            const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(*gate_level_layout);
 
             // compute area
-            fiction::fcn::area_stats                                  area_stats{};
-            fiction::fcn::area_params<fiction::sidb::sidb_technology> area_ps{};
-            fiction::fcn::area(cell_level_layout, area_ps, &area_stats);
+            area_stats                   area_stats{};
+            area_params<sidb_technology> area_ps{};
+            area(cell_level_layout, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            fiction::sidb::io::write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),

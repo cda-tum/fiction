@@ -50,6 +50,17 @@
 #include <iostream>    // output
 #include <string>      // strings
 
+using namespace fiction;
+using namespace fiction::fcn;
+using namespace fiction::layouts;
+using namespace fiction::layouts::io;
+using namespace fiction::networks::io;
+using namespace fiction::physical_design;
+using namespace fiction::qca;
+using namespace fiction::qca::io;
+using namespace fiction::sidb::io;
+using namespace fiction::synthesis;
+
 template <typename Ntk>
 void print_network_properties(const Ntk& ntk)
 {
@@ -80,17 +91,17 @@ void print_gate_layout_properties(const Lyt& lyt)
 template <typename CellLyt>
 void print_cell_layout_properties(const CellLyt& cell_lyt)
 {
-    fiction::fcn::area_params<fiction::technology<CellLyt>> ps{};
-    fiction::fcn::area_stats                                st{};
+    area_params<technology<CellLyt>> ps{};
+    area_stats                       st{};
     // determine area
-    fiction::fcn::area(cell_lyt, ps, &st);
+    area(cell_lyt, ps, &st);
 
     // print statistics
     std::cout
         << fmt::format(
                "[i] Cell-level {} layout: aspect ratio = {} × {}, inputs = {}, outputs = {}, cells = {}, area = {}nm²",
-               fiction::tech_impl_name<fiction::technology<CellLyt>>, cell_lyt.x() + 1, cell_lyt.y() + 1,
-               cell_lyt.num_pis(), cell_lyt.num_pos(), cell_lyt.num_cells(), st.area)
+               tech_impl_name<technology<CellLyt>>, cell_lyt.x() + 1, cell_lyt.y() + 1, cell_lyt.num_pis(),
+               cell_lyt.num_pos(), cell_lyt.num_cells(), st.area)
         << std::endl;
 }
 
@@ -151,7 +162,7 @@ int main(int argc, char* argv[])  // NOLINT
     // first, print some properties
     print_network_properties(ntk);
     // and draw the network
-    fiction::networks::io::write_dot_network(ntk, designs + "ntk.dot");
+    write_dot_network(ntk, designs + "ntk.dot");
 
     std::cout << std::endl;
 
@@ -176,7 +187,7 @@ int main(int argc, char* argv[])  // NOLINT
     // print network properties again
     print_network_properties(ntk);
     // draw the network again
-    fiction::networks::io::write_dot_network(ntk, designs + "cut_ntk.dot");
+    write_dot_network(ntk, designs + "cut_ntk.dot");
 
     std::cout << std::endl;
 
@@ -187,18 +198,18 @@ int main(int argc, char* argv[])  // NOLINT
     std::cout << "[i] fanout substitution" << std::endl;
 
     // set up parameters for fanout substitution
-    fiction::synthesis::fanout_substitution_params fanout_params{};
-    fanout_params.strategy  = fiction::synthesis::fanout_substitution_params::substitution_strategy::BREADTH;
+    fanout_substitution_params fanout_params{};
+    fanout_params.strategy  = fanout_substitution_params::substitution_strategy::BREADTH;
     fanout_params.degree    = 2;
     fanout_params.threshold = 1;
 
     // substitute high-degree output nodes by fanout nodes (converts network into a topology_network)
-    auto top_ntk = fiction::synthesis::fanout_substitution<fiction::tec_nt>(ntk, fanout_params);
+    auto top_ntk = fanout_substitution<tec_nt>(ntk, fanout_params);
 
     // print network properties again
     print_network_properties(top_ntk);
     // draw network again
-    fiction::networks::io::write_dot_network(top_ntk, designs + "top_ntk.dot");
+    write_dot_network(top_ntk, designs + "top_ntk.dot");
 
     std::cout << std::endl;
 
@@ -209,46 +220,40 @@ int main(int argc, char* argv[])  // NOLINT
     /**************************************************************/
 
     // defining the type of gate-level layout to use (also already pre-defined in fiction/types.hpp as cart_gate_clk_lyt
-    using fcn_gate_level_layout = fiction::layouts::gate_level_layout<fiction::layouts::clocked_layout<
-        fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>;
+    using fcn_gate_level_layout =
+        gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     // defining the type of cell-level layout to use (also already pre-defined in fiction/types.hpp as qca_cell_clk_lyt
-    using qca_cell_level_layout = fiction::layouts::cell_level_layout<
-        fiction::qca::qca_technology,
-        fiction::layouts::clocked_layout<fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>;
+    using qca_cell_level_layout = cell_level_layout<qca_technology, clocked_layout<cartesian_layout<coords::offset>>>;
 
     std::cout << "[i] orthogonal physical design" << std::endl;
 
     // set up parameters for orthogonal physical design
-    fiction::physical_design::orthogonal_physical_design_params ortho_params{};
-    ortho_params.number_of_clock_phases = fiction::layouts::clocking::num_clks::FOUR;
-    fiction::physical_design::orthogonal_physical_design_stats ortho_stats{};
+    orthogonal_physical_design_params ortho_params{};
+    ortho_params.number_of_clock_phases = clocking::num_clks::FOUR;
+    orthogonal_physical_design_stats ortho_stats{};
 
     // perform layout generation with a scalable algorithm
-    auto ortho_gate_lyt =
-        fiction::physical_design::orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
+    auto ortho_gate_lyt = orthogonal<fcn_gate_level_layout>(top_ntk, ortho_params, &ortho_stats);
 
     // print layout properties
     print_gate_layout_properties(ortho_gate_lyt);
     // draw the layout
-    fiction::layouts::io::write_dot_layout<fcn_gate_level_layout,
-                                           fiction::layouts::io::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
+    write_dot_layout<fcn_gate_level_layout, gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
         ortho_gate_lyt, designs + "ortho_lyt.dot");
 
     // apply the QCA ONE gate library to retrieve a cell-level layout
-    auto ortho_cell_layout =
-        fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca::qca_one_library>(
-            ortho_gate_lyt);
+    auto ortho_cell_layout = apply_gate_library<qca_cell_level_layout, qca_one_library>(ortho_gate_lyt);
 
     // print cell properties
     print_cell_layout_properties(ortho_cell_layout);
 
     // write an SVG image of the layout
-    fiction::qca::io::write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
+    write_qca_layout_svg(ortho_cell_layout, designs + "ortho_qca.svg");
     // write a QCADesigner simulation file
-    fiction::qca::io::write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
+    write_qca_layout(ortho_cell_layout, designs + "ortho_qca.qca");
     // write a SiQAD simulation file
-    fiction::sidb::io::write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
+    write_sqd_layout(ortho_cell_layout, designs + "ortho_qca.sqd");
 
     std::cout << std::endl;
 
@@ -262,16 +267,15 @@ int main(int argc, char* argv[])  // NOLINT
         std::cout << "[i] SMT-based physical design" << std::endl;
 
         // set up parameters for SMT-based physical design
-        fiction::physical_design::exact_physical_design_params exact_params{};
+        exact_physical_design_params exact_params{};
         exact_params.scheme    = "2DDWave";
         exact_params.crossings = true;
         exact_params.border_io = true;
         exact_params.timeout   = 180000;  // 3min in ms
-        fiction::physical_design::exact_physical_design_stats exact_stats{};
+        exact_physical_design_stats exact_stats{};
 
         // perform layout generation with an SMT-based exact algorithm
-        auto exact_gate_lyt =
-            fiction::physical_design::exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
+        auto exact_gate_lyt = exact<fcn_gate_level_layout>(top_ntk, exact_params, &exact_stats);
 
         // if attempt was successful
         if (exact_gate_lyt.has_value())
@@ -279,24 +283,21 @@ int main(int argc, char* argv[])  // NOLINT
             // print layout properties
             print_gate_layout_properties(*exact_gate_lyt);
             // draw the layout
-            fiction::layouts::io::write_dot_layout<
-                fcn_gate_level_layout, fiction::layouts::io::gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
+            write_dot_layout<fcn_gate_level_layout, gate_layout_cartesian_drawer<fcn_gate_level_layout>>(
                 *exact_gate_lyt, designs + "exact_lyt.dot");
 
             // apply the QCA ONE gate library to retrieve a cell-level layout
-            auto exact_cell_layout =
-                fiction::physical_design::apply_gate_library<qca_cell_level_layout, fiction::qca::qca_one_library>(
-                    *exact_gate_lyt);
+            auto exact_cell_layout = apply_gate_library<qca_cell_level_layout, qca_one_library>(*exact_gate_lyt);
 
             // print cell properties
             print_cell_layout_properties(exact_cell_layout);
 
             // write an SVG image of the layout
-            fiction::qca::io::write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
+            write_qca_layout_svg(exact_cell_layout, designs + "exact_qca.svg");
             // write a QCADesigner simulation file
-            fiction::qca::io::write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
+            write_qca_layout(exact_cell_layout, designs + "exact_qca.qca");
             // write a SiQAD simulation file
-            fiction::sidb::io::write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
+            write_sqd_layout(exact_cell_layout, designs + "exact_qca.sqd");
         }
         // not successful
         else

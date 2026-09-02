@@ -48,6 +48,15 @@
 #include <cstdlib>
 #include <string>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::surfaces;
+using namespace fiction::synthesis;
+
 // This script conducts defect-aware placement and routing with defect-aware on-the-fly SiDB gate design. Thereby, SiDB
 // circuits can be designed in the presence of atomic defects.
 
@@ -57,44 +66,44 @@
 
 int main()  // NOLINT
 {
-    using gate_lyt = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt_cube;
+    using gate_lyt = hex_even_row_gate_clk_lyt;
+    using cell_lyt = sidb_cell_clk_lyt_cube;
 
-    fiction::sidb::generators::design_gates_params<fiction::cell<cell_lyt>> design_gate_params{};
-    design_gate_params.operational_params.sim_params = fiction::sidb::model::simulation_parameters{2, -0.32};
+    design_gates_params<cell<cell_lyt>> design_gate_params{};
+    design_gate_params.operational_params.sim_params = simulation_parameters{2, -0.32};
     // needs to be changed if a different skeleton is used.
     design_gate_params.canvas = {{24, 17}, {34, 28}};
 
     design_gate_params.number_of_canvas_sidbs        = 3;
-    design_gate_params.operational_params.sim_engine = fiction::sidb::simulation::engine::QUICKEXACT;
-    design_gate_params.termination_cond              = fiction::sidb::generators::design_gates_params<
-        fiction::cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
+    design_gate_params.operational_params.sim_engine = engine::QUICKEXACT;
+    design_gate_params.termination_cond =
+        design_gates_params<cell<cell_lyt>>::termination_condition::AFTER_FIRST_SOLUTION;
 
     // save atomic defects which their respective physical parameters as experimentally determined by T. R. Huff, T.
     // Dienel, M. Rashidi, R. Achal, L. Livadaru, J. Croshaw, and R. A. Wolkow, "Electrostatic landscape of a
     // Hydrogen-terminated Silicon Surface Probed by a Moveable Quantum Dot."
-    const auto stray_db   = fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8};
-    const auto si_vacancy = fiction::sidb::model::defect{fiction::sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto stray_db   = defect{defect_type::DB, -1, 4.1, 1.8};
+    const auto si_vacancy = defect{defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
     static const std::string layouts_folder =
         fmt::format("{}/physical_design_with_on_the_fly_gate_design/layouts", EXPERIMENTS_PATH);
 
     // read-in the initial defects. Physical parameters of the defects are not stored yet.
-    auto surface_lattice_initial = fiction::sidb::io::read_surface_defects<cell_lyt>(
+    auto surface_lattice_initial = read_surface_defects<cell_lyt>(
         "../../experiments/physical_design_with_on_the_fly_gate_design/0.5_percent_with_charged_surface.txt");
 
     // create an empty surface.
-    fiction::sidb::surfaces::defect_surface<cell_lyt> surface_lattice{};
+    defect_surface<cell_lyt> surface_lattice{};
 
     // add physical parameters of the defects to the surface_lattice.
     surface_lattice_initial.foreach_sidb_defect(
         [&surface_lattice, &stray_db, &si_vacancy](const auto& cd)
         {
-            if (cd.second.type == fiction::sidb::model::defect_type::DB)
+            if (cd.second.type == defect_type::DB)
             {
                 surface_lattice.assign_defect(cd.first, stray_db);
             }
-            else if (cd.second.type == fiction::sidb::model::defect_type::SI_VACANCY)
+            else if (cd.second.type == defect_type::SI_VACANCY)
             {
                 surface_lattice.assign_defect(cd.first, si_vacancy);
             }
@@ -105,7 +114,7 @@ int main()  // NOLINT
         });
 
     // determine bounding-box of the surface to set the aspect ratio of the surface lattice.
-    const auto bb_defect_surface = fiction::layouts::bounding_box_2d{surface_lattice};
+    const auto bb_defect_surface = bounding_box_2d{surface_lattice};
     surface_lattice.resize(bb_defect_surface.get_max());
 
     const auto lattice_tiling = gate_lyt{{11, 30}};
@@ -131,8 +140,7 @@ int main()  // NOLINT
         // compute depth
         const mockturtle::depth_view depth_xag{xag};
 
-        const fiction::synthesis::technology_mapping_params tech_map_params =
-            fiction::synthesis::all_standard_2_input_functions();
+        const technology_mapping_params tech_map_params = all_standard_2_input_functions();
 
         // parameters for cut rewriting
         mockturtle::cut_rewriting_params cut_params{};
@@ -148,10 +156,9 @@ int main()  // NOLINT
         const auto cut_xag = mockturtle::cut_rewriting(xag, resynthesis_function, cut_params);
 
         // perform technology mapping
-        const auto mapped_network = fiction::synthesis::technology_mapping(cut_xag, tech_map_params);
+        const auto mapped_network = technology_mapping(cut_xag, tech_map_params);
 
-        fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface_params<fiction::cell<cell_lyt>>
-            params{};
+        on_the_fly_circuit_design_on_defective_surface_params<cell<cell_lyt>> params{};
 
         params.exact_design_parameters.scheme        = "ROW4";
         params.exact_design_parameters.crossings     = true;
@@ -163,15 +170,15 @@ int main()  // NOLINT
 
         params.sidb_on_the_fly_gate_library_parameters.design_gate_params = design_gate_params;
 
-        fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface_stats<gate_lyt> st{};
+        on_the_fly_circuit_design_on_defective_surface_stats<gate_lyt> st{};
 
         try
         {
-            const auto result = fiction::sidb::generators::on_the_fly_circuit_design_on_defective_surface<
-                decltype(mapped_network), decltype(surface_lattice), gate_lyt>(mapped_network, lattice_tiling,
-                                                                               surface_lattice, params, &st);
+            const auto result = on_the_fly_circuit_design_on_defective_surface<decltype(mapped_network),
+                                                                               decltype(surface_lattice), gate_lyt>(
+                mapped_network, lattice_tiling, surface_lattice, params, &st);
 
-            fiction::sidb::io::write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
             const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());

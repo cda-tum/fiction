@@ -31,10 +31,16 @@
 #include <filesystem>
 #include <string>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::layouts::io;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
+
 template <typename Lyt>
 void remove_clocking(Lyt& lyt) noexcept
 {
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
@@ -46,8 +52,7 @@ int main()  // NOLINT
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH);
 
-    using gate_lyt = fiction::layouts::gate_level_layout<
-        fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -74,7 +79,7 @@ int main()  // NOLINT
                 const auto benchmark = path.stem().string();
 
                 // read layout from file
-                auto original_layout = fiction::layouts::io::read_fgl_layout<gate_lyt>(path.string(), benchmark);
+                auto original_layout = read_fgl_layout<gate_lyt>(path.string(), benchmark);
 
                 fmt::print("[i] processing {}\n", benchmark);
 
@@ -90,15 +95,14 @@ int main()  // NOLINT
                 remove_clocking(newly_clocked_layout);
 
                 // parameters and statistics of the clock number assignment
-                const fiction::physical_design::determine_clocking_params params{};
-                fiction::physical_design::determine_clocking_stats        stats{};
+                const determine_clocking_params params{};
+                determine_clocking_stats        stats{};
 
                 // perform clock number assignment
-                fiction::physical_design::determine_clocking(newly_clocked_layout, params, &stats);
+                determine_clocking(newly_clocked_layout, params, &stats);
 
                 // check equivalence of the original and the newly clocked layout
-                const auto eq_result = fiction::verification::equivalence_checking(
-                                           original_layout, newly_clocked_layout) != fiction::verification::eq_type::NO;
+                const auto eq_result = equivalence_checking(original_layout, newly_clocked_layout) != eq_type::NO;
 
                 // log results
                 clock_number_assignment_exp(original_layout.get_clocking_scheme().name.data(), benchmark,

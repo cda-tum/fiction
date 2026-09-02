@@ -33,6 +33,10 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::sidb::simulation::io;
 
 /**
  * This program reads randomly generated SiDB layouts from a specified folder, simulates them, and collects the
@@ -116,45 +120,41 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         std::cout << benchmark << '\n';
 
-                        const sidb::model::simulation_parameters phys_params{2, mu};
+                        const simulation_parameters phys_params{2, mu};
 
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
                                                                   folder.path().string(), name, -phys_params.mu_minus);
 
                         if (orientation == "100")
                         {
-                            auto lyt = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
+                            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const sidb::simulation::engines::quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>>
-                                params{phys_params};
+                            const quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>> params{phys_params};
 
-                            const auto simulation_results =
-                                sidb::simulation::engines::quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
+                            const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
 
                             // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                             // physically valid charge distribution is found) because the physical model currently works
                             // reliably only for layouts with neutrally and negatively charged SiDBs.
                             if (!simulation_results.charge_distributions.empty())
                             {
-                                sidb::simulation::io::write_location_and_ground_state(simulation_results, file_path);
+                                write_location_and_ground_state(simulation_results, file_path);
                             }
                         }
                         else if (orientation == "111")
                         {
-                            auto lyt = sidb::io::read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
+                            auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const sidb::simulation::engines::quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>>
-                                params{phys_params};
+                            const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{phys_params};
 
-                            const auto simulation_results =
-                                sidb::simulation::engines::quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
+                            const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
 
                             // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
                             // physically valid charge distribution is found) because the physical model currently works
                             // reliably only for layouts with neutrally and negatively charged SiDBs.
                             if (!simulation_results.charge_distributions.empty())
                             {
-                                sidb::simulation::io::write_location_and_ground_state(simulation_results, file_path);
+                                write_location_and_ground_state(simulation_results, file_path);
                             }
                         }
                         else

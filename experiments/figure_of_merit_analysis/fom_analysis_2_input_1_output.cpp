@@ -49,6 +49,15 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::sidb::simulation::defects;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
+using namespace fiction::utils::math;
 
 // This script summarizes all experiments presented in \"Unifying Figures of Merit: A Versatile Cost Function for
 // Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-NANO 2024
@@ -59,7 +68,7 @@ int main()  // NOLINT
     using Lyt = sidb_100_cell_clk_lyt_cube;
 
     // 2-input/1-output gate skeleton for the experiments. It is used to design gates with 2 inputs and 1 output.
-    static const auto skeleton = sidb::io::read_sqd_layout<Lyt>(fmt::format(
+    static const auto skeleton = read_sqd_layout<Lyt>(fmt::format(
         "{}/gate_skeletons/skeleton_bestagons_with_tags/skeleton_hex_inputsdbp_2i1o.sqd", EXPERIMENTS_PATH));
 
     // This table is used to explore the figures of merit for 2-input/1-output SiDB gates.
@@ -70,42 +79,39 @@ int main()  // NOLINT
     experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
-    const auto op_params = sidb::simulation::logic::is_operational_params{sidb::model::simulation_parameters{2, -0.32}};
-    auto       design_params = sidb::generators::design_gates_params<cell<Lyt>>{};
+    const auto op_params     = is_operational_params{simulation_parameters{2, -0.32}};
+    auto       design_params = design_gates_params<cell<Lyt>>{};
 
     design_params.operational_params = op_params;
-    design_params.design_mode =
-        sidb::generators::design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    design_params.canvas                 = {{17, 14, 0}, {21, 22, 0}};
+    design_params.design_mode = design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_params.canvas      = {{17, 14, 0}, {21, 22, 0}};
     design_params.number_of_canvas_sidbs = 2;
-    design_params.termination_cond =
-        sidb::generators::design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    design_params.termination_cond = design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
-    design_params.operational_params.sim_engine = sidb::simulation::engine::CLUSTERCOMPLETE;
+    design_params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
 
     const std::size_t minimum_number_of_canvas_sidbs = 2;
     const std::size_t maximum_number_of_canvas_sidbs = 6;
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{synthesis::create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{synthesis::create_nand_tt()}),
-        std::make_pair("nor", std::vector<tt>{synthesis::create_nor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{synthesis::create_xnor_tt()}),
-        std::make_pair("xor", std::vector<tt>{synthesis::create_xor_tt()}),
-        std::make_pair("or", std::vector<tt>{synthesis::create_or_tt()}),
-        std::make_pair("wire", std::vector<tt>{synthesis::create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{synthesis::create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{synthesis::create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{synthesis::create_not_tt()})};
+        std::make_pair("and", std::vector<tt>{create_and_tt()}),
+        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
+        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
+        std::make_pair("or", std::vector<tt>{create_or_tt()}),
+        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
+        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
 
-    const sidb::simulation::analysis::critical_temperature_params ct_params{op_params};
+    const critical_temperature_params ct_params{op_params};
 
     // defining the operational domain parameters
-    sidb::simulation::logic::operational_domain_params op_domain_params{op_params};
+    operational_domain_params op_domain_params{op_params};
 
-    op_domain_params.sweep_dimensions = {{sidb::simulation::logic::sweep_parameter::EPSILON_R},
-                                         {sidb::simulation::logic::sweep_parameter::LAMBDA_TF}};
+    op_domain_params.sweep_dimensions = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
 
     op_domain_params.sweep_dimensions[0].min  = 4.0;
     op_domain_params.sweep_dimensions[0].max  = 6.0;
@@ -114,18 +120,17 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.2;
 
-    const sidb::simulation::analysis::band_bending_resilience_params bbr_params{
-        sidb::simulation::analysis::physical_population_stability_params{op_params.sim_params}};
+    const band_bending_resilience_params bbr_params{physical_population_stability_params{op_params.sim_params}};
 
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
     // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon
     // Surface Probed by a Moveable Quantum Dot" by T. R. Huff et al.
-    const auto si_vacancy = fiction::sidb::model::defect{fiction::sidb::model::defect_type::SI_VACANCY, -1, 10.6, 5.9};
-    const auto arsenic    = fiction::sidb::model::defect{fiction::sidb::model::defect_type::ARSENIC, 1, 9.7, 2.1};
+    const auto si_vacancy = defect{defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto arsenic    = defect{defect_type::ARSENIC, 1, 9.7, 2.1};
 
-    const std::vector<sidb::model::defect> defects = {si_vacancy, arsenic};
+    const std::vector<defect> defects = {si_vacancy, arsenic};
 
-    sidb::simulation::defects::defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {20, 20};
     params.operational_params       = op_params;
 
@@ -150,10 +155,10 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy      = {};
             std::vector<double> bbr_all                       = {};
 
-            std::vector<Lyt>                     all_gates{};
-            sidb::generators::design_gates_stats efficient_stats{};
+            std::vector<Lyt>   all_gates{};
+            design_gates_stats efficient_stats{};
 
-            all_gates = sidb::generators::design_gates(skeleton, truth_table, design_params, &efficient_stats);
+            all_gates = design_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {
@@ -170,21 +175,18 @@ int main()  // NOLINT
 
             for (const auto& gate : all_gates)
             {
-                sidb::simulation::logic::operational_domain_stats op_stats{};
-                const auto op_domain = sidb::simulation::logic::operational_domain_grid_search(
-                    gate, truth_table, op_domain_params, &op_stats);
+                operational_domain_stats op_stats{};
+                const auto op_domain = operational_domain_grid_search(gate, truth_table, op_domain_params, &op_stats);
                 const auto percentual_op_area = static_cast<double>(op_stats.num_operational_parameter_combinations) /
                                                 static_cast<double>(op_stats.num_total_parameter_points);
                 percentual_operational_domain.push_back(percentual_op_area);
 
                 max_relative_op_domain = std::max(percentual_op_area, max_relative_op_domain);
 
-                const auto ct =
-                    sidb::simulation::analysis::critical_temperature_gate_based(gate, truth_table, ct_params);
+                const auto ct = critical_temperature_gate_based(gate, truth_table, ct_params);
                 temps.push_back(ct);
-                max_temp = std::max(ct, max_temp);
-                const auto bbr_in_volt =
-                    sidb::simulation::analysis::band_bending_resilience(gate, truth_table, bbr_params);
+                max_temp                    = std::max(ct, max_temp);
+                const auto bbr_in_volt      = band_bending_resilience(gate, truth_table, bbr_params);
                 const auto bbr_in_millivolt = bbr_in_volt * 1000;  // convert to mV
                 bbr_all.push_back(bbr_in_millivolt);
                 max_bbr = std::max(bbr_in_millivolt, max_bbr);
@@ -192,13 +194,12 @@ int main()  // NOLINT
                 for (const auto& defect : defects)
                 {
                     params.defect = defect;
-                    sidb::simulation::defects::defect_influence_stats defect_inf_stats{};
-                    const auto defect_inf_grid = sidb::simulation::defects::defect_influence_grid_search(
-                        gate, truth_table, params, 4, &defect_inf_stats);
-                    const auto defect_clearance =
-                        sidb::simulation::defects::calculate_defect_clearance(gate, defect_inf_grid);
+                    defect_influence_stats defect_inf_stats{};
+                    const auto             defect_inf_grid =
+                        defect_influence_grid_search(gate, truth_table, params, 4, &defect_inf_stats);
+                    const auto defect_clearance = calculate_defect_clearance(gate, defect_inf_grid);
 
-                    if (defect.type == sidb::model::defect_type::SI_VACANCY)
+                    if (defect.type == defect_type::SI_VACANCY)
                     {
                         min_defect_clearance_vacancy =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_vacancy);
@@ -206,7 +207,7 @@ int main()  // NOLINT
                             std::max(defect_clearance.defect_clearance_distance, max_defect_clearance_vacancy);
                         defect_influence_vacancy.push_back(defect_clearance.defect_clearance_distance);
                     }
-                    else if (defect.type == sidb::model::defect_type::ARSENIC)
+                    else if (defect.type == defect_type::ARSENIC)
                     {
                         min_defect_clearance_arsenic =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_arsenic);
@@ -236,7 +237,7 @@ int main()  // NOLINT
 
             for (auto i = 0u; i < temps.size(); i++)
             {
-                const auto chi = fiction::utils::math::cost_function_chi(
+                const auto chi = cost_function_chi(
                     {temps.at(i) / max_temp, percentual_operational_domain[i] / max_relative_op_domain,
                      defect_influence_arsenic.at(i) / max_defect_clearance_arsenic,
                      defect_influence_vacancy.at(i) / max_defect_clearance_vacancy, bbr_all.at(i) / max_bbr},

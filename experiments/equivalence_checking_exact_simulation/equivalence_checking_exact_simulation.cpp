@@ -41,6 +41,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::utils::math;
 
 // This script verifies the equivalence between ExGS and QuickExact. It generates all layouts consisting of
 // 4 SiDBs within an 11x11 spanned area. The simulation is then executed using both simulators, and the results
@@ -48,14 +54,12 @@ using namespace fiction;
 
 int main()  // NOLINT
 {
-    const auto all_cells_in_region =
-        layouts::all_coordinates_in_spanned_area<layouts::coords::offset>({0, 0}, {10, 10});
+    const auto all_cells_in_region = all_coordinates_in_spanned_area<coords::offset>({0, 0}, {10, 10});
 
     const auto all_distributions =
-        fiction::utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            4, all_cells_in_region.size());
+        determine_all_combinations_of_distributing_k_entities_on_n_positions(4, all_cells_in_region.size());
 
-    const auto params = sidb::model::simulation_parameters{3, -0.32};
+    const auto params = simulation_parameters{3, -0.32};
 
     uint64_t quickexact_non_equivalence_counter      = 0;
     uint64_t clustercomplete_non_equivalence_counter = 0;
@@ -95,29 +99,26 @@ int main()  // NOLINT
 
                     for (const auto idx : *std::next(all_distributions.cbegin(), static_cast<int64_t>(ix)))
                     {
-                        lyt.assign_cell_type(all_cells_in_region[idx], sidb::sidb_technology::cell_type::NORMAL);
+                        lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
                     }
 
-                    auto result_exgs       = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, params);
-                    auto result_quickexact = sidb::simulation::engines::quickexact(
-                        lyt, sidb::simulation::engines::quickexact_params<cell<sidb_100_cell_clk_lyt>>{.sim_params =
-                                                                                                           params});
+                    auto result_exgs = exhaustive_ground_state_simulation(lyt, params);
+                    auto result_quickexact =
+                        quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{.sim_params = params});
 
-                    if (!sidb::simulation::check_simulation_results_for_equivalence(result_exgs, result_quickexact))
+                    if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
                         const std::scoped_lock lock{mutex_qe};
                         quickexact_non_equivalence_counter++;
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    sidb::simulation::engines::clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{
-                        .sim_params = params};
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{.sim_params = params};
                     cc_params.available_threads = 1;
 
-                    auto result_clustercomplete = sidb::simulation::engines::clustercomplete(lyt, cc_params);
+                    auto result_clustercomplete = clustercomplete(lyt, cc_params);
 
-                    if (!sidb::simulation::check_simulation_results_for_equivalence(result_exgs,
-                                                                                    result_clustercomplete))
+                    if (!check_simulation_results_for_equivalence(result_exgs, result_clustercomplete))
                     {
                         const std::scoped_lock lock{mutex_cc};
                         clustercomplete_non_equivalence_counter++;

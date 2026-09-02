@@ -39,10 +39,17 @@
 #include <string>
 #include <vector>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks::io;
+using namespace fiction::physical_design;
+using namespace fiction::synthesis;
+using namespace fiction::verification;
+
 template <typename Lyt>
 void remove_clocking(Lyt& lyt) noexcept
 {
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
@@ -51,8 +58,7 @@ int main()  // NOLINT
 {
     const std::string network_folder = fmt::format("{}/../benchmarks/IWLS93/", EXPERIMENTS_PATH);
 
-    using gate_lyt = fiction::layouts::gate_level_layout<
-        fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -67,8 +73,7 @@ int main()  // NOLINT
 
     // instantiate a technology mapping library (AND, OR, NOT)
     std::stringstream library_stream{};
-    library_stream << fiction::synthesis::GATE_ZERO << fiction::synthesis::GATE_ONE << fiction::synthesis::GATE_BUF
-                   << fiction::synthesis::GATE_INV << fiction::synthesis::GATE_AND2 << fiction::synthesis::GATE_OR2;
+    library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND2 << GATE_OR2;
 
     std::vector<mockturtle::gate> gates{};
 
@@ -80,7 +85,7 @@ int main()  // NOLINT
     const mockturtle::map_params map_params{};
 
     // instantiate a network reader
-    fiction::networks::io::network_reader<fiction::aig_ptr> reader{network_folder, std::cout};
+    network_reader<aig_ptr> reader{network_folder, std::cout};
 
     for (const auto& benchmark : reader.get_networks(true))  // for each benchmark sorted by size (ascending)
     {
@@ -92,7 +97,7 @@ int main()  // NOLINT
         const auto mapped_network = mockturtle::map(network, gate_lib, map_params);
 
         // perform layout generation with an exact SMT-based algorithm
-        const auto original_layout = fiction::physical_design::orthogonal<gate_lyt>(mapped_network);
+        const auto original_layout = orthogonal<gate_lyt>(mapped_network);
 
         // obtain layout characteristics
         const auto width  = original_layout.x() + 1;
@@ -106,15 +111,14 @@ int main()  // NOLINT
         remove_clocking(newly_clocked_layout);
 
         // parameters and statistics of the clock number assignment
-        const fiction::physical_design::determine_clocking_params params{};
-        fiction::physical_design::determine_clocking_stats        stats{};
+        const determine_clocking_params params{};
+        determine_clocking_stats        stats{};
 
         // perform clock number assignment
-        fiction::physical_design::determine_clocking(newly_clocked_layout, params, &stats);
+        determine_clocking(newly_clocked_layout, params, &stats);
 
         // check equivalence of the original and the newly clocked layout
-        const auto eq_result = fiction::verification::equivalence_checking(original_layout, newly_clocked_layout) !=
-                               fiction::verification::eq_type::NO;
+        const auto eq_result = equivalence_checking(original_layout, newly_clocked_layout) != eq_type::NO;
 
         // log results
         clock_number_assignment_exp(network.get_network_name(), original_layout.num_pis(), original_layout.num_pos(),

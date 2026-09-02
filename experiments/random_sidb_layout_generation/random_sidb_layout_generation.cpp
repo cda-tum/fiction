@@ -30,6 +30,10 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
 
 /**
  * This program generates random SiDB layouts and saves them as .sqd files (provide SiQAD
@@ -111,18 +115,18 @@ int main(int argc, const char* argv[])  // NOLINT
 
     // specifies whether positively charged SiDBs are allowed ("ALLOWED"), forbidden ("FORBIDDEN") or can occur
     // ("MAY_OCCUR")
-    sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges charges{};
+    generate_random_layout_params<coords::offset>::positive_charges charges{};
     if (charges_str == "ALLOWED")
     {
-        charges = sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::ALLOWED;
+        charges = generate_random_layout_params<coords::offset>::positive_charges::ALLOWED;
     }
     else if (charges_str == "MAY_OCCUR")
     {
-        charges = sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::MAY_OCCUR;
+        charges = generate_random_layout_params<coords::offset>::positive_charges::MAY_OCCUR;
     }
     else
     {
-        charges = sidb::generators::generate_random_layout_params<layouts::coords::offset>::positive_charges::FORBIDDEN;
+        charges = generate_random_layout_params<coords::offset>::positive_charges::FORBIDDEN;
     }
 
     // sets the number of SiDBs for the first bunch of layouts
@@ -190,22 +194,17 @@ int main(int argc, const char* argv[])  // NOLINT
                     std::cout << "Folder already exists.\n";
                 }
 
-                const sidb::generators::generate_random_layout_params<layouts::coords::offset> params{
-                    {{nw_x, nw_y}, {se_x, se_y}},
-                    number_of_placed_sidbs,
-                    charges,
-                    sidb::model::simulation_parameters{3, -0.32},
-                    static_cast<uint64_t>(10E6),
-                    number_of_layouts};
-                const auto unique_lyts =
-                    sidb::generators::generate_multiple_random_layouts<sidb_100_cell_clk_lyt>(params);
+                const generate_random_layout_params<coords::offset> params{
+                    {{nw_x, nw_y}, {se_x, se_y}},    number_of_placed_sidbs,      charges,
+                    simulation_parameters{3, -0.32}, static_cast<uint64_t>(10E6), number_of_layouts};
+                const auto unique_lyts = generate_multiple_random_layouts<sidb_100_cell_clk_lyt>(params);
 
                 if (unique_lyts.has_value())
                 {
                     for (auto i = 0u; i < unique_lyts.value().size(); i++)
                     {
-                        sidb::io::write_sqd_layout(unique_lyts.value()[i],
-                                                   fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
+                        write_sqd_layout(unique_lyts.value()[i],
+                                         fmt::format("{}/layout_{}.sqd", dir_path_sqd.string(), i));
                     }
                 }
             }

@@ -38,6 +38,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 // This script designs standard cells for 3-input Boolean functions using *QuickCell*. The number of designed gate
 // implementations and the required runtime are recorded.
@@ -61,56 +67,54 @@ int main()  // NOLINT
             "t_pruning [s]"             // double
     };
 
-    const auto truth_tables_and_names = std::array<std::pair<std::vector<tt>, std::string>, 11>{
-        {{std::vector<tt>{synthesis::create_and3_tt()}, "and3"},
-         {std::vector<tt>{synthesis::create_xor_and_tt()}, "xor_and"},
-         {std::vector<tt>{synthesis::create_or_and_tt()}, "or_and"},
-         {std::vector<tt>{synthesis::create_onehot_tt()}, "onehot"},
-         {std::vector<tt>{synthesis::create_maj_tt()}, "maj"},
-         {std::vector<tt>{synthesis::create_gamble_tt()}, "gamble"},
-         {std::vector<tt>{synthesis::create_dot_tt()}, "dot"},
-         {std::vector<tt>{synthesis::create_ite_tt()}, "ite"},
-         {std::vector<tt>{synthesis::create_and_xor_tt()}, "and_xor"},
-         {std::vector<tt>{synthesis::create_xor3_tt()}, "xor3"},
-         {std::vector<tt>{synthesis::create_ite_tt()}, "21_mux"}}};
+    const auto truth_tables_and_names =
+        std::array<std::pair<std::vector<tt>, std::string>, 11>{{{std::vector<tt>{create_and3_tt()}, "and3"},
+                                                                 {std::vector<tt>{create_xor_and_tt()}, "xor_and"},
+                                                                 {std::vector<tt>{create_or_and_tt()}, "or_and"},
+                                                                 {std::vector<tt>{create_onehot_tt()}, "onehot"},
+                                                                 {std::vector<tt>{create_maj_tt()}, "maj"},
+                                                                 {std::vector<tt>{create_gamble_tt()}, "gamble"},
+                                                                 {std::vector<tt>{create_dot_tt()}, "dot"},
+                                                                 {std::vector<tt>{create_ite_tt()}, "ite"},
+                                                                 {std::vector<tt>{create_and_xor_tt()}, "and_xor"},
+                                                                 {std::vector<tt>{create_xor3_tt()}, "xor3"},
+                                                                 {std::vector<tt>{create_ite_tt()}, "21_mux"}}};
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_3_input/", EXPERIMENTS_PATH);
 
     // this skeleton is used for the design of AND3 and Gamble
-    const auto skeleton_one = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "3_in_1_out_skeleton_one.sqd"));
+    const auto skeleton_one =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_one.sqd"));
 
     // this skeleton is used for the design of all Boolean functions, except for AND3 and Gamble.
-    const auto skeleton_two = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
+    const auto skeleton_two =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
-    const sidb::generators::design_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
-            sidb::simulation::logic::is_operational_params{
-                .sim_params = sidb::model::simulation_parameters{2, -0.31},
-                .sim_engine = sidb::simulation::engine::QUICKEXACT,
+            is_operational_params{
+                .sim_params = simulation_parameters{2, -0.31},
+                .sim_engine = engine::QUICKEXACT,
                 .input_bdl_iterator_params =
-                    sidb::simulation::logic::bdl_input_iterator_params{
-                        .bdl_wire_params =
-                            sidb::simulation::logic::detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
-                .op_condition = sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS},
-        .design_mode = sidb::generators::design_gates_params<
-            fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
+                    bdl_input_iterator_params{.bdl_wire_params =
+                                                  detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
+                .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
+        .design_mode            = design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
         .canvas                 = {{22, 6, 0}, {32, 12, 0}},
         .number_of_canvas_sidbs = 4};
 
     for (const auto& [truth_tables, gate_names] : truth_tables_and_names)
     {
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
-        sidb::generators::design_gates_stats     stats_quickcell{};
+        design_gates_stats                       stats_quickcell{};
 
         if (gate_names == "and3" || gate_names == "gamble")
         {
-            quickcell_design = sidb::generators::design_gates(skeleton_one, truth_tables, params, &stats_quickcell);
+            quickcell_design = design_gates(skeleton_one, truth_tables, params, &stats_quickcell);
         }
         else
         {
-            quickcell_design = sidb::generators::design_gates(skeleton_two, truth_tables, params, &stats_quickcell);
+            quickcell_design = design_gates(skeleton_two, truth_tables, params, &stats_quickcell);
         }
 
         const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);

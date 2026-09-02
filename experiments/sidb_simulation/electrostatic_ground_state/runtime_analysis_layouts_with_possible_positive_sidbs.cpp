@@ -32,6 +32,9 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::engines;
 
 // This script compares the simulation runtime of ExGS and QuickExact for randomly
 // generated layouts that may contain positively charged SiDBs (`can_positive_charges_occur` returns `true`). The number
@@ -49,24 +52,24 @@ int main()  // NOLINT
         "QuickExact Runtime [s]",
         "Average #positive SiDBs of ground state"};
 
-    const sidb::model::simulation_parameters sim_params{3, -0.32};
+    const simulation_parameters sim_params{3, -0.32};
 
-    const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
-        sim_params, sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+    const quickexact_params<cell<Lyt>> qe_params{sim_params,
+                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
-    auto random_layouts_params = sidb::generators::generate_random_layout_params<cell<Lyt>>{
-        {{0, 0}, {10, 10}},
-        0,
-        sidb::generators::generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
-        sim_params,
-        static_cast<uint64_t>(10E6),
-        10};
+    auto random_layouts_params =
+        generate_random_layout_params<cell<Lyt>>{{{0, 0}, {10, 10}},
+                                                 0,
+                                                 generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
+                                                 sim_params,
+                                                 static_cast<uint64_t>(10E6),
+                                                 10};
 
     for (auto num_sidbs = 5u; num_sidbs < 20; num_sidbs++)
     {
         random_layouts_params.number_of_sidbs = num_sidbs;
 
-        const auto random_layouts = sidb::generators::generate_multiple_random_layouts<Lyt>(random_layouts_params);
+        const auto random_layouts = generate_multiple_random_layouts<Lyt>(random_layouts_params);
 
         double runtime_exhaustive = 0;
         double runtime_quickexact = 0;
@@ -81,10 +84,9 @@ int main()  // NOLINT
 
         for (const auto& layout : random_layouts.value())
         {
-            const auto exhaustive_results_layout =
-                sidb::simulation::engines::exhaustive_ground_state_simulation(layout, sim_params);
+            const auto exhaustive_results_layout = exhaustive_ground_state_simulation(layout, sim_params);
 
-            const auto quickexact_results_layout = sidb::simulation::engines::quickexact(layout, qe_params);
+            const auto quickexact_results_layout = quickexact(layout, qe_params);
 
             const auto gs = exhaustive_results_layout.groundstates();
 

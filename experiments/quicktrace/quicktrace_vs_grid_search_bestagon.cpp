@@ -38,6 +38,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::defects;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -54,25 +60,24 @@ int main()  // NOLINT
     static const std::string plot_folder     = fmt::format("{}quicktrace/plots/", EXPERIMENTS_PATH);
 
     static const std::array<std::pair<std::string, std::vector<tt>>, 10> gates = {
-        std::make_pair("and", std::vector<tt>{synthesis::create_and_tt()}),
-        std::make_pair("nand", std::vector<tt>{synthesis::create_nand_tt()}),
-        std::make_pair("or", std::vector<tt>{synthesis::create_or_tt()}),
-        std::make_pair("nor", std::vector<tt>{synthesis::create_nor_tt()}),
-        std::make_pair("xor", std::vector<tt>{synthesis::create_xor_tt()}),
-        std::make_pair("xnor", std::vector<tt>{synthesis::create_xnor_tt()}),
-        std::make_pair("wire", std::vector<tt>{synthesis::create_id_tt()}),
-        std::make_pair("wire_diag", std::vector<tt>{synthesis::create_id_tt()}),
-        std::make_pair("inv", std::vector<tt>{synthesis::create_not_tt()}),
-        std::make_pair("inv_diag", std::vector<tt>{synthesis::create_not_tt()})};
+        std::make_pair("and", std::vector<tt>{create_and_tt()}),
+        std::make_pair("nand", std::vector<tt>{create_nand_tt()}),
+        std::make_pair("or", std::vector<tt>{create_or_tt()}),
+        std::make_pair("nor", std::vector<tt>{create_nor_tt()}),
+        std::make_pair("xor", std::vector<tt>{create_xor_tt()}),
+        std::make_pair("xnor", std::vector<tt>{create_xnor_tt()}),
+        std::make_pair("wire", std::vector<tt>{create_id_tt()}),
+        std::make_pair("wire_diag", std::vector<tt>{create_id_tt()}),
+        std::make_pair("inv", std::vector<tt>{create_not_tt()}),
+        std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
 
-    const sidb::simulation::logic::is_operational_params is_op_params{
-        .sim_params = sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0}};
+    const is_operational_params is_op_params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5.0}};
 
     // for this experiment we use a stray SiDB defect
-    const auto stray_db = fiction::sidb::model::defect{fiction::sidb::model::defect_type::DB, -1, 4.1, 1.8};
-    // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto stray_db = defect{defect_type::DB, -1, 4.1, 1.8};
+    // const auto si_vacancy = sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    sidb::simulation::defects::defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {100, 100};
     params.defect                   = stray_db;
     params.operational_params       = is_op_params;
@@ -90,40 +95,36 @@ int main()  // NOLINT
         std::filesystem::create_directories(plot_folder_for_given_gate);
 
         // read the Bestagon SiDB layout
-        const auto layout =
-            sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_cube>(fmt::format("{}{}.sqd", bestagon_folder, gate));
+        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_cube>(fmt::format("{}{}.sqd", bestagon_folder, gate));
 
         // Write the SQD layout
-        sidb::io::write_sqd_layout(layout, fmt::format("{}/{}.sqd", plot_folder_for_given_gate, gate));
+        write_sqd_layout(layout, fmt::format("{}/{}.sqd", plot_folder_for_given_gate, gate));
 
         // grid search
-        sidb::simulation::defects::defect_influence_stats grid_stats{};
-        const auto                                        defect_inf_grid =
-            sidb::simulation::defects::defect_influence_grid_search(layout, truth_table, params, 1, &grid_stats);
+        defect_influence_stats grid_stats{};
+        const auto defect_inf_grid = defect_influence_grid_search(layout, truth_table, params, 1, &grid_stats);
         total_number_of_samples_grid += grid_stats.num_evaluated_defect_positions;
 
         // Write the defect influence domain to a CSV file
-        sidb::simulation::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_grid, fmt::format("{}{}_grid.csv", plot_folder_for_given_gate, gate));
-        const auto clearance_grid_search =
-            sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_grid);
+        const auto clearance_grid_search = calculate_defect_clearance(layout, defect_inf_grid);
 
         // random sampling
-        sidb::simulation::defects::defect_influence_stats random_stats{};
-        const auto defect_inf_random = sidb::simulation::defects::defect_influence_random_sampling(
-            layout, truth_table, 100, params, &random_stats);
-        const auto clearance_random = sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_random);
-        sidb::simulation::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        defect_influence_stats random_stats{};
+        const auto             defect_inf_random =
+            defect_influence_random_sampling(layout, truth_table, 100, params, &random_stats);
+        const auto clearance_random = calculate_defect_clearance(layout, defect_inf_random);
+        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_random, fmt::format("{}{}_random.csv", plot_folder_for_given_gate, gate));
 
         // quicktrace
-        sidb::simulation::defects::defect_influence_stats quicktrace_stats{};
-        const auto                                        defect_inf_quicktrace =
-            sidb::simulation::defects::defect_influence_quicktrace(layout, truth_table, 20, params, &quicktrace_stats);
+        defect_influence_stats quicktrace_stats{};
+        const auto             defect_inf_quicktrace =
+            defect_influence_quicktrace(layout, truth_table, 20, params, &quicktrace_stats);
         total_number_of_samples_quicktrace += quicktrace_stats.num_evaluated_defect_positions;
-        const auto clearance_quicktrace =
-            sidb::simulation::defects::calculate_defect_clearance(layout, defect_inf_quicktrace);
-        sidb::simulation::io::write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
+        const auto clearance_quicktrace = calculate_defect_clearance(layout, defect_inf_quicktrace);
+        write_defect_influence_domain<sidb_100_cell_clk_lyt_cube>(
             defect_inf_quicktrace, fmt::format("{}{}_quicktrace.csv", plot_folder_for_given_gate, gate));
 
         // Log the simulation results

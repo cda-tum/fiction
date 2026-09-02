@@ -39,6 +39,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 // This script compares the runtime of applying the three pruning techniques presented used in **QuickCell** with
 // physical simulation to determine the non-operationality of different standard cell layouts.
@@ -116,63 +122,62 @@ int main()  // NOLINT
     static const std::string folder_2i =
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/", EXPERIMENTS_PATH);
 
-    const auto skeleton_2i1o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+    const auto skeleton_2i1o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
-    const auto skeleton_2i2o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
+    const auto skeleton_2i2o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
         fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
-    const auto skeleton_3i1o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
+    const auto skeleton_3i1o =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
 
-    const auto skeleton_3i2o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
+    const auto skeleton_3i2o =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
 
-    const auto skeleton_3i3o = sidb::io::read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
+    const auto skeleton_3i3o =
+        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
 
     auto two_one = skeleton_2i1o;
-    two_one.assign_cell_type({22, 10}, sidb::sidb_technology::cell_type::LOGIC);
-    two_one.assign_cell_type({17, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    two_one.assign_cell_type({22, 10}, sidb_technology::cell_type::LOGIC);
+    two_one.assign_cell_type({17, 7}, sidb_technology::cell_type::LOGIC);
 
     auto two_two = skeleton_2i2o;
-    two_two.assign_cell_type({15, 7}, sidb::sidb_technology::cell_type::LOGIC);
-    two_two.assign_cell_type({22, 8}, sidb::sidb_technology::cell_type::LOGIC);
-    two_two.assign_cell_type({22, 10}, sidb::sidb_technology::cell_type::LOGIC);
-    two_two.assign_cell_type({17, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({15, 7}, sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({22, 8}, sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({22, 10}, sidb_technology::cell_type::LOGIC);
+    two_two.assign_cell_type({17, 7}, sidb_technology::cell_type::LOGIC);
 
     auto three_one = skeleton_3i1o;
-    three_one.assign_cell_type({25, 7}, sidb::sidb_technology::cell_type::LOGIC);
-    three_one.assign_cell_type({32, 8}, sidb::sidb_technology::cell_type::LOGIC);
-    three_one.assign_cell_type({36, 11}, sidb::sidb_technology::cell_type::LOGIC);
-    three_one.assign_cell_type({40, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({25, 7}, sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({32, 8}, sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
+    three_one.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
     auto three_two = skeleton_3i2o;
-    three_two.assign_cell_type({25, 7}, sidb::sidb_technology::cell_type::LOGIC);
-    three_two.assign_cell_type({32, 8}, sidb::sidb_technology::cell_type::LOGIC);
-    three_two.assign_cell_type({36, 11}, sidb::sidb_technology::cell_type::LOGIC);
-    three_two.assign_cell_type({40, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({25, 7}, sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({32, 8}, sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
+    three_two.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
     auto three_three = skeleton_3i3o;
-    three_three.assign_cell_type({25, 7}, sidb::sidb_technology::cell_type::LOGIC);
-    three_three.assign_cell_type({32, 8}, sidb::sidb_technology::cell_type::LOGIC);
-    three_three.assign_cell_type({36, 11}, sidb::sidb_technology::cell_type::LOGIC);
-    three_three.assign_cell_type({40, 7}, sidb::sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({25, 7}, sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({32, 8}, sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
+    three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
     const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>>
-        layout_truth_table{{two_one, {synthesis::create_or_tt()}},
-                           {two_two, synthesis::create_crossing_wire_tt()},
-                           {three_one, {synthesis::create_gamble_tt()}},
+        layout_truth_table{{two_one, {create_or_tt()}},
+                           {two_two, create_crossing_wire_tt()},
+                           {three_one, {create_gamble_tt()}},
                            {three_two, create_truth_tables_3i2o()},
                            {three_three, create_truth_tables_3i3o()}};
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
-    sidb::simulation::logic::is_operational_params operational_params{
-        sidb::model::simulation_parameters{2, -0.32}, sidb::simulation::engine::QUICKEXACT,
-        sidb::simulation::logic::bdl_input_iterator_params{sidb::simulation::logic::detect_bdl_wires_params{3.0}},
-        sidb::simulation::logic::is_operational_params::operational_condition::REJECT_KINKS,
-        sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
+    is_operational_params operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
+                                             bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
+                                             is_operational_params::operational_condition::REJECT_KINKS,
+                                             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
 
     for (size_t i = 0; i < layout_truth_table.size(); ++i)
     {
@@ -180,25 +185,23 @@ int main()  // NOLINT
 
         // Set to SIMULATION_ONLY and measure time
         operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
         mockturtle::stopwatch<>::duration simulation_only_runtime{};
         {
             // measure run time (artificial scope)
             const mockturtle::stopwatch stop{simulation_only_runtime};
-            [[maybe_unused]] const auto op_sim =
-                sidb::simulation::logic::is_operational(layout, truth_table, operational_params);
+            [[maybe_unused]] const auto op_sim = is_operational(layout, truth_table, operational_params);
         }
         // Set to FILTER_ONLY and measure time
         operational_params.strategy_to_analyze_operational_status =
-            sidb::simulation::logic::is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+            is_operational_params::operational_analysis_strategy::FILTER_ONLY;
 
         mockturtle::stopwatch<>::duration filter_only_runtime{};
         {
             // measure run time (artificial scope)
             const mockturtle::stopwatch stop{filter_only_runtime};
-            [[maybe_unused]] const auto op_filt =
-                sidb::simulation::logic::is_operational(layout, truth_table, operational_params);
+            [[maybe_unused]] const auto op_filt = is_operational(layout, truth_table, operational_params);
         }
 
         simulation_exp(
