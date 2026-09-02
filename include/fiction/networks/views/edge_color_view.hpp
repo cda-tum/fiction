@@ -12,8 +12,7 @@
 // Created by marcel on 18.01.22.
 //
 
-#ifndef FICTION_NETWORKS_VIEWS_EDGE_COLOR_VIEW_HPP
-#define FICTION_NETWORKS_VIEWS_EDGE_COLOR_VIEW_HPP
+#pragma once
 
 #include "fiction/networks/network_utils.hpp"
 
@@ -145,4 +144,3 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
 };
 
 }  // namespace fiction::networks::views
-#endif  // FICTION_NETWORKS_VIEWS_EDGE_COLOR_VIEW_HPP

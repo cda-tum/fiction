@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 05.03.2024.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_DEFECT_INFLUENCE_DOMAIN_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_DEFECT_INFLUENCE_DOMAIN_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/utils/io/csv_writer.hpp"
@@ -102,4 +101,3 @@ void write_defect_influence_domain(const sidb::simulation::defects::defect_influ
 }
 
 }  // namespace fiction::sidb::simulation::io
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_DEFECT_INFLUENCE_DOMAIN_HPP

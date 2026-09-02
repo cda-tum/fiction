@@ -12,8 +12,7 @@
 // Created by marcel on 08.06.21.
 //
 
-#ifndef FICTION_CMD_MAP_HPP
-#define FICTION_CMD_MAP_HPP
+#pragma once
 
 #include <fiction/synthesis/technology_mapping.hpp>
 
@@ -49,5 +48,3 @@ class map_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_MAP_HPP

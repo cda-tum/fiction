@@ -12,8 +12,7 @@
 // Created by marcel on 11.08.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINE_HPP
+#pragma once
 
 #include <phmap.h>
 
@@ -199,4 +198,3 @@ template <typename EngineType>
 }
 
 }  // namespace fiction::sidb::simulation
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINE_HPP

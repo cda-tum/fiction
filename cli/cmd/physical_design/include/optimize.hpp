@@ -12,8 +12,7 @@
 // Created by Simon Hofmann on 02.08.23.
 //
 
-#ifndef FICTION_CMD_OPTIMIZE_HPP
-#define FICTION_CMD_OPTIMIZE_HPP
+#pragma once
 
 #include <fiction/physical_design/post_layout_optimization.hpp>
 #include <fiction/physical_design/wiring_reduction.hpp>
@@ -67,5 +66,3 @@ class optimize_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_OPTIMIZE_HPP

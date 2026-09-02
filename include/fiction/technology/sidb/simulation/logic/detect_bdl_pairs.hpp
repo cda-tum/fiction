@@ -12,8 +12,7 @@
 // Created by marcel on 21.07.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_PAIRS_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_PAIRS_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/technology/sidb/technology.hpp"
@@ -400,4 +399,3 @@ detect_bdl_pairs(const Lyt& lyt, const std::optional<typename fiction::technolog
 }
 
 }  // namespace fiction::sidb::simulation::logic
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_PAIRS_HPP

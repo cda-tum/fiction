@@ -12,8 +12,7 @@
 // Created by Willem Lambooy on 04.02.2024.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTER_HIERARCHY_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTER_HIERARCHY_HPP
+#pragma once
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -1245,5 +1244,3 @@ get_projector_state_compositions(const cluster_projector_state& pst) noexcept
 
 }  // namespace fiction::sidb::simulation::engines::detail
 #endif  // FICTION_ALGLIB_ENABLED
-
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTER_HIERARCHY_HPP

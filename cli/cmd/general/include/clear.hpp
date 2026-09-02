@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_CLEAR_HPP
-#define FICTION_CMD_CLEAR_HPP
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -47,5 +46,3 @@ class clear_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CLEAR_HPP

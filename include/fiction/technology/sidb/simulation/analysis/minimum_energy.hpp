@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 18.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_MINIMUM_ENERGY_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_MINIMUM_ENERGY_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -73,4 +72,3 @@ template <typename InputIt>
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_MINIMUM_ENERGY_HPP

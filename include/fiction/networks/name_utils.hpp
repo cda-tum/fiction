@@ -12,8 +12,7 @@
 // Created by marcel on 26.05.21.
 //
 
-#ifndef FICTION_NETWORKS_NAME_UTILS_HPP
-#define FICTION_NETWORKS_NAME_UTILS_HPP
+#pragma once
 
 #include "fiction/physical_design/placement_utils.hpp"
 
@@ -289,4 +288,3 @@ void restore_names(const NtkSrc& ntk_src, NtkDest& ntk_dest, mockturtle::node_ma
 }
 
 }  // namespace fiction::networks
-#endif  // FICTION_NETWORKS_NAME_UTILS_HPP

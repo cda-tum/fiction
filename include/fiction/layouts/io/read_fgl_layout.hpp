@@ -12,8 +12,7 @@
 // Created by simon on 25.09.23.
 //
 
-#ifndef FICTION_LAYOUTS_IO_READ_FGL_LAYOUT_HPP
-#define FICTION_LAYOUTS_IO_READ_FGL_LAYOUT_HPP
+#pragma once
 
 // clang-format off
 // NOLINTBEGIN(misc-include-cleaner): no symbol from these headers is named directly, but clocked_layout.hpp's
@@ -837,4 +836,3 @@ void read_fgl_layout(Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction::layouts::io
-#endif  // FICTION_LAYOUTS_IO_READ_FGL_LAYOUT_HPP

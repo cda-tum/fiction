@@ -12,8 +12,7 @@
 // Created by marcel on 24.05.21.
 //
 
-#ifndef FICTION_NETWORK_BLUEPRINTS_HPP
-#define FICTION_NETWORK_BLUEPRINTS_HPP
+#pragma once
 
 #include <mockturtle/views/names_view.hpp>
 
@@ -455,5 +454,3 @@ mockturtle::names_view<Ntk> parity_network()
     return ntk;
 }
 }  // namespace blueprints
-
-#endif  // FICTION_NETWORK_BLUEPRINTS_HPP

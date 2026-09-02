@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 23.12.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_TIME_TO_SOLUTION_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_TIME_TO_SOLUTION_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/engine.hpp"
 #include "fiction/technology/sidb/simulation/engines/clustercomplete.hpp"
@@ -249,4 +248,3 @@ void time_to_solution_for_given_simulation_results(const sidb::simulation::resul
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_TIME_TO_SOLUTION_HPP

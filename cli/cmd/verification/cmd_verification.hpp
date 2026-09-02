@@ -12,8 +12,7 @@
 // Created by marcel on 10.10.2025.
 //
 
-#ifndef FICTION_CMD_VERIFICATION_HPP
-#define FICTION_CMD_VERIFICATION_HPP
+#pragma once
 
 namespace alice
 {
@@ -52,5 +51,3 @@ ALICE_ADD_COMMAND(check, FICTION_CLI_CATEGORY_VERIFICATION)
 }  // namespace alice
 
 #endif
-
-#endif  // FICTION_CMD_VERIFICATION_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 01.09.20.
 //
 
-#ifndef FICTION_NETWORKS_IO_NETWORK_READER_HPP
-#define FICTION_NETWORKS_IO_NETWORK_READER_HPP
+#pragma once
 
 #include "fiction/synthesis/network_conversion.hpp"
 
@@ -222,4 +221,3 @@ class network_reader
 };
 
 }  // namespace fiction::networks::io
-#endif  // FICTION_NETWORKS_IO_NETWORK_READER_HPP

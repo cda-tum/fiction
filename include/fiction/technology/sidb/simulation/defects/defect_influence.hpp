@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 28.12.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_INFLUENCE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_INFLUENCE_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
@@ -1121,4 +1120,3 @@ defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples,
 }
 
 }  // namespace fiction::sidb::simulation::defects
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_INFLUENCE_HPP

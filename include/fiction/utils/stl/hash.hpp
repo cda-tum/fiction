@@ -12,8 +12,7 @@
 // Created by marcel on 28.06.21.
 //
 
-#ifndef FICTION_UTILS_STL_HASH_HPP
-#define FICTION_UTILS_STL_HASH_HPP
+#pragma once
 
 #include <algorithm>
 #include <array>
@@ -172,5 +171,3 @@ struct hash<std::pair<T1, T2>>
 };
 
 }  // namespace std
-
-#endif  // FICTION_UTILS_STL_HASH_HPP

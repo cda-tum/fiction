@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 20.04.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CALCULATE_ENERGY_AND_STATE_TYPE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
@@ -178,4 +177,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CALCULATE_ENERGY_AND_STATE_TYPE_HPP

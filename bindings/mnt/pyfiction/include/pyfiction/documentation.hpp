@@ -8,8 +8,7 @@
  * Licensed under the MIT License
  */
 
-#ifndef PYFICTION_DOCSTRINGS_HPP
-#define PYFICTION_DOCSTRINGS_HPP
+#pragma once
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"
 
@@ -101,5 +100,3 @@ empty layout coordinates.
 
 Returns:
     The minimum  and maximum enclosing coordinate in the associated layout.)doc";
-
-#endif  // PYFICTION_DOCSTRINGS_HPP

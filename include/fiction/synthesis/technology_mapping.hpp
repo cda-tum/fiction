@@ -12,8 +12,7 @@
 // Created by marcel on 06.09.23.
 //
 
-#ifndef FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP
-#define FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP
+#pragma once
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/synthesis/network_conversion.hpp"
@@ -620,4 +619,3 @@ template <typename Ntk>
 }
 
 }  // namespace fiction::synthesis
-#endif  // FICTION_SYNTHESIS_TECHNOLOGY_MAPPING_HPP

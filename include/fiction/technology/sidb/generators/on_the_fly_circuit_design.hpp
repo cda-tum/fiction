@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 26.06.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_ON_THE_FLY_CIRCUIT_DESIGN_HPP
-#define FICTION_TECHNOLOGY_SIDB_GENERATORS_ON_THE_FLY_CIRCUIT_DESIGN_HPP
+#pragma once
 
 #include "fiction/physical_design/apply_gate_library.hpp"
 #include "fiction/physical_design/exact.hpp"
@@ -279,4 +278,3 @@ template <typename CellLyt, typename GateLyt>
 }
 
 }  // namespace fiction::sidb::generators
-#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_ON_THE_FLY_CIRCUIT_DESIGN_HPP

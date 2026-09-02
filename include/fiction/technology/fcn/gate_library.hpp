@@ -12,8 +12,7 @@
 // Created by marcel on 26.07.18.
 //
 
-#ifndef FICTION_TECHNOLOGY_FCN_GATE_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_FCN_GATE_LIBRARY_HPP
+#pragma once
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/utils/stl/array_utils.hpp"
@@ -344,4 +343,3 @@ class gate_library
 };
 
 }  // namespace fiction::fcn
-#endif  // FICTION_TECHNOLOGY_FCN_GATE_LIBRARY_HPP

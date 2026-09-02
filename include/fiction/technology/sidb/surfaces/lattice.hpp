@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 12.02.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -96,4 +95,3 @@ template <class T, class U>
 lattice(const T&, const U&) -> lattice<T, U>;
 
 }  // namespace fiction::sidb::surfaces
-#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_HPP

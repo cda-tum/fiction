@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_QLL_HPP
-#define FICTION_CMD_QLL_HPP
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -53,5 +52,3 @@ class qll_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QLL_HPP

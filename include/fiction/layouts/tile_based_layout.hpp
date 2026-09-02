@@ -12,8 +12,7 @@
 // Created by marcel on 21.07.21.
 //
 
-#ifndef FICTION_LAYOUTS_TILE_BASED_LAYOUT_HPP
-#define FICTION_LAYOUTS_TILE_BASED_LAYOUT_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -116,4 +115,3 @@ class tile_based_layout : public CoordinateLayout
 };
 
 }  // namespace fiction::layouts
-#endif  // FICTION_LAYOUTS_TILE_BASED_LAYOUT_HPP

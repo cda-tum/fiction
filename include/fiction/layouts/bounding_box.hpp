@@ -12,8 +12,7 @@
 // Created by marcel on 13.01.22.
 //
 
-#ifndef FICTION_LAYOUTS_BOUNDING_BOX_HPP
-#define FICTION_LAYOUTS_BOUNDING_BOX_HPP
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
@@ -262,5 +261,3 @@ class bounding_box_2d
 
 }  // namespace fiction::layouts
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_LAYOUTS_BOUNDING_BOX_HPP

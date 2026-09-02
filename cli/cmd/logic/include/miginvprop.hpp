@@ -12,8 +12,7 @@
 // Created by marcel on 07.06.23.
 //
 
-#ifndef FICTION_CMD_MIGINVPROP_HPP
-#define FICTION_CMD_MIGINVPROP_HPP
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -41,5 +40,3 @@ class miginvprop_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_MIGINVPROP_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 01.05.21.
 //
 
-#ifndef FICTION_LAYOUTS_COORDINATES_HPP
-#define FICTION_LAYOUTS_COORDINATES_HPP
+#pragma once
 
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -1144,5 +1143,3 @@ struct formatter<fiction::layouts::coords::siqad>
 }  // namespace fmt
 
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_LAYOUTS_COORDINATES_HPP

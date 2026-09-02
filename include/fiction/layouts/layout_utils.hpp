@@ -12,8 +12,7 @@
 // Created by marcel on 14.10.21.
 //
 
-#ifndef FICTION_LAYOUTS_LAYOUT_UTILS_HPP
-#define FICTION_LAYOUTS_LAYOUT_UTILS_HPP
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -885,4 +884,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::layouts
-#endif  // FICTION_LAYOUTS_LAYOUT_UTILS_HPP

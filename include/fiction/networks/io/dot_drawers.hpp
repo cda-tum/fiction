@@ -12,8 +12,7 @@
 // Created by marcel on 26.05.21.
 //
 
-#ifndef FICTION_NETWORKS_IO_DOT_DRAWERS_HPP
-#define FICTION_NETWORKS_IO_DOT_DRAWERS_HPP
+#pragma once
 
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
@@ -454,5 +453,3 @@ void write_dot_network(const Ntk& ntk, const std::string_view& filename, const D
 }
 
 }  // namespace fiction::networks::io
-
-#endif  // FICTION_NETWORKS_IO_DOT_DRAWERS_HPP

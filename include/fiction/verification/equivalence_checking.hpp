@@ -12,8 +12,7 @@
 // Created by marcel on 04.03.20.
 //
 
-#ifndef FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP
-#define FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP
+#pragma once
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
@@ -254,4 +253,3 @@ eq_type equivalence_checking(const Spec& spec, const Impl& impl, equivalence_che
 }
 
 }  // namespace fiction::verification
-#endif  // FICTION_VERIFICATION_EQUIVALENCE_CHECKING_HPP

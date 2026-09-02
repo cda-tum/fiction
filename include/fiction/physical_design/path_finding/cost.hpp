@@ -12,8 +12,7 @@
 // Created by marcel on 27.05.22.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_COST_HPP
-#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_COST_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -136,4 +135,3 @@ class random_cost_functor : public cost_functor<Lyt, Cost>
 };
 
 }  // namespace fiction::physical_design::path_finding
-#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_COST_HPP

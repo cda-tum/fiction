@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 11.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_QUICKSIM_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_QUICKSIM_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -278,4 +277,3 @@ quicksim(const Lyt& lyt, const quicksim_params& ps = quicksim_params{}) noexcept
 }
 
 }  // namespace fiction::sidb::simulation::engines
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_QUICKSIM_HPP

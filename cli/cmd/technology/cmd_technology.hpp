@@ -12,8 +12,7 @@
 // Created by marcel on 10.10.2025.
 //
 
-#ifndef FICTION_CMD_TECHNOLOGY_HPP
-#define FICTION_CMD_TECHNOLOGY_HPP
+#pragma once
 
 #ifdef FICTION_PHYSICAL_DESIGN_FLOW
 
@@ -34,5 +33,3 @@ ALICE_ADD_COMMAND(cell, FICTION_CLI_CATEGORY_TECHNOLOGY)
 }  // namespace alice
 
 #endif  // FICTION_PHYSICAL_DESIGN_FLOW
-
-#endif  // FICTION_CMD_TECHNOLOGY_HPP

@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 10.11.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_POTENTIAL_TO_DISTANCE_CONVERSION_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/physical_constants.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -67,4 +66,3 @@ namespace fiction::sidb::model
 }
 
 }  // namespace fiction::sidb::model
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_POTENTIAL_TO_DISTANCE_CONVERSION_HPP

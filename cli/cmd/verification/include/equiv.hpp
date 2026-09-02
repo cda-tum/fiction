@@ -12,8 +12,7 @@
 // Created by marcel on 04.03.20.
 //
 
-#ifndef FICTION_CMD_EQUIV_HPP
-#define FICTION_CMD_EQUIV_HPP
+#pragma once
 
 #include <fiction/verification/equivalence_checking.hpp>
 
@@ -59,5 +58,3 @@ class equiv_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_EQUIV_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_CHECK_HPP
-#define FICTION_CMD_CHECK_HPP
+#pragma once
 
 #include <fiction/verification/design_rule_violations.hpp>
 
@@ -58,5 +57,3 @@ class check_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CHECK_HPP

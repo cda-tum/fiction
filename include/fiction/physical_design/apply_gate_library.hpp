@@ -12,8 +12,7 @@
 // Created by marcel on 28.06.21.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_APPLY_GATE_LIBRARY_HPP
-#define FICTION_PHYSICAL_DESIGN_APPLY_GATE_LIBRARY_HPP
+#pragma once
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
@@ -423,5 +422,3 @@ template <typename DefectLyt, typename GateLibrary, typename GateLyt, typename P
 
 }  // namespace fiction::physical_design
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_PHYSICAL_DESIGN_APPLY_GATE_LIBRARY_HPP

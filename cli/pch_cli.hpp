@@ -18,8 +18,7 @@
 // - Frequently used: Included in most CLI translation units
 //
 
-#ifndef FICTION_PCH_CLI_HPP
-#define FICTION_PCH_CLI_HPP
+#pragma once
 
 // NOLINTBEGIN(misc-include-cleaner)
 
@@ -71,5 +70,3 @@
 #include "stores.hpp"
 
 // NOLINTEND(misc-include-cleaner)
-
-#endif  // FICTION_PCH_CLI_HPP

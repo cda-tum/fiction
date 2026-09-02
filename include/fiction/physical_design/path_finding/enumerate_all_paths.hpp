@@ -12,8 +12,7 @@
 // Created by marcel on 01.02.22.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_ENUMERATE_ALL_PATHS_HPP
-#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_ENUMERATE_ALL_PATHS_HPP
+#pragma once
 
 #include "fiction/physical_design/routing_utils.hpp"
 #include "fiction/traits.hpp"
@@ -257,4 +256,3 @@ template <typename Path, typename Lyt>
 }
 
 }  // namespace fiction::physical_design::path_finding
-#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_ENUMERATE_ALL_PATHS_HPP

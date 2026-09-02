@@ -12,8 +12,7 @@
 // Created by marcel on 21.07.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/critical_temperature.hpp"
@@ -2442,5 +2441,3 @@ struct hash<fiction::sidb::simulation::logic::parameter_point>
 };
 
 }  // namespace std
-
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_HPP

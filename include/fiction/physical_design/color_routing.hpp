@@ -12,8 +12,7 @@
 // Created by marcel on 02.02.22.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_COLOR_ROUTING_HPP
-#define FICTION_PHYSICAL_DESIGN_COLOR_ROUTING_HPP
+#pragma once
 
 #include "fiction/physical_design/generate_edge_intersection_graph.hpp"
 #include "fiction/physical_design/routing_utils.hpp"
@@ -243,4 +242,3 @@ bool color_routing(Lyt& lyt, const std::vector<routing_objective<Lyt>>& objectiv
 }
 
 }  // namespace fiction::physical_design
-#endif  // FICTION_PHYSICAL_DESIGN_COLOR_ROUTING_HPP

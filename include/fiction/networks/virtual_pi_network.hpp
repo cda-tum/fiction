@@ -12,8 +12,7 @@
 // Created by benjamin on 14.06.24.
 //
 
-#ifndef FICTION_NETWORKS_VIRTUAL_PI_NETWORK_HPP
-#define FICTION_NETWORKS_VIRTUAL_PI_NETWORK_HPP
+#pragma once
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -317,4 +316,3 @@ class virtual_pi_network : public Ntk
 };
 
 }  // namespace fiction::networks
-#endif  // FICTION_NETWORKS_VIRTUAL_PI_NETWORK_HPP

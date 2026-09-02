@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 02.11.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICAL_POPULATION_STABILITY_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICAL_POPULATION_STABILITY_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/potential_to_distance_conversion.hpp"
@@ -416,4 +415,3 @@ physical_population_stability(const Lyt& lyt, const physical_population_stabilit
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICAL_POPULATION_STABILITY_HPP

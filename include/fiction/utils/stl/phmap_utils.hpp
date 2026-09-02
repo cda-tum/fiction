@@ -12,8 +12,7 @@
 // Created by marcel on 08.08.23.
 //
 
-#ifndef FICTION_UTILS_STL_PHMAP_UTILS_HPP
-#define FICTION_UTILS_STL_PHMAP_UTILS_HPP
+#pragma once
 
 #include <phmap.h>
 #include <phmap_fwd_decl.h>
@@ -36,4 +35,3 @@ using locked_parallel_flat_hash_map =
                                   std::allocator<std::pair<const K, V>>, 4, std::mutex>;
 
 }  // namespace fiction::utils::stl
-#endif  // FICTION_UTILS_STL_PHMAP_UTILS_HPP

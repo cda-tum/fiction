@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 26.09.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SKELETON_BESTAGON_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_SIDB_SKELETON_BESTAGON_LIBRARY_HPP
+#pragma once
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -622,4 +621,3 @@ class skeleton_bestagon_library
 };
 
 }  // namespace fiction::sidb
-#endif  // FICTION_TECHNOLOGY_SIDB_SKELETON_BESTAGON_LIBRARY_HPP

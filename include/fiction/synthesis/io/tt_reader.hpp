@@ -12,8 +12,7 @@
 // Created by marcel on 05.05.20.
 //
 
-#ifndef FICTION_SYNTHESIS_IO_TT_READER_HPP
-#define FICTION_SYNTHESIS_IO_TT_READER_HPP
+#pragma once
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -112,4 +111,3 @@ class tt_reader
 };
 
 }  // namespace fiction::synthesis::io
-#endif  // FICTION_SYNTHESIS_IO_TT_READER_HPP

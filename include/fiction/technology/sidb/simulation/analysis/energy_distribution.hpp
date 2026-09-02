@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 17.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_ENERGY_DISTRIBUTION_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_ENERGY_DISTRIBUTION_HPP
+#pragma once
 
 #include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -262,4 +261,3 @@ calculate_energy_distribution(const std::vector<sidb::surfaces::charge_distribut
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_ENERGY_DISTRIBUTION_HPP

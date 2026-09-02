@@ -12,8 +12,7 @@
 // Created by marcel on 18.06.23.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_MAP_HPP
-#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_MAP_HPP
+#pragma once
 
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/traits.hpp"
@@ -278,4 +277,3 @@ class smart_distance_cache_functor : public distance_functor<Lyt, Dist>
 };
 
 }  // namespace fiction::physical_design::path_finding
-#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_DISTANCE_MAP_HPP

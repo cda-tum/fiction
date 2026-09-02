@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_CELL_HPP
-#define FICTION_CMD_CELL_HPP
+#pragma once
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
@@ -98,5 +97,3 @@ class cell_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CELL_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 13.10.21.
 //
 
-#ifndef FICTION_NETWORKS_NETWORK_UTILS_HPP
-#define FICTION_NETWORKS_NETWORK_UTILS_HPP
+#pragma once
 
 #include "fiction/utils/stl/hash.hpp"
 
@@ -482,4 +481,3 @@ std::vector<uint32_t> inverse_levels(const Ntk& ntk) noexcept
 }
 
 }  // namespace fiction::networks
-#endif  // FICTION_NETWORKS_NETWORK_UTILS_HPP

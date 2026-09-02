@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 30.08.23.
 //
 
-#ifndef FICTION_UTILS_MATH_GRAY_CODE_ITERATOR_HPP
-#define FICTION_UTILS_MATH_GRAY_CODE_ITERATOR_HPP
+#pragma once
 
 #include <cstddef>
 #include <cstdint>
@@ -346,5 +345,3 @@ struct iterator_traits<fiction::utils::math::gray_code_iterator>
     using difference_type   = int64_t;
 };
 }  // namespace std
-
-#endif  // FICTION_UTILS_MATH_GRAY_CODE_ITERATOR_HPP

@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 18.12.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_QUICKEXACT_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_QUICKEXACT_HPP
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
@@ -590,4 +589,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::sidb::simulation::engines
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_QUICKEXACT_HPP

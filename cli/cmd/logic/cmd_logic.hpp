@@ -12,8 +12,7 @@
 // Created by marcel on 10.10.2025.
 //
 
-#ifndef FICTION_CMD_LOGIC_HPP
-#define FICTION_CMD_LOGIC_HPP
+#pragma once
 
 #ifdef FICTION_LOGIC_SYNTHESIS_FLOW
 
@@ -54,5 +53,3 @@ ALICE_ADD_COMMAND(simulate, FICTION_CLI_CATEGORY_LOGIC)
 }  // namespace alice
 
 #endif
-
-#endif  // FICTION_CMD_LOGIC_HPP

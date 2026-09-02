@@ -12,8 +12,7 @@
 // Created by marcel on 04.04.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_SQD_SIM_RESULT_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_SQD_SIM_RESULT_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
@@ -337,4 +336,3 @@ void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const
 }
 
 }  // namespace fiction::sidb::simulation::io
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_IO_WRITE_SQD_SIM_RESULT_HPP

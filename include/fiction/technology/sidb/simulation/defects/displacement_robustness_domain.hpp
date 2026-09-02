@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 21.03.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
@@ -669,4 +668,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::simulation::defects
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DISPLACEMENT_ROBUSTNESS_DOMAIN_HPP

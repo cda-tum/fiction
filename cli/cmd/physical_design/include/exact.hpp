@@ -14,8 +14,7 @@
 
 #if (FICTION_Z3_SOLVER)
 
-#ifndef FICTION_CMD_EXACT_HPP
-#define FICTION_CMD_EXACT_HPP
+#pragma once
 
 #include <fiction/physical_design/exact.hpp>
 
@@ -80,7 +79,5 @@ class exact_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_EXACT_HPP
 
 #endif  // FICTION_Z3_SOLVER

@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 03.05.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICALLY_VALID_PARAMETERS_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICALLY_VALID_PARAMETERS_HPP
+#pragma once
 
 #include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
@@ -63,4 +62,3 @@ physically_valid_parameters(Lyt& cds, const sidb::simulation::logic::operational
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_PHYSICALLY_VALID_PARAMETERS_HPP

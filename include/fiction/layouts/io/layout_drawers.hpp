@@ -12,8 +12,7 @@
 // Created by marcel on 26.05.21.
 //
 
-#ifndef FICTION_LAYOUTS_IO_LAYOUT_DRAWERS_HPP
-#define FICTION_LAYOUTS_IO_LAYOUT_DRAWERS_HPP
+#pragma once
 
 #include "fiction/networks/io/dot_drawers.hpp"
 #include "fiction/networks/network_utils.hpp"
@@ -781,5 +780,3 @@ void write_dot_layout(const Lyt& lyt, const std::string_view& filename, const Dr
     os.close();
 }
 }  // namespace fiction::layouts::io
-
-#endif  // FICTION_LAYOUTS_IO_LAYOUT_DRAWERS_HPP

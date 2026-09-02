@@ -10,8 +10,7 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#ifndef FICTION_CMD_CLUSTERCOMPLETE_HPP
-#define FICTION_CMD_CLUSTERCOMPLETE_HPP
+#pragma once
 
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
@@ -84,7 +83,5 @@ class clustercomplete_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CLUSTERCOMPLETE_HPP
 
 #endif  // FICTION_ALGLIB_ENABLED

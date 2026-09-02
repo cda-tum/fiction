@@ -12,8 +12,7 @@
 // Created by marcel on 16.11.21.
 //
 
-#ifndef FICTION_FICTION_EXPERIMENTS_HPP
-#define FICTION_FICTION_EXPERIMENTS_HPP
+#pragma once
 
 #include <fmt/format.h>
 
@@ -193,5 +192,3 @@ std::string benchmark_path(const std::string& benchmark_name, const std::string&
 }
 
 }  // namespace fiction_experiments
-
-#endif  // FICTION_FICTION_EXPERIMENTS_HPP

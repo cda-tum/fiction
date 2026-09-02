@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_FANOUTS_HPP
-#define FICTION_CMD_FANOUTS_HPP
+#pragma once
 
 #include <fiction/synthesis/fanout_substitution.hpp>
 
@@ -59,5 +58,3 @@ class fanouts_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_FANOUTS_HPP

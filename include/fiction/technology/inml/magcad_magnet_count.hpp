@@ -12,8 +12,7 @@
 // Created by marcel on 07.08.19.
 //
 
-#ifndef FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP
-#define FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP
+#pragma once
 
 #include "fiction/technology/inml/technology.hpp"
 #include "fiction/traits.hpp"
@@ -53,4 +52,3 @@ uint64_t magcad_magnet_count(const Lyt& lyt) noexcept
 }
 
 }  // namespace fiction::inml
-#endif  // FICTION_TECHNOLOGY_INML_MAGCAD_MAGNET_COUNT_HPP

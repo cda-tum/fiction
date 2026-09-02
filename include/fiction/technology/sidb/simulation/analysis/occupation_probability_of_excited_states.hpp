@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 06.02.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/physical_constants.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
@@ -137,4 +136,3 @@ namespace fiction::sidb::simulation::analysis
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_OCCUPATION_PROBABILITY_OF_EXCITED_STATES_HPP

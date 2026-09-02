@@ -12,8 +12,7 @@
 // Created by marcel on 17.01.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_FCN_IO_WRITE_QLL_LAYOUT_HPP
-#define FICTION_TECHNOLOGY_FCN_IO_WRITE_QLL_LAYOUT_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/technology/inml/technology.hpp"
@@ -489,4 +488,3 @@ void write_qll_layout(const Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction::fcn::io
-#endif  // FICTION_TECHNOLOGY_FCN_IO_WRITE_QLL_LAYOUT_HPP

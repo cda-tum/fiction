@@ -12,8 +12,7 @@
 // Created by marcel on 24.09.21.
 //
 
-#ifndef FICTION_FQCA_HPP
-#define FICTION_FQCA_HPP
+#pragma once
 
 #include <fiction/technology/qca/io/write_fqca_layout.hpp>
 
@@ -55,5 +54,3 @@ class fqca_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_FQCA_HPP

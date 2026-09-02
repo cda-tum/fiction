@@ -12,8 +12,7 @@
 // Created by marcel on 23.06.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_INML_TECHNOLOGY_HPP
-#define FICTION_TECHNOLOGY_INML_TECHNOLOGY_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -225,5 +224,3 @@ struct inml_technology
 };
 
 }  // namespace fiction::inml
-
-#endif  // FICTION_TECHNOLOGY_INML_TECHNOLOGY_HPP

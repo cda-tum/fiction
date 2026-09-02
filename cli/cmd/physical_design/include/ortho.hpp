@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_ORTHO_HPP
-#define FICTION_CMD_ORTHO_HPP
+#pragma once
 
 #include <fiction/physical_design/orthogonal.hpp>
 
@@ -76,5 +75,3 @@ class ortho_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_ORTHO_HPP

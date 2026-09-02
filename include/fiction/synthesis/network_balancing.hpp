@@ -12,8 +12,7 @@
 // Created by marcel on 25.05.21.
 //
 
-#ifndef FICTION_SYNTHESIS_NETWORK_BALANCING_HPP
-#define FICTION_SYNTHESIS_NETWORK_BALANCING_HPP
+#pragma once
 
 #include "fiction/synthesis/network_conversion.hpp"
 
@@ -268,4 +267,3 @@ bool is_balanced(const Ntk& ntk, network_balancing_params ps = {}) noexcept
 }
 
 }  // namespace fiction::synthesis
-#endif  // FICTION_SYNTHESIS_NETWORK_BALANCING_HPP

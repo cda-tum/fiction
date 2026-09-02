@@ -12,8 +12,7 @@
 // Created by benjamin on 14.06.24.
 //
 
-#ifndef FICTION_SYNTHESIS_DELETE_VIRTUAL_PIS_HPP
-#define FICTION_SYNTHESIS_DELETE_VIRTUAL_PIS_HPP
+#pragma once
 
 #include "fiction/networks/name_utils.hpp"
 
@@ -263,4 +262,3 @@ Ntk delete_virtual_pis(const Ntk& ntk) noexcept
 }
 
 }  // namespace fiction::synthesis
-#endif  // FICTION_SYNTHESIS_DELETE_VIRTUAL_PIS_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 12.05.21.
 //
 
-#ifndef FICTION_LAYOUTS_CLOCKING_SCHEME_HPP
-#define FICTION_LAYOUTS_CLOCKING_SCHEME_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -829,4 +828,3 @@ std::optional<scheme<clock_zone<Lyt>>> get_scheme(const std::string_view& scheme
 }
 
 }  // namespace fiction::layouts::clocking
-#endif  // FICTION_LAYOUTS_CLOCKING_SCHEME_HPP

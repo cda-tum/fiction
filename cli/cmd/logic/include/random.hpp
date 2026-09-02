@@ -12,8 +12,7 @@
 // Created by marcel on 08.11.19.
 //
 
-#ifndef FICTION_CMD_RANDOM_HPP
-#define FICTION_CMD_RANDOM_HPP
+#pragma once
 
 #include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
@@ -72,5 +71,3 @@ class random_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_RANDOM_HPP

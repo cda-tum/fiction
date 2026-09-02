@@ -12,8 +12,7 @@
 // Created by marcel on 10.10.2025.
 //
 
-#ifndef FICTION_CMD_IO_HPP
-#define FICTION_CMD_IO_HPP
+#pragma once
 
 // NOLINTBEGIN(misc-include-cleaner)
 #include "include/blif.hpp"
@@ -46,5 +45,3 @@ ALICE_ADD_COMMAND(tt, FICTION_CLI_CATEGORY_IO)
 ALICE_ADD_COMMAND(verilog, FICTION_CLI_CATEGORY_IO)
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_IO_HPP

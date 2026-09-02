@@ -12,8 +12,7 @@
 // Created by marcel on 15.01.23.
 //
 
-#ifndef FICTION_UTILS_STL_EXECUTION_UTILS_HPP
-#define FICTION_UTILS_STL_EXECUTION_UTILS_HPP
+#pragma once
 
 #include <version>  // defines the feature-test macros the guard below reads
 
@@ -77,5 +76,3 @@
 #define FICTION_EXECUTION_POLICY_PAR_UNSEQ
 
 #endif
-
-#endif  // FICTION_UTILS_STL_EXECUTION_UTILS_HPP

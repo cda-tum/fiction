@@ -12,8 +12,7 @@
 // Created by marcel on 13.07.17.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP
-#define FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP
+#pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/networks/name_utils.hpp"
@@ -737,4 +736,3 @@ Lyt orthogonal(const Ntk& ntk, orthogonal_physical_design_params ps = {},
 }
 
 }  // namespace fiction::physical_design
-#endif  // FICTION_PHYSICAL_DESIGN_ORTHOGONAL_HPP

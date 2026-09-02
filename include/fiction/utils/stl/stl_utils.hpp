@@ -12,8 +12,7 @@
 // Created by marcel on 15.02.22.
 //
 
-#ifndef FICTION_UTILS_STL_STL_UTILS_HPP
-#define FICTION_UTILS_STL_STL_UTILS_HPP
+#pragma once
 
 #include <algorithm>
 #include <ctime>
@@ -152,4 +151,3 @@ class searchable_priority_queue : public std::priority_queue<T, Container, Compa
 }
 
 }  // namespace fiction::utils::stl
-#endif  // FICTION_UTILS_STL_STL_UTILS_HPP

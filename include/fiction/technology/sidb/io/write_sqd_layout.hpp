@@ -12,8 +12,7 @@
 // Created by marcel on 14.07.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP
-#define FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP
+#pragma once
 
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -462,4 +461,3 @@ void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction::sidb::io
-#endif  // FICTION_TECHNOLOGY_SIDB_IO_WRITE_SQD_LAYOUT_HPP

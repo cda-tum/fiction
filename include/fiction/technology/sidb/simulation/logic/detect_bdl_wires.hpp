@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 15.07.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_WIRES_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_WIRES_HPP
+#pragma once
 
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -734,4 +733,3 @@ detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
 }
 
 }  // namespace fiction::sidb::simulation::logic
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_DETECT_BDL_WIRES_HPP

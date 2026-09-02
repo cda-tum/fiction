@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 12.08.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CAN_POSITIVE_CHARGES_OCCUR_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CAN_POSITIVE_CHARGES_OCCUR_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -63,4 +62,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CAN_POSITIVE_CHARGES_OCCUR_HPP

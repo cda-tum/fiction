@@ -12,8 +12,7 @@
 // Created by simon on 09.01.24.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_WIRING_REDUCTION_HPP
-#define FICTION_PHYSICAL_DESIGN_WIRING_REDUCTION_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/cartesian_layout.hpp"
@@ -1302,4 +1301,3 @@ void wiring_reduction(const Lyt& lyt, wiring_reduction_params ps = {}, wiring_re
 }
 
 }  // namespace fiction::physical_design
-#endif  // FICTION_PHYSICAL_DESIGN_WIRING_REDUCTION_HPP

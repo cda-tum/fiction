@@ -12,8 +12,7 @@
 // Created by marcel on 06.01.20.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_EXACT_HPP
-#define FICTION_PHYSICAL_DESIGN_EXACT_HPP
+#pragma once
 
 #if (FICTION_Z3_SOLVER)
 
@@ -3348,5 +3347,3 @@ exact_with_blacklist(const Ntk& ntk, const sidb::surface_black_list<Lyt, fcn::po
 
 }  // namespace fiction::physical_design
 #endif  // FICTION_Z3_SOLVER
-
-#endif  // FICTION_PHYSICAL_DESIGN_EXACT_HPP

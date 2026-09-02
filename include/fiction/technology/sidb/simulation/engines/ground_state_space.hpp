@@ -12,8 +12,7 @@
 // Created by Willem Lambooy on 06.02.2024.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_GROUND_STATE_SPACE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_GROUND_STATE_SPACE_HPP
+#pragma once
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -1270,5 +1269,3 @@ template <typename Lyt>
 
 }  // namespace fiction::sidb::simulation::engines
 #endif  // FICTION_ALGLIB_ENABLED
-
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_GROUND_STATE_SPACE_HPP

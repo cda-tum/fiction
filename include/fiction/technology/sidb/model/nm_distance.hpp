@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 26.03.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_NM_DISTANCE_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_NM_DISTANCE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/traits.hpp"
@@ -52,4 +51,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::sidb::model
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_NM_DISTANCE_HPP

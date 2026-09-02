@@ -11,8 +11,7 @@
 //
 // Created by Simon Hofmann on 30.01.24.
 //
-#ifndef FICTION_PHYSICAL_DESIGN_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
-#define FICTION_PHYSICAL_DESIGN_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/clocking_scheme.hpp"
@@ -2524,4 +2523,3 @@ std::optional<Lyt> graph_oriented_layout_design(Ntk& ntk, graph_oriented_layout_
 }
 
 }  // namespace fiction::physical_design
-#endif  // FICTION_PHYSICAL_DESIGN_GRAPH_ORIENTED_LAYOUT_DESIGN_HPP

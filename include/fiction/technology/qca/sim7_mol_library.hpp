@@ -12,8 +12,7 @@
 // Created by benjamin on 15.07.25.
 //
 
-#ifndef FICTION_TECHNOLOGY_QCA_SIM7_MOL_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_QCA_SIM7_MOL_LIBRARY_HPP
+#pragma once
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -684,4 +683,3 @@ class sim7_mol_library : public fcn::gate_library<qca::mol_qca_technology, 10, 1
 };
 
 }  // namespace fiction::qca
-#endif  // FICTION_TECHNOLOGY_QCA_SIM7_MOL_LIBRARY_HPP

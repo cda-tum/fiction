@@ -8,8 +8,7 @@
  * Licensed under the MIT License
  */
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_ORIENTATIONS_HPP
-#define FICTION_TECHNOLOGY_SIDB_SURFACES_LATTICE_ORIENTATIONS_HPP
+#pragma once
 
 #include <utility>
 
@@ -59,4 +58,3 @@ struct lattice_111
 };
 
 }  // namespace fiction::sidb::surfaces
-#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_LATTICE_ORIENTATIONS_HPP

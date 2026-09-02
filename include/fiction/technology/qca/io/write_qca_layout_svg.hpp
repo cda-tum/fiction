@@ -12,8 +12,7 @@
 // Created by sophia on 12/30/18.
 //
 
-#ifndef FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_SVG_HPP
-#define FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_SVG_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
@@ -1068,5 +1067,3 @@ void write_mol_qca_layout_svg(const Lyt& lyt, const std::string_view& filename,
 }
 
 }  // namespace fiction::qca::io
-
-#endif  // FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_SVG_HPP

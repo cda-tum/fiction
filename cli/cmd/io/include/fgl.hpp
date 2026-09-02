@@ -12,8 +12,7 @@
 // Created by simon on 06.10.2023
 //
 
-#ifndef FICTION_CMD_FGL_HPP
-#define FICTION_CMD_FGL_HPP
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -49,5 +48,3 @@ class fgl_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_FGL_HPP

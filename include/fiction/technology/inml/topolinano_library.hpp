@@ -12,8 +12,7 @@
 // Created by marcel on 29.07.19.
 //
 
-#ifndef FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP
+#pragma once
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -812,4 +811,3 @@ class topolinano_library : public fcn::gate_library<inml::inml_technology, 4, 4>
         {{{fcn::port_position(0, 3)}, {fcn::port_position(3, 0)}}, BOTTOM_LOWER_UP_BENT_INVERTER}};
 };
 }  // namespace fiction::inml
-#endif  // FICTION_TECHNOLOGY_INML_TOPOLINANO_LIBRARY_HPP

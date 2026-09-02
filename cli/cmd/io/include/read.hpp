@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_READ_HPP
-#define FICTION_CMD_READ_HPP
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -67,5 +66,3 @@ class read_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_READ_HPP

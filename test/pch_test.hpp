@@ -17,8 +17,7 @@
 // is included by 62 of them.
 //
 
-#ifndef FICTION_PCH_TEST_HPP
-#define FICTION_PCH_TEST_HPP
+#pragma once
 
 // NOLINTBEGIN(misc-include-cleaner)
 
@@ -55,5 +54,3 @@
 #include <vector>
 
 // NOLINTEND(misc-include-cleaner)
-
-#endif  // FICTION_PCH_TEST_HPP

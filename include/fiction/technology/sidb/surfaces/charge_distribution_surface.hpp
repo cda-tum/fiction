@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 23.11.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_CHARGE_DISTRIBUTION_SURFACE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SURFACES_CHARGE_DISTRIBUTION_SURFACE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -2505,4 +2504,3 @@ charge_distribution_surface(const T&, const sidb::model::simulation_parameters&,
                             cds_configuration cds_configuration) -> charge_distribution_surface<T>;
 
 }  // namespace fiction::sidb::surfaces
-#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_CHARGE_DISTRIBUTION_SURFACE_HPP

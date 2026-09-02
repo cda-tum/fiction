@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 06.02.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CRITICAL_TEMPERATURE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CRITICAL_TEMPERATURE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
@@ -749,4 +748,3 @@ double critical_temperature_non_gate_based(const Lyt& lyt, const critical_temper
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_CRITICAL_TEMPERATURE_HPP

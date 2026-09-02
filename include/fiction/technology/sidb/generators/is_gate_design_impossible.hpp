@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 25.10.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP
-#define FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -119,4 +118,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::generators
-#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_IS_GATE_DESIGN_IMPOSSIBLE_HPP

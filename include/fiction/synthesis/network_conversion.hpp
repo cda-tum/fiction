@@ -12,8 +12,7 @@
 // Created by marcel on 20.05.21.
 //
 
-#ifndef FICTION_SYNTHESIS_NETWORK_CONVERSION_HPP
-#define FICTION_SYNTHESIS_NETWORK_CONVERSION_HPP
+#pragma once
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
@@ -243,4 +242,3 @@ NtkDest convert_network(const NtkSrc& ntk)
 }
 
 }  // namespace fiction::synthesis
-#endif  // FICTION_SYNTHESIS_NETWORK_CONVERSION_HPP

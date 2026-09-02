@@ -12,8 +12,7 @@
 // Created by benjamin on 13.12.24.
 //
 
-#ifndef FICTION_NETWORKS_VIEWS_STATIC_DEPTH_VIEW_HPP
-#define FICTION_NETWORKS_VIEWS_STATIC_DEPTH_VIEW_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -500,4 +499,3 @@ template <typename T, typename NodeCostFn = mockturtle::unit_cost<T>>
 static_depth_view(T const&, NodeCostFn const&, depth_view_params const&) -> static_depth_view<T, NodeCostFn>;
 
 }  // namespace fiction::networks::views
-#endif  // FICTION_NETWORKS_VIEWS_STATIC_DEPTH_VIEW_HPP

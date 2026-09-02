@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 12.11.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_VERIFY_LOGIC_MATCH_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_VERIFY_LOGIC_MATCH_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
@@ -77,4 +76,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::simulation::logic
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_VERIFY_LOGIC_MATCH_HPP

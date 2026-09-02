@@ -12,8 +12,7 @@
 // Created by marcel on 02.09.26.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_PHYSICAL_CONSTANTS_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_PHYSICAL_CONSTANTS_HPP
+#pragma once
 
 namespace fiction::sidb::model
 {
@@ -36,5 +35,3 @@ inline constexpr double BOLTZMANN_CONSTANT = 1.38064852 * 1E-23;
 inline constexpr double EV_TO_JOULE = ELEMENTARY_CHARGE;
 
 }  // namespace fiction::sidb::model
-
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_PHYSICAL_CONSTANTS_HPP

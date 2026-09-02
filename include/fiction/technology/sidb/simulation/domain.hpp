@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 29.01.25.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_DOMAIN_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_DOMAIN_HPP
+#pragma once
 
 #include "fiction/utils/stl/phmap_utils.hpp"
 
@@ -112,4 +111,3 @@ class domain
 };
 
 }  // namespace fiction::sidb::simulation
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_DOMAIN_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 04.11.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_BESTAGON_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_SIDB_BESTAGON_LIBRARY_HPP
+#pragma once
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -1716,4 +1715,3 @@ class bestagon_library : public fcn::gate_library<sidb::sidb_technology, 60, 46>
 };
 
 }  // namespace fiction::sidb
-#endif  // FICTION_TECHNOLOGY_SIDB_BESTAGON_LIBRARY_HPP

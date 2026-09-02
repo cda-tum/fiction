@@ -12,8 +12,7 @@
 // Created by marcel on 06.01.20.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_ASPECT_RATIO_ITERATOR_HPP
-#define FICTION_PHYSICAL_DESIGN_ASPECT_RATIO_ITERATOR_HPP
+#pragma once
 
 #include <cmath>
 #include <cstdint>
@@ -196,5 +195,3 @@ struct iterator_traits<fiction::physical_design::aspect_ratio_iterator<AspectRat
     using value_type        = AspectRatio;
 };
 }  // namespace std
-
-#endif  // FICTION_PHYSICAL_DESIGN_ASPECT_RATIO_ITERATOR_HPP

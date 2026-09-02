@@ -12,8 +12,7 @@
 // Created by marcel on 29.03.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
-#define FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/defect_surface.hpp"
@@ -231,4 +230,3 @@ sidb::surfaces::defect_surface<Lyt> read_surface_defects(const std::string_view&
 }
 
 }  // namespace fiction::sidb::io
-#endif  // FICTION_TECHNOLOGY_SIDB_IO_READ_SURFACE_DEFECTS_HPP

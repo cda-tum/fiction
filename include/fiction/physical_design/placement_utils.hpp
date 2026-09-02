@@ -12,8 +12,7 @@
 // Created by marcel on 14.10.21.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_PLACEMENT_UTILS_HPP
-#define FICTION_PHYSICAL_DESIGN_PLACEMENT_UTILS_HPP
+#pragma once
 
 #include "fiction/networks/network_utils.hpp"
 #include "fiction/traits.hpp"
@@ -526,4 +525,3 @@ place(Lyt& lyt, const tile<Lyt>& t, const Ntk& ntk, const mockturtle::node<Ntk>&
 }
 
 }  // namespace fiction::physical_design
-#endif  // FICTION_PHYSICAL_DESIGN_PLACEMENT_UTILS_HPP

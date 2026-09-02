@@ -12,8 +12,7 @@
 // Created by marcel on 12.12.22.
 //
 
-#ifndef FICTION_UTILS_OPTIMIZATION_SIMULATED_ANNEALING_HPP
-#define FICTION_UTILS_OPTIMIZATION_SIMULATED_ANNEALING_HPP
+#pragma once
 
 #include <algorithm>
 #include <cassert>
@@ -218,4 +217,3 @@ multi_simulated_annealing(const double init_temp, const double final_temp, const
 }
 
 }  // namespace fiction::utils::optimization
-#endif  // FICTION_UTILS_OPTIMIZATION_SIMULATED_ANNEALING_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 22.07.21.
 //
 
-#ifndef FICTION_CMD_BLIF_HPP
-#define FICTION_CMD_BLIF_HPP
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -57,5 +56,3 @@ class blif_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_BLIF_HPP

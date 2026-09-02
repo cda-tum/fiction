@@ -12,8 +12,7 @@
 // Created by marcel on 05.10.18.
 //
 
-#ifndef FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_HPP
-#define FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_HPP
+#pragma once
 
 #include "fiction/technology/qca/technology.hpp"
 #include "fiction/traits.hpp"
@@ -585,4 +584,3 @@ void write_qca_layout(const Lyt& lyt, const std::string_view& filename, write_qc
 }
 
 }  // namespace fiction::qca::io
-#endif  // FICTION_TECHNOLOGY_QCA_IO_WRITE_QCA_LAYOUT_HPP

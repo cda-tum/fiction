@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 08.12.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_CHARGE_STATE_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_CHARGE_STATE_HPP
+#pragma once
 
 #include <cstdint>
 #include <sstream>
@@ -154,4 +153,3 @@ charge_configuration_to_string(const std::vector<charge_state>& charge_distribut
 }
 
 }  // namespace fiction::sidb::model
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_CHARGE_STATE_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 18.05.21.
 //
 
-#ifndef FICTION_TYPES_HPP
-#define FICTION_TYPES_HPP
+#pragma once
 
 #include "fiction/layouts/cartesian_layout.hpp"
 #include "fiction/layouts/cell_level_layout.hpp"
@@ -422,5 +421,3 @@ static_assert(
     std::is_same_v<cds_sidb_defect_100_cell_clk_lyt_cube_ptr::element_type, cds_sidb_defect_100_cell_clk_lyt_cube>);
 
 }  // namespace fiction
-
-#endif  // FICTION_TYPES_HPP

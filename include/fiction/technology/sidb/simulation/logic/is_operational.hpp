@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_IS_OPERATIONAL_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_IS_OPERATIONAL_HPP
+#pragma once
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -1765,4 +1764,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::simulation::logic
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_IS_OPERATIONAL_HPP

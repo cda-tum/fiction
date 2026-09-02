@@ -12,8 +12,7 @@
 // Created by simon on 25.09.23.
 //
 
-#ifndef FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP
-#define FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP
+#pragma once
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/traits.hpp"
@@ -381,4 +380,3 @@ void write_fgl_layout(const Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction::layouts::io
-#endif  // FICTION_LAYOUTS_IO_WRITE_FGL_LAYOUT_HPP

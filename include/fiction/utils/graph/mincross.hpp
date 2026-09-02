@@ -12,8 +12,7 @@
 // Created by benjamin on 08.04.25.
 //
 
-#ifndef FICTION_UTILS_GRAPH_MINCROSS_HPP
-#define FICTION_UTILS_GRAPH_MINCROSS_HPP
+#pragma once
 
 #include "fiction/synthesis/network_balancing.hpp"
 
@@ -658,4 +657,3 @@ Ntk mincross(Ntk& ntk, const mincross_params& ps = {}, mincross_stats* pst = nul
 }
 
 }  // namespace fiction::utils::graph
-#endif  // FICTION_UTILS_GRAPH_MINCROSS_HPP

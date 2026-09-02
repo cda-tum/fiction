@@ -12,8 +12,7 @@
 // Created by Willem Lambooy on 29.02.2024.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTERCOMPLETE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTERCOMPLETE_HPP
+#pragma once
 
 #if (FICTION_ALGLIB_ENABLED)
 
@@ -1203,5 +1202,3 @@ clustercomplete(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params 
 
 }  // namespace fiction::sidb::simulation::engines
 #endif  // FICTION_ALGLIB_ENABLED
-
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_CLUSTERCOMPLETE_HPP

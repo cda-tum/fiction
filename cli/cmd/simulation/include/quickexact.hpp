@@ -12,8 +12,7 @@
 // Created by marcel on 06.12.23.
 //
 
-#ifndef FICTION_CMD_QUICKEXACT_HPP
-#define FICTION_CMD_QUICKEXACT_HPP
+#pragma once
 
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
@@ -87,5 +86,3 @@ class quickexact_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QUICKEXACT_HPP

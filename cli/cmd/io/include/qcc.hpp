@@ -12,8 +12,7 @@
 // Created by marcel on 24.10.19.
 //
 
-#ifndef FICTION_CMD_QCC_HPP
-#define FICTION_CMD_QCC_HPP
+#pragma once
 
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 
@@ -55,5 +54,3 @@ class qcc_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QCC_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 19.05.21.
 //
 
-#ifndef FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP
-#define FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
@@ -642,5 +641,3 @@ void print_tile_to_node_assignments(const Lyt& lyt, std::ostream& os = std::cout
 }
 
 }  // namespace fiction::layouts::io
-
-#endif  // FICTION_LAYOUTS_IO_PRINT_LAYOUT_HPP

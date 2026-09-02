@@ -12,8 +12,7 @@
 // Created by marcel on 17.02.22.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_A_STAR_HPP
-#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_A_STAR_HPP
+#pragma once
 
 #include "fiction/physical_design/path_finding/cost.hpp"
 #include "fiction/physical_design/path_finding/distance.hpp"
@@ -466,4 +465,3 @@ class a_star_distance_functor : public distance_functor<Lyt, Dist>
 };
 
 }  // namespace fiction::physical_design::path_finding
-#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_A_STAR_HPP

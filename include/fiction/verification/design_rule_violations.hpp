@@ -12,8 +12,7 @@
 // Created by marcel on 26.04.19.
 //
 
-#ifndef FICTION_VERIFICATION_DESIGN_RULE_VIOLATIONS_HPP
-#define FICTION_VERIFICATION_DESIGN_RULE_VIOLATIONS_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -722,4 +721,3 @@ void gate_level_drvs(const Lyt& lyt, const gate_level_drv_params& ps = {}, gate_
 }
 
 }  // namespace fiction::verification
-#endif  // FICTION_VERIFICATION_DESIGN_RULE_VIOLATIONS_HPP

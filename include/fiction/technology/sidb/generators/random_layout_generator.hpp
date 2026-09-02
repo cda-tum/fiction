@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 05.04.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
-#define FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP
+#pragma once
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -249,4 +248,3 @@ generate_multiple_random_layouts(const generate_random_layout_params<coordinate<
 }
 
 }  // namespace fiction::sidb::generators
-#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_RANDOM_LAYOUT_GENERATOR_HPP

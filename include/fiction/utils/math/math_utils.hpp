@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 19.04.23.
 //
 
-#ifndef FICTION_UTILS_MATH_MATH_UTILS_HPP
-#define FICTION_UTILS_MATH_MATH_UTILS_HPP
+#pragma once
 
 #include <cmath>
 #include <concepts>
@@ -157,4 +156,3 @@ cartesian_combinations(const std::vector<std::vector<VectorDataType>>& sets) noe
 }
 
 }  // namespace fiction::utils::math
-#endif  // FICTION_UTILS_MATH_MATH_UTILS_HPP

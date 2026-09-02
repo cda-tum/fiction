@@ -12,8 +12,7 @@
 // Created by marcel on 27.07.18.
 //
 
-#ifndef FICTION_TECHNOLOGY_QCA_QCA_ONE_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_QCA_QCA_ONE_LIBRARY_HPP
+#pragma once
 
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/fcn/gate_library.hpp"
@@ -535,4 +534,3 @@ class qca_one_library : public fcn::gate_library<qca::qca_technology, 5, 5>
 };
 
 }  // namespace fiction::qca
-#endif  // FICTION_TECHNOLOGY_QCA_QCA_ONE_LIBRARY_HPP

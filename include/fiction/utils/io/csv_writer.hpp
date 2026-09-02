@@ -12,8 +12,7 @@
 // Created by marcel on 06.05.20.
 //
 
-#ifndef FICTION_UTILS_IO_CSV_WRITER_HPP
-#define FICTION_UTILS_IO_CSV_WRITER_HPP
+#pragma once
 
 #include <ostream>
 #include <utility>
@@ -98,4 +97,3 @@ class csv_writer
 };
 
 }  // namespace fiction::utils::io
-#endif  // FICTION_UTILS_IO_CSV_WRITER_HPP

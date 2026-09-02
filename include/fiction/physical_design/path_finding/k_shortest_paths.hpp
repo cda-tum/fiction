@@ -12,8 +12,7 @@
 // Created by marcel on 21.02.22.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_PATH_FINDING_K_SHORTEST_PATHS_HPP
-#define FICTION_PHYSICAL_DESIGN_PATH_FINDING_K_SHORTEST_PATHS_HPP
+#pragma once
 
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/physical_design/path_finding/a_star.hpp"
@@ -289,4 +288,3 @@ template <typename Path, typename Lyt>
 }
 
 }  // namespace fiction::physical_design::path_finding
-#endif  // FICTION_PHYSICAL_DESIGN_PATH_FINDING_K_SHORTEST_PATHS_HPP

@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 11.09.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_GATES_HPP
-#define FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_GATES_HPP
+#pragma once
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
@@ -884,4 +883,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::generators
-#endif  // FICTION_TECHNOLOGY_SIDB_GENERATORS_DESIGN_GATES_HPP

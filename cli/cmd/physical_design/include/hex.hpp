@@ -12,8 +12,7 @@
 // Created by Simon Hofmann on 27.04.23.
 //
 
-#ifndef FICTION_CMD_HEX_HPP
-#define FICTION_CMD_HEX_HPP
+#pragma once
 
 #include <fiction/physical_design/hexagonalization.hpp>
 
@@ -52,5 +51,3 @@ class hex_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_HEX_HPP

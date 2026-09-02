@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 03.03.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -114,4 +113,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::sidb::simulation
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_CHECK_SIMULATION_RESULTS_FOR_EQUIVALENCE_HPP

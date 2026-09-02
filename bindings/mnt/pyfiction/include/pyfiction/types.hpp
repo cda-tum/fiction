@@ -12,8 +12,7 @@
 // Created by marcel on 15.12.22.
 //
 
-#ifndef PYFICTION_TYPES_HPP
-#define PYFICTION_TYPES_HPP
+#pragma once
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/cell_level_layout.hpp>
@@ -160,5 +159,3 @@ using py_charge_distribution_surface_100 = py_charge_distribution_surface_layout
 using py_charge_distribution_surface_111 = py_charge_distribution_surface_layout<py_sidb_111_lattice>;
 
 }  // namespace pyfiction
-
-#endif  // PYFICTION_TYPES_HPP

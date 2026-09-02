@@ -12,8 +12,7 @@
 // Created by benjamin on 31.07.24.
 //
 
-#ifndef FICTION_VERIFICATION_VIRTUAL_MITER_HPP
-#define FICTION_VERIFICATION_VIRTUAL_MITER_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -146,4 +145,3 @@ template <typename NtkDest, typename NtkSrc1, typename NtkSrc2>
 }
 
 }  // namespace fiction::verification
-#endif  // FICTION_VERIFICATION_VIRTUAL_MITER_HPP

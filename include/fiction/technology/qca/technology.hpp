@@ -12,8 +12,7 @@
 // Created by marcel on 23.06.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_QCA_TECHNOLOGY_HPP
-#define FICTION_TECHNOLOGY_QCA_TECHNOLOGY_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -503,5 +502,3 @@ struct mol_qca_technology
 };
 
 }  // namespace fiction::qca
-
-#endif  // FICTION_TECHNOLOGY_QCA_TECHNOLOGY_HPP

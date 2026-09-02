@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 18.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_IS_GROUND_STATE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_IS_GROUND_STATE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/traits.hpp"
@@ -81,4 +80,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::sidb::simulation
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_IS_GROUND_STATE_HPP

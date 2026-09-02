@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 09.09.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_RATIO_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_RATIO_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
 
@@ -74,4 +73,3 @@ template <typename Lyt, typename TT>
 }
 
 }  // namespace fiction::sidb::simulation::logic
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_OPERATIONAL_DOMAIN_RATIO_HPP

@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 18.12.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -92,4 +91,3 @@ sidb::simulation::result<Lyt> exhaustive_ground_state_simulation(
 }
 
 }  // namespace fiction::sidb::simulation::engines
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ENGINES_EXHAUSTIVE_GROUND_STATE_SIMULATION_HPP

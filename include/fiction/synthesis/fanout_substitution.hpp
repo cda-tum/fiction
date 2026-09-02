@@ -12,8 +12,7 @@
 // Created by marcel on 31.05.21.
 //
 
-#ifndef FICTION_SYNTHESIS_FANOUT_SUBSTITUTION_HPP
-#define FICTION_SYNTHESIS_FANOUT_SUBSTITUTION_HPP
+#pragma once
 
 #include "fiction/synthesis/network_conversion.hpp"
 #include "fiction/traits.hpp"
@@ -504,4 +503,3 @@ bool is_fanout_substituted(const Ntk& ntk, fanout_substitution_params ps = {}) n
 }
 
 }  // namespace fiction::synthesis
-#endif  // FICTION_SYNTHESIS_FANOUT_SUBSTITUTION_HPP

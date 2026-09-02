@@ -12,8 +12,7 @@
 // Created by marcel on 26.05.21.
 //
 
-#ifndef FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
-#define FICTION_EQUIVALENCE_CHECKING_UTILS_HPP
+#pragma once
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -24,5 +23,3 @@ void check_eq(const Spec& spec, const Impl& impl)
 {
     CHECK(fiction::verification::equivalence_checking(spec, impl) != fiction::verification::eq_type::NO);
 }
-
-#endif  // FICTION_EQUIVALENCE_CHECKING_UTILS_HPP

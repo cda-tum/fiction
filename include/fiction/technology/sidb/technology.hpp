@@ -12,8 +12,7 @@
 // Created by marcel on 23.06.21.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_TECHNOLOGY_HPP
-#define FICTION_TECHNOLOGY_SIDB_TECHNOLOGY_HPP
+#pragma once
 
 #include <cstdint>
 
@@ -158,5 +157,3 @@ struct sidb_technology
 };
 
 }  // namespace fiction::sidb
-
-#endif  // FICTION_TECHNOLOGY_SIDB_TECHNOLOGY_HPP

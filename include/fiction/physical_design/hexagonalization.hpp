@@ -12,8 +12,7 @@
 // created by simon on 14.04.23.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_HEXAGONALIZATION_HPP
-#define FICTION_PHYSICAL_DESIGN_HEXAGONALIZATION_HPP
+#pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/obstruction_layout.hpp"
@@ -1049,5 +1048,3 @@ template <typename HexLyt, typename CartLyt>
 
 }  // namespace fiction::physical_design
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_PHYSICAL_DESIGN_HEXAGONALIZATION_HPP

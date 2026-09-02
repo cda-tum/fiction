@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 02.02.25.
 //
 
-#ifndef FICTION_UTILS_MATH_MAP_UTILS_HPP
-#define FICTION_UTILS_MATH_MAP_UTILS_HPP
+#pragma once
 
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -45,4 +44,3 @@ typename MapType::const_iterator find_key_with_tolerance(const MapType& map, con
 }
 
 }  // namespace fiction::utils::math
-#endif  // FICTION_UTILS_MATH_MAP_UTILS_HPP

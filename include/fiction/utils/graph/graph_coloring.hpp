@@ -12,8 +12,7 @@
 // Created by marcel on 04.02.22.
 //
 
-#ifndef FICTION_UTILS_GRAPH_GRAPH_COLORING_HPP
-#define FICTION_UTILS_GRAPH_GRAPH_COLORING_HPP
+#pragma once
 
 #include "fiction/utils/stl/hash.hpp"  // NOLINT(misc-include-cleaner): provides std::hash<std::pair<...>> used by variables' unordered_map
 
@@ -1051,4 +1050,3 @@ vertex_coloring<Graph, Color> determine_vertex_coloring(const Graph&            
 }
 
 }  // namespace fiction::utils::graph
-#endif  // FICTION_UTILS_GRAPH_GRAPH_COLORING_HPP

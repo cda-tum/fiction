@@ -12,8 +12,7 @@
 // Created by marcel on 24.07.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_BDL_INPUT_ITERATOR_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_BDL_INPUT_ITERATOR_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
@@ -627,5 +626,3 @@ struct iterator_traits<fiction::sidb::simulation::logic::bdl_input_iterator<Lyt>
     using value_type        = Lyt;
 };
 }  // namespace std
-
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_LOGIC_BDL_INPUT_ITERATOR_HPP

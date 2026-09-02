@@ -12,8 +12,7 @@
 // Created by marcel on 05.04.22.
 //
 
-#ifndef FICTION_SYNTHESIS_TRUTH_TABLES_HPP
-#define FICTION_SYNTHESIS_TRUTH_TABLES_HPP
+#pragma once
 
 #include <kitty/bit_operations.hpp>
 #include <kitty/constructors.hpp>
@@ -444,4 +443,3 @@ namespace fiction::synthesis
 // NOLINTEND(*-pointer-arithmetic)
 
 }  // namespace fiction::synthesis
-#endif  // FICTION_SYNTHESIS_TRUTH_TABLES_HPP

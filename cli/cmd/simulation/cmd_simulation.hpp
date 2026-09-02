@@ -12,8 +12,7 @@
 // Created by marcel on 10.10.2025.
 //
 
-#ifndef FICTION_CMD_SIMULATION_HPP
-#define FICTION_CMD_SIMULATION_HPP
+#pragma once
 
 #ifdef FICTION_SIMULATION_FLOW
 
@@ -44,5 +43,3 @@ ALICE_ADD_COMMAND(temp, FICTION_CLI_CATEGORY_SIMULATION)
 }  // namespace alice
 
 #endif  // FICTION_SIMULATION_FLOW
-
-#endif  // FICTION_CMD_SIMULATION_HPP

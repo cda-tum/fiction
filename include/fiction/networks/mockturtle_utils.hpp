@@ -12,8 +12,7 @@
 // Created by marcel on 29.11.22.
 //
 
-#ifndef FICTION_NETWORKS_MOCKTURTLE_UTILS_HPP
-#define FICTION_NETWORKS_MOCKTURTLE_UTILS_HPP
+#pragma once
 
 #include <mockturtle/networks/detail/foreach.hpp>
 
@@ -93,5 +92,3 @@ Iterator foreach_element_if_transform(Iterator begin, Iterator end, Pred&& pred,
 }
 
 }  // namespace mockturtle::detail
-
-#endif  // FICTION_NETWORKS_MOCKTURTLE_UTILS_HPP

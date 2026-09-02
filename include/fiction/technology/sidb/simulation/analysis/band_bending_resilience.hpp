@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 28.01.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_BAND_BENDING_RESILIENCE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_BAND_BENDING_RESILIENCE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
@@ -110,4 +109,3 @@ band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_
 }
 
 }  // namespace fiction::sidb::simulation::analysis
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_ANALYSIS_BAND_BENDING_RESILIENCE_HPP

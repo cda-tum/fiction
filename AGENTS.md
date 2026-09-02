@@ -306,9 +306,11 @@ imitate.
 
 ### C++
 
-- **Headers**: `.hpp` extension. The include guard is `FICTION_<PATH>_HPP`, the path relative
-  to `include/fiction/` in upper case with `/` and `.` as `_`, so
-  `technology/sidb/model/defect.hpp` guards with `FICTION_TECHNOLOGY_SIDB_MODEL_DEFECT_HPP`.
+- **Headers**: `.hpp` extension, guarded with `#pragma once`. Every supported compiler
+  implements it, and it needs no macro name kept in step with the directory tree -- the
+  restructure had to rename all 201 of them by hand, and four `#endif` comments were left
+  naming the old one. `portability-avoid-pragma-once` is switched off in `.clang-tidy`
+  accordingly.
 - **Documentation**:
   - Apply to **ALL** new and edited code.
   - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions,

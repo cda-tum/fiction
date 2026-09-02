@@ -12,8 +12,7 @@
 // Created by simon on 14.06.23.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_POST_LAYOUT_OPTIMIZATION_HPP
-#define FICTION_PHYSICAL_DESIGN_POST_LAYOUT_OPTIMIZATION_HPP
+#pragma once
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -1295,5 +1294,3 @@ void post_layout_optimization(const Lyt& lyt, post_layout_optimization_params ps
 
 }  // namespace fiction::physical_design
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_PHYSICAL_DESIGN_POST_LAYOUT_OPTIMIZATION_HPP

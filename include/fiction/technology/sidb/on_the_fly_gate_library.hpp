@@ -12,8 +12,7 @@
 // Created by Jan Drewniok 20.09.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
-#define FICTION_TECHNOLOGY_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP
+#pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
@@ -1542,4 +1541,3 @@ class on_the_fly_gate_library
 };
 
 }  // namespace fiction::sidb
-#endif  // FICTION_TECHNOLOGY_SIDB_ON_THE_FLY_GATE_LIBRARY_HPP

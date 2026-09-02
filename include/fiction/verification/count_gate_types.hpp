@@ -12,8 +12,7 @@
 // Created by marcel on 08.07.21.
 //
 
-#ifndef FICTION_VERIFICATION_COUNT_GATE_TYPES_HPP
-#define FICTION_VERIFICATION_COUNT_GATE_TYPES_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -332,4 +331,3 @@ void count_gate_types(const Ntk& ntk, count_gate_types_stats* pst = nullptr)
 }
 
 }  // namespace fiction::verification
-#endif  // FICTION_VERIFICATION_COUNT_GATE_TYPES_HPP

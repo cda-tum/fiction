@@ -12,8 +12,7 @@
 // Created by simon on 12.06.2024.
 //
 
-#ifndef FICTION_CMD_GOLD_HPP
-#define FICTION_CMD_GOLD_HPP
+#pragma once
 
 #include <fiction/physical_design/graph_oriented_layout_design.hpp>
 
@@ -72,5 +71,3 @@ class gold_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_GOLD_HPP

@@ -12,8 +12,7 @@
 // Created by marcel on 05.11.21.
 //
 
-#ifndef FICTION_VERIFICATION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
-#define FICTION_VERIFICATION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -196,4 +195,3 @@ cp_and_tp critical_path_length_and_throughput(const Lyt& lyt)
 }
 
 }  // namespace fiction::verification
-#endif  // FICTION_VERIFICATION_CRITICAL_PATH_LENGTH_AND_THROUGHPUT_HPP

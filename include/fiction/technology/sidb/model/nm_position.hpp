@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 28.01.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb/surfaces/lattice.hpp"
@@ -70,4 +69,3 @@ template <typename Lyt>
 }
 
 }  // namespace fiction::sidb::model
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_NM_POSITION_HPP

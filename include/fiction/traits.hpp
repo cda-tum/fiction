@@ -12,8 +12,7 @@
 // Created by marcel on 24.05.21.
 //
 
-#ifndef FICTION_TRAITS_HPP
-#define FICTION_TRAITS_HPP
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
@@ -1433,5 +1432,3 @@ inline constexpr bool has_update_ranks_v = has_update_ranks<Ntk>::value;
 #pragma endregion
 
 }  // namespace fiction
-
-#endif  // FICTION_TRAITS_HPP

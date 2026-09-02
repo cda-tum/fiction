@@ -12,8 +12,7 @@
 // Created by marcel on 16.07.18.
 //
 
-#ifndef FICTION_STORES_HPP
-#define FICTION_STORES_HPP
+#pragma once
 
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/layout_drawers.hpp>
@@ -526,5 +525,3 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
 }
 
 }  // namespace alice
-
-#endif  // FICTION_STORES_HPP

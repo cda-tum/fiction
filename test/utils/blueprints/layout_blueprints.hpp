@@ -12,8 +12,7 @@
 // Created by marcel on 24.05.21.
 //
 
-#ifndef FICTION_LAYOUT_BLUEPRINTS_HPP
-#define FICTION_LAYOUT_BLUEPRINTS_HPP
+#pragma once
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -1882,5 +1881,3 @@ Lyt two_input_one_output_skeleton_west_west() noexcept
 };
 
 }  // namespace blueprints
-
-#endif  // FICTION_LAYOUT_BLUEPRINTS_HPP

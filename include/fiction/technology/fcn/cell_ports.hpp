@@ -12,8 +12,7 @@
 // Created by marcel on 29.09.18.
 //
 
-#ifndef FICTION_TECHNOLOGY_FCN_CELL_PORTS_HPP
-#define FICTION_TECHNOLOGY_FCN_CELL_PORTS_HPP
+#pragma once
 
 #include "fiction/utils/stl/hash.hpp"
 
@@ -382,5 +381,3 @@ struct formatter<fiction::fcn::port_list<PortType>>
     }
 };
 }  // namespace fmt
-
-#endif  // FICTION_TECHNOLOGY_FCN_CELL_PORTS_HPP

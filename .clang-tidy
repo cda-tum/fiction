@@ -38,6 +38,10 @@ Checks: |
   -modernize-use-trailing-return-type,
   performance-*,
   portability-*,
+  # headers guard themselves with `#pragma once`. Every compiler the project supports
+  # implements it. It also retires 201 hand-written macro names whose spelling had to
+  # be kept in step with the directory tree by hand
+  -portability-avoid-pragma-once,
   readability-*,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,

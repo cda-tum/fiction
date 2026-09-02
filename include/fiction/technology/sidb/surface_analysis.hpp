@@ -12,8 +12,7 @@
 // Created by marcel on 01.04.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP
-#define FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP
+#pragma once
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -164,4 +163,3 @@ template <typename GateLibrary, typename GateLyt, typename CellLyt>
 }
 
 }  // namespace fiction::sidb
-#endif  // FICTION_TECHNOLOGY_SIDB_SURFACE_ANALYSIS_HPP

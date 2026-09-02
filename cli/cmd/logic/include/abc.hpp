@@ -12,8 +12,7 @@
 // Created by marcel on 04.12.24.
 //
 
-#ifndef FICTION_CMD_ABC_HPP
-#define FICTION_CMD_ABC_HPP
+#pragma once
 
 #if (FICTION_ABC)
 
@@ -95,5 +94,3 @@ class abc_command final : public command
 }  // namespace alice
 
 #endif  // FICTION_ABC
-
-#endif  // FICTION_CMD_ABC_HPP

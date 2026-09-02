@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 07.02.24.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_CLEARANCE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_CLEARANCE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/nm_distance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
@@ -91,4 +90,3 @@ calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& d
 }
 
 }  // namespace fiction::sidb::simulation::defects
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_DEFECTS_DEFECT_CLEARANCE_HPP

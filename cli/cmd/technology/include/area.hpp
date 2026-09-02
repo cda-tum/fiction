@@ -12,8 +12,7 @@
 // Created by marcel on 25.11.19.
 //
 
-#ifndef FICTION_CMD_AREA_HPP
-#define FICTION_CMD_AREA_HPP
+#pragma once
 
 #include <fiction/technology/fcn/area.hpp>
 
@@ -72,5 +71,3 @@ class area_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_AREA_HPP

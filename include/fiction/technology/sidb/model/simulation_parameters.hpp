@@ -12,8 +12,7 @@
 // Created by Jan Drewniok on 24.11.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP
-#define FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/physical_constants.hpp"
 
@@ -85,4 +84,3 @@ struct simulation_parameters
 };
 
 }  // namespace fiction::sidb::model
-#endif  // FICTION_TECHNOLOGY_SIDB_MODEL_SIMULATION_PARAMETERS_HPP

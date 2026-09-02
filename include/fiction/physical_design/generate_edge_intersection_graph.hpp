@@ -12,8 +12,7 @@
 // Created by marcel on 02.02.22.
 //
 
-#ifndef FICTION_PHYSICAL_DESIGN_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
-#define FICTION_PHYSICAL_DESIGN_GENERATE_EDGE_INTERSECTION_GRAPH_HPP
+#pragma once
 
 #include "fiction/layouts/obstruction_layout.hpp"
 #include "fiction/physical_design/path_finding/enumerate_all_paths.hpp"
@@ -380,4 +379,3 @@ edge_intersection_graph<Lyt> generate_edge_intersection_graph(const Lyt&        
 }
 
 }  // namespace fiction::physical_design
-#endif  // FICTION_PHYSICAL_DESIGN_GENERATE_EDGE_INTERSECTION_GRAPH_HPP

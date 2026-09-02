@@ -12,8 +12,7 @@
 // Created by marcel on 28.06.21.
 //
 
-#ifndef FICTION_UTILS_STL_ARRAY_UTILS_HPP
-#define FICTION_UTILS_STL_ARRAY_UTILS_HPP
+#pragma once
 
 #include <array>
 #include <utility>
@@ -102,4 +101,3 @@ constexpr auto convert_array_of_arrays(const std::array<std::array<T, M>, N>& a)
 }
 
 }  // namespace fiction::utils::stl
-#endif  // FICTION_UTILS_STL_ARRAY_UTILS_HPP

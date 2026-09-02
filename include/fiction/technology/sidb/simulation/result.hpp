@@ -12,8 +12,7 @@
 // Created by marcel on 05.04.23.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SIMULATION_RESULT_HPP
-#define FICTION_TECHNOLOGY_SIDB_SIMULATION_RESULT_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
@@ -125,4 +124,3 @@ struct result
 };
 
 }  // namespace fiction::sidb::simulation
-#endif  // FICTION_TECHNOLOGY_SIDB_SIMULATION_RESULT_HPP

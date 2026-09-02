@@ -12,8 +12,7 @@
 // Created by marcel on 07.03.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_SURFACES_DEFECT_SURFACE_HPP
-#define FICTION_TECHNOLOGY_SIDB_SURFACES_DEFECT_SURFACE_HPP
+#pragma once
 
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/traits.hpp"
@@ -358,4 +357,3 @@ template <class T>
 defect_surface(const T&) -> defect_surface<T>;
 
 }  // namespace fiction::sidb::surfaces
-#endif  // FICTION_TECHNOLOGY_SIDB_PRIMITIVES_DEFECT_SURFACE_HPP

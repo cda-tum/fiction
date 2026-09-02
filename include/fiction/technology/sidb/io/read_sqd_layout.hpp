@@ -12,8 +12,7 @@
 // Created by marcel on 23.06.22.
 //
 
-#ifndef FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
-#define FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
+#pragma once
 
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -549,4 +548,3 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 }
 
 }  // namespace fiction::sidb::io
-#endif  // FICTION_TECHNOLOGY_SIDB_IO_READ_SQD_LAYOUT_HPP
