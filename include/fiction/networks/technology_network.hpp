@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Logic network that disables structural hashing and adds FCN-specific gate types.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

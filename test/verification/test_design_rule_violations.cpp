@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/verification/design_rule_violations.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

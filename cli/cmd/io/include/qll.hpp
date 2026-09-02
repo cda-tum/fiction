@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `qll` command, which writes a ToPoliNano/MagCAD/SCERPA layout file.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
  */

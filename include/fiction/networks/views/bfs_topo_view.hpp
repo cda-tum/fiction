@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Network view that yields a breadth-first instead of depth-first topological order.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

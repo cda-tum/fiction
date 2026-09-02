@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/simulation/engines/ground_state_space.hpp`.
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)

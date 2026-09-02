@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Hand-built layouts the test suite reuses as fixtures.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/utils/graph/graph_coloring.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

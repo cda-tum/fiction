@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Iterator over the Gray code representations of consecutive numbers.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

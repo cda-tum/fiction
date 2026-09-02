@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Decides whether positively charged SiDBs are possible in a layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

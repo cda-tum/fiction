@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/generators/is_gate_design_impossible.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

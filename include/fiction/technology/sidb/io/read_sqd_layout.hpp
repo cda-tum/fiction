@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Reader for SiDB layouts in the SQD format used by SiQAD.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)

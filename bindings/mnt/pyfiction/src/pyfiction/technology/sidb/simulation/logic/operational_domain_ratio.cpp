@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

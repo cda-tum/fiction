@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Detects the SiDB pairs that jointly encode one Binary-dot Logic value.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

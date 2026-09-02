@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Clocking scheme type and the catalog of regular clockings the library ships.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

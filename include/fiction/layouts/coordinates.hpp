@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Offset, cube, and SiQAD coordinate types and the conversions between them.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)

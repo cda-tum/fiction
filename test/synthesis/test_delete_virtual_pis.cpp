@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/synthesis/delete_virtual_pis.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `blif` command.
  * @author Marcel Walter (marcelwa)
  */
 

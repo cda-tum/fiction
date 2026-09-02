@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Network that duplicates primary inputs into freely copyable virtual PIs.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

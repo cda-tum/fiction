@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

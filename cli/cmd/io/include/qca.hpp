@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `qca` command, which writes the current cell layout for QCADesigner.
  * @author Marcel Walter (marcelwa)
  */
 

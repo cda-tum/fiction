@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/synthesis/fanout_substitution.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Simon Hofmann (simon1hofmann)

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `equiv` command.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief alice store definitions for truth tables, logic networks, and layouts.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)

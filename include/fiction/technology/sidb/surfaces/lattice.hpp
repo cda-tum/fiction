@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Layout extension that pins an SiDB layout to a silicon lattice orientation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

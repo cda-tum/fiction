@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Layout that adds a unified obstruction interface to any coordinate layout.
  * @author Marcel Walter (marcelwa)
  */
 

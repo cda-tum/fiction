@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/qca/io/write_qca_layout_svg.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

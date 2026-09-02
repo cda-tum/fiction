@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `opdom` command, which computes the current layout's operational domain.
  * @author Marcel Walter (marcelwa)
  */
 

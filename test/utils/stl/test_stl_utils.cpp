@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/utils/stl/stl_utils.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

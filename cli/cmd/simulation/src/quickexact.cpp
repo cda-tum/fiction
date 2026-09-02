@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `quickexact` command.
  * @author Marcel Walter (marcelwa)
  */
 

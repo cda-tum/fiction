@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Compile-time construction and element-wise conversion of `std::array`s.
  * @author Marcel Walter (marcelwa)
  */
 

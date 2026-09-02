@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/generators/design_gates.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

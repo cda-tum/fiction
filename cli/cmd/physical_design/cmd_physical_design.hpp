@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Collects the physical design CLI commands for inclusion into the shell.
  * @author Marcel Walter (marcelwa)
  */
 

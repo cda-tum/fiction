@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Registers the `technology/sidb/surfaces` bindings with the `mnt.pyfiction` module.
  * @author Marcel Walter (marcelwa)
  */
 

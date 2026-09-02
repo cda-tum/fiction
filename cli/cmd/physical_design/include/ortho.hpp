@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `ortho` command, which runs orthogonal-graph-drawing physical design.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -28,7 +29,7 @@ namespace alice
 
 /**
  * Executes a heuristic physical approach based on "Improved Orthogonal Drawing of 3-graphs" by Therese Biedl, 1996.
- * See algo/orthogonal.hpp for more details.
+ * See include/fiction/physical_design/orthogonal.hpp for more details.
  */
 class ortho_command final : public command
 {

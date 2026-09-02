@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `random` command, which generates a random logic network.
  * @author Marcel Walter (marcelwa)
  */
 

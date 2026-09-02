@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Entry point of the `mnt.pyfiction` module, which calls every registry in turn.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)

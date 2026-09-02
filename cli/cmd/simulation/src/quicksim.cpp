@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `quicksim` command.
  * @author Marcel Walter (marcelwa)
  */
 

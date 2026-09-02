@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Cross-checks the exact SiDB simulation engines against each other.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

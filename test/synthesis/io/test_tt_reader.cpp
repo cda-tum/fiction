@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/synthesis/io/tt_reader.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

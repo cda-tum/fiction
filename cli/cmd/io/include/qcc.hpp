@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `qcc` command, which writes a ToPoliNano/MagCAD component file.
  * @author Marcel Walter (marcelwa)
  */
 

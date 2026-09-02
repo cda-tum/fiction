@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *QuickExact*, exact SiDB simulation with physically informed pruning.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/apply_gate_library.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)

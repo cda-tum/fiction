@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Registers the `physical_design` bindings with the `mnt.pyfiction` module.
  * @author Marcel Walter (marcelwa)
  */
 

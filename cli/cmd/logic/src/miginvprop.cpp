@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `miginvprop` command.
  * @author Marcel Walter (marcelwa)
  */
 

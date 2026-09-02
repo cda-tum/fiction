@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `abc` command.
  * @author Marcel Walter (marcelwa)
  */
 

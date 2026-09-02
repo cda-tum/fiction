@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/model/charge_state.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

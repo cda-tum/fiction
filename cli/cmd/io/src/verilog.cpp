@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `verilog` command.
  * @author Marcel Walter (marcelwa)
  */
 

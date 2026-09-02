@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief in-plane Nanomagnet Logic technology tag and its cell types.
  * @author Marcel Walter (marcelwa)
  */
 

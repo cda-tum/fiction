@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/layouts/obstruction_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

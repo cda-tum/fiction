@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief The physical parameters every SiDB simulation is run under.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

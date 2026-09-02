@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests that a gate-level layout satisfies the mockturtle network interface.
  * @author Marcel Walter (marcelwa)
  */
 

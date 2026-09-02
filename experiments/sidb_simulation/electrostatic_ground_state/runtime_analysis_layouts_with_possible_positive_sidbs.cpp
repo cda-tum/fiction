@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Runtime of the SiDB simulation engines where positive charges can occur.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

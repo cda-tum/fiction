@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Fraction of a parameter neighborhood in which a layout stays operational.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

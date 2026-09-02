@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *QuickCell* against exhaustive design of 2-input SiDB gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

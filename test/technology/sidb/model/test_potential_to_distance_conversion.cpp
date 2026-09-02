@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/model/potential_to_distance_conversion.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

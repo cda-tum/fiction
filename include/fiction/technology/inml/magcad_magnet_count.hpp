@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Counts the magnets of an iNML layout the way MagCAD does.
  * @author Marcel Walter (marcelwa)
  */
 

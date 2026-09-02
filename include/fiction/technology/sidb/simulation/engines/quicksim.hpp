@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *QuickSim*, heuristic SiDB ground state simulation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

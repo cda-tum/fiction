@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Color routing against exact routing across the benchmark set.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

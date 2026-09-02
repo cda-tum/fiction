@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/inml/io/write_qcc_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

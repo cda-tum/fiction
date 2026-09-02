@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/aspect_ratio_iterator.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

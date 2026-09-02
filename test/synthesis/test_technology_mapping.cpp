@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/synthesis/technology_mapping.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

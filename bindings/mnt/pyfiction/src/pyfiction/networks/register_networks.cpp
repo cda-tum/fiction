@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Registers the `networks` bindings with the `mnt.pyfiction` module.
  * @author Marcel Walter (marcelwa)
  */
 

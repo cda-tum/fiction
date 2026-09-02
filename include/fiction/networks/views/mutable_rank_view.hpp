@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Network view that exposes and rearranges node ranks within their level.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

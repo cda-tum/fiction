@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `temp` command, which computes the current layout's critical temperature.
  * @author Marcel Walter (marcelwa)
  */
 

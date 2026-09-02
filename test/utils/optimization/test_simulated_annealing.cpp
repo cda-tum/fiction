@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/utils/optimization/simulated_annealing.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

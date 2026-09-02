@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/utils/graph/mincross.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

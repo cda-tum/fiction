@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Port positions, directions, and port lists that describe a gate's tile interface.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

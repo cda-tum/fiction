@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `equiv` command, which equivalence-checks networks and layouts.
  * @author Marcel Walter (marcelwa)
  */
 

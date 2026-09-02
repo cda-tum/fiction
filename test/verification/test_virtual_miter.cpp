@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/verification/virtual_miter.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Distribution of the electrostatic energies a simulation produced.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

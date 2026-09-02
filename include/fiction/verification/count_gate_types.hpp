@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Counts the gate types a network or layout contains.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp`.
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
  */

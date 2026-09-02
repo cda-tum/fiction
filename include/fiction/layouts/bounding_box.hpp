@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief 2D bounding box that encloses all non-empty coordinates of a layout.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)

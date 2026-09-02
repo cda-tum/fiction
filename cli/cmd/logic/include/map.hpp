@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `map` command, which technology-maps the current logic network.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Turns a gate-level layout into a cell-level one by applying a gate library.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Catch2 benchmarks for `fiction/physical_design/graph_oriented_layout_design.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

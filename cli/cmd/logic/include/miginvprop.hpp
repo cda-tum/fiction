@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `miginvprop` command, which propagates inverters in an MIG to its inputs.
  * @author Marcel Walter (marcelwa)
  */
 

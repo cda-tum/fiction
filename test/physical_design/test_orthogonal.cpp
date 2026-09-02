@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/orthogonal.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

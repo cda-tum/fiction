@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Network view that paints edges in addition to nodes.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SAT-based equivalence checking of a specification against an implementation.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

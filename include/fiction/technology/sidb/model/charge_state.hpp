@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief The three SiDB charge states and the sets used in base-2 and base-3 simulation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

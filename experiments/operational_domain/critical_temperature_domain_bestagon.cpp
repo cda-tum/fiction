@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Critical temperature domains of the Bestagon gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

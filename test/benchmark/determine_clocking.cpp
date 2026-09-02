@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Catch2 benchmarks for `fiction/physical_design/determine_clocking.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

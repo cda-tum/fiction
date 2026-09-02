@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/layouts/clocked_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

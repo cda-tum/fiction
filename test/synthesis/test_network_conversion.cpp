@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/synthesis/network_conversion.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

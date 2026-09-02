@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Labels charge distributions as ground or excited states with their energies.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

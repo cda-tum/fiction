@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `simulate` command.
  * @author Marcel Walter (marcelwa)
  */
 

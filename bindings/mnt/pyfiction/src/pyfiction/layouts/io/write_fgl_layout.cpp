@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/layouts/io/write_fgl_layout.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

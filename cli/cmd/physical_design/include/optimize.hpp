@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `optimize` command, which post-optimizes a 2DDWave-clocked layout.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

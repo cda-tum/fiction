@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Wiring reduction across the benchmark set.
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)

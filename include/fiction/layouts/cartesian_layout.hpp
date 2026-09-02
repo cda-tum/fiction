@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Cartesian grid layout addressed by offset coordinates.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)

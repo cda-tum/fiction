@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Filtering-and-transforming variant of mockturtle's `foreach_element` helper.
  * @author Marcel Walter (marcelwa)
  */
 

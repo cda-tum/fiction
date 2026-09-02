@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Entry point of the `fiction` CLI, which hands control to alice's shell.
  * @author Marcel Walter (marcelwa)
  */
 

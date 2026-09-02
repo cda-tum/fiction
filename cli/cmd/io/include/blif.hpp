@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `blif` command, which writes the current network or layout to BLIF.
  * @author Marcel Walter (marcelwa)
  */
 

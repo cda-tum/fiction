@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `fanouts` command.
  * @author Marcel Walter (marcelwa)
  */
 

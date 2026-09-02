@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Catch2 benchmarks for `fiction/physical_design/path_finding/distance_map.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

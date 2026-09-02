@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/layouts/clocking_scheme.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

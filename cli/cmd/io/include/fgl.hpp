@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `fgl` command, which writes the current gate-level layout to FGL.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

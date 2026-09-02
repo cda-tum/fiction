@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/networks/virtual_pi_network.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

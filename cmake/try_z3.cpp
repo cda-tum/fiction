@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief CMake probe that checks whether a usable Z3 installation is present.
  * @author Marcel Walter (marcelwa)
  */
 

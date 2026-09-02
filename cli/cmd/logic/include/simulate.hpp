@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `simulate` command, which simulates a network or layout into truth tables.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Constructors for the truth tables of the Boolean functions the library uses.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

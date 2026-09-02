@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief The parameter region in which an SiDB layout stays operational.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

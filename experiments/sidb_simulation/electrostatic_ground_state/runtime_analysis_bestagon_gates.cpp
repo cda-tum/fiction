@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Runtime of the SiDB simulation engines on the Bestagon gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Collects the general CLI commands for inclusion into the shell.
  * @author Marcel Walter (marcelwa)
  */
 

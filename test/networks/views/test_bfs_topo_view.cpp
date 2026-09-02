@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/networks/views/bfs_topo_view.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

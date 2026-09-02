@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/generate_edge_intersection_graph.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

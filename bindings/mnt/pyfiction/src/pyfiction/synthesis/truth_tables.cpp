@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/synthesis/truth_tables.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

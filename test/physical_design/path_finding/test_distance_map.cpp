@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/path_finding/distance_map.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

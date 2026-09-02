@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/wiring_reduction.hpp`.
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)

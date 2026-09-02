@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/layouts/layout_utils.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief A* shortest-path search between two layout coordinates, plus its distance functor.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Order-independent hash combination and hashes for common STL containers.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `miginvopt` command, which optimizes the inverter cost of the current MIG.
  * @author Marcel Walter (marcelwa)
  */
 

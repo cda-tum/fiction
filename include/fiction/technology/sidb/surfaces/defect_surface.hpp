@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Layout extension that stores fabrication defects alongside the SiDBs.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for simulating a logic network into truth tables.
  * @author Marcel Walter (marcelwa)
  */
 

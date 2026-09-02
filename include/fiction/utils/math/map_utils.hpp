@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Looks up a floating-point key in a map within a tolerance.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

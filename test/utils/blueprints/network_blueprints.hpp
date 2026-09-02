@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Hand-built logic networks the test suite reuses as fixtures.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

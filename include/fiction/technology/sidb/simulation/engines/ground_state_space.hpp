@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *Ground State Space*, the cluster hierarchy pre-simulation *ClusterComplete* needs.
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)

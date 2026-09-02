@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief How often `determine_clocking` reclocks a layout stripped of its clocking.
  * @author Marcel Walter (marcelwa)
  */
 

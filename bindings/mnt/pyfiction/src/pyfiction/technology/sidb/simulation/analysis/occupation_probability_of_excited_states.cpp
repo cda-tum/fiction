@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `occupation_probability_of_excited_states.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

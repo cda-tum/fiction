@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `kitty`'s dynamic truth tables.
  * @author Marcel Walter (marcelwa)
  */
 

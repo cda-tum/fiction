@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `fqca` command.
  * @author Marcel Walter (marcelwa)
  */
 

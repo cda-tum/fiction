@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief On-the-fly SiDB circuit design on a defective surface.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Replaces high-degree fanouts with trees of identity-computing fanout nodes.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

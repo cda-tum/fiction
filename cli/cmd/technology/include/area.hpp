@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `area` command, which prints the current cell layout's area in nm².
  * @author Marcel Walter (marcelwa)
  */
 

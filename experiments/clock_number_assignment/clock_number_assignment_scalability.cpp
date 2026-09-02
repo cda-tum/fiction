@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Runtime of `determine_clocking` as the layouts it reclocks grow.
  * @author Marcel Walter (marcelwa)
  */
 

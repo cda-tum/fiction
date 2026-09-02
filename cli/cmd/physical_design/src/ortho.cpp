@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `ortho` command.
  * @author Marcel Walter (marcelwa)
  */
 

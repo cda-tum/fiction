@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `hex` command.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

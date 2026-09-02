@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Generates random SiDB layouts and writes them as SQD files.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

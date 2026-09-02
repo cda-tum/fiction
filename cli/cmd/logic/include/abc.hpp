@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `abc` command, which runs an ABC command string on the current network.
  * @author Marcel Walter (marcelwa)
  */
 

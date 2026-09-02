@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/layouts/coordinates.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)

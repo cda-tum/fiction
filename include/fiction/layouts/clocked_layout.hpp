@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Layout that assigns clock numbers to the coordinates of a coordinate layout.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

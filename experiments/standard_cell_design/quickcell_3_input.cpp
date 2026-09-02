@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *QuickCell* design of 3-input SiDB standard cells.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Operational domains of the SiQAD gates across all algorithms.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Bestagon I/O wire skeletons that on-the-fly gate design fills in.
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)

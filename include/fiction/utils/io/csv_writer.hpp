@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Writes delimiter-separated rows to an output stream.
  * @author Marcel Walter (marcelwa)
  */
 

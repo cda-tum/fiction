@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Cartesian-to-hexagonal layout mapping across the benchmark set.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

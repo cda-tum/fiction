@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief QCA and molQCA technology tags and their cell types.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)

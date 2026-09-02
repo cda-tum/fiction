@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Figures of merit of designed 2-input/1-output SiDB gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

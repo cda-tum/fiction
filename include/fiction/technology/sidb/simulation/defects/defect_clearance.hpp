@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Minimum distance a defect must keep for a layout to stay operational.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

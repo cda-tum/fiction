@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/analysis/time_to_solution.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

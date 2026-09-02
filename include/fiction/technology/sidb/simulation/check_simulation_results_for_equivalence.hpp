@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Compares two SiDB simulation results for equivalence.
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)

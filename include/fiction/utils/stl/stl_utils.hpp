@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief A searchable priority queue and a relaxed `std::find_first_of`.
  * @author Marcel Walter (marcelwa)
  */
 

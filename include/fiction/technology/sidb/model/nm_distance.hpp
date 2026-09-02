@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Distance between two SiDB cells in nanometers.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

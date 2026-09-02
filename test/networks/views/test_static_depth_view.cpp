@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/networks/views/static_depth_view.hpp`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

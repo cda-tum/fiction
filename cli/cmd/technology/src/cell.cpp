@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `cell` command.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
  */

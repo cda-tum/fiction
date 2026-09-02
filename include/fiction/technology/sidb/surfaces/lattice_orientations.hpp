@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief The H-Si(100)-2x1 and H-Si(111)-1x1 surface orientations.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

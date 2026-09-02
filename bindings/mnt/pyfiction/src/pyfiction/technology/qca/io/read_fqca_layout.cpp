@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/qca/io/read_fqca_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

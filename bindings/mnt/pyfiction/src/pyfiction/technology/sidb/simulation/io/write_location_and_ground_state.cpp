@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

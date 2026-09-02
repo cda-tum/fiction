@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Cost functions between adjacent layout coordinates and their functor wrappers.
  * @author Marcel Walter (marcelwa)
  */
 

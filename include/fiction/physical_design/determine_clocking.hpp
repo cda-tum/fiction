@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SAT-based assignment of clock numbers to an unclocked gate-level layout.
  * @author Marcel Walter (marcelwa)
  */
 

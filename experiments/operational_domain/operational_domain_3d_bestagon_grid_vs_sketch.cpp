@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief 3D operational domains of the Bestagon gates: grid search against sketching.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

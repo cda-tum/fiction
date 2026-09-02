@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Builds a combinational miter from networks that may carry virtual PIs.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

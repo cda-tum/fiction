@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Simulates generated SiDB layouts and records their ground state charges.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

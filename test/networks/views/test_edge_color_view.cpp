@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/networks/views/edge_color_view.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

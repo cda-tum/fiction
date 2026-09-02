@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/synthesis/fanout_substitution.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

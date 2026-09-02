@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/verification/critical_path_length_and_throughput.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

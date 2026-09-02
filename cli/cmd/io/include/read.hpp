@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `read` command, which parses a file by its extension into a store.
  * @author Marcel Walter (marcelwa)
  */
 

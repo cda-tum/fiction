@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Designs SiDB gate implementations for a given Boolean function and skeleton.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `balance` command, which path-balances the current logic network.
  * @author Marcel Walter (marcelwa)
  */
 

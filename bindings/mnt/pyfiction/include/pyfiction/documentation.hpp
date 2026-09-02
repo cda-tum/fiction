@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Hand-written docstrings that override the ones extracted from the C++ sources.
  * @author Marcel Walter (marcelwa)
  */
 

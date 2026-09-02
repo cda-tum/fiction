@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Graph-oriented layout design under each of its cost objectives.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SIM(7)-MolPDK molecular QCA gate library.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

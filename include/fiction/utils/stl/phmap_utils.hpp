@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Thread-safe parallel flat hash map with built-in mutexes.
  * @author Marcel Walter (marcelwa)
  */
 

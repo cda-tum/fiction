@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/physical_design/placement_utils.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

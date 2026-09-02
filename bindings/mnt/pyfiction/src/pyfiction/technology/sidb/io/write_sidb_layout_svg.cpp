@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/io/write_sidb_layout_svg.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

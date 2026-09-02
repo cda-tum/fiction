@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Catch2 assertion that a specification and an implementation are equivalent.
  * @author Marcel Walter (marcelwa)
  */
 

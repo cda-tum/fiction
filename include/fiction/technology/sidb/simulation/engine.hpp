@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Selectors for the exact and heuristic SiDB simulation engines.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)

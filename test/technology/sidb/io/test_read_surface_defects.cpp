@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/io/read_surface_defects.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

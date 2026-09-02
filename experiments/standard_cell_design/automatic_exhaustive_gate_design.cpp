@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Exhaustive SiDB gate design over a growing number of canvas SiDBs.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

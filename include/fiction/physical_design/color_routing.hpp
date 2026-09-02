@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Multi-path signal routing by coloring an edge intersection graph.
  * @author Marcel Walter (marcelwa)
  */
 

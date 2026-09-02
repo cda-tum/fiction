@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `qcc` command.
  * @author Marcel Walter (marcelwa)
  */
 

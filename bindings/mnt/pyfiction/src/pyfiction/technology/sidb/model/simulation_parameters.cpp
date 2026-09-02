@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/model/simulation_parameters.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Temperature above which an SiDB layout stops behaving as intended.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

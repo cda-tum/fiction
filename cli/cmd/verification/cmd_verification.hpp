@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Collects the verification CLI commands for inclusion into the shell.
  * @author Marcel Walter (marcelwa)
  */
 

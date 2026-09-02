@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Physical constants of the silicon surface the SiDB models are built on.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

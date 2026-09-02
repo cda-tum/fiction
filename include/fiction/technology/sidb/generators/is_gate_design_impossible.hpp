@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Decides up front whether an SiDB gate design task admits no solution.
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)

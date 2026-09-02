@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Decides whether an SiDB layout implements its Boolean function.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

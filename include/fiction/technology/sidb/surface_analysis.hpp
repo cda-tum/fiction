@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Black-lists the gate tiles a defective SiDB surface cannot host.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

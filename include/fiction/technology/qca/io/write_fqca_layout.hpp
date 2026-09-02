@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Writer for QCA layouts in the FQCA format used by QCA-STACK.
  * @author Marcel Walter (marcelwa)
  */
 

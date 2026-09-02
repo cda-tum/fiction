@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `read` command.
  * @author Marcel Walter (marcelwa)
  */
 

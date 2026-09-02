@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Generic container mapping simulation parameter points to their outcome.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

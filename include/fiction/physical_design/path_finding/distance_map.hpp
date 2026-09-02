@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Dense, sparse, and caching precomputed distance maps over a layout.
  * @author Marcel Walter (marcelwa)
  */
 

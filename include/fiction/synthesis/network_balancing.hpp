@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Path-balances a logic network with identity-computing buffer nodes.
  * @author Marcel Walter (marcelwa)
  */
 

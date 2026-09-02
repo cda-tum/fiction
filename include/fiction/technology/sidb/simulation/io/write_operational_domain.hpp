@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Writer that serializes an operational domain to CSV.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

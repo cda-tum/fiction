@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Helpers that place network nodes of any arity onto layout tiles.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

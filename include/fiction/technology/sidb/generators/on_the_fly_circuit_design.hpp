@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Designs SiDB circuits gate by gate, optionally around a defective surface.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

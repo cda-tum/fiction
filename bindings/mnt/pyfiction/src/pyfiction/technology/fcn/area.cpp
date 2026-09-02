@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/fcn/area.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

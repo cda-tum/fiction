@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Bestagon SiDB gate library of Y-shaped gates on hexagonal tiles.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)

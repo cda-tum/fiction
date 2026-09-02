@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `balance` command.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `clustercomplete` command, which runs *ClusterComplete* on the current layout.
  * @author Marcel Walter (marcelwa)
  */
 

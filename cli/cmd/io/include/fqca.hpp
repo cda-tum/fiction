@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `fqca` command, which writes the current cell layout for QCA-STACK.
  * @author Marcel Walter (marcelwa)
  */
 

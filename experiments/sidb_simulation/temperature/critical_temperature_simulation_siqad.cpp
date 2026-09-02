@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Critical temperature of the SiQAD gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

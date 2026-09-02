@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Layout that assigns individual cells to the clock zones of a clocked layout.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)

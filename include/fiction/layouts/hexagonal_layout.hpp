@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Hexagonal grid layout in the four pointy- and flat-top offset orientations.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)

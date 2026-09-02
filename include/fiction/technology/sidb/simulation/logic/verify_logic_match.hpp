@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Checks a charge distribution against the logic expected for an input pattern.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

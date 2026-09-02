@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `gates` command, which prints the gate counts of the current network.
  * @author Marcel Walter (marcelwa)
  */
 

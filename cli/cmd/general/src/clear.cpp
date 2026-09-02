@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `clear` command.
  * @author Marcel Walter (marcelwa)
  */
 

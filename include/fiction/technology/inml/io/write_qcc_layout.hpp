@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Writer for iNML layouts in the QCC format used by ToPoliNano and MagCAD.
  * @author Marcel Walter (marcelwa)
  */
 

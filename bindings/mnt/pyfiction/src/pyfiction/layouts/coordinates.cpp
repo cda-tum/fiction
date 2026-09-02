@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/layouts/coordinates.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

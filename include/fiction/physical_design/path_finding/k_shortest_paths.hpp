@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Yen's algorithm for the k shortest loop-less paths in a layout.
  * @author Marcel Walter (marcelwa)
  */
 

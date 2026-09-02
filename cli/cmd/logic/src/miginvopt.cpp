@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `miginvopt` command.
  * @author Marcel Walter (marcelwa)
  */
 

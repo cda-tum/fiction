@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for the logic network types and the network reader.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

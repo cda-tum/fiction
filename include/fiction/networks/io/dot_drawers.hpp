@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief DOT drawers for logic networks, including node- and edge-colored variants.
  * @author Marcel Walter (marcelwa)
  */
 

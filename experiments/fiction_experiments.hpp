@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Benchmark selectors and paths shared by every experiment.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Benjamin Hien (hibenj)

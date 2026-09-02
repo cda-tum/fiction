@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/fcn/area.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

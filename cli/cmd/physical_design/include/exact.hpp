@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `exact` command, which runs SMT-based exact physical design.
  * @author Marcel Walter (marcelwa)
  */
 

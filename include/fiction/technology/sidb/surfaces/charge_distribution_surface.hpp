@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Layout extension that assigns charge states to SiDBs and derives their potentials.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

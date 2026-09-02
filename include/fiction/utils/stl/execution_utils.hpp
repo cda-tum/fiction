@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Execution policy macros that degrade to nothing without library support.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

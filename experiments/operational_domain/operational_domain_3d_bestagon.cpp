@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Three-dimensional operational domains of the Bestagon gates.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

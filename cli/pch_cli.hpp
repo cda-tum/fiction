@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Pre-compiled header for the CLI, enabled by `FICTION_ENABLE_PCH`.
  * @author Marcel Walter (marcelwa)
  */
 

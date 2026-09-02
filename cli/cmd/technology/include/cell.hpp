@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `cell` command, which applies a gate library to the current layout.
  * @author Marcel Walter (marcelwa)
  */
 

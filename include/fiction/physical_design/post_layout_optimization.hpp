@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Shrinks a placed and routed gate-level layout by relocating its gates.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)

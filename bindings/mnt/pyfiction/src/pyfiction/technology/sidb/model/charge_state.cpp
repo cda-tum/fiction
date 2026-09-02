@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/model/charge_state.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  */

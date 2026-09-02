@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *ExGS*, exhaustive SiDB ground state simulation over all charge assignments.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

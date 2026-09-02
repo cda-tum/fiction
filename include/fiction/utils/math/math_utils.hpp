@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Rounding, absolute value, and Cartesian product helpers.
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)

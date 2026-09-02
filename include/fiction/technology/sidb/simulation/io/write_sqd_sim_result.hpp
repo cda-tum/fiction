@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Writer for SiDB simulation results in SiQAD's XML format.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

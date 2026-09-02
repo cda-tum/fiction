@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Clocked layout extension that turns clock zones into synchronization elements.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

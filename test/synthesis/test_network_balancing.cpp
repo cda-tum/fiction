@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/synthesis/network_balancing.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

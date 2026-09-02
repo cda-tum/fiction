@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Catch2 benchmarks comparing the SiDB simulation engines on a Bestagon gate.
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)

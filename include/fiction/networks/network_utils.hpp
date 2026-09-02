@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Edge type for mockturtle networks plus fanin, fanout, and edge iteration helpers.
  * @author Marcel Walter (marcelwa)
  */
 

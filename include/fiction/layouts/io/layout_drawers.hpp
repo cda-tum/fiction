@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief DOT drawers for gate-level layouts, specialized per grid topology.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

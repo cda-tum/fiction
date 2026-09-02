@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for the version and repository metadata CMake generates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

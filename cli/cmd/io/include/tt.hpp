@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `tt` command, which builds a truth table from a string or expression.
  * @author Marcel Walter (marcelwa)
  */
 

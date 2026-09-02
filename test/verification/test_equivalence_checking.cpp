@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/verification/equivalence_checking.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

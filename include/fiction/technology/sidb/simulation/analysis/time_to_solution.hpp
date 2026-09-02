@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Time-to-solution and accuracy of a heuristic engine against an exact one.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Preset genlib gate definitions for mockturtle's technology mapper.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

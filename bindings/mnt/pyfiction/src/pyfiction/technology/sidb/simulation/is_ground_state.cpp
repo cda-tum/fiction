@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/is_ground_state.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SVG writer for SiDB cell-level layouts.
  * @author Sophia Kuhn
  * @author Marcel Walter (marcelwa)
  */

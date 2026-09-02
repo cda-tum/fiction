@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Silicon Dangling Bond technology tag and its cell types.
  * @author Marcel Walter (marcelwa)
  */
 

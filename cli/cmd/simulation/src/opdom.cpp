@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `opdom` command.
  * @author Marcel Walter (marcelwa)
  */
 

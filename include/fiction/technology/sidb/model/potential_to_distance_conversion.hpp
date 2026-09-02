@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Inverts the screened Coulomb potential to obtain a distance from a potential.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

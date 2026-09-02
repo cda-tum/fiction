@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/engines/clustercomplete.hpp`.
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
  */

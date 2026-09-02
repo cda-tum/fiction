@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *QuickCell* design of a rectangular SiDB gate library.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

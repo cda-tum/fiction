@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `map` command.
  * @author Marcel Walter (marcelwa)
  */
 

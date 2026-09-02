@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *QuickTrace* contour tracing against grid search on newly designed gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

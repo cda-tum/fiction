@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Critical path length and throughput of a gate-level layout.
  * @author Marcel Walter (marcelwa)
  */
 

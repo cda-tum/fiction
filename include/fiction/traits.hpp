@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief The compile-time trait system that classifies networks, layouts, and technologies.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)

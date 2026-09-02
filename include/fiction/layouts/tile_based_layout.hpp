@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tile-based naming scheme layered over a coordinate layout.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

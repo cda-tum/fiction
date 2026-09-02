@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/networks/network_utils.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

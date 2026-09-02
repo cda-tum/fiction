@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Cartesian layout with shifted rows or columns in four offset orientations.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

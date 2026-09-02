@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `check` command.
  * @author Marcel Walter (marcelwa)
  */
 

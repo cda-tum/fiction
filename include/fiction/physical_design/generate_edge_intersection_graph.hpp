@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Builds the edge intersection graph of all paths satisfying given routing objectives.
  * @author Marcel Walter (marcelwa)
  */
 

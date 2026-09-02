@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Distance functions between layout coordinates and their functor wrappers.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

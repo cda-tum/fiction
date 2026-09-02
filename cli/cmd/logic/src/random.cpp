@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `random` command.
  * @author Marcel Walter (marcelwa)
  */
 

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Physical design on defective SiDB surfaces with on-the-fly gate design.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Edge crossing minimization modeled after Graphviz's `mincross`.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

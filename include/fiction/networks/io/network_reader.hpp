@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Reads directories of logic networks in the formats mockturtle supports.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

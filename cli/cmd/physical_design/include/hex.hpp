@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `hex` command, which hexagonalizes a 2DDWave-clocked Cartesian layout.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

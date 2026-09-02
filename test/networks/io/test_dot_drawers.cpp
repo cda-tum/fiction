@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/networks/io/dot_drawers.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

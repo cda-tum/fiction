@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Determines at which positions a defect disturbs an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

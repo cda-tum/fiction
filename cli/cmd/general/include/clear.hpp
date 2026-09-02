@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `clear` command, which empties every store.
  * @author Marcel Walter (marcelwa)
  */
 

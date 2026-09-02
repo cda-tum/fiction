@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Critical temperature of the Bestagon gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

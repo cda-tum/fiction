@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Position of an SiDB cell relative to the layout origin in nanometers.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

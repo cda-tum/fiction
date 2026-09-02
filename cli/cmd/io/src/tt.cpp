@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `tt` command.
  * @author Marcel Walter (marcelwa)
  */
 

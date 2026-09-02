@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `clustercomplete` command.
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
  */

@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/model/nm_position.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

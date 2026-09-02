@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `akers` command, which synthesizes a network from a truth table.
  * @author Marcel Walter (marcelwa)
  */
 

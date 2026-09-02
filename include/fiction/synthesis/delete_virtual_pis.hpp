@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Removes virtual primary inputs and remaps their signals back to the real ones.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

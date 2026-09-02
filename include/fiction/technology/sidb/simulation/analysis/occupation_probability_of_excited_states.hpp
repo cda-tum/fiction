@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Boltzmann occupation probability of the excited states of an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

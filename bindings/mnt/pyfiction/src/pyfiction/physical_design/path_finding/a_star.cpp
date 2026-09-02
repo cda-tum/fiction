@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/physical_design/path_finding/a_star.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

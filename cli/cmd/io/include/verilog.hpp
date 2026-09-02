@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `verilog` command, which writes the current network or layout to Verilog.
  * @author Marcel Walter (marcelwa)
  */
 

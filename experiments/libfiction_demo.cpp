@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Walkthrough of the design flow from a logic network to a cell-level layout.
  * @author Marcel Walter (marcelwa)
  */
 

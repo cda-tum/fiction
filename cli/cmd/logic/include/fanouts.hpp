@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `fanouts` command, which substitutes multi-outputs with fanout nodes.
  * @author Marcel Walter (marcelwa)
  */
 

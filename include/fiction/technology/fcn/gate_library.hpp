@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Base class every FCN gate library derives from, plus its two error types.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

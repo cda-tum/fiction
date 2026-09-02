@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Removes excess wiring from a gate-level layout to shrink its area.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

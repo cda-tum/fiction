@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/physical_design/path_finding/k_shortest_paths.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

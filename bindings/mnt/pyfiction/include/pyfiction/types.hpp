@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief The concrete network and layout types the Python bindings instantiate.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
  */

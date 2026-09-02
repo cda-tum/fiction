@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Simplified 2D textual rendering of gate-, cell-, and SiDB-level layouts.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)

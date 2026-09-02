@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `optimize` command.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

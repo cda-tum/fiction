@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Post-layout optimization across the benchmark set.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

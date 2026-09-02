@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `exact` command.
  * @author Marcel Walter (marcelwa)
  */
 

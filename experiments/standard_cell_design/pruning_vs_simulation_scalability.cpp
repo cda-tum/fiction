@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Scalability of *QuickCell*'s pruning against full simulation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  */

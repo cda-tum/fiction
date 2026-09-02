@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `akers` command.
  * @author Marcel Walter (marcelwa)
  */
 

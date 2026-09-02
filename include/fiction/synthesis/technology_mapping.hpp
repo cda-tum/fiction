@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Maps a logic network onto the gate types a technology library provides.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */

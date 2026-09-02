@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief *ClusterComplete* exact SiDB simulation on the Ground State Space hierarchy.
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)

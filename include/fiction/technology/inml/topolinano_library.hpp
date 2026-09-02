@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief iNML gate library as used by ToPoliNano.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)

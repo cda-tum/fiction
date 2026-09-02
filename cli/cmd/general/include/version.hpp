@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `version` command, which prints version and build information.
  * @author Marcel Walter (marcelwa)
  */
 

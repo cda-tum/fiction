@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Preset network, layout, and technology types that instantiate the algorithms.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)

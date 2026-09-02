@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `temp` command.
  * @author Marcel Walter (marcelwa)
  */
 

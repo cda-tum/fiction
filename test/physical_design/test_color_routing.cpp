@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/physical_design/color_routing.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

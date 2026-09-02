@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SMT-based exact placement and routing of FCN gate-level layouts.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)

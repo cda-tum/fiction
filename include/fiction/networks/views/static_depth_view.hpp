@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Network view that provides node levels and overall network depth.
  * @author Benjamin Hien (hibenj)
  * @author Marcel Walter (marcelwa)
  */

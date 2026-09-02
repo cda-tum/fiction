@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Routing objective and path types plus helpers to lay and remove wire routing.
  * @author Marcel Walter (marcelwa)
  */
 

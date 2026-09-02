@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `sqd` command, which writes the current cell layout for SiQAD.
  * @author Marcel Walter (marcelwa)
  */
 

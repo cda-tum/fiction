@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Tests for `fiction/technology/sidb/bestagon_library.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

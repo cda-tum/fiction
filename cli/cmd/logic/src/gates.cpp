@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `gates` command.
  * @author Marcel Walter (marcelwa)
  */
 

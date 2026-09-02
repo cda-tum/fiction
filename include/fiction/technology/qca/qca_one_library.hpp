@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief QCA gate library based on the QCA ONE standard cell design.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)

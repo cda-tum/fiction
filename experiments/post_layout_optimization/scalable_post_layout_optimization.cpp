@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Scalability of post-layout optimization on larger benchmarks.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

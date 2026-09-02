@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Translation unit that builds the test suite's pre-compiled header.
  * @author Marcel Walter (marcelwa)
  */
 

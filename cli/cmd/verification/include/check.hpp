@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `check` command, which runs design rule checks on the current layout.
  * @author Marcel Walter (marcelwa)
  */
 

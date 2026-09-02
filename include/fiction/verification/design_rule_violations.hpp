@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Design rule violation checking for gate-level layouts.
  * @author Marcel Walter (marcelwa)
  */
 

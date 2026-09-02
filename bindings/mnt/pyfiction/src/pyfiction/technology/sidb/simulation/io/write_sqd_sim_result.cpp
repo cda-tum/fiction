@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

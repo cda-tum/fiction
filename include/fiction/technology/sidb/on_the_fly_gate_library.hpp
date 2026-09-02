@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief SiDB gate library that designs each gate on demand for the surface at hand.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)

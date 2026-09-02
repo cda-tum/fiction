@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Scalable placement and routing based on orthogonal graph drawing.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
  */

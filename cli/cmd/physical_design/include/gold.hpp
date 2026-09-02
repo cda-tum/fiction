@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Declares the `gold` command, which runs graph-oriented layout design.
  * @author Simon Hofmann (simon1hofmann)
  * @author Marcel Walter (marcelwa)
  */

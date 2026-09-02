@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Iterator over increasingly larger 2D aspect ratios obtained by factorization.
  * @author Marcel Walter (marcelwa)
  */
 

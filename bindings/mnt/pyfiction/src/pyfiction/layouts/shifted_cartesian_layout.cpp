@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Python bindings for `fiction/layouts/shifted_cartesian_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  */
 

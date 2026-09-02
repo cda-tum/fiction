@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Implements the `sqd` command.
  * @author Marcel Walter (marcelwa)
  */
 

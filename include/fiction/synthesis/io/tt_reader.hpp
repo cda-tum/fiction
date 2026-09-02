@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Reader for files pairing a hexadecimal truth table with its Boolean expression.
  * @author Marcel Walter (marcelwa)
  */
 

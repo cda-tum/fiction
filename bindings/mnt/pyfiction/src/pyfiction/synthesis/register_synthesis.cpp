@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Registers the `synthesis` bindings with the `mnt.pyfiction` module.
  * @author Marcel Walter (marcelwa)
  */
 

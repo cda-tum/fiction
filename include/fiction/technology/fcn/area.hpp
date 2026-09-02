@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Real-world area requirements of a cell-level layout in nm².
  * @author Marcel Walter (marcelwa)
  */
 

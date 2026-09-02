@@ -10,6 +10,7 @@
 
 /**
  * @file
+ * @brief Vertex coloring of undirected graphs by heuristic engines or by SAT solving.
  * @author Marcel Walter (marcelwa)
  */
 
