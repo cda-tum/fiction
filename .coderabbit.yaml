@@ -10,8 +10,8 @@ reviews:
     enabled: true
     drafts: false
 
-  # Keep in sync with `exclude:` in .pre-commit-config.yaml and `ignore:` in
-  # .github/workflows/cpp-linter.yml
+  # Keep in sync with `exclude:` in .pre-commit-config.yaml and `IGNORE` in
+  # .github/scripts/clang_tidy_changed_lines.py
   path_filters:
     - "!vendors/**"
     - "!benchmarks/**"
@@ -19,6 +19,16 @@ reviews:
     - "!bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
   path_instructions:
+    - path: "**/*.{hpp,cpp}"
+      instructions: >-
+        Every file opens with the MIT copyright block, then a Doxygen block carrying
+        @file, a one-line @brief, and one @author line per contributor as
+        `Full Name (handle)`, oldest first. The copyright block is written by the
+        license-tools hook; never comment on its contents or suggest editing it, and note
+        that nothing may be placed above it. Flag a file this pull request edits whose
+        @author list does not name the pull request's author, and flag a new file missing
+        either block or carrying an include guard instead of `#pragma once`. See
+        "File headers" in AGENTS.md.
     - path: "include/fiction/**"
       instructions: >-
         Header-only C++20. Identifier naming, casing, and formatting are enforced by

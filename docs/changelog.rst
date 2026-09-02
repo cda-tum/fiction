@@ -238,8 +238,17 @@ Changed
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
       including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
       headers instead
+    - The ``license-tools`` hook now covers ``.hpp`` and ``.cpp`` as well as Python, and skips the
+      generated ``pybind11_mkdoc_docstrings.hpp``. Added a ``.mailmap`` so that ``git blame`` and
+      ``git shortlog`` collapse the 21 committer identities onto the 11 people behind them
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
+    - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying ``@file``,
+      a one-line ``@brief``, and one ``@author`` line per contributor. The ``// Created by ...``
+      comments 428 files carried are gone; editing a file now means adding yourself to its list
+    - **Breaking for forks:** the ``#ifndef FICTION_..._HPP`` include guards are replaced by
+      ``#pragma once``, so a patch that touches the top or the bottom of a header will not apply
+      as-is. ``portability-avoid-pragma-once`` is switched off in ``.clang-tidy`` accordingly
 - Continuous integration:
     - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
       paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
