@@ -31,6 +31,29 @@ so `technology/sidb/model/charge_state.hpp` is tested by
 
 ## Writing tests
 
+- **Open the namespaces the file uses.** `using namespace fiction;` alone shortens nothing
+  below the top level, and the tree is three levels deep in places. Add one directive per
+  namespace the file draws symbols from, general to specific, so a SiDB engine test opens
+
+  ```cpp
+  using namespace fiction;
+  using namespace fiction::sidb::model;
+  using namespace fiction::sidb::simulation;
+  using namespace fiction::sidb::simulation::engines;
+  ```
+
+  and writes `quickexact(lyt, params)` rather than
+  `sidb::simulation::engines::quickexact(lyt, params)`.
+  - `fiction::layouts::coords` and `fiction::layouts::clocking` are never opened: bare
+    `offset`, `cube`, `siqad`, and `scheme` say nothing. Open `fiction::layouts` instead and
+    write `coords::offset` and `clocking::scheme`. `detail` namespaces are never opened.
+  - Opening a namespace can collide with a local alias or variable -- `using lattice = ...`
+    against `sidb::surfaces::lattice`, or a variable named `defect` against
+    `sidb::model::defect`. Rename the local one; the compiler names both candidates.
+  - The blueprints under `utils/blueprints/` stay fully qualified. A directive inside
+    `namespace blueprints` reaches every translation unit that reopens it, and nearly every
+    test does.
+
 - Use `TEST_CASE` for a concrete case and `TEMPLATE_TEST_CASE` to sweep layout and network
   types. Both are the house style; `SCENARIO` is unused, so do not introduce it.
 - Test the documented contract. Do not assert on iteration order, tie-breaking, or the

@@ -227,6 +227,12 @@ Changed
     - ``exact`` now surfaces a failure in one of its asynchronous workers instead of reporting it
       as "no layout found"
     - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
+    - The C++ test suite and the experiments now open the namespaces they use, one
+      ``using namespace`` directive per namespace, rather than qualifying every symbol below
+      ``fiction``. That removes about 14,000 qualifier tokens. ``fiction::layouts::coords`` and
+      ``fiction::layouts::clocking`` are deliberately left closed, so those references read
+      ``coords::offset`` and ``clocking::scheme``, and ``detail`` namespaces stay qualified by
+      their module
     - Migrated the ``pyfiction`` test suite from ``unittest`` to pytest and enabled ruff's ``PT``,
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
     - Every Python file now carries ``from __future__ import annotations``, which ruff's

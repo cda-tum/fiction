@@ -311,6 +311,14 @@ imitate.
   restructure had to rename all 201 of them by hand, and four `#endif` comments were left
   naming the old one. `portability-avoid-pragma-once` is switched off in `.clang-tidy`
   accordingly.
+- **Namespaces**: headers never carry a `using namespace` directive; they qualify. A `.cpp`
+  under `test/` or `experiments/` opens the namespaces it draws symbols from, one directive
+  per namespace, general to specific, starting from `using namespace fiction;`. Two are never
+  opened, because their leaf names cannot stand alone: `fiction::layouts::coords` (`offset`,
+  `cube`, `siqad`) and `fiction::layouts::clocking` (`scheme`) -- a reference to either is
+  shortened only as far as `coords::offset` and `clocking::scheme`. `detail` namespaces are
+  never opened either. `cli/` and the `pyfiction` bindings qualify in full. See
+  `test/AGENTS.md`.
 - **Documentation**:
   - Apply to **ALL** new and edited code.
   - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions,
