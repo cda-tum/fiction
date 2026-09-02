@@ -17,56 +17,42 @@ Let there be a *fiction*
 
 .. toctree::
    :maxdepth: 2
-   :caption: Networks
-
-   networks/technology_network.rst
-   networks/views.rst
-
-.. toctree::
-   :maxdepth: 2
    :caption: Layouts
 
-   layouts/coordinates.rst
-   layouts/cartesian_layout.rst
-   layouts/shifted_cartesian_layout.rst
-   layouts/hexagonal_layout.rst
-   layouts/tile_based_layout.rst
-   layouts/clocked_layout.rst
-   layouts/clocking_scheme.rst
-   layouts/synchronization_element_layout.rst
-   layouts/gate_level_layout.rst
-   layouts/cell_level_layout.rst
-   layouts/obstruction_layout.rst
-   layouts/bounding_box.rst
+   layouts/layouts.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Algorithms
+   :caption: Networks
 
-   algorithms/algorithms.rst
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Technology
-
-   technology/cell_technologies.rst
-   technology/hsi_lattices.rst
-   technology/defects.rst
-   technology/simulation.rst
-   technology/gate_libraries.rst
+   networks/networks.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Input/Output
+   :caption: Synthesis
 
-   io/input.rst
-   io/visualization.rst
-   io/physical_simulation.rst
-   io/utility.rst
+   synthesis/synthesis.rst
 
 .. toctree::
    :maxdepth: 2
-   :glob:
-   :caption: Utility
+   :caption: Physical Design
+
+   physical_design/physical_design.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Verification
+
+   verification/verification.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Technologies
+
+   technology/technology.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Utilities
 
    utils/utils.rst

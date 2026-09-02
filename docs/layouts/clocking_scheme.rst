@@ -107,6 +107,5 @@ BANCS
 Utility functions
 -----------------
 
-.. doxygenfunction:: fiction::layouts::clocking::ptr(scheme<clock_zone<Lyt>>&& scm) noexcept
 .. doxygenfunction:: fiction::layouts::clocking::is_linear(const scheme<clock_zone<Lyt>>& scm) noexcept
 .. doxygenfunction:: fiction::layouts::clocking::get_scheme(const std::string_view& scheme_name) noexcept
