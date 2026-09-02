@@ -235,8 +235,7 @@ Changed
       including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
       headers instead
     - The ``license-tools`` hook now covers ``.hpp`` and ``.cpp`` as well as Python, and skips the
-      generated ``pybind11_mkdoc_docstrings.hpp``. Added a ``.mailmap`` so that ``git blame`` and
-      ``git shortlog`` collapse the 21 committer identities onto the 11 people behind them
+      generated ``pybind11_mkdoc_docstrings.hpp``
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
     - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying ``@file``,

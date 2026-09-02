@@ -361,7 +361,7 @@ imitate.
   - The five people in the C++ history and their handles: Marcel Walter (`marcelwa`), Jan
     Drewniok (`Drewniok`), Simon Hofmann (`simon1hofmann`), Willem Lambooy (`wlambooy`),
     Benjamin Hien (`hibenj`). Sophia Kuhn wrote the SVG writer and has no commit of her
-    own. `.mailmap` maps their addresses onto one identity each.
+    own.
 
 ### Python
 
