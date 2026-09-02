@@ -5,26 +5,29 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-Unreleased
-----------
+v0.8.0 - 2026-09-02
+-------------------
+
+.. epigraph::
+
+   Fiction when we're not together; Mistaken for a vision, something of my own creation
+
+   -- The xx
 
 Added
 #####
 - Algorithms:
-    - Added the ``missing_required_gates_exception`` that ``technology_mapping`` throws when the
-      technology library is missing the gates required by the base network type (AIG requires INV and
-      AND; XAG requires INV, AND, and XOR; MIG requires INV and MAJ)
+    - Added ``missing_required_gates_exception``, which ``technology_mapping`` throws when the gate
+      library lacks a gate the base network type requires
     - Added an ``is_operational`` overload that takes one layout per input pattern, and
       ``generate_bdl_input_pattern_layouts`` to generate them
     - Added a ``critical_temperature_gate_based`` overload that takes the pre-generated input pattern
       layouts and BDL detection results instead of deriving them from the layout
     - Added ``number_of_threads`` to ``operational_domain_params``, ``defect_influence_params``, and
-      ``displacement_robustness_domain_params``, defaulting to the number of hardware threads, which
-      leaves the previous behavior unchanged. Pinning it makes runtime comparisons reproducible and
-      lets a computation leave cores free
-    - ``operational_domain_contour_tracing`` now supports three or more sweep dimensions, where it
-      collects the boundary surface instead of walking a closed curve. ``operational_domain_flood_fill``
-      no longer caps at three dimensions
+      ``displacement_robustness_domain_params``. It defaults to the hardware concurrency, so
+      behavior is unchanged; pinning it makes runtimes reproducible
+    - ``operational_domain_contour_tracing`` now collects a boundary surface for three or more sweep
+      dimensions, and ``operational_domain_flood_fill`` no longer caps at three
     - Added ``cell_layout_digest``, which hashes a cell-level layout in agreement with
       ``are_cell_layouts_identical`` so that callers can group candidates before comparing them exactly
 - Build system:
@@ -37,8 +40,7 @@ Added
       distribution drops a tracked source or ships an untracked one
     - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
     - Added a 🐍 Test job that runs ``nox -s tests`` and ``nox -s minimums`` on Linux, macOS, and
-      Windows, so every supported interpreter and every declared dependency floor is exercised
-      against a source build
+      Windows against a source build
 - Data structures:
     - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
     - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits
@@ -47,9 +49,8 @@ Added
     - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
       operational domain sketch over a three-dimensional parameter space
 - Gate libraries:
-    - Added ``sim7_mol_library`` and ``mol_qca_technology`` for applying the SIM(7)-MolPDK
-      molecular QCA standard-cell library to gate-level layouts, including QLL/SVG export support,
-      Python bindings, and tests
+    - Added ``sim7_mol_library`` and ``mol_qca_technology``, which apply the SIM(7)-MolPDK molecular
+      QCA standard-cell library to gate-level layouts, with QLL/SVG export and Python bindings
 - Python bindings:
     - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
     - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
@@ -168,30 +169,27 @@ Changed
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
-    - **Breaking:** ``technology_mapping_params::mapper_params`` is now a ``mockturtle::emap_params``
-      (was ``mockturtle::map_params``) and ``technology_mapping_stats::mapper_stats`` is now a
-      ``mockturtle::emap_stats`` (was ``mockturtle::map_stats``)
+    - **Breaking:** ``technology_mapping_params::mapper_params`` and
+      ``technology_mapping_stats::mapper_stats`` are now ``mockturtle::emap_params`` and
+      ``mockturtle::emap_stats``
     - **Breaking:** the ``map`` command now warns when remapping an already-mapped network and reports
       mapping errors instead of storing a failed mapping
     - ``operational_domain`` and ``critical_temperature_domain`` now generate the input pattern
-      layouts once instead of once per sample point. SiQAD grid search gets about 10% faster; larger
-      gates are dominated by the physical simulation and gain little
+      layouts once instead of once per sample point, which makes SiQAD grid search about 10% faster
     - Parallelized ``operational_domain_flood_fill`` over a pool of worker threads. The result is
       independent of exploration order and therefore unchanged
     - ``critical_temperature_domain`` now reuses the operational domain's input pattern layouts and BDL
       detection results instead of re-deriving them for every parameter point
-    - ``is_operational`` now builds the canvas charge distribution surface once per call instead of once
-      per canvas enumeration, which the ``FILTER_ONLY`` and ``FILTER_THEN_SIMULATION`` strategies repeat
-      for every combination of input kink state and output pattern
+    - ``is_operational`` now builds the canvas charge distribution surface once per call instead of
+      once per canvas enumeration
     - ``bdl_input_iterator`` now determines the BDL dot distances that decide the input assignment once
       in its constructor instead of on every increment; they cannot change over its lifetime
     - ``is_operational_impl`` no longer detects the output BDL pairs twice under ``TOLERATE_KINKS``
     - ``quicksim`` and ``multi_simulated_annealing`` no longer pass a parallel execution policy to
-      their ``std::find`` and ``std::min_element``, which scan a handful of elements where the
-      dispatch costs an order of magnitude more than the scan
-    - ``generate_multiple_random_sidb_layouts`` now rejects duplicate candidates through a digest
-      lookup instead of comparing each candidate against every layout it has already collected.
-      Collecting 4000 layouts of 10 SiDBs takes about 7 ms instead of 160 ms
+      ``std::find`` and ``std::min_element``, whose ranges are too small to pay for the dispatch
+    - ``generate_multiple_random_sidb_layouts`` now rejects duplicate candidates by digest lookup
+      instead of pairwise comparison. Collecting 4000 layouts of 10 SiDBs takes about 7 ms instead
+      of 160 ms
 - Build system:
     - Bumped the required C++ standard from C++17 to C++20
     - Fetch dependencies as release archives instead of git clones, which cuts ``tests-slim``'s
@@ -205,26 +203,22 @@ Changed
       ``setuptools`` from the build. Building from source now requires ``scikit-build-core`` 1.0
     - The CMake policy range now ends at 4.4
 - Code quality:
-    - **Breaking:** ``qca_technology::cell_type``, ``inml_technology::cell_type``, and
-      ``sidb_technology::cell_type`` are now scoped ``enum class``, consistent with
-      ``mol_qca_technology::cell_type``. Replace references to the leaked enumerators, e.g.,
-      ``sidb_technology::INPUT``, with ``sidb_technology::cell_type::INPUT``, and add an
-      explicit ``static_cast`` wherever a cell type was implicitly converted to an integer
-      or ``char``. ``pyfiction`` is unaffected
+    - **Breaking:** ``qca_technology``, ``inml_technology``, and ``sidb_technology`` now declare
+      ``cell_type`` as a scoped ``enum class``. Qualify the enumerators, e.g.,
+      ``sidb_technology::cell_type::INPUT`` instead of ``sidb_technology::INPUT``, and
+      ``static_cast`` wherever a cell type was implicitly converted. ``pyfiction`` is unaffected
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
     - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
       from ``fiction/utils/math/math_utils.hpp`` to the new ``fiction/utils/math/combination_utils.hpp``.
       Include the latter to keep using it
     - ``orthogonal`` and ``graph_oriented_layout_design`` no longer template their implementation on
-      the specification network type, which they convert away before doing any work. Their public
-      entry points are unchanged
+      the specification network type. Their public entry points are unchanged
     - Modernized the entire code base for C++20, adopting ``std::ranges`` algorithms, concepts,
       defaulted comparison operators, and designated initializers throughout
     - Replaced unchecked ``operator[]`` with bounds-checked ``at()`` in the operational domain module
     - The type checks on the path-finding, operational domain, and ``hexagonal_layout`` entry points
-      are now ``requires`` clauses. An unsatisfied one is reported as a failed constraint at the call
-      site instead of a ``static_assert`` message from inside the body
+      are now ``requires`` clauses, so an unsatisfied one is reported at the call site
     - ``hexagonal_layout`` now rejects an invalid ``HexagonalCoordinateSystem`` where the type is
       named rather than where it is constructed
     - ``exact`` no longer polls its worker futures every 10 ms while solving asynchronously
@@ -234,7 +228,7 @@ Changed
     - Migrated the ``pyfiction`` test suite from ``unittest`` to pytest and enabled ruff's ``PT``,
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
-      ``future-annotations`` setting had assumed of all of them and only six of them had
+      ``future-annotations`` setting assumes
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
       including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
       headers instead
@@ -253,9 +247,8 @@ Changed
       and the two SiDB writer implementations, ``-Wswitch`` in ``write_sqd_layout``, and
       ``-Wparentheses`` and ``-Wconversion`` in two tests
 - Continuous integration:
-    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and the include
-      paths and defines of a configured build. Parse errors drop from about 180 to zero, so a
-      ``requires`` clause no longer silences the Doxygen comments that follow it
+    - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and a configured
+      build's include paths and defines, which drops parse errors from about 180 to zero
     - The twelve workflows are consolidated into ``ci.yml`` and ``cd.yml`` over a set of callable
       workflows. Change detection decides what runs, and a single ``🚦 Check`` job aggregates the
       outcome
@@ -269,38 +262,32 @@ Changed
       that cap rather than on a regression; the short jobs keep a ceiling
     - Publishing moved out of CI: only ``cd.yml``, which runs on a published release, holds the
       credentials for PyPI, Docker Hub, and ghcr.io
-    - The wheel jobs now run whenever anything the extension is compiled from changes, not only
-      the packaging metadata. ``cibuildwheel`` runs the Python test suite, so this is what
-      decides whether it runs at all
+    - The wheel jobs now run whenever anything the extension is compiled from changes, not only when
+      the packaging metadata does
     - Updated the Ubuntu compiler matrix for C++20: dropped ``g++-10``, ``clang++-14``, and
       ``clang++-15``, and added ``clang++-19`` and ``clang++-20``
     - Halved the OS matrices; ``docs/getting_started.rst`` records the combinations we verify
     - The wheel builds now run the ``pyfiction`` test suite against the repaired wheel instead of
       only smoke-testing the import
     - ``prek`` now validates ``.codecov.yml`` against its schema
-    - The ``prek`` hooks now carry explicit priorities, which run the read-only checks
-      concurrently and cut a warm ``prek run -a`` by about 18%. Hooks that rewrite the same file
-      keep exclusive priorities, since ``prek`` runs hooks that share one concurrently
-    - The docstring generator is a ``🐍 Docstrings`` check instead of a job that commits the
-      regenerated header, which it could no longer push to a protected ``main``. It uploads the
-      header as an artifact and fails when the committed one differs; download that artifact and
-      commit it
-    - The docstring generator parses the headers in sorted order. It numbers repeated symbol
-      names in the order it meets them, so the numbering used to depend on the order the
-      filesystem reported the files in
+    - The ``prek`` hooks now carry explicit priorities, which run the read-only checks concurrently
+      and cut a warm ``prek run -a`` by about 18%
+    - The docstring generator is now a ``🐍 Docstrings`` check that uploads the regenerated header as
+      an artifact and fails when the committed one differs, instead of committing it itself
+    - The docstring generator parses the headers in sorted order, so the numbering of repeated
+      symbol names no longer depends on the filesystem's order
     - Publishing to PyPI runs in a ``pypi`` deployment environment, which is where a required
       reviewer or a wait timer on releases would go
     - The 🐧 Test jobs build with Z3 on ``ubuntu-24.04-arm`` as well. ``cda-tum/setup-z3`` does
       serve an ``arm64`` archive, so the ``-DFICTION_Z3=OFF`` override those jobs carried is gone
 - Dependencies:
-    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.10.2, the first
-      release publishing a wheel for every supported platform. Below it, macOS and Linux aarch64
-      fall back to a source build of a 2019 Z3 that modern toolchains reject
+    - **Breaking:** raised the declared ``z3-solver`` floor from 4.8.0 to 4.10.2, the first release
+      with a wheel for every supported platform. Below it, macOS and Linux aarch64 fall back to a
+      source build that modern toolchains reject
     - Bumped the Z3 version pinned in CI and in the Docker image from 4.13.4 to 4.14.1. Newer
       releases require glibc 2.38, which the ``ubuntu-22.04`` job does not provide
-    - The Linux wheels pin ``z3-solver`` to the same version instead of flooring it at 4.10.2,
-      and the ``aarch64`` image moves to ``manylinux_2_34``. The published ``aarch64`` wheel
-      therefore requires glibc 2.34, matching the oldest distribution *fiction* supports
+    - The Linux wheels pin ``z3-solver`` instead of flooring it, and the ``aarch64`` image moves to
+      ``manylinux_2_34``. The published ``aarch64`` wheel therefore requires glibc 2.34
 - Documentation:
     - The ``docs/`` tree mirrors ``include/fiction/``: every page sits in the directory of the
       headers it documents, and every directory with more than one page has a page named after
@@ -310,8 +297,8 @@ Changed
     - ``docs/contributing.rst`` describes the checks a pull request now reports and what
       ``🚦 Check`` means
 - Experiments:
-    - Modernized ``generate_defective_surface.py`` now that ``experiments/AGENTS.md`` opens the
-      directory to it. Apart from the out-of-bounds fix below, the surface it generates is unchanged
+    - Modernized ``generate_defective_surface.py``. Apart from the out-of-bounds fix below, the
+      surface it generates is unchanged
     - ``generate_defective_surface.py`` is executable and declares its dependencies in a PEP 723
       block, so running it needs nothing installed first
     - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
@@ -320,13 +307,15 @@ Changed
     - **Breaking:** ``critical_temperature_stats.is_ground_state_transparent`` is renamed
       ``energy_between_ground_state_and_first_erroneous``, the member it always exposed
     - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
-      ``__doc_*``. ``DOC(...)`` is unchanged, but hand-written docstrings that define such a symbol
-      directly must be renamed
+      ``__doc_*``. ``DOC(...)`` is unchanged; a hand-written docstring that defines such a symbol
+      must be renamed
     - ``mnt.pyfiction`` now advertises developers and information technology as intended audiences
       and physics as a topic on PyPI
     - Adopted nanobind's split mode, so one ``abi3`` wheel per platform now covers Python 3.10 and
-      up instead of four. ``mnt.pyfiction`` gains ``nanobind-backend`` as a runtime dependency,
-      which ``pip`` installs along with it
+      up instead of four. ``mnt.pyfiction`` gains a ``nanobind-backend`` runtime dependency
+    - The ``pyfiction`` extension no longer re-exports the internals of the ``tinyxml2``,
+      ``graph-coloring``, and ALGLIB archives it embeds, and collects unreferenced sections
+      again. It ships 9.1 MB instead of 12.0 MB
 
 Removed
 #######
@@ -344,13 +333,11 @@ Removed
     - Removed the 🐍 CI workflow; the wheel builds now cover the same ground. ``nox -s tests``
       remains the local entry point
 - Data structures:
-    - Removed ``range_t`` (``fiction/utils/range.hpp``); ``cartesian_layout``'s and ``hexagonal_layout``'s
-      ``coordinates()``/``ground_coordinates()`` now return a ``std::ranges::subrange`` instead, with no
-      change in usage
+    - Removed ``range_t`` (``fiction/utils/range.hpp``); ``coordinates()`` and
+      ``ground_coordinates()`` now return a ``std::ranges::subrange``, with no change in usage
 - Python bindings:
-    - Removed the free-threaded (``cp314t``) wheel. Free-threaded interpreters are unsupported,
-      source builds included, until Python 3.15 gives them the ``abi3t`` stable ABI
-      (`PEP 803 <https://peps.python.org/pep-0803/>`_)
+    - Removed the free-threaded (``cp314t``) wheel; free-threaded interpreters stay unsupported until
+      Python 3.15 gives them the ``abi3t`` stable ABI (`PEP 803 <https://peps.python.org/pep-0803/>`_)
     - Removed the ``DISABLE_GIL`` scikit-build-core override for free-threaded Windows builds. No
       CMake code ever read the define, and split mode rejects free-threaded interpreters outright
 
@@ -360,20 +347,20 @@ Fixed
   ``cds_sidb_111_cell_clk_lyt_siqad_ptr``, and ``cds_sidb_111_cell_clk_lyt_cube_ptr`` pointed at
   the wrong type; a ``static_assert`` per ``*_ptr`` alias pins each to the type its name says
 - Algorithms:
-    - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a layout
-      without ``LOGIC`` cells now throws instead of silently falling back to a full simulation of the
-      entire parameter space
+    - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a
+      layout without ``LOGIC`` cells now throws instead of silently simulating the whole parameter
+      space
     - Fixed a division by zero in the parallel operational domain, defect influence, and displacement
-      robustness helpers, which derive their slice size by dividing by a worker count that is zero when
-      there is no work at all. ``operational_domain_random_sampling`` with ``samples = 0`` reached it
+      robustness helpers, which divided by a worker count of zero when there is no work at all.
+      ``operational_domain_random_sampling`` with ``samples = 0`` reached it
     - Fixed ``is_operational`` reporting every layout operational without checking it when ``FILTER_ONLY``
       was combined with ``TOLERATE_KINKS``. All entry points now decide canvas filtering in one place
-    - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted guard
-      had left permanently inactive. Its flood fill is now bounded by the traced contour and expands over
-      the von Neumann neighborhood, so it can no longer suppress the tracing of other operational islands
-    - Fixed an off-by-one in the boundary search of ``operational_domain_contour_tracing``, which skipped
-      the first sweep dimension's lowest step index. Where the operational region reached that edge, the
-      traced contour came out empty and every reachable point was marked operational without simulation
+    - Fixed the enclosure inference of ``operational_domain_contour_tracing``, which an inverted
+      guard had left permanently inactive, so its flood fill could suppress the tracing of other
+      operational islands
+    - Fixed an off-by-one in ``operational_domain_contour_tracing``'s boundary search that skipped
+      the first sweep dimension's lowest step index, marking every reachable point operational
+      without simulation
     - Fixed a data race on ``quicksim``'s timeout flag, which every worker thread wrote as a plain
       ``bool``. It is now ``std::atomic_bool``
 - Build system:
@@ -384,9 +371,9 @@ Fixed
 - CLI:
     - Updated the ``qll`` command's description to mention molQCA layouts and SCERPA simulations
 - Code quality:
-    - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test macros
-      before including ``<version>`` and misread Clang's ``__GNUC__`` of 4 as an old GCC. Parallel STL
-      algorithms were disabled on every Clang build
+    - Fixed the execution-policy guard in ``execution_utils.hpp``, which read the feature-test
+      macros before including ``<version>`` and disabled parallel STL algorithms on every Clang
+      build
     - Fixed several ``fmt`` compile-time format-string misuses surfaced by the C++20 bump
     - Fixed ``std::string_view::data()`` calls that assumed null termination, which ``std::string_view``
       does not guarantee
@@ -394,9 +381,8 @@ Fixed
       ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
     - Fixed a signed-integer overflow in ``to_siqad`` for the minimum representable ``y`` value
 - Continuous integration:
-    - Renamed ``.readthedocs.yml`` to ``.readthedocs.yaml``. The preview guard and the
-      ``check-readthedocs`` hook both expect that name, so editing the file now rebuilds the
-      documentation preview instead of skipping it
+    - Renamed ``.readthedocs.yml`` to ``.readthedocs.yaml``, the name the preview guard and the
+      ``check-readthedocs`` hook expect, so editing the file rebuilds the documentation preview
     - Publishing the Docker image no longer clears its Docker Hub short description, which it
       derived from a field that never held one
     - Fixed the Renovate ``github-tags`` custom managers to reference ``owner/repository`` package names
@@ -406,10 +392,8 @@ Fixed
       instead of floating on ``master``
     - Fixed ccache being skipped on every ``ubuntu-24.04-arm`` job, leaving the slowest runners cold
     - Fixed the CodeQL ccache key interpolating an undefined ``matrix.os``
-    - The CodeQL jobs now declare their build mode: ``manual`` for C++, whose database comes
-      from the CMake build, and ``none`` for Python, which has no build. Python stops warning
-      that it cannot build an overlay database; C++ still does, since a leg that builds
-      cannot have one
+    - The CodeQL jobs now declare their build mode: ``manual`` for C++, whose database comes from
+      the CMake build, and ``none`` for Python, which has no build
     - Fixed the packaging path filter still pointing at the removed ``bindings/pyfiction/**``
 - Documentation:
     - Fixed the ``doc_overview_table`` directive rendering ``None`` in the description column for a

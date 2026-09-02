@@ -24,7 +24,7 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 # Set the project name and version
 project(
   fiction
-  VERSION 0.7.0
+  VERSION 0.8.0
   DESCRIPTION
     "An open-source design automation framework for Field-coupled Nanotechnologies"
   HOMEPAGE_URL "https://github.com/cda-tum/fiction"
