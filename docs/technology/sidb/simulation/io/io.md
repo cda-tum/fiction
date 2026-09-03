@@ -50,21 +50,21 @@
 
 **Header:** `fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp`
 
-```{doxygenfunction} fiction::sidb::simulation::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+```{doxygenfunction} fiction::sidb::simulation::io::write_sqd_sim_result(const sidb::simulation::result& sim_result, std::ostream& os)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::io::write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
+```{doxygenfunction} fiction::sidb::simulation::io::write_sqd_sim_result(const sidb::simulation::result& sim_result, const std::string_view& filename)
 
 ```
 
 **Header:** `fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp`
 
-```{doxygenfunction} fiction::sidb::simulation::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+```{doxygenfunction} fiction::sidb::simulation::io::write_location_and_ground_state(const sidb::simulation::result& sim_result, std::ostream& os)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::io::write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
+```{doxygenfunction} fiction::sidb::simulation::io::write_location_and_ground_state(const sidb::simulation::result& sim_result, const std::string_view& filename)
 
 ```
 

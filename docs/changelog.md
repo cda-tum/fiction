@@ -21,6 +21,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
     `sidb::layout` stores tagged dots and defects without templates. `to_sidb_layout` converts
     Cartesian cell-level layouts
+  - `sidb::charge_distribution` assigns one charge state per SiDB and carries its energy;
+    `sidb::simulation::result` stores one layout plus its physically valid configurations
+  - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
+    charge configurations and simulation worker threads
 
 - Documentation:
 
@@ -41,12 +45,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
     `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
     `write_sidb_layout_svg`
+  - Exposed `charge_distribution`, `potential_landscape`, charge transition thresholds,
+    and `sidb_simulation_result`; simulation engines and consumers accept the new types
 
 - Tooling:
 
   - Added EditorConfig settings that match the repository's formatters.
 
 ### Changed
+
+- Algorithms:
+  - **Breaking:** *QuickExact*, *QuickSim*, *ExGS*, *ClusterComplete*, and *Ground State Space*
+    simulate `sidb::layout` and return the non-template `sidb::simulation::result`. The former
+    result remains available as `legacy_result<Lyt>` while consumers migrate
+  - *QuickSim* returns `std::nullopt` for layouts with charged surface defects
 
 - Continuous integration:
   - Reusable workflows now use GitHub's self-repository reference syntax.
@@ -59,11 +71,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - SiDB layouts use dot operations and `dot_tag` for dot roles. `assign_sidb` defaults to the
     `NORMAL` tag. Lattice-site constructors
     take `int32_t` coordinates and an `int8_t` basis index.
+  - Simulation results store charge states and energy beside one shared layout and potential
+    landscape instead of copying a `charge_distribution_surface` for every configuration
 
 - Documentation:
   - Clarified the difference between coverage collection jobs and Codecov coverage targets.
   - Migrated the documentation to MyST Markdown and the Furo theme with light and dark modes.
   - Documentation now displays the installed package version.
+
+- I/O:
+  - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
+    `charge_distribution`
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
