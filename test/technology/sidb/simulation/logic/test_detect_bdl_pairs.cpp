@@ -17,10 +17,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
-#include <fiction/technology/sidb/surfaces/lattice.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <optional>
 
@@ -30,38 +30,38 @@ using namespace fiction::sidb::simulation::logic;
 
 TEST_CASE("Empty layout BDL detection", "[detect-bdl-pairs]")
 {
-    const sidb_100_cell_clk_lyt_siqad lyt{};
+    const layout lyt{};
 
-    const auto result = detect_bdl_pairs(lyt, sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
+    const auto result = detect_bdl_pairs(lyt, sidb_technology::cell_type::NORMAL);
 
     CHECK(result.empty());
 }
 
 TEST_CASE("BDL wire", "[detect-bdl-pairs]")
 {
-    sidb_cell_clk_lyt_siqad lyt{{24, 0}, "Atomic wire"};
+    layout lyt{lattice::si_100_2x1(), "Atomic wire"};
 
-    lyt.assign_cell_type({-1, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    lyt.assign_cell_type({-1, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({18, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     detect_bdl_pairs_params params{};
 
     params.minimum_distance = 0.2;
     params.maximum_distance = 2.2;
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
     const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
@@ -77,7 +77,7 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
 
 TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 {
-    sidb_cell_clk_lyt_siqad lyt{{7, 0}, "Atomic wire"};
+    layout lyt{lattice::si_100_2x1(), "Atomic wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -92,7 +92,7 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 
     detect_bdl_pairs_params params{};
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     SECTION("default minimum distance")
     {
@@ -107,17 +107,13 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         const auto& normal_pair1 = normal_bdl_pairs[0];
         const auto& normal_pair2 = normal_bdl_pairs[1];
 
-        CHECK(normal_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        CHECK((normal_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0} ||
-               normal_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{3, 0, 0}));
-        CHECK((normal_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 0, 0} ||
-               normal_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{5, 0, 0}));
+        CHECK(normal_pair1.type == sidb_technology::cell_type::NORMAL);
+        CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{3, 0, 0}));
+        CHECK((normal_pair1.lower == lattice_site{4, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
 
-        CHECK(normal_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        CHECK((normal_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0} ||
-               normal_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{3, 0, 0}));
-        CHECK((normal_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 0, 0} ||
-               normal_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{5, 0, 0}));
+        CHECK(normal_pair2.type == sidb_technology::cell_type::NORMAL);
+        CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{3, 0, 0}));
+        CHECK((normal_pair2.lower == lattice_site{4, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
     }
     SECTION("0.5 nm as minimum distance")
     {
@@ -134,17 +130,13 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         const auto& normal_pair1 = normal_bdl_pairs[0];
         const auto& normal_pair2 = normal_bdl_pairs[1];
 
-        CHECK(normal_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        CHECK((normal_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0} ||
-               normal_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{3, 0, 0}));
-        CHECK((normal_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 0, 0} ||
-               normal_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{5, 0, 0}));
+        CHECK(normal_pair1.type == sidb_technology::cell_type::NORMAL);
+        CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{3, 0, 0}));
+        CHECK((normal_pair1.lower == lattice_site{4, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
 
-        CHECK(normal_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        CHECK((normal_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0} ||
-               normal_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{3, 0, 0}));
-        CHECK((normal_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 0, 0} ||
-               normal_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{5, 0, 0}));
+        CHECK(normal_pair2.type == sidb_technology::cell_type::NORMAL);
+        CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{3, 0, 0}));
+        CHECK((normal_pair2.lower == lattice_site{4, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
     }
     SECTION("0 nm as minimum distance")
     {
@@ -164,31 +156,27 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
         const auto& normal_pair1 = normal_bdl_pairs[0];
         const auto& normal_pair2 = normal_bdl_pairs[1];
 
-        CHECK(input_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-        CHECK(input_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{0, 0, 0});
-        CHECK(input_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{1, 0, 0});
+        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.upper == lattice_site{0, 0, 0});
+        CHECK(input_pair.lower == lattice_site{1, 0, 0});
 
-        CHECK(output_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-        CHECK(output_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{6, 0, 0});
-        CHECK(output_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{7, 0, 0});
+        CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair.upper == lattice_site{6, 0, 0});
+        CHECK(output_pair.lower == lattice_site{7, 0, 0});
 
-        CHECK(normal_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        CHECK((normal_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0} ||
-               normal_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{4, 0, 0}));
-        CHECK((normal_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{3, 0, 0} ||
-               normal_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{5, 0, 0}));
+        CHECK(normal_pair1.type == sidb_technology::cell_type::NORMAL);
+        CHECK((normal_pair1.upper == lattice_site{2, 0, 0} || normal_pair1.upper == lattice_site{4, 0, 0}));
+        CHECK((normal_pair1.lower == lattice_site{3, 0, 0} || normal_pair1.lower == lattice_site{5, 0, 0}));
 
-        CHECK(normal_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::NORMAL);
-        CHECK((normal_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0} ||
-               normal_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{4, 0, 0}));
-        CHECK((normal_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{3, 0, 0} ||
-               normal_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{5, 0, 0}));
+        CHECK(normal_pair2.type == sidb_technology::cell_type::NORMAL);
+        CHECK((normal_pair2.upper == lattice_site{2, 0, 0} || normal_pair2.upper == lattice_site{4, 0, 0}));
+        CHECK((normal_pair2.lower == lattice_site{3, 0, 0} || normal_pair2.lower == lattice_site{5, 0, 0}));
     }
 }
 
 TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 {
-    sidb_cell_clk_lyt_siqad lyt{{20, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -206,7 +194,7 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     // set default minimum distance to 0 for testing
     params.minimum_distance = 0;
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     SECTION("default maximum distance")
     {
@@ -219,13 +207,13 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
         const auto& input_pair  = input_bdl_pairs.front();
         const auto& output_pair = output_bdl_pairs.front();
 
-        CHECK(input_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-        CHECK(input_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{0, 0, 0});
-        CHECK(input_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0});
+        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.upper == lattice_site{0, 0, 0});
+        CHECK(input_pair.lower == lattice_site{2, 0, 0});
 
-        CHECK(output_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-        CHECK(output_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{18, 0, 0});
-        CHECK(output_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{20, 0, 0});
+        CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair.upper == lattice_site{18, 0, 0});
+        CHECK(output_pair.lower == lattice_site{20, 0, 0});
     }
     SECTION("1 nm maximum distance")
     {
@@ -240,13 +228,13 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
         const auto& input_pair  = input_bdl_pairs.front();
         const auto& output_pair = output_bdl_pairs.front();
 
-        CHECK(input_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-        CHECK(input_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{0, 0, 0});
-        CHECK(input_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{2, 0, 0});
+        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.upper == lattice_site{0, 0, 0});
+        CHECK(input_pair.lower == lattice_site{2, 0, 0});
 
-        CHECK(output_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-        CHECK(output_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{18, 0, 0});
-        CHECK(output_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{20, 0, 0});
+        CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+        CHECK(output_pair.upper == lattice_site{18, 0, 0});
+        CHECK(output_pair.lower == lattice_site{20, 0, 0});
     }
     SECTION("0.5 nm maximum distance")
     {
@@ -263,7 +251,7 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
 
 TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 {
-    sidb_cell_clk_lyt_siqad lyt{{20, 10}, "AND gate"};
+    layout lyt{lattice::si_100_2x1(), "AND gate"};
 
     lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
@@ -282,7 +270,7 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
     const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
@@ -294,26 +282,22 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
     const auto& input_pair2 = input_bdl_pairs[1];
     const auto& output_pair = output_bdl_pairs.front();
 
-    CHECK(input_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-    CHECK((input_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{20, 0, 1} ||
-           input_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{0, 0, 1}));
-    CHECK((input_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{18, 1, 1} ||
-           input_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{2, 1, 1}));
+    CHECK(input_pair1.type == sidb_technology::cell_type::INPUT);
+    CHECK((input_pair1.upper == lattice_site{20, 0, 1} || input_pair1.upper == lattice_site{0, 0, 1}));
+    CHECK((input_pair1.lower == lattice_site{18, 1, 1} || input_pair1.lower == lattice_site{2, 1, 1}));
 
-    CHECK(input_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-    CHECK((input_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{20, 0, 1} ||
-           input_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{0, 0, 1}));
-    CHECK((input_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{18, 1, 1} ||
-           input_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{2, 1, 1}));
+    CHECK(input_pair2.type == sidb_technology::cell_type::INPUT);
+    CHECK((input_pair2.upper == lattice_site{20, 0, 1} || input_pair2.upper == lattice_site{0, 0, 1}));
+    CHECK((input_pair2.lower == lattice_site{18, 1, 1} || input_pair2.lower == lattice_site{2, 1, 1}));
 
-    CHECK(output_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-    CHECK(output_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 6, 0});
-    CHECK(output_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{10, 7, 0});
+    CHECK(output_pair.type == sidb_technology::cell_type::OUTPUT);
+    CHECK(output_pair.upper == lattice_site{10, 6, 0});
+    CHECK(output_pair.lower == lattice_site{10, 7, 0});
 }
 
 TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
 {
-    sidb_100_cell_clk_lyt_siqad lyt{{42, 21}, "Fan-out"};
+    layout lyt{lattice::si_100_2x1(), "Fan-out"};
 
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::INPUT);
@@ -346,7 +330,7 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
     lyt.assign_cell_type({4, 20, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({38, 20, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     SECTION("Detect different BDL pair types")
     {
@@ -360,21 +344,17 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
         const auto& output_pair1 = output_bdl_pairs[0];
         const auto& output_pair2 = output_bdl_pairs[1];
 
-        CHECK(input_pair.type == sidb_100_cell_clk_lyt_siqad::cell_type::INPUT);
-        CHECK(input_pair.upper == cell<sidb_100_cell_clk_lyt_siqad>{2, 1, 0});
-        CHECK(input_pair.lower == cell<sidb_100_cell_clk_lyt_siqad>{4, 2, 0});
+        CHECK(input_pair.type == sidb_technology::cell_type::INPUT);
+        CHECK(input_pair.upper == lattice_site{2, 1, 0});
+        CHECK(input_pair.lower == lattice_site{4, 2, 0});
 
-        CHECK(output_pair1.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-        CHECK((output_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 18, 0} ||
-               output_pair1.upper == cell<sidb_100_cell_clk_lyt_siqad>{32, 18, 0}));
-        CHECK((output_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{8, 19, 0} ||
-               output_pair1.lower == cell<sidb_100_cell_clk_lyt_siqad>{34, 19, 0}));
+        CHECK(output_pair1.type == sidb_technology::cell_type::OUTPUT);
+        CHECK((output_pair1.upper == lattice_site{10, 18, 0} || output_pair1.upper == lattice_site{32, 18, 0}));
+        CHECK((output_pair1.lower == lattice_site{8, 19, 0} || output_pair1.lower == lattice_site{34, 19, 0}));
 
-        CHECK(output_pair2.type == sidb_100_cell_clk_lyt_siqad::cell_type::OUTPUT);
-        CHECK((output_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{10, 18, 0} ||
-               output_pair2.upper == cell<sidb_100_cell_clk_lyt_siqad>{32, 18, 0}));
-        CHECK((output_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{8, 19, 0} ||
-               output_pair2.lower == cell<sidb_100_cell_clk_lyt_siqad>{34, 19, 0}));
+        CHECK(output_pair2.type == sidb_technology::cell_type::OUTPUT);
+        CHECK((output_pair2.upper == lattice_site{10, 18, 0} || output_pair2.upper == lattice_site{32, 18, 0}));
+        CHECK((output_pair2.lower == lattice_site{8, 19, 0} || output_pair2.lower == lattice_site{34, 19, 0}));
     }
 
     SECTION("Detect all BDL pairs")

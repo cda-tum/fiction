@@ -17,6 +17,8 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp"
 #include "fiction/technology/sidb/technology.hpp"
@@ -70,6 +72,411 @@ struct bdl_input_iterator_params
 };
 
 /**
+ * Iterator that assigns the input patterns to the input BDL pairs of an SiDB layout. Incrementing the iterator
+ * advances the input pattern; dereferencing it yields the layout with that pattern applied. Every input BDL pair
+ * encodes one bit: a `1` keeps the SiDB closer to the wire's end, a `0` keeps the other one (perturber-distance
+ * encoding) or none (perturber-absence encoding). Bit `i` of the pattern belongs to the `i`-th input pair in
+ * layout order, with the first pair as the most significant bit.
+ */
+class bdl_input_iterator
+{
+  public:
+    /**
+     * Detects the input BDL pairs and wires of `lyt` and applies input pattern `0`.
+     *
+     * @param lyt The layout to iterate over.
+     * @param ps Parameters for the BDL pair and wire detection and the input encoding.
+     */
+    explicit bdl_input_iterator(const layout& lyt, const bdl_input_iterator_params& ps = {}) noexcept :
+            bdl_input_iterator{lyt, ps, detect_bdl_wires(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT)}
+    {}
+    /**
+     * Like the constructor above but with input wires that are already known.
+     *
+     * @param lyt The layout to iterate over.
+     * @param ps Parameters for the BDL pair detection and the input encoding.
+     * @param input_wires The input wires of `lyt`.
+     */
+    bdl_input_iterator(const layout& lyt, const bdl_input_iterator_params& ps,
+                       const std::vector<bdl_wire>& input_wires) noexcept :
+            lyt_{lyt},
+            input_pairs_{detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
+            input_wires_{input_wires},
+            last_bdl_for_each_wire_{determine_last_bdl_for_each_wire()},
+            upper_input_closer_to_wire_end_{determine_upper_input_closer_to_wire_end()},
+            params_{ps}
+    {
+        set_all_inputs();
+    }
+    /**
+     * The layout with the current input pattern applied.
+     *
+     * @return The layout.
+     */
+    [[nodiscard]] const layout& operator*() const noexcept
+    {
+        return lyt_;
+    }
+    /**
+     * Advances to the next input pattern.
+     *
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator++() noexcept
+    {
+        ++current_input_index_;
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Advances to the next input pattern.
+     *
+     * @return Copy of `this` before the increment.
+     */
+    bdl_input_iterator operator++(int) noexcept
+    {
+        auto result{*this};
+        ++(*this);
+
+        return result;
+    }
+    /**
+     * Returns an iterator `m` patterns ahead.
+     *
+     * @param m The number of patterns to advance.
+     * @return The advanced iterator.
+     */
+    [[nodiscard]] bdl_input_iterator operator+(const int m) const noexcept
+    {
+        auto result{*this};
+        result += m;
+
+        return result;
+    }
+    /**
+     * Advances by `m` patterns.
+     *
+     * @param m The number of patterns to advance.
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator+=(const int m) noexcept
+    {
+        current_input_index_ = static_cast<uint64_t>(static_cast<int64_t>(current_input_index_) + m);
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Returns an iterator `m` patterns behind.
+     *
+     * @param m The number of patterns to go back.
+     * @return The iterator.
+     */
+    [[nodiscard]] bdl_input_iterator operator-(const int m) const noexcept
+    {
+        auto result{*this};
+        result -= m;
+
+        return result;
+    }
+    /**
+     * Goes back to the previous input pattern.
+     *
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator--() noexcept
+    {
+        --current_input_index_;
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Goes back to the previous input pattern.
+     *
+     * @return Copy of `this` before the decrement.
+     */
+    bdl_input_iterator operator--(int) noexcept
+    {
+        auto result{*this};
+        --(*this);
+
+        return result;
+    }
+    /**
+     * Goes back by `m` patterns.
+     *
+     * @param m The number of patterns to go back.
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator-=(const int m) noexcept
+    {
+        current_input_index_ = static_cast<uint64_t>(static_cast<int64_t>(current_input_index_) - m);
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Jumps to input pattern `m`.
+     *
+     * @param m The input pattern.
+     * @return Reference to `this`.
+     */
+    bdl_input_iterator& operator=(const uint64_t m) noexcept
+    {
+        current_input_index_ = m;
+        set_all_inputs();
+
+        return *this;
+    }
+    /**
+     * Returns an iterator `m` patterns ahead.
+     *
+     * @param m The number of patterns to advance.
+     * @return The advanced iterator.
+     */
+    [[nodiscard]] bdl_input_iterator operator[](const int m) const noexcept
+    {
+        return *this + m;
+    }
+    /**
+     * Distance between two iterators in input patterns.
+     *
+     * @param other The other iterator.
+     * @return `this` pattern minus `other`'s pattern.
+     */
+    [[nodiscard]] int64_t operator-(const bdl_input_iterator& other) const noexcept
+    {
+        return static_cast<int64_t>(current_input_index_) - static_cast<int64_t>(other.current_input_index_);
+    }
+    /**
+     * Compares the current input pattern with `m`.
+     *
+     * @param m The pattern to compare with.
+     * @return The three-way comparison result.
+     */
+    [[nodiscard]] auto operator<=>(const uint64_t m) const noexcept
+    {
+        return current_input_index_ <=> m;
+    }
+    /**
+     * Whether the current input pattern is `m`.
+     *
+     * @param m The pattern to compare with.
+     * @return `true` if the patterns are equal.
+     */
+    [[nodiscard]] bool operator==(const uint64_t m) const noexcept
+    {
+        return current_input_index_ == m;
+    }
+    /**
+     * Number of input BDL pairs.
+     *
+     * @return The number of input pairs.
+     */
+    [[nodiscard]] uint64_t num_input_pairs() const noexcept
+    {
+        return input_pairs_.size();
+    }
+    /**
+     * The current input pattern.
+     *
+     * @return The pattern.
+     */
+    [[nodiscard]] uint64_t get_current_input_index() const noexcept
+    {
+        return current_input_index_;
+    }
+
+  private:
+    /**
+     * The layout with the current input pattern applied.
+     */
+    layout lyt_;
+    /**
+     * The input BDL pairs in layout order.
+     */
+    std::vector<bdl_pair<lattice_site>> input_pairs_;
+    /**
+     * The input wires.
+     */
+    std::vector<bdl_wire> input_wires_;
+    /**
+     * For each input wire, the BDL pair farthest from its input pair.
+     */
+    std::vector<bdl_pair<lattice_site>> last_bdl_for_each_wire_;
+    /**
+     * For each input pair, whether its upper SiDB is the one closer to the wire's end.
+     */
+    std::vector<bool> upper_input_closer_to_wire_end_;
+    /**
+     * The current input pattern.
+     */
+    uint64_t current_input_index_{0};
+    /**
+     * Parameters.
+     */
+    bdl_input_iterator_params params_;
+    /**
+     * Finds, for each input wire, the BDL pair farthest from the wire's input pair.
+     *
+     * @return One pair per wire.
+     */
+    [[nodiscard]] std::vector<bdl_pair<lattice_site>> determine_last_bdl_for_each_wire() const noexcept
+    {
+        const auto& lat = lyt_.get_lattice();
+
+        std::vector<bdl_pair<lattice_site>> end_bdls{};
+        end_bdls.reserve(input_wires_.size());
+
+        for (const auto& wire : input_wires_)
+        {
+            const auto start = std::ranges::find_if(wire.pairs, [](const auto& bdl)
+                                                    { return bdl.type == sidb_technology::cell_type::INPUT; });
+
+            if (start == wire.pairs.cend())
+            {
+                continue;
+            }
+
+            const auto farthest = std::ranges::max_element(
+                wire.pairs, [&lat, &start](const auto& a, const auto& b)
+                { return lat.nm_distance(start->upper, a.upper) < lat.nm_distance(start->upper, b.upper); });
+
+            if (farthest != wire.pairs.cend())
+            {
+                end_bdls.push_back(*farthest);
+            }
+        }
+
+        return end_bdls;
+    }
+    /**
+     * Determines for each input pair whether its upper SiDB is closer to the end of its wire than its lower one.
+     *
+     * @return One flag per input pair.
+     */
+    [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const noexcept
+    {
+        const auto& lat = lyt_.get_lattice();
+
+        std::vector<bool> upper_is_closer{};
+        upper_is_closer.reserve(input_pairs_.size());
+
+        for (std::size_t i = 0; i < input_pairs_.size(); ++i)
+        {
+            const auto& input_i = input_pairs_[i];
+            // both distances are measured against the upper dot of the wire's last BDL pair
+            const auto to_upper = lat.nm_distance(input_i.upper, last_bdl_for_each_wire_[i].upper);
+            const auto to_lower = lat.nm_distance(input_i.lower, last_bdl_for_each_wire_[i].upper);
+
+            upper_is_closer.push_back(to_upper < to_lower);
+        }
+
+        return upper_is_closer;
+    }
+    /**
+     * Applies the current input pattern to the input pairs.
+     */
+    void set_all_inputs() noexcept
+    {
+        assert(input_pairs_.size() == input_wires_.size() && "number of inputs and number of wires don't match");
+
+        const auto num_inputs = input_pairs_.size();
+
+        for (std::size_t i = 0; i < num_inputs; ++i)
+        {
+            const auto& input_i = input_pairs_[i];
+
+            const bool bit_set = (current_input_index_ & (uint64_t{1} << (num_inputs - 1 - i))) != 0;
+
+            if (bit_set)
+            {
+                if (upper_input_closer_to_wire_end_[i])
+                {
+                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
+                }
+                else
+                {
+                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
+                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                }
+            }
+            else if (params_.input_bdl_config ==
+                     bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
+            {
+                if (upper_input_closer_to_wire_end_[i])
+                {
+                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
+                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                }
+                else
+                {
+                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
+                }
+            }
+            else
+            {
+                lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+            }
+        }
+    }
+};
+
+/**
+ * Applies every input pattern to the input BDL pairs of a layout and returns the resulting layouts, pattern `0`
+ * first, with the input wires given by the caller.
+ *
+ * @param lyt The layout.
+ * @param ps Parameters for the BDL pair detection and the input encoding.
+ * @param input_wires The input wires of `lyt`.
+ * @return One layout per input pattern.
+ */
+[[nodiscard]] inline std::vector<layout>
+generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_params& ps,
+                                   const std::vector<bdl_wire>& input_wires) noexcept
+{
+    bdl_input_iterator bii{lyt, ps, input_wires};
+
+    assert(bii.num_input_pairs() < 64 && "too many input BDL pairs to enumerate");
+
+    const auto num_input_patterns = uint64_t{1} << bii.num_input_pairs();
+
+    std::vector<layout> layouts{};
+    layouts.reserve(num_input_patterns);
+
+    for (bii = 0; bii < num_input_patterns; ++bii)
+    {
+        layouts.push_back(*bii);
+    }
+
+    return layouts;
+}
+/**
+ * Applies every input pattern to the input BDL pairs of a layout and returns the resulting layouts, pattern `0`
+ * first; the input wires are detected first.
+ *
+ * @param lyt The layout.
+ * @param ps Parameters for the BDL detection and the input encoding.
+ * @return One layout per input pattern.
+ */
+[[nodiscard]] inline std::vector<layout>
+generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_params& ps = {}) noexcept
+{
+    return generate_bdl_input_pattern_layouts(lyt, ps,
+                                              detect_bdl_wires(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT));
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Transitional: the template versions below serve the algorithms that still run on SiDB cell-level layouts. They
+// disappear once every consumer takes `sidb::layout`.
+// ---------------------------------------------------------------------------------------------------------------
+
+/**
  * Iterator that iterates over all possible input states of a BDL layout. There are \f$2^n\f$ possible input states
  * for an \f$n\f$-input BDL layout, each with a unique input index. The input index is interpreted as a binary number,
  * where the \f$i\f$-th bit represents the input state of the \f$i\f$-th input BDL pair. If the bit is `1`, the lower
@@ -83,7 +490,7 @@ struct bdl_input_iterator_params
  * @tparam Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
-class bdl_input_iterator
+class legacy_bdl_input_iterator
 {
   public:
     /**
@@ -93,8 +500,8 @@ class bdl_input_iterator
      * @param lyt The SiDB BDL layout to iterate over.
      * @param ps Parameters for the BDL input iterator.
      */
-    explicit bdl_input_iterator(const Lyt&                       lyt,
-                                const bdl_input_iterator_params& ps = bdl_input_iterator_params{}) noexcept :
+    explicit legacy_bdl_input_iterator(const Lyt&                       lyt,
+                                       const bdl_input_iterator_params& ps = bdl_input_iterator_params{}) noexcept :
             layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb::sidb_technology::cell_type::INPUT,
                                               ps.bdl_wire_params.bdl_pairs_params)},
@@ -117,8 +524,8 @@ class bdl_input_iterator
      * @param ps Parameters for the BDL input iterator.
      * @param input_wires Pre-detected input BDL wires.
      */
-    explicit bdl_input_iterator(const Lyt& lyt, const bdl_input_iterator_params& ps,
-                                const std::vector<bdl_wire<Lyt>>& input_wires) noexcept :
+    explicit legacy_bdl_input_iterator(const Lyt& lyt, const bdl_input_iterator_params& ps,
+                                       const std::vector<legacy_bdl_wire<Lyt>>& input_wires) noexcept :
             layout{lyt.clone()},
             input_pairs{detect_bdl_pairs<Lyt>(lyt, sidb::sidb_technology::cell_type::INPUT,
                                               ps.bdl_wire_params.bdl_pairs_params)},
@@ -146,7 +553,7 @@ class bdl_input_iterator
      *
      * @return Reference to `this`.
      */
-    bdl_input_iterator& operator++() noexcept
+    legacy_bdl_input_iterator& operator++() noexcept
     {
         ++current_input_index;
 
@@ -159,7 +566,7 @@ class bdl_input_iterator
      *
      * @return Copy of `this` before incrementing.
      */
-    bdl_input_iterator operator++(int) noexcept
+    legacy_bdl_input_iterator operator++(int) noexcept
     {
         auto result{*this};
 
@@ -173,7 +580,7 @@ class bdl_input_iterator
      * @param m The amount of input states to skip.
      * @return The input state of the current iterator plus the given integer.
      */
-    [[nodiscard]] bdl_input_iterator operator+(const int m) const noexcept
+    [[nodiscard]] legacy_bdl_input_iterator operator+(const int m) const noexcept
     {
         auto result{*this};
 
@@ -189,7 +596,7 @@ class bdl_input_iterator
      * @param m The amount of input states to skip.
      * @return Reference to `this`.
      */
-    bdl_input_iterator& operator+=(const int m) noexcept
+    legacy_bdl_input_iterator& operator+=(const int m) noexcept
     {
         current_input_index += m;
 
@@ -204,7 +611,7 @@ class bdl_input_iterator
      * @param m The amount of input states to skip.
      * @return The input state of the current iterator minus the given integer.
      */
-    [[nodiscard]] bdl_input_iterator operator-(const int m) const noexcept
+    [[nodiscard]] legacy_bdl_input_iterator operator-(const int m) const noexcept
     {
         auto result{*this};
 
@@ -217,7 +624,7 @@ class bdl_input_iterator
      *
      * @return Reference to `this`.
      */
-    bdl_input_iterator& operator--() noexcept
+    legacy_bdl_input_iterator& operator--() noexcept
     {
         --current_input_index;
 
@@ -230,7 +637,7 @@ class bdl_input_iterator
      *
      * @return Copy of `this` before decrementing.
      */
-    bdl_input_iterator operator--(int) noexcept
+    legacy_bdl_input_iterator operator--(int) noexcept
     {
         auto result{*this};
 
@@ -246,7 +653,7 @@ class bdl_input_iterator
      * @param m The amount of input states to skip.
      * @return Reference to `this`.
      */
-    bdl_input_iterator& operator-=(const int m) noexcept
+    legacy_bdl_input_iterator& operator-=(const int m) noexcept
     {
         current_input_index -= m;
 
@@ -260,7 +667,7 @@ class bdl_input_iterator
      *
      * @param m The input state to set.
      */
-    bdl_input_iterator& operator=(const uint64_t m) noexcept
+    legacy_bdl_input_iterator& operator=(const uint64_t m) noexcept
     {
         current_input_index = m;
 
@@ -274,7 +681,7 @@ class bdl_input_iterator
      * @param m The amount of input states to skip.
      * @return The input state of the current iterator plus the given integer.
      */
-    [[nodiscard]] bdl_input_iterator operator[](const int m) const noexcept
+    [[nodiscard]] legacy_bdl_input_iterator operator[](const int m) const noexcept
     {
         return (*this + m);
     }
@@ -284,7 +691,7 @@ class bdl_input_iterator
      * @param other Iterator to compute the difference with.
      * @return The difference between the current input index and the given iterator ones.
      */
-    [[nodiscard]] int64_t operator-(const bdl_input_iterator& other) const noexcept
+    [[nodiscard]] int64_t operator-(const legacy_bdl_input_iterator& other) const noexcept
     {
         return static_cast<int64_t>(current_input_index) - static_cast<int64_t>(other.current_input_index);
     }
@@ -383,7 +790,7 @@ class bdl_input_iterator
     /**
      * The detected input BDL wires.
      */
-    const std::vector<bdl_wire<Lyt>> input_bdl_wires;
+    const std::vector<legacy_bdl_wire<Lyt>> input_bdl_wires;
     /**
      * Last BDL pairs for each BDL wire.
      */
@@ -549,7 +956,7 @@ namespace detail
  * @return Deep copies of the layout for each of the \f$2^n\f$ input patterns, indexed by input pattern.
  */
 template <typename Lyt>
-[[nodiscard]] std::vector<Lyt> collect_bdl_input_pattern_layouts(bdl_input_iterator<Lyt>& bii) noexcept
+[[nodiscard]] std::vector<Lyt> collect_bdl_input_pattern_layouts(legacy_bdl_input_iterator<Lyt>& bii) noexcept
 {
     assert(bii.num_input_pairs() < 64 && "too many input BDL pairs to enumerate");
 
@@ -572,7 +979,7 @@ template <typename Lyt>
 /**
  * Generates the SiDB layout of every input pattern of a BDL layout. For an \f$n\f$-input BDL layout, this returns
  * \f$2^n\f$ layouts, where the layout at index \f$i\f$ has the input pattern \f$i\f$ applied, using the same encoding
- * as `bdl_input_iterator`.
+ * as `legacy_bdl_input_iterator`.
  *
  * Since the input configuration of a layout does not depend on the physical simulation parameters, algorithms that
  * evaluate the same layout under many parameter settings can generate these layouts once and reuse them, instead of
@@ -585,13 +992,14 @@ template <typename Lyt>
  * @return One layout per input pattern, indexed by input pattern.
  */
 template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::vector<Lyt> generate_bdl_input_pattern_layouts(const Lyt&                       lyt,
                                                                   const bdl_input_iterator_params& ps = {}) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    bdl_input_iterator<Lyt> bii{lyt, ps};
+    legacy_bdl_input_iterator<Lyt> bii{lyt, ps};
 
     return detail::collect_bdl_input_pattern_layouts(bii);
 }
@@ -605,24 +1013,32 @@ template <typename Lyt>
  * @return One layout per input pattern, indexed by input pattern.
  */
 template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::vector<Lyt>
 generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps,
-                                   const std::vector<bdl_wire<Lyt>>& input_wires) noexcept
+                                   const std::vector<legacy_bdl_wire<Lyt>>& input_wires) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    bdl_input_iterator<Lyt> bii{lyt, ps, input_wires};
+    legacy_bdl_input_iterator<Lyt> bii{lyt, ps, input_wires};
 
     return detail::collect_bdl_input_pattern_layouts(bii);
 }
 
 }  // namespace fiction::sidb::simulation::logic
-// make `bdl_input_iterator` compatible with STL iterator categories
+// make the input iterators compatible with STL iterator categories
 namespace std
 {
+template <>
+struct iterator_traits<fiction::sidb::simulation::logic::bdl_input_iterator>
+{
+    using iterator_category = std::random_access_iterator_tag;
+    using difference_type   = int64_t;
+    using value_type        = fiction::sidb::layout;
+};
 template <typename Lyt>
-struct iterator_traits<fiction::sidb::simulation::logic::bdl_input_iterator<Lyt>>
+struct iterator_traits<fiction::sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>>
 {
     using iterator_category = std::random_access_iterator_tag;
     using difference_type   = int64_t;

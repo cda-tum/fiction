@@ -19,16 +19,20 @@
 
 #include "fiction/physical_design/path_finding/distance.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <set>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::simulation::logic
@@ -69,12 +73,504 @@ struct detect_bdl_wires_params
 };
 
 /**
+ * A BDL wire is a chain of BDL pairs. Its port direction follows from the positions of its input and output pairs;
+ * a wire with fewer than two pairs or without input and output pairs has no port. The first and last pairs are
+ * the input and output pairs where present, and otherwise the pairs at the ends of the chain.
+ */
+struct bdl_wire
+{
+    /**
+     * The BDL pairs of the wire, sorted.
+     */
+    std::vector<bdl_pair<lattice_site>> pairs{};
+    /**
+     * Port direction of the wire.
+     */
+    fcn::port_direction port{fcn::port_direction::NONE};
+    /**
+     * First BDL pair of the wire.
+     */
+    std::optional<bdl_pair<lattice_site>> first_bdl_pair{};
+    /**
+     * Last BDL pair of the wire.
+     */
+    std::optional<bdl_pair<lattice_site>> last_bdl_pair{};
+    /**
+     * Constructs an empty wire.
+     */
+    bdl_wire() noexcept = default;
+    /**
+     * Constructs a wire from BDL pairs and determines its direction.
+     *
+     * @param p The BDL pairs of the wire.
+     */
+    explicit bdl_wire(std::vector<bdl_pair<lattice_site>> p) noexcept : pairs(std::move(p))
+    {
+        if (!pairs.empty())
+        {
+            first_bdl_pair = pairs.front();
+            last_bdl_pair  = pairs.back();
+        }
+
+        update_direction();
+    }
+    /**
+     * Adds a BDL pair to the wire, keeps the pairs sorted, and updates the direction.
+     *
+     * @param pair The BDL pair to add.
+     */
+    void add_bdl_pair(const bdl_pair<lattice_site>& pair) noexcept
+    {
+        pairs.push_back(pair);
+        std::ranges::sort(pairs);
+        update_direction();
+    }
+    /**
+     * Removes a BDL pair from the wire and updates the direction if it was present.
+     *
+     * @param pair The BDL pair to remove.
+     */
+    void erase_bdl_pair(const bdl_pair<lattice_site>& pair) noexcept
+    {
+        if (std::erase(pairs, pair) > 0)
+        {
+            update_direction();
+        }
+    }
+    /**
+     * Finds the first BDL pair of the given type.
+     *
+     * @param t The SiDB type to look for.
+     * @return The first BDL pair of type `t`, or `std::nullopt` if the wire has none.
+     */
+    [[nodiscard]] std::optional<bdl_pair<lattice_site>>
+    find_bdl_pair_by_type(const sidb_technology::cell_type t) const noexcept
+    {
+        const auto it = std::ranges::find_if(pairs, [t](const auto& bdl) { return bdl.type == t; });
+
+        if (it != pairs.cend())
+        {
+            return *it;
+        }
+
+        return std::nullopt;
+    }
+    /**
+     * Equality operator. Also provides `operator!=` via `= default`.
+     *
+     * @param other The other wire to compare with.
+     * @return `true` if both wires hold the same pairs, port, and end pairs.
+     */
+    [[nodiscard]] bool operator==(const bdl_wire& other) const noexcept = default;
+
+  private:
+    /**
+     * Euclidean distance of two sites in units of lattice indices, ignoring the sublattice index. This is the
+     * measure the direction heuristics below rank the pairs of a wire by.
+     *
+     * @param a First site.
+     * @param b Second site.
+     * @return The distance.
+     */
+    [[nodiscard]] static double index_distance(const lattice_site& a, const lattice_site& b) noexcept
+    {
+        const auto dx = static_cast<double>(a.x) - static_cast<double>(b.x);
+        const auto dy = static_cast<double>(a.y) - static_cast<double>(b.y);
+
+        return std::hypot(dx, dy);
+    }
+    /**
+     * Determines the port direction of the wire from the positions of its input and output pairs.
+     */
+    void update_direction() noexcept
+    {
+        // a wire with fewer than 2 BDL pairs does not have a port
+        if (pairs.size() < 2)
+        {
+            port.dir = fcn::port_direction::NONE;
+            return;
+        }
+
+        // a wire without input or output cells does not have a port
+        if (std::ranges::all_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::NORMAL; }))
+        {
+            port.dir = fcn::port_direction::NONE;
+            return;
+        }
+
+        const auto input_exists =
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::INPUT; });
+        const auto output_exists =
+            std::ranges::any_of(pairs, [](const auto& bdl) { return bdl.type == sidb_technology::cell_type::OUTPUT; });
+
+        // input and output cells are present
+        if (input_exists && output_exists)
+        {
+            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
+            last_bdl_pair  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+
+            // determine the port of the wire based on the position of input and output BDL pairs
+            if (first_bdl_pair.value() < last_bdl_pair)
+            {
+                port.dir = fcn::port_direction::SOUTH;
+
+                if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y ||
+                    first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
+                {
+                    port.dir = fcn::port_direction::EAST;
+                }
+            }
+            // if the input BDL pair is at the same position as the output BDL pair, the wire has no port
+            else if (first_bdl_pair.value().equal_ignore_type(last_bdl_pair.value()))
+            {
+                assert(false && "input and output BDL pairs are at the same position");
+                port.dir = fcn::port_direction::NONE;
+            }
+            else
+            {
+                port.dir = fcn::port_direction::NORTH;
+
+                if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y &&
+                    first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
+                {
+                    port.dir = fcn::port_direction::WEST;
+                }
+            }
+        }
+        // only input cells are present
+        else if (input_exists)
+        {
+            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT).value();
+
+            auto max_distance = 0.0;
+
+            for (const auto& pair : pairs)
+            {
+                const auto distance = index_distance(pair.lower, first_bdl_pair.value().lower);
+
+                if (distance > max_distance)
+                {
+                    max_distance  = distance;
+                    last_bdl_pair = pair;
+                }
+            }
+
+            // the input and final BDL pairs share the y-coordinate and the input pair is to the left --> EAST
+            if (first_bdl_pair.value().lower.x < last_bdl_pair.value().lower.x &&
+                first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
+            {
+                port.dir = fcn::port_direction::EAST;
+            }
+            // the lower cell of the input BDL pair is below the lower cell of the final BDL pair --> NORTH
+            else if (first_bdl_pair.value().lower.y > last_bdl_pair.value().lower.y)
+            {
+                port.dir = fcn::port_direction::NORTH;
+            }
+            // the input BDL pair is to the right of the final BDL pair --> WEST
+            else if (first_bdl_pair.value().lower.x > last_bdl_pair.value().lower.x &&
+                     first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
+            {
+                port.dir = fcn::port_direction::WEST;
+            }
+            else
+            {
+                port.dir = fcn::port_direction::SOUTH;
+            }
+        }
+        // only output cells are present
+        else
+        {
+            last_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT).value();
+
+            auto max_distance = 0.0;
+
+            for (const auto& pair : pairs)
+            {
+                const auto distance = index_distance(pair.lower, last_bdl_pair.value().upper);
+
+                if (distance > max_distance)
+                {
+                    max_distance   = distance;
+                    first_bdl_pair = pair;
+                }
+            }
+
+            // the output and first BDL pairs share the y-coordinate and the output pair is to the left --> WEST
+            if (last_bdl_pair.value().lower.x < first_bdl_pair.value().lower.x &&
+                last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
+            {
+                port.dir = fcn::port_direction::WEST;
+            }
+            // the lower cell of the output BDL pair is below the lower cell of the first BDL pair --> SOUTH
+            else if (last_bdl_pair.value().lower.y > first_bdl_pair.value().lower.y)
+            {
+                port.dir = fcn::port_direction::SOUTH;
+            }
+            // the output BDL pair is to the right of the first BDL pair --> EAST
+            else if (last_bdl_pair.value().lower.x > first_bdl_pair.value().lower.x &&
+                     last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
+            {
+                port.dir = fcn::port_direction::EAST;
+            }
+            else
+            {
+                port.dir = fcn::port_direction::NORTH;
+            }
+        }
+    }
+};
+
+namespace detail
+{
+
+/**
+ * Chains the BDL pairs of a layout into wires.
+ */
+class detect_bdl_wires_impl
+{
+  public:
+    /**
+     * Detects the wires of `lyt`.
+     *
+     * @param lyt The layout.
+     * @param ps Parameters.
+     */
+    detect_bdl_wires_impl(const layout& lyt, const detect_bdl_wires_params& ps) : lat{lyt.get_lattice()}, params{ps}
+    {
+        auto bdl_pairs = aggregate_bdl_pairs(lyt);
+
+        while (!bdl_pairs.empty())
+        {
+            bdl_wire wire{};
+
+            auto current = *bdl_pairs.cbegin();
+            wire.add_bdl_pair(current);
+            bdl_pairs.erase(current);
+
+            while (true)
+            {
+                if (const auto below = find_bdl_neighbor_below(current, bdl_pairs); below.has_value())
+                {
+                    wire.add_bdl_pair(*below);
+                    bdl_pairs.erase(*below);
+                    current = *below;
+                }
+                else if (const auto above = find_bdl_neighbor_above(current, bdl_pairs); above.has_value())
+                {
+                    wire.add_bdl_pair(*above);
+                    bdl_pairs.erase(*above);
+                    current = *above;
+                }
+                else
+                {
+                    bdl_wires.push_back(std::move(wire));
+                    break;
+                }
+            }
+        }
+    }
+    /**
+     * Returns the detected wires, optionally restricted to input or output wires.
+     *
+     * @param selection Which wires to return.
+     * @return The selected wires.
+     */
+    [[nodiscard]] std::vector<bdl_wire> filter_wires(const bdl_wire_selection selection) const noexcept
+    {
+        switch (selection)
+        {
+            case bdl_wire_selection::INPUT:
+            {
+                return filter_wires_by_type(sidb_technology::cell_type::INPUT);
+            }
+            case bdl_wire_selection::OUTPUT:
+            {
+                return filter_wires_by_type(sidb_technology::cell_type::OUTPUT);
+            }
+            default:
+            {
+                return bdl_wires;
+            }
+        }
+    }
+
+  private:
+    /**
+     * The layout's lattice.
+     */
+    const lattice lat;
+    /**
+     * Parameters.
+     */
+    const detect_bdl_wires_params params;
+    /**
+     * The detected wires.
+     */
+    std::vector<bdl_wire> bdl_wires{};
+    /**
+     * Finds a neighboring BDL pair above the given one.
+     *
+     * @param given The given pair.
+     * @param bdl_pairs The pairs not assigned to a wire yet.
+     * @return A neighboring pair above `given`, if any.
+     */
+    [[nodiscard]] std::optional<bdl_pair<lattice_site>>
+    find_bdl_neighbor_above(const bdl_pair<lattice_site>&           given,
+                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const noexcept
+    {
+        const auto it = std::ranges::find_if(
+            bdl_pairs,
+            [this, &given](const auto& bdl)
+            {
+                return lat.nm_distance(given.lower, bdl.upper) < params.threshold_bdl_interdistance ||
+                       (lat.nm_distance(given.upper, bdl.lower) < params.threshold_bdl_interdistance &&
+                        !given.equal_ignore_type(bdl) && given > bdl);
+            });
+
+        if (it != bdl_pairs.cend())
+        {
+            return *it;
+        }
+
+        return std::nullopt;
+    }
+    /**
+     * Finds a neighboring BDL pair below the given one.
+     *
+     * @param given The given pair.
+     * @param bdl_pairs The pairs not assigned to a wire yet.
+     * @return A neighboring pair below `given`, if any.
+     */
+    [[nodiscard]] std::optional<bdl_pair<lattice_site>>
+    find_bdl_neighbor_below(const bdl_pair<lattice_site>&           given,
+                            const std::set<bdl_pair<lattice_site>>& bdl_pairs) const noexcept
+    {
+        const auto it = std::ranges::find_if(
+            bdl_pairs,
+            [this, &given](const auto& bdl)
+            {
+                return lat.nm_distance(given.lower, bdl.upper) < params.threshold_bdl_interdistance ||
+                       (lat.nm_distance(given.upper, bdl.lower) < params.threshold_bdl_interdistance &&
+                        given.not_equal_ignore_type(bdl) && given < bdl);
+            });
+
+        if (it != bdl_pairs.cend())
+        {
+            return *it;
+        }
+
+        return std::nullopt;
+    }
+    /**
+     * Returns the wires that contain a pair of the given type. If an input wire also holds output pairs, those
+     * are removed from the returned copy, and vice versa. All returned unmixed wires have to be equally long.
+     *
+     * @param type The SiDB type to filter by.
+     * @return The filtered wires.
+     */
+    [[nodiscard]] std::vector<bdl_wire> filter_wires_by_type(const sidb_technology::cell_type type) const noexcept
+    {
+        std::vector<bdl_wire> filtered_wires{};
+
+        std::optional<std::size_t> wire_length_of_the_first_wire{};
+
+        std::optional<sidb_technology::cell_type> filtered_out_type{};
+
+        if (type == sidb_technology::cell_type::INPUT)
+        {
+            filtered_out_type = sidb_technology::cell_type::OUTPUT;
+        }
+        else if (type == sidb_technology::cell_type::OUTPUT)
+        {
+            filtered_out_type = sidb_technology::cell_type::INPUT;
+        }
+
+        for (const auto& wire : bdl_wires)
+        {
+            if (!std::ranges::any_of(wire.pairs, [type](const auto& bdl) { return bdl.type == type; }))
+            {
+                continue;
+            }
+
+            if (filtered_out_type.has_value() && std::ranges::any_of(wire.pairs, [&filtered_out_type](const auto& bdl)
+                                                                     { return bdl.type == *filtered_out_type; }))
+            {
+                auto wire_copy = wire;
+                std::erase_if(wire_copy.pairs,
+                              [&filtered_out_type](const auto& bdl) { return bdl.type == *filtered_out_type; });
+                filtered_wires.push_back(std::move(wire_copy));
+
+                continue;
+            }
+
+            filtered_wires.push_back(wire);
+
+            if (!wire_length_of_the_first_wire.has_value())
+            {
+                wire_length_of_the_first_wire = wire.pairs.size();
+            }
+            else
+            {
+                assert(*wire_length_of_the_first_wire == wire.pairs.size() &&
+                       "input or output wires have different lengths");
+            }
+        }
+
+        return filtered_wires;
+    }
+    /**
+     * Collects the input, output, and normal BDL pairs of the layout.
+     *
+     * @param lyt The layout.
+     * @return All BDL pairs.
+     */
+    [[nodiscard]] std::set<bdl_pair<lattice_site>> aggregate_bdl_pairs(const layout& lyt) const noexcept
+    {
+        std::set<bdl_pair<lattice_site>> bdl_pairs{};
+
+        for (const auto type : {sidb_technology::cell_type::INPUT, sidb_technology::cell_type::OUTPUT,
+                                sidb_technology::cell_type::NORMAL})
+        {
+            const auto pairs = detect_bdl_pairs(lyt, type, params.bdl_pairs_params);
+            bdl_pairs.insert(pairs.cbegin(), pairs.cend());
+        }
+
+        return bdl_pairs;
+    }
+};
+
+}  // namespace detail
+
+/**
+ * Detects the BDL wires of an SiDB layout: the BDL pairs of all types are chained into wires along the layout's
+ * lattice whenever two pairs lie within `params.threshold_bdl_interdistance` of each other.
+ *
+ * @param lyt The layout.
+ * @param params Parameters for the BDL pair and wire detection.
+ * @param wire_selection Which wires to return: all, input, or output wires.
+ * @return The detected wires.
+ */
+[[nodiscard]] inline std::vector<bdl_wire>
+detect_bdl_wires(const layout& lyt, const detect_bdl_wires_params& params = {},
+                 const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
+{
+    const detail::detect_bdl_wires_impl p{lyt, params};
+
+    return p.filter_wires(wire_selection);
+}
+
+// ---------------------------------------------------------------------------------------------------------------
+// Transitional: the template versions below serve the algorithms that still run on SiDB cell-level layouts. They
+// disappear once every consumer takes `sidb::layout`.
+// ---------------------------------------------------------------------------------------------------------------
+
+/**
  * This struct encapsulates a vector of `bdl_pair` objects, representing the pairs of SiDBs in the BDL wire.
  *
  * @tparam Lyt SiDB cell-level layout type.
  */
 template <typename Lyt>
-struct bdl_wire
+struct legacy_bdl_wire
 {
     /**
      * Vector of BDL pairs representing the wire.
@@ -95,7 +591,7 @@ struct bdl_wire
     /**
      * Default constructor for an empty BDL wire.
      */
-    bdl_wire() noexcept
+    legacy_bdl_wire() noexcept
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -110,7 +606,7 @@ struct bdl_wire
      *
      * @param p The vector of BDL pairs to initialize the wire with.
      */
-    explicit bdl_wire(const std::vector<bdl_pair<cell<Lyt>>>& p) noexcept : pairs(p)
+    explicit legacy_bdl_wire(const std::vector<bdl_pair<cell<Lyt>>>& p) noexcept : pairs(p)
     {
         static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
         static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -126,11 +622,11 @@ struct bdl_wire
     /**
      * Copy constructor.
      *
-     * Creates a new `bdl_wire` object as a copy of another `bdl_wire` object.
+     * Creates a new `legacy_bdl_wire` object as a copy of another `legacy_bdl_wire` object.
      *
-     * @param other The `bdl_wire` object to copy from.
+     * @param other The `legacy_bdl_wire` object to copy from.
      */
-    bdl_wire(const bdl_wire& other) noexcept :
+    legacy_bdl_wire(const legacy_bdl_wire& other) noexcept :
             pairs(other.pairs),
             port(other.port),
             first_bdl_pair(other.first_bdl_pair),
@@ -143,11 +639,11 @@ struct bdl_wire
     /**
      * Move constructor.
      *
-     * Transfers ownership of the BDL pairs, port, and start/end pairs from another `bdl_wire` object.
+     * Transfers ownership of the BDL pairs, port, and start/end pairs from another `legacy_bdl_wire` object.
      *
-     * @param other The `bdl_wire` object to move from.
+     * @param other The `legacy_bdl_wire` object to move from.
      */
-    bdl_wire(bdl_wire&& other) noexcept :
+    legacy_bdl_wire(legacy_bdl_wire&& other) noexcept :
             pairs(std::move(other.pairs)),
             port(other.port),
             first_bdl_pair(std::move(other.first_bdl_pair)),
@@ -162,12 +658,12 @@ struct bdl_wire
     /**
      * Move assignment operator.
      *
-     * Transfers ownership of the BDL pairs, port, and start/end pairs from another `bdl_wire` object.
+     * Transfers ownership of the BDL pairs, port, and start/end pairs from another `legacy_bdl_wire` object.
      *
-     * @param other The `bdl_wire` object to move from.
+     * @param other The `legacy_bdl_wire` object to move from.
      * @return A reference to the updated object.
      */
-    bdl_wire& operator=(bdl_wire&& other) noexcept
+    legacy_bdl_wire& operator=(legacy_bdl_wire&& other) noexcept
     {
         if (this != &other)
         {
@@ -184,12 +680,12 @@ struct bdl_wire
     /**
      * Copy assignment operator.
      *
-     * Copies the content of another `bdl_wire` object, including start and end pairs.
+     * Copies the content of another `legacy_bdl_wire` object, including start and end pairs.
      *
-     * @param other The `bdl_wire` object to copy from.
+     * @param other The `legacy_bdl_wire` object to copy from.
      * @return A reference to the updated object.
      */
-    bdl_wire& operator=(const bdl_wire& other) noexcept
+    legacy_bdl_wire& operator=(const legacy_bdl_wire& other) noexcept
     {
         if (this != &other)
         {
@@ -201,10 +697,10 @@ struct bdl_wire
         return *this;
     }
     /**
-     * Destructor for bdl_wire.
+     * Destructor for legacy_bdl_wire.
      *
      */
-    ~bdl_wire() noexcept = default;
+    ~legacy_bdl_wire() noexcept = default;
     /**
      * Add a BDL pair to the wire.
      *
@@ -402,10 +898,10 @@ namespace detail
 {
 
 template <typename Lyt>
-class detect_bdl_wires_impl
+class legacy_detect_bdl_wires_impl
 {
   public:
-    detect_bdl_wires_impl(const Lyt& lyt, const detect_bdl_wires_params& ps) : layout{lyt}, params{ps}
+    legacy_detect_bdl_wires_impl(const Lyt& lyt, const detect_bdl_wires_params& ps) : layout{lyt}, params{ps}
     {
         detect_bdl_wires();
     }
@@ -426,11 +922,11 @@ class detect_bdl_wires_impl
     {
         auto bdl_pairs = aggregate_bdl_pairs();
 
-        std::vector<bdl_wire<Lyt>> wires{};
+        std::vector<legacy_bdl_wire<Lyt>> wires{};
 
         while (!bdl_pairs.empty())
         {
-            bdl_wire<Lyt> wire{};
+            legacy_bdl_wire<Lyt> wire{};
 
             bool neighbor_bdl_found = true;
 
@@ -491,10 +987,10 @@ class detect_bdl_wires_impl
      * lengths are found, an assertion is triggered.
      *
      * @param selection The type of wires to filter by, specified by the `bdl_wire_selection` enum.
-     * @return A vector of filtered `bdl_wire` objects based on the current selection. If no wires match the selection
-     * criteria, an empty vector is returned.
+     * @return A vector of filtered `legacy_bdl_wire` objects based on the current selection. If no wires match the
+     * selection criteria, an empty vector is returned.
      */
-    [[nodiscard]] std::vector<bdl_wire<Lyt>> filter_wires(const bdl_wire_selection& selection) const noexcept
+    [[nodiscard]] std::vector<legacy_bdl_wire<Lyt>> filter_wires(const bdl_wire_selection& selection) const noexcept
     {
         switch (selection)
         {
@@ -527,7 +1023,7 @@ class detect_bdl_wires_impl
     /**
      * All detected BDL wires.
      */
-    std::vector<bdl_wire<Lyt>> bdl_wires;
+    std::vector<legacy_bdl_wire<Lyt>> bdl_wires;
     /**
      * This function searches for the first Binary-dot Logic (BDL) pair in a given set of BDL pairs that is above a
      * specified BDL pair. The function returns the first BDL pair that meets the following criteria:
@@ -608,14 +1104,14 @@ class detect_bdl_wires_impl
      * lengths are found.
      *
      * @param type The type of the BDL pair cells to filter by.
-     * @return A vector of `bdl_wire` objects containing cells of the specified type. If no such wires are found,
+     * @return A vector of `legacy_bdl_wire` objects containing cells of the specified type. If no such wires are found,
      *         an empty vector is returned.
      */
-    [[nodiscard]] std::vector<bdl_wire<Lyt>>
+    [[nodiscard]] std::vector<legacy_bdl_wire<Lyt>>
     filter_wires_by_type(const typename fiction::technology<Lyt>::cell_type& type) const noexcept
     {
-        std::vector<bdl_wire<Lyt>> filtered_wires{};
-        std::optional<std::size_t> wire_length_of_the_first_wire{};  // Track the length of the first wire
+        std::vector<legacy_bdl_wire<Lyt>> filtered_wires{};
+        std::optional<std::size_t>        wire_length_of_the_first_wire{};  // Track the length of the first wire
 
         // Filter out the BDL pairs of the opposite type. This is needed if a wire contains both input and output cells.
         // Example: If an input wire is selected, the output cells are removed and vice versa.
@@ -723,14 +1219,15 @@ class detect_bdl_wires_impl
  * @return A vector of BDL wires, where each wire is represented as a vector of BDL pairs.
  */
 template <typename Lyt>
-[[nodiscard]] std::vector<bdl_wire<Lyt>>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] std::vector<legacy_bdl_wire<Lyt>>
 detect_bdl_wires(const Lyt& lyt, const detect_bdl_wires_params& params = {},
                  const bdl_wire_selection wire_selection = bdl_wire_selection::ALL) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    detail::detect_bdl_wires_impl<Lyt> p{lyt, params};
+    detail::legacy_detect_bdl_wires_impl<Lyt> p{lyt, params};
 
     return p.filter_wires(wire_selection);
 }
