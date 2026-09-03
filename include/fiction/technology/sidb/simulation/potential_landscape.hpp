@@ -327,8 +327,8 @@ class potential_landscape
 
             for (std::size_t j = 0; j < n_; ++j)
             {
-                collect += potentials_[(i * n_) + j] *
-                           static_cast<double>(model::charge_state_to_sign(cd.get_charge_state_by_index(j)));
+                collect +=
+                    potentials_[(i * n_) + j] * static_cast<double>(model::charge_state_to_sign(cd.charge_states()[j]));
             }
 
             pot[i] += collect;
@@ -370,7 +370,7 @@ class potential_landscape
 
         for (std::size_t i = 0; i < n_; ++i)
         {
-            const auto q = static_cast<double>(model::charge_state_to_sign(cd.get_charge_state_by_index(i)));
+            const auto q = static_cast<double>(model::charge_state_to_sign(cd.charge_states()[i]));
 
             collect_ext += local_ext_pot_[i] * q;
             collect += local_internal_potential[i] * q;
@@ -390,7 +390,7 @@ class potential_landscape
             for (std::size_t i = 0; i < n_; ++i)
             {
                 pot_at_defect += defect_sidb_potentials_[(d * n_) + i] *
-                                 static_cast<double>(model::charge_state_to_sign(cd.get_charge_state_by_index(i)));
+                                 static_cast<double>(model::charge_state_to_sign(cd.charge_states()[i]));
             }
 
             collect_ext += local_ext_pot_at_defect_[d] * q;
@@ -426,11 +426,11 @@ class potential_landscape
             const auto& t = thresholds_[i];
 
             const bool valid =
-                (cd.get_charge_state_by_index(i) == model::charge_state::NEGATIVE &&
+                (cd.charge_states()[i] == model::charge_state::NEGATIVE &&
                  v < t[static_cast<std::size_t>(charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)]) ||
-                (cd.get_charge_state_by_index(i) == model::charge_state::POSITIVE &&
+                (cd.charge_states()[i] == model::charge_state::POSITIVE &&
                  v > t[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)]) ||
-                (cd.get_charge_state_by_index(i) == model::charge_state::NEUTRAL &&
+                (cd.charge_states()[i] == model::charge_state::NEUTRAL &&
                  v > t[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_LOWER_BOUND)] &&
                  v < t[static_cast<std::size_t>(charge_transition_threshold_bounds::NEUTRAL_UPPER_BOUND)]);
 
@@ -454,15 +454,15 @@ class potential_landscape
     {
         for (std::size_t i = 0; i < n_; ++i)
         {
-            if (cd.get_charge_state_by_index(i) == model::charge_state::POSITIVE)  // we do nothing with SiDB+
+            if (cd.charge_states()[i] == model::charge_state::POSITIVE)  // we do nothing with SiDB+
             {
                 continue;
             }
 
             for (std::size_t j = 0; j < n_; ++j)
             {
-                if (model::charge_state_to_sign(cd.get_charge_state_by_index(j)) <=
-                    model::charge_state_to_sign(cd.get_charge_state_by_index(i)))
+                if (model::charge_state_to_sign(cd.charge_states()[j]) <=
+                    model::charge_state_to_sign(cd.charge_states()[i]))
                 {
                     continue;
                 }

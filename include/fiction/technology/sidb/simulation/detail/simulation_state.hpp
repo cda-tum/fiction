@@ -238,7 +238,7 @@ class simulation_state
      */
     [[nodiscard]] model::charge_state get_charge_state_by_index(const std::size_t i) const noexcept
     {
-        return cd_.get_charge_state_by_index(i);
+        return cd_.charge_states()[i];
     }
     /**
      * Assigns the charge state of an SiDB.
@@ -322,7 +322,7 @@ class simulation_state
                 for (std::size_t j = 0; j < n_; ++j)
                 {
                     collect += land_->chargeless_potential(i, j) *
-                               static_cast<double>(model::charge_state_to_sign(cd_.get_charge_state_by_index(j)));
+                               static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[j]));
                 }
 
                 local_int_pot_[i] = land_->local_potential_caused_by_defects(i) + collect;
@@ -333,8 +333,8 @@ class simulation_state
             if (history_gray_code_.first != -1)
             {
                 const auto changed     = static_cast<std::size_t>(history_gray_code_.first);
-                const auto charge_diff = static_cast<double>(
-                    model::charge_state_to_sign(cd_.get_charge_state_by_index(changed)) - history_gray_code_.second);
+                const auto charge_diff = static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[changed]) -
+                                                             history_gray_code_.second);
 
                 for (std::size_t j = 0; j < n_; ++j)
                 {
@@ -347,7 +347,7 @@ class simulation_state
             for (const auto& [changed, old_sign] : history_)
             {
                 const auto charge_diff =
-                    static_cast<double>(model::charge_state_to_sign(cd_.get_charge_state_by_index(changed))) - old_sign;
+                    static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[changed])) - old_sign;
 
                 for (std::size_t j = 0; j < n_; ++j)
                 {
@@ -409,8 +409,7 @@ class simulation_state
 
             for (std::size_t i = 0; i < n_; ++i)
             {
-                collect += local_int_pot_[i] *
-                           static_cast<double>(model::charge_state_to_sign(cd_.get_charge_state_by_index(i)));
+                collect += local_int_pot_[i] * static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[i]));
             }
 
             cd_.assign_energy(0.5 * collect);
@@ -507,7 +506,7 @@ class simulation_state
         uint64_t sub_index = 0;
 
         const auto digit = [this](const std::size_t i)
-        { return static_cast<uint64_t>(model::charge_state_to_sign(cd_.get_charge_state_by_index(i)) + int8_t{1}); };
+        { return static_cast<uint64_t>(model::charge_state_to_sign(cd_.charge_states()[i]) + int8_t{1}); };
 
         if (!three_state_.empty())
         {
@@ -851,7 +850,7 @@ class simulation_state
 
         for (std::size_t unocc = 0; unocc < n_; ++unocc)
         {
-            if (cd_.get_charge_state_by_index(unocc) != model::charge_state::NEUTRAL)
+            if (cd_.charge_states()[unocc] != model::charge_state::NEUTRAL)
             {
                 continue;
             }
@@ -1026,7 +1025,7 @@ class simulation_state
         const auto  d            = *dependent_;
         const auto  loc_pot_cell = -local_int_pot_[d];
         const auto& t            = land_->effective_charge_transition_thresholds(d);
-        const auto  current      = cd_.get_charge_state_by_index(d);
+        const auto  current      = cd_.charge_states()[d];
 
         const auto switch_to = [&](const model::charge_state cs)
         {
@@ -1168,7 +1167,7 @@ class simulation_state
 
         const auto flip = [this](const std::size_t i, const model::charge_state cs)
         {
-            if (const auto old = cd_.get_charge_state_by_index(i); old != cs)
+            if (const auto old = cd_.charge_states()[i]; old != cs)
             {
                 history_.emplace_back(i, model::charge_state_to_sign(old));
                 cd_.assign_charge_state_by_index(i, cs);
