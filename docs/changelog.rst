@@ -10,6 +10,8 @@ Unreleased
 
 Added
 #####
+- Documentation:
+    - Added ``nox -s docs`` for local previews, HTML builds, and link checks. Read the Docs uses the same session.
 - Python bindings:
     - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
 
