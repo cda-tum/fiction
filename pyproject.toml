@@ -248,9 +248,7 @@ warn_unreachable = true
 [tool.ruff]
 line-length = 120
 namespace-packages = ["mnt"]
-# Load-bearing, not just extra rules: the `# ruff: ignore[<name>]` suppressions in `docs/conf.py`
-# and the `rule-codes-in-selectors` rule that puts rule names in the selectors below are both
-# preview features. Turning this off makes those suppressions inert
+# `rule-codes-in-selectors` requires preview mode to allow rule names in selectors.
 preview = true
 fix = true
 unsafe-fixes = true

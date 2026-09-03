@@ -22,7 +22,7 @@ jobs:
       contents: read # required to check out the repository
 
     # `mypy` is the one hook `.pre-commit-config.yaml` lists under `ci: skip`. Its environment
-    # needs `numpy`, `matplotlib`, and `sphinx` to resolve the imports of the files it checks,
+    # needs `numpy` and `matplotlib` to resolve the imports of the files it checks,
     # which puts it over the 250 MiB pre-commit.ci allows a hook. It runs here instead, so the
     # dependencies it needs cost nothing and `prek run -a` stays complete locally.
     steps:

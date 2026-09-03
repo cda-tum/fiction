@@ -12,7 +12,7 @@ ci:
   autoupdate_commit_msg: "⬆️ Bump pre-commit hooks"
   autofix_commit_msg: "🎨 Incorporated pre-commit fixes"
   autoupdate_schedule: quarterly
-  # `mypy` needs `numpy`, `matplotlib`, and `sphinx` to resolve the imports of the files it
+  # `mypy` needs `numpy` and `matplotlib` to resolve the imports of the files it
   # checks, which puts its environment over the 250 MiB pre-commit.ci allows a hook. The
   # 🐍 Lint workflow runs it instead
   skip: [mypy]
@@ -164,9 +164,6 @@ repos:
         additional_dependencies:
           - nox
           - pytest
-          # `docs/conf.py` subclasses `docutils`' `Directive` and annotates a Sphinx `app`
-          - sphinx
-          - types-docutils
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
