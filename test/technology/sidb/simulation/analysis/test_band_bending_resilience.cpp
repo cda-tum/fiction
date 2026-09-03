@@ -22,15 +22,20 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::synthesis;
@@ -40,7 +45,7 @@ using test_layout = sidb_cell_clk_lyt_siqad;
 
 TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
-    const auto lyt = blueprints::bestagon_and_gate<test_layout>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_and_gate<test_layout>());
 
     constexpr auto params =
         band_bending_resilience_params{physical_population_stability_params{simulation_parameters{2, -0.32}, 2}};

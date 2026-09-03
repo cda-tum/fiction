@@ -20,6 +20,9 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
@@ -38,9 +41,8 @@ using namespace fiction::utils::math;
 
 TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{24, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -57,7 +59,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -114,7 +116,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
 TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 {
-    const auto lyt = blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -162,7 +164,7 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 #ifdef NDEBUG
 TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
-    const auto lyt = blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base = 2;

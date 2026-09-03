@@ -22,8 +22,10 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
@@ -45,7 +47,6 @@
 #include <vector>
 
 using namespace fiction;
-using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
@@ -206,7 +207,7 @@ TEST_CASE("operational_domain class member functions", "[operational-domain]")
 
 TEST_CASE("Error handling of operational domain algorithms", "[operational-domain]")
 {
-    const sidb_100_cell_clk_lyt_siqad lat{sidb_cell_clk_lyt_siqad{}};  // empty layout
+    const layout lat{};  // empty layout
 
     SECTION("invalid number of dimensions")
     {
@@ -246,11 +247,11 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         // kinks are rejected, and they enumerate the charge configurations of the canvas that the layout's `LOGIC`
         // cells define. Without either, the sketch would silently fall back to a full simulation of the whole
         // parameter space, which is the exhaustive cost it exists to avoid
-        const auto and_gate = blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>();
+        const auto and_gate = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
 
-        const sidb_100_cell_clk_lyt_siqad and_lat{and_gate};
+        const layout and_lat{and_gate};
 
-        REQUIRE(and_lat.num_cells_of_given_type(sidb_technology::cell_type::LOGIC) > 0);
+        REQUIRE(and_lat.num_cells_of_type(sidb_technology::cell_type::LOGIC) > 0);
 
         operational_domain_params sketch_params{};
         sketch_params.operational_params.strategy_to_analyze_operational_status =
@@ -397,7 +398,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
 
 TEST_CASE("SiQAD OR gate", "[operational-domain]")
 {
-    const auto lyt = blueprints::siqad_or_gate<sidb_100_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_100_cell_clk_lyt_siqad>());
 
     operational_domain_stats op_domain_stats{};
 
@@ -422,7 +423,7 @@ TEST_CASE("Three-dimensional operational domain sketch", "[operational-domain]")
     // the sketch determines the operational status by filtering alone, which is a property of a single parameter
     // point and therefore independent of how many dimensions are swept. These cases pin that contract in three
     // dimensions, where the third dimension is the only remaining sweep parameter, `MU_MINUS`
-    const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
+    const layout lat{to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>())};
 
     operational_domain_params params{};
     params.operational_params.sim_params   = simulation_parameters{2, -0.32};
@@ -528,7 +529,7 @@ TEST_CASE("Three-dimensional contour tracing", "[operational-domain]")
     // by a breadth-first search over the operational points that border a non-operational one instead of being walked
     // in clockwise order. What the algorithm promises is unchanged: every point it reports was either simulated or
     // enclosed by the traced boundary
-    const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
+    const layout lat{to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>())};
 
     operational_domain_params params{};
     params.operational_params.sim_params = simulation_parameters{2, -0.32};
@@ -588,7 +589,7 @@ TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]"
     // the parallel helpers slice their work across `min(number_of_threads, work_size)` threads and derive the slice
     // size by dividing by that count, which is zero when there is no work at all. `samples = 0` reaches it through
     // public API
-    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+    const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
@@ -608,7 +609,7 @@ TEST_CASE("Sampling zero points does not divide by zero", "[operational-domain]"
 
 TEST_CASE("Pinning the thread count does not change the operational domain", "[operational-domain]")
 {
-    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+    const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = simulation_parameters{2, -0.32};
@@ -654,9 +655,8 @@ TEST_CASE("Pinning the thread count does not change the operational domain", "[o
 // NOLINTNEXTLINE(*-function-size)
 TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{24, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -673,7 +673,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1408,9 +1408,8 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
 
 TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operational-domain]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{24, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -1427,7 +1426,7 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1447,8 +1446,8 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
     {
         operational_domain_stats op_domain_stats{};
 
-        sidb::simulation::logic::detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt, operational_domain>
-            impl{lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
+        sidb::simulation::logic::detail::operational_domain_impl<tt, operational_domain> impl{
+            lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
 
         const auto op_domain = impl.contour_tracing(50);
 
@@ -1491,9 +1490,8 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
 
 TEST_CASE("Parallel flood fill yields deterministic results", "[operational-domain]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{24, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -1510,7 +1508,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1551,8 +1549,8 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
     {
         operational_domain_stats op_domain_stats{};
 
-        sidb::simulation::logic::detail::operational_domain_impl<sidb_100_cell_clk_lyt_siqad, tt, operational_domain>
-            impl{lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
+        sidb::simulation::logic::detail::operational_domain_impl<tt, operational_domain> impl{
+            lat, std::vector{create_id_tt()}, op_domain_params, op_domain_stats};
 
         const auto op_domain = impl.flood_fill(0, seed_point);
 
@@ -1598,9 +1596,8 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
 
 TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domain]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{20, 10}, "AND gate"};
+    layout lyt{lattice::si_100_2x1(), "AND gate"};
 
     lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::INPUT);
@@ -1619,7 +1616,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -1703,116 +1700,9 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
     }
 }
 
-TEST_CASE("SiQAD's AND gate operational domain computation, using cube coordinates", "[operational-domain]")
+TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]")
 {
-    using layout = sidb_cell_clk_lyt_cube;
-
-    layout lyt{{20, 10}, "AND gate"};
-
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{0, 0, 1}), sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{2, 1, 1}), sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{20, 0, 1}), sidb_technology::cell_type::INPUT);
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{18, 1, 1}), sidb_technology::cell_type::INPUT);
-
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{4, 2, 1}), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{6, 3, 1}), sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{14, 3, 1}), sidb_technology::cell_type::NORMAL);
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{16, 2, 1}), sidb_technology::cell_type::NORMAL);
-
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 6, 0}), sidb_technology::cell_type::OUTPUT);
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 7, 0}), sidb_technology::cell_type::OUTPUT);
-
-    lyt.assign_cell_type(coords::from_siqad<coords::cube>(coords::siqad{10, 9, 1}), sidb_technology::cell_type::NORMAL);
-
-    const sidb_100_cell_clk_lyt_cube lat{lyt};
-
-    simulation_parameters sim_params{};
-    sim_params.base     = 2;
-    sim_params.mu_minus = -0.28;
-
-    operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.sim_params = sim_params;
-    op_domain_params.sweep_dimensions              = {
-        {.dimension = sweep_parameter::EPSILON_R, .min = 5.1, .max = 6.0, .step = 0.1},
-        {.dimension = sweep_parameter::LAMBDA_TF, .min = 4.5, .max = 5.4, .step = 0.1}};
-
-    operational_domain_stats op_domain_stats{};
-
-    SECTION("grid_search")
-    {
-        const auto op_domain =
-            operational_domain_grid_search(lat, std::vector{create_and_tt()}, op_domain_params, &op_domain_stats);
-
-        // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.size() == 100);
-
-        // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
-
-        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-        CHECK(op_domain_stats.num_simulator_invocations == 400);
-        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
-        CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
-        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-    }
-    SECTION("random_sampling")
-    {
-        const auto op_domain = operational_domain_random_sampling(lat, std::vector{create_and_tt()}, 100,
-                                                                  op_domain_params, &op_domain_stats);
-
-        // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.size() <= 100);
-
-        // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
-
-        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-        CHECK(op_domain_stats.num_simulator_invocations <= 400);
-        CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
-        CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
-        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-    }
-    SECTION("flood_fill")
-    {
-        const auto op_domain =
-            operational_domain_flood_fill(lat, std::vector{create_and_tt()}, 1, op_domain_params, &op_domain_stats);
-
-        // check if the operational domain has the correct size (10 steps in each dimension)
-        CHECK(op_domain.size() == 100);
-
-        // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
-
-        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-        CHECK(op_domain_stats.num_simulator_invocations == 400);
-        CHECK(op_domain_stats.num_evaluated_parameter_combinations == 100);
-        CHECK(op_domain_stats.num_operational_parameter_combinations == 100);
-        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-    }
-    SECTION("contour_tracing")
-    {
-        const auto op_domain = operational_domain_contour_tracing(lat, std::vector{create_and_tt()}, 1,
-                                                                  op_domain_params, &op_domain_stats);
-
-        // check if the operational domain has the correct size (max 10 steps in each dimension)
-        CHECK(op_domain.size() <= 100);
-
-        // for the selected range, all samples should be within the parameters and operational
-        check_op_domain_params_and_operational_status(op_domain, op_domain_params, operational_status::OPERATIONAL);
-
-        CHECK(mockturtle::to_seconds(op_domain_stats.time_total) > 0.0);
-        CHECK(op_domain_stats.num_simulator_invocations <= 400);
-        CHECK(op_domain_stats.num_evaluated_parameter_combinations <= 100);
-        CHECK(op_domain_stats.num_operational_parameter_combinations <= 100);
-        CHECK(op_domain_stats.num_non_operational_parameter_combinations == 0);
-    }
-}
-
-TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain]", sidb_111_cell_clk_lyt_siqad)
-{
-    const auto layout = blueprints::and_gate_111<TestType>();
+    const auto layout = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -1899,10 +1789,9 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[operational-domain
     }
 }
 
-TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default physical parameters",
-                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad)
+TEST_CASE("AND gate with Bestagon shape and kink states at default physical parameters", "[operational-domain]")
 {
-    const auto layout = blueprints::and_gate_with_kink_states<TestType>();
+    const auto layout = to_sidb_layout(blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -1945,11 +1834,11 @@ TEMPLATE_TEST_CASE("AND gate with Bestagon shape and kink states at default phys
     }
 }
 
-TEMPLATE_TEST_CASE("Grid search to determine the operational domain. The operational status is determined by physical "
-                   "simulation and the efficient but approximate method of pruning only.",
-                   "[operational-domain]", sidb_100_cell_clk_lyt_siqad)
+TEST_CASE("Grid search to determine the operational domain. The operational status is determined by physical "
+          "simulation and the efficient but approximate method of pruning only.",
+          "[operational-domain]")
 {
-    const auto layout = blueprints::bestagon_and<TestType>();
+    const auto layout = to_sidb_layout(blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -2034,7 +1923,7 @@ TEST_CASE("critical_temperature_domain class member functions", "[operational-do
 TEST_CASE("Bestagon AND gate operational domain and temperature computation, using siqad coordinates",
           "[operational-domain]")
 {
-    const auto lyt = blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>());
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;

@@ -23,6 +23,9 @@
 
 #include <fiction/layouts/cell_level_layout.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -47,9 +50,9 @@ using namespace fiction::synthesis;
 
 TEST_CASE("SiQAD OR gate", "[is-operational]")
 {
-    const auto or_gate = blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>();
+    const auto or_gate = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
 
-    const sidb_100_cell_clk_lyt_siqad lat{or_gate};
+    const layout lat{or_gate};
 
     auto op_params = is_operational_params{
         .sim_params = simulation_parameters{2, -0.32},
@@ -119,7 +122,7 @@ TEST_CASE("SiQAD OR gate", "[is-operational]")
 
 TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operational]")
 {
-    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::two_input_two_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>());
 
     const auto op_params =
         is_operational_params{.sim_params                = simulation_parameters{2, -0.32},
@@ -134,9 +137,9 @@ TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operationa
 
 TEST_CASE("SiQAD NAND gate", "[is-operational]")
 {
-    const auto nand_gate = blueprints::siqad_nand_gate<sidb_cell_clk_lyt_siqad>();
+    const auto nand_gate = to_sidb_layout(blueprints::siqad_nand_gate<sidb_cell_clk_lyt_siqad>());
 
-    const sidb_100_cell_clk_lyt_siqad lat{nand_gate};
+    const layout lat{nand_gate};
 
     auto op_params = is_operational_params{
         .sim_params = simulation_parameters{2, -0.28},
@@ -167,7 +170,7 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
     const auto output_wires =
         detect_bdl_wires(lat, detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}, bdl_wire_selection::OUTPUT);
 
-    sidb_100_cell_clk_lyt_siqad canvas_lyt{};
+    layout canvas_lyt{};
     canvas_lyt.assign_cell_type({10, 4, 1}, sidb_technology::cell_type::NORMAL);
     canvas_lyt.assign_cell_type({10, 5, 1}, sidb_technology::cell_type::NORMAL);
 
@@ -181,7 +184,6 @@ TEST_CASE("SiQAD NAND gate", "[is-operational]")
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
     layout lyt{};
 
@@ -202,7 +204,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     CHECK(is_operational(lat, std::vector<tt>{create_and_tt()}, is_operational_params{simulation_parameters{2, -0.28}})
               .first == operational_status::OPERATIONAL);
@@ -212,7 +214,7 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-operat
 
 TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 {
-    const auto lyt = blueprints::bestagon_fo2<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_fo2<sidb_cell_clk_lyt_siqad>());
 
     SECTION("using QuickExact")
     {
@@ -251,11 +253,11 @@ TEST_CASE("Bestagon FO2 gate", "[is-operational]")
 
 TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 {
-    const auto lyt = blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
 
     CHECK(lyt.num_cells() == 29);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     CHECK(is_operational(lat, create_crossing_wire_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -267,7 +269,7 @@ TEST_CASE("Bestagon CROSSING gate", "[is-operational]")
 
 TEST_CASE("Bestagon AND gate", "[is-operational]")
 {
-    auto lyt = blueprints::bestagon_and<sidb_defect_cell_clk_lyt_siqad>();
+    auto lyt = to_sidb_layout(blueprints::bestagon_and<sidb_defect_cell_clk_lyt_siqad>());
 
     const simulation_parameters params{2, -0.32};
 
@@ -289,12 +291,12 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
                   .first == operational_status::OPERATIONAL);
 
         // move defect one to the right
-        lyt.move_sidb_defect({3, 16, 1}, {4, 16, 1});
+        lyt.move_defect({3, 16, 1}, {4, 16, 1});
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params, engine::QUICKEXACT})
                   .first == operational_status::OPERATIONAL);
 
         // move defect one to the right
-        lyt.move_sidb_defect({4, 16, 1}, {5, 16, 1});
+        lyt.move_defect({4, 16, 1}, {5, 16, 1});
         CHECK(is_operational(lyt, std::vector<tt>{create_and_tt()}, is_operational_params{params, engine::QUICKEXACT})
                   .first == operational_status::NON_OPERATIONAL);
     }
@@ -319,7 +321,7 @@ TEST_CASE("Bestagon AND gate", "[is-operational]")
 
 TEST_CASE("SiQAD AND gate", "[is-operational]")
 {
-    auto lyt = blueprints::siqad_and_gate<sidb_defect_cell_clk_lyt_siqad>();
+    auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_defect_cell_clk_lyt_siqad>());
 
     simulation_parameters params{2, -0.28};
 
@@ -364,7 +366,6 @@ TEST_CASE("SiQAD AND gate", "[is-operational]")
 
 TEST_CASE("Not working diagonal Wire", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
     layout lyt{};
 
@@ -387,17 +388,16 @@ TEST_CASE("Not working diagonal Wire", "[is-operational]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     CHECK(is_operational(lat, std::vector<tt>{create_id_tt()},
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
               .first == operational_status::NON_OPERATIONAL);
 }
 
-TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", sidb_111_cell_clk_lyt_siqad,
-                   cds_sidb_111_cell_clk_lyt_siqad)
+TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]")
 {
-    const auto lyt = blueprints::and_gate_111<TestType>();
+    const auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
 
     SECTION("check operation for different values of mu")
     {
@@ -419,8 +419,9 @@ TEMPLATE_TEST_CASE("AND gate on the H-Si(111)-1x1 surface", "[is-operational]", 
     SECTION("verify the operational status of the AND gate, which is mirrored on the x-axis. Note that the input BDL "
             "pairs are located at the bottom, while the output BDL pairs are at the top.")
     {
-        const auto lyt_mirrored_x = blueprints::and_gate_111_mirrored_on_the_x_axis<TestType>();
-        const auto op_inputs      = operational_input_patterns(
+        const auto lyt_mirrored_x = to_sidb_layout(
+            blueprints::and_gate_111_mirrored_on_the_x_axis<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
+        const auto op_inputs = operational_input_patterns(
             lyt_mirrored_x, std::vector<tt>{create_and_tt()},
             is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT});
         CHECK(op_inputs.size() == 4);
@@ -432,7 +433,7 @@ TEST_CASE(
     "AND gate with Bestagon structure and kink state on right input wire for input 01 and left input wire for input 10",
     "[is-operational]")
 {
-    const auto lyt = blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::and_gate_with_kink_states<sidb_cell_clk_lyt_siqad>());
 
     SECTION("allow kink states")
     {
@@ -469,9 +470,8 @@ TEST_CASE(
 
 TEST_CASE("BDL wire", "[is-operational]")
 {
-    using layout = sidb_cell_clk_lyt_siqad;
 
-    layout lyt{{24, 0}, "BDL wire"};
+    layout lyt{lattice::si_100_2x1(), "BDL wire"};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::INPUT);
@@ -488,7 +488,7 @@ TEST_CASE("BDL wire", "[is-operational]")
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     simulation_parameters sim_params{};
 
@@ -501,30 +501,30 @@ TEST_CASE("BDL wire", "[is-operational]")
 
 TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks are rejected", "[is-operational]")
 {
-    sidb_cell_clk_lyt_siqad lyt{};
+    layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({11, 7, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
-    lyt.assign_cell_type({13, 13, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
+    lyt.assign_cell_type({11, 7, 0}, sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({13, 13, 0}, sidb_technology::cell_type::LOGIC);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
     simulation_parameters sim_params{};
 
@@ -557,7 +557,8 @@ TEST_CASE("Special wire that cannot be pruned, but is non-operational when kinks
 #ifdef NDEBUG
 TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 {
-    const auto lyt = blueprints::crossing_bestagon_shape_input_down_output_up<sidb_cell_clk_lyt_siqad>();
+    const auto lyt =
+        to_sidb_layout(blueprints::crossing_bestagon_shape_input_down_output_up<sidb_cell_clk_lyt_siqad>());
 
     CHECK(is_operational(lyt, create_crossing_wire_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
@@ -586,11 +587,11 @@ TEST_CASE("flipped CX bestagon gate", "[is-operational]")
 
 TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quality]")
 {
-    const auto lyt = blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_crossing<sidb_cell_clk_lyt_siqad>());
 
     CHECK(lyt.num_cells() == 29);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     SECTION("without predetermined wires")
     {
@@ -636,11 +637,11 @@ TEST_CASE("is operational check for Bestagon CX gate", "[is-operational], [quali
 
 TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [quality]")
 {
-    const auto lyt = blueprints::bestagon_double_wire<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_double_wire<sidb_cell_clk_lyt_siqad>());
 
     CHECK(lyt.num_cells() == 30);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     CHECK(is_operational(lat, create_double_wire_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -652,11 +653,11 @@ TEST_CASE("is operational check for Bestagon double wire", "[is-operational], [q
 
 TEST_CASE("is operational check for Bestagon half adder", "[is-operational], [quality]")
 {
-    const auto lyt = blueprints::bestagon_ha<sidb_cell_clk_lyt_siqad>();
+    const auto lyt = to_sidb_layout(blueprints::bestagon_ha<sidb_cell_clk_lyt_siqad>());
 
     CHECK(lyt.num_cells() == 26);
 
-    const sidb_100_cell_clk_lyt_siqad lat{lyt};
+    const layout lat{lyt};
 
     CHECK(is_operational(lat, create_half_adder_tt(),
                          is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT})
@@ -689,7 +690,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
     SECTION("SiQAD AND gate")
     {
-        const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+        const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
 
         for (const auto condition : {is_operational_params::operational_condition::TOLERATE_KINKS,
                                      is_operational_params::operational_condition::REJECT_KINKS})
@@ -709,7 +710,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
     SECTION("SiQAD OR gate")
     {
-        const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>()};
+        const layout lat{to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>())};
 
         is_operational_params params{.sim_params = simulation_parameters{2, -0.28}, .sim_engine = engine::QUICKEXACT};
         params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
@@ -719,7 +720,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
     SECTION("Bestagon AND gate")
     {
-        const sidb_100_cell_clk_lyt_siqad lat{blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>()};
+        const layout lat{to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>())};
 
         const is_operational_params params{.sim_params = simulation_parameters{2, -0.32},
                                            .sim_engine = engine::QUICKEXACT};
@@ -730,7 +731,7 @@ TEST_CASE("Pre-generated input pattern layouts match the layout-based overload",
 
 TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]")
 {
-    const sidb_100_cell_clk_lyt_siqad lat{blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>()};
+    const layout lat{to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>())};
 
     const is_operational_params params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT};
 
@@ -746,8 +747,7 @@ TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]
 
     SECTION("Too few layouts for the specification")
     {
-        const std::vector<sidb_100_cell_clk_lyt_siqad> too_few{input_pattern_layouts.cbegin(),
-                                                               input_pattern_layouts.cbegin() + 2};
+        const std::vector<layout> too_few{input_pattern_layouts.cbegin(), input_pattern_layouts.cbegin() + 2};
 
         CHECK_THROWS_AS(is_operational(too_few, std::vector<tt>{create_and_tt()}, params, input_wires, output_wires),
                         std::invalid_argument);
@@ -763,30 +763,30 @@ TEST_CASE("Pre-generated input pattern layouts are validated", "[is-operational]
 TEST_CASE("Both is_operational entry points apply the same canvas rule", "[is-operational]")
 {
     // a layout with canvas SiDBs, so that both entry points can build a canvas layout from its `LOGIC` cells
-    sidb_cell_clk_lyt_siqad lyt{};
+    layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, sidb_cell_clk_lyt_siqad::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({11, 7, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
-    lyt.assign_cell_type({13, 13, 0}, sidb_cell_clk_lyt_siqad::cell_type::LOGIC);
+    lyt.assign_cell_type({11, 7, 0}, sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({13, 13, 0}, sidb_technology::cell_type::LOGIC);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 16, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, sidb_cell_clk_lyt_siqad::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, sidb_technology::cell_type::NORMAL);
 
     const auto spec = std::vector<tt>{create_id_tt()};
 

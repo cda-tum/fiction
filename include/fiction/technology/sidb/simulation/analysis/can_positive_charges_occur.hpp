@@ -18,51 +18,70 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/traits.hpp"
 
 #include <cstddef>
-#include <cstdint>
 
 namespace fiction::sidb::simulation::analysis
 {
 
 /**
- * This algorithm determines if positively charged SiDBs can occur in a given SiDB cell-level layout due to strong
- * electrostatic interaction.
+ * Checks whether positively charged SiDBs can occur in a layout under the given physical parameters, i.e., whether
+ * the band bending of the fully negatively charged layout, which maximizes every local potential, pushes any SiDB
+ * past its positive transition threshold. If it does not in this extreme case, it does not for any other charge
+ * distribution either.
  *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to be analyzed.
- * @param sim_params Physical parameters used to determine whether positively charged SiDBs can occur.
+ * @param land The potential landscape of the layout under the parameters to check.
+ * @return `true` if at least one SiDB can be positively charged, `false` otherwise.
  */
-template <typename Lyt>
-[[nodiscard]] bool can_positive_charges_occur(const Lyt&                                lyt,
-                                              const sidb::model::simulation_parameters& sim_params) noexcept
+[[nodiscard]] inline bool can_positive_charges_occur(const potential_landscape& land) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    const auto local_potentials =
+        land.local_internal_potentials(charge_distribution{land.sites(), model::charge_state::NEGATIVE});
 
-    // The charge layout is initialized with negatively charged SiDBs. Therefore, the local electrostatic potentials are
-    // maximal. In this extreme case, if the banding is not sufficient for any SiDB to be positively charged, it will
-    // not be for any other charge distribution. Therefore, no positively charged SiDBs can occur.
-    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
-    charge_lyt.assign_physical_parameters(sim_params);
-    charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
-
-    for (uint64_t i = 0; i < lyt.num_cells(); ++i)
+    for (std::size_t i = 0; i < land.num_sidbs(); ++i)
     {
-        // access does not need to be checked since 0 <= i < lyt.num_cells()
-        if (-*charge_lyt.get_local_internal_potential_by_index(i) >
-            charge_lyt.get_effective_charge_transition_thresholds(
-                i)[static_cast<std::size_t>(sidb::surfaces::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
+        if (-local_potentials[i] >
+            land.effective_charge_transition_thresholds(
+                i)[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
         {
             return true;
         }
     }
 
     return false;
+}
+/**
+ * Checks whether positively charged SiDBs can occur in a layout under the given physical parameters. See the
+ * `potential_landscape` overload.
+ *
+ * @param lyt The layout to check.
+ * @param sim_params The physical parameters.
+ * @return `true` if at least one SiDB can be positively charged, `false` otherwise.
+ */
+[[nodiscard]] inline bool can_positive_charges_occur(const layout&                       lyt,
+                                                     const model::simulation_parameters& sim_params) noexcept
+{
+    return can_positive_charges_occur(potential_landscape{lyt, sim_params});
+}
+/**
+ * Transitional overload for SiDB cell-level layouts, which are converted with `to_sidb_layout` first.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout to check.
+ * @param sim_params The physical parameters.
+ * @return `true` if at least one SiDB can be positively charged, `false` otherwise.
+ */
+template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] bool can_positive_charges_occur(const Lyt& lyt, const model::simulation_parameters& sim_params) noexcept
+{
+    return can_positive_charges_occur(to_sidb_layout(lyt), sim_params);
 }
 
 }  // namespace fiction::sidb::simulation::analysis
