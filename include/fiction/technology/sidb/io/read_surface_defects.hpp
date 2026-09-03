@@ -17,10 +17,13 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -175,6 +178,72 @@ class read_surface_defects_impl
 
 #pragma GCC diagnostic pop
 
+/**
+ * Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of row `y` becomes the defect at column `x` of
+ * single-SiDB row `y`.
+ */
+class surface_defects_reader
+{
+  public:
+    surface_defects_reader(std::istream& s, const std::string_view& name) :
+            defect_matrix{std::istreambuf_iterator<char>(s), {}}  // read the stream into a string to perform regex
+    {
+        lyt.set_layout_name(std::string{name});
+    }
+
+    layout run()
+    {
+        // each match is one row
+        const std::vector<std::smatch> matrix_matches{
+            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX),
+            std::sregex_iterator()};
+
+        std::size_t row_length = 0;
+
+        for (std::size_t y = 0; y < matrix_matches.size(); ++y)
+        {
+            const auto row_str = matrix_matches[y].str();
+
+            // each match is a defect index
+            const std::vector<std::smatch> row_matches{
+                std::sregex_iterator(std::cbegin(row_str), std::cend(row_str), defects::RE_ROW_INDICES),
+                std::sregex_iterator()};
+
+            if (row_matches.size() < row_length)
+            {
+                // row y has fewer SiDBs than previous rows
+                throw missing_position_exception(static_cast<uint32_t>(y));
+            }
+
+            row_length = std::max(row_length, row_matches.size());
+
+            for (std::size_t x = 0; x < row_matches.size(); ++x)
+            {
+                const auto defect_index = std::stoi(row_matches[x].str());
+
+                try
+                {
+                    lyt.assign_defect(
+                        site_at_row(static_cast<int32_t>(x), static_cast<int32_t>(y)),
+                        sidb::model::defect{defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});
+                }
+                catch (const std::out_of_range&)
+                {
+                    // defect index does not match any supported defects
+                    throw unsupported_defect_index_exception(defect_index);
+                }
+            }
+        }
+
+        return lyt;
+    }
+
+  private:
+    layout lyt{};
+
+    const std::string defect_matrix;
+};
+
 }  // namespace detail
 
 /**
@@ -227,6 +296,45 @@ sidb::surfaces::defect_surface<Lyt> read_surface_defects(const std::string_view&
     }
 
     const auto lyt = read_surface_defects<Lyt>(is, name);
+    is.close();
+
+    return lyt;
+}
+
+/**
+ * Reads a defect matrix from a stream into a defects-only `sidb::layout` on the H-Si(100)-2x1 lattice. Each `[...]`
+ * row lists one defect index per column; entry `x` of row `y` becomes the defect at column `x` of single-SiDB row `y`.
+ *
+ * @param is The input stream to read from.
+ * @param name The name to give to the layout.
+ * @return The layout holding the defects.
+ * @throws unsupported_defect_index_exception if an index names no known defect type.
+ * @throws missing_position_exception if a row is shorter than a row before it.
+ */
+[[nodiscard]] inline layout read_surface_defects(std::istream& is, const std::string_view& name = "")
+{
+    detail::surface_defects_reader p{is, name};
+
+    return p.run();
+}
+/**
+ * Reads a defect matrix from a file into a defects-only `sidb::layout`. See the stream overload for the format.
+ *
+ * @param filename The file to read.
+ * @param name The name to give to the layout.
+ * @return The layout holding the defects.
+ * @throws std::ifstream::failure if the file cannot be opened.
+ */
+[[nodiscard]] inline layout read_surface_defects(const std::string_view& filename, const std::string_view& name = "")
+{
+    std::ifstream is{std::string{filename}, std::ifstream::in};
+
+    if (!is.is_open())
+    {
+        throw std::ifstream::failure("could not open file");
+    }
+
+    auto lyt = read_surface_defects(is, name);
     is.close();
 
     return lyt;

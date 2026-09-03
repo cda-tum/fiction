@@ -18,6 +18,7 @@
 #pragma once
 
 #include "fiction/technology/qca/technology.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
@@ -97,6 +98,23 @@ inline constexpr const char* LATTICE_LAYER_DEFINITION_SI_111 = "        <layer_p
                                                                "                 <N>2</N>\n"
                                                                "                 <b1 x=\"0\" y=\"0\"/>\n"
                                                                "                 <b2 x=\"3.3255\" y=\"1.92\"/>\n"
+                                                               "            </lat_vec>\n"
+                                                               "        </layer_prop>\n";
+inline constexpr const char* LATTICE_LAYER_DEFINITION        = "        <layer_prop>\n"
+                                                               "            <name>Lattice</name>\n"
+                                                               "            <type>Lattice</type>\n"
+                                                               "            <role>Design</role>\n"
+                                                               "            <zoffset>0</zoffset>\n"
+                                                               "            <zheight>0</zheight>\n"
+                                                               "            <visible>1</visible>\n"
+                                                               "            <active>0</active>\n"
+                                                               "            <lat_vec>\n"
+                                                               "                <name>{}</name>\n"
+                                                               "                <a1 x=\"{}\" y=\"{}\"/>\n"
+                                                               "                <a2 x=\"{}\" y=\"{}\"/>\n"
+                                                               "                <N>2</N>\n"
+                                                               "                <b1 x=\"{}\" y=\"{}\"/>\n"
+                                                               "                <b2 x=\"{}\" y=\"{}\"/>\n"
                                                                "            </lat_vec>\n"
                                                                "        </layer_prop>\n";
 inline constexpr const char* SCREENSHOT_LAYER_DEFINITION     = "        <layer_prop>\n"
@@ -419,6 +437,106 @@ class write_sqd_layout_impl
     }
 };
 
+/**
+ * Writes an `sidb::layout` as an SQD file: the layout's lattice as the lattice layer, every SiDB as a `<dbdot>` at
+ * its `(n, m, l)` lattice coordinate, and every surface defect as a `<defect>`.
+ */
+class sqd_writer
+{
+  public:
+    sqd_writer(const layout& src, std::ostream& s) : lyt{src}, os{s} {}
+
+    void run()
+    {
+        std::stringstream header{}, design{};
+
+        header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
+
+        const auto current_time = std::time(nullptr);
+        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time));
+
+        header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
+
+        const auto lattice_layer =
+            fmt::format(siqad::LATTICE_LAYER_DEFINITION, lyt.get_lattice().name, lyt.get_lattice().a1.first,
+                        lyt.get_lattice().a1.second, lyt.get_lattice().a2.first, lyt.get_lattice().a2.second,
+                        lyt.get_lattice().basis[0].first, lyt.get_lattice().basis[0].second,
+                        lyt.get_lattice().basis[1].first, lyt.get_lattice().basis[1].second);
+
+        std::vector<const char*> active_layers{lattice_layer.c_str(), siqad::SCREENSHOT_LAYER_DEFINITION,
+                                               siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
+
+        if (lyt.num_defects() > 0)
+        {
+            active_layers.push_back(siqad::DEFECT_LAYER_DEFINITION);
+        }
+
+        design << fmt::format(siqad::LAYERS_BLOCK, fmt::join(active_layers, "")) << siqad::OPEN_DESIGN
+               << siqad::LATTICE_LAYER << siqad::MISC_LAYER;
+
+        design << siqad::OPEN_DB_LAYER;
+        lyt.foreach_cell([this, &design](const auto& s) { write_db_dot(design, s); });
+        design << siqad::CLOSE_DB_LAYER;
+
+        if (lyt.num_defects() > 0)
+        {
+            design << siqad::OPEN_DEFECTS_LAYER;
+            lyt.foreach_defect([&design](const auto& sd) { write_defect(design, sd.first, sd.second); });
+            design << siqad::CLOSE_DEFECTS_LAYER;
+        }
+
+        design << siqad::ELECTRODE_LAYER << siqad::CLOSE_DESIGN;
+
+        os << header.str() << design.str() << siqad::CLOSE_SIQAD;
+    }
+
+  private:
+    const layout& lyt;
+    std::ostream& os;
+
+    void write_db_dot(std::stringstream& design, const lattice_site& s) const
+    {
+        std::string type_str{};
+
+        switch (lyt.get_cell_type(s))
+        {
+            case sidb_technology::cell_type::INPUT:
+            {
+                type_str = fmt::format(siqad::DOT_TYPE, "input");
+                break;
+            }
+            case sidb_technology::cell_type::OUTPUT:
+            {
+                type_str = fmt::format(siqad::DOT_TYPE, "output");
+                break;
+            }
+            case sidb_technology::cell_type::LOGIC:
+            {
+                type_str = fmt::format(siqad::DOT_TYPE, "logic");
+                break;
+            }
+            case sidb_technology::cell_type::NORMAL:
+            case sidb_technology::cell_type::EMPTY:
+            {
+                break;
+            }
+        }
+
+        design << fmt::format(siqad::DBDOT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, s.x, s.y, s.z), type_str,
+                              siqad::NORMAL_COLOR);
+    }
+    static void write_defect(std::stringstream& design, const lattice_site& s, const sidb::model::defect& d)
+    {
+        const auto it = siqad::defect_type_to_name.find(d.type);
+
+        design << fmt::format(siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, s.x, s.y, s.z),
+                              sidb::model::is_charged_defect_type(d) ?
+                                  fmt::format(siqad::COULOMB, d.charge, d.epsilon_r, d.lambda_tf) :
+                                  "",
+                              it == siqad::defect_type_to_name.cend() ? "Unknown" : it->second);
+    }
+};
+
 }  // namespace detail
 
 /**
@@ -457,6 +575,39 @@ void write_sqd_layout(const Lyt& lyt, std::ostream& os)
  */
 template <typename Lyt>
 void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
+{
+    std::ofstream os{std::string{filename}, std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_sqd_layout(lyt, os);
+    os.close();
+}
+
+/**
+ * Writes an `sidb::layout` as an SQD file to a stream. The layout's lattice becomes the file's lattice layer, SiDBs
+ * are written at their `(n, m, l)` lattice coordinates, and surface defects, if any, in a defect layer.
+ *
+ * @param lyt Layout to write.
+ * @param os Output stream to write into.
+ */
+inline void write_sqd_layout(const layout& lyt, std::ostream& os)
+{
+    detail::sqd_writer p{lyt, os};
+
+    p.run();
+}
+/**
+ * Writes an `sidb::layout` as an SQD file. See the stream overload for the file's content.
+ *
+ * @param lyt Layout to write.
+ * @param filename File to write into.
+ * @throws std::ofstream::failure if the file cannot be opened.
+ */
+inline void write_sqd_layout(const layout& lyt, const std::string_view& filename)
 {
     std::ofstream os{std::string{filename}, std::ofstream::out};
 

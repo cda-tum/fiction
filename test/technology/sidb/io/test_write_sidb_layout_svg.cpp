@@ -648,3 +648,50 @@ TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for
         }
     }
 }
+
+TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
+{
+    sidb::layout lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+
+    SECTION("light mode")
+    {
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL));
+    }
+    SECTION("dark mode")
+    {
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL));
+    }
+    SECTION("dark mode and hidden lattice")
+    {
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, os,
+                              {.color_background = write_sidb_layout_svg_params::color_mode::DARK,
+                               .lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_HIDE_LATTICE));
+    }
+    SECTION("H-Si(111)-1x1 surface")
+    {
+        lyt.set_lattice(sidb::lattice::si_111_1x1());
+
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL_111));
+    }
+}
