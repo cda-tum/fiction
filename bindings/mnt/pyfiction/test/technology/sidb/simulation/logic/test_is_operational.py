@@ -14,44 +14,44 @@ from mnt.pyfiction import (
     bdl_input_iterator_params,
     bdl_wire_selection,
     create_and_tt,
-    detect_bdl_wires_100,
+    detect_bdl_wires,
     detect_bdl_wires_params,
     generate_bdl_input_pattern_layouts,
     is_kink_induced_non_operational,
     is_operational,
     is_operational_params,
     kink_induced_non_operational_input_patterns,
+    lattice_site,
     operational_analysis_strategy,
     operational_condition,
     operational_input_patterns,
     operational_status,
-    read_sqd_layout_100,
-    read_sqd_layout_111,
-    sidb_100_lattice,
+    read_sqd_layout,
+    sidb_layout,
     sidb_simulation_parameters,
     sidb_technology,
 )
 
 
 def test_is_operational():
-    lyt = sidb_100_lattice()
+    lyt = sidb_layout()
 
-    lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
 
-    lyt.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type((19, 3), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(19, 1, 1), sidb_technology.cell_type.INPUT)
 
-    lyt.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((10, 12, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type((10, 14, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(10, 6, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(10, 7, 0), sidb_technology.cell_type.OUTPUT)
 
-    lyt.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.28)
@@ -67,8 +67,8 @@ def test_is_operational():
     assert op_status == operational_status.NON_OPERATIONAL
 
     # pre-determined I/O pins
-    output_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
-    input_bdl_wires = detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
+    output_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT)
+    input_bdl_wires = detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT)
     [op_status, _evaluated_input_combinations] = is_operational(
         lyt,
         [create_and_tt()],
@@ -79,9 +79,9 @@ def test_is_operational():
     assert op_status == operational_status.NON_OPERATIONAL
 
     # pre-determined I/O pins and canvas layout
-    canvas_lyt = sidb_100_lattice()
-    canvas_lyt.assign_cell_type((4, 5), sidb_technology.cell_type.LOGIC)
-    canvas_lyt.assign_cell_type((6, 7), sidb_technology.cell_type.LOGIC)
+    canvas_lyt = sidb_layout()
+    canvas_lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.LOGIC)
+    canvas_lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.LOGIC)
     [op_status, _evaluated_input_combinations] = is_operational(
         lyt,
         [create_and_tt()],
@@ -99,29 +99,29 @@ def and_gate_with_bdl_wires():
     Returns:
         The layout, its input BDL wires, and its output BDL wires.
     """
-    lyt = sidb_100_lattice()
+    lyt = sidb_layout()
 
-    lyt.assign_cell_type((0, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type((2, 3), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(2, 1, 1), sidb_technology.cell_type.INPUT)
 
-    lyt.assign_cell_type((20, 1), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type((19, 3), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(20, 0, 1), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(19, 1, 1), sidb_technology.cell_type.INPUT)
 
-    lyt.assign_cell_type((4, 5), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((6, 7), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(4, 2, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(6, 3, 1), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((14, 7), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((16, 5), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(14, 3, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(16, 2, 1), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((10, 12, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type((10, 14, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(10, 6, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(10, 7, 0), sidb_technology.cell_type.OUTPUT)
 
-    lyt.assign_cell_type((10, 19), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(10, 9, 1), sidb_technology.cell_type.NORMAL)
 
     return (
         lyt,
-        detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT),
-        detect_bdl_wires_100(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT),
+        detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.INPUT),
+        detect_bdl_wires(lyt, detect_bdl_wires_params(), bdl_wire_selection.OUTPUT),
     )
 
 
@@ -185,7 +185,7 @@ def test_a_layout_list_that_does_not_match_the_specification_is_rejected(and_gat
 
 
 def test_and_gate_kinks(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "AND_mu_032_kinks.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -202,7 +202,7 @@ def test_and_gate_kinks(resources_dir):
 
 
 def test_and_gate_non_operational_due_to_kinks(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "AND_mu_032_kinks.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -213,7 +213,7 @@ def test_and_gate_non_operational_due_to_kinks(resources_dir):
 
 
 def test_and_gate_non_operational_input_patterns_due_to_kinks(resources_dir):
-    lyt = read_sqd_layout_100(str(resources_dir / "AND_mu_032_kinks.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_kinks.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -224,7 +224,7 @@ def test_and_gate_non_operational_input_patterns_due_to_kinks(resources_dir):
 
 
 def test_and_gate_111_lattice_11_input_pattern(resources_dir):
-    lyt = read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.32)
@@ -255,7 +255,7 @@ def test_and_gate_111_lattice_11_input_pattern(resources_dir):
 
 
 def test_and_gate_111_lattice_operational_input_pattern(resources_dir):
-    lyt = read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
+    lyt = read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
     params = is_operational_params()
     params.simulation_parameters = sidb_simulation_parameters(2, -0.30)

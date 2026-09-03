@@ -13,14 +13,14 @@ from itertools import pairwise
 import pytest
 
 from mnt.pyfiction import (
-    bdl_input_iterator_100,
+    bdl_input_iterator,
     calculate_energy_and_state_type_with_kinks_accepted,
     calculate_energy_distribution,
     create_and_tt,
     detect_bdl_pairs,
     occupation_probability_gate_based,
     quickexact,
-    read_sqd_layout_100,
+    read_sqd_layout,
     sidb_technology,
     state_type,
 )
@@ -39,10 +39,10 @@ EXPECTED_ENERGIES_AND_STATE_TYPES = [
 
 
 def test_calculate_energy_and_state_type(resources_dir):
-    layout = read_sqd_layout_100(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
+    layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     # advance the iterator to input pattern 01
-    input_iterator = bdl_input_iterator_100(layout)
+    input_iterator = bdl_input_iterator(layout)
     input_iterator += 1
     layout_with_inputs = input_iterator.get_layout()
 
