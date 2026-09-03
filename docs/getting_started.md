@@ -31,7 +31,7 @@ To help you getting started with _fiction_, pick the interface that best fits yo
 
 For a full CLI command list or API reference, see the respective documentation sections.
 
-(cli)=
+<span id="cli"></span>
 
 (cli-docker)=
 

@@ -1,4 +1,8 @@
-# Design Rule Violations (DRVs)
+# Verification
+
+Check design rules, compare circuit behavior, and construct virtual miters.
+
+## Design Rule Violations (DRVs)
 
 ::::{tab-set}
 :sync-group: language

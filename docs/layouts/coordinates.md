@@ -141,7 +141,7 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 
 .. autofunction:: mnt.pyfiction.to_cube_coord
 
-.. autofunction:: mnt.pyfiction.to_siqad
+.. autofunction:: mnt.pyfiction.to_siqad_coord
 ```
 
 :::

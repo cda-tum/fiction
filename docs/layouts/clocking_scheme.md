@@ -26,6 +26,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### Columnar
 
 :::{figure} /_static/columnar.png
+:alt: Columnar clocking scheme with phases progressing across columns
 :width: 200
 :::
 
@@ -36,6 +37,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### Row
 
 :::{figure} /_static/row.png
+:alt: Row clocking scheme with phases progressing across rows
 :width: 200
 :::
 
@@ -46,6 +48,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### 2DDWave
 
 :::{figure} /_static/2ddwave.png
+:alt: 2DDWave clocking scheme with phases progressing along two dimensions
 :width: 200
 :::
 
@@ -60,6 +63,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### USE
 
 :::{figure} /_static/use.png
+:alt: USE clocking scheme
 :width: 200
 :::
 
@@ -70,6 +74,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### RES
 
 :::{figure} /_static/res.png
+:alt: RES clocking scheme
 :width: 200
 :::
 
@@ -80,6 +85,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### ESR
 
 :::{figure} /_static/esr.png
+:alt: ESR clocking scheme
 :width: 200
 :::
 
@@ -90,6 +96,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### CFE
 
 :::{figure} /_static/cfe.png
+:alt: CFE clocking scheme
 :width: 200
 :::
 
@@ -100,6 +107,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### Ripple
 
 :::{figure} /_static/ripple.png
+:alt: Ripple clocking scheme
 :width: 200
 :::
 
@@ -110,6 +118,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### SRS
 
 :::{figure} /_static/srs.png
+:alt: SRS clocking scheme
 :width: 200
 :::
 
@@ -120,6 +129,7 @@ This header provides the `clocking_scheme` class that defines general floor plan
 ### BANCS
 
 :::{figure} /_static/bancs.png
+:alt: BANCS clocking scheme
 :width: 150
 :::
 

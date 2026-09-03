@@ -16,6 +16,7 @@ x_{\mathit{hex}} = x_{\mathit{Cart}} + \left \lceil{\left \lfloor{\frac{h}{2}} \
 $$
 
 :::{figure} /_static/hexagonalization.svg
+:alt: Mapping a Cartesian 2DDWave-clocked layout onto a hexagonal row-clocked layout
 :width: 600
 :::
 

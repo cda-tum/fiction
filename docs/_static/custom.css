@@ -1,3 +1,17 @@
 .bottom-of-page .icons {
   gap: 0.75rem;
 }
+
+body[data-theme="dark"]
+  .highlight
+  :is(.s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sr, .ss, .sx, .dl) {
+  background-color: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not([data-theme="light"])
+    .highlight
+    :is(.s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sr, .ss, .sx, .dl) {
+    background-color: transparent;
+  }
+}

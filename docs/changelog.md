@@ -158,12 +158,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Documentation:
+
+  - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
+  - Restored Python API entries and method signatures, and formatted generated docstrings.
+
 - `types.hpp`: `sidb_111_cell_clk_lyt_siqad_ptr`, `cds_sidb_cell_clk_lyt_cube`,
   `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
   the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
 
 - Python bindings:
 
+  - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
   - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results
