@@ -10,48 +10,46 @@ from __future__ import annotations
 
 from mnt.pyfiction import (
     bdl_wire_selection,
-    charge_distribution_surface_100,
-    detect_bdl_wires_100,
+    detect_bdl_wires,
     detect_bdl_wires_params,
-    sidb_100_lattice,
+    lattice_site,
+    sidb_layout,
     sidb_technology,
 )
 
 
 def test_detect_bdl_wires_100_lattice():
-    lyt = sidb_100_lattice((7, 0))
+    lyt = sidb_layout()
 
-    lyt = charge_distribution_surface_100(lyt)
+    lyt.assign_cell_type(lattice_site(38, 0, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.OUTPUT)
 
-    lyt.assign_cell_type((38, 0, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type((0, 0, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(36, 1, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(2, 1, 0), sidb_technology.cell_type.OUTPUT)
 
-    lyt.assign_cell_type((36, 2, 0), sidb_technology.cell_type.OUTPUT)
-    lyt.assign_cell_type((2, 2, 0), sidb_technology.cell_type.OUTPUT)
+    lyt.assign_cell_type(lattice_site(6, 2, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(32, 2, 0), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((6, 4, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((32, 4, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(30, 3, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(8, 3, 0), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((30, 6, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((8, 6, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(26, 4, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(12, 4, 0), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((26, 8, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((12, 8, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(24, 5, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(14, 5, 0), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((24, 10, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((14, 10, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(24, 15, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(26, 16, 0), sidb_technology.cell_type.NORMAL)
 
-    lyt.assign_cell_type((24, 30, 0), sidb_technology.cell_type.NORMAL)
-    lyt.assign_cell_type((26, 32, 0), sidb_technology.cell_type.NORMAL)
-
-    lyt.assign_cell_type((30, 34, 0), sidb_technology.cell_type.INPUT)
-    lyt.assign_cell_type((32, 36, 0), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(30, 17, 0), sidb_technology.cell_type.INPUT)
+    lyt.assign_cell_type(lattice_site(32, 18, 0), sidb_technology.cell_type.INPUT)
 
     params = detect_bdl_wires_params()
 
-    all_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.ALL)
-    output_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.OUTPUT)
-    input_bdl_wires = detect_bdl_wires_100(lyt, params, bdl_wire_selection.INPUT)
+    all_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.ALL)
+    output_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.OUTPUT)
+    input_bdl_wires = detect_bdl_wires(lyt, params, bdl_wire_selection.INPUT)
 
     assert len(all_bdl_wires) == 3
     assert len(output_bdl_wires) == 2

@@ -11,22 +11,21 @@ from __future__ import annotations
 import pytest
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution,
+    lattice,
+    lattice_site,
     parameter_point,
     physically_valid_parameters,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    sidb_layout,
     sidb_technology,
 )
 
 
 def test_one_sidb_100_lattice():
-    layout = sidb_100_lattice((10, 10))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    cds = charge_distribution_surface_100(layout)
+    layout = sidb_layout()
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
 
-    valid_parameters = physically_valid_parameters(cds)
+    valid_parameters = physically_valid_parameters(layout, charge_distribution(layout))
 
     assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])) == 0
 
@@ -38,11 +37,10 @@ def test_one_sidb_100_lattice():
 
 
 def test_one_sidb_111_lattice():
-    layout = sidb_111_lattice((10, 10))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    cds = charge_distribution_surface_111(layout)
+    layout = sidb_layout(lattice.si_111_1x1())
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
 
-    valid_parameters = physically_valid_parameters(cds)
+    valid_parameters = physically_valid_parameters(layout, charge_distribution(layout))
 
     assert valid_parameters.get_excited_state_number_for_parameter(parameter_point([5, 5])) == 0
 

@@ -18,6 +18,8 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp>
 #include <fiction/technology/sidb/simulation/domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
@@ -38,21 +40,6 @@
 
 namespace pyfiction
 {
-
-namespace detail
-{
-
-template <typename Lyt>
-void physically_valid_parameters_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("physically_valid_parameters", &fiction::sidb::simulation::analysis::physically_valid_parameters<Lyt>,
-          py::arg("cds"), py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
-          DOC(fiction_sidb_simulation_analysis_physically_valid_parameters));
-}
-
-}  // namespace detail
 
 void physically_valid_parameters(nanobind::module_& m)
 {
@@ -78,8 +65,10 @@ void physically_valid_parameters(nanobind::module_& m)
             py::arg("pp"));
 
     // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::physically_valid_parameters_impl<py_charge_distribution_surface_100>(m);
-    detail::physically_valid_parameters_impl<py_charge_distribution_surface_111>(m);
+    m.def("physically_valid_parameters", &fiction::sidb::simulation::analysis::physically_valid_parameters,
+          py::arg("lyt"), py::arg("cd"),
+          py::arg("params") = fiction::sidb::simulation::logic::operational_domain_params{},
+          DOC(fiction_sidb_simulation_analysis_physically_valid_parameters));
 }
 
 }  // namespace pyfiction
