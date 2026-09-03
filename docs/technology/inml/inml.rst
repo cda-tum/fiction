@@ -1,6 +1,12 @@
 iNML
 ====
 
+.. toctree::
+   :maxdepth: 1
+
+   io/io
+
+
 in-plane Nanomagnet Logic (iNML)
 --------------------------------
 
@@ -29,8 +35,3 @@ MagCAD Magnet Count
 **Header:** ``fiction/technology/inml/magcad_magnet_count.hpp``
 
 .. doxygenfunction:: fiction::inml::magcad_magnet_count
-
-.. toctree::
-   :maxdepth: 1
-
-   io/io

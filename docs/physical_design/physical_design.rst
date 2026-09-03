@@ -1,6 +1,21 @@
 Physical Design
 ===============
 
+.. toctree::
+   :maxdepth: 1
+
+   apply_gate_library
+   color_routing
+   determine_clocking
+   exact
+   graph_oriented_layout_design
+   hexagonalization
+   orthogonal
+   post_layout_optimization
+   wiring_reduction
+   path_finding/path_finding
+
+
 Generate Edge Intersection Graph
 --------------------------------
 
@@ -73,17 +88,3 @@ Routing Utils
         .. autofunction:: mnt.pyfiction.route_path
         .. autofunction:: mnt.pyfiction.extract_routing_objectives
         .. autofunction:: mnt.pyfiction.clear_routing
-
-.. toctree::
-   :maxdepth: 1
-
-   apply_gate_library
-   color_routing
-   determine_clocking
-   exact
-   graph_oriented_layout_design
-   hexagonalization
-   orthogonal
-   post_layout_optimization
-   wiring_reduction
-   path_finding/path_finding

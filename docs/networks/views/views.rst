@@ -4,6 +4,11 @@ Views
 Views are wrappers around network types that add or change certain functionality. For more information, please refer to
 the `mockturtle documentation <https://mockturtle.readthedocs.io/en/latest/views.html>`_.
 
+.. toctree::
+   :maxdepth: 1
+
+   bfs_topo_view
+
 
 Edge Color View
 ---------------
@@ -28,8 +33,3 @@ Mutable Rank View
 
 .. doxygenclass:: fiction::networks::views::mutable_rank_view
  :members:
-
-.. toctree::
-   :maxdepth: 1
-
-   bfs_topo_view

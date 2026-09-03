@@ -1,6 +1,15 @@
 Networks
 ========
 
+.. toctree::
+   :maxdepth: 1
+
+   technology_network
+   virtual_pi_network
+   io/io
+   views/views
+
+
 Network Utils
 -------------
 
@@ -59,11 +68,3 @@ Name Utils
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.get_name
         .. autofunction:: mnt.pyfiction.set_name
-
-.. toctree::
-   :maxdepth: 1
-
-   technology_network
-   virtual_pi_network
-   io/io
-   views/views

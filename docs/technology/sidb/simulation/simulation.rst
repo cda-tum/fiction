@@ -1,6 +1,16 @@
 SiDB Simulation
 ===============
 
+.. toctree::
+   :maxdepth: 1
+
+   analysis/analysis
+   defects/defects
+   engines/engines
+   io/io
+   logic/logic
+
+
 Simulation Result
 -----------------
 
@@ -69,12 +79,3 @@ Simulation Domain
 
 .. doxygenclass:: fiction::sidb::simulation::domain
    :members:
-
-.. toctree::
-   :maxdepth: 1
-
-   analysis/analysis
-   defects/defects
-   engines/engines
-   io/io
-   logic/logic

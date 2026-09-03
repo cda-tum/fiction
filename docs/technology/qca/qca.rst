@@ -1,6 +1,12 @@
 QCA
 ===
 
+.. toctree::
+   :maxdepth: 1
+
+   io/io
+
+
 Quantum-dot Cellular Automata (QCA)
 -----------------------------------
 
@@ -46,8 +52,3 @@ Molecular QCA Library
 
 .. doxygenclass:: fiction::qca::sim7_mol_library
    :members:
-
-.. toctree::
-   :maxdepth: 1
-
-   io/io

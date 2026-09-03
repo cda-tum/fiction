@@ -1,6 +1,13 @@
 SiDB Generators
 ===============
 
+.. toctree::
+   :maxdepth: 1
+
+   design_gates
+   on_the_fly_circuit_design
+
+
 Random SiDB Layout Generator
 ----------------------------
 
@@ -27,9 +34,3 @@ Is SiDB gate design deemed impossible
 .. doxygenstruct:: fiction::sidb::generators::is_gate_design_impossible_params
    :members:
 .. doxygenfunction:: fiction::sidb::generators::is_gate_design_impossible
-
-.. toctree::
-   :maxdepth: 1
-
-   design_gates
-   on_the_fly_circuit_design

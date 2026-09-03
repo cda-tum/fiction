@@ -1,6 +1,12 @@
 SiDB Surfaces
 =============
 
+.. toctree::
+   :maxdepth: 1
+
+   hsi_lattices
+
+
 SiDB Defect Surface
 -------------------
 
@@ -54,8 +60,3 @@ distributions of the SiDBs. Charge distribution surfaces are returned by the SiD
             :members:
         .. autoclass:: mnt.pyfiction.charge_distribution_surface_111
             :members:
-
-.. toctree::
-   :maxdepth: 1
-
-   hsi_lattices

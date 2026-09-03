@@ -1,6 +1,24 @@
 Layouts
 =======
 
+.. toctree::
+   :maxdepth: 1
+
+   bounding_box
+   cartesian_layout
+   cell_level_layout
+   clocked_layout
+   clocking_scheme
+   coordinates
+   gate_level_layout
+   hexagonal_layout
+   obstruction_layout
+   shifted_cartesian_layout
+   synchronization_element_layout
+   tile_based_layout
+   io/io
+
+
 Layout Utils
 ------------
 
@@ -22,20 +40,3 @@ Layout Utils
         .. autofunction:: mnt.pyfiction.normalize_layout_coordinates
         .. autofunction:: mnt.pyfiction.convert_layout_to_siqad_coordinates
         .. autofunction:: mnt.pyfiction.random_coordinate
-
-.. toctree::
-   :maxdepth: 1
-
-   bounding_box
-   cartesian_layout
-   cell_level_layout
-   clocked_layout
-   clocking_scheme
-   coordinates
-   gate_level_layout
-   hexagonal_layout
-   obstruction_layout
-   shifted_cartesian_layout
-   synchronization_element_layout
-   tile_based_layout
-   io/io

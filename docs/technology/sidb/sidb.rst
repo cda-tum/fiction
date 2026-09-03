@@ -1,6 +1,16 @@
 SiDB
 ====
 
+.. toctree::
+   :maxdepth: 1
+
+   generators/generators
+   io/io
+   model/model
+   simulation/simulation
+   surfaces/surfaces
+
+
 Silicon Dangling Bonds (SiDB)
 -----------------------------
 
@@ -51,12 +61,3 @@ Skeleton Bestagon Library
 **Header:** ``fiction/technology/sidb/skeleton_bestagon_library.hpp``
 
 .. doxygenclass:: fiction::sidb::skeleton_bestagon_library
-
-.. toctree::
-   :maxdepth: 1
-
-   generators/generators
-   io/io
-   model/model
-   simulation/simulation
-   surfaces/surfaces

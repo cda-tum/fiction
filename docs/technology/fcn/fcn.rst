@@ -3,6 +3,12 @@
 FCN
 ===
 
+.. toctree::
+   :maxdepth: 1
+
+   io/io
+
+
 Abstract Gate Library
 ---------------------
 
@@ -42,8 +48,3 @@ Area Requirements
 
     .. tab:: Python
         .. autofunction:: mnt.pyfiction.area
-
-.. toctree::
-   :maxdepth: 1
-
-   io/io

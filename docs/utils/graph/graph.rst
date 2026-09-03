@@ -1,6 +1,12 @@
 Graph Algorithms
 ================
 
+.. toctree::
+   :maxdepth: 1
+
+   mincross
+
+
 Graph Coloring
 --------------
 
@@ -23,8 +29,3 @@ Graph Coloring
     .. tab:: Python
         .. autoclass:: mnt.pyfiction.graph_coloring_engine
             :members:
-
-.. toctree::
-   :maxdepth: 1
-
-   mincross
