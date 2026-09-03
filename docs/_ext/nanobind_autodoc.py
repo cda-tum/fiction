@@ -63,6 +63,18 @@ class NanobindClassDocumenter(ClassDocumenter):
         return super().format_signature(**kwargs)
 
 
+def _inline_markup(match: re.Match[str]) -> str:
+    """Translate inline code while preserving roles and fenced examples.
+
+    Returns:
+        RST markup with inline continuations kept out of block-list parsing.
+    """
+    if protected := match[1]:
+        return protected if protected.startswith("```") else re.sub(r"\n\s*", " ", protected)
+    literal = re.sub(r"\n\s*", " ", match[2])
+    return f"``{literal}``" + ("\\ " + match[3] if match[3] else "")
+
+
 def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _options: Options, lines: list[str]) -> None:
     """Translate generated code markup before Napoleon parses Google sections."""
     if not name.startswith("mnt.pyfiction."):
@@ -72,7 +84,7 @@ def prepare_docstring(_app: Sphinx, _what: str, name: str, _obj: object, _option
     bullet_indent = None
     text = re.sub(
         r"(```[\s\S]*?```|:[\w:]+:`[^`]+`|``[^`]*``)|`([^`]+)`(\w?)",
-        lambda match: match[1] or f"``{match[2]}``" + ("\\ " + match[3] if match[3] else ""),
+        _inline_markup,
         "\n".join(lines),
     )
     for line in text.splitlines():

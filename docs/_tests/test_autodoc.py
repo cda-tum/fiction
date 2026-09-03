@@ -35,6 +35,7 @@ class AutodocTests(unittest.TestCase):
             (root / "index.rst").write_text(
                 "Bindings\n========\n\n"
                 ".. autoclass:: mnt.pyfiction.cartesian_layout\n   :members: above\n\n"
+                ".. autoclass:: mnt.pyfiction.siqad_coordinate\n\n"
                 ".. autofunction:: mnt.pyfiction.to_siqad_coord\n\n"
                 ".. autoexception:: mnt.pyfiction.missing_required_gates_exception\n\n"
                 ".. autoclass:: mnt.pyfiction.cartesian_gate_layout\n\n"
