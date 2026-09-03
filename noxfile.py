@@ -186,17 +186,17 @@ def docs(session: nox.Session) -> None:
     with session.chdir("docs"):
         session.run("doxygen", "Doxyfile", external=True)
 
-    serve = args.builder == "html" and session.interactive
-    command = ["sphinx-autobuild" if serve else "sphinx-build"]
-    if serve:
-        command.extend(["--ignore", "docs/doxyxml/**", "--watch", "include/fiction"])
-        command.extend(["--pre-build", "cd docs && doxygen Doxyfile"])
-    session.run(
-        *command,
-        "-T",
-        "-b",
-        args.builder,
-        "docs",
-        str(Path("docs/_build") / args.builder),
-        *sphinx_args,
-    )
+        serve = args.builder == "html" and session.interactive
+        command = ["sphinx-autobuild" if serve else "sphinx-build"]
+        if serve:
+            command.extend(["--ignore", "doxyxml/**", "--watch", "../include/fiction"])
+            command.extend(["--pre-build", "doxygen Doxyfile"])
+        session.run(
+            *command,
+            "-T",
+            "-b",
+            args.builder,
+            ".",
+            str(Path("_build") / args.builder),
+            *sphinx_args,
+        )
