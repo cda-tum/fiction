@@ -111,7 +111,7 @@ int main()  // NOLINT
         quicksim_single_runtime += stats.mean_single_runtime;
 
         // simulate layout with all input patterns
-        auto       bii                = bdl_input_iterator<sidb_100_cell_clk_lyt_siqad>{layout};
+        auto       bii                = legacy_bdl_input_iterator<sidb_100_cell_clk_lyt_siqad>{layout};
         const auto num_input_patterns = truth_table.front().num_bits();
 
         for (auto i = 0u; i < num_input_patterns; ++i, ++bii)

@@ -79,7 +79,8 @@ template <typename Lyt, typename TT>
 
     assert(output_pairs.empty() == false && "lyt needs output BDL pairs");
 
-    auto bdl_iter = sidb::simulation::logic::bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
+    auto bdl_iter =
+        sidb::simulation::logic::legacy_bdl_input_iterator<Lyt>{skeleton_with_defects, params.bdl_iterator_params};
 
     for (auto i = 0u; i < spec.front().num_bits(); ++i, ++bdl_iter)
     {
