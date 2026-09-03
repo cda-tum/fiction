@@ -6,145 +6,121 @@
 #
 # Licensed under the MIT License
 
+"""Tests for ``sidb_simulation_result``."""
+
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    charge_distribution,
+    lattice,
+    lattice_site,
+    potential_landscape,
     sidb_charge_state,
+    sidb_layout,
     sidb_simulation_parameters,
-    sidb_simulation_result_100,
-    sidb_simulation_result_111,
+    sidb_simulation_result,
     sidb_technology,
 )
 
-
-def test_negative_and_neutral_layout_100_lattice():
-    result = sidb_simulation_result_100()
-
-    layout = sidb_100_lattice((2, 3))
-    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
-
-    cds_negative = charge_distribution_surface_100(layout)
-    cds_neutral = charge_distribution_surface_100(layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL)
-
-    result.charge_distributions = [cds_negative, cds_neutral]
-
-    groundstate = result.groundstates()
-
-    assert len(groundstate) == 1, "Expected exactly one ground state."
-    assert groundstate[0].get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL, (
-        "Cell (0, 1) should have a NEUTRAL charge state."
-    )
-    assert groundstate[0].get_charge_state((0, 3)) == sidb_charge_state.NEUTRAL, (
-        "Cell (0, 3) should have a NEUTRAL charge state."
-    )
+LATTICES = [
+    pytest.param(lattice.si_100_2x1(), id="100"),
+    pytest.param(lattice.si_111_1x1(), id="111"),
+]
 
 
-def test_negative_and_neutral_layout_111_lattice():
-    result = sidb_simulation_result_111()
+def test_default_result():
+    result = sidb_simulation_result()
 
-    layout = sidb_111_lattice((2, 3))
-    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
+    assert not result.algorithm_name
+    assert result.layout == sidb_layout()
+    assert result.charge_distributions == []
+    assert result.additional_simulation_parameters == {}
+    assert result.groundstates() == []
 
-    cds_negative = charge_distribution_surface_111(layout)
-    cds_neutral = charge_distribution_surface_111(layout, sidb_simulation_parameters(), sidb_charge_state.NEUTRAL)
 
-    result.charge_distributions = [cds_negative, cds_neutral]
+@pytest.mark.parametrize("lat", LATTICES)
+def test_negative_and_neutral_layout(lat):
+    layout = sidb_layout(lat)
+    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(0, 1, 1), sidb_technology.cell_type.NORMAL)
+
+    landscape = potential_landscape(layout, sidb_simulation_parameters())
+
+    cd_negative = landscape.evaluate(charge_distribution(layout))
+    cd_neutral = landscape.evaluate(charge_distribution(layout, sidb_charge_state.NEUTRAL))
+
+    result = sidb_simulation_result()
+    result.layout = layout
+    result.charge_distributions = [cd_negative, cd_neutral]
 
     groundstate = result.groundstates()
 
     assert len(groundstate) == 1, "Expected exactly one ground state."
-    assert groundstate[0].get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL, (
-        "Cell (0, 1) should have a NEUTRAL charge state."
-    )
-    assert groundstate[0].get_charge_state((0, 3)) == sidb_charge_state.NEUTRAL, (
-        "Cell (0, 3) should have a NEUTRAL charge state."
-    )
+    assert groundstate[0].get_charge_state(lattice_site(0, 0, 1)) == sidb_charge_state.NEUTRAL
+    assert groundstate[0].get_charge_state(lattice_site(0, 1, 1)) == sidb_charge_state.NEUTRAL
+
+    # lookup by distribution index and site
+    assert result.charge_state(0, lattice_site(0, 0, 1)) == sidb_charge_state.NEGATIVE
+    assert result.charge_state(1, lattice_site(0, 0, 1)) == sidb_charge_state.NEUTRAL
 
 
-def test_empty_layout_100_lattice():
-    result = sidb_simulation_result_100()
+@pytest.mark.parametrize("lat", LATTICES)
+def test_empty_layout(lat):
+    layout = sidb_layout(lat)
 
-    layout = sidb_100_lattice((0, 0))  # Empty layout
+    result = sidb_simulation_result()
+    result.layout = layout
+    result.charge_distributions = [charge_distribution(layout)]
 
-    cds_empty = charge_distribution_surface_100(layout)
-
-    result.charge_distributions = [cds_empty]
-    groundstate = result.groundstates()
-
-    assert len(groundstate) == 1
+    assert len(result.groundstates()) == 1
 
 
-def test_empty_layout_111_lattice():
-    result = sidb_simulation_result_111()
+@pytest.mark.parametrize("lat", LATTICES)
+def test_three_sidbs(lat):
+    layout = sidb_layout(lat)
+    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(6, 0, 1), sidb_technology.cell_type.NORMAL)
 
-    layout = sidb_111_lattice((0, 0))  # Empty layout
+    landscape = potential_landscape(layout, sidb_simulation_parameters())
 
-    cds_empty = charge_distribution_surface_111(layout)
+    cd1 = landscape.evaluate(charge_distribution(layout))  # all negative
+    cd2 = landscape.evaluate(charge_distribution(layout, sidb_charge_state.NEUTRAL))  # all neutral
+    cd3 = charge_distribution(layout)
+    cd3.assign_charge_state(lattice_site(6, 0, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
+    cd3 = landscape.evaluate(cd3)
 
-    result.charge_distributions = [cds_empty]
-    groundstate = result.groundstates()
+    result = sidb_simulation_result()
+    result.layout = layout
+    result.charge_distributions = [cd1, cd2, cd3]
 
-    assert len(groundstate) == 1
-
-
-def test_three_sidbs_100_lattice():
-    layout = sidb_100_lattice((10, 10))
-
-    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
-
-    cds1 = charge_distribution_surface_100(layout)  # all negative
-    cds2 = charge_distribution_surface_100(
-        layout,
-        sidb_simulation_parameters(),
-        sidb_charge_state.NEUTRAL,
-    )  # all neutral
-    cds3 = charge_distribution_surface_100(layout)
-    cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
-
-    results = sidb_simulation_result_100()
-    results.charge_distributions = [cds1, cds2, cds3]
-
-    ground_state = results.groundstates()
+    ground_state = result.groundstates()
     assert len(ground_state) == 1
 
-    groundstate = ground_state[0]
-    assert groundstate.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
-    assert groundstate.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
-    assert groundstate.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
+    assert ground_state[0] == cd2
+    assert ground_state[0].get_charge_state(lattice_site(0, 0, 1)) == sidb_charge_state.NEUTRAL
+    assert ground_state[0].get_charge_state(lattice_site(4, 0, 1)) == sidb_charge_state.NEUTRAL
+    assert ground_state[0].get_charge_state(lattice_site(6, 0, 1)) == sidb_charge_state.NEUTRAL
 
 
-def test_three_sidbs_111_lattice():
-    layout = sidb_111_lattice((10, 10))
+def test_degenerate_ground_states():
+    layout = sidb_layout()
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(10, 0, 0), sidb_technology.cell_type.NORMAL)
 
-    layout.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)
+    # two distributions with the same energy but different charge states are both ground states
+    left = charge_distribution(layout, sidb_charge_state.NEUTRAL)
+    left.assign_charge_state(lattice_site(0, 0, 0), sidb_charge_state.NEGATIVE)
+    left.assign_energy(0.5)
+    right = charge_distribution(layout, sidb_charge_state.NEUTRAL)
+    right.assign_charge_state(lattice_site(10, 0, 0), sidb_charge_state.NEGATIVE)
+    right.assign_energy(0.5)
+    excited = charge_distribution(layout)
+    excited.assign_energy(1.0)
 
-    cds1 = charge_distribution_surface_111(layout)  # all negative
-    cds2 = charge_distribution_surface_111(
-        layout,
-        sidb_simulation_parameters(),
-        sidb_charge_state.NEUTRAL,
-    )  # all neutral
-    cds3 = charge_distribution_surface_111(layout)
-    cds3.assign_charge_state((6, 1), sidb_charge_state.NEUTRAL)  # only two SiDBs are negative
+    result = sidb_simulation_result()
+    result.charge_distributions = [excited, left, right, left]
 
-    results = sidb_simulation_result_111()
-    results.charge_distributions = [cds1, cds2, cds3]
-
-    result = results.groundstates()
-    assert len(result) == 1
-
-    ground_state = result[0]
-
-    assert ground_state.get_charge_state((0, 1)) == sidb_charge_state.NEUTRAL
-    assert ground_state.get_charge_state((4, 1)) == sidb_charge_state.NEUTRAL
-    assert ground_state.get_charge_state((6, 1)) == sidb_charge_state.NEUTRAL
+    assert len(result.groundstates()) == 2

@@ -6,26 +6,27 @@
 #
 # Licensed under the MIT License
 
+"""Tests for ``clustercomplete``."""
+
 from __future__ import annotations
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
     clustercomplete,
     clustercomplete_params,
     ground_state_space_reporting,
-    sidb_100_lattice,
-    sidb_111_lattice,
+    lattice,
+    lattice_site,
     sidb_charge_state,
+    sidb_layout,
     sidb_technology,
 )
 
 
 def test_three_sidbs():
-    layout = sidb_100_lattice((2, 1))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
+    layout = sidb_layout()
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
 
     params = clustercomplete_params()
     params.simulation_parameters.base = 2
@@ -41,40 +42,37 @@ def test_three_sidbs():
     assert params.available_threads == 4
     assert params.report_gss_stats == ground_state_space_reporting.ON
 
-    cds = charge_distribution_surface_100(layout)
-
-    result = clustercomplete(cds, params)
+    result = clustercomplete(layout, params)
 
     assert result.algorithm_name == "ClusterComplete"
+    assert result.layout == layout
     assert len(result.charge_distributions) <= 3
 
     params.simulation_parameters.base = 3
     assert params.simulation_parameters.base == 3
 
-    result = clustercomplete(cds, params)
+    result = clustercomplete(layout, params)
     assert len(result.charge_distributions) <= 4
 
     params.simulation_parameters.epsilon_r = 2
     params.simulation_parameters.lambda_tf = 2
-    result = clustercomplete(cds, params)
+    result = clustercomplete(layout, params)
     assert len(result.charge_distributions) <= 2
 
 
 def test_perturber_and_sidb_pair_111():
-    layout = sidb_111_lattice((4, 1))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((3, 0), sidb_technology.cell_type.NORMAL)
+    layout = sidb_layout(lattice.si_111_1x1())
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(3, 0, 0), sidb_technology.cell_type.NORMAL)
 
     params = clustercomplete_params()
     params.simulation_parameters.base = 2
     params.simulation_parameters.mu_minus = -0.32
     assert params.simulation_parameters.mu_minus == -0.32
 
-    cds = charge_distribution_surface_111(layout)
-
-    result = clustercomplete(cds, params)
+    result = clustercomplete(layout, params)
 
     assert result.algorithm_name == "ClusterComplete"
 
@@ -82,7 +80,7 @@ def test_perturber_and_sidb_pair_111():
 
     assert len(groundstate) == 1
 
-    assert groundstate[0].get_charge_state((0, 0)) == sidb_charge_state.NEGATIVE
-    assert groundstate[0].get_charge_state((1, 0)) == sidb_charge_state.NEUTRAL
-    assert groundstate[0].get_charge_state((2, 0)) == sidb_charge_state.NEUTRAL
-    assert groundstate[0].get_charge_state((3, 0)) == sidb_charge_state.NEGATIVE
+    assert groundstate[0].get_charge_state(lattice_site(0, 0, 0)) == sidb_charge_state.NEGATIVE
+    assert groundstate[0].get_charge_state(lattice_site(1, 0, 0)) == sidb_charge_state.NEUTRAL
+    assert groundstate[0].get_charge_state(lattice_site(2, 0, 0)) == sidb_charge_state.NEUTRAL
+    assert groundstate[0].get_charge_state(lattice_site(3, 0, 0)) == sidb_charge_state.NEGATIVE

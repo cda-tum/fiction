@@ -18,7 +18,12 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+
+#include <fmt/format.h>
 
 #include <any>
 #include <cstdint>
@@ -28,12 +33,7 @@
 #include <unordered_map>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>     // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
@@ -83,6 +83,7 @@ inline py::object convert_any_to_py(const std::any& value)
 inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
     nanobind::dict result;
+
     for (const auto& [key, value] : map)
     {
         try
@@ -94,31 +95,33 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
             throw std::runtime_error(fmt::format("Error converting key: {}", e.what()));
         }
     }
+
     return result;
 }
 
+/**
+ * Transitional binding of `legacy_result` over one Cartesian SiDB cell-level layout type; it goes away once every
+ * consumer takes `sidb_simulation_result`.
+ */
 template <typename Lyt>
-void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattice = "")
+void legacy_result_impl(nanobind::module_& m, const std::string& lattice)
 {
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+    using legacy = fiction::sidb::simulation::legacy_result<Lyt>;
 
-    py::class_<fiction::sidb::simulation::result<Lyt>>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
-                                                       DOC(fiction_sidb_simulation_result))
+    py::class_<legacy>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
+                       DOC(fiction_sidb_simulation_legacy_result))
         .def(py::init<>(), "Default constructor.")
-        .def_rw("algorithm_name", &fiction::sidb::simulation::result<Lyt>::algorithm_name,
-                DOC(fiction_sidb_simulation_result_algorithm_name))
-        .def_rw("simulation_runtime", &fiction::sidb::simulation::result<Lyt>::simulation_runtime,
-                DOC(fiction_sidb_simulation_result_simulation_runtime))
-        .def_rw("charge_distributions", &fiction::sidb::simulation::result<Lyt>::charge_distributions,
-                DOC(fiction_sidb_simulation_result_charge_distributions))
-        .def_rw("simulation_parameters", &fiction::sidb::simulation::result<Lyt>::sim_params,
-                DOC(fiction_sidb_simulation_result_sim_params))
+        .def_rw("algorithm_name", &legacy::algorithm_name, DOC(fiction_sidb_simulation_legacy_result_algorithm_name))
+        .def_rw("simulation_runtime", &legacy::simulation_runtime,
+                DOC(fiction_sidb_simulation_legacy_result_simulation_runtime))
+        .def_rw("charge_distributions", &legacy::charge_distributions,
+                DOC(fiction_sidb_simulation_legacy_result_charge_distributions))
+        .def_rw("simulation_parameters", &legacy::sim_params, DOC(fiction_sidb_simulation_legacy_result_sim_params))
         .def_prop_ro(
-            "additional_simulation_parameters", [](const fiction::sidb::simulation::result<Lyt>& self)
-            { return convert_map_to_py(self.additional_simulation_parameters); },
-            DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
-        .def("groundstates", &fiction::sidb::simulation::result<Lyt>::groundstates,
-             DOC(fiction_sidb_simulation_result_groundstates))
+            "additional_simulation_parameters",
+            [](const legacy& self) { return convert_map_to_py(self.additional_simulation_parameters); },
+            DOC(fiction_sidb_simulation_legacy_result_additional_simulation_parameters))
+        .def("groundstates", &legacy::groundstates, DOC(fiction_sidb_simulation_legacy_result_groundstates))
 
         ;
 }
@@ -127,9 +130,31 @@ void sidb_simulation_result_impl(nanobind::module_& m, const std::string& lattic
 
 void result(nanobind::module_& m)
 {
-    // Define simulation result for specific lattices
-    detail::sidb_simulation_result_impl<py_sidb_100_lattice>(m, "_100");
-    detail::sidb_simulation_result_impl<py_sidb_111_lattice>(m, "_111");
+    namespace py = nanobind;
+
+    using fiction::sidb::simulation::result;
+
+    py::class_<result>(m, "sidb_simulation_result", DOC(fiction_sidb_simulation_result))
+        .def(py::init<>(), "Default constructor.")
+        .def_rw("algorithm_name", &result::algorithm_name, DOC(fiction_sidb_simulation_result_algorithm_name))
+        .def_rw("simulation_runtime", &result::simulation_runtime,
+                DOC(fiction_sidb_simulation_result_simulation_runtime))
+        .def_rw("layout", &result::lyt, DOC(fiction_sidb_simulation_result_lyt))
+        .def_rw("charge_distributions", &result::charge_distributions,
+                DOC(fiction_sidb_simulation_result_charge_distributions))
+        .def_rw("simulation_parameters", &result::sim_params, DOC(fiction_sidb_simulation_result_sim_params))
+        .def_prop_ro(
+            "additional_simulation_parameters",
+            [](const result& self) { return detail::convert_map_to_py(self.additional_simulation_parameters); },
+            DOC(fiction_sidb_simulation_result_additional_simulation_parameters))
+        .def("charge_state", &result::charge_state, py::arg("distribution"), py::arg("site"),
+             DOC(fiction_sidb_simulation_result_charge_state))
+        .def("groundstates", &result::groundstates, DOC(fiction_sidb_simulation_result_groundstates))
+
+        ;
+
+    detail::legacy_result_impl<py_sidb_100_lattice>(m, "_100");
+    detail::legacy_result_impl<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction
