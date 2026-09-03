@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -58,6 +59,18 @@ inline const auto POSITIVE_DEFECT_COLOR = fmt::fg(fmt::color::red);
  */
 inline const auto NEGATIVE_DEFECT_COLOR = fmt::fg(fmt::color::blue);
 /**
+ * Color of negatively charged SiDBs.
+ */
+inline const auto NEGATIVE_COLOR = fmt::fg(fmt::color::cyan);
+/**
+ * Color of positively charged SiDBs.
+ */
+inline const auto POSITIVE_COLOR = fmt::fg(fmt::color::red);
+/**
+ * Color of neutrally charged SiDBs.
+ */
+inline const auto NEUTRAL_COLOR = fmt::fg(fmt::color::white);
+/**
  * No color.
  */
 inline constexpr auto NO_COLOR = fmt::text_style{};
@@ -67,17 +80,19 @@ inline constexpr auto NO_COLOR = fmt::text_style{};
 /**
  * Prints an `sidb::layout` as a lattice picture: one symbol per lattice site of the bounding box, row by row, with a
  * blank line between the dimer rows of an H-Si(100)-2x1 surface and an indented second row per unit cell of an
- * H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs, defects, and empty sites differ by color and symbol.
+ * H-Si(111)-1x1 surface. Inputs, outputs, normal SiDBs, defects, and empty sites differ by color and symbol. With a
+ * charge distribution, a charged SiDB is a filled circle colored by its sign and a neutral one a hollow circle.
  *
  * @param os Output stream to print into.
  * @param lyt Layout to print.
+ * @param cd Charge distribution over the layout's SiDBs, or `nullptr` to print cell types only.
  * @param lat_color Whether to color the picture.
  * @param crop_layout Whether to pad the bounding box by two columns and one unit cell instead of printing it tight.
  * @param draw_lattice Whether to print empty lattice sites as dots.
  * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
-inline void print_sidb_layout(std::ostream& os, const layout& lyt, const bool lat_color = true,
-                              const bool crop_layout = false, const bool draw_lattice = true)
+inline void print_sidb_layout(std::ostream& os, const layout& lyt, const charge_distribution* cd, const bool lat_color,
+                              const bool crop_layout, const bool draw_lattice)
 {
     if (lyt.is_empty() && lyt.num_defects() == 0)
     {
@@ -112,7 +127,36 @@ inline void print_sidb_layout(std::ostream& os, const layout& lyt, const bool la
     {
         bool printed = false;
 
-        if (const auto d = lyt.get_defect(s); d.type != model::defect_type::NONE)
+        if (cd != nullptr)
+        {
+            switch (cd->get_charge_state(s))
+            {
+                case model::charge_state::NEGATIVE:
+                {
+                    paint(detail::NEGATIVE_COLOR, " ● ");
+                    printed = true;
+                    break;
+                }
+                case model::charge_state::POSITIVE:
+                {
+                    paint(detail::POSITIVE_COLOR, " ● ");
+                    printed = true;
+                    break;
+                }
+                case model::charge_state::NEUTRAL:
+                {
+                    paint(detail::NEUTRAL_COLOR, " ◯ ");
+                    printed = true;
+                    break;
+                }
+                case model::charge_state::NONE:
+                {
+                    break;
+                }
+            }
+        }
+
+        if (const auto d = lyt.get_defect(s); d.type != model::defect_type::NONE && !printed)
         {
             if (model::is_negatively_charged_defect(d))
             {
@@ -189,6 +233,39 @@ inline void print_sidb_layout(std::ostream& os, const layout& lyt, const bool la
     }
 
     os << "\n";
+}
+
+/**
+ * Prints an `sidb::layout` as a lattice picture of its cell types. See the overload with a charge distribution
+ * pointer for the picture's layout.
+ *
+ * @param os Output stream to print into.
+ * @param lyt Layout to print.
+ * @param lat_color Whether to color the picture.
+ * @param crop_layout Whether to pad the bounding box by two columns and one unit cell instead of printing it tight.
+ * @param draw_lattice Whether to print empty lattice sites as dots.
+ */
+inline void print_sidb_layout(std::ostream& os, const layout& lyt, const bool lat_color = true,
+                              const bool crop_layout = false, const bool draw_lattice = true)
+{
+    print_sidb_layout(os, lyt, nullptr, lat_color, crop_layout, draw_lattice);
+}
+/**
+ * Prints an `sidb::layout` with a charge distribution as a lattice picture. See the overload with a charge
+ * distribution pointer for the picture's layout.
+ *
+ * @param os Output stream to print into.
+ * @param lyt Layout to print.
+ * @param cd Charge distribution over the layout's SiDBs.
+ * @param lat_color Whether to color the picture.
+ * @param crop_layout Whether to pad the bounding box by two columns and one unit cell instead of printing it tight.
+ * @param draw_lattice Whether to print empty lattice sites as dots.
+ */
+inline void print_sidb_layout(std::ostream& os, const layout& lyt, const charge_distribution& cd,
+                              const bool lat_color = true, const bool crop_layout = false,
+                              const bool draw_lattice = true)
+{
+    print_sidb_layout(os, lyt, &cd, lat_color, crop_layout, draw_lattice);
 }
 
 }  // namespace fiction::sidb::io
