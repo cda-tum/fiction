@@ -159,6 +159,12 @@
 ```{doxygenfunction} fiction::sidb::io::write_sidb_layout_svg(const layout& lyt, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
 ```
 
+```{doxygenfunction} fiction::sidb::io::write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
+```
+
+```{doxygenfunction} fiction::sidb::io::write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, const std::string_view& filename, const write_sidb_layout_svg_params& ps = {})
+```
+
 :::
 
 :::{tab-item} Python
@@ -182,5 +188,8 @@
 
 **Header:** `fiction/technology/sidb/io/print_sidb_layout.hpp`
 
-```{doxygenfunction} fiction::sidb::io::print_sidb_layout
+```{doxygenfunction} fiction::sidb::io::print_sidb_layout(std::ostream& os, const layout& lyt, const bool lat_color = true, const bool crop_layout = false, const bool draw_lattice = true)
+```
+
+```{doxygenfunction} fiction::sidb::io::print_sidb_layout(std::ostream& os, const layout& lyt, const charge_distribution& cd, const bool lat_color = true, const bool crop_layout = false, const bool draw_lattice = true)
 ```
