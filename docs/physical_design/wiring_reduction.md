@@ -39,16 +39,14 @@ spaces upward and subsequently reconnecting them. This iterative process continu
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.wiring_reduction_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.wiring_reduction_params
+   :members:
 
-```{autoclass} mnt.pyfiction.wiring_reduction_stats
-:members:
-```
+.. autoclass:: mnt.pyfiction.wiring_reduction_stats
+   :members:
 
-```{autofunction} mnt.pyfiction.wiring_reduction
-
+.. autofunction:: mnt.pyfiction.wiring_reduction
 ```
 
 :::

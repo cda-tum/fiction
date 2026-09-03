@@ -23,8 +23,8 @@ An offset coordinate is a coordinate that defines a location via an offset from 
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.offset_coordinate
-
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.offset_coordinate
 ```
 
 :::
@@ -51,8 +51,8 @@ At the same time, they can be used to address 3-dimensional grids.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.cube_coordinate
-
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.cube_coordinate
 ```
 
 :::
@@ -79,8 +79,8 @@ while the z value (0,1) points to the top or bottom Si atom in the dimer. The co
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.siqad_coordinate
-
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.siqad_coordinate
 ```
 
 :::
@@ -124,40 +124,24 @@ An iterator type that allows to enumerate coordinates in order within a boundary
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.offset_area
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.offset_area
 
-```
+.. autofunction:: mnt.pyfiction.cube_area
 
-```{autofunction} mnt.pyfiction.cube_area
+.. autofunction:: mnt.pyfiction.siqad_area
 
-```
+.. autofunction:: mnt.pyfiction.offset_volume
 
-```{autofunction} mnt.pyfiction.siqad_area
+.. autofunction:: mnt.pyfiction.cube_volume
 
-```
+.. autofunction:: mnt.pyfiction.siqad_volume
 
-```{autofunction} mnt.pyfiction.offset_volume
+.. autofunction:: mnt.pyfiction.to_offset_coord
 
-```
+.. autofunction:: mnt.pyfiction.to_cube_coord
 
-```{autofunction} mnt.pyfiction.cube_volume
-
-```
-
-```{autofunction} mnt.pyfiction.siqad_volume
-
-```
-
-```{autofunction} mnt.pyfiction.to_offset_coord
-
-```
-
-```{autofunction} mnt.pyfiction.to_cube_coord
-
-```
-
-```{autofunction} mnt.pyfiction.to_siqad
-
+.. autofunction:: mnt.pyfiction.to_siqad
 ```
 
 :::

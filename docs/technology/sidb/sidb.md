@@ -29,8 +29,9 @@ surfaces/surfaces
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_technology
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_technology
+   :members:
 ```
 
 :::

@@ -37,21 +37,19 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.calculate_energy_distribution
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.calculate_energy_distribution
 
-```
-
-```{autofunction} mnt.pyfiction.minimum_energy
-
+.. autofunction:: mnt.pyfiction.minimum_energy
 ```
 
 :::
 
 ::::
 
-## Temperature Behavior
-
 (critical_temperature)=
+
+## Temperature Behavior
 
 ::::{tab-set}
 :sync-group: language
@@ -114,40 +112,27 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.critical_temperature_stats
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.critical_temperature_stats
+   :members:
 
-```{autoclass} mnt.pyfiction.critical_temperature_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.critical_temperature_params
+   :members:
 
-```{autofunction} mnt.pyfiction.critical_temperature_gate_based
+.. autofunction:: mnt.pyfiction.critical_temperature_gate_based
 
-```
+.. autofunction:: mnt.pyfiction.critical_temperature_non_gate_based
 
-```{autofunction} mnt.pyfiction.critical_temperature_non_gate_based
+.. autofunction:: mnt.pyfiction.occupation_probability_gate_based
 
-```
+.. autofunction:: mnt.pyfiction.occupation_probability_non_gate_based
 
-```{autofunction} mnt.pyfiction.occupation_probability_gate_based
+.. autoclass:: mnt.pyfiction.state_type
+   :members:
 
-```
+.. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
 
-```{autofunction} mnt.pyfiction.occupation_probability_non_gate_based
-
-```
-
-```{autoclass} mnt.pyfiction.state_type
-:members:
-```
-
-```{autofunction} mnt.pyfiction.calculate_energy_and_state_type_with_kinks_accepted
-
-```
-
-```{autofunction} mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
-
+.. autofunction:: mnt.pyfiction.calculate_energy_and_state_type_with_kinks_rejected
 ```
 
 :::
@@ -185,20 +170,16 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.time_to_solution_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.time_to_solution_params
+   :members:
 
-```{autoclass} mnt.pyfiction.time_to_solution_stats
-:members:
-```
+.. autoclass:: mnt.pyfiction.time_to_solution_stats
+   :members:
 
-```{autofunction} mnt.pyfiction.time_to_solution
+.. autofunction:: mnt.pyfiction.time_to_solution
 
-```
-
-```{autofunction} mnt.pyfiction.time_to_solution_for_given_simulation_results
-
+.. autofunction:: mnt.pyfiction.time_to_solution_for_given_simulation_results
 ```
 
 :::
@@ -224,12 +205,11 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.physically_valid_parameters_domain
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.physically_valid_parameters_domain
+   :members:
 
-```{autoclass} mnt.pyfiction.physically_valid_parameters
-
+.. autoclass:: mnt.pyfiction.physically_valid_parameters
 ```
 
 :::
@@ -255,8 +235,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.can_positive_charges_occur
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.can_positive_charges_occur
 ```
 
 :::
@@ -294,37 +274,32 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.transition_type
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.transition_type
+   :members:
 
-```{autoclass} mnt.pyfiction.population_stability_information_100
-:members:
-```
+.. autoclass:: mnt.pyfiction.population_stability_information_100
+   :members:
 
-```{autoclass} mnt.pyfiction.population_stability_information_111
-:members:
-```
+.. autoclass:: mnt.pyfiction.population_stability_information_111
+   :members:
 
-```{autoclass} mnt.pyfiction.physical_population_stability_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.physical_population_stability_params
+   :members:
 
-```{autofunction} mnt.pyfiction.physical_population_stability_100
+.. autofunction:: mnt.pyfiction.physical_population_stability_100
 
-```
-
-```{autofunction} mnt.pyfiction.physical_population_stability_111
-
+.. autofunction:: mnt.pyfiction.physical_population_stability_111
 ```
 
 :::
 
 ::::
 
-## Band-Bending Resilience
-
+(band_bending_resilience)=
 (band-bending-resilience-1)=
+
+## Band-Bending Resilience
 
 **Header:** `fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp`
 

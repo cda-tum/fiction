@@ -35,36 +35,24 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.dimer_displacement_policy
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.dimer_displacement_policy
+   :members:
 
-```{autoclass} mnt.pyfiction.displacement_analysis_mode
-:members:
-```
+.. autoclass:: mnt.pyfiction.displacement_analysis_mode
+   :members:
 
-```{autofunction} mnt.pyfiction.displacement_robustness_domain_params
+.. autofunction:: mnt.pyfiction.displacement_robustness_domain_params
 
-```
+.. autofunction:: mnt.pyfiction.displacement_robustness_domain_stats
 
-```{autofunction} mnt.pyfiction.displacement_robustness_domain_stats
+.. autofunction:: mnt.pyfiction.displacement_robustness_domain_100
 
-```
+.. autofunction:: mnt.pyfiction.displacement_robustness_domain_111
 
-```{autofunction} mnt.pyfiction.displacement_robustness_domain_100
+.. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_100
 
-```
-
-```{autofunction} mnt.pyfiction.displacement_robustness_domain_111
-
-```
-
-```{autofunction} mnt.pyfiction.determine_displacement_robustness_domain_100
-
-```
-
-```{autofunction} mnt.pyfiction.determine_displacement_robustness_domain_111
-
+.. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_111
 ```
 
 :::

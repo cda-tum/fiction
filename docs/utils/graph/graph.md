@@ -49,8 +49,9 @@ mincross
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.graph_coloring_engine
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.graph_coloring_engine
+   :members:
 ```
 
 :::

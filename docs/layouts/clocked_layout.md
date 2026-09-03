@@ -27,12 +27,12 @@ can be utilized or the clock numbers can be assigned manually.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.clocked_cartesian_layout
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.clocked_cartesian_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.clocked_hexagonal_layout
-:members:
+.. autoclass:: mnt.pyfiction.clocked_hexagonal_layout
+   :members:
 ```
 
 :::

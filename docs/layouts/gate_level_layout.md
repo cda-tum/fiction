@@ -28,12 +28,12 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.cartesian_gate_layout
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.cartesian_gate_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.hexagonal_gate_layout
-:members:
+.. autoclass:: mnt.pyfiction.hexagonal_gate_layout
+   :members:
 ```
 
 :::

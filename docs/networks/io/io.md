@@ -19,8 +19,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.read_technology_network
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.read_technology_network
 ```
 
 :::
@@ -62,8 +62,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.write_dot_network
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.write_dot_network
 ```
 
 :::

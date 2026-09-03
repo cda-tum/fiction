@@ -25,8 +25,9 @@ io/io
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.inml_technology
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.inml_technology
+   :members:
 ```
 
 :::

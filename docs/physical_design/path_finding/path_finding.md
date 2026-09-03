@@ -59,24 +59,16 @@ Distance functions compute (an approximation for) the distance between two coord
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.manhattan_distance
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.manhattan_distance
 
-```
+.. autofunction:: mnt.pyfiction.euclidean_distance
 
-```{autofunction} mnt.pyfiction.euclidean_distance
+.. autofunction:: mnt.pyfiction.squared_euclidean_distance
 
-```
+.. autofunction:: mnt.pyfiction.twoddwave_distance
 
-```{autofunction} mnt.pyfiction.squared_euclidean_distance
-
-```
-
-```{autofunction} mnt.pyfiction.twoddwave_distance
-
-```
-
-```{autofunction} mnt.pyfiction.chebyshev_distance
-
+.. autofunction:: mnt.pyfiction.chebyshev_distance
 ```
 
 :::
@@ -176,16 +168,13 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.a_star_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.a_star_params
+   :members:
 
-```{autofunction} mnt.pyfiction.a_star
+.. autofunction:: mnt.pyfiction.a_star
 
-```
-
-```{autofunction} mnt.pyfiction.a_star_distance
-
+.. autofunction:: mnt.pyfiction.a_star_distance
 ```
 
 :::
@@ -215,12 +204,11 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.yen_k_shortest_paths_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.yen_k_shortest_paths_params
+   :members:
 
-```{autofunction} mnt.pyfiction.yen_k_shortest_paths
-
+.. autofunction:: mnt.pyfiction.yen_k_shortest_paths
 ```
 
 :::
@@ -250,12 +238,11 @@ Cost functions compute the cost to move from one coordinate to another (adjacent
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.enumerate_all_paths_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.enumerate_all_paths_params
+   :members:
 
-```{autofunction} mnt.pyfiction.enumerate_all_paths
-
+.. autofunction:: mnt.pyfiction.enumerate_all_paths
 ```
 
 :::

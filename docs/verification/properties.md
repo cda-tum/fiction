@@ -17,8 +17,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.critical_path_length_and_throughput
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.critical_path_length_and_throughput
 ```
 
 :::

@@ -25,12 +25,11 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.gate_level_drv_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.gate_level_drv_params
+   :members:
 
-```{autofunction} mnt.pyfiction.gate_level_drvs
-
+.. autofunction:: mnt.pyfiction.gate_level_drvs
 ```
 
 :::
@@ -66,12 +65,11 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.eq_type
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.eq_type
+   :members:
 
-```{autofunction} mnt.pyfiction.equivalence_checking
-
+.. autofunction:: mnt.pyfiction.equivalence_checking
 ```
 
 :::

@@ -7,7 +7,9 @@ orientation of the hexagons that can either be pointy-top up or flat-top up.
 ::::{tab-set}
 :sync-group: language
 
-:::{tab} C+
+:::{tab-item} C++
+:sync: cpp
+
 **Header:** `fiction/layouts/hexagonal_layout.hpp`
 
 ```{doxygenstruct} fiction::layouts::pointy_top_hex
@@ -48,8 +50,9 @@ The hexagonal layout supports all of them via template parameters.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.hexagonal_layout
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.hexagonal_layout
+   :members:
 ```
 
 :::

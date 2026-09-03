@@ -31,33 +31,29 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.input_bdl_configuration
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.input_bdl_configuration
+   :members:
 
-```{autoclass} mnt.pyfiction.bdl_input_iterator_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.bdl_input_iterator_params
+   :members:
 
-```{autoclass} mnt.pyfiction.bdl_input_iterator_100
-:members:
-```
+.. autoclass:: mnt.pyfiction.bdl_input_iterator_100
+   :members:
 
-```{autoclass} mnt.pyfiction.bdl_input_iterator_111
-:members:
-```
+.. autoclass:: mnt.pyfiction.bdl_input_iterator_111
+   :members:
 
-```{autofunction} mnt.pyfiction.generate_bdl_input_pattern_layouts
-
+.. autofunction:: mnt.pyfiction.generate_bdl_input_pattern_layouts
 ```
 
 :::
 
 ::::
 
-## Operational Domain Computation
-
 (opdom)=
+
+## Operational Domain Computation
 
 ::::{tab-set}
 :sync-group: language
@@ -218,64 +214,47 @@ flood fill or contour tracing in three dimensions.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.operational_status
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.operational_status
+   :members:
 
-```{autoclass} mnt.pyfiction.operational_condition
-:members:
-```
+.. autoclass:: mnt.pyfiction.operational_condition
+   :members:
 
-```{autoclass} mnt.pyfiction.operational_analysis_strategy
-:members:
-```
+.. autoclass:: mnt.pyfiction.operational_analysis_strategy
+   :members:
 
-```{autoclass} mnt.pyfiction.is_operational_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.is_operational_params
+   :members:
 
-```{autofunction} mnt.pyfiction.is_operational
+.. autofunction:: mnt.pyfiction.is_operational
 
-```
+.. autofunction:: mnt.pyfiction.operational_input_patterns
 
-```{autofunction} mnt.pyfiction.operational_input_patterns
+.. autofunction:: mnt.pyfiction.is_kink_induced_non_operational
 
-```
+.. autofunction:: mnt.pyfiction.kink_induced_non_operational_input_patterns
 
-```{autofunction} mnt.pyfiction.is_kink_induced_non_operational
+.. autoclass:: mnt.pyfiction.sweep_parameter
+   :members:
 
-```
+.. autoclass:: mnt.pyfiction.parameter_point
+   :members:
 
-```{autofunction} mnt.pyfiction.kink_induced_non_operational_input_patterns
+.. autoclass:: mnt.pyfiction.operational_domain
+   :members:
 
-```
+.. autoclass:: mnt.pyfiction.critical_temperature_domain
+   :members:
 
-```{autoclass} mnt.pyfiction.sweep_parameter
-:members:
-```
+.. autoclass:: mnt.pyfiction.operational_domain_value_range
+   :members:
 
-```{autoclass} mnt.pyfiction.parameter_point
-:members:
-```
+.. autoclass:: mnt.pyfiction.operational_domain_params
+   :members:
 
-```{autoclass} mnt.pyfiction.operational_domain
-:members:
-```
-
-```{autoclass} mnt.pyfiction.critical_temperature_domain
-:members:
-```
-
-```{autoclass} mnt.pyfiction.operational_domain_value_range
-:members:
-```
-
-```{autoclass} mnt.pyfiction.operational_domain_params
-:members:
-```
-
-```{autoclass} mnt.pyfiction.operational_domain_stats
-:members:
+.. autoclass:: mnt.pyfiction.operational_domain_stats
+   :members:
 ```
 
 The same four strategies are available here. Grid search and random sampling accept any number of
@@ -289,44 +268,27 @@ simulation. It requires `REJECT_KINKS` and a layout with `LOGIC` cells; without 
 call raises `ValueError`. The sketch pairs best with grid search and random sampling — see the
 C++ tab for why combining it with flood fill or contour tracing needs a much higher sample count.
 
-```{autofunction} mnt.pyfiction.operational_domain_grid_search
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.operational_domain_grid_search
 
-```
+.. autofunction:: mnt.pyfiction.operational_domain_random_sampling
 
-```{autofunction} mnt.pyfiction.operational_domain_random_sampling
+.. autofunction:: mnt.pyfiction.operational_domain_flood_fill
 
-```
+.. autofunction:: mnt.pyfiction.operational_domain_contour_tracing
 
-```{autofunction} mnt.pyfiction.operational_domain_flood_fill
+.. autofunction:: mnt.pyfiction.critical_temperature_domain_grid_search
 
-```
+.. autofunction:: mnt.pyfiction.critical_temperature_domain_random_sampling
 
-```{autofunction} mnt.pyfiction.operational_domain_contour_tracing
+.. autofunction:: mnt.pyfiction.critical_temperature_domain_flood_fill
 
-```
+.. autofunction:: mnt.pyfiction.critical_temperature_domain_contour_tracing
 
-```{autofunction} mnt.pyfiction.critical_temperature_domain_grid_search
+.. autoclass:: mnt.pyfiction.operational_domain_ratio_params
+   :members:
 
-```
-
-```{autofunction} mnt.pyfiction.critical_temperature_domain_random_sampling
-
-```
-
-```{autofunction} mnt.pyfiction.critical_temperature_domain_flood_fill
-
-```
-
-```{autofunction} mnt.pyfiction.critical_temperature_domain_contour_tracing
-
-```
-
-```{autoclass} mnt.pyfiction.operational_domain_ratio_params
-:members:
-```
-
-```{autofunction} mnt.pyfiction.operational_domain_ratio
-
+.. autofunction:: mnt.pyfiction.operational_domain_ratio
 ```
 
 :::
@@ -360,16 +322,14 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.bdl_pair
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.bdl_pair
+   :members:
 
-```{autoclass} mnt.pyfiction.detect_bdl_pairs_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.detect_bdl_pairs_params
+   :members:
 
-```{autofunction} mnt.pyfiction.detect_bdl_pairs
-
+.. autofunction:: mnt.pyfiction.detect_bdl_pairs
 ```
 
 :::
@@ -407,28 +367,22 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.bdl_wire_selection
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.bdl_wire_selection
+   :members:
 
-```{autoclass} mnt.pyfiction.detect_bdl_wires_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.detect_bdl_wires_params
+   :members:
 
-```{autoclass} mnt.pyfiction.bdl_wire_100
-:members:
-```
+.. autoclass:: mnt.pyfiction.bdl_wire_100
+   :members:
 
-```{autoclass} mnt.pyfiction.bdl_wire_111
-:members:
-```
+.. autoclass:: mnt.pyfiction.bdl_wire_111
+   :members:
 
-```{autofunction} mnt.pyfiction.detect_bdl_wires_100
+.. autofunction:: mnt.pyfiction.detect_bdl_wires_100
 
-```
-
-```{autofunction} mnt.pyfiction.detect_bdl_wires_111
-
+.. autofunction:: mnt.pyfiction.detect_bdl_wires_111
 ```
 
 :::

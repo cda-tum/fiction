@@ -34,16 +34,13 @@ network specifications under constraints. This approach finds exact results but 
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.exact_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.exact_params
+   :members:
 
-```{autofunction} mnt.pyfiction.exact_cartesian
+.. autofunction:: mnt.pyfiction.exact_cartesian
 
-```
-
-```{autofunction} mnt.pyfiction.exact_hexagonal
-
+.. autofunction:: mnt.pyfiction.exact_hexagonal
 ```
 
 :::

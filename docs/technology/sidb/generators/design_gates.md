@@ -1,6 +1,6 @@
-# SiDB Gate Designer
-
 (gate_design)=
+
+# SiDB Gate Designer
 
 ::::{tab-set}
 :sync-group: language
@@ -27,16 +27,14 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.design_sidb_gates_stats
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.design_sidb_gates_stats
+   :members:
 
-```{autoclass} mnt.pyfiction.design_sidb_gates_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.design_sidb_gates_params
+   :members:
 
-```{autofunction} mnt.pyfiction.design_sidb_gates
-
+.. autofunction:: mnt.pyfiction.design_sidb_gates
 ```
 
 :::

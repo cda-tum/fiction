@@ -65,20 +65,14 @@ io/io
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.num_adjacent_coordinates
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.num_adjacent_coordinates
 
-```
+.. autofunction:: mnt.pyfiction.normalize_layout_coordinates
 
-```{autofunction} mnt.pyfiction.normalize_layout_coordinates
+.. autofunction:: mnt.pyfiction.convert_layout_to_siqad_coordinates
 
-```
-
-```{autofunction} mnt.pyfiction.convert_layout_to_siqad_coordinates
-
-```
-
-```{autofunction} mnt.pyfiction.random_coordinate
-
+.. autofunction:: mnt.pyfiction.random_coordinate
 ```
 
 :::

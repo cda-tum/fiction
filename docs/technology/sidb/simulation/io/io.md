@@ -27,16 +27,13 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.write_operational_domain_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_operational_domain_params
+   :members:
 
-```{autofunction} mnt.pyfiction.write_operational_domain
+.. autofunction:: mnt.pyfiction.write_operational_domain
 
-```
-
-```{autofunction} mnt.pyfiction.write_critical_temperature_domain
-
+.. autofunction:: mnt.pyfiction.write_critical_temperature_domain
 ```
 
 :::
@@ -76,12 +73,10 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.write_sqd_sim_result
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.write_sqd_sim_result
 
-```
-
-```{autofunction} mnt.pyfiction.write_location_and_ground_state
-
+.. autofunction:: mnt.pyfiction.write_location_and_ground_state
 ```
 
 :::

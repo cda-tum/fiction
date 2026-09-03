@@ -1,8 +1,8 @@
 # Simulation Engines
 
-## Heuristic Ground State Simulation
-
 (quicksim)=
+
+## Heuristic Ground State Simulation
 
 ::::{tab-set}
 :sync-group: language
@@ -25,12 +25,11 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.quicksim_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.quicksim_params
+   :members:
 
-```{autofunction} mnt.pyfiction.quicksim
-
+.. autofunction:: mnt.pyfiction.quicksim
 ```
 
 :::
@@ -80,33 +79,27 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.quickexact_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.quickexact_params
+   :members:
 
-```{autofunction} mnt.pyfiction.quickexact
+.. autofunction:: mnt.pyfiction.quickexact
 
-```
+.. autoclass:: mnt.pyfiction.clustercomplete_params
+   :members:
 
-```{autoclass} mnt.pyfiction.clustercomplete_params
-:members:
-```
+.. autofunction:: mnt.pyfiction.clustercomplete
 
-```{autofunction} mnt.pyfiction.clustercomplete
-
-```
-
-```{autofunction} mnt.pyfiction.exhaustive_ground_state_simulation
-
+.. autofunction:: mnt.pyfiction.exhaustive_ground_state_simulation
 ```
 
 :::
 
 ::::
 
-## Ground State Space Construction
-
 (ground_state_space)=
+
+## Ground State Space Construction
 
 **Header:** `fiction/technology/sidb/simulation/engines/ground_state_space.hpp`
 

@@ -44,6 +44,7 @@ copybutton_line_continuation_character = "\\"
 
 html_theme = "furo"
 html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 pygments_style = "colorful"
 html_theme_options = {
     "light_logo": "mnt_dark.svg",

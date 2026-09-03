@@ -35,16 +35,13 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.read_sqd_layout_100
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.read_sqd_layout_100
 
-```
+.. autofunction:: mnt.pyfiction.read_sqd_layout_111
 
-```{autofunction} mnt.pyfiction.read_sqd_layout_111
-
-```
-
-```{autoclass} mnt.pyfiction.sqd_parsing_error
-:members:
+.. autoclass:: mnt.pyfiction.sqd_parsing_error
+   :members:
 ```
 
 :::
@@ -94,8 +91,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.write_sqd_layout
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.write_sqd_layout
 ```
 
 :::
@@ -129,16 +126,12 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.write_sidb_layout_svg_params
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_sidb_layout_svg_params
 
-```
+.. autofunction:: mnt.pyfiction.write_sidb_layout_svg
 
-```{autofunction} mnt.pyfiction.write_sidb_layout_svg
-
-```
-
-```{autofunction} mnt.pyfiction.write_sidb_layout_svg_to_string
-
+.. autofunction:: mnt.pyfiction.write_sidb_layout_svg_to_string
 ```
 
 :::

@@ -69,8 +69,8 @@ io/io
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.area
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.area
 ```
 
 :::

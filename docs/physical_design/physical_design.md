@@ -86,12 +86,10 @@ path_finding/path_finding
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.reserve_input_nodes
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.reserve_input_nodes
 
-```
-
-```{autofunction} mnt.pyfiction.place
-
+.. autofunction:: mnt.pyfiction.place
 ```
 
 :::
@@ -145,20 +143,14 @@ path_finding/path_finding
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.is_crossable_wire
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.is_crossable_wire
 
-```
+.. autofunction:: mnt.pyfiction.route_path
 
-```{autofunction} mnt.pyfiction.route_path
+.. autofunction:: mnt.pyfiction.extract_routing_objectives
 
-```
-
-```{autofunction} mnt.pyfiction.extract_routing_objectives
-
-```
-
-```{autofunction} mnt.pyfiction.clear_routing
-
+.. autofunction:: mnt.pyfiction.clear_routing
 ```
 
 :::

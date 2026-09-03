@@ -22,8 +22,9 @@ node is considered a fanout node (or splitter in some contexts) that copies an i
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.technology_network
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.technology_network
+   :members:
 ```
 
 :::

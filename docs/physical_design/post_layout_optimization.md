@@ -1,8 +1,8 @@
 (post_layout_optimization)=
 
-# Optimizing 2DDWave-clocked Cartesian Layouts
-
 (post_layout_opt)=
+
+# Optimizing 2DDWave-clocked Cartesian Layouts
 
 This algorithm aims to decrease the overall layout area of a given 2DDWave-clocked Cartesian layout that has been
 generated using either heuristic methods or machine learning techniques. It achieves this objective by strategically
@@ -34,16 +34,14 @@ relocating outputs to more favorable positions.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.post_layout_optimization_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.post_layout_optimization_params
+   :members:
 
-```{autoclass} mnt.pyfiction.post_layout_optimization_stats
-:members:
-```
+.. autoclass:: mnt.pyfiction.post_layout_optimization_stats
+   :members:
 
-```{autofunction} mnt.pyfiction.post_layout_optimization
-
+.. autofunction:: mnt.pyfiction.post_layout_optimization
 ```
 
 :::

@@ -35,20 +35,14 @@ implementations for each gate present in the passed `gate_level_layout`.
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.apply_qca_one_library
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.apply_qca_one_library
 
-```
+.. autofunction:: mnt.pyfiction.apply_topolinano_library
 
-```{autofunction} mnt.pyfiction.apply_topolinano_library
+.. autofunction:: mnt.pyfiction.apply_bestagon_library
 
-```
-
-```{autofunction} mnt.pyfiction.apply_bestagon_library
-
-```
-
-```{autofunction} mnt.pyfiction.apply_sim7_mol_library
-
+.. autofunction:: mnt.pyfiction.apply_sim7_mol_library
 ```
 
 :::

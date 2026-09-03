@@ -30,16 +30,15 @@ it.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.cartesian_obstruction_layout
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.cartesian_obstruction_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.shifted_cartesian_obstruction_layout
-:members:
-```
+.. autoclass:: mnt.pyfiction.shifted_cartesian_obstruction_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.hexagonal_obstruction_layout
-:members:
+.. autoclass:: mnt.pyfiction.hexagonal_obstruction_layout
+   :members:
 ```
 
 :::

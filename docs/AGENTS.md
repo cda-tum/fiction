@@ -24,6 +24,8 @@ The `Writing` rules in the root `AGENTS.md` apply here in full. In addition:
 - Write _fiction_ in italics when referring to the project.
 - Use single backticks for code literals and fenced MyST directives for Sphinx features.
 - Preserve explicit labels and use `{ref}` and `{doc}` roles for internal links.
+- Put Python autodoc directives in `{eval-rst}` fences: Sphinx emits their content
+  as reStructuredText. Keep prose and C++ directives in MyST.
 - Use rumdl's MyST-aware checks and run `prek run -a` after editing a page.
 
 ## The changelog

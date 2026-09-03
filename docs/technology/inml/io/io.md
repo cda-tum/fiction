@@ -27,8 +27,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.write_qcc_layout
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.write_qcc_layout
 ```
 
 :::

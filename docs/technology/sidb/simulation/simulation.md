@@ -29,12 +29,12 @@ logic/logic
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_simulation_result_100
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_simulation_result_100
+   :members:
 
-```{autoclass} mnt.pyfiction.sidb_simulation_result_111
-:members:
+.. autoclass:: mnt.pyfiction.sidb_simulation_result_111
+   :members:
 ```
 
 :::
@@ -72,20 +72,17 @@ logic/logic
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_simulation_engine
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_simulation_engine
+   :members:
 
-```{autoclass} mnt.pyfiction.exact_sidb_simulation_engine
-:members:
-```
+.. autoclass:: mnt.pyfiction.exact_sidb_simulation_engine
+   :members:
 
-```{autoclass} mnt.pyfiction.heuristic_sidb_simulation_engine
-:members:
-```
+.. autoclass:: mnt.pyfiction.heuristic_sidb_simulation_engine
+   :members:
 
-```{autofunction} mnt.pyfiction.sidb_simulation_engine_name
-
+.. autofunction:: mnt.pyfiction.sidb_simulation_engine_name
 ```
 
 :::
@@ -102,17 +99,17 @@ logic/logic
 
 **Header:** `fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp`
 
-> ```{doxygenfunction} fiction::sidb::simulation::check_simulation_results_for_equivalence
->
-> ```
+```{doxygenfunction} fiction::sidb::simulation::check_simulation_results_for_equivalence
+
+```
 
 :::
 
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.check_simulation_results_for_equivalence
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.check_simulation_results_for_equivalence
 ```
 
 :::
@@ -138,8 +135,8 @@ logic/logic
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.is_ground_state
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.is_ground_state
 ```
 
 :::

@@ -37,20 +37,15 @@ Can be used to read gate-level layout files (`.fgl`) as offered by [MNT Bench](h
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.read_cartesian_fgl_layout
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.read_cartesian_fgl_layout
 
-```
+.. autofunction:: mnt.pyfiction.read_shifted_cartesian_fgl_layout
 
-```{autofunction} mnt.pyfiction.read_shifted_cartesian_fgl_layout
+.. autofunction:: mnt.pyfiction.read_hexagonal_fgl_layout
 
-```
-
-```{autofunction} mnt.pyfiction.read_hexagonal_fgl_layout
-
-```
-
-```{autoclass} mnt.pyfiction.fgl_parsing_error
-:members:
+.. autoclass:: mnt.pyfiction.fgl_parsing_error
+   :members:
 ```
 
 :::
@@ -82,8 +77,8 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.write_fgl_layout
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.write_fgl_layout
 ```
 
 :::
@@ -149,8 +144,8 @@ Can be used to generate gate-level layout files (`.fgl`) as offered by [MNT Benc
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.write_dot_layout
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.write_dot_layout
 ```
 
 :::

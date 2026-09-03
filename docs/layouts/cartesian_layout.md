@@ -19,8 +19,9 @@ Coordinate system that represents a Cartesian grid of compile-time coordinate ty
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.cartesian_layout
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.cartesian_layout
+   :members:
 ```
 
 :::

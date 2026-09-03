@@ -29,16 +29,13 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.network_balancing_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.network_balancing_params
+   :members:
 
-```{autofunction} mnt.pyfiction.network_balancing
+.. autofunction:: mnt.pyfiction.network_balancing
 
-```
-
-```{autofunction} mnt.pyfiction.is_balanced
-
+.. autofunction:: mnt.pyfiction.is_balanced
 ```
 
 :::
@@ -68,20 +65,16 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.fanout_substitution_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.fanout_substitution_params
+   :members:
 
-```{autoclass} mnt.pyfiction.substitution_strategy
-:members:
-```
+.. autoclass:: mnt.pyfiction.substitution_strategy
+   :members:
 
-```{autofunction} mnt.pyfiction.fanout_substitution
+.. autofunction:: mnt.pyfiction.fanout_substitution
 
-```
-
-```{autofunction} mnt.pyfiction.is_fanout_substituted
-
+.. autofunction:: mnt.pyfiction.is_fanout_substituted
 ```
 
 :::
@@ -139,40 +132,27 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.missing_required_gates_exception
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.missing_required_gates_exception
+   :members:
 
-```{autoclass} mnt.pyfiction.technology_mapping_params
-:members:
-```
+.. autoclass:: mnt.pyfiction.technology_mapping_params
+   :members:
 
-```{autofunction} mnt.pyfiction.and_or_not
+.. autofunction:: mnt.pyfiction.and_or_not
 
-```
+.. autofunction:: mnt.pyfiction.and_or_not_maj
 
-```{autofunction} mnt.pyfiction.and_or_not_maj
+.. autofunction:: mnt.pyfiction.all_standard_2_input_functions
 
-```
+.. autofunction:: mnt.pyfiction.all_standard_3_input_functions
 
-```{autofunction} mnt.pyfiction.all_standard_2_input_functions
+.. autofunction:: mnt.pyfiction.all_supported_standard_functions
 
-```
+.. autoclass:: mnt.pyfiction.technology_mapping_stats
+   :members:
 
-```{autofunction} mnt.pyfiction.all_standard_3_input_functions
-
-```
-
-```{autofunction} mnt.pyfiction.all_supported_standard_functions
-
-```
-
-```{autoclass} mnt.pyfiction.technology_mapping_stats
-:members:
-```
-
-```{autofunction} mnt.pyfiction.technology_mapping
-
+.. autofunction:: mnt.pyfiction.technology_mapping
 ```
 
 :::
@@ -316,108 +296,58 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.create_id_tt
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.create_id_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_not_tt
 
-```{autofunction} mnt.pyfiction.create_not_tt
+.. autofunction:: mnt.pyfiction.create_and_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_or_tt
 
-```{autofunction} mnt.pyfiction.create_and_tt
+.. autofunction:: mnt.pyfiction.create_nand_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_nor_tt
 
-```{autofunction} mnt.pyfiction.create_or_tt
+.. autofunction:: mnt.pyfiction.create_xor_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_xnor_tt
 
-```{autofunction} mnt.pyfiction.create_nand_tt
+.. autofunction:: mnt.pyfiction.create_lt_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_gt_tt
 
-```{autofunction} mnt.pyfiction.create_nor_tt
+.. autofunction:: mnt.pyfiction.create_le_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_ge_tt
 
-```{autofunction} mnt.pyfiction.create_xor_tt
+.. autofunction:: mnt.pyfiction.create_and3_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_xor_and_tt
 
-```{autofunction} mnt.pyfiction.create_xnor_tt
+.. autofunction:: mnt.pyfiction.create_or_and_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_onehot_tt
 
-```{autofunction} mnt.pyfiction.create_lt_tt
+.. autofunction:: mnt.pyfiction.create_maj_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_gamble_tt
 
-```{autofunction} mnt.pyfiction.create_gt_tt
+.. autofunction:: mnt.pyfiction.create_dot_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_ite_tt
 
-```{autofunction} mnt.pyfiction.create_le_tt
+.. autofunction:: mnt.pyfiction.create_and_xor_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_xor3_tt
 
-```{autofunction} mnt.pyfiction.create_ge_tt
+.. autofunction:: mnt.pyfiction.create_double_wire_tt
 
-```
+.. autofunction:: mnt.pyfiction.create_crossing_wire_tt
 
-```{autofunction} mnt.pyfiction.create_and3_tt
+.. autofunction:: mnt.pyfiction.create_fan_out_tt
 
-```
-
-```{autofunction} mnt.pyfiction.create_xor_and_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_or_and_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_onehot_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_maj_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_gamble_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_dot_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_ite_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_and_xor_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_xor3_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_double_wire_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_crossing_wire_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_fan_out_tt
-
-```
-
-```{autofunction} mnt.pyfiction.create_half_adder_tt
-
+.. autofunction:: mnt.pyfiction.create_half_adder_tt
 ```
 
 :::

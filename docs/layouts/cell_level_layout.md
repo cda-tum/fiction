@@ -29,20 +29,18 @@ A cell-level layout can be obtained from a `gate_level_layout` by the {ref}`appl
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.qca_layout
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.qca_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.inml_layout
-:members:
-```
+.. autoclass:: mnt.pyfiction.inml_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.sidb_layout
-:members:
-```
+.. autoclass:: mnt.pyfiction.sidb_layout
+   :members:
 
-```{autoclass} mnt.pyfiction.mol_qca_layout
-:members:
+.. autoclass:: mnt.pyfiction.mol_qca_layout
+   :members:
 ```
 
 :::

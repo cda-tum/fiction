@@ -34,16 +34,13 @@ on_the_fly_circuit_design
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.generate_random_sidb_layout_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.generate_random_sidb_layout_params
+   :members:
 
-```{autofunction} mnt.pyfiction.generate_random_sidb_layout
+.. autofunction:: mnt.pyfiction.generate_random_sidb_layout
 
-```
-
-```{autofunction} mnt.pyfiction.generate_multiple_random_sidb_layouts
-
+.. autofunction:: mnt.pyfiction.generate_multiple_random_sidb_layouts
 ```
 
 :::

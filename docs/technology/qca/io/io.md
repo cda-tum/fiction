@@ -27,12 +27,11 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.write_qca_layout_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_qca_layout_params
+   :members:
 
-```{autofunction} mnt.pyfiction.write_qca_layout
-
+.. autofunction:: mnt.pyfiction.write_qca_layout
 ```
 
 :::
@@ -70,16 +69,14 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.write_fqca_layout_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_fqca_layout_params
+   :members:
 
-```{autofunction} mnt.pyfiction.write_fqca_layout
+.. autofunction:: mnt.pyfiction.write_fqca_layout
 
-```
-
-```{autoclass} mnt.pyfiction.out_of_cell_names_exception
-:members:
+.. autoclass:: mnt.pyfiction.out_of_cell_names_exception
+   :members:
 ```
 
 :::
@@ -119,20 +116,17 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.read_fqca_layout
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.read_fqca_layout
 
-```
+.. autoclass:: mnt.pyfiction.unsupported_character_exception
+   :members:
 
-```{autoclass} mnt.pyfiction.unsupported_character_exception
-:members:
-```
+.. autoclass:: mnt.pyfiction.undefined_cell_label_exception
+   :members:
 
-```{autoclass} mnt.pyfiction.undefined_cell_label_exception
-:members:
-```
-
-```{autoclass} mnt.pyfiction.unrecognized_cell_definition_exception
-:members:
+.. autoclass:: mnt.pyfiction.unrecognized_cell_definition_exception
+   :members:
 ```
 
 :::
@@ -178,16 +172,13 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.write_qca_layout_svg_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.write_qca_layout_svg_params
+   :members:
 
-```{autofunction} mnt.pyfiction.write_qca_layout_svg
+.. autofunction:: mnt.pyfiction.write_qca_layout_svg
 
-```
-
-```{autofunction} mnt.pyfiction.write_mol_qca_layout_svg
-
+.. autofunction:: mnt.pyfiction.write_mol_qca_layout_svg
 ```
 
 :::

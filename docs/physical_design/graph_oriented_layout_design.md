@@ -35,16 +35,14 @@ always optimal.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.graph_oriented_layout_design_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.graph_oriented_layout_design_params
+   :members:
 
-```{autoclass} mnt.pyfiction.graph_oriented_layout_design_stats
-:members:
-```
+.. autoclass:: mnt.pyfiction.graph_oriented_layout_design_stats
+   :members:
 
-```{autofunction} mnt.pyfiction.graph_oriented_layout_design
-
+.. autofunction:: mnt.pyfiction.graph_oriented_layout_design
 ```
 
 :::

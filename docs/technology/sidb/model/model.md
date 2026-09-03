@@ -19,8 +19,9 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_simulation_parameters
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_simulation_parameters
+   :members:
 ```
 
 :::
@@ -46,8 +47,8 @@
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.potential_to_distance_conversion
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.potential_to_distance_conversion
 ```
 
 :::
@@ -117,36 +118,24 @@
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_defect_type
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_defect_type
+   :members:
 
-```{autoclass} mnt.pyfiction.sidb_defect
-:members:
-```
+.. autoclass:: mnt.pyfiction.sidb_defect
+   :members:
 
-```{autofunction} mnt.pyfiction.is_charged_defect_type
+.. autofunction:: mnt.pyfiction.is_charged_defect_type
 
-```
+.. autofunction:: mnt.pyfiction.is_neutral_defect_type
 
-```{autofunction} mnt.pyfiction.is_neutral_defect_type
+.. autofunction:: mnt.pyfiction.is_positively_charged_defect
 
-```
+.. autofunction:: mnt.pyfiction.is_negatively_charged_defect
 
-```{autofunction} mnt.pyfiction.is_positively_charged_defect
+.. autofunction:: mnt.pyfiction.is_neutrally_charged_defect
 
-```
-
-```{autofunction} mnt.pyfiction.is_negatively_charged_defect
-
-```
-
-```{autofunction} mnt.pyfiction.is_neutrally_charged_defect
-
-```
-
-```{autofunction} mnt.pyfiction.defect_extent
-
+.. autofunction:: mnt.pyfiction.defect_extent
 ```
 
 :::
@@ -198,24 +187,17 @@ Possible charge states of SiDBs.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_charge_state
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_charge_state
+   :members:
 
-```{autofunction} mnt.pyfiction.sidb_charge_states_for_base_number
+.. autofunction:: mnt.pyfiction.sidb_charge_states_for_base_number
 
-```
+.. autofunction:: mnt.pyfiction.charge_state_to_sign
 
-```{autofunction} mnt.pyfiction.charge_state_to_sign
+.. autofunction:: mnt.pyfiction.sign_to_charge_state
 
-```
-
-```{autofunction} mnt.pyfiction.sign_to_charge_state
-
-```
-
-```{autofunction} mnt.pyfiction.charge_configuration_to_string
-
+.. autofunction:: mnt.pyfiction.charge_configuration_to_string
 ```
 
 :::
@@ -261,12 +243,10 @@ Possible charge states of SiDBs.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_nm_distance_100
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_nm_distance_100
 
-```
-
-```{autoclass} mnt.pyfiction.sidb_nm_distance_111
-
+.. autoclass:: mnt.pyfiction.sidb_nm_distance_111
 ```
 
 :::
@@ -292,8 +272,8 @@ Possible charge states of SiDBs.
 :::{tab-item} Python
 :sync: python
 
-```{autofunction} mnt.pyfiction.sidb_nm_position
-
+```{eval-rst}
+.. autofunction:: mnt.pyfiction.sidb_nm_position
 ```
 
 :::

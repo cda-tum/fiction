@@ -25,8 +25,9 @@ io/io
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.qca_technology
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.qca_technology
+   :members:
 ```
 
 :::
@@ -52,8 +53,9 @@ io/io
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.mol_qca_technology
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.mol_qca_technology
+   :members:
 ```
 
 :::

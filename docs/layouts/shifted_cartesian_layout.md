@@ -50,8 +50,9 @@ The shifted Cartesian layout supports all of them via template parameters. It sh
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.shifted_cartesian_layout
-:members:
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.shifted_cartesian_layout
+   :members:
 ```
 
 :::

@@ -26,12 +26,12 @@ H-Si(100)-2x1 and H-Si(111)-1x1.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.sidb_100_lattice
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.sidb_100_lattice
+   :members:
 
-```{autoclass} mnt.pyfiction.sidb_111_lattice
-:members:
+.. autoclass:: mnt.pyfiction.sidb_111_lattice
+   :members:
 ```
 
 :::
@@ -54,11 +54,6 @@ H-Si lattice orientation. We currently support H-Si(100)-2x1 and H-Si(111)-1x1.
 ```{doxygenclass} fiction::sidb::surfaces::lattice
 :members:
 ```
-
-:::
-
-:::{tab-item} Python
-:sync: python
 
 :::
 

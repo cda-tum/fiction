@@ -44,16 +44,14 @@ $$
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.hexagonalization_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.hexagonalization_params
+   :members:
 
-```{autoclass} mnt.pyfiction.hexagonalization_stats
-:members:
-```
+.. autoclass:: mnt.pyfiction.hexagonalization_stats
+   :members:
 
-```{autofunction} mnt.pyfiction.hexagonalization
-
+.. autofunction:: mnt.pyfiction.hexagonalization
 ```
 
 :::

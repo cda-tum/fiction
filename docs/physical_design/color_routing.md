@@ -34,12 +34,11 @@ to the layout.
 :::{tab-item} Python
 :sync: python
 
-```{autoclass} mnt.pyfiction.color_routing_params
-:members:
-```
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.color_routing_params
+   :members:
 
-```{autofunction} mnt.pyfiction.color_routing
-
+.. autofunction:: mnt.pyfiction.color_routing
 ```
 
 :::
