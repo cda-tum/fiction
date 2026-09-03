@@ -5,67 +5,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
-v0.8.0 - 2026-09-02
--------------------
-
-.. epigraph::
-
-   Fiction when we're not together; Mistaken for a vision, something of my own creation
-
-   -- The xx
+Unreleased
+----------
 
 Added
 #####
-- Algorithms:
-    - Added ``missing_required_gates_exception``, which ``technology_mapping`` throws when the gate
-      library lacks a gate the base network type requires
-    - Added an ``is_operational`` overload that takes one layout per input pattern, and
-      ``generate_bdl_input_pattern_layouts`` to generate them
-    - Added a ``critical_temperature_gate_based`` overload that takes the pre-generated input pattern
-      layouts and BDL detection results instead of deriving them from the layout
-    - Added ``number_of_threads`` to ``operational_domain_params``, ``defect_influence_params``, and
-      ``displacement_robustness_domain_params``. It defaults to the hardware concurrency, so
-      behavior is unchanged; pinning it makes runtimes reproducible
-    - ``operational_domain_contour_tracing`` now collects a boundary surface for three or more sweep
-      dimensions, and ``operational_domain_flood_fill`` no longer caps at three
-    - Added ``cell_layout_digest``, which hashes a cell-level layout in agreement with
-      ``are_cell_layouts_identical`` so that callers can group candidates before comparing them exactly
-- Build system:
-    - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
-- CLI:
-    - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
-      physical simulation. It implies kink rejection, since the filtering steps are only defined there
-- Continuous integration:
-    - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
-      distribution drops a tracked source or ships an untracked one
-    - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
-    - Added a 🐍 Test job that runs ``nox -s tests`` and ``nox -s minimums`` on Linux, macOS, and
-      Windows against a source build
-- Data structures:
-    - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
-    - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits
-      containers whose iteration order is not canonical
-- Experiments:
-    - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
-      operational domain sketch over a three-dimensional parameter space
-- Gate libraries:
-    - Added ``sim7_mol_library`` and ``mol_qca_technology``, which apply the SIM(7)-MolPDK molecular
-      QCA standard-cell library to gate-level layouts, with QLL/SVG export and Python bindings
 - Python bindings:
     - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
-    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
-      ``critical_temperature_gate_based`` overloads
-    - Exposed ``number_of_threads`` on ``operational_domain_params`` and
-      ``displacement_robustness_domain_params``
-    - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
-      ``apply_sim7_mol_library``
-    - Exposed ``state_type``, which makes ``calculate_energy_and_state_type_with_kinks_accepted``/``_rejected``
-      and ``occupation_probability_gate_based`` callable from Python
-- Tooling:
-    - Added the ``license-tools`` prek hook, which puts an MIT copyright header on every Python
-      file and rewrites any that departs from the canonical text
-    - Added the ``minimums`` nox session, which runs the Python test suite on Python 3.10 against
-      the lowest declared direct dependencies instead of the newest compatible ones
 
 Changed
 #######
@@ -162,6 +108,106 @@ Changed
   binding sits in the directory of the header it wraps under the header's name, and every
   directory that holds binding sources has exactly one registry. The Python API is unchanged,
   except for the two attributes listed under *Python bindings*
+- Code quality:
+    - The C++ test suite and the experiments now open the namespaces they use, one
+      ``using namespace`` directive per namespace, rather than qualifying every symbol below
+      ``fiction``. That removes about 14,000 qualifier tokens. ``fiction::layouts::coords`` and
+      ``fiction::layouts::clocking`` are deliberately left closed, so those references read
+      ``coords::offset`` and ``clocking::scheme``, and ``detail`` namespaces stay qualified by
+      their module
+    - The ``license-tools`` hook now covers ``.hpp`` and ``.cpp`` as well as Python, and skips the
+      generated ``pybind11_mkdoc_docstrings.hpp``
+    - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying ``@file``,
+      a one-line ``@brief``, and one ``@author`` line per contributor. The ``// Created by ...``
+      comments 428 files carried are gone; editing a file now means adding yourself to its list
+    - **Breaking for forks:** the ``#ifndef FICTION_..._HPP`` include guards are replaced by
+      ``#pragma once``, so a patch that touches the top or the bottom of a header will not apply
+      as-is. ``portability-avoid-pragma-once`` is switched off in ``.clang-tidy`` accordingly
+    - The Debug build no longer emits compiler warnings. Cleared ``-Wshadow`` in ``energy_state``
+      and the two SiDB writer implementations, ``-Wswitch`` in ``write_sqd_layout``, and
+      ``-Wparentheses`` and ``-Wconversion`` in two tests
+- Documentation:
+    - The ``docs/`` tree mirrors ``include/fiction/``: every page sits in the directory of the
+      headers it documents, and every directory with more than one page has a page named after
+      it that carries the toctree
+- Python bindings:
+    - **Breaking:** ``critical_temperature_stats.is_ground_state_transparent`` is renamed
+      ``energy_between_ground_state_and_first_erroneous``, the member it always exposed
+
+Fixed
+#####
+- ``types.hpp``: ``sidb_111_cell_clk_lyt_siqad_ptr``, ``cds_sidb_cell_clk_lyt_cube``,
+  ``cds_sidb_111_cell_clk_lyt_siqad_ptr``, and ``cds_sidb_111_cell_clk_lyt_cube_ptr`` pointed at
+  the wrong type; a ``static_assert`` per ``*_ptr`` alias pins each to the type its name says
+- Python bindings:
+    - ``parameter_point.__getitem__`` raises ``IndexError`` for an out-of-range index instead of
+      reading past the parameter vector
+    - ``write_sqd_sim_result`` accepts the ``sidb_simulation_result_100`` and ``_111`` results
+      Python produces; it was bound for a result type Python cannot construct
+
+v0.8.0 - 2026-09-02
+-------------------
+
+.. epigraph::
+
+   Fiction when we're not together; Mistaken for a vision, something of my own creation
+
+   -- The xx
+
+Added
+#####
+- Algorithms:
+    - Added ``missing_required_gates_exception``, which ``technology_mapping`` throws when the gate
+      library lacks a gate the base network type requires
+    - Added an ``is_operational`` overload that takes one layout per input pattern, and
+      ``generate_bdl_input_pattern_layouts`` to generate them
+    - Added a ``critical_temperature_gate_based`` overload that takes the pre-generated input pattern
+      layouts and BDL detection results instead of deriving them from the layout
+    - Added ``number_of_threads`` to ``operational_domain_params``, ``defect_influence_params``, and
+      ``displacement_robustness_domain_params``. It defaults to the hardware concurrency, so
+      behavior is unchanged; pinning it makes runtimes reproducible
+    - ``operational_domain_contour_tracing`` now collects a boundary surface for three or more sweep
+      dimensions, and ``operational_domain_flood_fill`` no longer caps at three
+    - Added ``cell_layout_digest``, which hashes a cell-level layout in agreement with
+      ``are_cell_layouts_identical`` so that callers can group candidates before comparing them exactly
+- Build system:
+    - Added ``-DFICTION_ENABLE_TIME_TRACE=ON`` to emit Clang ``-ftime-trace`` compilation profiles
+- CLI:
+    - Added ``opdom --sketch/-s``, which determines the operational status by filtering instead of by
+      physical simulation. It implies kink rejection, since the filtering steps are only defined there
+- Continuous integration:
+    - The 🐍 Packaging jobs now run ``check-sdist --inject-junk``, which fails if the source
+      distribution drops a tracked source or ships an untracked one
+    - Added a 🐍 Lint job that runs the ``mypy`` hook, which pre-commit.ci no longer runs
+    - Added a 🐍 Test job that runs ``nox -s tests`` and ``nox -s minimums`` on Linux, macOS, and
+      Windows against a source build
+- Data structures:
+    - Added a ``std::hash`` specialization for ``fiction::sidb_defect``
+    - Added ``hash_combine_unordered``, which folds hash values commutatively and therefore suits
+      containers whose iteration order is not canonical
+- Experiments:
+    - Added ``operational_domain_3d_bestagon_grid_vs_sketch``, which compares grid search against the
+      operational domain sketch over a three-dimensional parameter space
+- Gate libraries:
+    - Added ``sim7_mol_library`` and ``mol_qca_technology``, which apply the SIM(7)-MolPDK molecular
+      QCA standard-cell library to gate-level layouts, with QLL/SVG export and Python bindings
+- Python bindings:
+    - Exposed ``generate_bdl_input_pattern_layouts`` and the new ``is_operational`` and
+      ``critical_temperature_gate_based`` overloads
+    - Exposed ``number_of_threads`` on ``operational_domain_params`` and
+      ``displacement_robustness_domain_params``
+    - Exposed ``mol_qca_technology``, ``mol_qca_layout``, ``write_mol_qca_layout_svg``, and
+      ``apply_sim7_mol_library``
+    - Exposed ``state_type``, which makes ``calculate_energy_and_state_type_with_kinks_accepted``/``_rejected``
+      and ``occupation_probability_gate_based`` callable from Python
+- Tooling:
+    - Added the ``license-tools`` prek hook, which puts an MIT copyright header on every Python
+      file and rewrites any that departs from the canonical text
+    - Added the ``minimums`` nox session, which runs the Python test suite on Python 3.10 against
+      the lowest declared direct dependencies instead of the newest compatible ones
+
+Changed
+#######
 - Algorithms:
     - ``technology_mapping`` and the ``map`` command now default to ``mockturtle::emap`` instead of
       ``mockturtle::map``
@@ -206,7 +252,7 @@ Changed
     - Pruned the include graph of the most widely included headers, keeping ``nlohmann/json.hpp``,
       ``fmt``, and the vendored ``combinations.h`` off the path that ``traits.hpp`` pulls in
     - **Breaking:** moved ``determine_all_combinations_of_distributing_k_entities_on_n_positions``
-      from ``fiction/utils/math/math_utils.hpp`` to the new ``fiction/utils/math/combination_utils.hpp``.
+      from ``fiction/utils/math_utils.hpp`` to the new ``fiction/utils/combination_utils.hpp``.
       Include the latter to keep using it
     - ``orthogonal`` and ``graph_oriented_layout_design`` no longer template their implementation on
       the specification network type. Their public entry points are unchanged
@@ -221,12 +267,6 @@ Changed
     - ``exact`` now surfaces a failure in one of its asynchronous workers instead of reporting it
       as "no layout found"
     - Cleared the pre-existing Clang-Tidy findings in ``exact.hpp``
-    - The C++ test suite and the experiments now open the namespaces they use, one
-      ``using namespace`` directive per namespace, rather than qualifying every symbol below
-      ``fiction``. That removes about 14,000 qualifier tokens. ``fiction::layouts::coords`` and
-      ``fiction::layouts::clocking`` are deliberately left closed, so those references read
-      ``coords::offset`` and ``clocking::scheme``, and ``detail`` namespaces stay qualified by
-      their module
     - Migrated the ``pyfiction`` test suite from ``unittest`` to pytest and enabled ruff's ``PT``,
       ``PTH``, and ``E501`` rule sets. The suite now fails on warnings
     - Every Python file now carries ``from __future__ import annotations``, which ruff's
@@ -234,19 +274,8 @@ Changed
     - Retired ruff's TODO ignore list. Every entry that remains states a decision in a comment,
       including ``CPY001``, which stays off because the ``license-tools`` hook enforces the
       headers instead
-    - The ``license-tools`` hook now covers ``.hpp`` and ``.cpp`` as well as Python, and skips the
-      generated ``pybind11_mkdoc_docstrings.hpp``
     - ``mypy`` now checks every Python file the repository owns, where it previously checked only
       the bindings and ``noxfile.py``
-    - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying ``@file``,
-      a one-line ``@brief``, and one ``@author`` line per contributor. The ``// Created by ...``
-      comments 428 files carried are gone; editing a file now means adding yourself to its list
-    - **Breaking for forks:** the ``#ifndef FICTION_..._HPP`` include guards are replaced by
-      ``#pragma once``, so a patch that touches the top or the bottom of a header will not apply
-      as-is. ``portability-avoid-pragma-once`` is switched off in ``.clang-tidy`` accordingly
-    - The Debug build no longer emits compiler warnings. Cleared ``-Wshadow`` in ``energy_state``
-      and the two SiDB writer implementations, ``-Wswitch`` in ``write_sqd_layout``, and
-      ``-Wparentheses`` and ``-Wconversion`` in two tests
 - Continuous integration:
     - The docstring generator now parses with a pinned libclang, ``-std=c++20``, and a configured
       build's include paths and defines, which drops parse errors from about 180 to zero
@@ -290,9 +319,6 @@ Changed
     - The Linux wheels pin ``z3-solver`` instead of flooring it, and the ``aarch64`` image moves to
       ``manylinux_2_34``. The published ``aarch64`` wheel therefore requires glibc 2.34
 - Documentation:
-    - The ``docs/`` tree mirrors ``include/fiction/``: every page sits in the directory of the
-      headers it documents, and every directory with more than one page has a page named after
-      it that carries the toctree
     - The README's six per-workflow status badges are replaced by one ``CI`` and one ``CD`` badge,
       matching the two workflows that remain
     - ``docs/contributing.rst`` describes the checks a pull request now reports and what
@@ -305,8 +331,6 @@ Changed
     - ``generate_defective_surface.py`` now writes the surface it generates, which it previously
       discarded, and takes the parameters it used to hard-code as command-line arguments
 - Python bindings:
-    - **Breaking:** ``critical_temperature_stats.is_ground_state_transparent`` is renamed
-      ``energy_between_ground_state_and_first_erroneous``, the member it always exposed
     - **Breaking:** generated docstring symbols are now named ``mkd_doc_*`` instead of the reserved
       ``__doc_*``. ``DOC(...)`` is unchanged; a hand-written docstring that defines such a symbol
       must be renamed
@@ -344,9 +368,6 @@ Removed
 
 Fixed
 #####
-- ``types.hpp``: ``sidb_111_cell_clk_lyt_siqad_ptr``, ``cds_sidb_cell_clk_lyt_cube``,
-  ``cds_sidb_111_cell_clk_lyt_siqad_ptr``, and ``cds_sidb_111_cell_clk_lyt_cube_ptr`` pointed at
-  the wrong type; a ``static_assert`` per ``*_ptr`` alias pins each to the type its name says
 - Algorithms:
     - Requesting the operational domain sketch (``FILTER_ONLY``) without ``REJECT_KINKS`` or on a
       layout without ``LOGIC`` cells now throws instead of silently simulating the whole parameter
@@ -380,7 +401,7 @@ Fixed
       does not guarantee
     - Fixed plain ``char`` values being passed to ``::toupper``, ``::tolower``, ``::isdigit``, and
       ``::isxdigit``, which is undefined behavior on platforms with a signed ``char``
-    - Fixed a signed-integer overflow in ``to_siqad`` for the minimum representable ``y`` value
+    - Fixed a signed-integer overflow in ``to_siqad_coord`` for the minimum representable ``y`` value
 - Continuous integration:
     - Renamed ``.readthedocs.yml`` to ``.readthedocs.yaml``, the name the preview guard and the
       ``check-readthedocs`` hook expect, so editing the file rebuilds the documentation preview
@@ -408,17 +429,12 @@ Fixed
     - Fixed ``write_qca_layout_svg``'s simple-mode output emitting malformed ``fill:##000000`` for
       constant-0/1 QCA cells instead of ``fill:#000000``
 - Python bindings:
-    - ``parameter_point.__getitem__`` raises ``IndexError`` for an out-of-range index instead of
-      reading past the parameter vector
-    - ``write_sqd_sim_result`` accepts the ``sidb_simulation_result_100`` and ``_111`` results
-      Python produces; it was bound for a result type Python cannot construct
     - Fixed the ``sidb_defect`` ``operator!=`` binding, which referenced a docstring symbol that is no
       longer emitted now that the operator is compiler-synthesized
     - Fixed nine ``DOC(...)`` references that named symbols the broken parse had invented; the
       ``*_stats`` runtime members are now documented under their real names
     - Fixed ``bdl_input_iterator.py`` never being collected, as its name did not match pytest's
       ``python_files`` pattern, so its five tests had never run
-
 v0.7.0 - 2026-07-31
 -------------------
 
