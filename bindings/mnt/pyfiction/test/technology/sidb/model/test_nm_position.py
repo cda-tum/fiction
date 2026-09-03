@@ -8,11 +8,11 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_layout, sidb_nm_position
+from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_cell_level_layout, sidb_nm_position
 
 
 def test_layout_without_lattice_orientation():
-    layout_one = sidb_layout((10, 10))
+    layout_one = sidb_cell_level_layout((10, 10))
 
     result = sidb_nm_position(layout_one, (0, 0))
 

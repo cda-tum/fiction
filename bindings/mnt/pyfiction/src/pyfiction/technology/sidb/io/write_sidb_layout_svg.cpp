@@ -18,6 +18,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 
 #include <sstream>
 #include <string>
@@ -109,6 +110,26 @@ void write_sidb_layout_svg(nanobind::module_& m)
     detail::write_sidb_layout_svg_impl<py_sidb_111_lattice>(m);
     detail::write_sidb_layout_svg_impl<py_sidb_100_lattice>(m);
     detail::write_sidb_layout_svg_impl<py_sidb_layout>(m);
+
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_sidb_layout_svg_pointer)(const fiction::sidb::layout&, const std::string_view&,
+                                                const fiction::sidb::io::write_sidb_layout_svg_params&) =
+        &fiction::sidb::io::write_sidb_layout_svg;
+
+    m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
+          py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+          DOC(fiction_sidb_io_write_sidb_layout_svg_3));
+
+    m.def(
+        "write_sidb_layout_svg_to_string",
+        [](const fiction::sidb::layout& layout, const fiction::sidb::io::write_sidb_layout_svg_params& params)
+        {
+            std::ostringstream oss;
+            fiction::sidb::io::write_sidb_layout_svg(layout, oss, params);
+            return oss.str();
+        },
+        py::arg("layout"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+        DOC(fiction_sidb_io_write_sidb_layout_svg_3));
 }
 
 }  // namespace pyfiction

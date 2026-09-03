@@ -36,7 +36,7 @@ A cell-level layout can be obtained from a `gate_level_layout` by the {ref}`appl
 .. autoclass:: mnt.pyfiction.inml_layout
    :members:
 
-.. autoclass:: mnt.pyfiction.sidb_layout
+.. autoclass:: mnt.pyfiction.sidb_cell_level_layout
    :members:
 
 .. autoclass:: mnt.pyfiction.mol_qca_layout

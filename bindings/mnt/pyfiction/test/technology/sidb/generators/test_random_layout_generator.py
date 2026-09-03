@@ -16,7 +16,7 @@ from mnt.pyfiction import (
     generate_random_sidb_layout_params,
     sidb_100_lattice,
     sidb_111_lattice,
-    sidb_layout,
+    sidb_cell_level_layout,
 )
 
 
@@ -36,7 +36,7 @@ def test_area_with_five_sidb_layout():
     params.number_of_sidbs = 5
     print(params.number_of_sidbs)
     params.coordinate_pair = ((0, 0), (10, 10))
-    result_lyt = generate_random_sidb_layout(params, sidb_layout())
+    result_lyt = generate_random_sidb_layout(params, sidb_cell_level_layout())
     assert result_lyt.num_cells() == 5
 
 
@@ -81,7 +81,7 @@ def test_area_with_one_coordinate_111_lattice():
 def test_impossible_design_of_single_layout():
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 2
-    result_lyt = generate_random_sidb_layout(params, sidb_layout())
+    result_lyt = generate_random_sidb_layout(params, sidb_cell_level_layout())
     assert result_lyt is None
 
 
@@ -89,5 +89,5 @@ def test_impossible_design_of_multiple_layouts():
     params = generate_random_sidb_layout_params()
     params.maximal_attempts_for_multiple_layouts = 5
     params.number_of_sidbs = 2
-    result_lyt = generate_multiple_random_sidb_layouts(params, sidb_layout())
+    result_lyt = generate_multiple_random_sidb_layouts(params, sidb_cell_level_layout())
     assert result_lyt is None
