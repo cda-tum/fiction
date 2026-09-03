@@ -19,6 +19,8 @@
 #pragma once
 
 #include "fiction/networks/name_utils.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/technology/sidb/technology.hpp"
@@ -57,6 +59,79 @@ class sqd_parsing_error : public std::runtime_error
 
 namespace detail
 {
+
+/**
+ * Parses the `<type>` element of a `<dbdot>`; a missing element means a normal SiDB.
+ *
+ * @param dot_type The element, or `nullptr`.
+ * @return The cell type.
+ */
+inline sidb::sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElement* dot_type)
+{
+    // if no dot type is given, assume normal dot
+    if (dot_type == nullptr)
+    {
+        return sidb::sidb_technology::cell_type::NORMAL;
+    }
+
+    const auto* const type = dot_type->GetText();
+
+    if (type == nullptr)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: no text in element 'type'");
+    }
+
+    if (std::string{type} == "input")
+    {
+        return sidb::sidb_technology::cell_type::INPUT;
+    }
+    if (std::string{type} == "output")
+    {
+        return sidb::sidb_technology::cell_type::OUTPUT;
+    }
+    if (std::string{type} == "normal")
+    {
+        return sidb::sidb_technology::cell_type::NORMAL;
+    }
+    if (std::string{type} == "logic")
+    {
+        return sidb::sidb_technology::cell_type::LOGIC;
+    }
+
+    throw sqd_parsing_error("Error parsing SQD file: invalid dot type");
+}
+/**
+ * Maps SiQAD's defect labels to defect types; unknown labels yield `defect_type::UNKNOWN`.
+ *
+ * @param label The label text.
+ * @return The defect type.
+ */
+[[nodiscard]] inline sidb::model::defect_type parse_defect_label(const char* label) noexcept
+{
+    // maps defect names to their respective types
+    static const std::unordered_map<std::string, sidb::model::defect_type> defect_name_to_type{
+        {{"h-si", sidb::model::defect_type::NONE},
+         {"db", sidb::model::defect_type::DB},
+         {"vacancy", sidb::model::defect_type::SI_VACANCY},
+         {"single_dihydride", sidb::model::defect_type::SINGLE_DIHYDRIDE},
+         {"dihydride", sidb::model::defect_type::DIHYDRIDE_PAIR},
+         {"1by1", sidb::model::defect_type::ONE_BY_ONE},
+         {"3by1", sidb::model::defect_type::THREE_BY_ONE},
+         {"siloxane", sidb::model::defect_type::SILOXANE},
+         {"raised_silicon", sidb::model::defect_type::RAISED_SI},
+         {"missing_dimer", sidb::model::defect_type::MISSING_DIMER},
+         {"etch_pit", sidb::model::defect_type::ETCH_PIT},
+         {"step_edge", sidb::model::defect_type::STEP_EDGE},
+         {"gunk", sidb::model::defect_type::GUNK},
+         {"unknown", sidb::model::defect_type::UNKNOWN}}};
+
+    std::string name{label};
+    std::ranges::transform(name, name.begin(),
+                           [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
+
+    const auto it = defect_name_to_type.find(name);
+    return it == defect_name_to_type.cend() ? sidb::model::defect_type::UNKNOWN : it->second;
+}
 
 template <typename Lyt>
 class read_sqd_layout_impl
@@ -285,40 +360,6 @@ class read_sqd_layout_impl
      * @return The cell type specified by the <dbdot> element. If non is specified, the cell type is assumed to be
      * normal.
      */
-    sidb::sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElement* dot_type)
-    {
-        // if no dot type is given, assume normal dot
-        if (dot_type == nullptr)
-        {
-            return sidb::sidb_technology::cell_type::NORMAL;
-        }
-
-        const auto* const type = dot_type->GetText();
-
-        if (type == nullptr)
-        {
-            throw sqd_parsing_error("Error parsing SQD file: no text in element 'type'");
-        }
-
-        if (std::string{type} == "input")
-        {
-            return sidb::sidb_technology::cell_type::INPUT;
-        }
-        if (std::string{type} == "output")
-        {
-            return sidb::sidb_technology::cell_type::OUTPUT;
-        }
-        if (std::string{type} == "normal")
-        {
-            return sidb::sidb_technology::cell_type::NORMAL;
-        }
-        if (std::string{type} == "logic")
-        {
-            return sidb::sidb_technology::cell_type::LOGIC;
-        }
-
-        throw sqd_parsing_error("Error parsing SQD file: invalid dot type");
-    }
     /**
      * Parses a <dbdot> element from the SQD file and adds the respective dot to the layout.
      *
@@ -335,7 +376,7 @@ class read_sqd_layout_impl
 
         const auto* const dot_type = db_dot->FirstChildElement("type");
 
-        lyt.assign_cell_type(parse_latcoord(latcoord), parse_dot_type(dot_type));
+        lyt.assign_cell_type(parse_latcoord(latcoord), detail::parse_dot_type(dot_type));
     }
     /**
      * Parses a <val> attribute of a <type_label> element of a <property_map> element from the SQD file and converts it
@@ -344,32 +385,6 @@ class read_sqd_layout_impl
      * @param label The <type_label> element's <val> attribute.
      * @return The SiDB defect type corresponding to the given label.
      */
-    [[nodiscard]] static sidb::model::defect_type parse_defect_label(const char* label) noexcept
-    {
-        // maps defect names to their respective types
-        static const std::unordered_map<std::string, sidb::model::defect_type> defect_name_to_type{
-            {{"h-si", sidb::model::defect_type::NONE},
-             {"db", sidb::model::defect_type::DB},
-             {"vacancy", sidb::model::defect_type::SI_VACANCY},
-             {"single_dihydride", sidb::model::defect_type::SINGLE_DIHYDRIDE},
-             {"dihydride", sidb::model::defect_type::DIHYDRIDE_PAIR},
-             {"1by1", sidb::model::defect_type::ONE_BY_ONE},
-             {"3by1", sidb::model::defect_type::THREE_BY_ONE},
-             {"siloxane", sidb::model::defect_type::SILOXANE},
-             {"raised_silicon", sidb::model::defect_type::RAISED_SI},
-             {"missing_dimer", sidb::model::defect_type::MISSING_DIMER},
-             {"etch_pit", sidb::model::defect_type::ETCH_PIT},
-             {"step_edge", sidb::model::defect_type::STEP_EDGE},
-             {"gunk", sidb::model::defect_type::GUNK},
-             {"unknown", sidb::model::defect_type::UNKNOWN}}};
-
-        std::string name{label};
-        std::ranges::transform(name, name.begin(),
-                               [](const unsigned char c) { return static_cast<char>(std::tolower(c)); });
-
-        const auto it = defect_name_to_type.find(name);
-        return it == defect_name_to_type.cend() ? sidb::model::defect_type::UNKNOWN : it->second;
-    }
     /**
      * Parses a <defect> element from the SQD file and adds the respective defect to the layout if it implements the
      * has_assign_sidb_defect function..
@@ -404,7 +419,7 @@ class read_sqd_layout_impl
                 {
                     if (const auto* const val = type_label->FirstChildElement("val"); val != nullptr)
                     {
-                        defect_type = parse_defect_label(val->GetText());
+                        defect_type = detail::parse_defect_label(val->GetText());
                     }
                 }
             }
@@ -431,6 +446,210 @@ class read_sqd_layout_impl
             std::ranges::for_each(
                 incl_cells, [this, &defect_type, &charge, &eps_r, &lambda_tf](const auto& cell)
                 { lyt.assign_defect(cell, sidb::model::defect{defect_type, charge, eps_r, lambda_tf}); });
+        }
+    }
+};
+
+/**
+ * Reads an SQD file into an `sidb::layout`. The file's lattice definition selects the lattice; SiDBs and surface
+ * defects are placed at the `(n, m, l)` lattice coordinates the file names.
+ */
+class sqd_reader
+{
+  public:
+    sqd_reader(std::istream& s, const std::string_view& name) : is{s}
+    {
+        lyt.set_layout_name(std::string{name});
+    }
+
+    layout run()
+    {
+        // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
+        std::stringstream buffer{};
+        buffer << is.rdbuf();
+        const std::string sqd_content{buffer.str()};
+
+        tinyxml2::XMLDocument xml_document{};
+        xml_document.Parse(sqd_content.c_str());
+
+        if (xml_document.ErrorID() != 0)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: " + std::string(xml_document.ErrorName()));
+        }
+
+        const auto* const siqad_root = xml_document.FirstChildElement("siqad");
+
+        if (siqad_root == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no root element 'siqad'");
+        }
+
+        const auto* const layers_element = siqad_root->FirstChildElement("layers");
+
+        if (layers_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'layers'");
+        }
+
+        const auto* const layer_prop_element = layers_element->FirstChildElement("layer_prop");
+
+        if (layer_prop_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'layer_prop'");
+        }
+
+        const auto* const lat_vec_element = layer_prop_element->FirstChildElement("lat_vec");
+
+        if (lat_vec_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'lat_vec'");
+        }
+
+        std::string lattice_name{lattice::si_100_2x1().name};
+
+        if (const auto* const name = lat_vec_element->FirstChildElement("name"); name != nullptr)
+        {
+            if (const auto* const text = name->GetText(); text != nullptr)
+            {
+                lattice_name = text;
+            }
+        }
+
+        lyt.set_lattice(parse_lattice(lattice_name));
+
+        const auto* const design_element = siqad_root->FirstChildElement("design");
+
+        if (design_element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'design'");
+        }
+
+        for (const auto* layer = design_element->FirstChildElement("layer"); layer != nullptr;
+             layer             = layer->NextSiblingElement("layer"))
+        {
+            const auto* const layer_type = layer->Attribute("type");
+
+            if (layer_type == nullptr)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: no attribute 'type' in element 'layer'");
+            }
+
+            if (std::string{layer_type} == "DB")
+            {
+                for (const auto* db_dot = layer->FirstChildElement("dbdot"); db_dot != nullptr;
+                     db_dot             = db_dot->NextSiblingElement("dbdot"))
+                {
+                    parse_db_dot(db_dot);
+                }
+            }
+            else if (std::string{layer_type} == "Defects")
+            {
+                for (const auto* defect = layer->FirstChildElement("defect"); defect != nullptr;
+                     defect             = defect->NextSiblingElement("defect"))
+                {
+                    parse_defect(defect);
+                }
+            }
+        }
+
+        return lyt;
+    }
+
+  private:
+    layout        lyt{};
+    std::istream& is;
+
+    [[nodiscard]] static lattice parse_lattice(const std::string& name)
+    {
+        if (name == lattice::si_111_1x1().name)
+        {
+            return lattice::si_111_1x1();
+        }
+        if (name == lattice::si_100_2x1().name)
+        {
+            return lattice::si_100_2x1();
+        }
+
+        throw sqd_parsing_error("Error parsing SQD file: unknown lattice orientation");
+    }
+    [[nodiscard]] static lattice_site parse_latcoord(const tinyxml2::XMLElement* latcoord)
+    {
+        const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
+
+        if (n == nullptr || m == nullptr || l == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
+        }
+
+        const auto basis_site = std::stoll(l);
+
+        if (basis_site < 0 || basis_site > 1)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: dimer has invalid dot index");
+        }
+
+        return {std::stoll(n), std::stoll(m), basis_site};
+    }
+    void parse_db_dot(const tinyxml2::XMLElement* db_dot)
+    {
+        const auto* const latcoord = db_dot->FirstChildElement("latcoord");
+
+        if (latcoord == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'dbdot'");
+        }
+
+        lyt.assign_cell_type(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
+    }
+    void parse_defect(const tinyxml2::XMLElement* defect)
+    {
+        std::vector<lattice_site> incl_sites{};
+        sidb::model::defect_type  defect_type{sidb::model::defect_type::UNKNOWN};
+        int64_t                   charge{0};
+        double                    eps_r{0.0};
+        double                    lambda_tf{0.0};
+
+        if (const auto* const incl_coords = defect->FirstChildElement("incl_coords"); incl_coords != nullptr)
+        {
+            for (const auto* latcoord = incl_coords->FirstChildElement("latcoord"); latcoord != nullptr;
+                 latcoord             = latcoord->NextSiblingElement("latcoord"))
+            {
+                incl_sites.push_back(parse_latcoord(latcoord));
+            }
+            if (incl_sites.empty())
+            {
+                throw sqd_parsing_error("Error parsing SQD file: no element 'latcoord' in element 'incl_coords'");
+            }
+        }
+        if (const auto* const property_map = defect->FirstChildElement("property_map"); property_map != nullptr)
+        {
+            if (const auto* const type_label = property_map->FirstChildElement("type_label"); type_label != nullptr)
+            {
+                if (const auto* const val = type_label->FirstChildElement("val"); val != nullptr)
+                {
+                    defect_type = parse_defect_label(val->GetText());
+                }
+            }
+        }
+        if (const auto* const coulomb = defect->FirstChildElement("coulomb"); coulomb != nullptr)
+        {
+            const auto charge_string = coulomb->Attribute("charge"), eps_r_string = coulomb->Attribute("eps_r"),
+                       lambda_tf_string = coulomb->Attribute("lambda_tf");
+
+            if (charge_string == nullptr || eps_r_string == nullptr || lambda_tf_string == nullptr)
+            {
+                throw sqd_parsing_error(
+                    "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
+            }
+
+            charge    = std::stoll(charge_string);
+            eps_r     = std::stod(eps_r_string);
+            lambda_tf = std::stod(lambda_tf_string);
+        }
+
+        for (const auto& s : incl_sites)
+        {
+            lyt.assign_defect(s, sidb::model::defect{defect_type, charge, eps_r, lambda_tf});
         }
     }
 };
@@ -478,6 +697,7 @@ Lyt read_sqd_layout(std::istream& is, const std::string_view& name = "")
  * @param is The input stream to read from.
  */
 template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
 void read_sqd_layout(Lyt& lyt, std::istream& is)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -534,6 +754,7 @@ Lyt read_sqd_layout(const std::string_view& filename, const std::string_view& na
  * @param filename The file name to open and read from.
  */
 template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
 void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
@@ -549,6 +770,45 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 
     read_sqd_layout<Lyt>(lyt, is);
     is.close();
+}
+
+/**
+ * Reads an SQD file from a stream into an `sidb::layout`. The lattice comes from the file's lattice definition; SiDBs
+ * and surface defects are placed at the `(n, m, l)` lattice coordinates the file names.
+ *
+ * @param is The input stream to read from.
+ * @param name The name to give to the layout.
+ * @return The layout read from the stream.
+ * @throws sqd_parsing_error if the file is malformed or names an unknown lattice.
+ */
+[[nodiscard]] inline layout read_sqd_layout(std::istream& is, const std::string_view& name = "")
+{
+    detail::sqd_reader p{is, name};
+
+    return p.run();
+}
+/**
+ * Reads an SQD file into an `sidb::layout`. See the stream overload for the file's interpretation.
+ *
+ * @param filename The file to read.
+ * @param name The name to give to the layout.
+ * @return The layout read from the file.
+ * @throws sqd_parsing_error if the file is malformed or names an unknown lattice.
+ * @throws std::ifstream::failure if the file cannot be opened.
+ */
+[[nodiscard]] inline layout read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
+{
+    std::ifstream is{std::string{filename}, std::ifstream::in};
+
+    if (!is.is_open())
+    {
+        throw std::ifstream::failure("could not open file");
+    }
+
+    auto lyt = read_sqd_layout(is, name);
+    is.close();
+
+    return lyt;
 }
 
 }  // namespace fiction::sidb::io
