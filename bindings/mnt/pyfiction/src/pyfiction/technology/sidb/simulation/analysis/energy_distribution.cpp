@@ -18,9 +18,11 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/simulation/analysis/energy_distribution.hpp>
 
 #include <cstdint>
+#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -34,20 +36,6 @@
 
 namespace pyfiction
 {
-
-namespace detail
-{
-
-template <typename Lyt>
-void energy_distribution_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("calculate_energy_distribution", &fiction::sidb::simulation::analysis::calculate_energy_distribution<Lyt>,
-          py::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_energy_distribution));
-}
-
-}  // namespace detail
 
 void energy_distribution(nanobind::module_& m)
 {
@@ -81,9 +69,23 @@ void energy_distribution(nanobind::module_& m)
 
         ;
 
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
-    detail::energy_distribution_impl<py_sidb_100_lattice>(m);
-    detail::energy_distribution_impl<py_sidb_111_lattice>(m);
+    // NOLINTNEXTLINE(misc-const-correctness)
+    fiction::sidb::simulation::analysis::energy_distribution (*const energy_distribution_pointer)(
+        const std::vector<fiction::sidb::charge_distribution>&) =
+        &fiction::sidb::simulation::analysis::calculate_energy_distribution;
+
+    m.def("calculate_energy_distribution", energy_distribution_pointer, py::arg("charge_distributions"),
+          DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution_2));
+
+    // transitional overloads over charge distribution surfaces; they go away once every consumer takes
+    // `charge_distribution`. NOTE: registered after the `charge_distribution` overload, since Python resolves the
+    // first matching one.
+    m.def("calculate_energy_distribution",
+          &fiction::sidb::simulation::analysis::calculate_energy_distribution<py_sidb_100_lattice>,
+          py::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
+    m.def("calculate_energy_distribution",
+          &fiction::sidb::simulation::analysis::calculate_energy_distribution<py_sidb_111_lattice>,
+          py::arg("charge_distributions"), DOC(fiction_sidb_simulation_analysis_calculate_energy_distribution));
 }
 
 }  // namespace pyfiction

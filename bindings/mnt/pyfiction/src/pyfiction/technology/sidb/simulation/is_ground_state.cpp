@@ -15,40 +15,26 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/is_ground_state.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
-namespace detail
-{
-
-template <typename Lyt>
-void is_ground_state_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("is_ground_state", &fiction::sidb::simulation::is_ground_state<Lyt>, py::arg("heuristic_results"),
-          py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
-}
-
-}  // namespace detail
-
 void is_ground_state(nanobind::module_& m)
 {
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+    namespace py = nanobind;
 
-    detail::is_ground_state_impl<py_sidb_100_lattice>(m);
-    detail::is_ground_state_impl<py_sidb_111_lattice>(m);
+    // NOLINTNEXTLINE(misc-const-correctness)
+    bool (*const is_ground_state_pointer)(const fiction::sidb::simulation::result&,
+                                          const fiction::sidb::simulation::result&) =
+        &fiction::sidb::simulation::is_ground_state;
+
+    m.def("is_ground_state", is_ground_state_pointer, py::arg("heuristic_results"), py::arg("exhaustive_results"),
+          DOC(fiction_sidb_simulation_is_ground_state_2));
 }
 
 }  // namespace pyfiction

@@ -15,39 +15,25 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
 
-namespace detail
-{
-
-template <typename Lyt>
-void check_for_equivalence_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    m.def("check_simulation_results_for_equivalence",
-          &fiction::sidb::simulation::check_simulation_results_for_equivalence<Lyt>, py::arg("result1"),
-          py::arg("result2"), DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
-}
-
-}  // namespace detail
-
 void check_simulation_results_for_equivalence(nanobind::module_& m)
 {
-    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+    namespace py = nanobind;
 
-    detail::check_for_equivalence_impl<py_sidb_100_lattice>(m);
-    detail::check_for_equivalence_impl<py_sidb_111_lattice>(m);
+    // NOLINTNEXTLINE(misc-const-correctness)
+    bool (*const equivalence_pointer)(fiction::sidb::simulation::result, fiction::sidb::simulation::result) =
+        &fiction::sidb::simulation::check_simulation_results_for_equivalence;
+
+    m.def("check_simulation_results_for_equivalence", equivalence_pointer, py::arg("result1"), py::arg("result2"),
+          DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence_2));
 }
 
 }  // namespace pyfiction

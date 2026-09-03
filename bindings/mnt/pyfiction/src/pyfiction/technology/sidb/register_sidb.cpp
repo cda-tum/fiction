@@ -31,6 +31,7 @@ void lattice(nanobind::module_& m);
  * @param m Python module.
  */
 void layout(nanobind::module_& m);
+void charge_distribution(nanobind::module_& m);
 
 /**
  * @brief Registers SiDB lattice types before the layouts that use them.
@@ -41,6 +42,7 @@ void register_sidb(nanobind::module_& m)
 {
     lattice(m);
     layout(m);
+    charge_distribution(m);
 }
 
 }  // namespace pyfiction
