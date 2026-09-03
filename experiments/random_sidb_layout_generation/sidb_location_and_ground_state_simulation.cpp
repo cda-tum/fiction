@@ -129,7 +129,7 @@ int main(int argc, const char* argv[])  // NOLINT
                         {
                             auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>> params{phys_params};
+                            const quickexact_params params{phys_params};
 
                             const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
 
@@ -145,7 +145,7 @@ int main(int argc, const char* argv[])  // NOLINT
                         {
                             auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{phys_params};
+                            const quickexact_params params{phys_params};
 
                             const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
 

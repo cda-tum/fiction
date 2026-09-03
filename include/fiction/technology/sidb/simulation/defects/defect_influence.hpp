@@ -657,9 +657,9 @@ class defect_influence_impl
             return defect_influence_status::INFLUENTIAL;
         }
 
-        const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
+        const sidb::simulation::engines::quickexact_params qe_params{
             params.operational_params.sim_params,
-            sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+            sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
 
         mockturtle::stopwatch stop{stats.time_total};
 

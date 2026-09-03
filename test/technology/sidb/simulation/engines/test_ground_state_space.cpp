@@ -23,14 +23,15 @@
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/ground_state_space.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
-#include <fiction/types.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -47,16 +48,15 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::engines;
-using namespace fiction::sidb::surfaces;
 using namespace fiction::utils::math;
 
-TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]")
 {
-    TestType lyt{};
+    layout lyt{};
 
     const ground_state_space_results& res = ground_state_space(lyt);
 
@@ -67,11 +67,10 @@ TEMPLATE_TEST_CASE("Empty layout Ground State Space construction", "[ground-stat
     CHECK(res.maximum_top_level_multisets == 0);
 }
 
-TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Ground State Space construction of a single SiDB", "[ground-state-space]")
 {
-    TestType lyt{};
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
+    layout lyt{};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     const ground_state_space_results& res = ground_state_space(lyt);
 
@@ -97,13 +96,12 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a single SiDB", "[ground-
               .pot_bounds.get<sidb::simulation::engines::detail::bound_direction::UPPER>(0) == 0.0);
 }
 
-TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]",
-                   sidb_cell_clk_lyt_siqad, charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Ground State Space construction of two SiDBs directly next to each other", "[ground-state-space]")
 {
-    TestType lyt{};
+    layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({0, 0, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 1}, sidb_technology::cell_type::NORMAL);
 
     SECTION("Base 2")
     {
@@ -120,19 +118,18 @@ TEMPLATE_TEST_CASE("Ground State Space construction of two SiDBs directly next t
     }
 }
 
-TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-space]")
 {
-    TestType lyt{};
+    layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);  // neut
-    lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);  // neut
+    lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);  // neut
-    lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);  // neut
+    lyt.assign_cell_type({6, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
 
     const ground_state_space_results& gss_res =
         ground_state_space(lyt, ground_state_space_params{simulation_parameters{2}});
@@ -312,28 +309,27 @@ TEMPLATE_TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-
     }
 }
 
-TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Ground state space construction of a 14 DB layout", "[ground-state-space]")
 {
-    TestType lyt{};
+    layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 8, 1}, sidb_technology::cell_type::NORMAL);
 
     const ground_state_space_results& gss_res = ground_state_space(lyt);
 
@@ -353,46 +349,45 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 14 DB layout", "[ground
     }
 }
 
-TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-space]", sidb_cell_clk_lyt_siqad,
-                   charge_distribution_surface<sidb_cell_clk_lyt_siqad>)
+TEST_CASE("Ground state space construction of a 28 DB layout", "[ground-state-space]")
 {
-    TestType lyt{};
+    layout lyt{};
 
-    lyt.assign_cell_type({0, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({0, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({1, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 8, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({0 + 8, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({2 + 8, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4 + 8, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0 + 8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2 + 8, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4 + 8, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({0 + 8, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({1 + 8, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6 + 8, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({4 + 8, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({0 + 8, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1 + 8, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6 + 8, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4 + 8, 8, 1}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4 + 8, 0, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({6 + 8, 2, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8 + 8, 1, 0}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4 + 8, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6 + 8, 2, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8 + 8, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4 + 8, 7, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({5 + 8, 6, 0}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({10 + 8, 5, 1}, TestType::cell_type::NORMAL);
-    lyt.assign_cell_type({8 + 8, 8, 1}, TestType::cell_type::NORMAL);
+    lyt.assign_cell_type({4 + 8, 7, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({5 + 8, 6, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10 + 8, 5, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8 + 8, 8, 1}, sidb_technology::cell_type::NORMAL);
 
     const ground_state_space_results& gss_res = ground_state_space(lyt);
 
@@ -416,8 +411,7 @@ TEMPLATE_TEST_CASE("Ground state space construction of a 28 DB layout", "[ground
     }
 }
 
-template <typename Lyt>
-static bool verify_ground_state_space_stats(const charge_distribution_surface<Lyt>&               valid_cl,
+static bool verify_ground_state_space_stats(const charge_distribution&                            valid_cl,
                                             const sidb::simulation::engines::detail::cluster_ptr& gss_node) noexcept
 {
     sidb::simulation::engines::detail::cluster_charge_state cl_m_conf{};
@@ -457,71 +451,70 @@ static bool verify_ground_state_space_stats(const charge_distribution_surface<Ly
     return found_charge_conf;
 }
 
-TEMPLATE_TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state-space]",
-                   sidb_100_cell_clk_lyt_siqad, sidb_111_cell_clk_lyt_siqad)
+TEST_CASE("Ground State Space construction of sub-10 DB layouts", "[ground-state-space]")
 {
-    const auto& verify_layout = [](const TestType& lyt)
+    const auto& verify_layout = [](const layout& lyt)
     {
-        const result<TestType>&           qe_res   = quickexact(lyt);
-        const result<TestType>&           exgs_res = exhaustive_ground_state_simulation(lyt);
+        const result&                     qe_res   = quickexact(lyt);
+        const result&                     exgs_res = exhaustive_ground_state_simulation(lyt);
         const ground_state_space_results& gss_res  = ground_state_space(lyt);
 
-        for (const charge_distribution_surface<TestType>& cl : qe_res.charge_distributions)
+        for (const auto& cl : qe_res.charge_distributions)
         {
-            const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
+            const bool verification = verify_ground_state_space_stats(cl, gss_res.top_cluster);
             CHECK(verification);
         }
 
-        for (const charge_distribution_surface<TestType>& cl : exgs_res.charge_distributions)
+        for (const auto& cl : exgs_res.charge_distributions)
         {
-            const bool verification = verify_ground_state_space_stats<TestType>(cl, gss_res.top_cluster);
+            const bool verification = verify_ground_state_space_stats(cl, gss_res.top_cluster);
             CHECK(verification);
         }
     };
 
     SECTION("Layout 1 (4 DBs)")
     {
-        TestType lyt{};
-        lyt.assign_cell_type({1, 1, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 1, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({2, 2, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 2, 0}, TestType::cell_type::NORMAL);
+        layout lyt{lattice::si_111_1x1()};
+        lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({2, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 2, 0}, sidb_technology::cell_type::NORMAL);
 
         verify_layout(lyt);
     }
 
     SECTION("Layout 2 (4 DBs)")
     {
-        TestType lyt{};
-        lyt.assign_cell_type({2, 0, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 0, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 1, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 1, 0}, TestType::cell_type::NORMAL);
+        layout lyt{lattice::si_111_1x1()};
+        lyt.assign_cell_type({2, 0, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 1, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 1, 0}, sidb_technology::cell_type::NORMAL);
 
         verify_layout(lyt);
     }
 
     SECTION("Layout 3 (4 DBs)")
     {
-        TestType lyt{};
-        lyt.assign_cell_type({2, 0, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 2, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 2, 0}, TestType::cell_type::NORMAL);
+        layout lyt{lattice::si_111_1x1()};
+        lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
 
         verify_layout(lyt);
     }
 
     SECTION("Layout 4 (7 DBs)")
     {
-        TestType lyt{};
-        lyt.assign_cell_type({1, 0, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 0, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 1, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({1, 1, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 1, 1}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({0, 2, 0}, TestType::cell_type::NORMAL);
-        lyt.assign_cell_type({4, 2, 0}, TestType::cell_type::NORMAL);
+        layout lyt{lattice::si_111_1x1()};
+        lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({1, 1, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 1, 1}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 2, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
 
         verify_layout(lyt);
     }

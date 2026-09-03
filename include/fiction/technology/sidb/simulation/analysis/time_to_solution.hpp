@@ -132,19 +132,18 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
         return;
     }
 
-    sidb::simulation::result<Lyt> simulation_result{};
+    sidb::simulation::legacy_result<Lyt> simulation_result{};
     if (tts_params.engine == exact_engine::QUICKEXACT)
     {
-        const sidb::simulation::engines::quickexact_params<cell<Lyt>> params{
-            qs_params.sim_params,
-            sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+        const sidb::simulation::engines::quickexact_params params{
+            qs_params.sim_params, sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
         st.algorithm      = sidb::simulation::engine_name(exact_engine::QUICKEXACT);
         simulation_result = sidb::simulation::engines::quickexact(lyt, params);
     }
 #if (FICTION_ALGLIB_ENABLED)
     else if (tts_params.engine == exact_engine::CLUSTERCOMPLETE)
     {
-        const sidb::simulation::engines::clustercomplete_params<cell<Lyt>> params{qs_params.sim_params};
+        const sidb::simulation::engines::clustercomplete_params params{qs_params.sim_params};
         st.algorithm      = sidb::simulation::engine_name(exact_engine::CLUSTERCOMPLETE);
         simulation_result = sidb::simulation::engines::clustercomplete(lyt, params);
     }
@@ -155,16 +154,16 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
         simulation_result = sidb::simulation::engines::exhaustive_ground_state_simulation(lyt, qs_params.sim_params);
     }
 
-    std::vector<sidb::simulation::result<Lyt>> simulation_results_quicksim{};
+    std::vector<sidb::simulation::legacy_result<Lyt>> simulation_results_quicksim{};
     simulation_results_quicksim.reserve(tts_params.repetitions);
 
     for (auto i = 0u; i < tts_params.repetitions; ++i)
     {
-        if (const auto result = sidb::simulation::engines::quicksim<Lyt>(lyt, qs_params))
+        if (const auto result = sidb::simulation::engines::quicksim(lyt, qs_params))
         {
             if (!result.has_value())
             {
-                simulation_results_quicksim.push_back(sidb::simulation::result<Lyt>{});
+                simulation_results_quicksim.push_back(sidb::simulation::legacy_result<Lyt>{});
             }
             else
             {
@@ -198,10 +197,10 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
  * to be stored.
  */
 template <typename Lyt>
-void time_to_solution_for_given_simulation_results(const sidb::simulation::result<Lyt>&              results_exact,
-                                                   const std::vector<sidb::simulation::result<Lyt>>& results_heuristic,
-                                                   const double            confidence_level = 0.997,
-                                                   time_to_solution_stats* ps               = nullptr) noexcept
+void time_to_solution_for_given_simulation_results(
+    const sidb::simulation::legacy_result<Lyt>&              results_exact,
+    const std::vector<sidb::simulation::legacy_result<Lyt>>& results_heuristic, const double confidence_level = 0.997,
+    time_to_solution_stats* ps = nullptr) noexcept
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");

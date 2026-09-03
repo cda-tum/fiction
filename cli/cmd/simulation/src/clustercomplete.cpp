@@ -130,11 +130,10 @@ void clustercomplete_command::execute()
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
         {
-            cc_params.report_gss_stats = is_set("report_gss_stats") ?
-                                             fiction::sidb::simulation::engines::clustercomplete_params<
-                                                 fiction::cell<Lyt>>::ground_state_space_reporting::ON :
-                                             fiction::sidb::simulation::engines::clustercomplete_params<
-                                                 fiction::cell<Lyt>>::ground_state_space_reporting::OFF;
+            cc_params.report_gss_stats =
+                is_set("report_gss_stats") ?
+                    fiction::sidb::simulation::engines::clustercomplete_params::ground_state_space_reporting::ON :
+                    fiction::sidb::simulation::engines::clustercomplete_params::ground_state_space_reporting::OFF;
 
             sim_result = fiction::sidb::simulation::engines::clustercomplete(*lyt_ptr, cc_params);
 

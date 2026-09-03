@@ -316,7 +316,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const lattice<lattice_100, sidb_cell_clk_lyt_cube> lat{lyt};
+        const surfaces::lattice<lattice_100, sidb_cell_clk_lyt_cube> lat{lyt};
 
         const auto result = physical_population_stability(lat, population_stability_params);
         REQUIRE(result.size() == 20);
@@ -399,7 +399,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const lattice<lattice_100, sidb_100_cell_clk_lyt> lat{lyt};
+        const surfaces::lattice<lattice_100, sidb_100_cell_clk_lyt> lat{lyt};
 
         const auto result = physical_population_stability(lat, params);
         REQUIRE(result.size() == 20);

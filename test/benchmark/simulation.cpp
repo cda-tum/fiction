@@ -37,7 +37,7 @@ using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::engines;
 
-using lattice       = sidb_100_cell_clk_lyt;
+using cell_lyt      = sidb_100_cell_clk_lyt;
 using lattice_siqad = sidb_100_cell_clk_lyt_siqad;
 
 TEST_CASE("Benchmark simulators", "[benchmark]")
@@ -87,7 +87,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params<cell<lattice_siqad>> sim_params{simulation_parameters{2, -0.32}};
+        const quickexact_params sim_params{simulation_parameters{2, -0.32}};
         return quickexact<lattice_siqad>(lyt, sim_params);
     };
 
@@ -100,13 +100,13 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 #if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete (multi-threaded)")
     {
-        const clustercomplete_params<cell<lattice_siqad>> sim_params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("ClusterComplete (single-threaded)")
     {
-        const clustercomplete_params<cell<lattice_siqad>> sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
@@ -303,22 +303,22 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
         return lyt;
     };
 
-    const lattice cl_4_seg{apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
+    const cell_lyt cl_4_seg{apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
         create_diagonal_wire_with_n_non_terminating_segments(2))};
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
-        const clustercomplete_params<> sim_params{simulation_parameters{3, -0.32}};
-        return clustercomplete<lattice>(cl_4_seg, sim_params);
+        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}};
+        return clustercomplete<cell_lyt>(cl_4_seg, sim_params);
     };
 
-    const lattice cl_3_seg{apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
+    const cell_lyt cl_3_seg{apply_gate_library<sidb_100_cell_clk_lyt, bestagon_library, hex_odd_row_gate_clk_lyt>(
         create_diagonal_wire_with_n_non_terminating_segments(1))};
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {
-        const clustercomplete_params<> sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
-        return clustercomplete<lattice>(cl_3_seg, sim_params);
+        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        return clustercomplete<cell_lyt>(cl_3_seg, sim_params);
     };
 }
 #endif  // FICTION_ALGLIB_ENABLED
