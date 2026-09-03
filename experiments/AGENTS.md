@@ -7,7 +7,7 @@ scientific record, so their results are fixed even though their code is not.
   Modernize, refactor, and reformat an experiment as you would library code.
 - **Never change what an experiment computes.** An experiment that reproduces a published
   result keeps producing that result: same parameters, same inputs, same output columns.
-- Record a change to an experiment under `Experiments` in `docs/changelog.rst`.
+- Record a change to an experiment under `Experiments` in `docs/changelog.md`.
 - `experiments/CMakeLists.txt` globs `*.cpp` and derives the executable name from the file
   base name, so base names must be unique across the whole directory. Do not edit that
   file to register a new experiment.

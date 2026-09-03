@@ -17,7 +17,7 @@ To add a command:
    `FILE_SET HEADERS FILES` list in the same file. Both lists are required — the first
    builds the source, the second registers the header for IDE integration and install
    metadata.
-4. Document the command in `docs/cli.rst`.
+4. Document the command in `docs/cli.md`.
 
 A new category additionally needs an `add_subdirectory(cmd/<category>)` line in
 `cli/CMakeLists.txt`.
