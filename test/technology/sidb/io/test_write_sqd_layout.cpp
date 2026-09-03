@@ -30,6 +30,8 @@
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/technology/sidb/surfaces/lattice.hpp>
@@ -38,7 +40,6 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
-#include <fstream>
 #include <map>
 #include <sstream>
 #include <string>

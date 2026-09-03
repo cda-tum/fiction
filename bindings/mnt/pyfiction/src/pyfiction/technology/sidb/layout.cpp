@@ -19,15 +19,12 @@
 #include <fiction/technology/sidb/io/print_sidb_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
-#include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 
-#include <cstdint>
 #include <functional>
 #include <optional>
 #include <sstream>
 #include <string>
-#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
@@ -100,8 +97,10 @@ void layout(nanobind::module_& m)
              py::arg("neutral_defect_spacing_overwrite") = std::nullopt, DOC(fiction_sidb_layout_all_affected_sidbs))
 
         .def("bounding_box", &layout::bounding_box, DOC(fiction_sidb_layout_bounding_box))
+        // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, DOC(fiction_sidb_layout_operator_eq))
         .def(py::self != py::self)
+        // NOLINTEND(misc-redundant-expression)
         .def("__hash__", [](const layout& lyt) { return std::hash<layout>{}(lyt); })
         .def("__repr__",
              [](const layout& lyt)

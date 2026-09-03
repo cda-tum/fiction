@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <unordered_set>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -213,7 +214,7 @@ TEST_CASE("Defects", "[layout]")
         CHECK(around_neutral.contains({2, 0, 1}));
 
         const auto around_charged = lyt.affected_sidbs({5, 2, 0});
-        CHECK(around_charged.size() == (2 * 26 + 1) * (2 * 13 + 1));
+        CHECK(around_charged.size() == (std::size_t{2} * 26 + 1) * (std::size_t{2} * 13 + 1));
         CHECK(around_charged.contains({5 - 26, 2 - 13, 0}));
         CHECK(around_charged.contains({5 + 26, 2 + 13, 0}));
         CHECK(!around_charged.contains({5, 2, 1}));

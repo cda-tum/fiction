@@ -25,6 +25,7 @@
 #include <cstdint>
 #include <functional>
 #include <iterator>
+#include <limits>
 #include <optional>
 #include <string>
 #include <type_traits>
@@ -59,7 +60,8 @@ class layout
      * @param lat Lattice of the surface.
      * @param name Layout name.
      */
-    explicit layout(const lattice& lat, std::string name = "") : lat_{lat}, name_{std::move(name)} {}
+    explicit layout(lattice lat, std::string name = "") : surface_lattice{std::move(lat)}, layout_name{std::move(name)}
+    {}
     /**
      * The lattice of the surface.
      *
@@ -67,7 +69,7 @@ class layout
      */
     [[nodiscard]] const lattice& get_lattice() const noexcept
     {
-        return lat_;
+        return surface_lattice;
     }
     /**
      * Reassigns the lattice. Sites are kept as they are; only their physical positions change.
@@ -76,7 +78,7 @@ class layout
      */
     void set_lattice(const lattice& lat) noexcept
     {
-        lat_ = lat;
+        surface_lattice = lat;
     }
     /**
      * The layout name.
@@ -85,7 +87,7 @@ class layout
      */
     [[nodiscard]] const std::string& get_layout_name() const noexcept
     {
-        return name_;
+        return layout_name;
     }
     /**
      * Sets the layout name.
@@ -94,7 +96,7 @@ class layout
      */
     void set_layout_name(const std::string& name)
     {
-        name_ = name;
+        layout_name = name;
     }
 
     // ------------------------------------------------------------------------------------------------------- cells
@@ -107,25 +109,25 @@ class layout
      */
     void assign_cell_type(const lattice_site& s, const cell_type ct)
     {
-        const auto it = std::ranges::lower_bound(sites_, s);
-        const auto i  = static_cast<std::size_t>(std::distance(sites_.begin(), it));
+        const auto it = std::ranges::lower_bound(cell_sites, s);
+        const auto i  = static_cast<std::size_t>(std::distance(cell_sites.begin(), it));
 
-        if (it != sites_.end() && *it == s)
+        if (it != cell_sites.end() && *it == s)
         {
             if (ct == cell_type::EMPTY)
             {
-                sites_.erase(it);
-                types_.erase(std::next(types_.cbegin(), static_cast<std::ptrdiff_t>(i)));
+                cell_sites.erase(it);
+                cell_types.erase(std::next(cell_types.cbegin(), static_cast<std::ptrdiff_t>(i)));
             }
             else
             {
-                types_[i] = ct;
+                cell_types[i] = ct;
             }
         }
         else if (ct != cell_type::EMPTY)
         {
-            sites_.insert(it, s);
-            types_.insert(std::next(types_.cbegin(), static_cast<std::ptrdiff_t>(i)), ct);
+            cell_sites.insert(it, s);
+            cell_types.insert(std::next(cell_types.cbegin(), static_cast<std::ptrdiff_t>(i)), ct);
         }
     }
     /**
@@ -138,7 +140,7 @@ class layout
     {
         const auto i = index_of(s);
 
-        return i.has_value() ? types_[*i] : cell_type::EMPTY;
+        return i.has_value() ? cell_types[*i] : cell_type::EMPTY;
     }
     /**
      * Whether no SiDB sits at a site.
@@ -157,7 +159,7 @@ class layout
      */
     [[nodiscard]] bool is_empty() const noexcept
     {
-        return sites_.empty();
+        return cell_sites.empty();
     }
     /**
      * Number of SiDBs.
@@ -166,7 +168,7 @@ class layout
      */
     [[nodiscard]] uint64_t num_cells() const noexcept
     {
-        return sites_.size();
+        return cell_sites.size();
     }
     /**
      * Number of SiDBs of a given cell type.
@@ -176,7 +178,7 @@ class layout
      */
     [[nodiscard]] uint64_t num_cells_of_type(const cell_type ct) const noexcept
     {
-        return static_cast<uint64_t>(std::ranges::count(types_, ct));
+        return static_cast<uint64_t>(std::ranges::count(cell_types, ct));
     }
     /**
      * All sites holding an SiDB of a given cell type, in raster order.
@@ -188,11 +190,11 @@ class layout
     {
         std::vector<lattice_site> result{};
 
-        for (std::size_t i = 0; i < sites_.size(); ++i)
+        for (std::size_t i = 0; i < cell_sites.size(); ++i)
         {
-            if (types_[i] == ct)
+            if (cell_types[i] == ct)
             {
-                result.push_back(sites_[i]);
+                result.push_back(cell_sites[i]);
             }
         }
 
@@ -206,7 +208,7 @@ class layout
      */
     [[nodiscard]] const std::vector<lattice_site>& sidbs() const noexcept
     {
-        return sites_;
+        return cell_sites;
     }
     /**
      * The index of a site in `sidbs()`.
@@ -216,11 +218,11 @@ class layout
      */
     [[nodiscard]] std::optional<std::size_t> index_of(const lattice_site& s) const noexcept
     {
-        const auto it = std::ranges::lower_bound(sites_, s);
+        const auto it = std::ranges::lower_bound(cell_sites, s);
 
-        if (it != sites_.cend() && *it == s)
+        if (it != cell_sites.cend() && *it == s)
         {
-            return static_cast<std::size_t>(std::distance(sites_.cbegin(), it));
+            return static_cast<std::size_t>(std::distance(cell_sites.cbegin(), it));
         }
 
         return std::nullopt;
@@ -235,7 +237,7 @@ class layout
     template <typename Fn>
     void foreach_cell(Fn&& fn) const
     {
-        for_each_site(sites_, std::forward<Fn>(fn));
+        for_each_site(cell_sites, std::forward<Fn>(fn));
     }
     /**
      * Number of input SiDBs.
@@ -308,13 +310,14 @@ class layout
      */
     void assign_defect(const lattice_site& s, const model::defect& d)
     {
-        const auto it = std::ranges::lower_bound(defects_, s, {}, &std::pair<lattice_site, model::defect>::first);
+        const auto it =
+            std::ranges::lower_bound(surface_defects, s, {}, &std::pair<lattice_site, model::defect>::first);
 
-        if (it != defects_.cend() && it->first == s)
+        if (it != surface_defects.cend() && it->first == s)
         {
             if (d.type == model::defect_type::NONE)
             {
-                defects_.erase(it);
+                surface_defects.erase(it);
             }
             else
             {
@@ -323,7 +326,7 @@ class layout
         }
         else if (d.type != model::defect_type::NONE)
         {
-            defects_.emplace(it, s, d);
+            surface_defects.emplace(it, s, d);
         }
     }
     /**
@@ -347,9 +350,10 @@ class layout
      */
     [[nodiscard]] model::defect get_defect(const lattice_site& s) const noexcept
     {
-        const auto it = std::ranges::lower_bound(defects_, s, {}, &std::pair<lattice_site, model::defect>::first);
+        const auto it =
+            std::ranges::lower_bound(surface_defects, s, {}, &std::pair<lattice_site, model::defect>::first);
 
-        if (it != defects_.cend() && it->first == s)
+        if (it != surface_defects.cend() && it->first == s)
         {
             return it->second;
         }
@@ -363,7 +367,7 @@ class layout
      */
     [[nodiscard]] uint64_t num_defects() const noexcept
     {
-        return defects_.size();
+        return surface_defects.size();
     }
     /**
      * Number of positively charged defects.
@@ -408,7 +412,7 @@ class layout
      */
     [[nodiscard]] const std::vector<std::pair<lattice_site, model::defect>>& defects() const noexcept
     {
-        return defects_;
+        return surface_defects;
     }
     /**
      * Applies a function to every defect in raster order. `fn` takes the `(site, defect)` pair and optionally its
@@ -420,7 +424,7 @@ class layout
     template <typename Fn>
     void foreach_defect(Fn&& fn) const
     {
-        for_each_site(defects_, std::forward<Fn>(fn));
+        for_each_site(surface_defects, std::forward<Fn>(fn));
     }
     /**
      * The sites whose SiDBs the defect at a given site would influence: the rectangle around the defect spanned by
@@ -471,7 +475,7 @@ class layout
     {
         std::unordered_set<lattice_site> influenced{};
 
-        for (const auto& [s, d] : defects_)
+        for (const auto& [s, d] : surface_defects)
         {
             influenced.merge(affected_sidbs(s, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite));
         }
@@ -489,7 +493,7 @@ class layout
      */
     [[nodiscard]] std::pair<lattice_site, lattice_site> bounding_box() const noexcept
     {
-        if (sites_.empty() && defects_.empty())
+        if (cell_sites.empty() && surface_defects.empty())
         {
             return {};
         }
@@ -505,8 +509,8 @@ class layout
             max_row = std::max(max_row, row_of(s));
         };
 
-        std::ranges::for_each(sites_, extend);
-        std::ranges::for_each(defects_, [&](const auto& sd) { extend(sd.first); });
+        std::ranges::for_each(cell_sites, extend);
+        std::ranges::for_each(surface_defects, [&](const auto& sd) { extend(sd.first); });
 
         return {site_at_row(min_x, min_row), site_at_row(max_x, max_row)};
     }
@@ -522,28 +526,29 @@ class layout
     /**
      * The lattice of the surface.
      */
-    lattice lat_{lattice::si_100_2x1()};
+    lattice surface_lattice{lattice::si_100_2x1()};
     /**
      * Layout name.
      */
-    std::string name_{};
+    std::string layout_name{};
     /**
      * SiDB sites in raster order.
      */
-    std::vector<lattice_site> sites_{};
+    std::vector<lattice_site> cell_sites{};
     /**
-     * Cell type of the SiDB at the same index in `sites_`.
+     * Cell type of the SiDB at the same index in `cell_sites`.
      */
-    std::vector<cell_type> types_{};
+    std::vector<cell_type> cell_types{};
     /**
      * Defects with their sites in raster order.
      */
-    std::vector<std::pair<lattice_site, model::defect>> defects_{};
+    std::vector<std::pair<lattice_site, model::defect>> surface_defects{};
     /**
      * Applies `fn` to every element of `range`, passing the index too if `fn` takes it, and stopping early if `fn`
      * returns `false`.
      */
     template <typename Range, typename Fn>
+    // NOLINTNEXTLINE(cppcoreguidelines-missing-std-forward): each call reuses the callback as an lvalue.
     static void for_each_site(const Range& range, Fn&& fn)
     {
         std::size_t i = 0;
@@ -590,7 +595,8 @@ class layout
     template <typename Pred>
     [[nodiscard]] uint64_t count_defects(Pred&& pred) const noexcept
     {
-        return static_cast<uint64_t>(std::ranges::count_if(defects_, [&](const auto& sd) { return pred(sd.second); }));
+        return static_cast<uint64_t>(
+            std::ranges::count_if(surface_defects, [&](const auto& sd) { return pred(sd.second); }));
     }
 };
 
@@ -604,6 +610,10 @@ namespace std
 template <>
 struct hash<fiction::sidb::layout>
 {
+    /**
+     * @param lyt Layout to hash.
+     * @return Hash of the SiDB sites and cell types.
+     */
     std::size_t operator()(const fiction::sidb::layout& lyt) const noexcept
     {
         std::size_t h = lyt.num_cells();
@@ -611,7 +621,7 @@ struct hash<fiction::sidb::layout>
         lyt.foreach_cell(
             [&h, &lyt](const auto& s)
             {
-                h ^= std::hash<fiction::sidb::lattice_site>{}(s) + 0x9e3779b97f4a7c15ULL + (h << 6) + (h >> 2);
+                h ^= std::hash<fiction::sidb::lattice_site>{}(s) + 0x9e3779b97f4a7c15ULL + (h << 6u) + (h >> 2u);
                 h ^= static_cast<std::size_t>(lyt.get_cell_type(s));
             });
 
