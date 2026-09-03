@@ -18,11 +18,11 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_params& ps = {})
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(const Lyt& lyt, const bdl_input_iterator_params& ps, const std::vector<bdl_wire<Lyt>>& input_wires)
+```{doxygenfunction} fiction::sidb::simulation::logic::generate_bdl_input_pattern_layouts(const layout& lyt, const bdl_input_iterator_params& ps, const std::vector<bdl_wire>& input_wires)
 
 ```
 
@@ -38,10 +38,7 @@
 .. autoclass:: mnt.pyfiction.bdl_input_iterator_params
    :members:
 
-.. autoclass:: mnt.pyfiction.bdl_input_iterator_100
-   :members:
-
-.. autoclass:: mnt.pyfiction.bdl_input_iterator_111
+.. autoclass:: mnt.pyfiction.bdl_input_iterator
    :members:
 
 .. autofunction:: mnt.pyfiction.generate_bdl_input_pattern_layouts
@@ -71,39 +68,39 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+```{doxygenfunction} fiction::sidb::simulation::logic::is_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::is_operational(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+```{doxygenfunction} fiction::sidb::simulation::logic::is_operational(const std::vector<layout>& input_pattern_layouts, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+```{doxygenfunction} fiction::sidb::simulation::logic::is_kink_induced_non_operational(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
+```{doxygenfunction} fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params = {})
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire<Lyt>>& input_bdl_wire, const std::vector<bdl_wire<Lyt>>& output_bdl_wire, const std::optional<Lyt>& canvas_lyt = std::nullopt)
+```{doxygenfunction} fiction::sidb::simulation::logic::kink_induced_non_operational_input_patterns(const layout& lyt, const std::vector<TT>& spec, const is_operational_params& params, const std::vector<bdl_wire>& input_bdl_wire, const std::vector<bdl_wire>& output_bdl_wire, const std::optional<layout>& canvas_lyt = std::nullopt)
 
 ```
 
@@ -161,35 +158,35 @@ and the flood fill visits every point anyway, at a higher per-point cost than a 
 grid search with the sketch, and raise the sample count substantially before combining the sketch with
 flood fill or contour tracing in three dimensions.
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_grid_search
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_grid_search(const layout& lyt, const std::vector<TT>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_random_sampling
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_random_sampling(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_flood_fill
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_flood_fill(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_contour_tracing(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_grid_search
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_grid_search(const layout& lyt, const std::vector<TT>& spec, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_random_sampling(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_flood_fill(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing
+```{doxygenfunction} fiction::sidb::simulation::logic::critical_temperature_domain_contour_tracing(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const operational_domain_params& params = {}, operational_domain_stats* stats = nullptr)
 
 ```
 
@@ -199,7 +196,7 @@ flood fill or contour tracing in three dimensions.
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_ratio
+```{doxygenfunction} fiction::sidb::simulation::logic::operational_domain_ratio(const layout& lyt, const std::vector<TT>& spec, const parameter_point& pp, const operational_domain_ratio_params& params = {})
 
 ```
 
@@ -313,7 +310,7 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::detect_bdl_pairs
+```{doxygenfunction} fiction::sidb::simulation::logic::detect_bdl_pairs(const layout& lyt, const std::optional<sidb_technology::cell_type>& type = std::nullopt, const detect_bdl_pairs_params& params = {})
 
 ```
 
@@ -358,7 +355,7 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::logic::detect_bdl_wires
+```{doxygenfunction} fiction::sidb::simulation::logic::detect_bdl_wires(const layout& lyt, const detect_bdl_wires_params& params = {}, const bdl_wire_selection wire_selection = bdl_wire_selection::ALL)
 
 ```
 
@@ -374,15 +371,10 @@ C++ tab for why combining it with flood fill or contour tracing needs a much hig
 .. autoclass:: mnt.pyfiction.detect_bdl_wires_params
    :members:
 
-.. autoclass:: mnt.pyfiction.bdl_wire_100
+.. autoclass:: mnt.pyfiction.bdl_wire
    :members:
 
-.. autoclass:: mnt.pyfiction.bdl_wire_111
-   :members:
-
-.. autofunction:: mnt.pyfiction.detect_bdl_wires_100
-
-.. autofunction:: mnt.pyfiction.detect_bdl_wires_111
+.. autofunction:: mnt.pyfiction.detect_bdl_wires
 ```
 
 :::

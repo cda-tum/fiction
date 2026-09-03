@@ -63,15 +63,15 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const layout& lyt, const std::vector<TT>& spec, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const std::vector<Lyt>& input_pattern_layouts, const std::vector<TT>& spec, const critical_temperature_params& params, const std::vector<sidb::simulation::logic::bdl_pair<cell<Lyt>>>& output_bdl_pairs, const std::vector<sidb::simulation::logic::bdl_wire<Lyt>>& input_bdl_wires, const std::vector<sidb::simulation::logic::bdl_wire<Lyt>>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_gate_based(const std::vector<layout>& input_pattern_layouts, const std::vector<TT>& spec, const critical_temperature_params& params, const std::vector<logic::bdl_pair<lattice_site>>& output_bdl_pairs, const std::vector<logic::bdl_wire>& input_bdl_wires, const std::vector<logic::bdl_wire>& output_bdl_wires, critical_temperature_stats* pst = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_non_gate_based
+```{doxygenfunction} fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(const layout& lyt, const critical_temperature_params& params = {}, critical_temperature_stats* pst = nullptr)
 
 ```
 
@@ -157,7 +157,7 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::time_to_solution
+```{doxygenfunction} fiction::sidb::simulation::analysis::time_to_solution(const layout& lyt, const engines::quicksim_params& qs_params, const time_to_solution_params& tts_params = {}, time_to_solution_stats* ps = nullptr)
 
 ```
 
@@ -226,7 +226,11 @@
 
 **Header:** `fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp`
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::can_positive_charges_occur
+```{doxygenfunction} fiction::sidb::simulation::analysis::can_positive_charges_occur(const potential_landscape& land)
+
+```
+
+```{doxygenfunction} fiction::sidb::simulation::analysis::can_positive_charges_occur(const layout& lyt, const model::simulation_parameters& sim_params)
 
 ```
 
@@ -278,18 +282,13 @@
 .. autoclass:: mnt.pyfiction.transition_type
    :members:
 
-.. autoclass:: mnt.pyfiction.population_stability_information_100
-   :members:
-
-.. autoclass:: mnt.pyfiction.population_stability_information_111
+.. autoclass:: mnt.pyfiction.population_stability_information
    :members:
 
 .. autoclass:: mnt.pyfiction.physical_population_stability_params
    :members:
 
-.. autofunction:: mnt.pyfiction.physical_population_stability_100
-
-.. autofunction:: mnt.pyfiction.physical_population_stability_111
+.. autofunction:: mnt.pyfiction.physical_population_stability
 ```
 
 :::
@@ -307,6 +306,6 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::band_bending_resilience
+```{doxygenfunction} fiction::sidb::simulation::analysis::band_bending_resilience(const layout& lyt, const std::vector<TT>& spec, const band_bending_resilience_params& params = {}, const std::optional<transition_type> transition_type = std::nullopt)
 
 ```
