@@ -83,16 +83,15 @@ repos:
       - id: fix-smartquotes
         priority: 5
 
-  # Check for common RST mistakes
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.10.0
+  # Lint documentation with MyST support after formatting.
+  - repo: https://github.com/rvben/rumdl-pre-commit
+    rev: v0.2.64
     hooks:
-      - id: rst-backticks
-        priority: 0
-      - id: rst-directive-colons
-        priority: 0
-      - id: rst-inline-touching-normal
-        priority: 0
+      - id: rumdl
+        files: ^docs/.*\.md$
+        exclude: (^|/)AGENTS\.md$
+        args: [--flavor, myst]
+        priority: 8
 
   # CMake format and lint the CMakeLists.txt files
   - repo: https://github.com/cheshirekow/cmake-format-precommit

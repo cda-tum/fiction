@@ -1,36 +1,34 @@
 # AGENTS.md — documentation
 
-`docs/` is reStructuredText built by Sphinx, plus Doxygen for the C++ API. Run
+`docs/` is MyST Markdown built by Sphinx, plus Doxygen for the C++ API. Run
 `uvx nox -s docs` for a local preview with live reload, or add `--non-interactive`
 to build and exit. Read the Docs uses the same session for pull request previews.
 
 ## Adding a page
 
-- A new page needs a `.rst` file **and** a line in the matching `toctree` in
-  `docs/index.rst`. A page that is not in a `toctree` builds without an error and is
+- A new page needs a `.md` file **and** a line in the matching `{toctree}` in
+  `docs/index.md`. A page that is not in a `toctree` builds without an error and is
   unreachable.
 - API documentation comes from the C++ sources through Doxygen directives —
-  `.. doxygenfunction::`, `.. doxygenclass::`, `.. doxygenstruct::`, `.. doxygenenum::`.
-  Do not retype a signature or a parameter description into the `.rst` file; fix the
+  `{doxygenfunction}`, `{doxygenclass}`, `{doxygenstruct}`, `{doxygenenum}`.
+  Do not retype a signature or a parameter description into the `.md` file; fix the
   Doxygen comment in the header instead.
-- Where a feature exists in both C++ and Python, document both under a `.. tabs::` block,
-  following `technology/sidb/generators/design_gates.rst`.
+- Where a feature exists in both C++ and Python, use `{tab-set}` with
+  `:sync-group: language` and `{tab-item}` with `:sync: cpp` or `:sync: python`,
+  following `technology/sidb/generators/design_gates.md`.
 
 ## Prose
 
 The `Writing` rules in the root `AGENTS.md` apply here in full. In addition:
 
 - Write _fiction_ in italics when referring to the project.
-- Code literals in reStructuredText take **two** backticks, not one. A single backtick is
-  interpreted-text markup and renders as italics, not code — the `rst-backticks` prek hook
-  catches this.
-- The three `rst-*` prek hooks catch the usual reStructuredText mistakes (single
-  backticks, missing directive colons, inline markup touching text). Run `prek run -a`
-  after editing a page.
+- Use single backticks for code literals and fenced MyST directives for Sphinx features.
+- Preserve explicit labels and use `{ref}` and `{doc}` roles for internal links.
+- Use rumdl's MyST-aware checks and run `prek run -a` after editing a page.
 
 ## The changelog
 
-`docs/changelog.rst` follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
+`docs/changelog.md` follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 Every user-facing change adds a bullet to the `Unreleased` section under `Added`,
 `Changed`, `Fixed`, or `Removed`, matching the existing category order and bullet style.
 
