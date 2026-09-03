@@ -8,15 +8,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Data structures:
+  - `sidb::lattice` describes an H-Si surface as two lattice vectors plus a two-site basis, with
+    `si_100_2x1()` and `si_111_1x1()` predefined; `sidb::lattice_site` is the `(x, y, z)` site an
+    SiDB occupies, and `sidb::layout` places SiDBs and surface defects on one lattice without any
+    template parameter. `to_sidb_layout` converts the Cartesian cell-level layouts that placement and
+    routing produce
+
 - Documentation:
 
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
   - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
+- I/O:
+  - `read_sqd_layout`, `write_sqd_layout`, `write_sidb_layout_svg`, `read_surface_defects`, and
+    `print_sidb_layout` accept and produce `sidb::layout`; the SQD reader takes the lattice from the file
+    instead of a template parameter
+
 - Python bindings:
 
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
+  - `lattice`, `lattice_site`, `sidb_layout` (the lattice-based layout), `read_sqd_layout`,
+    `read_surface_defects`, and the `sidb_layout` overloads of `write_sqd_layout` and
+    `write_sidb_layout_svg`
 
 ### Changed
 
@@ -153,6 +168,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     it that carries the toctree
 
 - Python bindings:
+
+  - **Breaking:** The Python class `sidb_layout` now names the lattice-based `sidb::layout`. The Cartesian
+    SiDB cell-level layout is `sidb_cell_level_layout`
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
