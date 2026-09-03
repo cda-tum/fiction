@@ -463,6 +463,23 @@ TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
     CHECK(twoddwave3({2 + 3, 2 + 3}) == 1);
 }
 
+TEST_CASE("3-phase clocking repeats across negative cube coordinates", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<coords::cube>>;
+
+    const auto columnar3  = clocking::columnar<clk_lyt>(clocking::num_clks::THREE);
+    const auto row3       = clocking::row<clk_lyt>(clocking::num_clks::THREE);
+    const auto twoddwave3 = clocking::twoddwave<clk_lyt>(clocking::num_clks::THREE);
+    const auto bancs3     = clocking::bancs<clk_lyt>();
+
+    CHECK(columnar3({-1, 0}) == columnar3({2, 0}));
+    CHECK(row3({0, -1}) == row3({0, 2}));
+    CHECK(twoddwave3({-1, 0}) == twoddwave3({2, 0}));
+    CHECK(twoddwave3({0, -1}) == twoddwave3({0, 2}));
+    CHECK(bancs3({-1, 0}) == bancs3({2, 0}));
+    CHECK(bancs3({0, -1}) == bancs3({0, 5}));
+}
+
 TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;

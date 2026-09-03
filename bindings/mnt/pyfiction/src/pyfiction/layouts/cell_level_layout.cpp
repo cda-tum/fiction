@@ -14,9 +14,11 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/layout_dimension.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/bounding_box.hpp>
@@ -60,8 +62,8 @@ namespace pyfiction
 namespace detail
 {
 
-template <typename Technology>
-void fcn_technology_cell_level_layout(nanobind::module_& m)
+template <typename Technology, typename Coordinate = py_offset_coordinate>
+void fcn_technology_cell_level_layout(nanobind::module_& m, const std::string& class_name)
 {
     namespace py = nanobind;
 
@@ -74,75 +76,103 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
         tech_name = "mol_qca";
     }
 
-    /**
-     * FCN cell technology.
-     */
-    const py::class_<Technology> tech(m, fmt::format("{}_technology", tech_name).c_str());
+    if constexpr (std::is_same_v<Coordinate, py_offset_coordinate>)
+    {
+        /**
+         * FCN cell technology.
+         */
+        const py::class_<Technology> tech(m, fmt::format("{}_technology", tech_name).c_str());
 
-    py::enum_<typename Technology::cell_type> cell_type(tech, "cell_type");
+        py::enum_<typename Technology::cell_type> cell_type(tech, "cell_type");
 
-    cell_type.value("EMPTY", Technology::cell_type::EMPTY);
-    if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
-    {
-        cell_type.value("NORMAL1", Technology::cell_type::NORMAL1,
-                        DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL1));
-        cell_type.value("NORMAL2", Technology::cell_type::NORMAL2,
-                        DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL2));
-        cell_type.value("NORMAL3", Technology::cell_type::NORMAL3,
-                        DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL3));
-        cell_type.value("NORMAL4", Technology::cell_type::NORMAL4,
-                        DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL4));
-    }
-    else
-    {
-        cell_type.value("NORMAL", Technology::cell_type::NORMAL);
-    }
-    cell_type.value("INPUT", Technology::cell_type::INPUT);
-    cell_type.value("OUTPUT", Technology::cell_type::OUTPUT);
+        cell_type.value("EMPTY", Technology::cell_type::EMPTY);
+        if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
+        {
+            cell_type.value("NORMAL1", Technology::cell_type::NORMAL1,
+                            DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL1));
+            cell_type.value("NORMAL2", Technology::cell_type::NORMAL2,
+                            DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL2));
+            cell_type.value("NORMAL3", Technology::cell_type::NORMAL3,
+                            DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL3));
+            cell_type.value("NORMAL4", Technology::cell_type::NORMAL4,
+                            DOC(fiction_qca_mol_qca_technology_cell_type_NORMAL4));
+        }
+        else
+        {
+            cell_type.value("NORMAL", Technology::cell_type::NORMAL);
+        }
+        cell_type.value("INPUT", Technology::cell_type::INPUT);
+        cell_type.value("OUTPUT", Technology::cell_type::OUTPUT);
 
-    if constexpr (std::is_same_v<Technology, fiction::qca::qca_technology>)
-    {
-        cell_type.value("CONST_0", Technology::cell_type::CONST_0, DOC(fiction_qca_qca_technology_cell_type_CONST_0));
-        cell_type.value("CONST_1", Technology::cell_type::CONST_1, DOC(fiction_qca_qca_technology_cell_type_CONST_1));
+        if constexpr (std::is_same_v<Technology, fiction::qca::qca_technology>)
+        {
+            cell_type.value("CONST_0", Technology::cell_type::CONST_0,
+                            DOC(fiction_qca_qca_technology_cell_type_CONST_0));
+            cell_type.value("CONST_1", Technology::cell_type::CONST_1,
+                            DOC(fiction_qca_qca_technology_cell_type_CONST_1));
+        }
+        else if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
+        {
+            cell_type.value("CONST_0", Technology::cell_type::CONST_0,
+                            DOC(fiction_qca_mol_qca_technology_cell_type_CONST_0));
+            cell_type.value("CONST_1", Technology::cell_type::CONST_1,
+                            DOC(fiction_qca_mol_qca_technology_cell_type_CONST_1));
+        }
+        else if constexpr (std::is_same_v<Technology, fiction::inml::inml_technology>)
+        {
+            cell_type.value("SLANTED_EDGE_UP_MAGNET", Technology::cell_type::SLANTED_EDGE_UP_MAGNET,
+                            DOC(fiction_inml_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET));
+            cell_type.value("SLANTED_EDGE_DOWN_MAGNET", Technology::cell_type::SLANTED_EDGE_DOWN_MAGNET,
+                            DOC(fiction_inml_inml_technology_cell_type_SLANTED_EDGE_DOWN_MAGNET));
+            cell_type.value("INVERTER_MAGNET", Technology::cell_type::INVERTER_MAGNET,
+                            DOC(fiction_inml_inml_technology_cell_type_INVERTER_MAGNET));
+            cell_type.value("CROSSWIRE_MAGNET", Technology::cell_type::CROSSWIRE_MAGNET,
+                            DOC(fiction_inml_inml_technology_cell_type_CROSSWIRE_MAGNET));
+            cell_type.value("FANOUT_COUPLER_MAGNET", Technology::cell_type::FANOUT_COUPLER_MAGNET,
+                            DOC(fiction_inml_inml_technology_cell_type_FANOUT_COUPLER_MAGNET));
+        }
+        else if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
+        {
+            cell_type.value("LOGIC", Technology::cell_type::LOGIC);
+        }
+        // NOTE: more technologies go here
     }
-    else if constexpr (std::is_same_v<Technology, fiction::qca::mol_qca_technology>)
-    {
-        cell_type.value("CONST_0", Technology::cell_type::CONST_0,
-                        DOC(fiction_qca_mol_qca_technology_cell_type_CONST_0));
-        cell_type.value("CONST_1", Technology::cell_type::CONST_1,
-                        DOC(fiction_qca_mol_qca_technology_cell_type_CONST_1));
-    }
-    else if constexpr (std::is_same_v<Technology, fiction::inml::inml_technology>)
-    {
-        cell_type.value("SLANTED_EDGE_UP_MAGNET", Technology::cell_type::SLANTED_EDGE_UP_MAGNET,
-                        DOC(fiction_inml_inml_technology_cell_type_SLANTED_EDGE_UP_MAGNET));
-        cell_type.value("SLANTED_EDGE_DOWN_MAGNET", Technology::cell_type::SLANTED_EDGE_DOWN_MAGNET,
-                        DOC(fiction_inml_inml_technology_cell_type_SLANTED_EDGE_DOWN_MAGNET));
-        cell_type.value("INVERTER_MAGNET", Technology::cell_type::INVERTER_MAGNET,
-                        DOC(fiction_inml_inml_technology_cell_type_INVERTER_MAGNET));
-        cell_type.value("CROSSWIRE_MAGNET", Technology::cell_type::CROSSWIRE_MAGNET,
-                        DOC(fiction_inml_inml_technology_cell_type_CROSSWIRE_MAGNET));
-        cell_type.value("FANOUT_COUPLER_MAGNET", Technology::cell_type::FANOUT_COUPLER_MAGNET,
-                        DOC(fiction_inml_inml_technology_cell_type_FANOUT_COUPLER_MAGNET));
-    }
-    else if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
-    {
-        cell_type.value("LOGIC", Technology::cell_type::LOGIC);
-    }
-    // NOTE: more technologies go here
 
-    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology>;
+    using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology, Coordinate>;
 
     /**
      * Cell-level clocked Cartesian layout.
      */
     py::class_<py_cartesian_technology_cell_layout,
-               fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<
-                   fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>(
-        m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_layouts_cell_level_layout))
+               fiction::layouts::clocked_layout<
+                   fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<Coordinate>>>>(
+        m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout))
         .def(py::init<>(), DOC(fiction_layouts_cell_level_layout_cell_level_layout))
-        .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
-             DOC(fiction_layouts_cell_level_layout_cell_level_layout))
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<py_cartesian_technology_cell_layout>       self,
+               const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension)
+            { new (self.p) py_cartesian_technology_cell_layout{validate_layout_maximum(dimension)}; },
+            py::arg("dimension"), DOC(fiction_layouts_cell_level_layout_cell_level_layout))
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<py_cartesian_technology_cell_layout> self, const py::tuple& dimension)
+            {
+                using coordinate = fiction::coordinate<py_cartesian_technology_cell_layout>;
+
+                const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
+                if (parsed_dimension.minimum.has_value())
+                {
+                    new (self.p) py_cartesian_technology_cell_layout{coordinate{0, 0, 0}};
+                    self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
+                    return;
+                }
+
+                new (self.p) py_cartesian_technology_cell_layout{parsed_dimension.maximum};
+            },
+            py::arg("dimension"),
+            "Constructs a cell-level layout from a maximum coordinate or an inclusive (minimum, maximum) coordinate "
+            "pair.")
         .def(
             "__init__",
             [](py::pointer_and_handle<py_cartesian_technology_cell_layout>       self,
@@ -153,7 +183,8 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
                         fiction::layouts::clocking::get_scheme<py_cartesian_technology_cell_layout>(scheme_name);
                     scheme.has_value())
                 {
-                    new (self.p) py_cartesian_technology_cell_layout{dimension, *scheme, layout_name};
+                    new (self.p)
+                        py_cartesian_technology_cell_layout{validate_layout_maximum(dimension), *scheme, layout_name};
                     return;
                 }
 
@@ -161,6 +192,33 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
             },
             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
             DOC(fiction_layouts_cell_level_layout_cell_level_layout_2))
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<py_cartesian_technology_cell_layout> self, const py::tuple& dimension,
+               const std::string& scheme_name, const std::string& layout_name)
+            {
+                using coordinate = fiction::coordinate<py_cartesian_technology_cell_layout>;
+
+                if (const auto scheme =
+                        fiction::layouts::clocking::get_scheme<py_cartesian_technology_cell_layout>(scheme_name);
+                    scheme.has_value())
+                {
+                    const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
+                    if (parsed_dimension.minimum.has_value())
+                    {
+                        new (self.p) py_cartesian_technology_cell_layout{coordinate{0, 0, 0}, *scheme, layout_name};
+                        self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
+                        return;
+                    }
+
+                    new (self.p) py_cartesian_technology_cell_layout{parsed_dimension.maximum, *scheme, layout_name};
+                    return;
+                }
+
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            },
+            py::arg("dimension"), py::arg("clocking_scheme"), py::arg("layout_name") = "",
+            "Constructs a named cell-level layout from coordinate bounds and a clocking scheme.")
 
         .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, py::arg("c"), py::arg("ct"),
              DOC(fiction_layouts_cell_level_layout_assign_cell_type))
@@ -254,10 +312,15 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
 void cell_level_layout(nanobind::module_& m)
 {
-    detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::inml::inml_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::sidb::sidb_technology>(m);
+    detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m, "qca_layout");
+    detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology>(m, "mol_qca_layout");
+    detail::fcn_technology_cell_level_layout<fiction::inml::inml_technology>(m, "inml_layout");
+    detail::fcn_technology_cell_level_layout<fiction::sidb::sidb_technology>(m, "sidb_layout");
+    detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology, py_cube_coordinate>(m, "qca_layout_cube");
+    detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology, py_cube_coordinate>(
+        m, "mol_qca_layout_cube");
+    detail::fcn_technology_cell_level_layout<fiction::inml::inml_technology, py_cube_coordinate>(m, "inml_layout_cube");
+    detail::fcn_technology_cell_level_layout<fiction::sidb::sidb_technology, py_cube_coordinate>(m, "sidb_layout_cube");
 }
 
 }  // namespace pyfiction

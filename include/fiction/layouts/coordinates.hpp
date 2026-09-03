@@ -12,6 +12,7 @@
  * @file
  * @brief Offset, cube, and SiQAD coordinate types and the conversions between them.
  * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  */
@@ -167,39 +168,52 @@ struct offset
         return offset{static_cast<uint64_t>(*this) | static_cast<uint64_t>(offset{})};
     }
     /**
-     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
-     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
-     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
-     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
-     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
-     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     * Wraps the coordinate within the inclusive bounds from `minimum` to `maximum`. If x exceeds its maximum, x is
+     * reset to its minimum and y is increased. If y exceeds its maximum, y is reset to its minimum and z is increased.
+     * If z exceeds its maximum, the coordinate becomes a dead copy of `maximum`.
      *
-     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     * @param maximum Maximum coordinate to wrap against.
+     * @param minimum Minimum coordinate to wrap to. Defaults to the origin.
      */
-    void wrap(const offset& aspect_ratio) noexcept
+    void wrap(const offset& maximum, const offset& minimum = {0, 0, 0}) noexcept
     {
-        if (x > aspect_ratio.x)
+        if (x > maximum.x)
         {
-            x = 0;
-            ++y;
-        }
+            x = minimum.x;
 
-        if (y > aspect_ratio.y)
-        {
-            if (z == 1)
+            if (y >= maximum.y)
             {
-                *this = aspect_ratio.get_dead();
+                if (z >= maximum.z)
+                {
+                    *this = maximum.get_dead();
+                    return;
+                }
+
+                y = minimum.y;
+                ++z;
             }
             else
             {
-                y = 0;
-                z = 1;
+                ++y;
             }
         }
 
-        if (z > aspect_ratio.z)
+        if (y > maximum.y)
         {
-            *this = aspect_ratio.get_dead();
+            if (z >= maximum.z)
+            {
+                *this = maximum.get_dead();
+            }
+            else
+            {
+                y = minimum.y;
+                ++z;
+            }
+        }
+
+        if (z > maximum.z)
+        {
+            *this = maximum.get_dead();
         }
     }
     /**
@@ -413,32 +427,52 @@ struct cube
         return dead_coord;
     }
     /**
-     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
-     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
-     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
-     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
-     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
-     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     * Wraps the coordinate within the inclusive bounds from `minimum` to `maximum`. If x exceeds its maximum, x is
+     * reset to its minimum and y is increased. If y exceeds its maximum, y is reset to its minimum and z is increased.
+     * If z exceeds its maximum, the coordinate becomes a dead copy of `maximum`.
      *
-     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     * @param maximum Maximum coordinate to wrap against.
+     * @param minimum Minimum coordinate to wrap to. Defaults to the origin.
      */
-    void wrap(const cube& aspect_ratio) noexcept
+    void wrap(const cube& maximum, const cube& minimum = {0, 0, 0}) noexcept
     {
-        if (x > aspect_ratio.x)
+        if (x > maximum.x)
         {
-            x = 0;
-            ++y;
+            x = minimum.x;
+
+            if (y >= maximum.y)
+            {
+                if (z >= maximum.z)
+                {
+                    *this = maximum.get_dead();
+                    return;
+                }
+
+                y = minimum.y;
+                ++z;
+            }
+            else
+            {
+                ++y;
+            }
         }
 
-        if (y > aspect_ratio.y)
+        if (y > maximum.y)
         {
-            y = 0;
+            y = minimum.y;
+
+            if (z >= maximum.z)
+            {
+                *this = maximum.get_dead();
+                return;
+            }
+
             ++z;
         }
 
-        if (z > aspect_ratio.z)
+        if (z > maximum.z)
         {
-            *this = aspect_ratio.get_dead();
+            *this = maximum.get_dead();
         }
     }
     /**
@@ -654,32 +688,57 @@ struct siqad
         return dead_coord;
     }
     /**
-     * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
-     * by the coordinate type. For any dimension of the coordinate that is strictly larger than the associated dimension
-     * of the aspect ratio, this dimension will be wrapped to zero, and the next dimension is increased. The resulting
-     * coordinate becomes a dead copy of the aspect ratio if it is not contained in the aspect ratio after iterating.
-     * An example use case of this function is the coordinate iterator, which implements iterator advancing by first
-     * incrementing the x dimension, then wrapping the coordinate to the boundary within to enumerate.
+     * Wraps the coordinate within the inclusive bounds from `minimum` to `maximum` in SiQAD row order. If x exceeds its
+     * maximum, it is reset to its minimum before advancing to the next dimer position. If the resulting coordinate is
+     * outside the y- or z-bounds, it becomes a dead copy of `maximum`.
      *
-     * @param aspect_ratio Aspect ratio to wrap the coordinate to.
+     * @param maximum Maximum coordinate to wrap against.
+     * @param minimum Minimum coordinate to wrap to. Defaults to the origin.
      */
-    void wrap(const siqad& aspect_ratio) noexcept
+    void wrap(const siqad& maximum, const siqad& minimum = {0, 0, 0}) noexcept
     {
-        if (x > aspect_ratio.x)
+        if (x > maximum.x)
         {
-            x = 0;
-            y += z;
-            z = !z;
+            x = minimum.x;
+
+            if (minimum.z == maximum.z)
+            {
+                z = minimum.z;
+
+                if (y >= maximum.y)
+                {
+                    *this = maximum.get_dead();
+                    return;
+                }
+
+                ++y;
+            }
+            else if (z >= maximum.z)
+            {
+                z = minimum.z;
+
+                if (y >= maximum.y)
+                {
+                    *this = maximum.get_dead();
+                    return;
+                }
+
+                ++y;
+            }
+            else
+            {
+                z = maximum.z;
+            }
         }
 
-        if (z > aspect_ratio.z)
+        if (z < minimum.z || z > maximum.z)
         {
-            *this = aspect_ratio.get_dead();
+            *this = maximum.get_dead();
         }
 
-        if (y > aspect_ratio.y)
+        if (y > maximum.y)
         {
-            *this = aspect_ratio.get_dead();
+            *this = maximum.get_dead();
         }
     }
     /**
@@ -921,7 +980,8 @@ class coordinate_iterator
      */
     constexpr coordinate_iterator() noexcept = default;
     /**
-     * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
+     * Standard constructor. Initializes the iterator with a starting position and inclusive boundaries within to
+     * enumerate.
      *
      * With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following order would be enumerated for offset or cubic
      * coordinates:
@@ -954,23 +1014,28 @@ class coordinate_iterator
      * - (0, 2, 1)
      * - (1, 2, 1)
      *
-     * iterator is compatible with the STL forward_iterator category. Does not iterate over negative coordinates.
+     * The iterator is compatible with the STL forward_iterator category.
      *
-     * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
+     * @param maximum Maximum boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
+     * @param minimum Minimum boundary to wrap to. Defaults to the origin.
      */
-    constexpr explicit coordinate_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
+    constexpr explicit coordinate_iterator(const CoordinateType& maximum, const CoordinateType& start,
+                                           const CoordinateType& minimum = {0, 0, 0}) noexcept
         requires std::same_as<CoordinateType, offset> || std::same_as<CoordinateType, cube> ||
                      std::same_as<CoordinateType, siqad>
-            : aspect_ratio{dimension}, coord{start}
+            : maximum{maximum}, minimum{minimum}, coord{start}
     {
-        // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
-        coord.x = std::max(coord.x, static_cast<decltype(coord.x)>(0));
-        coord.y = std::max(coord.y, static_cast<decltype(coord.y)>(0));
-        coord.z = std::max(coord.z, static_cast<decltype(coord.z)>(0));
+        assert(minimum.x <= maximum.x && minimum.y <= maximum.y && minimum.z <= maximum.z &&
+               "Minimum coordinate must not exceed maximum coordinate");
 
-        // ... then handle coordinates that are beyond the given boundary.
-        coord.wrap(aspect_ratio);
+        // Make sure the start iterator is within the lower boundary.
+        coord.x = std::max(coord.x, minimum.x);
+        coord.y = std::max(coord.y, minimum.y);
+        coord.z = std::max(coord.z, minimum.z);
+
+        // Then handle coordinates that are beyond the upper boundary.
+        coord.wrap(maximum, minimum);
     }
     /**
      * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.
@@ -979,15 +1044,48 @@ class coordinate_iterator
      */
     constexpr coordinate_iterator& operator++() noexcept
     {
-        if (coord != aspect_ratio)
+        if (coord == maximum)
+        {
+            coord = coord.get_dead();
+            return *this;
+        }
+
+        if (coord.x < maximum.x)
         {
             ++coord.x;
+            return *this;
+        }
 
-            coord.wrap(aspect_ratio);
+        coord.x = minimum.x;
+
+        if constexpr (std::is_same_v<CoordinateType, siqad>)
+        {
+            if (minimum.z != maximum.z && coord.z < maximum.z)
+            {
+                ++coord.z;
+            }
+            else if (coord.y < maximum.y)
+            {
+                coord.z = minimum.z;
+                ++coord.y;
+            }
+            else
+            {
+                coord = maximum.get_dead();
+            }
+        }
+        else if (coord.y < maximum.y)
+        {
+            ++coord.y;
+        }
+        else if (coord.z < maximum.z)
+        {
+            coord.y = minimum.y;
+            ++coord.z;
         }
         else
         {
-            coord = coord.get_dead();
+            coord = maximum.get_dead();
         }
 
         return *this;
@@ -1029,10 +1127,13 @@ class coordinate_iterator
 
   private:
     /**
-     * Boundary within to enumerate. Not `const`: `std::input_or_output_iterator` requires `iterator` to be
+     * Maximum boundary within to enumerate. Not `const`: `std::input_or_output_iterator` requires `iterator` to be
      * `std::movable`, which in turn requires it to be assignable.
      */
-    CoordinateType aspect_ratio;
+    CoordinateType maximum;
+
+    /** Minimum boundary to wrap to. */
+    CoordinateType minimum;
 
     CoordinateType coord;
 };

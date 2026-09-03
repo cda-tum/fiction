@@ -13,16 +13,16 @@
  * @brief Python bindings for `fiction/layouts/clocked_layout.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/layout_dimension.hpp"
 #include "pyfiction/types.hpp"
 
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/traits.hpp>
-
-#include <fmt/format.h>
 
 #include <sstream>
 #include <stdexcept>
@@ -45,18 +45,46 @@ namespace detail
 {
 
 template <typename LytBase, typename ClockedLyt>
-void clocked_layout(nanobind::module_& m, const std::string& topology)
+void clocked_layout(nanobind::module_& m, const std::string& class_name)
 {
     namespace py = nanobind;
+
+    using coordinate = fiction::coordinate<ClockedLyt>;
+
+    constexpr auto supports_explicit_minimum = requires(ClockedLyt& lyt, const coordinate& minimum,
+                                                        const coordinate& maximum) { lyt.resize(minimum, maximum); };
 
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, fmt::format("clocked_{}_layout", topology).c_str(),
-                                    DOC(fiction_is_clocked_layout))
+    py::class_<ClockedLyt, LytBase>(m, class_name.c_str(), DOC(fiction_is_clocked_layout))
         .def(py::init<>(), DOC(fiction_layouts_clocked_layout_clocked_layout))
-        .def(py::init<const fiction::aspect_ratio<ClockedLyt>&>(), py::arg("dimension"),
-             DOC(fiction_layouts_clocked_layout_clocked_layout))
+        .def(
+            "__init__", [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension)
+            { new (self.p) ClockedLyt{validate_layout_maximum(dimension)}; }, py::arg("dimension"),
+            DOC(fiction_layouts_clocked_layout_clocked_layout))
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<ClockedLyt> self, const py::tuple& dimension)
+            {
+                const auto parsed_dimension = parse_layout_dimension<coordinate, supports_explicit_minimum>(dimension);
+                if (parsed_dimension.minimum.has_value())
+                {
+                    if constexpr (supports_explicit_minimum)
+                    {
+                        new (self.p) ClockedLyt{coordinate{0, 0, 0}};
+                        self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
+                        return;
+                    }
+                }
+
+                new (self.p) ClockedLyt{parsed_dimension.maximum};
+            },
+            py::arg("dimension"),
+            supports_explicit_minimum ?
+                "Constructs a clocked layout from a maximum coordinate or an inclusive (minimum, maximum) coordinate "
+                "pair." :
+                "Constructs a clocked layout from a maximum coordinate.")
         .def(
             "__init__",
             [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension,
@@ -65,7 +93,7 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
                 if (const auto scheme = fiction::layouts::clocking::get_scheme<ClockedLyt>(scheme_name);
                     scheme.has_value())
                 {
-                    new (self.p) ClockedLyt{dimension, *scheme};
+                    new (self.p) ClockedLyt{validate_layout_maximum(dimension), *scheme};
                     return;
                 }
 
@@ -73,6 +101,34 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
             },
             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave",
             DOC(fiction_layouts_clocked_layout_clocked_layout_2))
+        .def(
+            "__init__",
+            [](py::pointer_and_handle<ClockedLyt> self, const py::tuple& dimension, const std::string& scheme_name)
+            {
+                if (const auto scheme = fiction::layouts::clocking::get_scheme<ClockedLyt>(scheme_name);
+                    scheme.has_value())
+                {
+                    const auto parsed_dimension =
+                        parse_layout_dimension<coordinate, supports_explicit_minimum>(dimension);
+                    if (parsed_dimension.minimum.has_value())
+                    {
+                        if constexpr (supports_explicit_minimum)
+                        {
+                            new (self.p) ClockedLyt{coordinate{0, 0, 0}, *scheme};
+                            self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
+                            return;
+                        }
+                    }
+
+                    new (self.p) ClockedLyt{parsed_dimension.maximum, *scheme};
+                    return;
+                }
+
+                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+            },
+            py::arg("dimension"), py::arg("clocking_scheme"),
+            supports_explicit_minimum ? "Constructs a clocked layout from coordinate bounds and a clocking scheme." :
+                                        "Constructs a clocked layout from a maximum coordinate and a clocking scheme.")
 
         .def("assign_clock_number", &ClockedLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
              DOC(fiction_layouts_clocked_layout_assign_clock_number))
@@ -116,9 +172,12 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
 
 void clocked_layout(nanobind::module_& m)
 {
-    detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "cartesian");
-    detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(m, "shifted_cartesian");
-    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "hexagonal");
+    detail::clocked_layout<py_cartesian_layout, py_cartesian_clocked_layout>(m, "clocked_cartesian_layout");
+    detail::clocked_layout<py_cartesian_layout_cube, py_cartesian_clocked_layout_cube>(m,
+                                                                                       "clocked_cartesian_layout_cube");
+    detail::clocked_layout<py_shifted_cartesian_layout, py_shifted_cartesian_clocked_layout>(
+        m, "clocked_shifted_cartesian_layout");
+    detail::clocked_layout<py_hexagonal_layout, py_hexagonal_clocked_layout>(m, "clocked_hexagonal_layout");
 }
 
 }  // namespace pyfiction

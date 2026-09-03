@@ -8,7 +8,18 @@
 
 from __future__ import annotations
 
-from mnt.pyfiction import inml_technology, qca_layout, qca_technology, sidb_technology
+import pytest
+
+from mnt.pyfiction import (
+    inml_layout_cube,
+    inml_technology,
+    mol_qca_layout_cube,
+    qca_layout,
+    qca_layout_cube,
+    qca_technology,
+    sidb_layout_cube,
+    sidb_technology,
+)
 
 
 def test_qca_technology():
@@ -59,6 +70,23 @@ def test_qca_cell_layout_inheritance():
 
     for t in layout.adjacent_coordinates((2, 2)):
         assert t in [(1, 2), (2, 1), (3, 2), (2, 3)]
+
+
+@pytest.mark.parametrize("layout_type", [qca_layout_cube, mol_qca_layout_cube, inml_layout_cube, sidb_layout_cube])
+def test_cube_coordinate_cell_layout(layout_type):
+    layout = layout_type(((-2, -1), (1, 1)), "OPEN", "Cube layout")
+
+    assert (layout.x_min(), layout.y_min()) == (-2, -1)
+    assert layout.is_within_bounds((-1, 0))
+
+
+def test_cube_coordinate_cell_assignment():
+    layout = qca_layout_cube(((-2, -1), (1, 1)), "OPEN", "Cube layout")
+
+    layout.assign_cell_type((-1, 0), qca_technology.cell_type.NORMAL)
+
+    assert layout.cells() == [(-1, 0)]
+    assert layout.is_within_bounds((-1, 0))
 
 
 def test_cell_type_assignment():

@@ -1192,8 +1192,8 @@ static const char *mkd_doc_fiction_layouts_bounding_box_2d_x_size = R"doc(The ho
 static const char *mkd_doc_fiction_layouts_bounding_box_2d_y_size = R"doc(The vertical size of the bounding box in layout coordinates.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout =
-R"doc( A layout type that utilizes offset coordinates to represent a
- Cartesian grid. Its faces are organized in the following way:
+R"doc( A layout type that utilizes coordinates to represent a Cartesian
+ grid. Its faces are organized in the following way:
 
  
 ```
@@ -1296,6 +1296,9 @@ exactly one coordinate.
 Args:
     ar: Highest possible position in the layout.
 
+Precondition:
+    No component of `ar` is below the origin.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_2 =
@@ -1308,9 +1311,17 @@ Args:
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage = R"doc()doc";
+static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_cartesian_layout_storage =
+R"doc(Creates storage whose minimum is the origin and whose maximum is `ar`.
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_dimension = R"doc()doc";
+Args:
+    ar: Maximum coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_dimension = R"doc(Maximum coordinate.)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_cartesian_layout_storage_minimum = R"doc(Minimum coordinate.)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_clone =
 R"doc(Clones the layout returning a deep copy.
@@ -1362,6 +1373,22 @@ Args:
 Returns:
     An iterator range from `start` to `stop`. If they are not
     provided, the first/last coordinate is used as a default.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_dimension_size =
+R"doc(Returns the distance between a minimum and maximum coordinate
+component.
+
+Args:
+    minimum: Minimum component value.
+    maximum: Maximum component value.
+
+Template Args:
+    CoordinateValue: Coordinate component type.
+
+Returns:
+    Distance between `minimum` and `maximum`.
 
 )doc";
 
@@ -1479,6 +1506,19 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_initialize_dimension = R"doc()doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_initialize_minimum =
+R"doc(Initializes a Cartesian layout's minimum coordinate. For SiQAD
+coordinates, the z-value is set to 0 such that only complete dimer
+rows are considered.
+
+Args:
+    coord: Minimum coordinate to initialize.
+
+Returns:
+    Initialized minimum coordinate.
+
+)doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
@@ -1793,6 +1833,23 @@ R"doc(Updates the layout's dimensions, effectively resizing it.
 Args:
     ar: New aspect ratio.
 
+Precondition:
+    No component of `ar` is below the origin.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_resize_2 =
+R"doc(Updates the layout's inclusive minimum and maximum coordinates,
+effectively resizing it.
+
+Args:
+    minimum: New minimum coordinate.
+    maximum: New maximum coordinate.
+
+Precondition:
+    No component of `minimum` exceeds the corresponding component of
+    `maximum`.
+
 )doc";
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_south =
@@ -1852,6 +1909,14 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_strg = R"doc()doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_volume =
+R"doc(Returns the layout's number of coordinate positions.
+
+Returns:
+    Volume of layout.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_west =
 R"doc(Returns the coordinate that is directly adjacent in western direction
 of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -1887,6 +1952,22 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_x_min =
+R"doc(Returns the layout's minimum x-coordinate.
+
+Returns:
+    Minimum x-coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_x_size =
+R"doc(Returns the distance between the minimum and maximum x-coordinates.
+
+Returns:
+    Layout size in x-direction.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
@@ -1896,12 +1977,44 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_cartesian_layout_y_min =
+R"doc(Returns the layout's minimum y-coordinate.
+
+Returns:
+    Minimum y-coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_y_size =
+R"doc(Returns the distance between the minimum and maximum y-coordinates.
+
+Returns:
+    Layout size in y-direction.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_cartesian_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
 
 Returns:
     z-dimension.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_z_min =
+R"doc(Returns the layout's minimum z-coordinate.
+
+Returns:
+    Minimum z-coordinate.
+
+)doc";
+
+static const char *mkd_doc_fiction_layouts_cartesian_layout_z_size =
+R"doc(Returns the distance between the minimum and maximum z-coordinates.
+
+Returns:
+    Layout size in z-direction.
 
 )doc";
 
@@ -2622,6 +2735,22 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_layouts_clocking_detail_cutout_index =
+R"doc(Maps a coordinate component to an index within a periodically repeated
+cutout.
+
+Args:
+    coordinate: Coordinate component.
+    period: Cutout period.
+
+Template Args:
+    Coordinate: Coordinate component type.
+
+Returns:
+    Index in `[0, period)`.
+
+)doc";
+
 static const char *mkd_doc_fiction_layouts_clocking_esr =
 R"doc(Returns the ESR clocking as defined in \"An efficient, scalable,
 regular clocking scheme based on quantum dot cellular automata\" by
@@ -2966,11 +3095,6 @@ Note:
     (required for `std::semiregular`) remains usable for any
     `CoordinateType`.)doc";
 
-static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_aspect_ratio =
-R"doc(Boundary within to enumerate. Not `const`:
-`std::input_or_output_iterator` requires `iterator` to be
-`std::movable`, which in turn requires it to be assignable.)doc";
-
 static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coord = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coordinate_iterator =
@@ -2982,7 +3106,7 @@ own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
 
 static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_coordinate_iterator_2 =
 R"doc(Standard constructor. Initializes the iterator with a starting
-position and the boundary within to enumerate.
+position and inclusive boundaries within to enumerate.
 
 With `dimension = (1, 2, 1)` and `start = (0, 0, 0)`, the following
 order would be enumerated for offset or cubic
@@ -2999,15 +3123,22 @@ order of enumeration:
   0) - (0, 1, 1) - (1, 1, 1) - (1, 1, 0) - (0, 2, 0) - (0, 2, 1) - (1,
   2, 1)
 
-iterator is compatible with the STL forward_iterator category. Does
-not iterate over negative coordinates.
+The iterator is compatible with the STL forward_iterator category.
 
 Args:
-    dimension: Boundary within to enumerate. Iteration wraps at its
-               limits.
+    maximum: Maximum boundary within to enumerate. Iteration wraps at
+             its limits.
     start: Starting coordinate to enumerate first.
+    minimum: Minimum boundary to wrap to. Defaults to the origin.
 
 )doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_maximum =
+R"doc(Maximum boundary within to enumerate. Not `const`:
+`std::input_or_output_iterator` requires `iterator` to be
+`std::movable`, which in turn requires it to be assignable.)doc";
+
+static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_minimum = R"doc(Minimum boundary to wrap to.)doc";
 
 static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_operator_eq = R"doc()doc";
 
@@ -3197,19 +3328,15 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_coords_cube_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order defined by the coordinate
-type. For any dimension of the coordinate that is strictly larger than
-the associated dimension of the aspect ratio, this dimension will be
-wrapped to zero, and the next dimension is increased. The resulting
-coordinate becomes a dead copy of the aspect ratio if it is not
-contained in the aspect ratio after iterating. An example use case of
-this function is the coordinate iterator, which implements iterator
-advancing by first incrementing the x dimension, then wrapping the
-coordinate to the boundary within to enumerate.
+R"doc(Wraps the coordinate within the inclusive bounds from `minimum` to
+`maximum`. If x exceeds its maximum, x is reset to its minimum and y
+is increased. If y exceeds its maximum, y is reset to its minimum and
+z is increased. If z exceeds its maximum, the coordinate becomes a
+dead copy of `maximum`.
 
 Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
+    maximum: Maximum coordinate to wrap against.
+    minimum: Minimum coordinate to wrap to. Defaults to the origin.
 
 )doc";
 
@@ -3408,19 +3535,15 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_coords_offset_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order defined by the coordinate
-type. For any dimension of the coordinate that is strictly larger than
-the associated dimension of the aspect ratio, this dimension will be
-wrapped to zero, and the next dimension is increased. The resulting
-coordinate becomes a dead copy of the aspect ratio if it is not
-contained in the aspect ratio after iterating. An example use case of
-this function is the coordinate iterator, which implements iterator
-advancing by first incrementing the x dimension, then wrapping the
-coordinate to the boundary within to enumerate.
+R"doc(Wraps the coordinate within the inclusive bounds from `minimum` to
+`maximum`. If x exceeds its maximum, x is reset to its minimum and y
+is increased. If y exceeds its maximum, y is reset to its minimum and
+z is increased. If z exceeds its maximum, the coordinate becomes a
+dead copy of `maximum`.
 
 Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
+    maximum: Maximum coordinate to wrap against.
+    minimum: Minimum coordinate to wrap to. Defaults to the origin.
 
 )doc";
 
@@ -3599,19 +3722,15 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_coords_siqad_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order defined by the coordinate
-type. For any dimension of the coordinate that is strictly larger than
-the associated dimension of the aspect ratio, this dimension will be
-wrapped to zero, and the next dimension is increased. The resulting
-coordinate becomes a dead copy of the aspect ratio if it is not
-contained in the aspect ratio after iterating. An example use case of
-this function is the coordinate iterator, which implements iterator
-advancing by first incrementing the x dimension, then wrapping the
-coordinate to the boundary within to enumerate.
+R"doc(Wraps the coordinate within the inclusive bounds from `minimum` to
+`maximum` in SiQAD row order. If x exceeds its maximum, it is reset to
+its minimum before advancing to the next dimer position. If the
+resulting coordinate is outside the y- or z-bounds, it becomes a dead
+copy of `maximum`.
 
 Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
+    maximum: Maximum coordinate to wrap against.
+    minimum: Minimum coordinate to wrap to. Defaults to the origin.
 
 )doc";
 

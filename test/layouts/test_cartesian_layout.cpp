@@ -21,7 +21,10 @@
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/traits.hpp>
 
+#include <cstdint>
+#include <limits>
 #include <set>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -295,6 +298,92 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
         });
 }
 
+TEST_CASE("Cartesian layout with signed bounds", "[cartesian-layout]")
+{
+    using layout     = cartesian_layout<coords::cube>;
+    using coordinate = layout::coordinate;
+
+    layout lyt{{1, 1, 1}};
+    lyt.resize({-2, -1, -1}, {1, 1, 1});
+
+    CHECK(lyt.x_min() == -2);
+    CHECK(lyt.y_min() == -1);
+    CHECK(lyt.z_min() == -1);
+    CHECK(lyt.x() == 1);
+    CHECK(lyt.y() == 1);
+    CHECK(lyt.z() == 1);
+    CHECK(lyt.x_size() == 3);
+    CHECK(lyt.y_size() == 2);
+    CHECK(lyt.z_size() == 2);
+    CHECK(lyt.area() == 12);
+    CHECK(lyt.volume() == 36);
+
+    const std::vector<coordinate> coordinates{lyt.coordinates().begin(), lyt.coordinates().end()};
+    REQUIRE(coordinates.size() == lyt.volume());
+    CHECK(coordinates.front() == coordinate{-2, -1, -1});
+    CHECK(coordinates.back() == coordinate{1, 1, 1});
+
+    const std::vector<coordinate> ground_coordinates{lyt.ground_coordinates().begin(), lyt.ground_coordinates().end()};
+    REQUIRE(ground_coordinates.size() == lyt.area());
+    CHECK(ground_coordinates.front() == coordinate{-2, -1, -1});
+    CHECK(ground_coordinates.back() == coordinate{1, 1, -1});
+
+    CHECK(lyt.is_within_bounds({-2, -1, -1}));
+    CHECK(lyt.is_within_bounds({1, 1, 1}));
+    CHECK(!lyt.is_within_bounds({-3, -1, -1}));
+    CHECK(!lyt.is_within_bounds({1, 2, 1}));
+
+    CHECK(lyt.north({0, 0, 0}) == coordinate{0, -1, 0});
+    CHECK(lyt.west({0, 0, 0}) == coordinate{-1, 0, 0});
+    CHECK(lyt.below({0, 0, 0}) == coordinate{0, 0, -1});
+    CHECK(lyt.north({0, -1, 0}) == coordinate{0, -1, 0});
+    CHECK(lyt.west({-2, 0, 0}) == coordinate{-2, 0, 0});
+    CHECK(lyt.below({0, 0, -1}) == coordinate{0, 0, -1});
+    CHECK(lyt.north({0, -2, 0}).is_dead());
+    CHECK(lyt.west({-3, 0, 0}).is_dead());
+    CHECK(lyt.below({0, 0, -2}).is_dead());
+    CHECK(lyt.northern_border_of({0, 0, 0}) == coordinate{0, -1, 0});
+    CHECK(lyt.western_border_of({0, 0, 0}) == coordinate{-2, 0, 0});
+    CHECK(lyt.is_ground_layer({0, 0, -1}));
+    CHECK(lyt.is_crossing_layer({0, 0, 0}));
+
+    lyt.resize({2, 3, 1});
+
+    CHECK(lyt.x_min() == 0);
+    CHECK(lyt.y_min() == 0);
+    CHECK(lyt.z_min() == 0);
+    CHECK(lyt.x() == 2);
+    CHECK(lyt.y() == 3);
+    CHECK(lyt.z() == 1);
+
+    layout dead_endpoint_layout{};
+    dead_endpoint_layout.resize(coordinate{}, coordinate{1, 0, 0});
+    const std::vector<coordinate> live_coordinates{dead_endpoint_layout.coordinates().begin(),
+                                                   dead_endpoint_layout.coordinates().end()};
+    CHECK(live_coordinates == std::vector<coordinate>{{0, 0, 0}, {1, 0, 0}});
+
+    constexpr auto maximum_component = std::numeric_limits<int32_t>::max();
+    layout         extreme_layout{};
+    extreme_layout.resize({maximum_component, 0, 0}, {maximum_component, 1, 0});
+    const std::vector<coordinate> extreme_coordinates{extreme_layout.coordinates().begin(),
+                                                      extreme_layout.coordinates().end()};
+    CHECK(extreme_coordinates == std::vector<coordinate>{{maximum_component, 0, 0}, {maximum_component, 1, 0}});
+
+    const coords::coordinate_iterator overflow_start{coordinate{0, maximum_component, maximum_component},
+                                                     coordinate{1, maximum_component, maximum_component},
+                                                     coordinate{0, 0, 0}};
+    CHECK((*overflow_start).is_dead());
+
+    lyt.resize({-4, -3, -2}, {2, 3, 1});
+
+    CHECK(lyt.x_min() == -4);
+    CHECK(lyt.y_min() == -3);
+    CHECK(lyt.z_min() == -2);
+    CHECK(lyt.x() == 2);
+    CHECK(lyt.y() == 3);
+    CHECK(lyt.z() == 1);
+}
+
 TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
 {
     using lyt = cartesian_layout<coords::siqad>;
@@ -302,4 +391,8 @@ TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1
     CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
     CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);
     CHECK(lyt{aspect_ratio<lyt>{42, 42, 1}}.z() == 1);
+
+    lyt signed_layout{{2, 3}};
+    signed_layout.resize({-2, -3, 1}, {2, 3, 0});
+    CHECK(signed_layout.z_min() == 0);
 }

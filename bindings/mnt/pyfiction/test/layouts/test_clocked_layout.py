@@ -10,7 +10,12 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import clocked_cartesian_layout, clocked_hexagonal_layout, clocked_shifted_cartesian_layout
+from mnt.pyfiction import (
+    clocked_cartesian_layout,
+    clocked_cartesian_layout_cube,
+    clocked_hexagonal_layout,
+    clocked_shifted_cartesian_layout,
+)
 
 CLOCKED_LAYOUTS = [
     pytest.param(lambda: clocked_cartesian_layout((2, 2, 0), "2DDWave"), id="clocked_cartesian_layout"),
@@ -69,3 +74,11 @@ def test_fetch_clocking_scheme(layout):
         layout((1, 2), "SUE")
     with pytest.raises(RuntimeError):
         layout((1, 2), "PES")
+
+
+def test_cube_coordinate_bounds():
+    layout = clocked_cartesian_layout_cube(((-1, -1), (1, 1)), "2DDWave")
+
+    assert (layout.x_min(), layout.y_min()) == (-1, -1)
+    assert layout.is_within_bounds((-1, -1))
+    assert layout.get_clock_number((-1, -1)) == 2
