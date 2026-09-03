@@ -112,3 +112,4 @@ AGENTS.local.md
 
 # compiler cache written by the Windows CI jobs
 .sccache/
+.rumdl_cache/

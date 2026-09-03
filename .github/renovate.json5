@@ -172,6 +172,20 @@
       enabled: false
     },
     {
+      description: "Keep the MyST pin compatible with Python 3.10",
+      matchManagers: ["pep621"],
+      matchDepNames: ["myst-parser"],
+      matchCurrentVersion: "4.0.1",
+      enabled: false
+    },
+    {
+      description: "Keep the sphinx-design pin compatible with Python 3.10",
+      matchManagers: ["pep621"],
+      matchDepNames: ["sphinx-design"],
+      matchCurrentVersion: "0.6.1",
+      enabled: false
+    },
+    {
       description: "Group and automerge all patch updates",
       groupName: "patch versions",
       groupSlug: "all-patch",

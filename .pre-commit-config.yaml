@@ -83,7 +83,7 @@ repos:
       - id: fix-smartquotes
         priority: 5
 
-  # Lint documentation with MyST support after formatting.
+  # Format and lint documentation with MyST support.
   - repo: https://github.com/rvben/rumdl-pre-commit
     rev: v0.2.64
     hooks:
@@ -92,6 +92,10 @@ repos:
         exclude: (^|/)AGENTS\.md$
         args: [--flavor, myst]
         priority: 8
+      - id: rumdl-fmt
+        files: ^docs/.*\.md$
+        exclude: (^|/)AGENTS\.md$
+        priority: 6
 
   # CMake format and lint the CMakeLists.txt files
   - repo: https://github.com/cheshirekow/cmake-format-precommit
@@ -159,11 +163,12 @@ repos:
     rev: v2.3.1
     hooks:
       - id: mypy
-        files: ^(bindings/mnt/pyfiction|docs/conf\.py|experiments|noxfile\.py|scripts)
+        files: ^(bindings/mnt/pyfiction|docs/.*\.py|experiments|noxfile\.py|scripts)
         args: []
         additional_dependencies:
           - nox
           - pytest
+          - sphinx==8.2.3
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
@@ -175,6 +180,7 @@ repos:
     hooks:
       - id: prettier
         types_or: [yaml, markdown, html, css, scss, javascript, json]
+        exclude: ^docs/.*\.md$
         priority: 6
 
   # Check JSON schemata

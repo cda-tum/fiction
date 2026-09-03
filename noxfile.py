@@ -186,14 +186,15 @@ def docs(session: nox.Session) -> None:
         "SKBUILD_CMAKE_ARGS": "--preset=pyfiction",
     }
     session.run("uv", "sync", "--frozen", "--no-dev", "--group", "build", "--group", "docs", env=env)
+    session.run("python", "-m", "unittest", "discover", "-s", "docs/_tests")
     with session.chdir("docs"):
-        session.run("doxygen", "Doxyfile", external=True)
-
         serve = args.builder == "html" and session.interactive
         command = ["sphinx-autobuild" if serve else "sphinx-build"]
         if serve:
             command.extend(["--ignore", "doxyxml/**", "--watch", "../include/fiction"])
             command.extend(["--pre-build", "doxygen Doxyfile"])
+        else:
+            session.run("doxygen", "Doxyfile", external=True)
         session.run(
             *command,
             "-T",

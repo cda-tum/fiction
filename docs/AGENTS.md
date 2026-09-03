@@ -27,6 +27,8 @@ The `Writing` rules in the root `AGENTS.md` apply here in full. In addition:
 - Put Python autodoc directives in `{eval-rst}` fences: Sphinx emits their content
   as reStructuredText. Keep prose and C++ directives in MyST.
 - Use rumdl's MyST-aware checks and run `prek run -a` after editing a page.
+- `nox -s docs` checks rendered binding signatures and docstrings before building.
+  Run `node --test docs/_tests/test_tabs.cjs` with Node.js 18 or newer after editing tab navigation.
 
 ## The changelog
 
