@@ -14788,7 +14788,12 @@ static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_os = R"d
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_write_sqd_layout_impl = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_write_sqd_layout_impl =
+R"doc(Args:
+    src: Layout to serialize.
+    s: Stream receiving the SQD output.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
@@ -15294,14 +15299,14 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_2 =
 R"doc(Creates the site `(x, y, z)`.
 
 Args:
-    x_: Steps along the first lattice vector.
-    y_: Steps along the second lattice vector.
-    z_: Basis site, 0 or 1.
+    x: Steps along the first lattice vector.
+    y: Steps along the second lattice vector.
+    z: Basis site, 0 or 1.
 
 Template Args:
-    X: Integral type of `x_`.
-    Y: Integral type of `y_`.
-    Z: Integral type of `z_`.
+    X: Integral type of `x`.
+    Y: Integral type of `y`.
+    Z: Integral type of `z`.
 
 )doc";
 
@@ -15309,12 +15314,12 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_3 =
 R"doc(Creates the site `(x, y, 0)`.
 
 Args:
-    x_: Steps along the first lattice vector.
-    y_: Steps along the second lattice vector.
+    x: Steps along the first lattice vector.
+    y: Steps along the second lattice vector.
 
 Template Args:
-    X: Integral type of `x_`.
-    Y: Integral type of `y_`.
+    X: Integral type of `x`.
+    Y: Integral type of `y`.
 
 )doc";
 
@@ -15457,6 +15462,10 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_layout_cell_sites = R"doc(SiDB sites in raster order.)doc";
+
+static const char *mkd_doc_fiction_sidb_layout_cell_types = R"doc(Cell type of the SiDB at the same index in `cell_sites`.)doc";
+
 static const char *mkd_doc_fiction_sidb_layout_cells_of_type =
 R"doc(All sites holding an SiDB of a given cell type, in raster order.
 
@@ -15477,8 +15486,6 @@ Returns:
     Site-defect pairs.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_layout_defects_2 = R"doc(Defects with their sites in raster order.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_for_each_site =
 R"doc(Applies `fn` to every element of `range`, passing the index too if
@@ -15631,8 +15638,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_lat = R"doc(The lattice of the surface.)doc";
-
 static const char *mkd_doc_fiction_sidb_layout_layout = R"doc(Creates an empty layout on the H-Si(100)-2x1 lattice.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_layout_2 =
@@ -15644,6 +15649,8 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)doc";
+
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
 R"doc(Moves the defect at one site to another, replacing whatever defect the
 target site held.
@@ -15653,8 +15660,6 @@ Args:
     target: Site to move the defect to.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_layout_name = R"doc(Layout name.)doc";
 
 static const char *mkd_doc_fiction_sidb_layout_num_cells =
 R"doc(Number of SiDBs.
@@ -15769,9 +15774,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_layout_sites = R"doc(SiDB sites in raster order.)doc";
+static const char *mkd_doc_fiction_sidb_layout_surface_defects = R"doc(Defects with their sites in raster order.)doc";
 
-static const char *mkd_doc_fiction_sidb_layout_types = R"doc(Cell type of the SiDB at the same index in `sites_`.)doc";
+static const char *mkd_doc_fiction_sidb_layout_surface_lattice = R"doc(The lattice of the surface.)doc";
 
 static const char *mkd_doc_fiction_sidb_model_charge_configuration_to_string =
 R"doc(Converts a vector of charge states to a string representation
@@ -27175,9 +27180,23 @@ static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_5 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_operator_call_6 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_6 =
+R"doc(Args:
+    s: Site to hash.
 
-static const char *mkd_doc_std_hash_operator_call_7 = R"doc()doc";
+Returns:
+    Hash of the lattice coordinates.
+
+)doc";
+
+static const char *mkd_doc_std_hash_operator_call_7 =
+R"doc(Args:
+    lyt: Layout to hash.
+
+Returns:
+    Hash of the SiDB sites and cell types.
+
+)doc";
 
 static const char *mkd_doc_std_hash_operator_call_8 =
 R"doc(Computes the hash value of a given SiDB defect.
