@@ -595,8 +595,8 @@ class layout
     template <typename Pred>
     [[nodiscard]] uint64_t count_defects(Pred&& pred) const noexcept
     {
-        return static_cast<uint64_t>(
-            std::ranges::count_if(surface_defects, [&](const auto& sd) { return pred(sd.second); }));
+        return static_cast<uint64_t>(std::ranges::count_if(surface_defects, std::forward<Pred>(pred),
+                                                           &std::pair<lattice_site, model::defect>::second));
     }
 };
 
