@@ -186,6 +186,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
   the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
 
+- I/O:
+  - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
+
 - Python bindings:
 
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.

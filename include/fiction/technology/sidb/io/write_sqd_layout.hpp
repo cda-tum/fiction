@@ -38,6 +38,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::io
@@ -217,7 +218,11 @@ template <typename Lyt>
 class write_sqd_layout_impl
 {
   public:
-    write_sqd_layout_impl(const Lyt& src, std::ostream& s) : lyt{src}, os{s} {}
+    /**
+     * @param src Layout to serialize.
+     * @param s Stream receiving the SQD output.
+     */
+    write_sqd_layout_impl(Lyt src, std::ostream& s) : lyt{std::move(src)}, os{s} {}
 
     void run()
     {

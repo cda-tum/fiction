@@ -209,7 +209,7 @@ class write_sidb_layout_svg_impl
     /**
      * Sets the colors based on the color mode.
      */
-    void set_colors() noexcept
+    void set_colors()
     {
         if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
         {
@@ -237,7 +237,7 @@ class write_sidb_layout_svg_impl
      * @return The SVG string representing the lattice point.
      */
     [[nodiscard]] std::string generate_lattice_point(const double x, const double y,
-                                                     const std::string& fill_color) const noexcept
+                                                     const std::string& fill_color) const
     {
         return fmt::format(R"(<use xlink:href="#lattice_point" x="{0}" y="{1}" style="fill:{2};"/>)", x, y, fill_color);
     }
