@@ -5,6 +5,7 @@
 
 generators/generators
 io/io
+layout
 model/model
 simulation/simulation
 surfaces/surfaces
