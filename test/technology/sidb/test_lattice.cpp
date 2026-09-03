@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/lattice.hpp>
@@ -23,7 +24,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <functional>
 #include <random>
 #include <unordered_set>
 #include <vector>
@@ -102,7 +102,7 @@ TEST_CASE("Lattice sites", "[lattice]")
     }
     SECTION("hash")
     {
-        std::unordered_set<lattice_site> set{{0, 0, 0}, {0, 0, 1}, {0, 0, 0}, {-1, 0, 0}};
+        const std::unordered_set<lattice_site> set{{0, 0, 0}, {0, 0, 1}, {0, 0, 0}, {-1, 0, 0}};
         CHECK(set.size() == 3);
     }
 }
@@ -129,6 +129,7 @@ TEST_CASE("Sites in an area", "[lattice]")
     }
     SECTION("random site stays inside")
     {
+        // NOLINTNEXTLINE(cert-msc32-c, cert-msc51-cpp): a fixed seed keeps the random-site test reproducible.
         std::mt19937_64 rng{42};
 
         const lattice_site nw{-2, -1, 1};
@@ -208,7 +209,7 @@ TEST_CASE("Custom lattice", "[lattice]")
 {
     using namespace Catch::Matchers;
 
-    const lattice square{"square", {5.0, 0.0}, {0.0, 5.0}, {{{0.0, 0.0}, {2.5, 2.5}}}};
+    const lattice square{.name = "square", .a1 = {5.0, 0.0}, .a2 = {0.0, 5.0}, .basis = {{{0.0, 0.0}, {2.5, 2.5}}}};
 
     const auto [x, y] = square.nm_position({2, 3, 1});
     CHECK_THAT(x, WithinAbs(1.25, 1E-9));

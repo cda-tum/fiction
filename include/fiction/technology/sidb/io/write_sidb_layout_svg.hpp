@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -33,7 +32,6 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <exception>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -41,7 +39,6 @@
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <unordered_map>
 #include <utility>
 #include <vector>
 

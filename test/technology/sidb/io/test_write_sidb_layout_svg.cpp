@@ -21,8 +21,9 @@
 
 #include "fiction/utils/version_info.hpp"
 
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
@@ -31,9 +32,6 @@
 #include <fmt/format.h>
 
 #include <cctype>
-#include <filesystem>
-#include <fstream>
-#include <iterator>
 #include <sstream>
 #include <string>
 

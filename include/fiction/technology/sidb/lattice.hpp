@@ -63,29 +63,29 @@ struct lattice_site
     /**
      * Creates the site `(x, y, z)`.
      *
-     * @tparam X Integral type of `x_`.
-     * @tparam Y Integral type of `y_`.
-     * @tparam Z Integral type of `z_`.
-     * @param x_ Steps along the first lattice vector.
-     * @param y_ Steps along the second lattice vector.
-     * @param z_ Basis site, 0 or 1.
+     * @tparam X Integral type of `x`.
+     * @tparam Y Integral type of `y`.
+     * @tparam Z Integral type of `z`.
+     * @param x Steps along the first lattice vector.
+     * @param y Steps along the second lattice vector.
+     * @param z Basis site, 0 or 1.
      */
     template <std::integral X, std::integral Y, std::integral Z>
-    constexpr lattice_site(const X x_, const Y y_, const Z z_) noexcept :
-            x{static_cast<int32_t>(x_)},
-            y{static_cast<int32_t>(y_)},
-            z{static_cast<uint8_t>(z_ & 1)}
+    constexpr lattice_site(const X x, const Y y, const Z z) noexcept :
+            x{static_cast<int32_t>(x)},
+            y{static_cast<int32_t>(y)},
+            z{static_cast<uint8_t>(static_cast<uint8_t>(z) & 1u)}
     {}
     /**
      * Creates the site `(x, y, 0)`.
      *
-     * @tparam X Integral type of `x_`.
-     * @tparam Y Integral type of `y_`.
-     * @param x_ Steps along the first lattice vector.
-     * @param y_ Steps along the second lattice vector.
+     * @tparam X Integral type of `x`.
+     * @tparam Y Integral type of `y`.
+     * @param x Steps along the first lattice vector.
+     * @param y Steps along the second lattice vector.
      */
     template <std::integral X, std::integral Y>
-    constexpr lattice_site(const X x_, const Y y_) noexcept : x{static_cast<int32_t>(x_)}, y{static_cast<int32_t>(y_)}
+    constexpr lattice_site(const X x, const Y y) noexcept : x{static_cast<int32_t>(x)}, y{static_cast<int32_t>(y)}
     {}
     /**
      * Compares two sites for equality.
@@ -102,11 +102,11 @@ struct lattice_site
      */
     [[nodiscard]] constexpr std::strong_ordering operator<=>(const lattice_site& other) const noexcept
     {
-        if (const auto c = y <=> other.y; c != 0)
+        if (const auto c = y <=> other.y; c != std::strong_ordering::equal)
         {
             return c;
         }
-        if (const auto c = z <=> other.z; c != 0)
+        if (const auto c = z <=> other.z; c != std::strong_ordering::equal)
         {
             return c;
         }
@@ -132,7 +132,7 @@ struct lattice_site
      */
     [[nodiscard]] constexpr lattice_site operator-(const lattice_site& other) const noexcept
     {
-        return {x - other.x, y - other.y - static_cast<int32_t>(!z && other.z), z ^ other.z};
+        return {x - other.x, y - other.y - static_cast<int32_t>(z == 0u && other.z != 0u), z ^ other.z};
     }
     /**
      * Returns a string representation of the form `"(x,y,z)"`.
@@ -215,10 +215,8 @@ template <std::uniform_random_bit_generator Rng>
     const auto min_row = std::min(row_of(first_corner), row_of(second_corner));
     const auto max_row = std::max(row_of(first_corner), row_of(second_corner));
 
-    std::uniform_int_distribution<int32_t> dist_x{min_x, max_x};
-    std::uniform_int_distribution<int32_t> dist_row{min_row, max_row};
-
-    return site_at_row(dist_x(rng), dist_row(rng));
+    return site_at_row(std::uniform_int_distribution<int32_t>{min_x, max_x}(rng),
+                       std::uniform_int_distribution<int32_t>{min_row, max_row}(rng));
 }
 
 /**
@@ -257,7 +255,7 @@ struct lattice
      */
     [[nodiscard]] static lattice si_100_2x1()
     {
-        return {"Si(100) 2x1", {3.84, 0.0}, {0.0, 7.68}, {{{0.0, 0.0}, {0.0, 2.25}}}};
+        return {.name = "Si(100) 2x1", .a1 = {3.84, 0.0}, .a2 = {0.0, 7.68}, .basis = {{{0.0, 0.0}, {0.0, 2.25}}}};
     }
     /**
      * The H-Si(111)-1x1 surface: a hexagonal arrangement with 3.84 Å between neighboring sites, described by a
@@ -267,7 +265,7 @@ struct lattice
      */
     [[nodiscard]] static lattice si_111_1x1()
     {
-        return {"Si(111) 1x1", {6.65, 0.0}, {0.0, 3.84}, {{{0.0, 0.0}, {3.3255, 1.92}}}};
+        return {.name = "Si(111) 1x1", .a1 = {6.65, 0.0}, .a2 = {0.0, 3.84}, .basis = {{{0.0, 0.0}, {3.3255, 1.92}}}};
     }
     /**
      * The position of a site relative to the site `(0, 0, 0)`.
@@ -277,7 +275,7 @@ struct lattice
      */
     [[nodiscard]] vector nm_position(const lattice_site& s) const noexcept
     {
-        const auto b = basis[s.z];
+        const auto b = basis.at(s.z);
 
         return {((s.x * a1.first) + (s.y * a2.first) + b.first) * 0.1,
                 ((s.x * a1.second) + (s.y * a2.second) + b.second) * 0.1};
@@ -320,12 +318,16 @@ namespace std
 template <>
 struct hash<fiction::sidb::lattice_site>
 {
+    /**
+     * @param s Site to hash.
+     * @return Hash of the lattice coordinates.
+     */
     std::size_t operator()(const fiction::sidb::lattice_site& s) const noexcept
     {
-        const auto h = (static_cast<uint64_t>(static_cast<uint32_t>(s.x)) << 32) |
+        const auto h = (static_cast<uint64_t>(static_cast<uint32_t>(s.x)) << 32u) |
                        static_cast<uint64_t>(static_cast<uint32_t>(s.y));
 
-        return std::hash<uint64_t>{}(h ^ (static_cast<uint64_t>(s.z) << 63));
+        return std::hash<uint64_t>{}(h ^ (static_cast<uint64_t>(s.z) << 63u));
     }
 };
 }  // namespace std
