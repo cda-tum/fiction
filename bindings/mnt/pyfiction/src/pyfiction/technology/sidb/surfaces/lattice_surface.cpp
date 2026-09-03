@@ -71,7 +71,7 @@ void sidb_lattice_cell_level_layout(nanobind::module_& m)
 
 }  // namespace detail
 
-void lattice(nanobind::module_& m)
+void lattice_surface(nanobind::module_& m)
 {
     detail::sidb_lattice_cell_level_layout<fiction::sidb::surfaces::lattice_100>(m);
     detail::sidb_lattice_cell_level_layout<fiction::sidb::surfaces::lattice_111>(m);

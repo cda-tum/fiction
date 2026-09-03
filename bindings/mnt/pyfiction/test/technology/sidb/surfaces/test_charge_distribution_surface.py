@@ -14,14 +14,14 @@ from mnt.pyfiction import (
     charge_index_mode,
     offset_coordinate,
     sidb_111_lattice,
+    sidb_cell_level_layout,
     sidb_charge_state,
-    sidb_layout,
     sidb_technology,
 )
 
 
 def test_initialization():
-    layout_one = sidb_layout((10, 10))
+    layout_one = sidb_cell_level_layout((10, 10))
     layout_one.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
     layout_one.assign_cell_type((4, 1), sidb_technology.cell_type.NORMAL)
     layout_one.assign_cell_type((6, 1), sidb_technology.cell_type.NORMAL)

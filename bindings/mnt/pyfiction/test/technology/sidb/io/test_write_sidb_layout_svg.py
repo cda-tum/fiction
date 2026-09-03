@@ -15,8 +15,10 @@ from mnt.pyfiction import (
     __version__,
     charge_distribution_surface_100,
     color_mode,
+    lattice_site,
     sidb_100_lattice,
     sidb_charge_state,
+    sidb_layout,
     sidb_technology,
     write_sidb_layout_svg_params,
     write_sidb_layout_svg_to_string,
@@ -24,18 +26,18 @@ from mnt.pyfiction import (
 
 
 @pytest.fixture
-def sidb_layout() -> sidb_100_lattice:
+def sidb_cell_level_layout() -> sidb_100_lattice:
     """A four-cell SiDB layout covering the cell types the SVG writer draws.
 
     Returns:
         The layout as a 100-lattice SiDB layout.
     """
-    sidb_layout = sidb_100_lattice((4, 4))
-    sidb_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
-    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
-    return sidb_layout
+    sidb_cell_level_layout = sidb_100_lattice((4, 4))
+    sidb_cell_level_layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
+    sidb_cell_level_layout.assign_cell_type((1, 1), sidb_technology.cell_type.NORMAL)
+    sidb_cell_level_layout.assign_cell_type((1, 0), sidb_technology.cell_type.NORMAL)
+    sidb_cell_level_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+    return sidb_cell_level_layout
 
 
 def normalize_svg(svg: str) -> str:
@@ -225,25 +227,25 @@ cds_light_mode = (
 )
 
 
-def test_write_sidb_cell_level_layout_to_svg(sidb_layout):
-    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+def test_write_sidb_cell_level_layout_to_svg(sidb_cell_level_layout):
+    sidb_cell_level_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
     params = write_sidb_layout_svg_params()
 
     params.color_background = color_mode.DARK
-    generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
+    generated_svg_cell_level_dark_mode = write_sidb_layout_svg_to_string(sidb_cell_level_layout, params)
     assert normalize_svg(generated_svg_cell_level_dark_mode) == normalize_svg(cell_level_dark_mode)
 
     params.color_background = color_mode.LIGHT
-    generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_layout, params)
+    generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_cell_level_layout, params)
     print(cell_level_light_mode)
     assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
 
-def test_write_sidb_charge_distribution_to_svg(sidb_layout):
-    sidb_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
+def test_write_sidb_charge_distribution_to_svg(sidb_cell_level_layout):
+    sidb_cell_level_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
-    cds = charge_distribution_surface_100(sidb_layout)
+    cds = charge_distribution_surface_100(sidb_cell_level_layout)
     cds.assign_charge_state((0, 0), sidb_charge_state.NEGATIVE)
     cds.assign_charge_state((1, 1), sidb_charge_state.NEGATIVE)
     cds.assign_charge_state((1, 0), sidb_charge_state.NEUTRAL)
@@ -258,3 +260,20 @@ def test_write_sidb_charge_distribution_to_svg(sidb_layout):
     params.color_background = color_mode.LIGHT
     generated_svg_cds_light_mode = write_sidb_layout_svg_to_string(cds, params)
     assert normalize_svg(generated_svg_cds_light_mode) == normalize_svg(cds_light_mode)
+
+
+def test_sidb_layout_svg() -> None:
+    lyt = sidb_layout()
+    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(1, 0, 1), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(3, 1, 1), sidb_technology.cell_type.NORMAL)
+
+    params = write_sidb_layout_svg_params()
+    params.color_background = color_mode.LIGHT
+
+    svg = write_sidb_layout_svg_to_string(lyt, params)
+
+    assert svg.count('xlink:href="#sidb_color"') == 4
+    assert svg.count('xlink:href="#lattice_point"') == 16
+    assert 'viewBox="0 0 19.2 23.04"' in svg

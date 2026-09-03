@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Registers the `technology/sidb/surfaces` bindings with the `mnt.pyfiction` module.
+ * @brief Registry for the bindings of `fiction/technology/sidb/`.
  * @author Marcel Walter (marcelwa)
  */
 
@@ -19,13 +19,13 @@
 namespace pyfiction
 {
 
-void lattice_surface(nanobind::module_& m);
-void charge_distribution_surface(nanobind::module_& m);
+void lattice(nanobind::module_& m);
+void layout(nanobind::module_& m);
 
-void register_sidb_surfaces(nanobind::module_& m)
+void register_sidb(nanobind::module_& m)
 {
-    lattice_surface(m);
-    charge_distribution_surface(m);
+    lattice(m);
+    layout(m);
 }
 
 }  // namespace pyfiction

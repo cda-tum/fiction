@@ -136,10 +136,16 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     /**
      * Cell-level clocked Cartesian layout.
      */
+    // `sidb_layout` names the lattice-based `fiction::sidb::layout`; the Cartesian cell-level layout that
+    // `apply_gate_library` produces keeps a distinct name.
+    const auto class_name = std::is_same_v<Technology, fiction::sidb::sidb_technology> ?
+                                std::string{"sidb_cell_level_layout"} :
+                                fmt::format("{}_layout", tech_name);
+
     py::class_<py_cartesian_technology_cell_layout,
                fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<
                    fiction::layouts::cartesian_layout<fiction::layouts::coords::offset>>>>(
-        m, fmt::format("{}_layout", tech_name).c_str(), DOC(fiction_layouts_cell_level_layout))
+        m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout))
         .def(py::init<>(), DOC(fiction_layouts_cell_level_layout_cell_level_layout))
         .def(py::init<const fiction::aspect_ratio<py_cartesian_technology_cell_layout>&>(), py::arg("dimension"),
              DOC(fiction_layouts_cell_level_layout_cell_level_layout))
