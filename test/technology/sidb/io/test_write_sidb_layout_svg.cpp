@@ -21,6 +21,7 @@
 
 #include "fiction/utils/version_info.hpp"
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -708,4 +709,37 @@ TEST_CASE("SVG padding rejects unrepresentable lattice sites", "[write-sidb-layo
     lyt.assign_cell_type({max_coordinate - 2, max_coordinate - 2, 1}, sidb_technology::cell_type::NORMAL);
     std::stringstream os{};
     CHECK_NOTHROW(write_sidb_layout_svg(lyt, os));
+}
+
+TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write-sidb-layout-svg]")
+{
+    sidb::layout lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+
+    sidb::charge_distribution cd{lyt};
+    cd.assign_charge_state({0, 0, 0}, charge_state::POSITIVE);
+    cd.assign_charge_state({1, 0, 1}, charge_state::NEGATIVE);
+    cd.assign_charge_state({1, 0, 0}, charge_state::NEUTRAL);
+    cd.assign_charge_state({3, 1, 1}, charge_state::NEUTRAL);
+
+    SECTION("light mode")
+    {
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, cd, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION));
+    }
+    SECTION("dark mode")
+    {
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, cd, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION));
+    }
 }
