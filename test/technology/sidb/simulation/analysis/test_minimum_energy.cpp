@@ -17,23 +17,23 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
-#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/simulation/analysis/minimum_energy.hpp>
-#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
-#include <fiction/types.hpp>
+#include <fiction/technology/sidb/simulation/potential_landscape.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 
 #include <cmath>
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::analysis;
-using namespace fiction::sidb::surfaces;
-
-using layout = sidb_100_cell_clk_lyt_siqad;
 
 TEST_CASE("Test minimum energy function", "[minimum-energy]")
 {
@@ -41,56 +41,51 @@ TEST_CASE("Test minimum energy function", "[minimum-energy]")
 
     SECTION("layout with no SiDB placed")
     {
-        const charge_distribution_surface                charge_layout{lyt};
-        std::vector<charge_distribution_surface<layout>> all_lyts{};
+        const potential_landscape        land{lyt};
+        std::vector<charge_distribution> all_cds{};
 
-        CHECK(std::isinf(minimum_energy(all_lyts.begin(), all_lyts.end())));
+        CHECK(std::isinf(minimum_energy(all_cds.begin(), all_cds.end())));
 
-        all_lyts.push_back(charge_layout);
+        all_cds.push_back(land.evaluate(charge_distribution{lyt}));
 
-        CHECK(std::abs(minimum_energy(all_lyts.begin(), all_lyts.end()) - 0) < 0.00000001);
+        CHECK(std::abs(minimum_energy(all_cds.begin(), all_cds.end()) - 0) < 0.00000001);
     }
 
     SECTION("layout with one SiDB placed")
     {
-        lyt.assign_cell_type({0, 0}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-        const charge_distribution_surface                charge_layout{lyt};
-        std::vector<charge_distribution_surface<layout>> all_lyts{};
+        const potential_landscape        land{lyt};
+        std::vector<charge_distribution> all_cds{};
 
-        CHECK(std::isinf(minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
+        CHECK(std::isinf(minimum_energy(all_cds.cbegin(), all_cds.cend())));
 
-        all_lyts.push_back(charge_layout);
+        all_cds.push_back(land.evaluate(charge_distribution{lyt}));
 
-        CHECK(std::abs(minimum_energy(all_lyts.cbegin(), all_lyts.cend()) - 0) < 0.00000001);
+        CHECK(std::abs(minimum_energy(all_cds.cbegin(), all_cds.cend()) - 0) < 0.00000001);
     }
 
     SECTION("layout with three SiDBs placed")
     {
-        lyt.assign_cell_type({0, 0}, layout::cell_type::NORMAL);
-        lyt.assign_cell_type({10, 10}, layout::cell_type::NORMAL);
-        lyt.assign_cell_type({9, 9}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({10, 5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({9, 4, 1}, sidb_technology::cell_type::NORMAL);
 
-        charge_distribution_surface                      charge_layout_first{lyt};
-        std::vector<charge_distribution_surface<layout>> all_lyts{};
+        const potential_landscape        land{lyt};
+        std::vector<charge_distribution> all_cds{};
 
-        CHECK(std::isinf(minimum_energy(all_lyts.cbegin(), all_lyts.cend())));
+        CHECK(std::isinf(minimum_energy(all_cds.cbegin(), all_cds.cend())));
 
-        charge_layout_first.assign_charge_state({0, 0}, charge_state::NEUTRAL);
+        charge_distribution first{lyt};
+        first.assign_charge_state({0, 0, 0}, charge_state::NEUTRAL);
+        all_cds.push_back(land.evaluate(first));
 
-        charge_layout_first.update_local_internal_potential();
-        charge_layout_first.recompute_electrostatic_potential_energy();
-        all_lyts.push_back(charge_layout_first);
+        charge_distribution second{lyt};
+        second.assign_charge_state({10, 5, 0}, charge_state::NEUTRAL);
+        second.assign_charge_state({9, 4, 1}, charge_state::NEUTRAL);
+        all_cds.push_back(land.evaluate(second));
 
-        charge_distribution_surface charge_layout_second{lyt};
-
-        charge_layout_second.assign_charge_state({10, 10}, charge_state::NEUTRAL);
-        charge_layout_second.assign_charge_state({9, 9}, charge_state::NEUTRAL);
-
-        charge_layout_second.update_local_internal_potential();
-        charge_layout_second.recompute_electrostatic_potential_energy();
-        all_lyts.push_back(charge_layout_second);
-
-        CHECK_THAT(minimum_energy(all_lyts.cbegin(), all_lyts.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK_THAT(minimum_energy(all_cds.cbegin(), all_cds.cend()), Catch::Matchers::WithinAbs(0.0, 0.00001));
+        CHECK(minimum_energy_distribution(all_cds.cbegin(), all_cds.cend())->same_charge_states(second));
     }
 }
