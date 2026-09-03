@@ -54,8 +54,7 @@ int main()  // NOLINT
 
     const simulation_parameters sim_params{3, -0.32};
 
-    const quickexact_params<cell<Lyt>> qe_params{sim_params,
-                                                 quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+    const quickexact_params qe_params{sim_params, quickexact_params::automatic_base_number_detection::OFF};
 
     auto random_layouts_params =
         generate_random_layout_params<cell<Lyt>>{{{0, 0}, {10, 10}},

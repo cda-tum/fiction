@@ -59,15 +59,15 @@ class clustercomplete_command final : public command
     /**
      * ClusterComplete parameters.
      */
-    fiction::sidb::simulation::engines::clustercomplete_params<> cc_params{};
+    fiction::sidb::simulation::engines::clustercomplete_params cc_params{};
     /**
      * Type alias for H-Si(100)-2x1 simulation result.
      */
-    using sim_result_100 = fiction::sidb::simulation::result<fiction::sidb_100_cell_clk_lyt>;
+    using sim_result_100 = fiction::sidb::simulation::legacy_result<fiction::sidb_100_cell_clk_lyt>;
     /**
      * Type alias for H-Si(111)-1x1 simulation result.
      */
-    using sim_result_111 = fiction::sidb::simulation::result<fiction::sidb_111_cell_clk_lyt>;
+    using sim_result_111 = fiction::sidb::simulation::legacy_result<fiction::sidb_111_cell_clk_lyt>;
     /**
      * Simulation result for either the H-Si(100)-2x1 or the H-Si(111)-1x1 surface.
      */

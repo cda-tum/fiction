@@ -219,8 +219,8 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
         constexpr simulation_parameters params{3, -0.32};
         const quicksim_params           qs_params{params};
 
-        constexpr std::size_t         number_of_repetitions = 100;
-        std::vector<result<TestType>> simulation_results_quicksim{};
+        constexpr std::size_t                number_of_repetitions = 100;
+        std::vector<legacy_result<TestType>> simulation_results_quicksim{};
         simulation_results_quicksim.reserve(number_of_repetitions);
 
         for (auto i = 0u; i < number_of_repetitions; i++)
@@ -231,8 +231,7 @@ TEMPLATE_TEST_CASE("time-to-solution test with simulation results", "[time-to-so
             }
         }
 
-        const auto simulation_results_quickexact =
-            quickexact(lyt, quickexact_params<cell<TestType>>{qs_params.sim_params});
+        const auto simulation_results_quickexact = quickexact(lyt, quickexact_params{qs_params.sim_params});
 
         time_to_solution_stats st{};
         time_to_solution_for_given_simulation_results(simulation_results_quickexact, simulation_results_quicksim, 0.997,
