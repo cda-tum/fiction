@@ -1,16 +1,28 @@
-//
-// Created by marcel on 11.01.22.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
-#define FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
+/**
+ * @file
+ * @brief Cartesian layout with shifted rows or columns in four offset orientations.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/hexagonal_layout.hpp"
 
 #include <type_traits>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -134,7 +146,7 @@ struct even_column_cartesian : vertical_shift_cartesian
  * @tparam ShiftedCartesianCoordinateSystem One of the following: odd_row_cartesian, even_row_cartesian,
  * odd_column_cartesian, even_column_cartesian.
  */
-template <typename OffsetCoordinateType             = offset::ucoord_t,
+template <typename OffsetCoordinateType             = coords::offset,
           typename ShiftedCartesianCoordinateSystem = even_row_cartesian>
 class shifted_cartesian_layout
         : public hexagonal_layout<
@@ -147,7 +159,7 @@ class shifted_cartesian_layout
                           std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian>, odd_column_hex,
                           std::conditional_t<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
                                              even_column_hex, void>>>>,
-              cube::coord_t>
+              coords::cube>
 {
   private:
     using HexagonalLayout = hexagonal_layout<
@@ -160,7 +172,7 @@ class shifted_cartesian_layout
                     std::is_same_v<ShiftedCartesianCoordinateSystem, odd_column_cartesian>, odd_column_hex,
                     std::conditional_t<std::is_same_v<ShiftedCartesianCoordinateSystem, even_column_cartesian>,
                                        even_column_hex, void>>>>,
-        cube::coord_t>;
+        coords::cube>;
 
   public:
     using cartesian_arrangement = ShiftedCartesianCoordinateSystem;
@@ -192,6 +204,4 @@ class shifted_cartesian_layout
     using typename HexagonalLayout::hex_arrangement;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_SHIFTED_CARTESIAN_LAYOUT_HPP
+}  // namespace fiction::layouts

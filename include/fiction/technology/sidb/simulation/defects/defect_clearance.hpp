@@ -1,0 +1,95 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Minimum distance a defect must keep for a layout to stay operational.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
+
+#include "fiction/technology/sidb/model/nm_distance.hpp"
+#include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
+#include "fiction/traits.hpp"
+
+#include <limits>
+
+namespace fiction::sidb::simulation::defects
+{
+/**
+ * Results of the defect clearance calculation.
+ *
+ * @tparam CellType Cell type of the layout.
+ */
+template <typename CellType>
+struct defect_clearance
+{
+    /**
+     * Position with maximum distance to the SiDB layout at which the placement of an SiDB defect still causes the gate
+     * to fail.
+     */
+    CellType defect_position{};
+    /**
+     * The maximum of the minimum distances between any SiDB of the layout and the defect responsible for gate
+     * failure (unit: nm).
+     */
+    double defect_clearance_distance{};
+};
+/**
+ * Computes the defect clearance for a given SiDB layout based on a defect influence domain. The defect clearance is
+ * the maximum distance at which a defect can influence the layout. It calculates the minimum distance from each SiDB to
+ * any influential defect position.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt SiDB layout for which the defect clearance is computed.
+ * @param defect_inf_domain Defect influence domain of the given SiDB layout.
+ * @return Defect clearance.
+ */
+template <typename Lyt>
+[[nodiscard]] defect_clearance<cell<Lyt>>
+calculate_defect_clearance(const Lyt& lyt, const defect_influence_domain<Lyt>& defect_inf_domain) noexcept
+{
+    double    max_distance          = 0;
+    cell<Lyt> max_distance_position = {};
+
+    defect_inf_domain.for_each(
+        [&lyt, &max_distance, &max_distance_position](const auto& defect_pos, const auto& val)
+        {
+            if (std::get<0>(val) == defect_influence_status::NON_INFLUENTIAL)
+            {
+                return;
+            }
+
+            auto      min_distance          = std::numeric_limits<double>::infinity();
+            cell<Lyt> min_distance_position = {};
+
+            lyt.foreach_cell(
+                [&defect_pos, &min_distance, &min_distance_position, &lyt](const auto& c)
+                {
+                    if (sidb::model::nm_distance<Lyt>(lyt, c, defect_pos) < min_distance)
+                    {
+                        min_distance          = sidb::model::nm_distance<Lyt>(lyt, c, defect_pos);
+                        min_distance_position = defect_pos;
+                    }
+                });
+
+            if (min_distance > max_distance)
+            {
+                max_distance          = min_distance;
+                max_distance_position = min_distance_position;
+            }
+        });
+
+    return defect_clearance<cell<Lyt>>{max_distance_position, max_distance};
+}
+
+}  // namespace fiction::sidb::simulation::defects

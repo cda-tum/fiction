@@ -1,14 +1,27 @@
-//
-// Created by Jan Drewniok on 03.09.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Critical temperature of the Bestagon gates.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -20,6 +33,10 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -46,7 +63,7 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
-    const sidb_simulation_parameters  sim_params{2, -0.32};
+    const simulation_parameters       sim_params{2, -0.32};
     const critical_temperature_params ct_params{sim_params};
 
     for (const auto& [gate, truth_table] : gates)

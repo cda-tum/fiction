@@ -1,17 +1,33 @@
-//
-// Created by marcel on 16.07.18.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_STORES_HPP
-#define FICTION_STORES_HPP
+/**
+ * @file
+ * @brief alice store definitions for truth tables, logic networks, and layouts.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Jan Drewniok (Drewniok)
+ * @author Benjamin Hien (hibenj)
+ */
 
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>
-#include <fiction/io/dot_drawers.hpp>
-#include <fiction/io/print_layout.hpp>
-#include <fiction/io/write_svg_layout.hpp>
+#pragma once
+
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/layouts/io/layout_drawers.hpp>
+#include <fiction/layouts/io/print_layout.hpp>
+#include <fiction/networks/io/dot_drawers.hpp>
+#include <fiction/technology/qca/io/write_qca_layout_svg.hpp>
+#include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/critical_path_length_and_throughput.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -144,11 +160,11 @@ inline void show<fiction::logic_network_t>(std::ostream& os, const fiction::logi
 
             if (cmd.is_set("indexes"))
             {
-                mockturtle::write_dot(depth_ntk, os, fiction::technology_dot_drawer<Ntk, true>());
+                mockturtle::write_dot(depth_ntk, os, fiction::networks::io::technology_dot_drawer<Ntk, true>());
             }
             else
             {
-                mockturtle::write_dot(depth_ntk, os, fiction::technology_dot_drawer<Ntk, false>());
+                mockturtle::write_dot(depth_ntk, os, fiction::networks::io::technology_dot_drawer<Ntk, false>());
             }
         }
         catch (const std::invalid_argument& e)
@@ -167,7 +183,7 @@ ALICE_ADD_STORE(fiction::gate_layout_t, "gate_layout", "g", "gate layout", "gate
 
 ALICE_PRINT_STORE(fiction::gate_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::layouts::io::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -185,7 +201,7 @@ ALICE_DESCRIBE_STORE(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*lyt_ptr);
 
         return fmt::format(
             "{} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, crossings: {}, CP: {}, TP: 1/{}, sync. elems.: {}",
@@ -210,7 +226,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::gate_layout_t, os, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*lyt_ptr);
 
         os << fmt::format("[i] {} ({}) - {} × {}, I/O: {}/{}, gates: {}, wires: {}, crossings: {}, CP: {}, TP: 1/{}, "
                           "sync. elems.: {}\n",
@@ -236,7 +252,7 @@ ALICE_LOG_STORE_STATISTICS(fiction::gate_layout_t, layout)
             num_se = lyt_ptr->num_se();
         }
 
-        const auto cp_tp = fiction::critical_path_length_and_throughput(*lyt_ptr);
+        const auto cp_tp = fiction::verification::critical_path_length_and_throughput(*lyt_ptr);
 
         return nlohmann::json{
             {"name", lyt_ptr->get_layout_name()},
@@ -284,22 +300,26 @@ inline void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_l
             {
                 if (cmd.is_set("clk_colors"))
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, true, true>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, true, true>());
                 }
                 else
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, false, true>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, false, true>());
                 }
             }
             else
             {
                 if (cmd.is_set("clk_colors"))
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, true, false>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, true, false>());
                 }
                 else
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_cartesian_drawer<Lyt, false, false>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt, false, false>());
                 }
             }
         }
@@ -310,26 +330,26 @@ inline void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_l
             {
                 if (cmd.is_set("clk_colors"))
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os,
-                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, true, true>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, true, true>());
                 }
                 else
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os,
-                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, false, true>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, false, true>());
                 }
             }
             else
             {
                 if (cmd.is_set("clk_colors"))
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os,
-                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, true, false>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, true, false>());
                 }
                 else
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os,
-                                              fiction::gate_layout_shifted_cartesian_drawer<Lyt, false, false>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt, false, false>());
                 }
             }
         }
@@ -340,22 +360,26 @@ inline void show<fiction::gate_layout_t>(std::ostream& os, const fiction::gate_l
             {
                 if (cmd.is_set("clk_colors"))
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, true, true>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, true, true>());
                 }
                 else
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, false, true>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, false, true>());
                 }
             }
             else
             {
                 if (cmd.is_set("clk_colors"))
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, true, false>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, true, false>());
                 }
                 else
                 {
-                    fiction::write_dot_layout(*lyt_ptr, os, fiction::gate_layout_hexagonal_drawer<Lyt, false, false>());
+                    fiction::layouts::io::write_dot_layout(
+                        *lyt_ptr, os, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt, false, false>());
                 }
             }
         }
@@ -375,7 +399,7 @@ ALICE_ADD_STORE(fiction::cell_layout_t, "cell_layout", "c", "cell layout", "cell
 
 ALICE_PRINT_STORE(fiction::cell_layout_t, os, layout)
 {
-    const auto print = [&os](auto&& lyt_ptr) { fiction::print_layout(*lyt_ptr, os); };
+    const auto print = [&os](auto&& lyt_ptr) { fiction::layouts::io::print_layout(*lyt_ptr, os); };
 
     std::visit(print, layout);
 }
@@ -388,7 +412,7 @@ ALICE_DESCRIBE_STORE(fiction::cell_layout_t, layout)
 
         // print z dimension only if layout uses cube coordinates
         decltype(lyt_ptr->z()) z{};
-        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::cube::coord_t>)
+        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::layouts::coords::cube>)
         {
             z = lyt_ptr->z() + 1;
         }
@@ -410,7 +434,7 @@ ALICE_PRINT_STORE_STATISTICS(fiction::cell_layout_t, os, layout)
 
         // print z dimension only if layout uses cube coordinates
         decltype(lyt_ptr->z()) z{};
-        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::cube::coord_t>)
+        if constexpr (std::is_same_v<fiction::coordinate<Lyt>, fiction::layouts::coords::cube>)
         {
             z = lyt_ptr->z() + 1;
         }
@@ -470,7 +494,7 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
             cmd.env->out() << fmt::format("[e] {} has an unsupported cell technology\n", lyt_ptr->get_layout_name());
         }
         else if constexpr ((fiction::has_qca_technology_v<Lyt> || fiction::has_mol_qca_technology_v<Lyt>) &&
-                           !fiction::has_offset_ucoord_v<Lyt>)
+                           !fiction::has_offset_coord_v<Lyt>)
         {
             cmd.env->out() << fmt::format("[e] {} is not a Cartesian layout\n", lyt_ptr->get_layout_name());
         }
@@ -480,18 +504,18 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
             {
                 if constexpr (fiction::has_qca_technology_v<Lyt>)
                 {
-                    fiction::write_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
+                    fiction::qca::io::write_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
                 }
                 else if constexpr (fiction::has_mol_qca_technology_v<Lyt>)
                 {
-                    fiction::write_mol_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
+                    fiction::qca::io::write_mol_qca_layout_svg(*lyt_ptr, os, {cmd.is_set("simple")});
                 }
                 else if constexpr (fiction::has_sidb_technology_v<Lyt>)
                 {
-                    fiction::write_sidb_layout_svg(*lyt_ptr, os, {});
+                    fiction::sidb::io::write_sidb_layout_svg(*lyt_ptr, os, {});
                 }
             }
-            catch (const fiction::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
+            catch (const fiction::qca::io::unsupported_cell_type_exception<fiction::coordinate<Lyt>>& e)
             {
                 cmd.env->out() << fmt::format("[e] unsupported cell type at cell position {}\n", e.where());
             }
@@ -506,5 +530,3 @@ inline void show<fiction::cell_layout_t>(std::ostream& os, const fiction::cell_l
 }
 
 }  // namespace alice
-
-#endif  // FICTION_STORES_HPP

@@ -1,15 +1,27 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `ortho` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/physical_design/include/ortho.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/networks/network_utils.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -52,7 +64,8 @@ void ortho_command::execute()
         return;
     }
 
-    ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::num_clks::THREE : fiction::num_clks::FOUR;
+    ps.number_of_clock_phases = num_clock_phases == 3 ? fiction::layouts::clocking::num_clks::THREE :
+                                                        fiction::layouts::clocking::num_clks::FOUR;
 
     if (is_set("hex"))
     {
@@ -102,7 +115,8 @@ nlohmann::json ortho_command::log() const
 template <typename Lyt>
 void ortho_command::orthogonal_physical_design()
 {
-    const auto perform_physical_design = [this](auto&& ntk_ptr) { return fiction::orthogonal<Lyt>(*ntk_ptr, ps, &st); };
+    const auto perform_physical_design = [this](auto&& ntk_ptr)
+    { return fiction::physical_design::orthogonal<Lyt>(*ntk_ptr, ps, &st); };
 
     const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 
@@ -117,7 +131,7 @@ void ortho_command::orthogonal_physical_design()
             st.report(env->out());
         }
     }
-    catch (const fiction::high_degree_fanin_exception& e)
+    catch (const fiction::networks::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {}\n", e.what());
     }

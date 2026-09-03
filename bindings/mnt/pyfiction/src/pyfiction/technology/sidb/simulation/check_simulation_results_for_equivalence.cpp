@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp`.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
+
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+void check_for_equivalence_impl(nanobind::module_& m)
+{
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+
+    m.def("check_simulation_results_for_equivalence",
+          &fiction::sidb::simulation::check_simulation_results_for_equivalence<Lyt>, py::arg("result1"),
+          py::arg("result2"), DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
+}
+
+}  // namespace detail
+
+void check_simulation_results_for_equivalence(nanobind::module_& m)
+{
+    // NOTE be careful with the order of the following calls! Python will resolve the first matching overload!
+
+    detail::check_for_equivalence_impl<py_sidb_100_lattice>(m);
+    detail::check_for_equivalence_impl<py_sidb_111_lattice>(m);
+}
+
+}  // namespace pyfiction

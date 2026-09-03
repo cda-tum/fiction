@@ -1,11 +1,22 @@
-//
-// Created by marcel on 08.11.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_RANDOM_HPP
-#define FICTION_CMD_RANDOM_HPP
+/**
+ * @file
+ * @brief Declares the `random` command, which generates a random logic network.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/network_transformation/network_conversion.hpp>
+#pragma once
+
+#include <fiction/synthesis/network_conversion.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -53,7 +64,7 @@ class random_command final : public command
     void generate(Generator gen) const
     {
         store<fiction::logic_network_t>().extend() =
-            std::make_shared<Ntk>(fiction::convert_network<Ntk>(gen.generate()), std::to_string(ps.seed));
+            std::make_shared<Ntk>(fiction::synthesis::convert_network<Ntk>(gen.generate()), std::to_string(ps.seed));
     }
     /**
      * Reset all flags, necessary for some reason... alice bug?
@@ -62,5 +73,3 @@ class random_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_RANDOM_HPP

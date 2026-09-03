@@ -1,9 +1,20 @@
-//
-// Created by marcel on 10.10.2025.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_PHYSICAL_DESIGN_HPP
-#define FICTION_CMD_PHYSICAL_DESIGN_HPP
+/**
+ * @file
+ * @brief Collects the physical design CLI commands for inclusion into the shell.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #ifdef FICTION_PHYSICAL_DESIGN_FLOW
 
@@ -34,5 +45,3 @@ ALICE_ADD_COMMAND(ortho, FICTION_CLI_CATEGORY_PHYSICAL_DESIGN)
 }  // namespace alice
 
 #endif  // FICTION_PHYSICAL_DESIGN_FLOW
-
-#endif  // FICTION_CMD_PHYSICAL_DESIGN_HPP

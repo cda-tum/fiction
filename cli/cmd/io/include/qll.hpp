@@ -1,9 +1,21 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_QLL_HPP
-#define FICTION_CMD_QLL_HPP
+/**
+ * @file
+ * @brief Declares the `qll` command, which writes a ToPoliNano/MagCAD/SCERPA layout file.
+ * @author Marcel Walter (marcelwa)
+ * @author Benjamin Hien (hibenj)
+ */
+
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -43,5 +55,3 @@ class qll_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QLL_HPP

@@ -1,11 +1,22 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_QCC_HPP
-#define FICTION_CMD_QCC_HPP
+/**
+ * @file
+ * @brief Declares the `qcc` command, which writes a ToPoliNano/MagCAD component file.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/io/write_qcc_layout.hpp>
+#pragma once
+
+#include <fiction/technology/inml/io/write_qcc_layout.hpp>
 
 #include <alice/alice.hpp>
 
@@ -41,9 +52,7 @@ class qcc_command final : public command
      */
     std::string filename;
 
-    fiction::write_qcc_layout_params ps{};
+    fiction::inml::io::write_qcc_layout_params ps{};
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QCC_HPP

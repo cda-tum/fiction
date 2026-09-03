@@ -1,13 +1,25 @@
-//
-// Created by marcel on 06.02.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `verilog` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/verilog.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/io/write_verilog.hpp>
@@ -47,7 +59,8 @@ void verilog_command::execute()
 template <typename NtkOrLytVariant>
 void verilog_command::write_verilog_callback(const NtkOrLytVariant& ntk_or_lyt_variant)
 {
-    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+    { return fiction::networks::get_name(*ntk_or_lyt_ptr); };
 
     const auto write_verilog = [this](auto&& ntk_or_lyt_ptr)
     {

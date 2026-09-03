@@ -1,13 +1,24 @@
-//
-// Created by marcel on 07.12.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_QUICKSIM_HPP
-#define FICTION_CMD_QUICKSIM_HPP
+/**
+ * @file
+ * @brief Declares the `quicksim` command, which runs *QuickSim* on the current layout.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#pragma once
+
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -42,19 +53,19 @@ class quicksim_command final : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
     /**
      * QuickSim parameters.
      */
-    fiction::quicksim_params qs_params{};
+    fiction::sidb::simulation::engines::quicksim_params qs_params{};
     /**
      * Type alias for H-Si(100)-2x1 simulation result.
      */
-    using sim_result_100 = fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt>;
+    using sim_result_100 = fiction::sidb::simulation::result<fiction::sidb_100_cell_clk_lyt>;
     /**
      * Type alias for H-Si(111)-1x1 simulation result.
      */
-    using sim_result_111 = fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt>;
+    using sim_result_111 = fiction::sidb::simulation::result<fiction::sidb_111_cell_clk_lyt>;
     /**
      * Simulation result for either the H-Si(100)-2x1 or the H-Si(111)-1x1 surface.
      */
@@ -77,5 +88,3 @@ class quicksim_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QUICKSIM_HPP

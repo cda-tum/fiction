@@ -1,5 +1,20 @@
-#ifndef PYFICTION_DOCSTRINGS_HPP
-#define PYFICTION_DOCSTRINGS_HPP
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Hand-written docstrings that override the ones extracted from the C++ sources.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include "pyfiction/pybind11_mkdoc_docstrings.hpp"
 
@@ -91,5 +106,3 @@ empty layout coordinates.
 
 Returns:
     The minimum  and maximum enclosing coordinate in the associated layout.)doc";
-
-#endif  // PYFICTION_DOCSTRINGS_HPP

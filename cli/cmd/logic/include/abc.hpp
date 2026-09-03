@@ -1,9 +1,20 @@
-//
-// Created by marcel on 04.12.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_ABC_HPP
-#define FICTION_CMD_ABC_HPP
+/**
+ * @file
+ * @brief Declares the `abc` command, which runs an ABC command string on the current network.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #if (FICTION_ABC)
 
@@ -85,5 +96,3 @@ class abc_command final : public command
 }  // namespace alice
 
 #endif  // FICTION_ABC
-
-#endif  // FICTION_CMD_ABC_HPP

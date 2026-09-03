@@ -1,17 +1,30 @@
-//
-// Created by Jan Drewniok on 08.06.25.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Scalability of *QuickCell*'s pruning against full simulation.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
@@ -26,6 +39,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 // This script compares the runtime of applying the three pruning techniques presented used in **QuickCell** with
 // physical simulation to determine the non-operationality of different standard cell layouts.
@@ -155,7 +174,7 @@ int main()  // NOLINT
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
-    is_operational_params operational_params{sidb_simulation_parameters{2, -0.32}, sidb_simulation_engine::QUICKEXACT,
+    is_operational_params operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
                                              bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
                                              is_operational_params::operational_condition::REJECT_KINKS,
                                              is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};

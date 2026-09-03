@@ -1,9 +1,21 @@
-//
-// Created by marcel on 30.08.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
-#define FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
+/**
+ * @file
+ * @brief Clocked layout extension that turns clock zones into synchronization elements.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -15,7 +27,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -350,6 +362,4 @@ class synchronization_element_layout : public ClockedLayout
     storage strg;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_SYNCHRONIZATION_ELEMENT_LAYOUT_HPP
+}  // namespace fiction::layouts

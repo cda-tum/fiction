@@ -17,9 +17,9 @@ ci:
   # 🐍 Lint workflow runs it instead
   skip: [mypy]
 
-# The fourth copy of this list. The others are `path_filters:` in `.coderabbit.yaml`,
-# `ignore:` in `.github/workflows/cpp-linter.yml`, and `exclude` in
-# `.license-tools-config.json`, which is JSON and cannot say so itself. Keep them in sync
+# The fourth copy of this list. The others are `path_filters:` in `.coderabbit.yaml`, the
+# `ignore:` input of cpp-linter-action in `.github/workflows/cpp-linter.yml`, and `exclude`
+# in `.license-tools-config.json`, which is JSON and cannot say so itself. Keep them in sync
 exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp"
 
 # `prek` runs hooks that share a `priority` concurrently and ascends from there; an unset
@@ -135,18 +135,24 @@ repos:
         exclude: ^uv\.lock$
         priority: 8
 
-  # Add and update the Python copyright headers. `types_or` repeats what `include` in
+  # Add and update the copyright headers. `types_or` repeats what `include` in
   # `.license-tools-config.json` already says, on purpose: the config scopes a bare `lictool`
   # run, this line scopes the hook. The config carries the second copyright holder as free
   # text in `author.name` after a newline, so the `- present` in it is literal and is never
   # parsed back as a year. That survives a round trip only because `force_author: true`
   # discards the author the tool mis-parses out of the line; turning that off emits a
-  # garbage name
+  # garbage name.
+  #
+  # On a C++ file the tool emits a `/* ... */` block, and it finds an existing one only with
+  # an anchored `re.match` at offset 0. Nothing may therefore precede that block -- a `//`
+  # comment above it sends the parse down the `//`-style pattern, which eats the `/*` and
+  # leaves a dangling `*/` behind. The Doxygen `@file` block every C++ file carries sits
+  # below the copyright block for exactly that reason
   - repo: https://github.com/emzeat/mz-lictools
     rev: v2.9.0
     hooks:
       - id: license-tools
-        types_or: [python, pyi]
+        types_or: [python, pyi, c++]
         priority: 7
 
   # Check static types with mypy

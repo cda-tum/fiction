@@ -1,13 +1,25 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `simulate` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/logic/include/simulate.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -103,7 +115,8 @@ nlohmann::json simulate_command::log() const
 template <typename NtkOrLytVariant>
 void simulate_command::perform_simulation(const NtkOrLytVariant& network_or_layout_variant)
 {
-    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+    { return fiction::networks::get_name(*ntk_or_lyt_ptr); };
 
     const auto store_po_names = [this](auto&& ntk_or_lyt_ptr)
     {

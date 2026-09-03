@@ -1,0 +1,105 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Python bindings for `fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp`.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
+
+#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
+
+#include <fmt/format.h>
+
+#include <string>
+#include <vector>
+
+#include <nanobind/nanobind.h>
+#include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/unordered_set.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)
+
+namespace pyfiction
+{
+
+namespace detail
+{
+
+template <typename Lyt>
+void detect_bdl_wires_impl(nanobind::module_& m, const std::string& lattice)
+{
+    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
+
+    using bdl_wire_t = fiction::sidb::simulation::logic::bdl_wire<Lyt>;
+
+    py::class_<bdl_wire_t>(m, fmt::format("bdl_wire_{}", lattice).c_str(), DOC(fiction_sidb_simulation_logic_bdl_wire))
+        .def(py::init<>(), DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire))
+        .def(py::init<std::vector<fiction::sidb::simulation::logic::bdl_pair<fiction::layouts::coords::offset>>>(),
+             py::arg("p"), DOC(fiction_sidb_simulation_logic_bdl_wire_bdl_wire_2))
+        .def_rw("pairs", &bdl_wire_t::pairs, DOC(fiction_sidb_simulation_logic_bdl_wire_pairs))
+        .def_rw("direction", &bdl_wire_t::port, DOC(fiction_sidb_simulation_logic_bdl_wire_port))
+        .def_rw("first_bdl_pair", &bdl_wire_t::first_bdl_pair,
+                DOC(fiction_sidb_simulation_logic_bdl_wire_first_bdl_pair))
+        .def_rw("last_bdl_pair", &bdl_wire_t::last_bdl_pair, DOC(fiction_sidb_simulation_logic_bdl_wire_last_bdl_pair));
+
+    m.def(fmt::format("detect_bdl_wires_{}", lattice).c_str(), &fiction::sidb::simulation::logic::detect_bdl_wires<Lyt>,
+          py::arg("lyt"), py::arg("params") = fiction::sidb::simulation::logic::detect_bdl_wires_params{},
+          py::arg("wire_selection") = fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
+          DOC(fiction_sidb_simulation_logic_detect_bdl_wires));
+}
+
+}  // namespace detail
+
+/**
+ * Registers all `bdl_wire` classes, enums, and related functions with the nanobind module.
+ *
+ * @param m The nanobind module.
+ */
+void detect_bdl_wires(nanobind::module_& m)
+{
+    namespace py = nanobind;
+
+    // Enum for wire selection options
+    py::enum_<fiction::sidb::simulation::logic::bdl_wire_selection>(
+        m, "bdl_wire_selection", DOC(fiction_sidb_simulation_logic_bdl_wire_selection))
+        .value("ALL", fiction::sidb::simulation::logic::bdl_wire_selection::ALL,
+               DOC(fiction_sidb_simulation_logic_bdl_wire_selection_ALL))
+        .value("INPUT", fiction::sidb::simulation::logic::bdl_wire_selection::INPUT,
+               DOC(fiction_sidb_simulation_logic_bdl_wire_selection_INPUT))
+        .value("OUTPUT", fiction::sidb::simulation::logic::bdl_wire_selection::OUTPUT,
+               DOC(fiction_sidb_simulation_logic_bdl_wire_selection_OUTPUT))
+        .export_values();  // Export enum values to Python namespace
+
+    // Class for detect_bdl_wires_params
+    py::class_<fiction::sidb::simulation::logic::detect_bdl_wires_params>(
+        m, "detect_bdl_wires_params", DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
+        .def(py::init<>(), DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params))
+        .def_rw("threshold_bdl_interdistance",
+                &fiction::sidb::simulation::logic::detect_bdl_wires_params::threshold_bdl_interdistance,
+                DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params_threshold_bdl_interdistance))
+        .def_rw("bdl_pairs_params", &fiction::sidb::simulation::logic::detect_bdl_wires_params::bdl_pairs_params,
+                DOC(fiction_sidb_simulation_logic_detect_bdl_wires_params_bdl_pairs_params));
+
+    // Register different lattice types with appropriate suffixes
+    detail::detect_bdl_wires_impl<py_sidb_100_lattice>(m, "100");
+    detail::detect_bdl_wires_impl<py_sidb_111_lattice>(m, "111");
+}
+
+}  // namespace pyfiction

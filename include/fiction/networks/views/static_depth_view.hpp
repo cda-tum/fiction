@@ -1,9 +1,21 @@
-//
-// Created by benjamin on 13.12.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_STATIC_DEPTH_VIEW_HPP
-#define FICTION_STATIC_DEPTH_VIEW_HPP
+/**
+ * @file
+ * @brief Network view that provides node levels and overall network depth.
+ * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include "fiction/traits.hpp"
 
@@ -16,7 +28,7 @@
 
 #include <parallel_hashmap/phmap.h>
 
-namespace fiction
+namespace fiction::networks::views
 {
 
 /**
@@ -474,7 +486,7 @@ class static_depth_view<Ntk, NodeCostFn, false> : public Ntk
 };
 
 /**
- * Deduction guide for `fiction::static_depth_view'.
+ * Deduction guide for `fiction::networks::views::static_depth_view`.
  *
  * @tparam T Network type deduced from the construction context of `fiction::static_depth_view`.
  */
@@ -489,6 +501,4 @@ static_depth_view(T const&) -> static_depth_view<T>;
 template <typename T, typename NodeCostFn = mockturtle::unit_cost<T>>
 static_depth_view(T const&, NodeCostFn const&, depth_view_params const&) -> static_depth_view<T, NodeCostFn>;
 
-}  // namespace fiction
-
-#endif  // FICTION_STATIC_DEPTH_VIEW_HPP
+}  // namespace fiction::networks::views

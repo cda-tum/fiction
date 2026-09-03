@@ -34,9 +34,10 @@ endif()
 file(GLOB_RECURSE FILENAMES */*.cpp)
 list(FILTER FILENAMES EXCLUDE REGEX "benchmark/.*$")
 
+# Test files carry the test_ prefix in their own name, so the target and the
+# CTest name are both just the base name -- nothing is synthesized here.
 foreach(FILE IN LISTS FILENAMES)
-  get_filename_component(NAME ${FILE} NAME_WE)
-  set(TEST_NAME test_${NAME})
+  get_filename_component(TEST_NAME ${FILE} NAME_WE)
   add_executable(${TEST_NAME} ${FILE})
 
   # Link the test executable against libfiction and Catch2
@@ -51,5 +52,5 @@ foreach(FILE IN LISTS FILENAMES)
     target_precompile_headers(${TEST_NAME} REUSE_FROM libfiction_test_pch)
   endif()
 
-  add_test(NAME ${NAME} COMMAND ${TEST_NAME}) # group tests by file
+  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME}) # group tests by file
 endforeach()

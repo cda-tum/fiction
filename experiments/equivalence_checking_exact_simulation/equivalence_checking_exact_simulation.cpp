@@ -1,18 +1,32 @@
-//
-// Created by Jan Drewniok on 03.03.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/algorithms/simulation/sidb/equivalence_check_for_simulation_results.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+/**
+ * @file
+ * @brief Cross-checks the exact SiDB simulation engines against each other.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ */
+
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_technologies.hpp>
+#include <fiction/layouts/layout_utils.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
+#include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/combination_utils.hpp>
-#include <fiction/utils/layout_utils.hpp>
+#include <fiction/utils/math/combination_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -27,6 +41,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::utils::math;
 
 // This script verifies the equivalence between ExGS and QuickExact. It generates all layouts consisting of
 // 4 SiDBs within an 11x11 spanned area. The simulation is then executed using both simulators, and the results
@@ -34,12 +54,12 @@ using namespace fiction;
 
 int main()  // NOLINT
 {
-    const auto all_cells_in_region = all_coordinates_in_spanned_area<offset::ucoord_t>({0, 0}, {10, 10});
+    const auto all_cells_in_region = all_coordinates_in_spanned_area<coords::offset>({0, 0}, {10, 10});
 
     const auto all_distributions =
         determine_all_combinations_of_distributing_k_entities_on_n_positions(4, all_cells_in_region.size());
 
-    const auto params = sidb_simulation_parameters{3, -0.32};
+    const auto params = simulation_parameters{3, -0.32};
 
     uint64_t quickexact_non_equivalence_counter      = 0;
     uint64_t clustercomplete_non_equivalence_counter = 0;
@@ -82,9 +102,9 @@ int main()  // NOLINT
                         lyt.assign_cell_type(all_cells_in_region[idx], sidb_technology::cell_type::NORMAL);
                     }
 
-                    auto result_exgs       = exhaustive_ground_state_simulation(lyt, params);
-                    auto result_quickexact = quickexact(
-                        lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{.simulation_parameters = params});
+                    auto result_exgs = exhaustive_ground_state_simulation(lyt, params);
+                    auto result_quickexact =
+                        quickexact(lyt, quickexact_params<cell<sidb_100_cell_clk_lyt>>{.sim_params = params});
 
                     if (!check_simulation_results_for_equivalence(result_exgs, result_quickexact))
                     {
@@ -93,7 +113,7 @@ int main()  // NOLINT
                     }
 
 #if (FICTION_ALGLIB_ENABLED)
-                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{.simulation_parameters = params};
+                    clustercomplete_params<cell<sidb_100_cell_clk_lyt>> cc_params{.sim_params = params};
                     cc_params.available_threads = 1;
 
                     auto result_clustercomplete = clustercomplete(lyt, cc_params);

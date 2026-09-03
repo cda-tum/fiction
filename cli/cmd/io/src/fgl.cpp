@@ -1,15 +1,28 @@
-//
-// Created by simon on 06.10.2023
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `fgl` command.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/fgl.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_fgl_layout.hpp>
+#include <fiction/layouts/io/write_fgl_layout.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -40,7 +53,7 @@ void fgl_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto write_fgl = [this, &get_name](auto&& lyt_ptr)
     {
@@ -48,7 +61,7 @@ void fgl_command::execute()
 
         if constexpr (fiction::is_gate_level_layout_v<Lyt>)
         {
-            fiction::write_fgl_layout(*lyt_ptr, filename);
+            fiction::layouts::io::write_fgl_layout(*lyt_ptr, filename);
         }
         else
         {

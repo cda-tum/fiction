@@ -1,15 +1,28 @@
-//
-// Created by simon on 12.06.2024.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `gold` command.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/physical_design/include/gold.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/networks/network_utils.hpp>
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -121,10 +134,10 @@ nlohmann::json gold_command::log() const
 template <typename Lyt>
 void gold_command::graph_oriented_layout_design()
 {
-    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::get_name(*ntk_ptr); };
+    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::networks::get_name(*ntk_ptr); };
 
     const auto perform_physical_design = [this](auto&& ntk_ptr)
-    { return fiction::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
+    { return fiction::physical_design::graph_oriented_layout_design<Lyt>(*ntk_ptr, ps, &st); };
 
     const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 
@@ -142,7 +155,7 @@ void gold_command::graph_oriented_layout_design()
                                       std::visit(get_name, ntk_ptr));
         }
     }
-    catch (const fiction::high_degree_fanin_exception& e)
+    catch (const fiction::networks::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {}\n", e.what());
     }

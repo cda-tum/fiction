@@ -1,9 +1,20 @@
-//
-// Created by marcel on 07.06.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_MIGINVOPT_HPP
-#define FICTION_CMD_MIGINVOPT_HPP
+/**
+ * @file
+ * @brief Declares the `miginvopt` command, which optimizes the inverter cost of the current MIG.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -31,5 +42,3 @@ class miginvopt_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_MIGINVOPT_HPP

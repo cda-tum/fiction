@@ -1,11 +1,22 @@
-//
-// Created by marcel on 24.09.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_FQCA_HPP
-#define FICTION_FQCA_HPP
+/**
+ * @file
+ * @brief Declares the `fqca` command, which writes the current cell layout for QCA-STACK.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/io/write_fqca_layout.hpp>
+#pragma once
+
+#include <fiction/technology/qca/io/write_fqca_layout.hpp>
 
 #include <alice/alice.hpp>
 
@@ -41,9 +52,7 @@ class fqca_command final : public command
      */
     std::string filename;
 
-    fiction::write_fqca_layout_params ps{};
+    fiction::qca::io::write_fqca_layout_params ps{};
 };
 
 }  // namespace alice
-
-#endif  // FICTION_FQCA_HPP

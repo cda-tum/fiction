@@ -1,11 +1,22 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_CHECK_HPP
-#define FICTION_CMD_CHECK_HPP
+/**
+ * @file
+ * @brief Declares the `check` command, which runs design rule checks on the current layout.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
+#pragma once
+
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -17,7 +28,7 @@ namespace alice
  * Performs design rule checks on the active gate-level layout. Checks for various design rule validations like crossing
  * gates, non-adjacent connections, wrongly assigned clock zones, etc.
  *
- * See fiction/algorithms/design_rule_violations.hpp for more details.
+ * See include/fiction/verification/design_rule_violations.hpp for more details.
  */
 class check_command final : public command
 {
@@ -43,10 +54,8 @@ class check_command final : public command
     nlohmann::json log() const override;
 
   private:
-    fiction::gate_level_drv_params ps{};
-    fiction::gate_level_drv_stats  pst{};
+    fiction::verification::gate_level_drv_params ps{};
+    fiction::verification::gate_level_drv_stats  pst{};
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CHECK_HPP

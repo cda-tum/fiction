@@ -1,13 +1,24 @@
-//
-// Created by marcel on 06.01.20.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Declares the `exact` command, which runs SMT-based exact physical design.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #if (FICTION_Z3_SOLVER)
 
-#ifndef FICTION_CMD_EXACT_HPP
-#define FICTION_CMD_EXACT_HPP
+#pragma once
 
-#include <fiction/algorithms/physical_design/exact.hpp>
+#include <fiction/physical_design/exact.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -20,7 +31,7 @@ namespace alice
 /**
  * Executes an exact physical design approach utilizing the SMT solver Z3.
  *
- * See include/fiction/algorithms/physical_design/exact.hpp for more details.
+ * See include/fiction/physical_design/exact.hpp for more details.
  */
 class exact_command final : public command
 {
@@ -50,11 +61,11 @@ class exact_command final : public command
     /**
      * Parameters.
      */
-    fiction::exact_physical_design_params ps{};
+    fiction::physical_design::exact_physical_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::exact_physical_design_stats st{};
+    fiction::physical_design::exact_physical_design_stats st{};
     /**
      * Tile shift for hexagonal layouts.
      */
@@ -70,7 +81,5 @@ class exact_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_EXACT_HPP
 
 #endif  // FICTION_Z3_SOLVER

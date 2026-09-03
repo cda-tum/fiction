@@ -1,12 +1,29 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Post-layout optimization across the benchmark set.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>                // scalable heuristic for physical design
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>  // post-layout optimization
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/network_reader.hpp>                                          // read networks from files
-#include <fiction/types.hpp>                                                      // types suitable for the FCN domain
+#include <fiction/networks/io/network_reader.hpp>                        // read networks from files
+#include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
+#include <fiction/physical_design/post_layout_optimization.hpp>          // post-layout optimization
+#include <fiction/types.hpp>                                             // types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // runtime measurements
@@ -16,6 +33,12 @@
 #include <sstream>
 #include <string>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks::io;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
+
 template <typename Ntk>
 Ntk read_ntk(const std::string& name)
 {
@@ -23,7 +46,7 @@ Ntk read_ntk(const std::string& name)
 
     std::ostringstream os{};
 
-    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
 
     const auto nets = reader.get_networks();
 
@@ -32,8 +55,7 @@ Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt =
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint32_t, uint32_t, uint64_t, uint64_t, double, double, float, std::string>
@@ -58,44 +80,44 @@ int main()  // NOLINT
                          "equivalent"};
 
     // stats
-    fiction::orthogonal_physical_design_stats orthogonal_stats{};
-    fiction::post_layout_optimization_stats   post_layout_optimization_stats{};
-    fiction::post_layout_optimization_params  post_layout_optimization_params{};
+    orthogonal_physical_design_stats orthogonal_stats{};
+    post_layout_optimization_stats   post_layout_optimization_stats{};
+    post_layout_optimization_params  post_layout_optimization_params{};
     // post_layout_optimization_params.max_gate_relocations = 1;
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_level_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy       = gate_level_layout.clone();
 
         //  compute critical path and throughput
-        const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp = critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
-        const auto bounding_box_before_optimization = fiction::bounding_box_2d(gate_level_layout);
+        const auto bounding_box_before_optimization = bounding_box_2d(gate_level_layout);
 
         const auto width_before_optimization  = bounding_box_before_optimization.get_x_size() + 1;
         const auto height_before_optimization = bounding_box_before_optimization.get_y_size() + 1;
         const auto area_before_optimization   = width_before_optimization * height_before_optimization;
 
         // perform post-layout optimization
-        fiction::post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
-                                                    &post_layout_optimization_stats);
+        post_layout_optimization<gate_lyt>(gate_level_layout, post_layout_optimization_params,
+                                           &post_layout_optimization_stats);
 
         // check equivalence
-        const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+        const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
-        const std::string eq_result = eq_stats == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                             "NO";
+        const std::string eq_result = eq_stats == eq_type::STRONG ? "STRONG" :
+                                      eq_stats == eq_type::WEAK   ? "WEAK" :
+                                                                    "NO";
 
         // calculate bounding box
-        const auto bounding_box_after_optimization = fiction::bounding_box_2d(gate_level_layout);
+        const auto bounding_box_after_optimization = bounding_box_2d(gate_level_layout);
 
         const auto width_after_optimization  = bounding_box_after_optimization.get_x_size() + 1;
         const auto height_after_optimization = bounding_box_after_optimization.get_y_size() + 1;

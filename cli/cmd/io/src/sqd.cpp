@@ -1,15 +1,27 @@
-//
-// Created by marcel on 14.07.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `sqd` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/sqd.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_sqd_layout.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -41,7 +53,7 @@ void sqd_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto write_sqd = [this, &get_name](auto&& lyt_ptr)
     {
@@ -49,7 +61,7 @@ void sqd_command::execute()
 
         if constexpr (fiction::has_qca_technology_v<Lyt> || fiction::has_sidb_technology_v<Lyt>)
         {
-            fiction::write_sqd_layout(*lyt_ptr, filename);
+            fiction::sidb::io::write_sqd_layout(*lyt_ptr, filename);
         }
         else
         {

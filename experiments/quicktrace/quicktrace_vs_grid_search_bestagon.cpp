@@ -1,17 +1,30 @@
-//
-// Created by Jan Drewniok on 30.11.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#include "fiction/algorithms/simulation/sidb/defect_clearance.hpp"
-#include "fiction/algorithms/simulation/sidb/defect_influence.hpp"
-#include "fiction/algorithms/simulation/sidb/is_operational.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_defect_influence_domain.hpp"
-#include "fiction/io/write_sqd_layout.hpp"
-#include "fiction/technology/sidb_defects.hpp"
+/**
+ * @file
+ * @brief *QuickTrace* contour tracing against grid search on the Bestagon gates.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#include "fiction/synthesis/truth_tables.hpp"
+#include "fiction/technology/sidb/io/read_sqd_layout.hpp"
+#include "fiction/technology/sidb/io/write_sqd_layout.hpp"
+#include "fiction/technology/sidb/model/defect.hpp"
+#include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
+#include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
+#include "fiction/technology/sidb/simulation/io/write_defect_influence_domain.hpp"
+#include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/types.hpp"
-#include "fiction/utils/truth_table_utils.hpp"
 #include "fiction_experiments.hpp"
 
 #include <fmt/format.h>
@@ -25,6 +38,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::defects;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -52,13 +71,13 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("inv_diag", std::vector<tt>{create_not_tt()})};
 
-    const is_operational_params is_op_params{.simulation_parameters = sidb_simulation_parameters{2, -0.32, 5.6, 5.0}};
+    const is_operational_params is_op_params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5.0}};
 
     // for this experiment we use a stray SiDB defect
-    const auto stray_db = fiction::sidb_defect{fiction::sidb_defect_type::DB, -1, 4.1, 1.8};
-    // const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto stray_db = defect{defect_type::DB, -1, 4.1, 1.8};
+    // const auto si_vacancy = sidb_defect{sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {100, 100};
     params.defect                   = stray_db;
     params.operational_params       = is_op_params;

@@ -1,9 +1,21 @@
-//
-// Created by marcel on 24.05.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_NETWORK_BLUEPRINTS_HPP
-#define FICTION_NETWORK_BLUEPRINTS_HPP
+/**
+ * @file
+ * @brief Hand-built logic networks the test suite reuses as fixtures.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#pragma once
 
 #include <mockturtle/views/names_view.hpp>
 
@@ -445,5 +457,3 @@ mockturtle::names_view<Ntk> parity_network()
     return ntk;
 }
 }  // namespace blueprints
-
-#endif  // FICTION_NETWORK_BLUEPRINTS_HPP

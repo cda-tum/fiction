@@ -1,11 +1,22 @@
-//
-// Created by marcel on 25.11.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_AREA_HPP
-#define FICTION_CMD_AREA_HPP
+/**
+ * @file
+ * @brief Declares the `area` command, which prints the current cell layout's area in nm².
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/technology/area.hpp>
+#pragma once
+
+#include <fiction/technology/fcn/area.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -36,7 +47,7 @@ class area_command final : public command
     /**
      * Layout area in nm².
      */
-    fiction::area_stats st{};
+    fiction::fcn::area_stats st{};
     /**
      * Width of each cell.
      */
@@ -62,5 +73,3 @@ class area_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_AREA_HPP

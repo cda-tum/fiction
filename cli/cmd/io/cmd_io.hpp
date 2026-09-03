@@ -1,9 +1,20 @@
-//
-// Created by marcel on 10.10.2025.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_IO_HPP
-#define FICTION_CMD_IO_HPP
+/**
+ * @file
+ * @brief Collects the file I/O CLI commands for inclusion into the shell.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 // NOLINTBEGIN(misc-include-cleaner)
 #include "include/blif.hpp"
@@ -36,5 +47,3 @@ ALICE_ADD_COMMAND(tt, FICTION_CLI_CATEGORY_IO)
 ALICE_ADD_COMMAND(verilog, FICTION_CLI_CATEGORY_IO)
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_IO_HPP

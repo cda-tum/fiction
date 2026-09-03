@@ -1,18 +1,31 @@
-//
-// Created by Jan Drewniok 10.06.24
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief *QuickCell* design of 3-input SiDB standard cells.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/simulation/sidb/detect_bdl_wires.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/generators/design_gates.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -25,6 +38,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 // This script designs standard cells for 3-input Boolean functions using *QuickCell*. The number of designed gate
 // implementations and the required runtime are recorded.
@@ -71,32 +90,31 @@ int main()  // NOLINT
     const auto skeleton_two =
         read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder, "3_in_1_out_skeleton_two.sqd"));
 
-    const design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>> params{
+    const design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>> params{
         .operational_params =
             is_operational_params{
-                .simulation_parameters = sidb_simulation_parameters{2, -0.31},
-                .sim_engine            = sidb_simulation_engine::QUICKEXACT,
+                .sim_params = simulation_parameters{2, -0.31},
+                .sim_engine = engine::QUICKEXACT,
                 .input_bdl_iterator_params =
                     bdl_input_iterator_params{.bdl_wire_params =
                                                   detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
                 .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
-        .design_mode =
-            design_sidb_gates_params<fiction::cell<sidb_100_cell_clk_lyt_siqad>>::design_sidb_gates_mode::QUICKCELL,
+        .design_mode            = design_gates_params<cell<sidb_100_cell_clk_lyt_siqad>>::design_gates_mode::QUICKCELL,
         .canvas                 = {{22, 6, 0}, {32, 12, 0}},
         .number_of_canvas_sidbs = 4};
 
     for (const auto& [truth_tables, gate_names] : truth_tables_and_names)
     {
         std::vector<sidb_100_cell_clk_lyt_siqad> quickcell_design{};
-        design_sidb_gates_stats                  stats_quickcell{};
+        design_gates_stats                       stats_quickcell{};
 
         if (gate_names == "and3" || gate_names == "gamble")
         {
-            quickcell_design = design_sidb_gates(skeleton_one, truth_tables, params, &stats_quickcell);
+            quickcell_design = design_gates(skeleton_one, truth_tables, params, &stats_quickcell);
         }
         else
         {
-            quickcell_design = design_sidb_gates(skeleton_two, truth_tables, params, &stats_quickcell);
+            quickcell_design = design_gates(skeleton_two, truth_tables, params, &stats_quickcell);
         }
 
         const auto runtime_quickcell = mockturtle::to_seconds(stats_quickcell.time_total);

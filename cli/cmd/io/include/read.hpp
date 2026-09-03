@@ -1,9 +1,20 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_READ_HPP
-#define FICTION_CMD_READ_HPP
+/**
+ * @file
+ * @brief Declares the `read` command, which parses a file by its extension into a store.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -57,5 +68,3 @@ class read_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_READ_HPP

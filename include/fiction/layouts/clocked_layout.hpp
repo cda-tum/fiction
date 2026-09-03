@@ -1,9 +1,21 @@
-//
-// Created by marcel on 14.05.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CLOCKED_LAYOUT_HPP
-#define FICTION_CLOCKED_LAYOUT_HPP
+/**
+ * @file
+ * @brief Layout that assigns clock numbers to the coordinates of a coordinate layout.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
@@ -19,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -40,7 +52,7 @@ class clocked_layout : public CoordinateLayout
 
     using clock_zone = typename CoordinateLayout::coordinate;
 
-    using clocking_scheme_t = clocking_scheme<clock_zone>;
+    using clocking_scheme_t = clocking::scheme<clock_zone>;
     using clock_number_t    = typename clocking_scheme_t::clock_number;
 
     using degree_t = uint8_t;
@@ -67,7 +79,7 @@ class clocked_layout : public CoordinateLayout
     explicit clocked_layout(const typename CoordinateLayout::aspect_ratio& ar = {}) :
             CoordinateLayout(ar),
             strg{std::make_shared<clocked_layout_storage>(
-                open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
+                clocking::open<clocked_layout<CoordinateLayout>>(clocking::num_clks::FOUR))}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
@@ -101,7 +113,7 @@ class clocked_layout : public CoordinateLayout
     explicit clocked_layout(const CoordinateLayout& lyt) :
             CoordinateLayout(lyt),
             strg{std::make_shared<clocked_layout_storage>(
-                open_clocking<clocked_layout<CoordinateLayout>>(num_clks::FOUR))}
+                clocking::open<clocked_layout<CoordinateLayout>>(clocking::num_clks::FOUR))}
     {
         static_assert(is_coordinate_layout_v<CoordinateLayout>, "CoordinateLayout is not a coordinate layout type");
     }
@@ -171,7 +183,7 @@ class clocked_layout : public CoordinateLayout
     }
     /**
      * Compares the stored clocking scheme against the provided name. Names of pre-defined clocking schemes are given in
-     * the `clock_name` namespace.
+     * the `clocking::name` namespace.
      *
      * @param name Clocking scheme name.
      * @return `true` iff the layout is clocked by a clocking scheme of name `name`.
@@ -345,6 +357,4 @@ class clocked_layout : public CoordinateLayout
     storage strg;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_CLOCKED_LAYOUT_HPP
+}  // namespace fiction::layouts

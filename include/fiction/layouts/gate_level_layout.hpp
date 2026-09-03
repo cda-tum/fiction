@@ -1,13 +1,26 @@
-//
-// Created by marcel on 14.05.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_GATE_LEVEL_LAYOUT_HPP
-#define FICTION_GATE_LEVEL_LAYOUT_HPP
+/**
+ * @file
+ * @brief Layout that assigns gates and wires to the tiles of a clocked layout.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Jan Drewniok (Drewniok)
+ */
+
+#pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
+#include "fiction/networks/mockturtle_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/mockturtle_utils.hpp"
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -28,20 +41,20 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
-{
-
-namespace detail
+namespace fiction::verification::detail
 {
 /**
  * Forward declaration for the friend declaration in `gate_level_layout`. Including
- * `algorithms/verification/design_rule_violations.hpp` here instead would pull `nlohmann/json.hpp` and three `fmt`
+ * `verification/design_rule_violations.hpp` here instead would pull `nlohmann/json.hpp` and three `fmt`
  * headers into every translation unit that touches a gate-level layout.
  */
 template <typename Lyt>
 class gate_level_drvs_impl;
 
-}  // namespace detail
+}  // namespace fiction::verification::detail
+
+namespace fiction::layouts
+{
 
 /**
  * A layout type to layer on top of a clocked layout that allows the assignment of gates to clock zones (aka tiles in
@@ -177,7 +190,7 @@ class gate_level_layout : public ClockedLayout
      * @param scheme Clocking scheme to apply to this layout.
      * @param name Layout name.
      */
-    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<tile>& scheme,
+    gate_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking::scheme<tile>& scheme,
                       const std::string& name = {}) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<gate_level_layout_storage>()},
@@ -1710,7 +1723,7 @@ class gate_level_layout : public ClockedLayout
     event_storage evnts;
 
     template <typename>
-    friend class detail::gate_level_drvs_impl;
+    friend class fiction::verification::detail::gate_level_drvs_impl;
 
     /**
      * Populates the truth table cache with the constant and elementary functions used by the fundamental gate
@@ -1846,6 +1859,4 @@ class gate_level_layout : public ClockedLayout
     }
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_GATE_LEVEL_LAYOUT_HPP
+}  // namespace fiction::layouts

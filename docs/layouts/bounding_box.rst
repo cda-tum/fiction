@@ -5,7 +5,7 @@ Bounding Box
     .. tab:: C++
         **Header:** ``fiction/layouts/bounding_box.hpp``
 
-        .. doxygenclass:: fiction::bounding_box_2d
+        .. doxygenclass:: fiction::layouts::bounding_box_2d
             :members:
 
     .. tab:: Python

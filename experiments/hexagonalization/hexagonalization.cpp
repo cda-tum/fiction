@@ -1,16 +1,33 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Cartesian-to-hexagonal layout mapping across the benchmark set.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/apply_gate_library.hpp>  // layout conversion to cell-level
-#include <fiction/algorithms/physical_design/hexagonalization.hpp>    // layout conversion to hexagonal gird
-#include <fiction/algorithms/physical_design/orthogonal.hpp>  // scalable heuristic for physical design of FCN layouts
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/technology/area.hpp>                                            // area requirement calculations
-#include <fiction/technology/cell_technologies.hpp>                               // cell implementations
-#include <fiction/technology/sidb_bestagon_library.hpp>                           // a pre-defined SiDB gate library
-#include <fiction/technology/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/traits.hpp>                                 // traits for type-checking
-#include <fiction/types.hpp>                                  // pre-defined types suitable for the FCN domain
+#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
+#include <fiction/physical_design/hexagonalization.hpp>      // layout conversion to hexagonal gird
+#include <fiction/physical_design/orthogonal.hpp>            // scalable heuristic for physical design of FCN layouts
+#include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
+#include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
+#include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
+#include <fiction/technology/sidb/technology.hpp>            // cell implementations
+#include <fiction/traits.hpp>                                // traits for type-checking
+#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
@@ -30,12 +47,19 @@
 #include <string>
 #include <vector>
 
+using namespace fiction;
+using namespace fiction::fcn;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
+using namespace fiction::sidb;
+using namespace fiction::synthesis;
+using namespace fiction::verification;
+
 int main()  // NOLINT
 {
-    using gate_lyt = fiction::gate_level_layout<
-        fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<fiction::offset::ucoord_t>>>>;
-    using hex_lyt  = fiction::hex_even_row_gate_clk_lyt;
-    using cell_lyt = fiction::sidb_cell_clk_lyt;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
+    using hex_lyt  = hex_even_row_gate_clk_lyt;
+    using cell_lyt = sidb_cell_clk_lyt;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t, uint32_t,
                             uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, uint32_t, uint32_t, uint64_t,
@@ -78,9 +102,8 @@ int main()  // NOLINT
 
     // instantiate a technology mapping library
     std::stringstream library_stream{};
-    library_stream << fiction::GATE_ZERO << fiction::GATE_ONE << fiction::GATE_BUF << fiction::GATE_INV
-                   << fiction::GATE_AND2 << fiction::GATE_NAND2 << fiction::GATE_OR2 << fiction::GATE_NOR2
-                   << fiction::GATE_XOR2 << fiction::GATE_XNOR2;
+    library_stream << GATE_ZERO << GATE_ONE << GATE_BUF << GATE_INV << GATE_AND2 << GATE_NAND2 << GATE_OR2 << GATE_NOR2
+                   << GATE_XOR2 << GATE_XNOR2;
 
     std::vector<mockturtle::gate> gates{};
 
@@ -92,11 +115,11 @@ int main()  // NOLINT
     const mockturtle::tech_library<2> gate_lib{gates};
 
     // stats for ortho
-    fiction::orthogonal_physical_design_stats orthogonal_stats{};
+    orthogonal_physical_design_stats orthogonal_stats{};
     // params for hexagonalization
-    const fiction::hexagonalization_params hexagonalization_params{};
+    const hexagonalization_params hexagonalization_params{};
     // stats for hexagonalization
-    fiction::hexagonalization_stats hexagonalization_stats{};
+    hexagonalization_stats hexagonalization_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::all & ~fiction_experiments::log2 &
                                                    ~fiction_experiments::sqrt & ~fiction_experiments::multiplier;
@@ -125,30 +148,29 @@ int main()  // NOLINT
         const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
-        const auto gate_level_layout = fiction::orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
+        const auto gate_level_layout = orthogonal<gate_lyt>(mapped_network, {}, &orthogonal_stats);
 
         // compute critical path and throughput
-        const auto cp_tp = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp = critical_path_length_and_throughput(gate_level_layout);
 
-        const auto hex_layout = fiction::hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, hexagonalization_params,
-                                                                             &hexagonalization_stats);
+        const auto hex_layout =
+            hexagonalization<hex_lyt, gate_lyt>(gate_level_layout, hexagonalization_params, &hexagonalization_stats);
 
         // check equivalence
-        fiction::equivalence_checking_stats eq_stats{};
-        fiction::equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
+        equivalence_checking_stats eq_stats{};
+        equivalence_checking(gate_level_layout, hex_layout, &eq_stats);
 
-        const std::string eq_result = eq_stats.eq == fiction::eq_type::STRONG ? "STRONG" :
-                                      eq_stats.eq == fiction::eq_type::WEAK   ? "WEAK" :
-                                                                                "NO";
+        const std::string eq_result = eq_stats.eq == eq_type::STRONG ? "STRONG" :
+                                      eq_stats.eq == eq_type::WEAK   ? "WEAK" :
+                                                                       "NO";
 
         // apply gate library
-        const auto cell_level_layout =
-            fiction::apply_gate_library<cell_lyt, fiction::sidb_bestagon_library>(hex_layout);
+        const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(hex_layout);
 
         // compute area
-        fiction::area_stats                            area_stats{};
-        fiction::area_params<fiction::sidb_technology> area_ps{};
-        fiction::area(cell_level_layout, area_ps, &area_stats);
+        area_stats                   area_stats{};
+        area_params<sidb_technology> area_ps{};
+        area(cell_level_layout, area_ps, &area_stats);
 
         // log results
         hexagonalization_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),

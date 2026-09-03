@@ -1,27 +1,42 @@
-//
-// Created by simon on 14.10.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Catch2 benchmarks for `fiction/physical_design/post_layout_optimization.hpp`.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
+#include <fiction/physical_design/post_layout_optimization.hpp>
 
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
 
 TEST_CASE("Benchmark Post-Layout Optimization", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     const auto ntk    = blueprints::parity_network<mockturtle::aig_network>();
     const auto layout = orthogonal<gate_layout>(ntk);

@@ -1,21 +1,35 @@
-//
-// Created by marcel on 12.07.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Catch2 benchmarks for `fiction/physical_design/path_finding/distance_map.hpp`.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/algorithms/path_finding/a_star.hpp>
-#include <fiction/algorithms/path_finding/distance.hpp>
-#include <fiction/algorithms/path_finding/distance_map.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/physical_design/path_finding/a_star.hpp>
+#include <fiction/physical_design/path_finding/distance.hpp>
+#include <fiction/physical_design/path_finding/distance_map.hpp>
 
 #include <cstdint>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design::path_finding;
 
 template <typename Lyt, typename Dist>
 Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_func) noexcept
@@ -33,10 +47,10 @@ Dist sum_distances(const Lyt& layout, const distance_functor<Lyt, Dist>& dist_fu
 
 TEST_CASE("Benchmark distance maps", "[benchmark]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, use_clocking<clk_lyt>()};
+    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use<clk_lyt>()};
 
     BENCHMARK("without distance maps")
     {
@@ -62,10 +76,10 @@ TEST_CASE("Benchmark distance maps", "[benchmark]")
 
 TEST_CASE("Benchmark smart distance cache", "[benchmark]")
 {
-    using clk_lyt = clocked_layout<cartesian_layout<offset::ucoord_t>>;
+    using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
     using dist    = uint64_t;
 
-    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, use_clocking<clk_lyt>()};
+    const clk_lyt layout{aspect_ratio<clk_lyt>{5, 5}, clocking::use<clk_lyt>()};
 
     BENCHMARK("smart_distance_cache (cold start)")
     {

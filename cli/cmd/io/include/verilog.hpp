@@ -1,9 +1,20 @@
-//
-// Created by marcel on 06.02.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_VERILOG_HPP
-#define FICTION_CMD_VERILOG_HPP
+/**
+ * @file
+ * @brief Declares the `verilog` command, which writes the current network or layout to Verilog.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -42,5 +53,3 @@ class verilog_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_VERILOG_HPP

@@ -1,0 +1,68 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Decides whether positively charged SiDBs are possible in a layout.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ */
+
+#pragma once
+
+#include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
+#include "fiction/traits.hpp"
+
+#include <cstddef>
+#include <cstdint>
+
+namespace fiction::sidb::simulation::analysis
+{
+
+/**
+ * This algorithm determines if positively charged SiDBs can occur in a given SiDB cell-level layout due to strong
+ * electrostatic interaction.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt The layout to be analyzed.
+ * @param sim_params Physical parameters used to determine whether positively charged SiDBs can occur.
+ */
+template <typename Lyt>
+[[nodiscard]] bool can_positive_charges_occur(const Lyt&                                lyt,
+                                              const sidb::model::simulation_parameters& sim_params) noexcept
+{
+    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+
+    // The charge layout is initialized with negatively charged SiDBs. Therefore, the local electrostatic potentials are
+    // maximal. In this extreme case, if the banding is not sufficient for any SiDB to be positively charged, it will
+    // not be for any other charge distribution. Therefore, no positively charged SiDBs can occur.
+    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
+    charge_lyt.assign_physical_parameters(sim_params);
+    charge_lyt.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
+
+    for (uint64_t i = 0; i < lyt.num_cells(); ++i)
+    {
+        // access does not need to be checked since 0 <= i < lyt.num_cells()
+        if (-*charge_lyt.get_local_internal_potential_by_index(i) >
+            charge_lyt.get_effective_charge_transition_thresholds(
+                i)[static_cast<std::size_t>(sidb::surfaces::charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+}  // namespace fiction::sidb::simulation::analysis

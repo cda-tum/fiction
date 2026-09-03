@@ -1,16 +1,29 @@
-//
-// Created by marcel on 22.07.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Three-dimensional operational domains of the SiQAD gates.
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>      // operational domain computation algorithms
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // SiDB simulation engines
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>  // SiDB simulation parameters
-#include <fiction/io/read_sqd_layout.hpp>                                     // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>                            // writer for operational domains
-#include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
-#include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
+#include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
+#include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
+#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                    // string formatting
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for measuring time
@@ -23,6 +36,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -47,17 +66,17 @@ int main()  // NOLINT
     };
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.28;
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
+    op_domain_params.operational_params.sim_params = sim_params;
     // reducing the threshold for the interdistance between two BDL wires makes sure that not both BDL pairs of the
     // SiQAD OR gate are put inside the same detected I/O pin.
     op_domain_params.operational_params.input_bdl_iterator_params.bdl_wire_params.threshold_bdl_interdistance = 1.5;
-    op_domain_params.operational_params.sim_engine = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
     op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R},
                                                       {sweep_parameter::LAMBDA_TF},
                                                       {sweep_parameter::MU_MINUS}};

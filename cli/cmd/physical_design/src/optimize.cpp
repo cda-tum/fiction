@@ -1,17 +1,30 @@
-//
-// Created by Simon Hofmann on 02.08.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `optimize` command.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/physical_design/include/optimize.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/post_layout_optimization.hpp>
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/physical_design/post_layout_optimization.hpp>
+#include <fiction/physical_design/wiring_reduction.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -59,7 +72,7 @@ void optimize_command::execute()
     const auto& lyt = gls.current();
 
     const auto is_twoddwave_clocked = [](auto&& lyt_ptr) -> bool
-    { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
+    { return lyt_ptr->is_clocking_scheme(fiction::layouts::clocking::TWODDWAVE_NAME); };
 
     // error case: layout is not 2DDWave-clocked
     if (!std::visit(is_twoddwave_clocked, lyt))
@@ -89,7 +102,7 @@ void optimize_command::execute()
         {
             if (is_set("wiring_reduction_only"))
             {
-                fiction::wiring_reduction(lyt_copy, psw, &stw);
+                fiction::physical_design::wiring_reduction(lyt_copy, psw, &stw);
                 if (is_set("verbose"))
                 {
                     stw.report(env->out());
@@ -97,14 +110,14 @@ void optimize_command::execute()
             }
             else
             {
-                fiction::post_layout_optimization(lyt_copy, ps, &st);
+                fiction::physical_design::post_layout_optimization(lyt_copy, ps, &st);
                 if (is_set("verbose"))
                 {
                     st.report(env->out());
                 }
             }
 
-            fiction::restore_names(*lyt_ptr, lyt_copy);
+            fiction::networks::restore_names(*lyt_ptr, lyt_copy);
 
             gls.extend() = std::make_shared<Lyt>(lyt_copy);
         }

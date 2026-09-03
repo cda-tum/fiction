@@ -1,0 +1,71 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Inverts the screened Coulomb potential to obtain a distance from a potential.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
+
+#include "fiction/technology/sidb/model/physical_constants.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+
+#include <cmath>
+#include <cstdint>
+
+namespace fiction::sidb::model
+{
+
+/**
+ * The electrostatic potential on hydrogen-passivated silicon is typically modeled using a screened Coulomb potential.
+ * This electrostatic potential is commonly employed to determine the electrostatic potential for a given distance
+ * (between SiDB and point under consideration) and given physical parameters. However, the function provided here
+ * serves the inverse purpose by calculating the distance for a given potential and given physical parameters.
+ *
+ * @note Runtime depends exponentially on the provided precision.
+ *
+ * @param params The physical parameters for a given hydrogen-passivated silicon surface.
+ * @param potential The electrostatic potential (unit: V) to be converted to a distance.
+ * @param precision The precision level for the conversion, specifying the number of decimal places.
+ * @return The distance (unit: nm) corresponding to the given electrostatic potential.
+ */
+[[nodiscard]] inline double potential_to_distance_conversion(
+    const double potential, const sidb::model::simulation_parameters& params = sidb::model::simulation_parameters{},
+    const uint64_t precision = 2) noexcept
+{
+    // function to calculate the electrostatic potential for a given distance and given physical parameters on the H-Si
+    // surface
+    const auto calculate_potential_for_given_distance = [&params](const double distance) noexcept
+    {
+        return params.k() * params.epsilon_r / params.epsilon_r / (distance * 1e-9) *
+               std::exp(-distance / params.lambda_tf) * model::ELEMENTARY_CHARGE;
+    };
+
+    // calculate the step size based on the precision
+    const double step_size = std::pow(10, -static_cast<double>(precision));
+
+    // initialize distance and potential for the initial step
+    double distance                     = step_size;
+    double potential_for_given_distance = calculate_potential_for_given_distance(distance);
+
+    // as long as the electrostatic potential is still larger than the given potential, the distance is increased
+    while (potential_for_given_distance > potential)
+    {
+        distance += step_size;
+        potential_for_given_distance = calculate_potential_for_given_distance(distance);
+    }
+
+    return distance;
+}
+
+}  // namespace fiction::sidb::model

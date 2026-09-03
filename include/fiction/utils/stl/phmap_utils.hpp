@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Thread-safe parallel flat hash map with built-in mutexes.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
+
+#include <phmap.h>
+#include <phmap_fwd_decl.h>
+
+#include <memory>
+#include <mutex>
+#include <utility>
+
+namespace fiction::utils::stl
+{
+
+/**
+ * A parallel flat hash map with built-in mutexes. This enables thread-safe access to the map without the need to
+ * manually lock and unlock the map. Since the map uses internal buckets that can be accessed in parallel, this
+ * implementation is a lot faster than a regular hash map with a single mutex.
+ */
+template <typename K, typename V>
+using locked_parallel_flat_hash_map =
+    phmap::parallel_flat_hash_map<K, V, phmap::priv::hash_default_hash<K>, phmap::priv::hash_default_eq<K>,
+                                  std::allocator<std::pair<const K, V>>, 4, std::mutex>;
+
+}  // namespace fiction::utils::stl

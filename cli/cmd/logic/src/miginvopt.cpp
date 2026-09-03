@@ -1,13 +1,25 @@
-//
-// Created by marcel on 07.06.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `miginvopt` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/logic/include/miginvopt.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -54,13 +66,13 @@ void miginvopt_command::execute()
 
             env->out() << fmt::format("[i] inverter cost reduction: {}\n", st.total_gain);
 
-            fiction::restore_names(*ntk_ptr, *mig_ptr);
+            fiction::networks::restore_names(*ntk_ptr, *mig_ptr);
 
             s.extend() = mig_ptr;
         }
         else  // not an MIG
         {
-            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::get_name(*ntk_ptr));
+            env->out() << fmt::format("[e] {} is not an MIG\n", fiction::networks::get_name(*ntk_ptr));
         }
     };
 

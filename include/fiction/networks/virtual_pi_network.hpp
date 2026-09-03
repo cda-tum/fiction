@@ -1,9 +1,21 @@
-//
-// Created by benjamin on 14.06.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_VIRTUAL_PI_NETWORK_HPP
-#define FICTION_VIRTUAL_PI_NETWORK_HPP
+/**
+ * @file
+ * @brief Network that duplicates primary inputs into freely copyable virtual PIs.
+ * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -17,7 +29,7 @@
 
 #include <parallel_hashmap/phmap.h>
 
-namespace fiction
+namespace fiction::networks
 {
 /* Network with additional "virtual" PIs.
  *
@@ -306,6 +318,4 @@ class virtual_pi_network : public Ntk
     v_strg v_storage;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_VIRTUAL_PI_NETWORK_HPP
+}  // namespace fiction::networks

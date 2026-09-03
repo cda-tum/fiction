@@ -1,11 +1,23 @@
-//
-// Created by simon on 12.06.2024.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_GOLD_HPP
-#define FICTION_CMD_GOLD_HPP
+/**
+ * @file
+ * @brief Declares the `gold` command, which runs graph-oriented layout design.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/physical_design/graph_oriented_layout_design.hpp>
+#pragma once
+
+#include <fiction/physical_design/graph_oriented_layout_design.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -18,7 +30,7 @@ namespace alice
 /**
  * Executes a physical design approach utilizing A* path finding in a search space graph.
  *
- * See include/fiction/algorithms/physical_design/graph_oriented_layout_design.hpp for more details.
+ * See include/fiction/physical_design/graph_oriented_layout_design.hpp for more details.
  */
 class gold_command final : public command
 {
@@ -51,16 +63,14 @@ class gold_command final : public command
     /**
      * Parameters.
      */
-    fiction::graph_oriented_layout_design_params ps{};
+    fiction::physical_design::graph_oriented_layout_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::graph_oriented_layout_design_stats st{};
+    fiction::physical_design::graph_oriented_layout_design_stats st{};
 
     template <typename Lyt>
     void graph_oriented_layout_design();
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_GOLD_HPP

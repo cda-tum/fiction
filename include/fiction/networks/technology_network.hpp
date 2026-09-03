@@ -1,9 +1,21 @@
-//
-// Created by marcel on 20.05.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_TECHNOLOGY_NETWORK_HPP
-#define FICTION_TECHNOLOGY_NETWORK_HPP
+/**
+ * @file
+ * @brief Logic network that disables structural hashing and adds FCN-specific gate types.
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
+
+#pragma once
 
 #include <kitty/constructors.hpp>
 #include <kitty/dynamic_truth_table.hpp>
@@ -19,7 +31,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::networks
 {
 
 /**
@@ -460,6 +472,4 @@ class technology_network : public mockturtle::klut_network
     }
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_TECHNOLOGY_NETWORK_HPP
+}  // namespace fiction::networks

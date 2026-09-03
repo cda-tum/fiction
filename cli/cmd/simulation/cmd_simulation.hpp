@@ -1,9 +1,20 @@
-//
-// Created by marcel on 10.10.2025.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_SIMULATION_HPP
-#define FICTION_CMD_SIMULATION_HPP
+/**
+ * @file
+ * @brief Collects the SiDB simulation CLI commands for inclusion into the shell.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #ifdef FICTION_SIMULATION_FLOW
 
@@ -34,5 +45,3 @@ ALICE_ADD_COMMAND(temp, FICTION_CLI_CATEGORY_SIMULATION)
 }  // namespace alice
 
 #endif  // FICTION_SIMULATION_FLOW
-
-#endif  // FICTION_CMD_SIMULATION_HPP

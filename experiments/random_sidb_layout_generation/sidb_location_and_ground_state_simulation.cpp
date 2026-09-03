@@ -1,13 +1,26 @@
-//
-// Created by Jan Drewniok on 04.05.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#include "fiction/algorithms/simulation/sidb/quickexact.hpp"
-#include "fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp"
-#include "fiction/io/read_sqd_layout.hpp"
-#include "fiction/io/write_location_and_ground_state.hpp"
-#include "fiction/technology/sidb_lattice.hpp"
-#include "fiction/technology/sidb_lattice_orientations.hpp"
+/**
+ * @file
+ * @brief Simulates generated SiDB layouts and records their ground state charges.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#include "fiction/technology/sidb/io/read_sqd_layout.hpp"
+#include "fiction/technology/sidb/model/simulation_parameters.hpp"
+#include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
+#include "fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp"
+#include "fiction/technology/sidb/surfaces/lattice.hpp"
+#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>
@@ -20,6 +33,10 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::sidb::simulation::io;
 
 /**
  * This program reads randomly generated SiDB layouts from a specified folder, simulates them, and collects the
@@ -103,7 +120,7 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         std::cout << benchmark << '\n';
 
-                        const sidb_simulation_parameters phys_params{2, mu};
+                        const simulation_parameters phys_params{2, mu};
 
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
                                                                   folder.path().string(), name, -phys_params.mu_minus);

@@ -1,13 +1,25 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `check` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/verification/include/check.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/verification/design_rule_violations.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/design_rule_violations.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -36,7 +48,8 @@ void check_command::execute()
     ps.out = &env->out();
     pst    = {};
 
-    const auto design_rule_check = [this](auto&& lyt_ptr) { fiction::gate_level_drvs(*lyt_ptr, ps, &pst); };
+    const auto design_rule_check = [this](auto&& lyt_ptr)
+    { fiction::verification::gate_level_drvs(*lyt_ptr, ps, &pst); };
 
     std::visit(design_rule_check, s.current());
 }

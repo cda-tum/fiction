@@ -1,11 +1,27 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief How often `determine_clocking` reclocks a layout stripped of its clocking.
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/network_transformation/network_conversion.hpp>  // conversion of networks
-#include <fiction/algorithms/physical_design/determine_clocking.hpp>         // SAT-based clock number assignment
-#include <fiction/algorithms/verification/equivalence_checking.hpp>          // SAT-based equivalence checking
-#include <fiction/io/read_fgl_layout.hpp>                                    // custom reader for layouts
-#include <fiction/types.hpp>                                                 // pre-defined types
-#include <fiction/utils/name_utils.hpp>                                      // name utilities
+#include <fiction/layouts/io/read_fgl_layout.hpp>          // custom reader for layouts
+#include <fiction/networks/name_utils.hpp>                 // name utilities
+#include <fiction/physical_design/determine_clocking.hpp>  // SAT-based clock number assignment
+#include <fiction/synthesis/network_conversion.hpp>        // conversion of networks
+#include <fiction/types.hpp>                               // pre-defined types
+#include <fiction/verification/equivalence_checking.hpp>   // SAT-based equivalence checking
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // time measurements
@@ -15,10 +31,16 @@
 #include <filesystem>
 #include <string>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::layouts::io;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
+
 template <typename Lyt>
 void remove_clocking(Lyt& lyt) noexcept
 {
-    static_assert(fiction::is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
+    static_assert(is_gate_level_layout_v<Lyt>, "Lyt is not a gate-level layout");
 
     lyt.foreach_tile([&lyt](const auto& t) { lyt.assign_clock_number(t, 0); });
 }
@@ -30,8 +52,7 @@ int main()  // NOLINT
     const std::string layout_folder =
         fmt::format("{}/clock_number_assignment/versatility_benchmarks/", EXPERIMENTS_PATH);
 
-    using gate_lyt =
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
     experiments::experiment<std::string, std::string, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t, double, bool>
         clock_number_assignment_exp{"clock number assignment",
@@ -58,7 +79,7 @@ int main()  // NOLINT
                 const auto benchmark = path.stem().string();
 
                 // read layout from file
-                auto original_layout = fiction::read_fgl_layout<gate_lyt>(path.string(), benchmark);
+                auto original_layout = read_fgl_layout<gate_lyt>(path.string(), benchmark);
 
                 fmt::print("[i] processing {}\n", benchmark);
 
@@ -74,15 +95,14 @@ int main()  // NOLINT
                 remove_clocking(newly_clocked_layout);
 
                 // parameters and statistics of the clock number assignment
-                const fiction::determine_clocking_params params{};
-                fiction::determine_clocking_stats        stats{};
+                const determine_clocking_params params{};
+                determine_clocking_stats        stats{};
 
                 // perform clock number assignment
-                fiction::determine_clocking(newly_clocked_layout, params, &stats);
+                determine_clocking(newly_clocked_layout, params, &stats);
 
                 // check equivalence of the original and the newly clocked layout
-                const auto eq_result =
-                    fiction::equivalence_checking(original_layout, newly_clocked_layout) != fiction::eq_type::NO;
+                const auto eq_result = equivalence_checking(original_layout, newly_clocked_layout) != eq_type::NO;
 
                 // log results
                 clock_number_assignment_exp(original_layout.get_clocking_scheme().name.data(), benchmark,

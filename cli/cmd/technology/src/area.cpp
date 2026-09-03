@@ -1,12 +1,24 @@
-//
-// Created by marcel on 25.11.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `area` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/technology/include/area.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/technology/area.hpp>
+#include <fiction/technology/fcn/area.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -54,9 +66,9 @@ void area_command::execute()
         const double hspace_nm = is_set("hspace") ? hspace : tech::CELL_HSPACE;
         const double vspace_nm = is_set("vspace") ? vspace : tech::CELL_VSPACE;
 
-        const fiction::area_params<tech> ps{width_nm, height_nm, hspace_nm, vspace_nm};
+        const fiction::fcn::area_params<tech> ps{width_nm, height_nm, hspace_nm, vspace_nm};
 
-        fiction::area(*lyt_ptr, ps, &st);
+        fiction::fcn::area(*lyt_ptr, ps, &st);
     };
 
     std::visit(calculate_area, lyt);

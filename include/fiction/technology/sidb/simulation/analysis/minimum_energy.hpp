@@ -1,0 +1,77 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Finds the charge distribution of least energy in a range.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
+
+#include "fiction/traits.hpp"
+
+#include <algorithm>
+#include <iterator>
+#include <limits>
+
+namespace fiction::sidb::simulation::analysis
+{
+
+/**
+ * Returns an iterator to the charge distribution of minimum energy contained in a range of
+ * `charge_distribution_surface` objects. If the range is empty, `last` is returned.
+ *
+ * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
+ * @param first Begin of the range to examine.
+ * @param last End of the range to examine.
+ * @return Iterator to the minimum energy charge distribution found in the input range, or `last` if the range is empty.
+ */
+template <typename InputIt>
+[[nodiscard]] InputIt minimum_energy_distribution(const InputIt first, const InputIt last) noexcept
+{
+    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
+                  "InputIt must meet the requirements of LegacyInputIterator");
+    static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
+                  "Range must be of charge_distribution_surface objects");
+
+    return std::min_element(
+        first, last, [](const auto& cds1, const auto& cds2)
+        { return cds1.get_electrostatic_potential_energy() < cds2.get_electrostatic_potential_energy(); });
+}
+
+/**
+ * Computes the minimum energy of a range of `charge_distribution_surface` objects. If the range is empty, infinity is
+ * returned to indicate no valid energy value exists.
+ *
+ * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
+ * @param first Begin of the range to examine.
+ * @param last End of the range to examine.
+ * @return Value of the minimum energy found in the input range (unit: eV), or `std::numeric_limits<double>::infinity()`
+ * if the range is empty.
+ */
+template <typename InputIt>
+[[nodiscard]] double minimum_energy(const InputIt first, const InputIt last) noexcept
+{
+    static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
+                  "InputIt must meet the requirements of LegacyInputIterator");
+    static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
+                  "Range must be of charge_distribution_surface objects");
+
+    if (first != last)
+    {
+        return minimum_energy_distribution(first, last)->get_electrostatic_potential_energy();
+    }
+
+    return std::numeric_limits<double>::infinity();
+}
+
+}  // namespace fiction::sidb::simulation::analysis

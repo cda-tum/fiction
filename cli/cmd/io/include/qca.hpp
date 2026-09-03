@@ -1,11 +1,22 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_QCA_HPP
-#define FICTION_CMD_QCA_HPP
+/**
+ * @file
+ * @brief Declares the `qca` command, which writes the current cell layout for QCADesigner.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/io/write_qca_layout.hpp>
+#pragma once
+
+#include <fiction/technology/qca/io/write_qca_layout.hpp>
 
 #include <alice/alice.hpp>
 
@@ -41,9 +52,7 @@ class qca_command final : public command
      */
     std::string filename;
 
-    fiction::write_qca_layout_params ps{};
+    fiction::qca::io::write_qca_layout_params ps{};
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_QCA_HPP

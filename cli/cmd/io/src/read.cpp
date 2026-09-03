@@ -1,15 +1,27 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `read` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/read.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/network_reader.hpp>
-#include <fiction/io/read_fgl_layout.hpp>
-#include <fiction/io/read_fqca_layout.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/layouts/io/read_fgl_layout.hpp>
+#include <fiction/networks/io/network_reader.hpp>
+#include <fiction/technology/qca/io/read_fqca_layout.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -88,25 +100,25 @@ void read_command::execute()
         {
             if (is_set("aig"))
             {
-                fiction::network_reader<fiction::aig_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::aig_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
             else if (is_set("xag"))
             {
-                fiction::network_reader<fiction::xag_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::xag_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
             else if (is_set("mig"))
             {
-                fiction::network_reader<fiction::mig_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::mig_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
             else if (is_set("tec"))
             {
-                fiction::network_reader<fiction::tec_ptr> reader{filename, env->out()};
+                fiction::networks::io::network_reader<fiction::tec_ptr> reader{filename, env->out()};
 
                 store_ntks(reader);
             }
@@ -126,64 +138,71 @@ void read_command::execute()
                                     {
                                         store<fiction::gate_layout_t>().extend() =
                                             std::make_shared<fiction::cart_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_gate_clk_lyt>(filename));
+                                                fiction::layouts::io::read_fgl_layout<fiction::cart_gate_clk_lyt>(
+                                                    filename));
                                     }
                                     else if (topology == "odd_row_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_odd_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_odd_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_row_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
-                                                    filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_even_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_even_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "odd_column_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_odd_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_odd_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_column_cartesian")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
-                                                    filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::cart_even_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::cart_even_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "odd_row_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_odd_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_odd_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_row_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_even_row_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "odd_column_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_odd_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_odd_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else if (topology == "even_column_hex")
                                     {
-                                        store<fiction::gate_layout_t>().extend() =
-                                            std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
-                                                fiction::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(filename));
+                                        store<fiction::gate_layout_t>()
+                                            .extend() = std::make_shared<fiction::hex_even_col_gate_clk_lyt>(
+                                            fiction::layouts::io::read_fgl_layout<fiction::hex_even_col_gate_clk_lyt>(
+                                                filename));
                                     }
                                     else
                                     {
                                         env->out() << fmt::format("[e] given topology does not exist: {}\n", topology);
                                     }
                                 }
-                                catch (const fiction::fgl_parsing_error& e)
+                                catch (const fiction::layouts::io::fgl_parsing_error& e)
                                 {
                                     env->out() << fmt::format("[e] {}\n", e.what());
                                 }
@@ -205,14 +224,16 @@ void read_command::execute()
                                 if (orientation == "100")
                                 {
                                     const auto layout =
-                                        fiction::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(filename, layout_name);
+                                        fiction::sidb::io::read_sqd_layout<fiction::sidb_100_cell_clk_lyt>(filename,
+                                                                                                           layout_name);
                                     store<fiction::cell_layout_t>().extend() =
                                         std::make_shared<fiction::sidb_100_cell_clk_lyt>(layout);
                                 }
                                 else if (orientation == "111")
                                 {
                                     const auto layout =
-                                        fiction::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(filename, layout_name);
+                                        fiction::sidb::io::read_sqd_layout<fiction::sidb_111_cell_clk_lyt>(filename,
+                                                                                                           layout_name);
                                     store<fiction::cell_layout_t>().extend() =
                                         std::make_shared<fiction::sidb_111_cell_clk_lyt>(layout);
                                 }
@@ -222,7 +243,7 @@ void read_command::execute()
                                     env->out() << "[e] 'lattice_orientation' must be either '100' or '111'\n";
                                 }
                             }
-                            catch (const fiction::sqd_parsing_error& e)
+                            catch (const fiction::sidb::io::sqd_parsing_error& e)
                             {
                                 env->out() << fmt::format("[e] {}\n", e.what());
                             }
@@ -235,22 +256,22 @@ void read_command::execute()
 
                                 store<fiction::cell_layout_t>().extend() =
                                     std::make_shared<fiction::stacked_qca_cell_clk_lyt>(
-                                        fiction::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(filename,
-                                                                                                     layout_name));
+                                        fiction::qca::io::read_fqca_layout<fiction::stacked_qca_cell_clk_lyt>(
+                                            filename, layout_name));
                             }
-                            catch (const fiction::unsupported_character_exception& e)
+                            catch (const fiction::qca::io::unsupported_character_exception& e)
                             {
                                 env->out() << fmt::format("[e] character '{}' is not supported as a cell designator\n",
                                                           e.which());
                             }
-                            catch (const fiction::undefined_cell_label_exception& e)
+                            catch (const fiction::qca::io::undefined_cell_label_exception& e)
                             {
                                 env->out()
                                     << fmt::format("[e] cell label '{}' was used in the cell definition section but "
                                                    "never defined above\n",
                                                    e.which());
                             }
-                            catch (const fiction::unrecognized_cell_definition_exception& e)
+                            catch (const fiction::qca::io::unrecognized_cell_definition_exception& e)
                             {
                                 env->out() << fmt::format("[e] unsupported cell definition in line {}\n", e.where());
                             }

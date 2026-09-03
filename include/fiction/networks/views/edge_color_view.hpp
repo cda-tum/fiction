@@ -1,18 +1,29 @@
-//
-// Created by marcel on 18.01.22.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_EDGE_COLOR_VIEW_HPP
-#define FICTION_EDGE_COLOR_VIEW_HPP
+/**
+ * @file
+ * @brief Network view that paints edges in addition to nodes.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include "fiction/utils/network_utils.hpp"
+#pragma once
+
+#include "fiction/networks/network_utils.hpp"
 
 #include <mockturtle/views/color_view.hpp>
 
 #include <cstdint>
 #include <unordered_map>
 
-namespace fiction
+namespace fiction::networks::views
 {
 /**
  * A view that extends `mockturtle::out_of_place_color_view` such that it can color edges, i.e., tuples of nodes as
@@ -134,6 +145,4 @@ class out_of_place_edge_color_view : public mockturtle::out_of_place_color_view<
     mutable std::unordered_map<edge, uint32_t> edge_colors{};
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_EDGE_COLOR_VIEW_HPP
+}  // namespace fiction::networks::views

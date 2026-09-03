@@ -6,10 +6,19 @@ Architecture" describes the layout in full; read it before adding a binding.
 
 The short version: a new Python-exposed feature gets its own `.cpp` file under
 `src/pyfiction/<module>/<submodule>/` defining a single
-`void xxx(nanobind::module_& m)`. Forward-declare that function in the enclosing
-`register_<name>.cpp` and call it from `register_<name>(m)`, which is itself called by a
-parent `register_<name>.cpp` or, for top-level modules, from the `NB_MODULE(pyfiction, m)`
-block in `pyfiction.cpp`.
+`void xxx(nanobind::module_& m)`, named after the file. Forward-declare that function in
+the directory's `register_<path>.cpp` and call it from `register_<path>(m)`, which the
+`NB_MODULE(pyfiction, m)` block in `pyfiction.cpp` calls in turn.
+
+**The tree mirrors `include/fiction/`,** so a binding lives beside the header it wraps:
+`quickexact.cpp` under `technology/sidb/simulation/engines/`, `write_qca_layout.cpp` under
+`technology/qca/io/`. Every directory that holds binding sources has exactly one registry,
+named after the directory (`register_sidb_simulation_engines.cpp`), that declares and calls
+the registration functions of that directory and nothing else. `pyfiction.cpp` calls every
+registry; none is nested inside another. That call order is load-bearing: a type has to be
+registered before anything names it in a signature or a default argument, which is why the
+block runs the type-defining directories first, then readers and writers, then the
+algorithms built on them.
 
 Never:
 
@@ -37,7 +46,7 @@ without the two `__init__.py` files above it.
 
 Move the suite to `test/python/` when the project structure is next reworked. That is what
 `mqt-core` does, and it removes the workaround rather than reproducing it. The move is
-mechanical — `git mv` of 92 tracked files plus eight references in `pyproject.toml` and
-`.github/workflows/change-detection.yml` — and `test/CMakeLists.txt` globs `*/*.cpp`, so a
+mechanical — `git mv` of 104 tracked files plus seven references in `pyproject.toml` — and
+`test/CMakeLists.txt` globs `*/*.cpp`, so a
 Python subdirectory there is inert. `sdist.exclude` and `check-sdist`'s `git-only` both
 already list `/test`, so their `/bindings/mnt/pyfiction/test` entries go away with it.

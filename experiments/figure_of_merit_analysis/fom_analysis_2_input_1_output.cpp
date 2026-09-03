@@ -1,27 +1,40 @@
-//
-// Created by Jan Drewniok 01.01.23
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Figures of merit of designed 2-input/1-output SiDB gates.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/design_sidb_gates.hpp>
-#include <fiction/algorithms/simulation/sidb/band_bending_resilience.hpp>
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/defect_clearance.hpp>
-#include <fiction/algorithms/simulation/sidb/defect_influence.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/physical_population_stability.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
-#include <fiction/technology/sidb_defects.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/generators/design_gates.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
+#include <fiction/technology/sidb/simulation/defects/defect_clearance.hpp>
+#include <fiction/technology/sidb/simulation/defects/defect_influence.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/math_utils.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <fmt/core.h>
 
@@ -36,6 +49,15 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::sidb::simulation::defects;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
+using namespace fiction::utils::math;
 
 // This script summarizes all experiments presented in \"Unifying Figures of Merit: A Versatile Cost Function for
 // Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R. Wille in IEEE-NANO 2024
@@ -57,19 +79,17 @@ int main()  // NOLINT
     experiments::experiment<std::string, std::size_t, double, double, double, double, double, double> minimal_cost{
         "Minimal Cost", "gate", "#canvas SiDBs", "CT", "OPD", "MDC_arsenic", "MDC_vacancy", "BBR", "X_custom,min"};
 
-    const auto op_params     = is_operational_params{sidb_simulation_parameters{2, -0.32}};
-    auto       design_params = design_sidb_gates_params<cell<Lyt>>{};
+    const auto op_params     = is_operational_params{simulation_parameters{2, -0.32}};
+    auto       design_params = design_gates_params<cell<Lyt>>{};
 
     design_params.operational_params = op_params;
-    design_params.design_mode =
-        design_sidb_gates_params<cell<Lyt>>::design_sidb_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
-    design_params.canvas                 = {{17, 14, 0}, {21, 22, 0}};
+    design_params.design_mode = design_gates_params<cell<Lyt>>::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER;
+    design_params.canvas      = {{17, 14, 0}, {21, 22, 0}};
     design_params.number_of_canvas_sidbs = 2;
-    design_params.termination_cond =
-        design_sidb_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
+    design_params.termination_cond = design_gates_params<cell<Lyt>>::termination_condition::ALL_COMBINATIONS_ENUMERATED;
     // QuickExact was used for the paper. However, ClusterComplete is more efficient and faster but does not influence
     // the results.
-    design_params.operational_params.sim_engine = sidb_simulation_engine::CLUSTERCOMPLETE;
+    design_params.operational_params.sim_engine = engine::CLUSTERCOMPLETE;
 
     const std::size_t minimum_number_of_canvas_sidbs = 2;
     const std::size_t maximum_number_of_canvas_sidbs = 6;
@@ -100,18 +120,17 @@ int main()  // NOLINT
     op_domain_params.sweep_dimensions[1].max  = 6.0;
     op_domain_params.sweep_dimensions[1].step = 0.2;
 
-    const band_bending_resilience_params bbr_params{
-        physical_population_stability_params{op_params.simulation_parameters}};
+    const band_bending_resilience_params bbr_params{physical_population_stability_params{op_params.sim_params}};
 
     // for this experiment, we use two different defects: a vacancy in the Si lattice and an arsenic atom.
     // The physical properties are taken from the paper "Electrostatic landscape of a Hydrogen-terminated Silicon
     // Surface Probed by a Moveable Quantum Dot" by T. R. Huff et al.
-    const auto si_vacancy = fiction::sidb_defect{fiction::sidb_defect_type::SI_VACANCY, -1, 10.6, 5.9};
-    const auto arsenic    = fiction::sidb_defect{fiction::sidb_defect_type::ARSENIC, 1, 9.7, 2.1};
+    const auto si_vacancy = defect{defect_type::SI_VACANCY, -1, 10.6, 5.9};
+    const auto arsenic    = defect{defect_type::ARSENIC, 1, 9.7, 2.1};
 
-    const std::vector<sidb_defect> defects = {si_vacancy, arsenic};
+    const std::vector<defect> defects = {si_vacancy, arsenic};
 
-    defect_influence_params<fiction::cell<sidb_100_cell_clk_lyt_cube>> params{};
+    defect_influence_params<cell<sidb_100_cell_clk_lyt_cube>> params{};
     params.additional_scanning_area = {20, 20};
     params.operational_params       = op_params;
 
@@ -136,10 +155,10 @@ int main()  // NOLINT
             std::vector<double> defect_influence_vacancy      = {};
             std::vector<double> bbr_all                       = {};
 
-            std::vector<Lyt>        all_gates{};
-            design_sidb_gates_stats efficient_stats{};
+            std::vector<Lyt>   all_gates{};
+            design_gates_stats efficient_stats{};
 
-            all_gates = design_sidb_gates(skeleton, truth_table, design_params, &efficient_stats);
+            all_gates = design_gates(skeleton, truth_table, design_params, &efficient_stats);
 
             if (all_gates.empty())
             {
@@ -180,7 +199,7 @@ int main()  // NOLINT
                         defect_influence_grid_search(gate, truth_table, params, 4, &defect_inf_stats);
                     const auto defect_clearance = calculate_defect_clearance(gate, defect_inf_grid);
 
-                    if (defect.type == sidb_defect_type::SI_VACANCY)
+                    if (defect.type == defect_type::SI_VACANCY)
                     {
                         min_defect_clearance_vacancy =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_vacancy);
@@ -188,7 +207,7 @@ int main()  // NOLINT
                             std::max(defect_clearance.defect_clearance_distance, max_defect_clearance_vacancy);
                         defect_influence_vacancy.push_back(defect_clearance.defect_clearance_distance);
                     }
-                    else if (defect.type == sidb_defect_type::ARSENIC)
+                    else if (defect.type == defect_type::ARSENIC)
                     {
                         min_defect_clearance_arsenic =
                             std::min(defect_clearance.defect_clearance_distance, min_defect_clearance_arsenic);

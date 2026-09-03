@@ -10,9 +10,10 @@
   "style_override_for_suffix": {
     ".pyi": "DOCSTRING_STYLE"
   },
-  "include": ["**/*.py", "**/*.pyi"],
+  "include": ["**/*.py", "**/*.pyi", "**/*.hpp", "**/*.cpp"],
   "exclude": [
     "^vendors/",
+    "^bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings\\.hpp$",
     "^benchmarks/",
     "(^|/)\\.(ai|git|mypy_cache|nox|pytest_cache|ruff_cache|tox|venv[^/]*)/",
     "(^|/)(build|cmake-build)[^/]*/",

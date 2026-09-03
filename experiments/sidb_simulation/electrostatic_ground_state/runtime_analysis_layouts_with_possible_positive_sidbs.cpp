@@ -1,14 +1,27 @@
-//
-// Created by Jan Drewniok on 02.09.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Runtime of the SiDB simulation engines where positive charges can occur.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/random_sidb_layout_generator.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/technology/sidb/generators/random_layout_generator.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>
@@ -19,6 +32,9 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::generators;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::engines;
 
 // This script compares the simulation runtime of ExGS and QuickExact for randomly
 // generated layouts that may contain positively charged SiDBs (`can_positive_charges_occur` returns `true`). The number
@@ -36,24 +52,24 @@ int main()  // NOLINT
         "QuickExact Runtime [s]",
         "Average #positive SiDBs of ground state"};
 
-    const sidb_simulation_parameters sim_params{3, -0.32};
+    const simulation_parameters sim_params{3, -0.32};
 
     const quickexact_params<cell<Lyt>> qe_params{sim_params,
                                                  quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
 
-    auto random_layouts_params = generate_random_sidb_layout_params<cell<Lyt>>{
-        {{0, 0}, {10, 10}},
-        0,
-        generate_random_sidb_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
-        sim_params,
-        static_cast<uint64_t>(10E6),
-        10};
+    auto random_layouts_params =
+        generate_random_layout_params<cell<Lyt>>{{{0, 0}, {10, 10}},
+                                                 0,
+                                                 generate_random_layout_params<cell<Lyt>>::positive_charges::MAY_OCCUR,
+                                                 sim_params,
+                                                 static_cast<uint64_t>(10E6),
+                                                 10};
 
     for (auto num_sidbs = 5u; num_sidbs < 20; num_sidbs++)
     {
         random_layouts_params.number_of_sidbs = num_sidbs;
 
-        const auto random_layouts = generate_multiple_random_sidb_layouts<Lyt>(random_layouts_params);
+        const auto random_layouts = generate_multiple_random_layouts<Lyt>(random_layouts_params);
 
         double runtime_exhaustive = 0;
         double runtime_quickexact = 0;

@@ -1,19 +1,36 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Registers the `layouts` bindings with the `mnt.pyfiction` module.
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void cartesian_layout(nanobind::module_& m);
-void cell_level_layouts(nanobind::module_& m);
-void clocked_layouts(nanobind::module_& m);
-void coordinate_utility(nanobind::module_& m);
-void cube_coordinate(nanobind::module_& m);
-void gate_level_layouts(nanobind::module_& m);
-void hexagonal_layout(nanobind::module_& m);
-void obstruction_layouts(nanobind::module_& m);
 void offset_coordinate(nanobind::module_& m);
-void shifted_cartesian_layout(nanobind::module_& m);
+void cube_coordinate(nanobind::module_& m);
 void siqad_coordinate(nanobind::module_& m);
+void coordinate_utility(nanobind::module_& m);
+void cartesian_layout(nanobind::module_& m);
+void shifted_cartesian_layout(nanobind::module_& m);
+void hexagonal_layout(nanobind::module_& m);
+void clocked_layout(nanobind::module_& m);
+void gate_level_layout(nanobind::module_& m);
+void cell_level_layout(nanobind::module_& m);
+void obstruction_layout(nanobind::module_& m);
+void layout_utils(nanobind::module_& m);
 
 void register_layouts(nanobind::module_& m)
 {
@@ -21,14 +38,14 @@ void register_layouts(nanobind::module_& m)
     cube_coordinate(m);
     siqad_coordinate(m);
     coordinate_utility(m);
-
     cartesian_layout(m);
     shifted_cartesian_layout(m);
     hexagonal_layout(m);
-    clocked_layouts(m);
-    gate_level_layouts(m);
-    cell_level_layouts(m);
-    obstruction_layouts(m);
+    clocked_layout(m);
+    gate_level_layout(m);
+    cell_level_layout(m);
+    obstruction_layout(m);
+    layout_utils(m);
 }
 
 }  // namespace pyfiction

@@ -1,12 +1,23 @@
-//
-// Created by marcel on 02.02.22.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_OBSTRUCTION_LAYOUT_HPP
-#define FICTION_OBSTRUCTION_LAYOUT_HPP
+/**
+ * @file
+ * @brief Layout that adds a unified obstruction interface to any coordinate layout.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include "fiction/traits.hpp"
-#include "fiction/utils/hash.hpp"
+#include "fiction/utils/stl/hash.hpp"  // IWYU pragma: keep, specializes std::hash for the std::pair the phmap set below instantiates
 
 #include <phmap.h>
 
@@ -14,7 +25,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -182,6 +193,4 @@ class obstruction_layout<Lyt, false> : public Lyt
 template <class T>
 obstruction_layout(const T&) -> obstruction_layout<T>;
 
-}  // namespace fiction
-
-#endif  // FICTION_OBSTRUCTION_LAYOUT_HPP
+}  // namespace fiction::layouts

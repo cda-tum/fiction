@@ -1,17 +1,30 @@
-//
-// Created by Jan Drewniok on 02.03.25.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Critical temperature domains of the Bestagon gates.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/is_operational.hpp>
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
+#include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 
@@ -23,6 +36,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 // This script analyzes the critical temperature within the operational domain of the Bestagon gates. It calculates
 // the operational domain at various temperatures relative to the total operational domain at 0 K.
@@ -39,14 +58,14 @@ int main()  // NOLINT
         "ΔCT"};
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
 
     op_domain_params.sweep_dimensions         = {{sweep_parameter::EPSILON_R}, {sweep_parameter::LAMBDA_TF}};
     op_domain_params.sweep_dimensions[0].min  = 1.0;

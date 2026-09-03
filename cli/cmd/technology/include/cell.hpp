@@ -1,13 +1,24 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_CELL_HPP
-#define FICTION_CMD_CELL_HPP
+/**
+ * @file
+ * @brief Declares the `cell` command, which applies a gate library to the current layout.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <fiction/layouts/coordinates.hpp>
-#include <fiction/technology/cell_ports.hpp>
-#include <fiction/technology/fcn_gate_library.hpp>
+#include <fiction/technology/fcn/cell_ports.hpp>
+#include <fiction/technology/fcn/gate_library.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -62,18 +73,18 @@ class cell_command final : public command
         {
             return std::forward<ApplyFunc>(apply_func)(std::forward<Source>(source));
         }
-        catch (const fiction::unsupported_gate_type_exception<fiction::offset::ucoord_t>& e)
+        catch (const fiction::fcn::unsupported_gate_type_exception<fiction::layouts::coords::offset>& e)
         {
             env->out() << fmt::format("[e] unsupported gate type at tile position {}\n", e.where());
         }
-        catch (
-            const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t, fiction::port_position>& e)
+        catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::layouts::coords::offset,
+                                                                          fiction::fcn::port_position>& e)
         {
             env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with ports {}\n", e.where(),
                                       e.which_ports());
         }
-        catch (const fiction::unsupported_gate_orientation_exception<fiction::offset::ucoord_t,
-                                                                     fiction::port_direction>& e)
+        catch (const fiction::fcn::unsupported_gate_orientation_exception<fiction::layouts::coords::offset,
+                                                                          fiction::fcn::port_direction>& e)
         {
             env->out() << fmt::format("[e] unsupported gate orientation at tile position {} with port directions {}\n",
                                       e.where(), e.which_ports());
@@ -88,5 +99,3 @@ class cell_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CELL_HPP

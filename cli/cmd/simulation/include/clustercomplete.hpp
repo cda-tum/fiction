@@ -1,11 +1,26 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Declares the `clustercomplete` command, which runs *ClusterComplete* on the current layout.
+ * @author Marcel Walter (marcelwa)
+ */
+
 #if (FICTION_ALGLIB_ENABLED)
 
-#ifndef FICTION_CMD_CLUSTERCOMPLETE_HPP
-#define FICTION_CMD_CLUSTERCOMPLETE_HPP
+#pragma once
 
-#include <fiction/algorithms/simulation/sidb/clustercomplete.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -40,19 +55,19 @@ class clustercomplete_command final : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{3, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters physical_params{3, -0.32, 5.6, 5.0};
     /**
      * ClusterComplete parameters.
      */
-    fiction::clustercomplete_params<> cc_params{};
+    fiction::sidb::simulation::engines::clustercomplete_params<> cc_params{};
     /**
      * Type alias for H-Si(100)-2x1 simulation result.
      */
-    using sim_result_100 = fiction::sidb_simulation_result<fiction::sidb_100_cell_clk_lyt>;
+    using sim_result_100 = fiction::sidb::simulation::result<fiction::sidb_100_cell_clk_lyt>;
     /**
      * Type alias for H-Si(111)-1x1 simulation result.
      */
-    using sim_result_111 = fiction::sidb_simulation_result<fiction::sidb_111_cell_clk_lyt>;
+    using sim_result_111 = fiction::sidb::simulation::result<fiction::sidb_111_cell_clk_lyt>;
     /**
      * Simulation result for either the H-Si(100)-2x1 or the H-Si(111)-1x1 surface.
      */
@@ -74,7 +89,5 @@ class clustercomplete_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_CLUSTERCOMPLETE_HPP
 
 #endif  // FICTION_ALGLIB_ENABLED

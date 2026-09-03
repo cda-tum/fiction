@@ -1,9 +1,22 @@
-//
-// Created by marcel on 16.11.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_FICTION_EXPERIMENTS_HPP
-#define FICTION_FICTION_EXPERIMENTS_HPP
+/**
+ * @file
+ * @brief Benchmark selectors and paths shared by every experiment.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Benjamin Hien (hibenj)
+ */
+
+#pragma once
 
 #include <fmt/format.h>
 
@@ -183,5 +196,3 @@ std::string benchmark_path(const std::string& benchmark_name, const std::string&
 }
 
 }  // namespace fiction_experiments
-
-#endif  // FICTION_FICTION_EXPERIMENTS_HPP

@@ -1,13 +1,26 @@
-//
-// Created by Simon Hofmann on 27.04.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `hex` command.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/physical_design/include/hex.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/hexagonalization.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/physical_design/hexagonalization.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -46,7 +59,7 @@ void hex_command::execute()
     const auto& lyt = gls.current();
 
     const auto check_clocking_scheme_2ddwave = [](auto&& lyt_ptr)
-    { return lyt_ptr->is_clocking_scheme(fiction::clock_name::TWODDWAVE); };
+    { return lyt_ptr->is_clocking_scheme(fiction::layouts::clocking::TWODDWAVE_NAME); };
 
     // error case: layout is not 2DDWave-clocked
     if (const auto is_2ddwave_clocked = std::visit(check_clocking_scheme_2ddwave, lyt); !is_2ddwave_clocked)
@@ -66,11 +79,12 @@ void hex_command::execute()
     {
         if (this->is_set("planar"))
         {
-            ps.input_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
+            ps.input_pin_extension =
+                fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
         }
         else
         {
-            ps.input_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND;
+            ps.input_pin_extension = fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND;
         }
     }
 
@@ -78,11 +92,12 @@ void hex_command::execute()
     {
         if (this->is_set("planar"))
         {
-            ps.output_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
+            ps.output_pin_extension =
+                fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND_PLANAR;
         }
         else
         {
-            ps.output_pin_extension = fiction::hexagonalization_params::io_pin_extension_mode::EXTEND;
+            ps.output_pin_extension = fiction::physical_design::hexagonalization_params::io_pin_extension_mode::EXTEND;
         }
     }
 
@@ -92,7 +107,7 @@ void hex_command::execute()
 
         if constexpr (fiction::is_cartesian_layout_v<Lyt>)
         {
-            return fiction::hexagonalization<fiction::hex_even_row_gate_clk_lyt>(*lyt_ptr, ps, &st);
+            return fiction::physical_design::hexagonalization<fiction::hex_even_row_gate_clk_lyt>(*lyt_ptr, ps, &st);
         }
         else
         {
@@ -115,7 +130,7 @@ void hex_command::execute()
             gls.extend() = std::make_shared<fiction::hex_even_row_gate_clk_lyt>(*hex_lyt);
         }
     }
-    catch (const fiction::hexagonalization_io_pin_routing_error& e)
+    catch (const fiction::physical_design::hexagonalization_io_pin_routing_error& e)
     {
         ps = {};
         env->out() << fmt::format("[e] {}\n", e.what());

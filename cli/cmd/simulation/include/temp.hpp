@@ -1,12 +1,23 @@
-//
-// Created by marcel on 06.12.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_TEMP_HPP
-#define FICTION_CMD_TEMP_HPP
+/**
+ * @file
+ * @brief Declares the `temp` command, which computes the current layout's critical temperature.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#pragma once
+
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -39,15 +50,15 @@ class temp_command final : public command
     /**
      * Physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters physical_params{2, -0.32, 5.6, 5.0};
     /**
      * Critical temperature parameters.
      */
-    fiction::critical_temperature_params params{};
+    fiction::sidb::simulation::analysis::critical_temperature_params params{};
     /**
      * Critical temperature statistics.
      */
-    fiction::critical_temperature_stats stats{};
+    fiction::sidb::simulation::analysis::critical_temperature_stats stats{};
     /**
      * Critical temperature.
      */
@@ -69,5 +80,3 @@ class temp_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_TEMP_HPP

@@ -5,6 +5,146 @@ All notable changes to this project will be documented in this file.
 
 The format is based on `Keep a Changelog <https://keepachangelog.com/en/1.0.0/>`_.
 
+Unreleased
+----------
+
+Added
+#####
+- Python bindings:
+    - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
+
+Changed
+#######
+- **Breaking:** Restructured ``include/fiction/`` so that the directory a header lives in tells
+  you what the header is about, and introduced nested namespaces mirroring that tree
+  (`#1096 <https://github.com/cda-tum/fiction/issues/1096>`_,
+  `#1097 <https://github.com/cda-tum/fiction/issues/1097>`_):
+
+    - ``algorithms/`` is dissolved. The design-flow stages sit directly under ``fiction/`` as
+      ``synthesis/``, ``physical_design/``, and ``verification/``
+    - The flat ``io/`` directory is dissolved. Readers and writers live with the module whose
+      data they serialize: ``layouts/io/``, ``networks/io/``, ``synthesis/io/``,
+      ``technology/<tech>/io/``, and ``technology/sidb/simulation/io/`` for the writers of
+      simulation results. The SVG writer is split by the technology it draws into
+      ``qca/io/write_qca_layout_svg.hpp`` and ``sidb/io/write_sidb_layout_svg.hpp``; the QLL
+      writer, which serves iNML, QCA, and molQCA alike, sits in ``fcn/io/``
+    - ``technology/`` is split by technology into ``fcn/``, ``qca/``, ``inml/``, and ``sidb/``.
+      The SiDB subtree gains ``surfaces/``, ``model/``, ``simulation/`` (with ``engines/``,
+      ``analysis/``, ``defects/``, ``logic/``, and ``io/``), ``generators/``, and ``io/``. The
+      ``cell_technologies.hpp`` umbrella is gone; each technology's tag is in its own
+      ``technology.hpp``
+    - ``utils/`` exists once, at the top, and holds what is domain-agnostic: ``math/``, ``stl/``,
+      ``graph/`` (``graph_coloring``, ``mincross``), ``optimization/`` (``simulated_annealing``),
+      and ``io/`` (``csv_writer``). A module's own helpers sit directly in the module, so
+      ``layout_utils.hpp`` is in ``layouts/`` and ``routing_utils.hpp`` in ``physical_design/``.
+      The ``utils/debug/`` printers join ``layouts/io/print_layout.hpp`` and
+      ``networks/io/dot_drawers.hpp``
+    - Namespaces mirror the directories, so ``fiction::quickexact`` becomes
+      ``fiction::sidb::simulation::engines::quickexact``. ``technology/`` itself adds no
+      namespace level; ``coordinates.hpp`` and ``clocking_scheme.hpp`` add ``layouts::coords``
+      and ``layouts::clocking`` for the families they define
+    - Identifiers shed prefixes the namespace now carries, so ``sidb_simulation_parameters``
+      becomes ``fiction::sidb::model::simulation_parameters``, ``design_sidb_gates`` becomes
+      ``fiction::sidb::generators::design_gates``, and ``gate_library::fcn_gate`` becomes
+      ``gate``. Published names are kept, so ``qca_one_library`` stays
+      ``fiction::qca::qca_one_library``, and so do the technology tags ``qca_technology``,
+      ``mol_qca_technology``, ``inml_technology`` and ``sidb_technology``: bare ``technology``
+      reads as nothing in a ``Technology`` template argument and would shadow the
+      ``fiction::technology<Lyt>`` trait in its own namespace
+    - The coordinate types are renamed: ``fiction::offset::ucoord_t`` becomes
+      ``fiction::layouts::coords::offset``, and likewise for ``cube`` and ``siqad``
+    - The cluster hierarchy that ``clustercomplete`` and ``ground_state_space`` build is
+      implementation detail, ``fiction::sidb::simulation::engines::detail``, and leaves the
+      documented API; ``ground_state_space_results::top_cluster`` stays as the handle into it
+
+  *fiction* is header-only, so an include path is public API. This is a clean break: no
+  forwarding headers are left behind and no deprecated ``using`` declarations
+- **Breaking:** ``quickexact_params``, ``quicksim_params``, ``clustercomplete_params``,
+  ``is_operational_params``, ``critical_temperature_params``,
+  ``physical_population_stability_params``, ``generate_random_sidb_layout_params``,
+  ``ground_state_space_params``, ``sidb_simulation_result``, and ``charge_distribution_surface``
+  renamed their ``simulation_parameters`` member to ``sim_params``, which is what several of them
+  already called it. ``is_sidb_gate_design_impossible_params`` spelled it ``simulation_params``
+  and is unified to ``sim_params`` too. The Python attribute keeps the name
+  ``simulation_parameters``
+- **Breaking:** Three member functions lose the prefix their class's namespace now carries:
+  ``charge_distribution_surface::set_sidb_simulation_engine`` becomes ``set_simulation_engine``,
+  and ``defect_surface::assign_sidb_defect`` and ``get_sidb_defect`` become ``assign_defect`` and
+  ``get_defect``
+- **Breaking:** The clocking schemes share one ``fiction::layouts::clocking`` namespace and
+  drop the ``clocking`` their identifiers repeated, so ``fiction::bancs_clocking`` becomes
+  ``fiction::layouts::clocking::bancs``, and likewise for ``open``, ``columnar``, ``row``,
+  ``twoddwave``, ``twoddwave_hex``, ``use``, ``res``, ``esr``, ``cfe``, ``ripple``, and
+  ``srs``. The type they return, the enum they take, and the helpers around them move with
+  them: ``clocking_scheme`` becomes ``clocking::scheme``, ``clock_name::TWODDWAVE`` becomes
+  ``clocking::TWODDWAVE_NAME``, ``get_clocking_scheme`` becomes ``clocking::get_scheme``, and
+  ``is_linear_scheme`` becomes ``clocking::is_linear``. ``clocking_scheme.hpp`` keeps its
+  path, the scheme name strings are unchanged, and the ``clocked_layout`` members that
+  mention clocking keep their names. ``fiction::ptr``, which wrapped a scheme in a
+  ``std::shared_ptr`` and had no caller, is removed
+- **Breaking:** The truth table helpers move from ``utils`` to ``synthesis``, where the gate
+  libraries and technology mapping that specify functions with them live:
+  ``fiction::create_and_tt`` becomes ``fiction::synthesis::create_and_tt``, and
+  ``fiction::tt_reader`` becomes ``fiction::synthesis::io::tt_reader``. The header sheds its
+  ``_utils`` suffix to match its siblings, so ``fiction/utils/truth_table_utils.hpp`` is now
+  ``fiction/synthesis/truth_tables.hpp``. Neither header depends on a network; both include only
+  ``kitty`` and the standard library
+- **Breaking:** ``fiction::layouts::coords`` adopts one naming rule: a bare noun is a coordinate
+  type, everything else is an operation on one. ``coord_iterator`` becomes
+  ``coordinate_iterator``, ``area`` and ``volume`` become ``area_of`` and ``volume_of``, and the
+  three conversions unify from ``to_fiction_coord``, ``to_siqad_coord`` and ``offset_to_cube``
+  into ``from_siqad``, ``to_siqad`` and ``to_cube``. The coordinate types ``offset``, ``cube``
+  and ``siqad`` keep their names
+- **Breaking:** ``fiction::constants`` is gone. ``ERROR_MARGIN``, the floating-point comparison
+  tolerance, is ``fiction::utils::math::ERROR_MARGIN``; ``ELEMENTARY_CHARGE``, ``K_E``,
+  ``BOLTZMANN_CONSTANT`` and ``EV_TO_JOULE`` are ``fiction::sidb::model`` constants in
+  ``technology/sidb/model/physical_constants.hpp``. ``PI``, which duplicated ``std::numbers::pi``
+  at lower precision, and ``physical::EPSILON``, which the electrostatics never used because the
+  Coulomb constant ``K_E`` folds in the ``1 / (4 * pi * epsilon_0)`` the two spelled out, are
+  removed
+- **Breaking:** Test files are renamed to ``test_<header>.cpp`` and the ``test/`` tree mirrors
+  ``include/fiction/``. CTest case names gain the ``test_`` prefix accordingly
+- The ``pyfiction`` binding sources and their test suite mirror the new tree as well: each
+  binding sits in the directory of the header it wraps under the header's name, and every
+  directory that holds binding sources has exactly one registry. The Python API is unchanged,
+  except for the two attributes listed under *Python bindings*
+- Code quality:
+    - The C++ test suite and the experiments now open the namespaces they use, one
+      ``using namespace`` directive per namespace, rather than qualifying every symbol below
+      ``fiction``. That removes about 14,000 qualifier tokens. ``fiction::layouts::coords`` and
+      ``fiction::layouts::clocking`` are deliberately left closed, so those references read
+      ``coords::offset`` and ``clocking::scheme``, and ``detail`` namespaces stay qualified by
+      their module
+    - The ``license-tools`` hook now covers ``.hpp`` and ``.cpp`` as well as Python, and skips the
+      generated ``pybind11_mkdoc_docstrings.hpp``
+    - Every C++ file now opens with the MIT copyright block and a Doxygen block carrying ``@file``,
+      a one-line ``@brief``, and one ``@author`` line per contributor. The ``// Created by ...``
+      comments 428 files carried are gone; editing a file now means adding yourself to its list
+    - **Breaking for forks:** the ``#ifndef FICTION_..._HPP`` include guards are replaced by
+      ``#pragma once``, so a patch that touches the top or the bottom of a header will not apply
+      as-is. ``portability-avoid-pragma-once`` is switched off in ``.clang-tidy`` accordingly
+    - The Debug build no longer emits compiler warnings. Cleared ``-Wshadow`` in ``energy_state``
+      and the two SiDB writer implementations, ``-Wswitch`` in ``write_sqd_layout``, and
+      ``-Wparentheses`` and ``-Wconversion`` in two tests
+- Documentation:
+    - The ``docs/`` tree mirrors ``include/fiction/``: every page sits in the directory of the
+      headers it documents, and every directory with more than one page has a page named after
+      it that carries the toctree
+- Python bindings:
+    - **Breaking:** ``critical_temperature_stats.is_ground_state_transparent`` is renamed
+      ``energy_between_ground_state_and_first_erroneous``, the member it always exposed
+
+Fixed
+#####
+- ``types.hpp``: ``sidb_111_cell_clk_lyt_siqad_ptr``, ``cds_sidb_cell_clk_lyt_cube``,
+  ``cds_sidb_111_cell_clk_lyt_siqad_ptr``, and ``cds_sidb_111_cell_clk_lyt_cube_ptr`` pointed at
+  the wrong type; a ``static_assert`` per ``*_ptr`` alias pins each to the type its name says
+- Python bindings:
+    - ``parameter_point.__getitem__`` raises ``IndexError`` for an out-of-range index instead of
+      reading past the parameter vector
+    - ``write_sqd_sim_result`` accepts the ``sidb_simulation_result_100`` and ``_111`` results
+      Python produces; it was bound for a result type Python cannot construct
+
 v0.8.0 - 2026-09-02
 -------------------
 

@@ -1,24 +1,28 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Registers the `utils` bindings with the `mnt.pyfiction` module.
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include <nanobind/nanobind.h>
 
 namespace pyfiction
 {
 
-void layout_utils(nanobind::module_& m);
-void name_utils(nanobind::module_& m);
-void network_utils(nanobind::module_& m);
-void placement_utils(nanobind::module_& m);
-void routing_utils(nanobind::module_& m);
-void truth_table_utils(nanobind::module_& m);
 void version_info(nanobind::module_& m);
 
 void register_utils(nanobind::module_& m)
 {
-    layout_utils(m);
-    routing_utils(m);
-    name_utils(m);
-    network_utils(m);
-    placement_utils(m);
-    truth_table_utils(m);
     version_info(m);
 }
 

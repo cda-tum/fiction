@@ -23,6 +23,13 @@ Checks: |
   -hicpp-named-parameter,
   -hicpp-uppercase-literal-suffix,
   misc-*,
+  # glibc expands `assert(x)` to an expression containing `sizeof((x) ? 1 : 0)`, and the
+  # check latches onto that constant sub-expression: it reports every `assert()` in the
+  # code base, `assert(x > 0)` on a runtime parameter included, and each `static_assert()`
+  # it proposes would fail to compile. Verified on clang-tidy 21 and 22
+  -misc-static-assert,
+  -cert-dcl03-c,
+  -hicpp-static-assert,
   -misc-no-recursion,
   -misc-non-private-member-variables-in-classes,
   -misc-use-anonymous-namespace,
@@ -31,13 +38,17 @@ Checks: |
   -modernize-use-trailing-return-type,
   performance-*,
   portability-*,
+  # headers guard themselves with `#pragma once`. Every compiler the project supports
+  # implements it. It also retires 201 hand-written macro names whose spelling had to
+  # be kept in step with the directory tree by hand
+  -portability-avoid-pragma-once,
   readability-*,
   -readability-function-cognitive-complexity,
   -readability-identifier-length,
   -readability-isolate-declaration,
   -readability-magic-numbers,
   -readability-named-parameter,
-  -readability-uppercase-literal-suffix
+  -readability-uppercase-literal-suffix,
   -readability-redundant-member-init
 
 CheckOptions:

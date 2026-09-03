@@ -1,13 +1,25 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `gates` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/logic/include/gates.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/properties/count_gate_types.hpp>
 #include <fiction/types.hpp>
+#include <fiction/verification/count_gate_types.hpp>
 
 #include <alice/alice.hpp>
 
@@ -35,8 +47,8 @@ void gates_command::execute()
 
     const auto count = [this](auto&& ntk_or_lyt_ptr)
     {
-        fiction::count_gate_types_stats st{};
-        fiction::count_gate_types(*ntk_or_lyt_ptr, &st);
+        fiction::verification::count_gate_types_stats st{};
+        fiction::verification::count_gate_types(*ntk_or_lyt_ptr, &st);
 
         st.report(env->out(), is_set("detailed"));
     };

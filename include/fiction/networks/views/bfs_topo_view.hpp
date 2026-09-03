@@ -1,9 +1,21 @@
-//
-// Created by benjamin on 08.04.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_BFS_TOPO_VIEW_HPP
-#define FICTION_BFS_TOPO_VIEW_HPP
+/**
+ * @file
+ * @brief Network view that yields a breadth-first instead of depth-first topological order.
+ * @author Benjamin Hien (hibenj)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <mockturtle/networks/detail/foreach.hpp>
 #include <mockturtle/traits.hpp>
@@ -18,7 +30,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace fiction
+namespace fiction::networks::views
 {
 
 /**
@@ -293,6 +305,4 @@ bfs_topo_view(const T&) -> bfs_topo_view<T>;
 template <class T>
 bfs_topo_view(const T&, const typename T::signal&) -> bfs_topo_view<T>;
 
-}  // namespace fiction
-
-#endif  // FICTION_BFS_TOPO_VIEW_HPP
+}  // namespace fiction::networks::views

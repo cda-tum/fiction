@@ -1,6 +1,18 @@
-//
-// Created by marcel on 06.01.20.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `exact` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #if (FICTION_Z3_SOLVER)
 
@@ -8,11 +20,11 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/physical_design/exact.hpp>
 #include <fiction/layouts/clocking_scheme.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/networks/network_utils.hpp>
+#include <fiction/physical_design/exact.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
-#include <fiction/utils/network_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -98,7 +110,7 @@ void exact_command::execute()
     // target technology constraints
     if (this->is_set("topolinano"))
     {
-        ps.technology_specifics = fiction::technology_constraints::TOPOLINANO;
+        ps.technology_specifics = fiction::physical_design::technology_constraints::TOPOLINANO;
 
         // shifted Cartesian layout
         exact_physical_design<fiction::cart_odd_col_gate_clk_lyt>();
@@ -146,16 +158,17 @@ nlohmann::json exact_command::log() const
 
 void exact_command::reset_flags()
 {
-    ps                   = fiction::exact_physical_design_params{};
+    ps                   = fiction::physical_design::exact_physical_design_params{};
     hexagonal_tile_shift = {};
 }
 
 template <typename Lyt>
 void exact_command::exact_physical_design()
 {
-    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::get_name(*ntk_ptr); };
+    const auto get_name = [](auto&& ntk_ptr) -> std::string { return fiction::networks::get_name(*ntk_ptr); };
 
-    const auto perform_physical_design = [this](auto&& ntk_ptr) { return fiction::exact<Lyt>(*ntk_ptr, ps, &st); };
+    const auto perform_physical_design = [this](auto&& ntk_ptr)
+    { return fiction::physical_design::exact<Lyt>(*ntk_ptr, ps, &st); };
 
     const auto& ntk_ptr = store<fiction::logic_network_t>().current();
 
@@ -174,11 +187,11 @@ void exact_command::exact_physical_design()
                                       std::visit(get_name, ntk_ptr));
         }
     }
-    catch (const fiction::unsupported_clocking_scheme_exception&)
+    catch (const fiction::layouts::clocking::unsupported_scheme_exception&)
     {
         env->out() << fmt::format("\"{}\" does not refer to a supported clocking scheme\n", ps.scheme);
     }
-    catch (const fiction::high_degree_fanin_exception& e)
+    catch (const fiction::networks::high_degree_fanin_exception& e)
     {
         env->out() << fmt::format("[e] {} of the given clocking scheme\n", e.what());
     }

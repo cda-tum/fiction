@@ -1,12 +1,23 @@
-//
-// Created by marcel on 12.12.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_OPDOM_HPP
-#define FICTION_CMD_OPDOM_HPP
+/**
+ * @file
+ * @brief Declares the `opdom` command, which computes the current layout's operational domain.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
+#pragma once
+
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -61,22 +72,22 @@ class opdom_command final : public command
     /**
      * Default physical parameters for the simulation.
      */
-    fiction::sidb_simulation_parameters simulation_params{2, -0.32, 5.6, 5.0};
+    fiction::sidb::model::simulation_parameters sim_params{2, -0.32, 5.6, 5.0};
     /**
      * Default value ranges for sweeping.
      */
-    std::vector<fiction::operational_domain_value_range> sweep_dimensions{
-        {fiction::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
-        {fiction::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
-        {fiction::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
+    std::vector<fiction::sidb::simulation::logic::operational_domain_value_range> sweep_dimensions{
+        {fiction::sidb::simulation::logic::sweep_parameter::EPSILON_R, 1.0, 10.0, 0.1},
+        {fiction::sidb::simulation::logic::sweep_parameter::LAMBDA_TF, 1.0, 10.0, 0.1},
+        {fiction::sidb::simulation::logic::sweep_parameter::MU_MINUS, -0.50, -0.10, 0.025}};
     /**
      * Operational domain parameters.
      */
-    fiction::operational_domain_params params{};
+    fiction::sidb::simulation::logic::operational_domain_params params{};
     /**
      * Operational domain stats.
      */
-    fiction::operational_domain_stats stats{};
+    fiction::sidb::simulation::logic::operational_domain_stats stats{};
     /**
      * Number of random samples.
      */
@@ -120,7 +131,7 @@ class opdom_command final : public command
     /**
      * The operational domain.
      */
-    fiction::operational_domain op_domain{};
+    fiction::sidb::simulation::logic::operational_domain op_domain{};
     /**
      * Writes the operational domain to the specified CSV file.
      */
@@ -138,5 +149,3 @@ class opdom_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_OPDOM_HPP

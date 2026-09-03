@@ -1,16 +1,34 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Wiring reduction across the benchmark set.
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>        // scalable heuristic for physical design
-#include <fiction/algorithms/physical_design/wiring_reduction.hpp>  // wiring reduction algorithm
-#include <fiction/algorithms/properties/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
-#include <fiction/algorithms/verification/equivalence_checking.hpp>               // SAT-based equivalence checking
-#include <fiction/io/network_reader.hpp>                                          // read networks from files
-#include <fiction/layouts/bounding_box.hpp>                                       // bounding box
-#include <fiction/layouts/cartesian_layout.hpp>                                   // Cartesian layout
-#include <fiction/layouts/clocked_layout.hpp>                                     // clocked layout
-#include <fiction/layouts/gate_level_layout.hpp>                                  // gate-level layout
-#include <fiction/layouts/tile_based_layout.hpp>                                  // tile-based layout
-#include <fiction/types.hpp>                                                      // tec_nt, tec_ptr
+#include <fiction/layouts/bounding_box.hpp>                              // bounding box
+#include <fiction/layouts/cartesian_layout.hpp>                          // Cartesian layout
+#include <fiction/layouts/clocked_layout.hpp>                            // clocked layout
+#include <fiction/layouts/gate_level_layout.hpp>                         // gate-level layout
+#include <fiction/layouts/tile_based_layout.hpp>                         // tile-based layout
+#include <fiction/networks/io/network_reader.hpp>                        // read networks from files
+#include <fiction/physical_design/orthogonal.hpp>                        // scalable heuristic for physical design
+#include <fiction/physical_design/wiring_reduction.hpp>                  // wiring reduction algorithm
+#include <fiction/types.hpp>                                             // tec_nt, tec_ptr
+#include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
+#include <fiction/verification/equivalence_checking.hpp>                 // SAT-based equivalence checking
 
 #include <fmt/format.h>  // output formatting
 #include <mockturtle/utils/stopwatch.hpp>
@@ -20,6 +38,12 @@
 #include <sstream>
 #include <string>
 
+using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::networks::io;
+using namespace fiction::physical_design;
+using namespace fiction::verification;
+
 template <typename Ntk>
 static Ntk read_ntk(const std::string& name)
 {
@@ -27,7 +51,7 @@ static Ntk read_ntk(const std::string& name)
 
     std::ostringstream os{};
 
-    fiction::network_reader<fiction::tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
+    network_reader<tec_ptr> reader{fiction_experiments::benchmark_path(name), os};
 
     const auto nets = reader.get_networks();
 
@@ -36,8 +60,7 @@ static Ntk read_ntk(const std::string& name)
 
 int main()  // NOLINT
 {
-    using gate_lyt =
-        fiction::gate_level_layout<fiction::clocked_layout<fiction::tile_based_layout<fiction::cartesian_layout<>>>>;
+    using gate_lyt = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<>>>>;
 
     experiments::experiment<std::string, uint32_t, uint32_t, uint32_t, uint64_t, uint64_t, uint64_t, uint64_t, uint64_t,
                             uint64_t, uint64_t, size_t, size_t, float, uint64_t, uint64_t, float, uint64_t, uint64_t,
@@ -69,49 +92,49 @@ int main()  // NOLINT
                              "equivalent"};
 
     // stats for SMT-based physical design
-    fiction::orthogonal_physical_design_stats orthogonal_stats{};
-    fiction::wiring_reduction_stats           wiring_reduction_stats{};
+    orthogonal_physical_design_stats orthogonal_stats{};
+    wiring_reduction_stats           wiring_reduction_stats{};
 
     static constexpr const uint64_t bench_select = fiction_experiments::trindade16 | fiction_experiments::fontes18;
 
     for (const auto& benchmark : fiction_experiments::all_benchmarks(bench_select))
     {
-        const auto benchmark_network = read_ntk<fiction::tec_nt>(benchmark);
+        const auto benchmark_network = read_ntk<tec_nt>(benchmark);
 
         // perform layout generation with an OGD-based heuristic algorithm
-        auto       gate_level_layout = fiction::orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
+        auto       gate_level_layout = orthogonal<gate_lyt>(benchmark_network, {}, &orthogonal_stats);
         const auto layout_copy       = gate_level_layout.clone();
 
         auto num_wires = gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
         //  compute critical path and throughput
-        const auto cp_tp_stats = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp_stats = critical_path_length_and_throughput(gate_level_layout);
 
         // calculate bounding box
-        const auto bounding_box_before_wiring_reduction = fiction::bounding_box_2d(gate_level_layout);
+        const auto bounding_box_before_wiring_reduction = bounding_box_2d(gate_level_layout);
 
         const auto width_before_wiring_reduction  = bounding_box_before_wiring_reduction.get_x_size() + 1;
         const auto height_before_wiring_reduction = bounding_box_before_wiring_reduction.get_y_size() + 1;
         const auto area_before_wiring_reduction   = width_before_wiring_reduction * height_before_wiring_reduction;
 
         // perform post-layout optimization
-        fiction::wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
+        wiring_reduction<gate_lyt>(gate_level_layout, {}, &wiring_reduction_stats);
 
         //  compute critical path and throughput
-        const auto cp_tp_stats_after = fiction::critical_path_length_and_throughput(gate_level_layout);
+        const auto cp_tp_stats_after = critical_path_length_and_throughput(gate_level_layout);
 
         auto num_wires_after =
             gate_level_layout.num_wires() - gate_level_layout.num_pis() - gate_level_layout.num_pos();
 
         // check equivalence
-        const auto eq_stats = fiction::equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
+        const auto eq_stats = equivalence_checking<gate_lyt, gate_lyt>(layout_copy, gate_level_layout);
 
         std::string eq_result;
 
-        if (eq_stats == fiction::eq_type::STRONG)
+        if (eq_stats == eq_type::STRONG)
         {
             eq_result = "STRONG";
         }
-        else if (eq_stats == fiction::eq_type::WEAK)
+        else if (eq_stats == eq_type::WEAK)
         {
             eq_result = "WEAK";
         }
@@ -121,7 +144,7 @@ int main()  // NOLINT
         }
 
         // calculate bounding box
-        const auto bounding_box_after_wiring_reduction = fiction::bounding_box_2d(gate_level_layout);
+        const auto bounding_box_after_wiring_reduction = bounding_box_2d(gate_level_layout);
 
         const auto width_after_wiring_reduction  = bounding_box_after_wiring_reduction.get_x_size() + 1;
         const auto height_after_wiring_reduction = bounding_box_after_wiring_reduction.get_y_size() + 1;

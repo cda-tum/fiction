@@ -16,7 +16,7 @@ has to have a concrete position assigned, mockturtle cannot be used to generate 
     .. tab:: C++
         **Header:** ``fiction/layouts/gate_level_layout.hpp``
 
-        .. doxygenclass:: fiction::gate_level_layout
+        .. doxygenclass:: fiction::layouts::gate_level_layout
            :members:
 
     .. tab:: Python

@@ -1,6 +1,18 @@
-//
-// Created by marcel on 09.02.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Python bindings for `fiction/layouts/obstruction_layout.hpp`.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
@@ -23,9 +35,9 @@ void obstruction_layout(nanobind::module_& m, const std::string& topology)
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
     py::class_<ObstrLyt, LytBase>(m, fmt::format("{}_obstruction_layout", topology).c_str(),
-                                  DOC(fiction_obstruction_layout))
+                                  DOC(fiction_layouts_obstruction_layout))
         .def(py::init<>(), "Default constructor.")
-        .def(py::init<const LytBase&>(), py::arg("layout"), DOC(fiction_obstruction_layout))
+        .def(py::init<const LytBase&>(), py::arg("layout"), DOC(fiction_layouts_obstruction_layout))
 
         .def("obstruct_coordinate", &ObstrLyt::obstruct_coordinate, py::arg("c"))
         .def("obstruct_connection", &ObstrLyt::obstruct_connection, py::arg("src"), py::arg("tgt"))
@@ -41,7 +53,7 @@ void obstruction_layout(nanobind::module_& m, const std::string& topology)
 
 }  // namespace detail
 
-void obstruction_layouts(nanobind::module_& m)
+void obstruction_layout(nanobind::module_& m)
 {
     /**
      * Cartesian obstruction layout.

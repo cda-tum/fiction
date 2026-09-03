@@ -8,7 +8,7 @@ SPHINXPROJ    = fiction
 SOURCEDIR     = .
 BUILDDIR      = _build
 
-doxygen: ../include/fiction/*.hpp
+doxygen: $(shell find ../include/fiction -name "*.hpp")
 	doxygen Doxyfile
 
 # Put it first so that "make" without argument is like "make help".

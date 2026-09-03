@@ -306,7 +306,19 @@ imitate.
 
 ### C++
 
-- **Headers**: `.hpp` extension. Use `#ifndef FICTION_FILENAME_HPP` include guards.
+- **Headers**: `.hpp` extension, guarded with `#pragma once`. Every supported compiler
+  implements it, and it needs no macro name kept in step with the directory tree -- the
+  restructure had to rename all 201 of them by hand, and four `#endif` comments were left
+  naming the old one. `portability-avoid-pragma-once` is switched off in `.clang-tidy`
+  accordingly.
+- **Namespaces**: headers never carry a `using namespace` directive; they qualify. A `.cpp`
+  under `test/` or `experiments/` opens the namespaces it draws symbols from, one directive
+  per namespace, general to specific, starting from `using namespace fiction;`. Two are never
+  opened, because their leaf names cannot stand alone: `fiction::layouts::coords` (`offset`,
+  `cube`, `siqad`) and `fiction::layouts::clocking` (`scheme`) -- a reference to either is
+  shortened only as far as `coords::offset` and `clocking::scheme`. `detail` namespaces are
+  never opened either. `cli/` and the `pyfiction` bindings qualify in full. See
+  `test/AGENTS.md`.
 - **Documentation**:
   - Apply to **ALL** new and edited code.
   - Doxygen style `/** ... */` before **ALL** symbols (members, aliases, functions,
@@ -316,9 +328,48 @@ imitate.
   - Describe the status quo, never the previous behavior, and keep the description true to
     what the code does — see "Documentation describes the status quo" and "Descriptions
     match the implementation" under `Writing`.
-  - The codebase still carries `// Created by ...` comments. A migration to per-file
-    `@file` and `@author` tags, with full name and GitHub handle, is planned; once it
-    lands, that convention is enforced and `// Created by ...` is gone.
+- **File headers**: every `.hpp` and `.cpp` outside `vendors/` opens with two blocks, in
+  this order, and nothing above them. The one exception is
+  `pybind11_mkdoc_docstrings.hpp`, which the docstring generator rewrites whole:
+
+  ```cpp
+  /*
+   * Copyright (c) 2018 - 2023 Marcel Walter
+   * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+   * All rights reserved.
+   *
+   * SPDX-License-Identifier: MIT
+   *
+   * Licensed under the MIT License
+   */
+
+  /**
+   * @file
+   * @brief SMT-based exact placement and routing of FCN gate-level layouts.
+   * @author Marcel Walter (marcelwa)
+   * @author Jan Drewniok (Drewniok)
+   */
+
+  #pragma once
+  ```
+
+  - The copyright block belongs to the `license-tools` hook. Never write or edit it by
+    hand, and never put anything above it: the tool looks for an existing block with a
+    match anchored at offset 0, so a comment in front of it makes the parse swallow the
+    `/*` and leave a dangling `*/` behind.
+  - `@brief` is one line that says what the file provides, in the vocabulary the file
+    itself uses. Not a restatement of the filename.
+  - `@author` is `Full Name (handle)`, oldest contributor first, with the file's creator
+    at the top. Write the handle without an `@`; Doxygen reports any `@word` it does not
+    know as an unknown command. Someone with no GitHub account gets a name-only line.
+  - **Editing a file means adding yourself to its `@author` list**, at the end. Bots and
+    automated formatting runs do not count. `git log --follow -- <file>` gives the
+    existing authors -- never with `--reverse`, which cuts the walk short at the first
+    rename and drops everyone from before it.
+  - The five people in the C++ history and their handles: Marcel Walter (`marcelwa`), Jan
+    Drewniok (`Drewniok`), Simon Hofmann (`simon1hofmann`), Willem Lambooy (`wlambooy`),
+    Benjamin Hien (`hibenj`). Sophia Kuhn wrote the SVG writer and has no commit of her
+    own.
 
 ### Python
 

@@ -282,7 +282,7 @@ required-imports = ["from __future__ import annotations"]
 
 [tool.ruff.lint.per-file-ignores]
 # E501: the expected SVG output is compared verbatim, so its lines cannot be wrapped
-"bindings/mnt/pyfiction/test/inout/test_write_svg_layout.py" = ["line-too-long"]
+"bindings/mnt/pyfiction/test/technology/sidb/io/test_write_sidb_layout_svg.py" = ["line-too-long"]
 # RUF069: a test that stores a float through a binding and reads it back asserts that it
 # comes back unchanged, which is exact; pytest.approx there would hide a broken setter
 # PLR6201: a set literal tests membership by hash, a list literal by `__eq__`. The coordinate

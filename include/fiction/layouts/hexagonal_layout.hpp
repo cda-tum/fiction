@@ -1,9 +1,22 @@
-//
-// Created by marcel on 15.09.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_HEXAGONAL_LAYOUT_HPP
-#define FICTION_HEXAGONAL_LAYOUT_HPP
+/**
+ * @file
+ * @brief Hexagonal grid layout in the four pointy- and flat-top offset orientations.
+ * @author Marcel Walter (marcelwa)
+ * @author Willem Lambooy (wlambooy)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
 
@@ -21,7 +34,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -148,8 +161,8 @@ struct even_column_hex : flat_top_hex
  * @tparam HexagonalCoordinateSystem One of the following: odd_row_hex, even_row_hex, odd_column_hex, even_column_hex.
  * @tparam CubeCoordinateType Internally, cube coordinates are needed for certain algorithms or calculations.
  */
-template <typename OffsetCoordinateType = offset::ucoord_t, typename HexagonalCoordinateSystem = even_row_hex,
-          typename CubeCoordinateType = cube::coord_t>
+template <typename OffsetCoordinateType = coords::offset, typename HexagonalCoordinateSystem = even_row_hex,
+          typename CubeCoordinateType = coords::cube>
     requires std::same_as<HexagonalCoordinateSystem, odd_row_hex> ||
              std::same_as<HexagonalCoordinateSystem, even_row_hex> ||
              std::same_as<HexagonalCoordinateSystem, odd_column_hex> ||
@@ -260,7 +273,7 @@ class hexagonal_layout
      */
     [[nodiscard]] uint64_t area() const noexcept
     {
-        return fiction::area(strg->dimension);
+        return fiction::layouts::coords::area_of(strg->dimension);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -822,8 +835,8 @@ class hexagonal_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return std::ranges::subrange{
-            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
+            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -839,8 +852,9 @@ class hexagonal_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coord_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}, std::forward<Fn>(fn));
+            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
+            std::forward<Fn>(fn));
     }
     /**
      * Returns a range of all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -858,8 +872,9 @@ class hexagonal_layout
 
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
-        return std::ranges::subrange{coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-                                     coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
+        return std::ranges::subrange{
+            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -879,8 +894,9 @@ class hexagonal_layout
         auto ground_layer = aspect_ratio{x(), y(), 0};
 
         mockturtle::detail::foreach_element(
-            coord_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coord_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}, std::forward<Fn>(fn));
+            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
+            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop},
+            std::forward<Fn>(fn));
     }
     /**
      * Returns a container that contains all coordinates that are adjacent to a given one. Thereby, cardinal and ordinal
@@ -1090,6 +1106,4 @@ class hexagonal_layout
     storage strg;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_HEXAGONAL_LAYOUT_HPP
+}  // namespace fiction::layouts

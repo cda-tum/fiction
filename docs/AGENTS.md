@@ -13,7 +13,7 @@ local docs session in `noxfile.py`; Read the Docs builds a preview on every pull
   Do not retype a signature or a parameter description into the `.rst` file; fix the
   Doxygen comment in the header instead.
 - Where a feature exists in both C++ and Python, document both under a `.. tabs::` block,
-  following `algorithms/design_sidb_gates.rst`.
+  following `technology/sidb/generators/design_gates.rst`.
 
 ## Prose
 

@@ -1,17 +1,29 @@
-//
-// Created by marcel on 06.12.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `quickexact` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/simulation/include/quickexact.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/simulation/sidb/minimum_energy.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_result.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/sidb/simulation/analysis/minimum_energy.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -66,7 +78,7 @@ void quickexact_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto quickexact = [this, &get_name](auto&& lyt_ptr)
     {
@@ -85,12 +97,12 @@ void quickexact_command::execute()
             return;
         }
 
-        qe_params.simulation_parameters = physical_params;
+        qe_params.sim_params = physical_params;
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
         {
-            sim_result = fiction::quickexact(*lyt_ptr, qe_params);
+            sim_result = fiction::sidb::simulation::engines::quickexact(*lyt_ptr, qe_params);
 
             if constexpr (fiction::is_sidb_lattice_100_v<Lyt>)
             {
@@ -100,9 +112,9 @@ void quickexact_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr =
-                    minimum_energy_distribution(std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
-                                                std::get<sim_result_100>(sim_result).charge_distributions.cend());
+                const auto min_energy_distr = fiction::sidb::simulation::analysis::minimum_energy_distribution(
+                    std::get<sim_result_100>(sim_result).charge_distributions.cbegin(),
+                    std::get<sim_result_100>(sim_result).charge_distributions.cend());
 
                 min_energy = min_energy_distr->get_electrostatic_potential_energy();
                 store<fiction::cell_layout_t>().extend() =
@@ -116,9 +128,9 @@ void quickexact_command::execute()
                     return;
                 }
 
-                const auto min_energy_distr =
-                    minimum_energy_distribution(std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
-                                                std::get<sim_result_111>(sim_result).charge_distributions.cend());
+                const auto min_energy_distr = fiction::sidb::simulation::analysis::minimum_energy_distribution(
+                    std::get<sim_result_111>(sim_result).charge_distributions.cbegin(),
+                    std::get<sim_result_111>(sim_result).charge_distributions.cend());
 
                 min_energy = min_energy_distr->get_electrostatic_potential_energy();
                 store<fiction::cell_layout_t>().extend() =
@@ -147,9 +159,9 @@ nlohmann::json quickexact_command::log() const
             return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
                                   {"Simulation runtime", sim_res.simulation_runtime.count()},
                                   {"Physical parameters",
-                                   {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
-                                    {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
-                                    {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
+                                   {{"epsilon_r", sim_res.sim_params.epsilon_r},
+                                    {"lambda_tf", sim_res.sim_params.lambda_tf},
+                                    {"mu_minus", sim_res.sim_params.mu_minus}}},
                                   {"Lowest state energy (eV)", min_energy},
                                   {"Number of stable states", sim_res.charge_distributions.size()}};
         }
@@ -159,9 +171,9 @@ nlohmann::json quickexact_command::log() const
         return nlohmann::json{{"Algorithm name", sim_res.algorithm_name},
                               {"Simulation runtime", sim_res.simulation_runtime.count()},
                               {"Physical parameters",
-                               {{"epsilon_r", sim_res.simulation_parameters.epsilon_r},
-                                {"lambda_tf", sim_res.simulation_parameters.lambda_tf},
-                                {"mu_minus", sim_res.simulation_parameters.mu_minus}}},
+                               {{"epsilon_r", sim_res.sim_params.epsilon_r},
+                                {"lambda_tf", sim_res.sim_params.lambda_tf},
+                                {"mu_minus", sim_res.sim_params.mu_minus}}},
                               {"Lowest state energy (eV)", min_energy},
                               {"Number of stable states", sim_res.charge_distributions.size()}};
     }
@@ -173,7 +185,7 @@ nlohmann::json quickexact_command::log() const
 
 void quickexact_command::reset_params()
 {
-    physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+    physical_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     qe_params       = {};
     sim_result      = {};
 }

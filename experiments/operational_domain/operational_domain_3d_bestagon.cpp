@@ -1,16 +1,29 @@
-//
-// Created by marcel on 22.07.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Three-dimensional operational domains of the Bestagon gates.
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ */
 
 #include "fiction_experiments.hpp"  // experiment class
 
-#include <fiction/algorithms/simulation/sidb/operational_domain.hpp>      // operational domain computation algorithms
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>  // SiDB simulation engines
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>  // SiDB simulation parameters
-#include <fiction/io/read_sqd_layout.hpp>                                     // reader for SiDB layouts
-#include <fiction/io/write_operational_domain.hpp>                            // writer for operational domains
-#include <fiction/types.hpp>                    // pre-defined types suitable for the FCN domain
-#include <fiction/utils/truth_table_utils.hpp>  // truth tables helper functions
+#include <fiction/synthesis/truth_tables.hpp>                                  // truth tables helper functions
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>                      // reader for SiDB layouts
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>             // SiDB simulation parameters
+#include <fiction/technology/sidb/simulation/engine.hpp>                       // SiDB simulation engines
+#include <fiction/technology/sidb/simulation/io/write_operational_domain.hpp>  // writer for operational domains
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>  // operational domain computation algorithms
+#include <fiction/types.hpp>  // pre-defined types suitable for the FCN domain
 
 #include <fmt/format.h>                    // output formatting
 #include <mockturtle/utils/stopwatch.hpp>  // stopwatch for time measurement
@@ -23,6 +36,12 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation;
+using namespace fiction::sidb::simulation::io;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -47,26 +66,26 @@ int main()  // NOLINT
     };
 
     // simulation parameters
-    sidb_simulation_parameters sim_params{};
+    simulation_parameters sim_params{};
     sim_params.base     = 2;
     sim_params.mu_minus = -0.32;
 
     // operational domain parameters
     operational_domain_params op_domain_params{};
-    op_domain_params.operational_params.simulation_parameters = sim_params;
-    op_domain_params.operational_params.sim_engine            = sidb_simulation_engine::QUICKEXACT;
-    op_domain_params.sweep_dimensions                         = {{sweep_parameter::EPSILON_R},
-                                                                 {sweep_parameter::LAMBDA_TF},
-                                                                 {sweep_parameter::MU_MINUS}};
-    op_domain_params.sweep_dimensions[0].min                  = 1.0;
-    op_domain_params.sweep_dimensions[0].max                  = 10.0;
-    op_domain_params.sweep_dimensions[0].step                 = 0.05;
-    op_domain_params.sweep_dimensions[1].min                  = 1.0;
-    op_domain_params.sweep_dimensions[1].max                  = 10.0;
-    op_domain_params.sweep_dimensions[1].step                 = 0.05;
-    op_domain_params.sweep_dimensions[2].min                  = -0.50;
-    op_domain_params.sweep_dimensions[2].max                  = -0.10;
-    op_domain_params.sweep_dimensions[2].step                 = 0.0025;
+    op_domain_params.operational_params.sim_params = sim_params;
+    op_domain_params.operational_params.sim_engine = engine::QUICKEXACT;
+    op_domain_params.sweep_dimensions              = {{sweep_parameter::EPSILON_R},
+                                                      {sweep_parameter::LAMBDA_TF},
+                                                      {sweep_parameter::MU_MINUS}};
+    op_domain_params.sweep_dimensions[0].min       = 1.0;
+    op_domain_params.sweep_dimensions[0].max       = 10.0;
+    op_domain_params.sweep_dimensions[0].step      = 0.05;
+    op_domain_params.sweep_dimensions[1].min       = 1.0;
+    op_domain_params.sweep_dimensions[1].max       = 10.0;
+    op_domain_params.sweep_dimensions[1].step      = 0.05;
+    op_domain_params.sweep_dimensions[2].min       = -0.50;
+    op_domain_params.sweep_dimensions[2].max       = -0.10;
+    op_domain_params.sweep_dimensions[2].step      = 0.0025;
 
     // write operational domain parameters
     write_operational_domain_params write_op_domain_params{};

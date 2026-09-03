@@ -1,25 +1,39 @@
-//
-// Created by marcel on 14.02.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Catch2 benchmarks for `fiction/physical_design/determine_clocking.hpp`.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include <catch2/benchmark/catch_benchmark.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "../utils/blueprints/network_blueprints.hpp"
 
-#include <fiction/algorithms/physical_design/determine_clocking.hpp>
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
+#include <fiction/physical_design/determine_clocking.hpp>
+#include <fiction/physical_design/orthogonal.hpp>
 #include <fiction/traits.hpp>
 
 #include <bill/sat/interface/common.hpp>
 #include <mockturtle/networks/aig.hpp>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::physical_design;
 
 template <typename Lyt>
 void remove_clocking(Lyt& lyt) noexcept
@@ -31,7 +45,7 @@ void remove_clocking(Lyt& lyt) noexcept
 
 TEST_CASE("Benchmark SAT-based clocking determination", "[benchmark]")
 {
-    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<offset::ucoord_t>>>>;
+    using gate_layout = gate_level_layout<clocked_layout<tile_based_layout<cartesian_layout<coords::offset>>>>;
 
     auto lyt = orthogonal<gate_layout>(blueprints::nary_operation_network<mockturtle::aig_network>());
     remove_clocking(lyt);

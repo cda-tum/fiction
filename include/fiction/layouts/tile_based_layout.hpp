@@ -1,15 +1,27 @@
-//
-// Created by marcel on 21.07.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_TILE_BASED_LAYOUT_HPP
-#define FICTION_TILE_BASED_LAYOUT_HPP
+/**
+ * @file
+ * @brief Tile-based naming scheme layered over a coordinate layout.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ */
+
+#pragma once
 
 #include "fiction/traits.hpp"
 
 #include <memory>
 
-namespace fiction
+namespace fiction::layouts
 {
 /**
  * This class provides a tile-based naming scheme for coordinate-based functions. It does not add any functionality,
@@ -105,6 +117,4 @@ class tile_based_layout : public CoordinateLayout
 #pragma endregion
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_TILE_BASED_LAYOUT_HPP
+}  // namespace fiction::layouts

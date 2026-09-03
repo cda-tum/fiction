@@ -1,11 +1,24 @@
-//
-// Created by marcel on 01.05.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_COORDINATES_HPP
-#define FICTION_COORDINATES_HPP
+/**
+ * @file
+ * @brief Offset, cube, and SiQAD coordinate types and the conversions between them.
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ * @author Willem Lambooy (wlambooy)
+ */
 
-#include "fiction/utils/math_utils.hpp"
+#pragma once
+
+#include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>
 
@@ -28,15 +41,13 @@
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
-namespace fiction
+namespace fiction::layouts::coords
 {
 
 /**
  * Provides offset coordinates. An offset coordinate is a coordinate that defines a location via an offset from a fixed
  * point (origin). Cartesian coordinates are offset coordinates.
  */
-namespace offset
-{
 
 /**
  * Unsigned offset coordinates.
@@ -45,7 +56,7 @@ namespace offset
  * to \f$(2^{31} - 1, 2^{31} - 1, 1)\f$. Each coordinate has a dead indicator `d` that can be used to represent
  * that it is not in use.
  */
-struct ucoord_t
+struct offset
 {
     /**
      * MSB acts as dead indicator.
@@ -69,8 +80,8 @@ struct ucoord_t
     /**
      * Default constructor. Creates a dead coordinate at (0, 0, 0).
      */
-    constexpr ucoord_t() noexcept :
-            d{static_cast<decltype(d)>(1u)},  // default-constructed ucoord_ts are dead
+    constexpr offset() noexcept :
+            d{static_cast<decltype(d)>(1u)},  // default-constructed offset coordinates are dead
             z{static_cast<decltype(z)>(0u)},
             y{static_cast<decltype(y)>(0u)},
             x{static_cast<decltype(x)>(0u)}
@@ -86,7 +97,7 @@ struct ucoord_t
      * @param z_ z position.
      */
     template <class X, class Y, class Z>
-    constexpr ucoord_t(X x_, Y y_, Z z_) noexcept :
+    constexpr offset(X x_, Y y_, Z z_) noexcept :
             d{static_cast<decltype(d)>(0u)},
             z{static_cast<decltype(z)>(z_)},
             y{static_cast<decltype(y)>(y_)},
@@ -101,7 +112,7 @@ struct ucoord_t
      * @param y_ y position.
      */
     template <class X, class Y>
-    constexpr ucoord_t(X x_, Y y_) noexcept :
+    constexpr offset(X x_, Y y_) noexcept :
             d{static_cast<decltype(d)>(0u)},
             z{static_cast<decltype(z)>(0u)},
             y{static_cast<decltype(y)>(y_)},
@@ -117,7 +128,7 @@ struct ucoord_t
      *
      * @param t Unsigned 64-bit integer to instantiate the coordinate from.
      */
-    constexpr explicit ucoord_t(const uint64_t t) noexcept :
+    constexpr explicit offset(const uint64_t t) noexcept :
             d{static_cast<decltype(d)>(t >> 63ull)},
             z{static_cast<decltype(z)>((t << 1ull) >> 63ull)},
             y{static_cast<decltype(y)>((t << 2ull) >> 33ull)},
@@ -151,9 +162,9 @@ struct ucoord_t
      *
      * @return A dead copy of the coordinate.
      */
-    [[nodiscard]] constexpr ucoord_t get_dead() const noexcept
+    [[nodiscard]] constexpr offset get_dead() const noexcept
     {
-        return ucoord_t{static_cast<uint64_t>(*this) | static_cast<uint64_t>(ucoord_t{})};
+        return offset{static_cast<uint64_t>(*this) | static_cast<uint64_t>(offset{})};
     }
     /**
      * Wraps the coordinate with respect to the given aspect ratio by iterating over the dimensions in the order defined
@@ -165,7 +176,7 @@ struct ucoord_t
      *
      * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void wrap(const ucoord_t& aspect_ratio) noexcept
+    void wrap(const offset& aspect_ratio) noexcept
     {
         if (x > aspect_ratio.x)
         {
@@ -200,8 +211,8 @@ struct ucoord_t
     // this is written out rather than defaulted. g++-11, the project's C++20 floor compiler and part of the Ubuntu CI
     // matrix, miscompiles a defaulted comparison over this struct's bit-field members and produces wrong
     // layout-printing output, consistent with a known class of GCC bugs in early C++20 support. The same applies to
-    // `siqad::coord_t` below. Revisit once g++-11 is dropped from the matrix
-    constexpr bool operator==(const ucoord_t& other) const noexcept
+    // `siqad` below. Revisit once g++-11 is dropped from the matrix
+    constexpr bool operator==(const offset& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
     }
@@ -221,7 +232,7 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are not identical.
      */
-    constexpr bool operator!=(const ucoord_t& other) const noexcept
+    constexpr bool operator!=(const offset& other) const noexcept
     {
         return !(*this == other);
     }
@@ -232,7 +243,7 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "less than" the other coordinate.
      */
-    constexpr bool operator<(const ucoord_t& other) const noexcept
+    constexpr bool operator<(const offset& other) const noexcept
     {
         if (z < other.z)
         {
@@ -261,7 +272,7 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "greater than" the other coordinate.
      */
-    constexpr bool operator>(const ucoord_t& other) const noexcept
+    constexpr bool operator>(const offset& other) const noexcept
     {
         return other < *this;
     }
@@ -272,7 +283,7 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "less than or equal to" the other coordinate.
      */
-    constexpr bool operator<=(const ucoord_t& other) const noexcept
+    constexpr bool operator<=(const offset& other) const noexcept
     {
         return !(*this > other);
     }
@@ -283,7 +294,7 @@ struct ucoord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "greater than or equal to" the other coordinate.
      */
-    constexpr bool operator>=(const ucoord_t& other) const noexcept
+    constexpr bool operator>=(const offset& other) const noexcept
     {
         return !(*this < other);
     }
@@ -299,20 +310,16 @@ struct ucoord_t
     }
 };
 
-inline std::ostream& operator<<(std::ostream& os, const ucoord_t& t)
+inline std::ostream& operator<<(std::ostream& os, const offset& t)
 {
     os << t.str();
     return os;
 }
 
-}  // namespace offset
-
 /**
  * Provides cube coordinates. Cube coordinates are used as a way to identify faces in a hexagonal grid. A wonderful
  * resource on the topic is: https://www.redblobgames.com/grids/hexagons/#coordinates-cube
  */
-namespace cube
-{
 
 /**
  * Signed cube coordinates.
@@ -321,7 +328,7 @@ namespace cube
  * of values. Coordinates span from \f$(-2^{31}, -2^{31}, -2^{31})\f$ to \f$(2^{31} - 1, 2^{31} - 1, 2^{31} - 1)\f$.
  * Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
-struct coord_t
+struct cube
 {
     /**
      * Dead indicator.
@@ -345,7 +352,7 @@ struct coord_t
     /**
      * Default constructor. Creates a dead coordinate at (0, 0, 0).
      */
-    constexpr coord_t() noexcept :
+    constexpr cube() noexcept :
             z{static_cast<decltype(z)>(0)},
             y{static_cast<decltype(y)>(0)},
             x{static_cast<decltype(x)>(0)}
@@ -361,7 +368,7 @@ struct coord_t
      * @param z_ z position.
      */
     template <class X, class Y, class Z>
-    constexpr coord_t(X x_, Y y_, Z z_) noexcept :
+    constexpr cube(X x_, Y y_, Z z_) noexcept :
             d{false},
             z{static_cast<decltype(z)>(z_)},
             y{static_cast<decltype(y)>(y_)},
@@ -376,7 +383,7 @@ struct coord_t
      * @param y_ y position.
      */
     template <class X, class Y>
-    constexpr coord_t(X x_, Y y_) noexcept :
+    constexpr cube(X x_, Y y_) noexcept :
             d{false},
             z{static_cast<decltype(z)>(0)},
             y{static_cast<decltype(y)>(y_)},
@@ -399,7 +406,7 @@ struct coord_t
      *
      * @return A dead copy of the coordinate.
      */
-    [[nodiscard]] constexpr coord_t get_dead() const noexcept
+    [[nodiscard]] constexpr cube get_dead() const noexcept
     {
         auto dead_coord{*this};
         dead_coord.d = true;
@@ -415,7 +422,7 @@ struct coord_t
      *
      * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void wrap(const coord_t& aspect_ratio) noexcept
+    void wrap(const cube& aspect_ratio) noexcept
     {
         if (x > aspect_ratio.x)
         {
@@ -440,7 +447,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept
+    constexpr bool operator==(const cube& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
     }
@@ -450,7 +457,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff both coordinates are not identical.
      */
-    constexpr bool operator!=(const coord_t& other) const noexcept
+    constexpr bool operator!=(const cube& other) const noexcept
     {
         return !(*this == other);
     }
@@ -461,7 +468,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "less than" the other coordinate.
      */
-    constexpr bool operator<(const coord_t& other) const noexcept
+    constexpr bool operator<(const cube& other) const noexcept
     {
         if (z < other.z)
         {
@@ -490,7 +497,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "greater than" the other coordinate.
      */
-    constexpr bool operator>(const coord_t& other) const noexcept
+    constexpr bool operator>(const cube& other) const noexcept
     {
         return other < *this;
     }
@@ -501,7 +508,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "less than or equal to" the other coordinate.
      */
-    constexpr bool operator<=(const coord_t& other) const noexcept
+    constexpr bool operator<=(const cube& other) const noexcept
     {
         return !(*this > other);
     }
@@ -512,7 +519,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return `true` iff this coordinate is "greater than or equal to" the other coordinate.
      */
-    constexpr bool operator>=(const coord_t& other) const noexcept
+    constexpr bool operator>=(const cube& other) const noexcept
     {
         return !(*this < other);
     }
@@ -522,9 +529,9 @@ struct coord_t
      * @param other Coordinate to add.
      * @return Sum of both coordinates.
      */
-    constexpr coord_t operator+(const coord_t& other) const noexcept
+    constexpr cube operator+(const cube& other) const noexcept
     {
-        return coord_t{x + other.x, y + other.y, z + other.z};
+        return cube{x + other.x, y + other.y, z + other.z};
     }
     /**
      * Subtracts another coordinate from this one and returns the result. Does not modify this coordinate.
@@ -532,9 +539,9 @@ struct coord_t
      * @param other Coordinate to subtract.
      * @return Difference of both coordinates.
      */
-    constexpr coord_t operator-(const coord_t& other) const noexcept
+    constexpr cube operator-(const cube& other) const noexcept
     {
-        return coord_t{x - other.x, y - other.y, z - other.z};
+        return cube{x - other.x, y - other.y, z - other.z};
     }
     /**
      * Returns a string representation of the coordinate of the form `"(x, y, z)"` that does not respect the dead
@@ -548,16 +555,12 @@ struct coord_t
     }
 };
 
-}  // namespace cube
-
 /**
  * Provides SiQAD coordinates. SiQAD coordinates are used to describe locations of Silicon Dangling Bonds on the
  * H-Si(100) 2x1 surface were dimer columns and rows are identified by x and y values, respectively, while the z value
  * (0,1) points to the top or bottom Si atom in the dimer. The coordinates are originally used in the SiQAD simulator
  * (https://github.com/siqad).
  */
-namespace siqad
-{
 
 /**
  * SiQAD coordinates.
@@ -566,7 +569,7 @@ namespace siqad
  * x-coordinate, `y` is the dimer pair's row number, and `z` represents the two possible SiDB positions in one SiDB
  * dimer pair. Each coordinate has a dead indicator `d` that can be used to represent that it is not in use.
  */
-struct coord_t
+struct siqad
 {
     /**
      * MSB acts as dead indicator.
@@ -590,7 +593,7 @@ struct coord_t
     /**
      * Default constructor. Creates a dead coordinate at (0, 0, 0).
      */
-    constexpr coord_t() noexcept :
+    constexpr siqad() noexcept :
             z{static_cast<decltype(z)>(0)},
             y{static_cast<decltype(y)>(0)},
             x{static_cast<decltype(x)>(0)}
@@ -606,7 +609,7 @@ struct coord_t
      * @param z_ z position.
      */
     template <class X, class Y, class Z>
-    constexpr coord_t(X x_, Y y_, Z z_) noexcept :
+    constexpr siqad(X x_, Y y_, Z z_) noexcept :
             d{false},
             z{static_cast<decltype(z)>(z_)},
             y{static_cast<decltype(y)>(y_)},
@@ -621,7 +624,7 @@ struct coord_t
      * @param y_ y position.
      */
     template <class X, class Y>
-    constexpr coord_t(X x_, Y y_) noexcept :
+    constexpr siqad(X x_, Y y_) noexcept :
             d{false},
             z{static_cast<decltype(z)>(0)},
             y{static_cast<decltype(y)>(y_)},
@@ -644,7 +647,7 @@ struct coord_t
      *
      * @return A dead copy of the coordinate.
      */
-    [[nodiscard]] constexpr coord_t get_dead() const noexcept
+    [[nodiscard]] constexpr siqad get_dead() const noexcept
     {
         auto dead_coord{*this};
         dead_coord.d = true;
@@ -660,7 +663,7 @@ struct coord_t
      *
      * @param aspect_ratio Aspect ratio to wrap the coordinate to.
      */
-    void wrap(const coord_t& aspect_ratio) noexcept
+    void wrap(const siqad& aspect_ratio) noexcept
     {
         if (x > aspect_ratio.x)
         {
@@ -685,7 +688,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff both coordinates are identical.
      */
-    constexpr bool operator==(const coord_t& other) const noexcept
+    constexpr bool operator==(const siqad& other) const noexcept
     {
         return d == other.d && z == other.z && y == other.y && x == other.x;
     }
@@ -695,7 +698,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff both coordinates are not identical.
      */
-    constexpr bool operator!=(const coord_t& other) const noexcept
+    constexpr bool operator!=(const siqad& other) const noexcept
     {
         return !(*this == other);
     }
@@ -706,7 +709,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff this coordinate is "less than" the other coordinate.
      */
-    constexpr bool operator<(const coord_t& other) const noexcept
+    constexpr bool operator<(const siqad& other) const noexcept
     {
 
         if (y != other.y)
@@ -727,7 +730,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff this coordinate is "greater than" the other coordinate.
      */
-    constexpr bool operator>(const coord_t& other) const noexcept
+    constexpr bool operator>(const siqad& other) const noexcept
     {
         return other < *this;
     }
@@ -738,7 +741,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff this coordinate is "less than or equal to" the other coordinate.
      */
-    constexpr bool operator<=(const coord_t& other) const noexcept
+    constexpr bool operator<=(const siqad& other) const noexcept
     {
         return !(*this > other);
     }
@@ -749,7 +752,7 @@ struct coord_t
      * @param other Right-hand side coordinate.
      * @return True iff this coordinate is "greater than or equal to" the other coordinate.
      */
-    constexpr bool operator>=(const coord_t& other) const noexcept
+    constexpr bool operator>=(const siqad& other) const noexcept
     {
         return !(*this < other);
     }
@@ -759,9 +762,9 @@ struct coord_t
      * @param other Coordinate to add.
      * @return Sum of both coordinates.
      */
-    constexpr coord_t operator+(const coord_t& other) const noexcept
+    constexpr siqad operator+(const siqad& other) const noexcept
     {
-        return coord_t{x + other.x, y + other.y + static_cast<decltype(y)>(z && other.z), z ^ other.z};
+        return siqad{x + other.x, y + other.y + static_cast<decltype(y)>(z && other.z), z ^ other.z};
     }
     /**
      * Subtracts another coordinate from this one and returns the result. Does not modify this coordinate.
@@ -769,9 +772,9 @@ struct coord_t
      * @param other Coordinate to subtract.
      * @return Difference of both coordinates.
      */
-    constexpr coord_t operator-(const coord_t& other) const noexcept
+    constexpr siqad operator-(const siqad& other) const noexcept
     {
-        return coord_t{x - other.x, y - other.y - static_cast<decltype(y)>(!z && other.z), z - other.z};
+        return siqad{x - other.x, y - other.y - static_cast<decltype(y)>(!z && other.z), z - other.z};
     }
     /**
      * Returns a string representation of the coordinate of the form "(x, y, z)" that does not respect the dead
@@ -793,20 +796,20 @@ struct coord_t
  * @return Coordinate of type `CoordinateType`.
  */
 template <typename CoordinateType>
-constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
+constexpr CoordinateType from_siqad(const siqad& coord) noexcept
 {
     if (!coord.is_dead())
     {
         if ((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z) >
-            static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::max()))
+            static_cast<double>(std::numeric_limits<decltype(siqad::y)>::max()))
         {
-            return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::max()};
+            return {coord.x, std::numeric_limits<decltype(siqad::y)>::max()};
         }
 
         if ((2 * static_cast<double>(coord.y)) + static_cast<double>(coord.z) <
-            static_cast<double>(std::numeric_limits<decltype(siqad::coord_t::y)>::min()))
+            static_cast<double>(std::numeric_limits<decltype(siqad::y)>::min()))
         {
-            return {coord.x, std::numeric_limits<decltype(siqad::coord_t::y)>::min()};
+            return {coord.x, std::numeric_limits<decltype(siqad::y)>::min()};
         }
 
         return {coord.x, (coord.y * 2) + coord.z};
@@ -823,7 +826,7 @@ constexpr CoordinateType to_fiction_coord(const siqad::coord_t& coord) noexcept
  *
  */
 template <typename CoordinateType>
-constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
+constexpr siqad to_siqad(const CoordinateType& coord) noexcept
 {
     if (coord.y >= 0)
     {
@@ -831,8 +834,6 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
     }
     return {coord.x, (coord.y + (coord.y % 2)) / 2, (coord.y % 2 == 0 ? 0 : 1)};
 }
-
-}  // namespace siqad
 
 /**
  * Converts offset coordinates to cube coordinates.
@@ -845,18 +846,18 @@ constexpr coord_t to_siqad_coord(const CoordinateType& coord) noexcept
  * @param coord Offset coordinate to convert to a cube coordinate.
  * @return Cube coordinate equivalent to `coord`.
  */
-constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noexcept
+constexpr cube to_cube(const offset& coord) noexcept
 {
     assert(coord.x <= std::numeric_limits<int32_t>::max() && coord.y <= std::numeric_limits<int32_t>::max() &&
            coord.z <= std::numeric_limits<int32_t>::max() && "Coordinate is out-of-range and cannot be transformed");
 
     if (coord.is_dead())
     {
-        return cube::coord_t{};
+        return cube{};
     }
 
-    return {static_cast<decltype(cube::coord_t::x)>(coord.x), static_cast<decltype(cube::coord_t::y)>(coord.y),
-            static_cast<decltype(cube::coord_t::z)>(coord.z)};
+    return {static_cast<decltype(cube::x)>(coord.x), static_cast<decltype(cube::y)>(coord.y),
+            static_cast<decltype(cube::z)>(coord.z)};
 }
 /**
  * Computes the area of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)\f$
@@ -867,15 +868,17 @@ constexpr cube::coord_t offset_to_cube_coord(const offset::ucoord_t& coord) noex
  * @return Area of coord.
  */
 template <typename CoordinateType>
-uint64_t area(const CoordinateType& coord) noexcept
+uint64_t area_of(const CoordinateType& coord) noexcept
 {
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    if constexpr (std::is_same_v<CoordinateType, siqad>)
     {
-        return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) *
-               ((2 * static_cast<uint64_t>(integral_abs(coord.y))) + static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+        return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
+               ((2 * static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y))) +
+                static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.z)) + 1);
     }
 
-    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1);
+    return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
+           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y)) + 1);
 }
 /**
  * Computes the volume of a given coordinate assuming its origin is (0, 0, 0). Calculates \f$(|x| + 1) \cdot (|y| + 1)
@@ -886,36 +889,37 @@ uint64_t area(const CoordinateType& coord) noexcept
  * @return Volume of coord.
  */
 template <typename CoordinateType>
-uint64_t volume(const CoordinateType& coord) noexcept
+uint64_t volume_of(const CoordinateType& coord) noexcept
 {
-    if constexpr (std::is_same_v<CoordinateType, siqad::coord_t>)
+    if constexpr (std::is_same_v<CoordinateType, siqad>)
     {
-        return area(coord);
+        return area_of(coord);
     }
 
-    return (static_cast<uint64_t>(integral_abs(coord.x)) + 1) * (static_cast<uint64_t>(integral_abs(coord.y)) + 1) *
-           (static_cast<uint64_t>(integral_abs(coord.z)) + 1);
+    return (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.x)) + 1) *
+           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.y)) + 1) *
+           (static_cast<uint64_t>(fiction::utils::math::integral_abs(coord.z)) + 1);
 }
 
 /**
  * An iterator type that allows to enumerate coordinates in order within a boundary.
  *
- * @note Only `offset::ucoord_t`, `cube::coord_t`, and `siqad::coord_t` are supported. This is enforced on the
+ * @note Only `offset`, `cube`, and `siqad` are supported. This is enforced on the
  * boundary-and-start constructor via a `requires` clause rather than on the class itself, so that the
  * default constructor (required for `std::semiregular`) remains usable for any `CoordinateType`.
  *
  * @tparam CoordinateType Type of coordinate to enumerate.
  */
 template <typename CoordinateType>
-class coord_iterator
+class coordinate_iterator
 {
   public:
     using value_type = CoordinateType;
     /**
-     * Default constructor. Required so that coord_iterator satisfies `std::semiregular`, which in turn is required
+     * Default constructor. Required so that iterator satisfies `std::semiregular`, which in turn is required
      * for it to serve as its own `std::sentinel_for` (e.g., for `std::ranges::subrange` CTAD).
      */
-    constexpr coord_iterator() noexcept = default;
+    constexpr coordinate_iterator() noexcept = default;
     /**
      * Standard constructor. Initializes the iterator with a starting position and the boundary within to enumerate.
      *
@@ -950,14 +954,14 @@ class coord_iterator
      * - (0, 2, 1)
      * - (1, 2, 1)
      *
-     * coord_iterator is compatible with the STL forward_iterator category. Does not iterate over negative coordinates.
+     * iterator is compatible with the STL forward_iterator category. Does not iterate over negative coordinates.
      *
      * @param dimension Boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
      */
-    constexpr explicit coord_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
-        requires std::same_as<CoordinateType, offset::ucoord_t> || std::same_as<CoordinateType, cube::coord_t> ||
-                     std::same_as<CoordinateType, siqad::coord_t>
+    constexpr explicit coordinate_iterator(const CoordinateType& dimension, const CoordinateType& start) noexcept
+        requires std::same_as<CoordinateType, offset> || std::same_as<CoordinateType, cube> ||
+                     std::same_as<CoordinateType, siqad>
             : aspect_ratio{dimension}, coord{start}
     {
         // Make sure the start iterator is within the given boundary; first handle negative coordinates ...
@@ -973,7 +977,7 @@ class coord_iterator
      *
      * @return Reference to the incremented iterator.
      */
-    constexpr coord_iterator& operator++() noexcept
+    constexpr coordinate_iterator& operator++() noexcept
     {
         if (coord != aspect_ratio)
         {
@@ -989,7 +993,7 @@ class coord_iterator
         return *this;
     }
 
-    constexpr coord_iterator operator++(int) noexcept
+    constexpr coordinate_iterator operator++(int) noexcept
     {
         const auto result{*this};
 
@@ -1003,29 +1007,29 @@ class coord_iterator
         return coord;
     }
 
-    constexpr bool operator==(const coord_iterator& other) const noexcept
+    constexpr bool operator==(const coordinate_iterator& other) const noexcept
     {
         return (coord == other.coord);
     }
 
-    constexpr bool operator!=(const coord_iterator& other) const noexcept
+    constexpr bool operator!=(const coordinate_iterator& other) const noexcept
     {
         return !(*this == other);
     }
 
-    constexpr bool operator<(const coord_iterator& other) const noexcept
+    constexpr bool operator<(const coordinate_iterator& other) const noexcept
     {
         return (coord < other.coord);
     }
 
-    constexpr bool operator<=(const coord_iterator& other) const noexcept
+    constexpr bool operator<=(const coordinate_iterator& other) const noexcept
     {
         return (coord <= other.coord);
     }
 
   private:
     /**
-     * Boundary within to enumerate. Not `const`: `std::input_or_output_iterator` requires `coord_iterator` to be
+     * Boundary within to enumerate. Not `const`: `std::input_or_output_iterator` requires `iterator` to be
      * `std::movable`, which in turn requires it to be assignable.
      */
     CoordinateType aspect_ratio;
@@ -1033,51 +1037,50 @@ class coord_iterator
     CoordinateType coord;
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts::coords
 // NOLINTBEGIN(cert-dcl58-cpp)
 
 namespace std
 {
 
-// define std::hash overload for offset::ucoord_t
+// define std::hash overload for offset
 template <>
-struct hash<fiction::offset::ucoord_t>
+struct hash<fiction::layouts::coords::offset>
 {
-    std::size_t operator()(const fiction::offset::ucoord_t& c) const noexcept
+    std::size_t operator()(const fiction::layouts::coords::offset& c) const noexcept
     {
         return static_cast<std::size_t>(std::hash<uint64_t>{}(static_cast<uint64_t>(c)));
     }
 };
-// define std::hash overload for cube::coord_t
+// define std::hash overload for cube
 template <>
-struct hash<fiction::cube::coord_t>
+struct hash<fiction::layouts::coords::cube>
 {
     // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
-    std::size_t operator()(const fiction::cube::coord_t& c) const noexcept
+    std::size_t operator()(const fiction::layouts::coords::cube& c) const noexcept
     {
         return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
     }
 };
-// define std::hash overload for siqad::coord_t
+// define std::hash overload for siqad
 template <>
-struct hash<fiction::siqad::coord_t>
+struct hash<fiction::layouts::coords::siqad>
 {
     // based on: https://stackoverflow.com/questions/25649342/hash-function-for-3d-integer-coordinates
-    std::size_t operator()(const fiction::siqad::coord_t& c) const noexcept
+    std::size_t operator()(const fiction::layouts::coords::siqad& c) const noexcept
     {
         return static_cast<std::size_t>((c.x * 18397ll) + (c.y * 20483ll) + (c.z * 29303ll) + static_cast<int>(c.d));
     }
 };
 
 /**
- * Makes `coord_iterator` compatible with STL iterator categories. `reference` and `difference_type` are required
- * for `coord_iterator` to satisfy `std::input_or_output_iterator` (e.g., for `std::ranges::subrange` CTAD).
+ * Makes `iterator` compatible with STL iterator categories. `reference` and `difference_type` are required
+ * for `iterator` to satisfy `std::input_or_output_iterator` (e.g., for `std::ranges::subrange` CTAD).
  *
- * @tparam Coordinate Coordinate type enumerated by the `coord_iterator`.
+ * @tparam Coordinate Coordinate type enumerated by the `iterator`.
  */
 template <typename Coordinate>
-struct iterator_traits<fiction::coord_iterator<Coordinate>>
+struct iterator_traits<fiction::layouts::coords::coordinate_iterator<Coordinate>>
 {
     using iterator_category = std::forward_iterator_tag;
     using value_type        = Coordinate;
@@ -1092,9 +1095,9 @@ struct iterator_traits<fiction::coord_iterator<Coordinate>>
 namespace fmt
 {
 
-// make offset::ucoord_t compatible with fmt::format
+// make offset compatible with fmt::format
 template <>
-struct formatter<fiction::offset::ucoord_t>
+struct formatter<fiction::layouts::coords::offset>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -1103,14 +1106,14 @@ struct formatter<fiction::offset::ucoord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::offset::ucoord_t& c, FormatContext& ctx) const
+    auto format(const fiction::layouts::coords::offset& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{},{})"), c.x, c.y, c.z);
     }
 };
-// make cube::coord_t compatible with fmt::format
+// make cube compatible with fmt::format
 template <>
-struct formatter<fiction::cube::coord_t>
+struct formatter<fiction::layouts::coords::cube>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -1119,14 +1122,14 @@ struct formatter<fiction::cube::coord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::cube::coord_t& c, FormatContext& ctx) const
+    auto format(const fiction::layouts::coords::cube& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{},{})"), c.x, c.y, c.z);
     }
 };
-// make siqad::coord_t compatible with fmt::format
+// make siqad compatible with fmt::format
 template <>
-struct formatter<fiction::siqad::coord_t>
+struct formatter<fiction::layouts::coords::siqad>
 {
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
@@ -1135,7 +1138,7 @@ struct formatter<fiction::siqad::coord_t>
     }
 
     template <typename FormatContext>
-    auto format(const fiction::siqad::coord_t& c, FormatContext& ctx) const
+    auto format(const fiction::layouts::coords::siqad& c, FormatContext& ctx) const
     {
         return format_to(ctx.out(), runtime("({},{},{})"), c.x, c.y, c.z);
     }
@@ -1144,5 +1147,3 @@ struct formatter<fiction::siqad::coord_t>
 }  // namespace fmt
 
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_COORDINATES_HPP

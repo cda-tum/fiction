@@ -1,19 +1,32 @@
-//
-// Created by Jan Drewniok on 17.05.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Runtime of the SiDB simulation engines on the Bestagon gates.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/algorithms/iter/bdl_input_iterator.hpp>
-#include <fiction/algorithms/simulation/sidb/exhaustive_ground_state_simulation.hpp>
-#include <fiction/algorithms/simulation/sidb/quickexact.hpp>
-#include <fiction/algorithms/simulation/sidb/quicksim.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_parameters.hpp>
-#include <fiction/algorithms/simulation/sidb/time_to_solution.hpp>
-#include <fiction/io/read_sqd_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
+#include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+#include <fiction/technology/sidb/simulation/analysis/time_to_solution.hpp>
+#include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
+#include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
+#include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
+#include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/truth_table_utils.hpp>
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
@@ -25,6 +38,13 @@
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::layouts;
+using namespace fiction::sidb::io;
+using namespace fiction::sidb::model;
+using namespace fiction::sidb::simulation::analysis;
+using namespace fiction::sidb::simulation::engines;
+using namespace fiction::sidb::simulation::logic;
+using namespace fiction::synthesis;
 
 int main()  // NOLINT
 {
@@ -54,10 +74,10 @@ int main()  // NOLINT
         std::make_pair("inv", std::vector<tt>{create_not_tt()}),
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
-    const sidb_simulation_parameters        sim_params{2, -0.32};
-    const quicksim_params                   qs_params{sim_params};
-    const quickexact_params<siqad::coord_t> qe_params{sim_params};
-    const time_to_solution_params           tts_params{};
+    const simulation_parameters            sim_params{2, -0.32};
+    const quicksim_params                  qs_params{sim_params};
+    const quickexact_params<coords::siqad> qe_params{sim_params};
+    const time_to_solution_params          tts_params{};
 
     double      total_runtime_exhaustive      = 0.0;
     double      total_runtime_quickexact      = 0.0;

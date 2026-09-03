@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Pre-compiled header for the CLI, enabled by `FICTION_ENABLE_PCH`.
+ * @author Marcel Walter (marcelwa)
+ */
+
 //
 // Pre-compiled headers for the fiction CLI
 // This file is automatically included in all CLI command compilation units
@@ -8,8 +24,7 @@
 // - Frequently used: Included in most CLI translation units
 //
 
-#ifndef FICTION_PCH_CLI_HPP
-#define FICTION_PCH_CLI_HPP
+#pragma once
 
 // NOLINTBEGIN(misc-include-cleaner)
 
@@ -61,5 +76,3 @@
 #include "stores.hpp"
 
 // NOLINTEND(misc-include-cleaner)
-
-#endif  // FICTION_PCH_CLI_HPP

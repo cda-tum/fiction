@@ -1,11 +1,22 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_ORTHO_HPP
-#define FICTION_CMD_ORTHO_HPP
+/**
+ * @file
+ * @brief Declares the `ortho` command, which runs orthogonal-graph-drawing physical design.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/physical_design/orthogonal.hpp>
+#pragma once
+
+#include <fiction/physical_design/orthogonal.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -18,7 +29,7 @@ namespace alice
 
 /**
  * Executes a heuristic physical approach based on "Improved Orthogonal Drawing of 3-graphs" by Therese Biedl, 1996.
- * See algo/orthogonal.hpp for more details.
+ * See include/fiction/physical_design/orthogonal.hpp for more details.
  */
 class ortho_command final : public command
 {
@@ -55,16 +66,14 @@ class ortho_command final : public command
     /**
      * Parameters.
      */
-    fiction::orthogonal_physical_design_params ps{};
+    fiction::physical_design::orthogonal_physical_design_params ps{};
     /**
      * Statistics.
      */
-    fiction::orthogonal_physical_design_stats st{};
+    fiction::physical_design::orthogonal_physical_design_stats st{};
 
     template <typename Lyt>
     void orthogonal_physical_design();
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_ORTHO_HPP

@@ -1,17 +1,29 @@
-//
-// Created by marcel on 06.12.23.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `temp` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/simulation/include/temp.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/simulation/sidb/critical_temperature.hpp>
-#include <fiction/algorithms/simulation/sidb/sidb_simulation_engine.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
+#include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/math_utils.hpp>
-#include <fiction/utils/name_utils.hpp>
+#include <fiction/utils/math/math_utils.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -104,7 +116,7 @@ void temp_command::execute()
         }
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto temp = [this, &ts, &get_name](auto&& lyt_ptr)
     {
@@ -123,7 +135,7 @@ void temp_command::execute()
             return;
         }
 
-        const auto sim_engine = fiction::get_sidb_simulation_engine(sim_engine_str);
+        const auto sim_engine = fiction::sidb::simulation::get_engine(sim_engine_str);
 
         if (!sim_engine.has_value())
         {
@@ -133,7 +145,7 @@ void temp_command::execute()
 
         params.operational_params.sim_engine = sim_engine.value();
 
-        params.operational_params.simulation_parameters = physical_params;
+        params.operational_params.sim_params = physical_params;
 
         // To aid the compiler
         if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
@@ -150,11 +162,12 @@ void temp_command::execute()
 
                 const auto tt_ptr = ts.current();
 
-                ct = fiction::critical_temperature_gate_based(*lyt_ptr, std::vector{*tt_ptr}, params, &stats);
+                ct = fiction::sidb::simulation::analysis::critical_temperature_gate_based(
+                    *lyt_ptr, std::vector{*tt_ptr}, params, &stats);
             }
             else
             {
-                ct = fiction::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
+                ct = fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
             }
 
             if (stats.num_valid_lyt == 0)
@@ -167,9 +180,9 @@ void temp_command::execute()
 
             if (stats.num_valid_lyt > 1)
             {
-                env->out() << fmt::format(
-                    "[i] energy between the ground state and the first erroneous is {} meV\n",
-                    fiction::round_to_n_decimal_places(stats.energy_between_ground_state_and_first_erroneous, 2));
+                env->out() << fmt::format("[i] energy between the ground state and the first erroneous is {} meV\n",
+                                          fiction::utils::math::round_to_n_decimal_places(
+                                              stats.energy_between_ground_state_and_first_erroneous, 2));
             }
         }
     };
@@ -183,10 +196,10 @@ nlohmann::json temp_command::log() const
 {
     return nlohmann::json{{"Algorithm name", stats.algorithm_name},
                           {"Physical parameters",
-                           {{"base", stats.simulation_parameters.base},
-                            {"epsilon_r", stats.simulation_parameters.epsilon_r},
-                            {"lambda_tf", stats.simulation_parameters.lambda_tf},
-                            {"mu_minus", stats.simulation_parameters.mu_minus}}},
+                           {{"base", stats.sim_params.base},
+                            {"epsilon_r", stats.sim_params.epsilon_r},
+                            {"lambda_tf", stats.sim_params.lambda_tf},
+                            {"mu_minus", stats.sim_params.mu_minus}}},
                           {"Critical temperature", ct},
                           {"Number of stable states", stats.num_valid_lyt},
                           {"Energy difference between ground state and first erroneous state",
@@ -195,7 +208,7 @@ nlohmann::json temp_command::log() const
 
 void temp_command::reset_params()
 {
-    physical_params = fiction::sidb_simulation_parameters{2, -0.32, 5.6, 5.0};
+    physical_params = fiction::sidb::model::simulation_parameters{2, -0.32, 5.6, 5.0};
     params          = {};
 }
 

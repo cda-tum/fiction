@@ -1,11 +1,22 @@
-//
-// Created by marcel on 04.03.20.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_EQUIV_HPP
-#define FICTION_CMD_EQUIV_HPP
+/**
+ * @file
+ * @brief Declares the `equiv` command, which equivalence-checks networks and layouts.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
+#pragma once
+
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>
@@ -41,7 +52,7 @@ class equiv_command final : public command
     nlohmann::json log() const override;
 
   private:
-    fiction::equivalence_checking_stats result{};
+    fiction::verification::equivalence_checking_stats result{};
 
     template <typename NtkOrLytVariant1, typename NtkOrLytVariant2>
     void equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_variant1,
@@ -49,5 +60,3 @@ class equiv_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_EQUIV_HPP

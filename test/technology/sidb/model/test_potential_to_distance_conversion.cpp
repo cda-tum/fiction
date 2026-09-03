@@ -1,0 +1,94 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Tests for `fiction/technology/sidb/model/potential_to_distance_conversion.hpp`.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+#include <fiction/technology/sidb/model/potential_to_distance_conversion.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
+
+#include <cstdint>
+#include <limits>
+
+using namespace fiction;
+using namespace fiction::sidb::model;
+
+TEST_CASE("Conversion of potential to distance", "[potential_to_distance_conversion]")
+{
+    auto params = simulation_parameters{};
+
+    SECTION("Valid conversion with default parameters")
+    {
+        constexpr uint64_t precision         = 1;
+        constexpr double   potential_value   = 5.0;
+        constexpr double   expected_distance = 0.1;
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
+                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+    }
+
+    SECTION("Valid conversion with custom parameters, precision is 1")
+    {
+        params.epsilon_r                     = 2.0;
+        params.lambda_tf                     = 1.0;
+        constexpr uint64_t precision         = 1;
+        constexpr double   potential_value   = 0.01;
+        constexpr double   expected_distance = 3.2;
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
+                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+    }
+
+    SECTION("Valid conversion with custom parameters, precision is 2")
+    {
+        params.epsilon_r                     = 2.0;
+        params.lambda_tf                     = 1.0;
+        constexpr uint64_t precision         = 2;
+        constexpr double   potential_value   = 0.01;
+        constexpr double   expected_distance = 3.14;
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
+                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+    }
+
+    SECTION("Valid conversion with custom parameters, precision is 3")
+    {
+        params.epsilon_r                     = 2.0;
+        params.lambda_tf                     = 1.0;
+        constexpr uint64_t precision         = 3;
+        constexpr double   potential_value   = 0.01;
+        constexpr double   expected_distance = 3.135;
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
+                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+    }
+
+    SECTION("Valid conversion with custom parameters, precision is 0")
+    {
+        constexpr uint64_t precision         = 0;
+        constexpr double   potential_value   = 0.03;
+        constexpr double   expected_distance = 4;
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
+                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+    }
+
+    SECTION("Conversion with infinite potential")
+    {
+        constexpr uint64_t precision         = 3;
+        constexpr double   potential_value   = std::numeric_limits<double>::infinity();
+        constexpr double   expected_distance = 0.001;
+        REQUIRE_THAT(potential_to_distance_conversion(potential_value, params, precision),
+                     Catch::Matchers::WithinAbs(expected_distance, 1e-5));
+    }
+}

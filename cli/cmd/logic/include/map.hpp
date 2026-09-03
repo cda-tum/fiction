@@ -1,11 +1,22 @@
-//
-// Created by marcel on 08.06.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_MAP_HPP
-#define FICTION_CMD_MAP_HPP
+/**
+ * @file
+ * @brief Declares the `map` command, which technology-maps the current logic network.
+ * @author Marcel Walter (marcelwa)
+ */
 
-#include <fiction/algorithms/network_transformation/technology_mapping.hpp>
+#pragma once
+
+#include <fiction/synthesis/technology_mapping.hpp>
 
 #include <alice/alice.hpp>
 
@@ -35,9 +46,7 @@ class map_command final : public command
     /**
      * Technology mapping parameters.
      */
-    fiction::technology_mapping_params ps{};
+    fiction::synthesis::technology_mapping_params ps{};
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_MAP_HPP

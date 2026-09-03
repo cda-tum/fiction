@@ -1,9 +1,22 @@
-//
-// Created by marcel on 23.06.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CELL_LEVEL_LAYOUT_HPP
-#define FICTION_CELL_LEVEL_LAYOUT_HPP
+/**
+ * @file
+ * @brief Layout that assigns individual cells to the clock zones of a clocked layout.
+ * @author Marcel Walter (marcelwa)
+ * @author Simon Hofmann (simon1hofmann)
+ * @author Jan Drewniok (Drewniok)
+ */
+
+#pragma once
 
 #include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/traits.hpp"
@@ -19,7 +32,7 @@
 #include <utility>
 #include <vector>
 
-namespace fiction
+namespace fiction::layouts
 {
 
 /**
@@ -111,7 +124,7 @@ class cell_level_layout : public ClockedLayout
      * @param tile_size_x Clock zone size in x-dimension in cells.
      * @param tile_size_y Clock zone size in y-dimension in cells.
      */
-    cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking_scheme<cell>& scheme,
+    cell_level_layout(const typename ClockedLayout::aspect_ratio& ar, const clocking::scheme<cell>& scheme,
                       const std::string& name = "", const uint16_t tile_size_x = 1u, const uint16_t tile_size_y = 1u) :
             ClockedLayout(ar, scheme),
             strg{std::make_shared<cell_level_layout_storage<cell>>(name, tile_size_x, tile_size_y)}
@@ -526,6 +539,4 @@ class cell_level_layout : public ClockedLayout
     storage strg;
 };
 
-}  // namespace fiction
-
-#endif  // FICTION_CELL_LEVEL_LAYOUT_HPP
+}  // namespace fiction::layouts

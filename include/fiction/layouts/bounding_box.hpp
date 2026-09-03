@@ -1,13 +1,26 @@
-//
-// Created by marcel on 13.01.22.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_BOUNDING_BOX_HPP
-#define FICTION_BOUNDING_BOX_HPP
+/**
+ * @file
+ * @brief 2D bounding box that encloses all non-empty coordinates of a layout.
+ * @author Marcel Walter (marcelwa)
+ * @author Jan Drewniok (Drewniok)
+ * @author Willem Lambooy (wlambooy)
+ */
+
+#pragma once
 
 #include "fiction/layouts/coordinates.hpp"
+#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/traits.hpp"
-#include "fiction/utils/layout_utils.hpp"
 
 #include <algorithm>
 #include <cstdint>
@@ -17,7 +30,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wconversion"
 
-namespace fiction
+namespace fiction::layouts
 {
 /**
  * A 2D bounding box object that computes a minimum-sized box around all non-empty coordinates in a given layout.
@@ -73,17 +86,17 @@ class bounding_box_2d
         {
             if constexpr (has_siqad_coord_v<Lyt>)
             {
-                auto coord_siqad    = siqad::to_fiction_coord<cube::coord_t>(coord);
-                auto min_coord_cube = siqad::to_fiction_coord<cube::coord_t>(min_coord);
-                auto max_coord_cube = siqad::to_fiction_coord<cube::coord_t>(max_coord);
+                auto coord_siqad    = coords::from_siqad<coords::cube>(coord);
+                auto min_coord_cube = coords::from_siqad<coords::cube>(min_coord);
+                auto max_coord_cube = coords::from_siqad<coords::cube>(max_coord);
 
                 min_coord_cube.x = std::min(min_coord_cube.x, coord_siqad.x);
                 max_coord_cube.x = std::max(max_coord_cube.x, coord_siqad.x);
                 min_coord_cube.y = std::min(min_coord_cube.y, coord_siqad.y);
                 max_coord_cube.y = std::max(max_coord_cube.y, coord_siqad.y);
 
-                min_coord = fiction::siqad::to_siqad_coord(min_coord_cube);
-                max_coord = fiction::siqad::to_siqad_coord(max_coord_cube);
+                min_coord = fiction::layouts::coords::to_siqad(min_coord_cube);
+                max_coord = fiction::layouts::coords::to_siqad(max_coord_cube);
             }
             else
             {
@@ -165,8 +178,8 @@ class bounding_box_2d
     /**
      * Returns the minimum corner of the bounding box.
      *
-     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most north-western coordinate of
-     * the bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<coords::offset>` object, this location represents the most north-western coordinate
+     * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The minimum enclosing coordinate in the associated layout.
      */
@@ -177,8 +190,8 @@ class bounding_box_2d
     /**
      * Returns the maximum corner of the bounding box.
      *
-     * In a `cartesian_layout<offset::ucoord_t>` object, this location represents the most south-eastern coordinate of
-     * the bounding box enclosing every non-empty coordinate.
+     * In a `cartesian_layout<coords::offset>` object, this location represents the most south-eastern coordinate
+     * of the bounding box enclosing every non-empty coordinate.
      *
      * @return The maximum enclosing coordinate in the associated layout.
      */
@@ -250,8 +263,5 @@ class bounding_box_2d
     }
 };
 
-}  // namespace fiction
-
+}  // namespace fiction::layouts
 #pragma GCC diagnostic pop
-
-#endif  // FICTION_BOUNDING_BOX_HPP

@@ -1,14 +1,26 @@
-//
-// Created by marcel on 04.03.20.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `equiv` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/verification/include/equiv.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/algorithms/verification/equivalence_checking.hpp>
+#include <fiction/networks/name_utils.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
+#include <fiction/verification/equivalence_checking.hpp>
 
 #include <alice/alice.hpp>
 #include <fmt/format.h>
@@ -87,11 +99,11 @@ nlohmann::json equiv_command::log() const
 {
     const auto get_eq_type_string = [this]() -> std::string
     {
-        if (result.eq == fiction::eq_type::NO)
+        if (result.eq == fiction::verification::eq_type::NO)
         {
             return "NOT EQ";
         }
-        if (result.eq == fiction::eq_type::WEAK)
+        if (result.eq == fiction::verification::eq_type::WEAK)
         {
             return "WEAK";
         }
@@ -110,9 +122,10 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
                                          const NtkOrLytVariant2& ntk_or_lyt_variant_2)
 {
     const auto equiv_check = [this](auto&& ntk_or_lyt_ptr1, auto&& ntk_or_lyt_ptr2)
-    { fiction::equivalence_checking(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2, &result); };
+    { fiction::verification::equivalence_checking(*ntk_or_lyt_ptr1, *ntk_or_lyt_ptr2, &result); };
 
-    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string { return fiction::get_name(*ntk_or_lyt_ptr); };
+    const auto get_name = [](auto&& ntk_or_lyt_ptr) -> std::string
+    { return fiction::networks::get_name(*ntk_or_lyt_ptr); };
 
     std::visit(equiv_check, ntk_or_lyt_variant1, ntk_or_lyt_variant_2);
 
@@ -128,11 +141,11 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
     {
         const auto get_eq_type_adverb = [this]() -> std::string
         {
-            if (result.eq == fiction::eq_type::NO)
+            if (result.eq == fiction::verification::eq_type::NO)
             {
                 return "NOT";
             }
-            if (result.eq == fiction::eq_type::WEAK)
+            if (result.eq == fiction::verification::eq_type::WEAK)
             {
                 return "WEAKLY";
             }
@@ -142,7 +155,7 @@ void equiv_command::equivalence_checking(const NtkOrLytVariant1& ntk_or_lyt_vari
 
         env->out() << fmt::format("[i] {} and {} are {} equivalent{}\n", std::visit(get_name, ntk_or_lyt_variant1),
                                   std::visit(get_name, ntk_or_lyt_variant_2), get_eq_type_adverb(),
-                                  result.eq == fiction::eq_type::WEAK ?
+                                  result.eq == fiction::verification::eq_type::WEAK ?
                                       fmt::format(" with a delay difference of {} clock cycles", result.tp_diff) :
                                       "");
     }

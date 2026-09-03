@@ -1,15 +1,27 @@
-//
-// Created by marcel on 24.09.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `fqca` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/fqca.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_fqca_layout.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -44,7 +56,7 @@ void fqca_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto write_fqca = [this, &get_name](auto&& lyt_ptr)
     {
@@ -52,7 +64,7 @@ void fqca_command::execute()
 
         if constexpr (fiction::has_qca_technology_v<Lyt>)
         {
-            fiction::write_fqca_layout(*lyt_ptr, filename, ps);
+            fiction::qca::io::write_fqca_layout(*lyt_ptr, filename, ps);
         }
         else
         {
@@ -86,7 +98,7 @@ void fqca_command::execute()
     {
         std::visit(write_fqca, lyt);
     }
-    catch (const fiction::out_of_cell_names_exception&)
+    catch (const fiction::qca::io::out_of_cell_names_exception&)
     {
         env->out() << "[e] layout contains more named cells than QCA-STACK's file format supports\n";
     }

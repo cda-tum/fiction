@@ -1,15 +1,27 @@
-//
-// Created by marcel on 24.10.19.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `qca` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #include "cmd/io/include/qca.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/write_qca_layout.hpp>
+#include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/qca/io/write_qca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
-#include <fiction/utils/name_utils.hpp>
 
 #include <alice/alice.hpp>
 
@@ -50,7 +62,7 @@ void qca_command::execute()
         ps.create_inter_layer_via_cells = false;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
 
     const auto write_qca = [this, &get_name](auto&& lyt_ptr)
     {
@@ -58,7 +70,7 @@ void qca_command::execute()
 
         if constexpr (fiction::has_qca_technology_v<Lyt>)
         {
-            fiction::write_qca_layout(*lyt_ptr, filename, ps);
+            fiction::qca::io::write_qca_layout(*lyt_ptr, filename, ps);
         }
         else
         {

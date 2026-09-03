@@ -1,9 +1,20 @@
-//
-// Created by marcel on 14.07.21.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
 
-#ifndef FICTION_CMD_SQD_HPP
-#define FICTION_CMD_SQD_HPP
+/**
+ * @file
+ * @brief Declares the `sqd` command, which writes the current cell layout for SiQAD.
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
 
 #include <alice/alice.hpp>
 
@@ -41,5 +52,3 @@ class sqd_command final : public command
 };
 
 }  // namespace alice
-
-#endif  // FICTION_CMD_SQD_HPP

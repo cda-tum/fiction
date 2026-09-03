@@ -1,3 +1,19 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Pre-compiled header for the test suite, enabled by `FICTION_ENABLE_PCH`.
+ * @author Marcel Walter (marcelwa)
+ */
+
 //
 // Pre-compiled header for the fiction test suite
 // Included automatically in every test translation unit when FICTION_ENABLE_PCH is on
@@ -7,8 +23,7 @@
 // is included by 62 of them.
 //
 
-#ifndef FICTION_PCH_TEST_HPP
-#define FICTION_PCH_TEST_HPP
+#pragma once
 
 // NOLINTBEGIN(misc-include-cleaner)
 
@@ -27,7 +42,6 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
-#include <fiction/technology/cell_technologies.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -46,5 +60,3 @@
 #include <vector>
 
 // NOLINTEND(misc-include-cleaner)
-
-#endif  // FICTION_PCH_TEST_HPP

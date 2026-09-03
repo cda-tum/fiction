@@ -1,6 +1,18 @@
-//
-// Created by marcel on 04.12.24.
-//
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Implements the `abc` command.
+ * @author Marcel Walter (marcelwa)
+ */
 
 #if (FICTION_ABC)
 
@@ -8,7 +20,7 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/io/network_reader.hpp>
+#include <fiction/networks/io/network_reader.hpp>
 #include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
@@ -120,7 +132,7 @@ void abc_command::execute()
             return;
         }
 
-        fiction::network_reader<fiction::aig_ptr> reader{abc_network_path.string(), env->out()};
+        fiction::networks::io::network_reader<fiction::aig_ptr> reader{abc_network_path.string(), env->out()};
 
         store<fiction::logic_network_t>().extend() = reader.get_networks().front();
     }

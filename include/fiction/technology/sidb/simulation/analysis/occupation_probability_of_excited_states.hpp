@@ -1,0 +1,141 @@
+/*
+ * Copyright (c) 2018 - 2023 Marcel Walter
+ * Copyright (c) 2023 - present Chair for Design Automation, Technical University of Munich
+ * All rights reserved.
+ *
+ * SPDX-License-Identifier: MIT
+ *
+ * Licensed under the MIT License
+ */
+
+/**
+ * @file
+ * @brief Boltzmann occupation probability of the excited states of an SiDB layout.
+ * @author Jan Drewniok (Drewniok)
+ * @author Marcel Walter (marcelwa)
+ */
+
+#pragma once
+
+#include "fiction/technology/sidb/model/physical_constants.hpp"
+#include "fiction/technology/sidb/simulation/analysis/calculate_energy_and_state_type.hpp"
+#include "fiction/technology/sidb/simulation/analysis/energy_distribution.hpp"
+#include "fiction/utils/math/math_utils.hpp"
+
+#include <algorithm>
+#include <cassert>
+#include <cmath>
+#include <cstdint>
+#include <numeric>
+#include <utility>
+
+namespace fiction::sidb::simulation::analysis
+{
+
+/**
+ * This function computes the Boltzmann factor for a given energy, the minimal energy, and the temperature.
+ *
+ * @param energy Boltzmann factor for the given energy is calculated.
+ * @param min_energy Minimum energy of the system.
+ * @param temperature Temperature of the system (unit: K).
+ * @return Boltzmann factor.
+ */
+[[nodiscard]] inline double calculate_boltzmann_factor(const double energy, const double min_energy,
+                                                       const double temperature) noexcept
+{
+    return std::exp(-((energy - min_energy) * model::EV_TO_JOULE / (model::BOLTZMANN_CONSTANT * temperature)));
+}
+
+/**
+ * This function computes the occupation probability of erroneous charge distributions (output charge does not match the
+ * expected output according the truth table) at a given temperature.
+ *
+ * @param est This contains the energies of all possible charge distributions together with the
+ * information if the charge distribution (state) is transparent or erroneous.
+ * @param temperature System temperature to assume (unit: K).
+ * @return The occupation probability of all erroneous states is returned.
+ */
+[[nodiscard]] inline double occupation_probability_gate_based(const energy_and_state_type& est,
+                                                              const double                 temperature) noexcept
+{
+    assert((temperature > 0.0) && "temperature should be slightly above 0 K");
+
+    if (est.empty())
+    {
+        return 0.0;
+    }
+
+    // Determine the minimal energy.
+    const auto [min_e_val, st_type] =
+        *std::ranges::min_element(est, [](const auto& a, const auto& b) { return a.first < b.first; });
+
+    const auto min_energy = min_e_val;
+
+    // The partition function is obtained by summing up all the Boltzmann factors.
+    const double partition_function =
+        std::accumulate(est.cbegin(), est.cend(), 0.0, [min_energy, temperature](const double sum, const auto& it)
+                        { return sum + calculate_boltzmann_factor(it.first, min_energy, temperature); });
+
+    // All Boltzmann factors of the erroneous states are summed.
+    double p = 0;
+
+    // The Boltzmann factors of all erroneous excited states are accumulated.
+    for (const auto& [energies, state_type] : est)
+    {
+        if (state_type == state_type::REJECTED)
+        {
+            p += calculate_boltzmann_factor(energies, min_energy, temperature);
+        }
+    }
+
+    return p / partition_function;  // Occupation probability of the erroneous states.
+}
+
+/**
+ * This function computes the occupation probability of excited states (charge distributions with energy higher than the
+ * ground state) at a given temperature.
+ *
+ * @param energy_dist This contains the energies in eV of all possible charge distributions with the degeneracy.
+ * @param temperature System temperature to assume (unit: K).
+ * @return The total occupation probability of all excited states is returned.
+ */
+[[nodiscard]] inline double occupation_probability_non_gate_based(const energy_distribution& energy_dist,
+                                                                  const double               temperature) noexcept
+{
+    assert((temperature > 0.0) && "Temperature should be slightly above 0 K");
+
+    if (energy_dist.empty())
+    {
+        return 0.0;
+    }
+
+    const auto min_energy = energy_dist.min_energy();  // unit: eV
+
+    // The partition function is obtained by summing up all the Boltzmann factors.
+
+    double partition_function = 0.0;
+
+    energy_dist.for_each(
+        [&partition_function, min_energy, temperature](const double energy, const uint64_t degeneracy)
+        {
+            partition_function +=
+                static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
+        });
+
+    double p = 0;
+
+    energy_dist.for_each(
+        [&p, min_energy, temperature](const double energy, const uint64_t degeneracy)
+        {
+            if (std::abs(fiction::utils::math::round_to_n_decimal_places(energy, 6) -
+                         fiction::utils::math::round_to_n_decimal_places(min_energy, 6)) >
+                fiction::utils::math::ERROR_MARGIN)
+            {
+                p += static_cast<double>(degeneracy) * calculate_boltzmann_factor(energy, min_energy, temperature);
+            }
+        });
+
+    return p / partition_function;  // Occupation probability of the excited states.
+}
+
+}  // namespace fiction::sidb::simulation::analysis
