@@ -17,7 +17,10 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/logic/operational_domain.hpp"
+#include "fiction/traits.hpp"
 
 #include <kitty/traits.hpp>
 
@@ -46,7 +49,6 @@ struct operational_domain_ratio_params
  * parameter values. A ratio close to 0 indicates that the gate is highly sensitive to parameter variations and may fail
  * to operate correctly.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @tparam TT Truth table type.
  * @param lyt The SiDB layout for which to compute the ratio of operational parameter points surrounding a specified
  * parameter point to the total number of parameter points.
@@ -55,17 +57,15 @@ struct operational_domain_ratio_params
  * @param pp The specific parameter point around which the operational ratio is computed.
  * @return The ratio of operational parameter points to the total number of parameter points in the parameter space.
  */
-template <typename Lyt, typename TT>
-[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
+template <typename TT>
+[[nodiscard]] double operational_domain_ratio(const layout& lyt, const std::vector<TT>& spec, const parameter_point& pp,
                                               const operational_domain_ratio_params& params = {}) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
     operational_domain_stats stats{};
 
-    fiction::sidb::simulation::logic::detail::operational_domain_impl<Lyt, TT, operational_domain> p{
+    fiction::sidb::simulation::logic::detail::operational_domain_impl<TT, operational_domain> p{
         lyt, spec, params.op_domain_params, stats};
 
     const auto op_domain = p.flood_fill(0, pp);
@@ -73,6 +73,25 @@ template <typename Lyt, typename TT>
     // calculate the ratio of operational parameter pairs to the total number of parameter pairs
     return static_cast<double>(stats.num_operational_parameter_combinations) /
            static_cast<double>(stats.num_total_parameter_points);
+}
+
+/**
+ * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @tparam TT Truth table type.
+ * @param lyt The layout to investigate.
+ * @param spec The Boolean function(s) the layout implements.
+ * @param pp The parameter point to start the flood fill from.
+ * @param params Parameters.
+ * @return The ratio of operational parameter points.
+ */
+template <typename Lyt, typename TT>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] double operational_domain_ratio(const Lyt& lyt, const std::vector<TT>& spec, const parameter_point& pp,
+                                              const operational_domain_ratio_params& params = {}) noexcept
+{
+    return operational_domain_ratio(to_sidb_layout(lyt), spec, pp, params);
 }
 
 }  // namespace fiction::sidb::simulation::logic
