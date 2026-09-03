@@ -55,6 +55,35 @@ target_include_directories(pyfiction
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set_property(TARGET pyfiction PROPERTY POSITION_INDEPENDENT_CODE ON)
 
+# Keep the embedded static libraries' symbols local. `fiction_options` adds
+# `-fvisibility=hidden` to everything that links `libfiction`, and nanobind adds
+# `CXX_VISIBILITY_PRESET hidden` on the module's own objects; the vendored
+# archives -- `tinyxml2`, `graph-coloring`, ALGLIB -- consume neither and keep
+# default visibility, so the extension re-exports them. Ported from
+# marcelwa/aigverse#490.
+if(APPLE)
+  target_link_options(pyfiction PRIVATE
+                      "LINKER:-exported_symbol,_PyInit_pyfiction")
+elseif(UNIX)
+  target_link_options(pyfiction PRIVATE "LINKER:--exclude-libs,ALL")
+
+  # `--gc-sections` collects nothing that was not compiled per-function and
+  # per-data, and nanobind's own size tuning stops at `-Os`. These cover the
+  # bindings; `vendors/CMakeLists.txt` covers the static archives, which is
+  # where most of the collectable code turns out to be. A linked build inherited
+  # both flags from `nanobind-static`; split mode links no nanobind target.
+  target_compile_options(
+    pyfiction
+    PRIVATE
+      "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:-ffunction-sections;-fdata-sections>"
+  )
+  target_link_options(
+    pyfiction
+    PRIVATE
+    "$<$<OR:$<CONFIG:Release>,$<CONFIG:MinSizeRel>,$<CONFIG:RelWithDebInfo>>:LINKER:--gc-sections>"
+  )
+endif()
+
 # Collect pyfiction headers under bindings/mnt/pyfiction/
 file(
   GLOB_RECURSE FICTION_PYFICTION_HEADERS CONFIGURE_DEPENDS

@@ -13,12 +13,6 @@ target_compile_features(libfiction INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 target_link_libraries(libfiction INTERFACE fiction::fiction_options
                                            fiction::fiction_warnings)
 
-set_target_properties(
-  libfiction
-  PROPERTIES VERSION ${PROJECT_VERSION}
-             CXX_VISIBILITY_PRESET hidden
-             VISIBILITY_INLINES_HIDDEN YES)
-
 # Set UTF-8 encoding for MSVC
 if(MSVC)
   target_compile_options(libfiction INTERFACE /utf-8 /Zm10)
