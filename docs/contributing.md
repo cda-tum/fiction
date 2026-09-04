@@ -67,6 +67,19 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 
 - If your PR gets a "Changes requested" review, you will need to address the feedback and update your PR by pushing to the same branch. You don't need to close the PR and open a new one. Respond to review comments on the PR (e.g., with "done 👍"). Be sure to re-request review once you have made changes after a code review so that maintainers know that the requests have been addressed.
 
+## Selecting Python Tests
+
+Tests inherit markers from their directories. Run `pytest -m simulation` to select
+SiDB simulation tests, or `uvx nox -s tests-3.12 -- -m simulation` to build the bindings
+and run that selection in an isolated environment. Use `pytest --markers` to list
+the available groups.
+
+Markers include `layouts`, `networks`, `physical_design`, `synthesis`, `verification`,
+`fcn`, `inml`, `sidb`, `simulation`, `io`, and `generators`. Nested tests inherit every
+matching ancestor marker: `pytest -m "sidb and io"` selects SiDB I/O tests, including
+simulation I/O. New files in those directories need no marker annotations. Running
+without `-m` executes the full suite.
+
 ## Code Review
 
 Two automated reviewers comment on every pull request, and they carry different weight.
