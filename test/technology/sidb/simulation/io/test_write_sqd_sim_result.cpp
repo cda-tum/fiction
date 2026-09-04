@@ -31,6 +31,7 @@
 #include <chrono>
 #include <cstdint>
 #include <ctime>
+#include <numbers>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -110,21 +111,21 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     }
     SECTION("float")
     {
-        constexpr float value  = -3.141593f;
+        constexpr float value  = -std::numbers::pi_v<float>;
         const auto      result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-3.141593");
     }
     SECTION("double")
     {
-        constexpr double value  = 3.14159265359;
+        constexpr double value  = std::numbers::pi;
         const auto       result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "3.141593");  // will be rounded by std::to_string
     }
     SECTION("long double")
     {
-        constexpr long double value  = 2.7182818284590452353602874l;
+        constexpr long double value  = std::numbers::e_v<long double>;
         const auto            result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "2.718282");  // will be rounded by std::to_string

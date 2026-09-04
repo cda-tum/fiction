@@ -15,7 +15,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
@@ -91,7 +90,7 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
         const layout                    lyt{};
         constexpr simulation_parameters params{2, -0.32};
         const auto                      simulation_results_exgs = exhaustive_ground_state_simulation(lyt, params);
-        const quicksim_params           qs_params{params};
+        const quicksim_params           qs_params{.sim_params = params};
         const auto                      simulation_results_quicksim = quicksim(lyt, qs_params);
 
         REQUIRE(!simulation_results_quicksim.has_value());
@@ -116,11 +115,14 @@ TEST_CASE("check if ground state is found", "[is-ground-state]")
 
         const auto simulation_results_exgs = exhaustive_ground_state_simulation(lyt, params);
 
-        const quicksim_params qs_params{params};
+        const quicksim_params qs_params{.sim_params = params};
         const auto            simulation_results_quicksim = quicksim(lyt, qs_params);
 
         REQUIRE(simulation_results_quicksim.has_value());
 
-        CHECK(is_ground_state(simulation_results_quicksim.value(), simulation_results_exgs));
+        if (simulation_results_quicksim.has_value())
+        {
+            CHECK(is_ground_state(*simulation_results_quicksim, simulation_results_exgs));
+        }
     }
 }
