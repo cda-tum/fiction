@@ -133,10 +133,6 @@ struct lattice_site
     {
         const auto result_x = int64_t{x} + other.x;
         const auto result_y = (int64_t{y} + other.y) + (z & other.z);
-        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
-        {
-            throw std::out_of_range("Lattice-site addition exceeds the coordinate range");
-        }
         return {result_x, result_y, z ^ other.z};
     }
     /**
@@ -151,10 +147,6 @@ struct lattice_site
     {
         const auto result_x = int64_t{x} - other.x;
         const auto result_y = (int64_t{y} - other.y) - static_cast<int64_t>(z == 0u && other.z != 0u);
-        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
-        {
-            throw std::out_of_range("Lattice-site subtraction exceeds the coordinate range");
-        }
         return {result_x, result_y, z ^ other.z};
     }
     /**
@@ -190,10 +182,6 @@ struct lattice_site
 [[nodiscard]] constexpr lattice_site site_at_row(const int32_t x, const int64_t row)
 {
     const auto y = (row / 2) - static_cast<int64_t>(row % 2 < 0);
-    if (!std::in_range<int32_t>(y))
-    {
-        throw std::out_of_range("Row exceeds the lattice-site coordinate range");
-    }
     return {x, y, row - (2 * y)};
 }
 /**
