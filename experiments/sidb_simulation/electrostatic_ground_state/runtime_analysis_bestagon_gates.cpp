@@ -37,7 +37,6 @@
 #include <vector>
 
 using namespace fiction;
-using namespace fiction::layouts;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::analysis;
@@ -87,7 +86,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        const auto layout = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}{}.sqd", folder, gate));
+        const auto layout = read_sqd_layout(fmt::format("{}{}.sqd", folder, gate));
 
         double      runtime_exhaustive      = 0;
         double      runtime_quickexact      = 0;
@@ -111,7 +110,7 @@ int main()  // NOLINT
         quicksim_single_runtime += stats.mean_single_runtime;
 
         // simulate layout with all input patterns
-        auto       bii                = legacy_bdl_input_iterator<sidb_100_cell_clk_lyt_siqad>{layout};
+        auto       bii                = bdl_input_iterator{layout};
         const auto num_input_patterns = truth_table.front().num_bits();
 
         for (auto i = 0u; i < num_input_patterns; ++i, ++bii)
