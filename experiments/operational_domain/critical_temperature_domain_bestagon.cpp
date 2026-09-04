@@ -95,7 +95,7 @@ int main()  // NOLINT
 
     for (const auto& [truth_table, gate] : gates)
     {
-        auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        auto lyt = read_sqd_layout(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // Loop over operational conditions
         for (const auto cond : {is_operational_params::operational_condition::TOLERATE_KINKS,

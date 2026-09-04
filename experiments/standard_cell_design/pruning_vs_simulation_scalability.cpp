@@ -40,6 +40,7 @@
 
 using namespace fiction;
 using namespace fiction::sidb;
+using namespace fiction::sidb;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
@@ -122,20 +123,15 @@ int main()  // NOLINT
     static const std::string folder_2i =
         fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags/", EXPERIMENTS_PATH);
 
-    const auto skeleton_2i1o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i1o.sqd"));
+    const auto skeleton_2i1o = read_sqd_layout(fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
-    const auto skeleton_2i2o = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(
-        fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i2o.sqd"));
+    const auto skeleton_2i2o = read_sqd_layout(fmt::format("{}/{}", folder_2i, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
-    const auto skeleton_3i1o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
+    const auto skeleton_3i1o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_1_out_skeleton_one.sqd"));
 
-    const auto skeleton_3i2o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
+    const auto skeleton_3i2o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_2_out_skeleton.sqd"));
 
-    const auto skeleton_3i3o =
-        read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
+    const auto skeleton_3i3o = read_sqd_layout(fmt::format("{}/{}", folder_3i, "3_in_3_out_skeleton.sqd"));
 
     auto two_one = skeleton_2i1o;
     two_one.assign_cell_type({22, 10}, sidb_technology::cell_type::LOGIC);
@@ -165,12 +161,12 @@ int main()  // NOLINT
     three_three.assign_cell_type({36, 11}, sidb_technology::cell_type::LOGIC);
     three_three.assign_cell_type({40, 7}, sidb_technology::cell_type::LOGIC);
 
-    const std::vector<std::pair<sidb_100_cell_clk_lyt_siqad, std::vector<kitty::dynamic_truth_table>>>
-        layout_truth_table{{two_one, {create_or_tt()}},
-                           {two_two, create_crossing_wire_tt()},
-                           {three_one, {create_gamble_tt()}},
-                           {three_two, create_truth_tables_3i2o()},
-                           {three_three, create_truth_tables_3i3o()}};
+    const std::vector<std::pair<layout, std::vector<kitty::dynamic_truth_table>>> layout_truth_table{
+        {two_one, {create_or_tt()}},
+        {two_two, create_crossing_wire_tt()},
+        {three_one, {create_gamble_tt()}},
+        {three_two, create_truth_tables_3i2o()},
+        {three_three, create_truth_tables_3i3o()}};
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 

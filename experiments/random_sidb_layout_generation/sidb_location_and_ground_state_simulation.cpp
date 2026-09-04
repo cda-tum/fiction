@@ -57,9 +57,7 @@ using namespace fiction::sidb::simulation::io;
 int main(int argc, const char* argv[])  // NOLINT
 {
 
-    std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random/"},
-                                                         {"--mu_minus", "-0.32"},
-                                                         {"--orientation", "100"}};
+    std::unordered_map<std::string, std::string> options{{"--folder_name", "layout_random/"}, {"--mu_minus", "-0.32"}};
 
     const std::span<const char* const> command_line{argv, static_cast<std::size_t>(argc)};
     std::vector<std::string>           arguments{};
@@ -92,8 +90,6 @@ int main(int argc, const char* argv[])  // NOLINT
     const std::string folder_name = options["--folder_name"];
     // µ-value used for the simulation.
     const double mu = std::stod(options["--mu_minus"]);
-    // Lattice orientation of H-Si.
-    const std::string orientation = options["--orientation"];
 
     // Print the parsed values
     std::cout << fmt::format("Folder name: {}\n", folder_name);
@@ -129,41 +125,18 @@ int main(int argc, const char* argv[])  // NOLINT
                         const std::string file_path = fmt::format("{}/loc/{}_sim_µ_minus_{:.3f}.txt",
                                                                   folder.path().string(), name, -phys_params.mu_minus);
 
-                        if (orientation == "100")
+                        const auto lyt = read_sqd_layout(benchmark.string());
+
+                        const quickexact_params params{phys_params};
+
+                        const auto simulation_results = quickexact(lyt, params);
+
+                        // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
+                        // physically valid charge distribution is found) because the physical model currently works
+                        // reliably only for layouts with neutrally and negatively charged SiDBs.
+                        if (!simulation_results.charge_distributions.empty())
                         {
-                            auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
-
-                            const quickexact_params params{.sim_params = phys_params};
-
-                            const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
-
-                            // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
-                            // physically valid charge distribution is found) because the physical model currently works
-                            // reliably only for layouts with neutrally and negatively charged SiDBs.
-                            if (!simulation_results.charge_distributions.empty())
-                            {
-                                write_location_and_ground_state(simulation_results, file_path);
-                            }
-                        }
-                        else if (orientation == "111")
-                        {
-                            auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
-
-                            const quickexact_params params{.sim_params = phys_params};
-
-                            const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
-
-                            // Some SiDB layouts where positively charged SiDBs may occur cannot be simulated (i.e., no
-                            // physically valid charge distribution is found) because the physical model currently works
-                            // reliably only for layouts with neutrally and negatively charged SiDBs.
-                            if (!simulation_results.charge_distributions.empty())
-                            {
-                                write_location_and_ground_state(simulation_results, file_path);
-                            }
-                        }
-                        else
-                        {
-                            std::cout << "unsupported lattice orientation.\n";
+                            write_location_and_ground_state(simulation_results, file_path);
                         }
                     }
                 }
