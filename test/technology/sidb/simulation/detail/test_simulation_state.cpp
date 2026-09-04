@@ -15,6 +15,7 @@
  */
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
@@ -98,19 +99,22 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
 
         std::size_t valid = 0;
 
-        do
+        while (true)
         {
             const auto cd = state.snapshot();
             CHECK(state.is_physically_valid() == land.is_physically_valid(cd));
             CHECK_THAT(state.energy(), WithinAbs(land.energy(cd), 1E-12));
-            valid += state.is_physically_valid() ? 1 : 0;
+            if (state.is_physically_valid())
+            {
+                ++valid;
+            }
 
             if (state.charge_index() == state.max_charge_index())
             {
                 break;
             }
             state.increase_charge_index_by_one();
-        } while (true);
+        }
 
         CHECK(valid == 1);
     }
@@ -129,7 +133,7 @@ TEST_CASE("Simulation state over a landscape", "[simulation-state]")
 
         for (uint64_t gray = 0; gray <= state.max_charge_index(); ++gray)
         {
-            const auto code = gray ^ (gray >> 1);
+            const auto code = gray ^ (gray >> uint64_t{1});
             state.assign_charge_index_by_gray_code(code, previous, detail::dependent_cell_mode::VARIABLE,
                                                    detail::energy_calculation::KEEP_OLD_ENERGY_VALUE,
                                                    detail::charge_distribution_history::CONSIDER);

@@ -92,20 +92,23 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickSim")
     {
-        const quicksim_params qs_params{simulation_parameters{2, -0.32}};
+        const quicksim_params qs_params{.sim_params = simulation_parameters{2, -0.32}};
         return quicksim<lattice_siqad>(lyt, qs_params);
     };
 
 #if (FICTION_ALGLIB_ENABLED)
     BENCHMARK("ClusterComplete (multi-threaded)")
     {
-        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 
     BENCHMARK("ClusterComplete (single-threaded)")
     {
-        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32},
+                                                .validity_witness_partitioning_max_cluster_size_gss = 6,
+                                                .num_overlapping_witnesses_limit_gss                = 6,
+                                                .available_threads                                  = 1};
         return clustercomplete<lattice_siqad>(lyt, sim_params);
     };
 #endif  // FICTION_ALGLIB_ENABLED
@@ -307,7 +310,7 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("4 Segment Diagonal Bestagon Wire (multi-threaded)")
     {
-        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
         return clustercomplete<cell_lyt>(cl_4_seg, sim_params);
     };
 
@@ -316,7 +319,10 @@ TEST_CASE("Benchmark ClusterComplete", "[benchmark]")
 
     BENCHMARK("3 Segment Diagonal Bestagon Wire (single-threaded)")
     {
-        const clustercomplete_params sim_params{simulation_parameters{3, -0.32}, {}, {}, 6, 6, 1};
+        const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32},
+                                                .validity_witness_partitioning_max_cluster_size_gss = 6,
+                                                .num_overlapping_witnesses_limit_gss                = 6,
+                                                .available_threads                                  = 1};
         return clustercomplete<cell_lyt>(cl_3_seg, sim_params);
     };
 }
