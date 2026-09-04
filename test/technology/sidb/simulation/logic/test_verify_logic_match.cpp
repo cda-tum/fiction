@@ -15,6 +15,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_test_macros.hpp>
+
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
@@ -23,7 +25,6 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/verify_logic_match.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <vector>
@@ -43,7 +44,7 @@ TEST_CASE("Bestagon FO2 gate", "[does-charge-distribution-match-logic-for-given-
 
     auto bii = bdl_input_iterator<sidb_cell_clk_lyt_siqad>{lyt};
 
-    const quickexact_params params{simulation_parameters{2, -0.32}};
+    const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
     SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
     {
@@ -98,7 +99,7 @@ TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface",
 
     auto bii = bdl_input_iterator<sidb_111_cell_clk_lyt_siqad>{lyt};
 
-    const quickexact_params params{simulation_parameters{2, -0.32}};
+    const quickexact_params params{.sim_params = simulation_parameters{2, -0.32}};
 
     SECTION("The index is 2, which means that the left input is set to one and the right input is set to zero.")
     {
