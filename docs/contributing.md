@@ -85,6 +85,31 @@ When working with CodeRabbit:
 
 `.coderabbit.yaml` in the repository root configures which paths are reviewed and what CodeRabbit should not comment on. Update it rather than repeating the same correction by hand.
 
+## Publishing to PyPI
+
+The `CD` workflow publishes `mnt.pyfiction` when a GitHub release is published.
+The `publish-to-pypi` job downloads the source distribution and wheels from the build jobs
+and authenticates through [PyPI trusted publishing](https://docs.pypi.org/trusted-publishers/using-a-publisher/).
+The job uses the `pypi` GitHub environment and requires `id-token: write` permission.
+A manual workflow run builds the distributions but skips publishing.
+
+The GitHub trusted publisher on the
+[project's Publishing page](https://pypi.org/manage/project/mnt.pyfiction/settings/publishing/)
+uses these values:
+
+| Field | Value |
+| --- | --- |
+| Owner | `cda-tum` |
+| Repository name | `fiction` |
+| Workflow name | `cd.yml` |
+| Environment name | `pypi` |
+
+The workflow name is the filename, without `.github/workflows/`.
+Configure any required reviewers or release-tag restrictions on the `pypi` GitHub environment.
+After the next release, verify that `Deploy to PyPI` succeeds and that the release files
+and their attestations appear on PyPI. Then revoke the old deployment token on PyPI and
+remove the `PYPI_DEPLOY_TOKEN` GitHub secret if no other workflow uses that token.
+
 ## AI-Assisted Contributions
 
 Contributions written with the help of an AI agent are welcome, under two conditions.
