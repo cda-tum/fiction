@@ -400,8 +400,8 @@ class ground_state_space_impl
      * @param rst Receptor state at which the updates to the accumulation of externally received potential should be
      * made when necessary.
      */
-    constexpr void update_external_potential_projection(const cluster_projector_state& pst,
-                                                        const cluster_receptor_state&  rst) const noexcept
+    void update_external_potential_projection(const cluster_projector_state& pst,
+                                              const cluster_receptor_state&  rst) const noexcept
     {
         update_external_pot_projection_if_bound_removed<bound_direction::LOWER>(pst, rst);
         update_external_pot_projection_if_bound_removed<bound_direction::UPPER>(pst, rst);
