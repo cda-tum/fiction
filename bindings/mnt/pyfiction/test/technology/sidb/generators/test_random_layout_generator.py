@@ -20,7 +20,8 @@ from mnt.pyfiction import (
 )
 
 
-def test_area_with_one_sidb_100_lattice():
+def test_area_with_one_sidb_100_lattice() -> None:
+    """A one-site H-Si(100)-2x1 area fixes the generated SiDB position."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 1
     params.coordinate_pair = ((10, 10), (10, 10))
@@ -67,7 +68,8 @@ def test_area_with_five_sidbs_cds_111() -> None:
     assert result_lyt.num_cells() == 5
 
 
-def test_area_with_one_coordinate_111_lattice():
+def test_area_with_one_coordinate_111_lattice() -> None:
+    """A one-site H-Si(111)-1x1 area fixes the generated SiDB position."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 1
     params.coordinate_pair = ((10, 10), (10, 10))
@@ -78,14 +80,16 @@ def test_area_with_one_coordinate_111_lattice():
     assert cell.y == 10
 
 
-def test_impossible_design_of_single_layout():
+def test_impossible_design_of_single_layout() -> None:
+    """The generator returns None when the requested SiDBs do not fit."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 2
     result_lyt = generate_random_sidb_layout(params, sidb_cell_level_layout())
     assert result_lyt is None
 
 
-def test_impossible_design_of_multiple_layouts():
+def test_impossible_design_of_multiple_layouts() -> None:
+    """Repeated generation returns None when the requested SiDBs do not fit."""
     params = generate_random_sidb_layout_params()
     params.maximal_attempts_for_multiple_layouts = 5
     params.number_of_sidbs = 2

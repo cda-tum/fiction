@@ -451,6 +451,12 @@ class write_sqd_layout_impl
 class sqd_writer
 {
   public:
+    /**
+     * Creates an SQD writer for a lattice layout.
+     *
+     * @param src Layout to write.
+     * @param s Output stream.
+     */
     sqd_writer(const layout& src, std::ostream& s) : lyt{src}, os{s} {}
 
     /**
@@ -503,9 +509,21 @@ class sqd_writer
     }
 
   private:
+    /**
+     * Layout to write.
+     */
     const layout& lyt;
+    /**
+     * Output stream.
+     */
     std::ostream& os;
 
+    /**
+     * Appends a DB dot with its lattice coordinate and cell type.
+     *
+     * @param design SQD design buffer.
+     * @param s Site of the SiDB.
+     */
     void write_db_dot(std::stringstream& design, const lattice_site& s) const
     {
         std::string type_str{};
@@ -537,6 +555,13 @@ class sqd_writer
         design << fmt::format(siqad::DBDOT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, s.x, s.y, s.z), type_str,
                               siqad::NORMAL_COLOR);
     }
+    /**
+     * Appends a defect with its lattice coordinate and Coulomb parameters when charged.
+     *
+     * @param design SQD design buffer.
+     * @param s Site of the defect.
+     * @param d Defect to write.
+     */
     static void write_defect(std::stringstream& design, const lattice_site& s, const sidb::model::defect& d)
     {
         const auto it = siqad::defect_type_to_name.find(d.type);
