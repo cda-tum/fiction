@@ -57,6 +57,28 @@ TEST_CASE("Lattice sites", "[lattice]")
         const lattice_site mixed{ux, iy, 1u};
         CHECK(mixed == lattice_site{5, -7, 1});
     }
+    SECTION("construction rejects unrepresentable coordinates")
+    {
+        constexpr int64_t      min_coordinate = std::numeric_limits<int32_t>::min();
+        constexpr int64_t      max_coordinate = std::numeric_limits<int32_t>::max();
+        constexpr lattice_site boundary{min_coordinate, max_coordinate, 1};
+        CHECK(boundary.x == min_coordinate);
+        CHECK(boundary.y == max_coordinate);
+        CHECK(lattice_site{false, char{1}} == lattice_site{0, 1});
+
+        for (const auto coordinate : {min_coordinate - 1, max_coordinate + 1})
+        {
+            CHECK_THROWS_AS((lattice_site{coordinate, 0}), std::out_of_range);
+            CHECK_THROWS_AS((lattice_site{0, coordinate}), std::out_of_range);
+            CHECK_THROWS_AS((lattice_site{coordinate, 0, 1}), std::out_of_range);
+            CHECK_THROWS_AS((lattice_site{0, coordinate, 1}), std::out_of_range);
+        }
+        constexpr auto max_unsigned = std::numeric_limits<uint64_t>::max();
+        CHECK_THROWS_AS((lattice_site{max_unsigned, 0}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, max_unsigned}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{max_unsigned, 0, 1}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, max_unsigned, 1}), std::out_of_range);
+    }
     SECTION("raster order")
     {
         CHECK(lattice_site{5, 0, 0} < lattice_site{0, 1, 0});
