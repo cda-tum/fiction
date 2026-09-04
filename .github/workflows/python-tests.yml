@@ -110,7 +110,16 @@ jobs:
         run: uvx nox -s minimums --verbose
 
       - name: 🐍 Test
-        run: uvx nox -s tests --verbose
+        env:
+          RUNS_ON: ${{ inputs.runs-on }}
+        run: uvx nox -s tests --verbose -- --cov --cov-config=pyproject.toml --cov-append --cov-report=xml:coverage-$RUNS_ON.xml
+
+      - name: Upload Python coverage report
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: python-coverage-${{ inputs.runs-on }}
+          path: coverage-${{ inputs.runs-on }}.xml
+          if-no-files-found: error
 
       # A hit rate is a fact; a step duration is a guess about one. `--show-stats` gates the job,
       # since it fails only when sccache is broken, which is what this step exists to catch;
