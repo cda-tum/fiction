@@ -108,7 +108,7 @@ macro(fiction_local_options)
 
   # Emit one JSON profile next to every object file, recording where the
   # compiler spent its time. Aggregate them with ClangBuildAnalyzer; see
-  # docs/getting_started.rst.
+  # docs/getting_started.md.
   if(FICTION_ENABLE_TIME_TRACE)
     if(CMAKE_CXX_COMPILER_ID MATCHES ".*Clang")
       target_compile_options(fiction_options INTERFACE -ftime-trace)

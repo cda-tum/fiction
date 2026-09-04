@@ -18,6 +18,7 @@ from mnt.pyfiction import (
     and_or_not_maj,
     eq_type,
     equivalence_checking,
+    missing_required_gates_exception,
     technology_mapping,
     technology_mapping_stats,
 )
@@ -29,6 +30,11 @@ GATE_LIBRARIES = [
     pytest.param(all_standard_3_input_functions, id="all_standard_3_input_functions"),
     pytest.param(all_supported_standard_functions, id="all_supported_standard_functions"),
 ]
+
+
+def test_missing_gate_exception_export():
+    """Users can catch the exception exposed by the technology mapper."""
+    assert issubclass(missing_required_gates_exception, RuntimeError)
 
 
 def test_mapping_default(mux21):
