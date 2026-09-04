@@ -16,6 +16,7 @@
  * @author Willem Lambooy (wlambooy)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
@@ -23,6 +24,7 @@
 #include <fiction/layouts/clocked_layout.hpp>
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
 #include <fiction/technology/sidb/surfaces/lattice.hpp>
@@ -35,6 +37,7 @@
 #include <sstream>
 #include <string>
 #include <unordered_set>
+#include <utility>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -1308,6 +1311,29 @@ TEST_CASE("SQD parsing error into an sidb::layout", "[sqd]")
             std::istringstream stream{std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
                                                   R"(<layer type="DB"><dbdot><latcoord )"} +
                                       attributes + " /></dbdot></layer></design></siqad>"};
+            CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
+        }
+    }
+    SECTION("malformed explicit lattice geometry")
+    {
+        const std::string geometry{R"(<name>custom</name><a1 x="4" y="1"/><a2 x="-2" y="8"/>)"
+                                   R"(<N>2</N><b1 x="0" y="0"/><b2 x="1.5" y="2.5"/>)"};
+        for (const auto& replacement :
+             {std::pair{R"(<a1 x="4" y="1"/>)", ""}, std::pair{R"(<a2 x="-2" y="8"/>)", ""},
+              std::pair{R"(<b1 x="0" y="0"/>)", ""}, std::pair{R"(<b2 x="1.5" y="2.5"/>)", ""},
+              std::pair{"<N>2</N>", ""}, std::pair{"<N>2</N>", "<N/>"}, std::pair{"<N>2</N>", "<N>1</N>"},
+              std::pair{"<N>2</N>", "<N>3</N>"}, std::pair{"<N>2</N>", "<N>2.5</N>"},
+              std::pair{"<N>2</N>", "<N>2junk</N>"}, std::pair{R"(x="4")", ""}, std::pair{R"(y="1")", ""},
+              std::pair{R"(x="4")", R"(x="")"}, std::pair{R"(x="4")", R"(x="nan")"},
+              std::pair{R"(x="4")", R"(x="inf")"}, std::pair{R"(x="4")", R"(x="1e999")"},
+              std::pair{R"(x="4")", R"(x="text")"}, std::pair{R"(x="4")", R"(x="4junk")"}})
+        {
+            CAPTURE(replacement.first, replacement.second);
+            auto malformed = geometry;
+            malformed.replace(malformed.find(replacement.first), std::string{replacement.first}.size(),
+                              replacement.second);
+            std::istringstream stream{"<siqad><layers><layer_prop><lat_vec>" + malformed +
+                                      "</lat_vec></layer_prop></layers><design/></siqad>"};
             CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
         }
     }

@@ -325,6 +325,23 @@ TEST_CASE("Write and read back an sidb::layout", "[sqd]")
                                ->FirstChildElement("name");
         REQUIRE(name != nullptr);
         CHECK(std::string{name->GetText()} == lat.name);
+        CHECK(read_sqd_layout(stream) == lyt);
+    }
+    SECTION("serialized geometry takes precedence over the lattice name")
+    {
+        for (const auto* name : {"custom", "Si(100) 2x1", "Si(111) 1x1", ""})
+        {
+            const sidb::lattice lat{.name  = name,
+                                    .a1    = {4.0, 1.0},
+                                    .a2    = {-2.0, 8.0},
+                                    .basis = {{{0.0, 0.0}, {1.5, 2.5}}}};
+            sidb::layout        lyt{lat};
+            lyt.assign_cell_type({-3, 2, 1}, sidb_technology::cell_type::INPUT);
+            lyt.assign_defect({1, -2, 0}, defect{defect_type::DB});
+            std::stringstream stream{};
+            write_sqd_layout(lyt, stream);
+            CHECK(read_sqd_layout(stream) == lyt);
+        }
     }
     SECTION("H-Si(100)-2x1 with defects")
     {

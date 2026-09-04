@@ -191,6 +191,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
 
 - I/O:
+  - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
   - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
   - SVG and text output now reject padding outside the lattice-site coordinate range
   - SQD readers now reject empty defect labels, invalid numeric values, and invalid Coulomb parameters.

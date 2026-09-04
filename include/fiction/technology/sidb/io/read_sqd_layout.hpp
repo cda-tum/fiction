@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <cctype>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <fstream>
 #include <istream>
@@ -554,9 +555,13 @@ class sqd_reader
             {
                 lattice_name = text;
             }
+            else
+            {
+                lattice_name.clear();
+            }
         }
 
-        lyt.set_lattice(parse_lattice(lattice_name));
+        lyt.set_lattice(parse_lattice(lattice_name, *lat_vec_element));
 
         const auto* const design_element = siqad_root->FirstChildElement("design");
 
@@ -615,14 +620,74 @@ class sqd_reader
     std::istream& is;
 
     /**
-     * Looks up a supported silicon lattice by name.
+     * Parses a finite lattice number without trailing non-whitespace characters.
+     *
+     * @param text Numeric XML text or attribute.
+     * @return The parsed number.
+     * @throws sqd_parsing_error if the number is missing, non-finite, or has trailing characters.
+     * @throws std::invalid_argument if the text is not numeric.
+     * @throws std::out_of_range if the number exceeds the range of a double.
+     */
+    [[nodiscard]] static double parse_lattice_number(const char* text)
+    {
+        if (text == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: missing lattice number");
+        }
+        const std::string number{text};
+        std::size_t       consumed{};
+        const auto        value = std::stod(number, &consumed);
+        if (!std::isfinite(value) || number.find_first_not_of(" \t\r\n", consumed) != std::string::npos)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: invalid lattice number");
+        }
+        return value;
+    }
+    /**
+     * Parses a lattice vector or basis site with finite components.
+     *
+     * @param element Vector element with x and y attributes.
+     * @return The vector.
+     * @throws sqd_parsing_error if the element or a component is missing or malformed.
+     * @throws std::invalid_argument if a component is not numeric.
+     * @throws std::out_of_range if a component exceeds the range of a double.
+     */
+    [[nodiscard]] static lattice::vector parse_lattice_vector(const tinyxml2::XMLElement* element)
+    {
+        if (element == nullptr)
+        {
+            throw sqd_parsing_error("Error parsing SQD file: missing lattice vector or basis site");
+        }
+        return {parse_lattice_number(element->Attribute("x")), parse_lattice_number(element->Attribute("y"))};
+    }
+    /**
+     * Reads explicit two-site lattice geometry, or a predefined lattice when geometry is absent.
      *
      * @param name Lattice name from the SQD layer.
-     * @return The named lattice.
-     * @throws sqd_parsing_error if the lattice name is unsupported.
+     * @param element Lattice definition element.
+     * @return The lattice defined by the layer.
+     * @throws sqd_parsing_error if the geometry is incomplete, the basis count is not two, or a name-only lattice is
+     * unknown.
+     * @throws std::invalid_argument if a geometry component is not numeric.
+     * @throws std::out_of_range if a geometry component exceeds the range of a double.
      */
-    [[nodiscard]] static lattice parse_lattice(const std::string& name)
+    [[nodiscard]] static lattice parse_lattice(const std::string& name, const tinyxml2::XMLElement& element)
     {
+        if (element.FirstChildElement("a1") != nullptr || element.FirstChildElement("a2") != nullptr ||
+            element.FirstChildElement("b1") != nullptr || element.FirstChildElement("b2") != nullptr ||
+            element.FirstChildElement("N") != nullptr)
+        {
+            const auto* count = element.FirstChildElement("N");
+            if (count == nullptr || parse_lattice_number(count->GetText()) != 2.0)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: lattice must have two basis sites");
+            }
+            return {.name  = name,
+                    .a1    = parse_lattice_vector(element.FirstChildElement("a1")),
+                    .a2    = parse_lattice_vector(element.FirstChildElement("a2")),
+                    .basis = {{parse_lattice_vector(element.FirstChildElement("b1")),
+                               parse_lattice_vector(element.FirstChildElement("b2"))}}};
+        }
         if (name == lattice::si_111_1x1().name)
         {
             return lattice::si_111_1x1();
@@ -865,11 +930,13 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
 /**
  * Reads an SQD file from a stream into an `sidb::layout`. The lattice comes from the file's lattice definition; SiDBs
  * and surface defects are placed at the `(n, m, l)` lattice coordinates the file names.
+ * Explicit geometry must contain finite vectors and two basis sites. Without geometry, the reader accepts the two
+ * predefined reconstruction names and defaults to H-Si(100)-2x1 when the name is absent.
  *
  * @param is The input stream to read from.
  * @param name The name to give to the layout.
  * @return The layout read from the stream.
- * @throws sqd_parsing_error if the file is malformed or names an unknown lattice.
+ * @throws sqd_parsing_error if the file is malformed or a name-only lattice is unknown.
  */
 [[nodiscard]] inline layout read_sqd_layout(std::istream& is, const std::string_view& name = "")
 {
@@ -883,7 +950,7 @@ void read_sqd_layout(Lyt& lyt, const std::string_view& filename)
  * @param filename The file to read.
  * @param name The name to give to the layout.
  * @return The layout read from the file.
- * @throws sqd_parsing_error if the file is malformed or names an unknown lattice.
+ * @throws sqd_parsing_error if the file is malformed or a name-only lattice is unknown.
  * @throws std::ifstream::failure if the file cannot be opened.
  */
 [[nodiscard]] inline layout read_sqd_layout(const std::string_view& filename, const std::string_view& name = "")
