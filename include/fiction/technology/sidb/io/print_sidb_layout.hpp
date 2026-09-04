@@ -74,6 +74,7 @@ inline constexpr auto NO_COLOR = fmt::text_style{};
  * @param lat_color Whether to color the picture.
  * @param crop_layout Whether to pad the bounding box by two columns and one unit cell instead of printing it tight.
  * @param draw_lattice Whether to print empty lattice sites as dots.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
 inline void print_sidb_layout(std::ostream& os, const layout& lyt, const bool lat_color = true,
                               const bool crop_layout = false, const bool draw_lattice = true)

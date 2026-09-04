@@ -22,7 +22,10 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 
+#include <cstdint>
+#include <limits>
 #include <sstream>
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -119,4 +122,18 @@ TEST_CASE("Print six SiDBs on the H-Si(111)-1x1 surface", "[print-sidb-layout]")
     print_sidb_layout(print_stream, lyt, false, true, true);
 
     CHECK(layout_print == print_stream.str());
+}
+
+TEST_CASE("Text padding rejects unrepresentable lattice sites", "[print-sidb-layout]")
+{
+    for (const auto coordinate : {std::numeric_limits<int32_t>::min(), std::numeric_limits<int32_t>::max()})
+    {
+        layout lyt{};
+        lyt.assign_cell_type({coordinate, coordinate, 0}, sidb_technology::cell_type::NORMAL);
+        std::stringstream os{};
+        CHECK_NOTHROW(print_sidb_layout(os, lyt, false, false));
+        os.str("");
+        CHECK_THROWS_AS(print_sidb_layout(os, lyt, false, true), std::out_of_range);
+        CHECK(os.str().empty());
+    }
 }

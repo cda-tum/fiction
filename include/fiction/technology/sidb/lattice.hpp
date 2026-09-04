@@ -67,26 +67,28 @@ struct lattice_site
      * @tparam X Integral type of `x`.
      * @tparam Y Integral type of `y`.
      * @tparam Z Integral type of `z`.
-     * @param x Steps along the first lattice vector.
-     * @param y Steps along the second lattice vector.
-     * @param z Basis site, 0 or 1.
+     * @param x_coord Steps along the first lattice vector.
+     * @param y_coord Steps along the second lattice vector.
+     * @param basis_site Basis site, 0 or 1.
      */
     template <std::integral X, std::integral Y, std::integral Z>
-    constexpr lattice_site(const X x, const Y y, const Z z) noexcept :
-            x{static_cast<int32_t>(x)},
-            y{static_cast<int32_t>(y)},
-            z{static_cast<uint8_t>(static_cast<uint8_t>(z) & 1u)}
+    constexpr lattice_site(const X x_coord, const Y y_coord, const Z basis_site) noexcept :
+            x{static_cast<int32_t>(x_coord)},
+            y{static_cast<int32_t>(y_coord)},
+            z{static_cast<uint8_t>(static_cast<uint8_t>(basis_site) & 1u)}
     {}
     /**
      * Creates the site `(x, y, 0)`.
      *
      * @tparam X Integral type of `x`.
      * @tparam Y Integral type of `y`.
-     * @param x Steps along the first lattice vector.
-     * @param y Steps along the second lattice vector.
+     * @param x_coord Steps along the first lattice vector.
+     * @param y_coord Steps along the second lattice vector.
      */
     template <std::integral X, std::integral Y>
-    constexpr lattice_site(const X x, const Y y) noexcept : x{static_cast<int32_t>(x)}, y{static_cast<int32_t>(y)}
+    constexpr lattice_site(const X x_coord, const Y y_coord) noexcept :
+            x{static_cast<int32_t>(x_coord)},
+            y{static_cast<int32_t>(y_coord)}
     {}
     /**
      * Compares two sites for equality.
@@ -212,7 +214,7 @@ struct lattice_site
     {
         throw std::length_error("Lattice-site rectangle exceeds the maximum vector size");
     }
-    sites.reserve(static_cast<std::size_t>(width * height));
+    sites.reserve(width * height);
 
     for (auto row = min_row; row <= max_row; ++row)
     {

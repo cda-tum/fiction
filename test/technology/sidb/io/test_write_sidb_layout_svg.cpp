@@ -32,7 +32,10 @@
 #include <fmt/format.h>
 
 #include <cctype>
+#include <cstdint>
+#include <limits>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 
 using namespace fiction;
@@ -42,22 +45,17 @@ using namespace fiction::sidb::model;
 using namespace fiction::sidb::surfaces;
 
 /**
- * This function takes an SVG string as input and returns a new string with all
- * whitespace characters removed. The purpose is to create a compact representation
- * of the SVG content, which can be useful for comparisons, optimizations, or transmission.
+ * Removes whitespace from an SVG string for comparison.
  *
- * @param svg The input SVG string to be normalized.
- * @return A string with all whitespace characters removed.
+ * @param svg SVG string.
+ * @return SVG without whitespace.
  */
-[[nodiscard]] static std::string normalize_svg(const std::string& svg) noexcept
+[[nodiscard]] static std::string normalize_svg(const std::string& svg)
 {
     std::string result = svg;
-
-    // Remove all whitespace (spaces, tabs, newlines)
-    std::erase_if(result, ::isspace);
-
+    std::erase_if(result, [](const unsigned char c) { return std::isspace(c) != 0; });
     return result;
-};
+}
 
 inline const std::string EXPECTED_SVG_LIGHT_CELL_LEVEL =
     fmt::format(R"(<?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -692,4 +690,22 @@ TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
 
         CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL_111));
     }
+}
+
+TEST_CASE("SVG padding rejects unrepresentable lattice sites", "[write-sidb-layout-svg]")
+{
+    constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
+    for (const lattice_site site :
+         {lattice_site{max_coordinate, 0, 0}, lattice_site{0, max_coordinate, 0}, lattice_site{0, max_coordinate, 1}})
+    {
+        sidb::layout lyt{};
+        lyt.assign_cell_type(site, sidb_technology::cell_type::NORMAL);
+        std::stringstream os{};
+        CHECK_THROWS_AS(write_sidb_layout_svg(lyt, os), std::out_of_range);
+        CHECK(os.str().empty());
+    }
+    sidb::layout lyt{};
+    lyt.assign_cell_type({max_coordinate - 2, max_coordinate - 2, 1}, sidb_technology::cell_type::NORMAL);
+    std::stringstream os{};
+    CHECK_NOTHROW(write_sidb_layout_svg(lyt, os));
 }
