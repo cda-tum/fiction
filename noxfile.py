@@ -170,6 +170,9 @@ def docs(session: nox.Session) -> None:
 
     Pass ``-b linkcheck`` to check links or ``--non-interactive`` to build and exit.
     Additional arguments are passed to Sphinx.
+
+    Args:
+        session: Nox session that supplies arguments and controls interactive mode.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", dest="builder", default="html")
