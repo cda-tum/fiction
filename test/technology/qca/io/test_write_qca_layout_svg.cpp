@@ -15,8 +15,9 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "fiction/utils/version_info.hpp"
 
@@ -26,8 +27,10 @@
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
+#include <tinyxml2.h>
 
 #include <cctype>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -40,22 +43,18 @@ using namespace fiction::qca;
 using namespace fiction::qca::io;
 
 /**
- * This function takes an SVG string as input and returns a new string with all
- * whitespace characters removed. The purpose is to create a compact representation
- * of the SVG content, which can be useful for comparisons, optimizations, or transmission.
+ * Removes whitespace from SVG output for snapshot comparisons.
  *
  * @param svg The input SVG string to be normalized.
  * @return A string with all whitespace characters removed.
  */
-[[nodiscard]] static std::string normalize_svg(const std::string& svg) noexcept
+[[nodiscard]] static std::string normalize_svg(const std::string& svg)
 {
     std::string result = svg;
-
-    // Remove all whitespace (spaces, tabs, newlines)
-    std::erase_if(result, ::isspace);
+    std::erase_if(result, [](const unsigned char c) { return std::isspace(c) != 0; });
 
     return result;
-};
+}
 
 /**
  * Checks whether `text` contains `substring`.
@@ -318,6 +317,11 @@ style="fill:#000000;stroke:#000000;" />
 </svg>)SVG",
                 FICTION_VERSION, FICTION_REPO);
 
+TEST_CASE("Normalize SVG whitespace without changing UTF-8 text", "[write-qca-layout-svg]")
+{
+    CHECK(normalize_svg(" \t<svg>\r\n\xc2\xb5</svg> ") == "<svg>\xc2\xb5</svg>");
+}
+
 TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-svg]")
 {
     mol_qca_cell_clk_lyt layout{{0, 0, 1}, "unsupported molQCA crossing"};
@@ -407,4 +411,79 @@ TEST_CASE("Generate QCA layout in simple SVG mode with constant cells", "[write-
 
     CHECK(contains(svg, "fill:#000000"));
     CHECK_FALSE(contains(svg, "fill:##"));
+}
+
+TEST_CASE("Render QCA cell and clock colors in SVG", "[write-qca-layout-svg]")
+{
+    const auto simple = GENERATE(false, true);
+    const auto [cell_type, clock, color] =
+        GENERATE(Catch::Generators::table<qca_technology::cell_type, uint8_t, const char*>(
+            {{qca_technology::cell_type::NORMAL, uint8_t{0}, "86e291"},
+             {qca_technology::cell_type::NORMAL, uint8_t{1}, "ffa5fa"},
+             {qca_technology::cell_type::NORMAL, uint8_t{2}, "00c8bc"},
+             {qca_technology::cell_type::NORMAL, uint8_t{3}, "ffffff"},
+             {qca_technology::cell_type::INPUT, uint8_t{0}, "008dc8"},
+             {qca_technology::cell_type::OUTPUT, uint8_t{0}, "e28686"},
+             {qca_technology::cell_type::CONST_0, uint8_t{0}, "000000"},
+             {qca_technology::cell_type::CONST_1, uint8_t{0}, "000000"}}));
+    CAPTURE(simple, cell_type, clock);
+
+    qca_cell_clk_lyt layout{{0, 0}, "QCA cell colors"};
+    layout.assign_cell_type({0, 0}, cell_type);
+    layout.assign_clock_number({0, 0}, clock);
+
+    std::ostringstream layout_stream{};
+    write_qca_layout_svg(layout, layout_stream, {.simple = simple});
+    const auto svg = layout_stream.str();
+
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
+    REQUIRE(document.FirstChildElement("svg") != nullptr);
+    CHECK(contains(svg, fmt::format("fill:#{};", color)));
+    CHECK_FALSE(contains(svg, "fill:##"));
+    CHECK(contains(svg, "<circle") == !simple);
+}
+
+TEST_CASE("Render QCA tile clock labels in detailed SVG mode", "[write-qca-layout-svg]")
+{
+    const auto simple = GENERATE(false, true);
+    const auto clock  = GENERATE(uint8_t{0}, uint8_t{1}, uint8_t{2}, uint8_t{3});
+    CAPTURE(simple, clock);
+
+    qca_cell_clk_lyt layout{{4, 4}, "QCA tile", 5, 5};
+    layout.assign_cell_type({2, 2}, qca_technology::cell_type::NORMAL);
+    layout.assign_clock_number({0, 0}, clock);
+
+    std::ostringstream layout_stream{};
+    write_qca_layout_svg(layout, layout_stream, {.simple = simple});
+    const auto svg = layout_stream.str();
+
+    tinyxml2::XMLDocument document{};
+    REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
+    CHECK(contains(svg, fmt::format(">{}</tspan>", clock + 1)) == !simple);
+    CHECK(contains(svg, "<circle") == !simple);
+    CHECK_FALSE(contains(svg, "fill:#;"));
+}
+
+TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layout-svg]")
+{
+    const auto       simple = GENERATE(false, true);
+    qca_cell_clk_lyt layout{{0, 0}, "QCA SVG file"};
+    layout.assign_cell_type({0, 0}, qca_technology::cell_type::INPUT);
+
+    const write_qca_layout_svg_params params{.simple = simple};
+    std::ostringstream                expected{};
+    write_qca_layout_svg(layout, expected, params);
+
+    const auto filename = std::filesystem::temp_directory_path() / "fiction_qca_layout.svg";
+    write_qca_layout_svg(layout, filename.string(), params);
+    std::ifstream file{filename};
+    REQUIRE(file.is_open());
+    const std::string svg{std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{}};
+    CHECK(svg == expected.str());
+    file.close();
+    std::filesystem::remove(filename);
+
+    CHECK_THROWS_AS(write_qca_layout_svg(layout, std::filesystem::temp_directory_path().string(), params),
+                    std::ofstream::failure);
 }
