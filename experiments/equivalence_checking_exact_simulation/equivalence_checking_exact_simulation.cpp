@@ -24,7 +24,6 @@
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/combination_utils.hpp>
 

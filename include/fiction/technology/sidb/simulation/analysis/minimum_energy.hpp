@@ -17,8 +17,6 @@
 
 #pragma once
 
-#include "fiction/traits.hpp"
-
 #include <algorithm>
 #include <iterator>
 #include <limits>

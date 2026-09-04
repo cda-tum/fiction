@@ -25,7 +25,6 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/simulation/engines/ground_state_space.hpp"
@@ -157,8 +156,10 @@ class clustercomplete_impl
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
             landscape,
-            ground_state_space_params{params.sim_params, params.validity_witness_partitioning_max_cluster_size_gss,
-                                      params.num_overlapping_witnesses_limit_gss});
+            ground_state_space_params{
+                .sim_params                              = params.sim_params,
+                .witness_partitioning_cluster_size_limit = params.validity_witness_partitioning_max_cluster_size_gss,
+                .num_overlapping_witnesses_limit_gss     = params.num_overlapping_witnesses_limit_gss});
 
         if (!gss_stats.top_cluster)
         {
@@ -699,7 +700,7 @@ class clustercomplete_impl
          */
         void apply_informant() noexcept
         {
-            mole informant = std::move(thief_informants.front());
+            const mole informant = thief_informants.front();
             thief_informants.pop_front();
 
             add_composition(clustering_state_for_thieves, informant.composition);
@@ -732,7 +733,7 @@ class clustercomplete_impl
          * enable forward-tracking. The mole says which composition to add to the clustering state, and which cluster is
          * selected for the subsequent unfolding.
          */
-        void add_to_queue(const std::vector<charge_space_composition>& compositions, mole&& informant) noexcept
+        void add_to_queue(const std::vector<charge_space_composition>& compositions, const mole informant) noexcept
         {
             const std::scoped_lock lock{mutex_to_protect_this_queue};
 
@@ -747,7 +748,7 @@ class clustercomplete_impl
             work_in_queue_count += compositions.size() - 1;
 
             // add informant
-            thief_informants.emplace_back(std::move(informant));
+            thief_informants.emplace_back(informant);
 
             assert(queue.empty() || queue.size() == thief_informants.size() + 1);
         }
@@ -820,7 +821,7 @@ class clustercomplete_impl
             }
 
             // stealing goes from the back
-            work_t work = queue.back().back();
+            const work_t work = queue.back().back();
             queue.back().pop_back();
 
             --work_in_queue_count;
@@ -1044,8 +1045,9 @@ class clustercomplete_impl
         cluster_projector_state_ptr max_pst = take_parent_out(w.cl_state, max_pst_ix);
 
         // unfold all compositions
-        if (!unfold_all_compositions(w, get_projector_state_compositions(*max_pst),
-                                     typename worker_queue::mole{max_pst_ix, composition}))
+        if (!unfold_all_compositions(
+                w, get_projector_state_compositions(*max_pst),
+                typename worker_queue::mole{.parent_to_move_out_ix = max_pst_ix, .composition = composition}))
         {
             return false;
         }
@@ -1073,14 +1075,14 @@ class clustercomplete_impl
      */
     // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
     [[nodiscard]] bool unfold_all_compositions(worker& w, const std::vector<charge_space_composition>& compositions,
-                                               typename worker_queue::mole&& informant) noexcept
+                                               const typename worker_queue::mole informant) noexcept
     {
         if (compositions.empty())
         {
             return true;
         }
 
-        w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
+        w.work_stealing_queue.add_to_queue(compositions, informant);
 
         // unfold first composition
         unfold_composition(w, compositions.front());

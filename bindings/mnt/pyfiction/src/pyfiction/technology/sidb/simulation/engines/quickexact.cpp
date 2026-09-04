@@ -22,9 +22,8 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
-#include <optional>
-
 #include <nanobind/nanobind.h>
+// These headers register nanobind type casters without exposing directly referenced symbols.
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>         // NOLINT(misc-include-cleaner)

@@ -18,9 +18,6 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/charge_distribution.hpp>
-#include <fiction/technology/sidb/lattice.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 
 #include <fmt/format.h>
@@ -33,6 +30,7 @@
 #include <unordered_map>
 
 #include <nanobind/nanobind.h>
+// These headers register nanobind type casters without exposing directly referenced symbols.
 #include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/unordered_map.h>  // NOLINT(misc-include-cleaner)

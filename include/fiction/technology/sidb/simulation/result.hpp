@@ -39,6 +39,7 @@
 #include <string>
 #include <typeinfo>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::simulation
@@ -249,7 +250,7 @@ template <typename Lyt>
             if constexpr (is_sidb_defect_surface_v<Lyt>)
             {
                 lyt.foreach_sidb_defect(
-                    [&b](const auto& cd)
+                    [&b](const std::pair<const typename Lyt::coordinate, sidb::model::defect>& cd)
                     {
                         const auto& cell   = cd.first;
                         const auto& defect = cd.second;

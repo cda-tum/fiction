@@ -177,16 +177,16 @@ class simulation_state
                               const model::charge_state  cs       = model::charge_state::NEGATIVE,
                               const energy_model         model    = energy_model::FULL,
                               const index_decoding       decoding = index_decoding::PLAIN) :
-            land_{&land},
-            n_{land.num_sidbs()},
-            model_{model},
-            decoding_{decoding},
-            base_{land.params().base},
-            index_base_{land.params().base},
-            cd_{land.sites(), cs},
-            local_int_pot_(n_, 0.0)
+            landscape_ptr{&land},
+            num_sites{land.num_sidbs()},
+            selected_energy_model{model},
+            selected_index_decoding{decoding},
+            simulation_base{land.params().base},
+            charge_index_base{land.params().base},
+            charge_distribution_state{land.sites(), cs},
+            internal_potential_values(num_sites, 0.0),
+            maximum_charge_index{max_index(simulation_base, num_sites)}
     {
-        max_charge_index_ = max_index(base_, n_);
         charge_distribution_to_index();
         update_after_charge_change();
     }
@@ -197,7 +197,7 @@ class simulation_state
      */
     [[nodiscard]] const potential_landscape& landscape() const noexcept
     {
-        return *land_;
+        return *landscape_ptr;
     }
     /**
      * Number of SiDBs.
@@ -206,7 +206,7 @@ class simulation_state
      */
     [[nodiscard]] std::size_t num_sidbs() const noexcept
     {
-        return n_;
+        return num_sites;
     }
     /**
      * The base of the physical model, 2 or 3: whether positive charge states take part at all.
@@ -215,7 +215,7 @@ class simulation_state
      */
     [[nodiscard]] uint8_t base() const noexcept
     {
-        return base_;
+        return simulation_base;
     }
     /**
      * The base the charge index is decoded in. It equals `base()` until a three-state sublayout is split off, from
@@ -225,7 +225,7 @@ class simulation_state
      */
     [[nodiscard]] uint8_t index_base() const noexcept
     {
-        return index_base_;
+        return charge_index_base;
     }
 
     // ----------------------------------------------------------------------------------------------- charge states
@@ -238,7 +238,7 @@ class simulation_state
      */
     [[nodiscard]] model::charge_state get_charge_state_by_index(const std::size_t i) const noexcept
     {
-        return cd_.charge_states()[i];
+        return charge_distribution_state.charge_states()[i];
     }
     /**
      * Assigns the charge state of an SiDB.
@@ -251,7 +251,7 @@ class simulation_state
     assign_charge_state_by_index(const std::size_t i, const model::charge_state cs,
                                  const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
-        cd_.assign_charge_state_by_index(i, cs);
+        charge_distribution_state.assign_charge_state_by_index(i, cs);
 
         if (index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
         {
@@ -267,7 +267,7 @@ class simulation_state
     void assign_all_charge_states(const model::charge_state cs,
                                   const charge_index_mode index_mode = charge_index_mode::UPDATE_CHARGE_INDEX) noexcept
     {
-        cd_.assign_all_charge_states(cs);
+        charge_distribution_state.assign_all_charge_states(cs);
 
         if (index_mode == charge_index_mode::UPDATE_CHARGE_INDEX)
         {
@@ -281,7 +281,7 @@ class simulation_state
      */
     [[nodiscard]] std::size_t num_negative_sidbs() const noexcept
     {
-        return cd_.num_negative_sidbs();
+        return charge_distribution_state.num_negative_sidbs();
     }
     /**
      * The current charge distribution with its energy.
@@ -290,7 +290,7 @@ class simulation_state
      */
     [[nodiscard]] charge_distribution snapshot() const
     {
-        return cd_;
+        return charge_distribution_state;
     }
     /**
      * The current charge distribution with its energy and the charge index recomputed in the plain base of the
@@ -300,7 +300,7 @@ class simulation_state
      */
     [[nodiscard]] const charge_distribution& current() const noexcept
     {
-        return cd_;
+        return charge_distribution_state;
     }
 
     // -------------------------------------------------------------------------------------------------- potentials
@@ -315,43 +315,46 @@ class simulation_state
     {
         if (history_mode == charge_distribution_history::NEGLECT)
         {
-            for (std::size_t i = 0; i < n_; ++i)
+            for (std::size_t i = 0; i < num_sites; ++i)
             {
                 double collect = 0.0;
 
-                for (std::size_t j = 0; j < n_; ++j)
+                for (std::size_t j = 0; j < num_sites; ++j)
                 {
-                    collect += land_->chargeless_potential(i, j) *
-                               static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[j]));
+                    collect +=
+                        landscape_ptr->chargeless_potential(i, j) *
+                        static_cast<double>(model::charge_state_to_sign(charge_distribution_state.charge_states()[j]));
                 }
 
-                local_int_pot_[i] = land_->local_potential_caused_by_defects(i) + collect;
+                internal_potential_values[i] = landscape_ptr->local_potential_caused_by_defects(i) + collect;
             }
         }
-        else if (base_ == 2)
+        else if (simulation_base == 2)
         {
-            if (history_gray_code_.first != -1)
+            if (gray_code_history.first != -1)
             {
-                const auto changed     = static_cast<std::size_t>(history_gray_code_.first);
-                const auto charge_diff = static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[changed]) -
-                                                             history_gray_code_.second);
+                const auto changed     = static_cast<std::size_t>(gray_code_history.first);
+                const auto charge_diff = static_cast<double>(
+                    model::charge_state_to_sign(charge_distribution_state.charge_states()[changed]) -
+                    gray_code_history.second);
 
-                for (std::size_t j = 0; j < n_; ++j)
+                for (std::size_t j = 0; j < num_sites; ++j)
                 {
-                    local_int_pot_[j] += land_->chargeless_potential(changed, j) * charge_diff;
+                    internal_potential_values[j] += landscape_ptr->chargeless_potential(changed, j) * charge_diff;
                 }
             }
         }
         else
         {
-            for (const auto& [changed, old_sign] : history_)
+            for (const auto& [changed, old_sign] : changed_sidb_history)
             {
-                const auto charge_diff =
-                    static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[changed])) - old_sign;
+                const auto charge_diff = static_cast<double>(model::charge_state_to_sign(
+                                             charge_distribution_state.charge_states()[changed])) -
+                                         old_sign;
 
-                for (std::size_t j = 0; j < n_; ++j)
+                for (std::size_t j = 0; j < num_sites; ++j)
                 {
-                    local_int_pot_[j] += land_->chargeless_potential(changed, j) * charge_diff;
+                    internal_potential_values[j] += landscape_ptr->chargeless_potential(changed, j) * charge_diff;
                 }
             }
         }
@@ -364,7 +367,7 @@ class simulation_state
      */
     [[nodiscard]] double local_internal_potential(const std::size_t i) const noexcept
     {
-        return local_int_pot_[i];
+        return internal_potential_values[i];
     }
     /**
      * The local potential at an SiDB: internal plus external.
@@ -374,7 +377,7 @@ class simulation_state
      */
     [[nodiscard]] double local_potential(const std::size_t i) const noexcept
     {
-        return local_int_pot_[i] + land_->local_external_potential(i);
+        return internal_potential_values[i] + landscape_ptr->local_external_potential(i);
     }
     /**
      * All local internal potentials.
@@ -383,7 +386,7 @@ class simulation_state
      */
     [[nodiscard]] const std::vector<double>& local_internal_potentials() const noexcept
     {
-        return local_int_pot_;
+        return internal_potential_values;
     }
     /**
      * Overwrites the local internal potential at an SiDB.
@@ -393,7 +396,7 @@ class simulation_state
      */
     void assign_local_internal_potential(const std::size_t i, const double pot) noexcept
     {
-        local_int_pot_[i] = pot;
+        internal_potential_values[i] = pot;
     }
 
     // ---------------------------------------------------------------------------------------- energy and validity
@@ -403,21 +406,24 @@ class simulation_state
      */
     void recompute_energy() noexcept
     {
-        if (model_ == energy_model::INTERNAL_ONLY)
+        if (selected_energy_model == energy_model::INTERNAL_ONLY)
         {
             double collect = 0.0;
 
-            for (std::size_t i = 0; i < n_; ++i)
+            for (std::size_t i = 0; i < num_sites; ++i)
             {
-                collect += local_int_pot_[i] * static_cast<double>(model::charge_state_to_sign(cd_.charge_states()[i]));
+                collect +=
+                    internal_potential_values[i] *
+                    static_cast<double>(model::charge_state_to_sign(charge_distribution_state.charge_states()[i]));
             }
 
-            cd_.assign_energy(0.5 * collect);
+            charge_distribution_state.assign_energy(0.5 * collect);
 
             return;
         }
 
-        cd_.assign_energy(land_->energy(cd_, local_int_pot_));
+        charge_distribution_state.assign_energy(
+            landscape_ptr->energy(charge_distribution_state, internal_potential_values));
     }
     /**
      * The energy of the current charge states.
@@ -426,7 +432,7 @@ class simulation_state
      */
     [[nodiscard]] double energy() const noexcept
     {
-        return cd_.energy();
+        return charge_distribution_state.energy();
     }
     /**
      * Updates potentials, the dependent SiDB, the energy, and the validity after charge states changed.
@@ -458,8 +464,8 @@ class simulation_state
      */
     void validity_check() noexcept
     {
-        valid_ =
-            land_->is_population_stable(cd_, local_int_pot_) && land_->is_configuration_stable(cd_, local_int_pot_);
+        physically_valid = landscape_ptr->is_population_stable(charge_distribution_state, internal_potential_values) &&
+                           landscape_ptr->is_configuration_stable(charge_distribution_state, internal_potential_values);
     }
     /**
      * Whether the current charge states are physically valid, as of the last `validity_check`.
@@ -468,7 +474,7 @@ class simulation_state
      */
     [[nodiscard]] bool is_physically_valid() const noexcept
     {
-        return valid_;
+        return physically_valid;
     }
     /**
      * Whether no charge hop lowers the energy of the current charge states.
@@ -477,14 +483,14 @@ class simulation_state
      */
     [[nodiscard]] bool is_configuration_stable() const noexcept
     {
-        return land_->is_configuration_stable(cd_, local_int_pot_);
+        return landscape_ptr->is_configuration_stable(charge_distribution_state, internal_potential_values);
     }
     /**
      * Marks the current charge states physically valid without checking.
      */
     void declare_physically_valid() noexcept
     {
-        valid_ = true;
+        physically_valid = true;
     }
 
     // ------------------------------------------------------------------------------------------------ charge index
@@ -494,7 +500,7 @@ class simulation_state
      */
     void charge_distribution_to_index_general() noexcept
     {
-        charge_index_ = cd_.charge_index(base_);
+        charge_index_value = charge_distribution_state.charge_index(simulation_base);
     }
     /**
      * Recomputes the charge index (and the sublayout index) from the charge states, skipping the dependent SiDB and
@@ -506,17 +512,20 @@ class simulation_state
         uint64_t sub_index = 0;
 
         const auto digit = [this](const std::size_t i)
-        { return static_cast<uint64_t>(model::charge_state_to_sign(cd_.charge_states()[i]) + int8_t{1}); };
-
-        if (!three_state_.empty())
         {
-            for (const auto i : three_state_)
+            return static_cast<uint64_t>(model::charge_state_to_sign(charge_distribution_state.charge_states()[i]) +
+                                         int8_t{1});
+        };
+
+        if (!three_state_sidb_indices.empty())
+        {
+            for (const auto i : three_state_sidb_indices)
             {
                 sub_index = (sub_index * 3) + digit(i);
             }
-            for (const auto i : two_state_)
+            for (const auto i : two_state_sidb_indices)
             {
-                if (!dependent_.has_value() || i != *dependent_)
+                if (!dependent_sidb.has_value() || i != *dependent_sidb)
                 {
                     index = (index * 2) + digit(i);
                 }
@@ -524,17 +533,17 @@ class simulation_state
         }
         else
         {
-            for (std::size_t i = 0; i < n_; ++i)
+            for (std::size_t i = 0; i < num_sites; ++i)
             {
-                if (!dependent_.has_value() || i != *dependent_)
+                if (!dependent_sidb.has_value() || i != *dependent_sidb)
                 {
-                    index = (index * base_) + digit(i);
+                    index = (index * simulation_base) + digit(i);
                 }
             }
         }
 
-        charge_index_     = index;
-        sub_charge_index_ = sub_index;
+        charge_index_value     = index;
+        sublayout_charge_index = sub_index;
     }
     /**
      * The charge index.
@@ -543,7 +552,7 @@ class simulation_state
      */
     [[nodiscard]] uint64_t charge_index() const noexcept
     {
-        return charge_index_;
+        return charge_index_value;
     }
     /**
      * The largest charge index over the SiDBs the index enumerates.
@@ -552,7 +561,7 @@ class simulation_state
      */
     [[nodiscard]] uint64_t max_charge_index() const noexcept
     {
-        return max_charge_index_;
+        return maximum_charge_index;
     }
     /**
      * The charge index of the sublayout of SiDBs that can be positively charged.
@@ -561,7 +570,7 @@ class simulation_state
      */
     [[nodiscard]] uint64_t charge_index_of_sub_layout() const noexcept
     {
-        return sub_charge_index_;
+        return sublayout_charge_index;
     }
     /**
      * The largest sublayout charge index.
@@ -570,7 +579,7 @@ class simulation_state
      */
     [[nodiscard]] uint64_t max_charge_index_sub_layout() const noexcept
     {
-        return max_sub_charge_index_;
+        return maximum_sublayout_charge_index;
     }
     /**
      * Assigns a charge index.
@@ -581,9 +590,9 @@ class simulation_state
     void assign_charge_index(const uint64_t index, const charge_distribution_mode mode =
                                                        charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION) noexcept
     {
-        assert(index <= max_charge_index_ && "charge index is too large");
+        assert(index <= maximum_charge_index && "charge index is too large");
 
-        charge_index_ = index;
+        charge_index_value = index;
 
         if (mode == charge_distribution_mode::UPDATE_CHARGE_DISTRIBUTION)
         {
@@ -602,14 +611,14 @@ class simulation_state
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
     {
-        if (charge_index_ >= max_charge_index_)
+        if (charge_index_value >= maximum_charge_index)
         {
             return;
         }
 
-        charge_index_ += 1;
+        charge_index_value += 1;
 
-        if (decoding_ == index_decoding::TRACKED)
+        if (selected_index_decoding == index_decoding::TRACKED)
         {
             index_to_charge_distribution_tracked();
         }
@@ -632,14 +641,14 @@ class simulation_state
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
     {
-        if (sub_charge_index_ >= max_sub_charge_index_)
+        if (sublayout_charge_index >= maximum_sublayout_charge_index)
         {
             return;
         }
 
-        sub_charge_index_ += 1;
+        sublayout_charge_index += 1;
 
-        if (decoding_ == index_decoding::TRACKED)
+        if (selected_index_decoding == index_decoding::TRACKED)
         {
             index_to_charge_distribution_tracked();
         }
@@ -655,9 +664,9 @@ class simulation_state
      */
     void reset_charge_index_sub_layout() noexcept
     {
-        sub_charge_index_ = 0;
+        sublayout_charge_index = 0;
 
-        if (decoding_ == index_decoding::TRACKED)
+        if (selected_index_decoding == index_decoding::TRACKED)
         {
             index_to_charge_distribution_tracked();
         }
@@ -684,9 +693,9 @@ class simulation_state
         const energy_calculation          energy_mode  = energy_calculation::UPDATE_ENERGY,
         const charge_distribution_history history_mode = charge_distribution_history::NEGLECT) noexcept
     {
-        if (current_gray_code <= max_charge_index_)
+        if (current_gray_code <= maximum_charge_index)
         {
-            charge_index_ = current_gray_code;
+            charge_index_value = current_gray_code;
             gray_code_to_charge_distribution(current_gray_code, previous_gray_code);
             update_after_charge_change(dep_cell, energy_mode, history_mode);
         }
@@ -701,10 +710,10 @@ class simulation_state
      */
     void assign_dependent_cell(const std::size_t i) noexcept
     {
-        assert(i < n_ && "dependent cell is not part of the layout");
+        assert(i < num_sites && "dependent cell is not part of the layout");
 
-        dependent_        = i;
-        max_charge_index_ = max_index(base_, n_ - 1);
+        dependent_sidb       = i;
+        maximum_charge_index = max_index(simulation_base, num_sites - 1);
     }
     /**
      * The dependent SiDB, if any.
@@ -713,7 +722,7 @@ class simulation_state
      */
     [[nodiscard]] std::optional<std::size_t> dependent_cell() const noexcept
     {
-        return dependent_;
+        return dependent_sidb;
     }
     /**
      * Sets the base of the charge index and the maximum index accordingly.
@@ -722,9 +731,9 @@ class simulation_state
      */
     void assign_base_number(const uint8_t base) noexcept
     {
-        base_             = base;
-        index_base_       = base;
-        max_charge_index_ = max_index(base, dependent_.has_value() ? n_ - 1 : n_);
+        simulation_base      = base;
+        charge_index_base    = base;
+        maximum_charge_index = max_index(base, dependent_sidb.has_value() ? num_sites - 1 : num_sites);
     }
     /**
      * Determines from the all-negative charge distribution which SiDBs can become positively charged and, if any can,
@@ -736,39 +745,40 @@ class simulation_state
     {
         update_after_charge_change();
 
-        three_state_.clear();
-        two_state_.clear();
-        dependent_in_sub_layout_ = false;
+        three_state_sidb_indices.clear();
+        two_state_sidb_indices.clear();
+        dependent_in_sublayout = false;
 
-        assert(num_negative_sidbs() == n_ && "All SiDBs have to be negatively charged");
+        assert(num_negative_sidbs() == num_sites && "All SiDBs have to be negatively charged");
 
         bool required = false;
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            if (-local_int_pot_[i] <
-                land_->effective_charge_transition_thresholds(
+            if (-internal_potential_values[i] <
+                landscape_ptr->effective_charge_transition_thresholds(
                     i)[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
             {
                 continue;
             }
 
-            if (dependent_.has_value() && i == *dependent_)
+            if (dependent_sidb.has_value() && i == *dependent_sidb)
             {
-                dependent_in_sub_layout_ = true;
+                dependent_in_sublayout = true;
             }
             else
             {
-                three_state_.push_back(i);
+                three_state_sidb_indices.push_back(i);
                 required = true;
             }
         }
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            if (!std::ranges::binary_search(three_state_, i) && (!dependent_.has_value() || i != *dependent_))
+            if (!std::ranges::binary_search(three_state_sidb_indices, i) &&
+                (!dependent_sidb.has_value() || i != *dependent_sidb))
             {
-                two_state_.push_back(i);
+                two_state_sidb_indices.push_back(i);
             }
         }
 
@@ -786,7 +796,7 @@ class simulation_state
      */
     [[nodiscard]] const std::vector<std::size_t>& three_state_sidbs() const noexcept
     {
-        return three_state_;
+        return three_state_sidb_indices;
     }
     /**
      * The SiDBs that can only be negatively or neutrally charged, ascending, without the dependent SiDB.
@@ -795,7 +805,7 @@ class simulation_state
      */
     [[nodiscard]] const std::vector<std::size_t>& two_state_sidbs() const noexcept
     {
-        return two_state_;
+        return two_state_sidb_indices;
     }
 
     // ---------------------------------------------------------------------------------------------- QuickSim helpers
@@ -806,7 +816,7 @@ class simulation_state
      */
     void reseed() noexcept
     {
-        rng_.seed(std::random_device{}());
+        random_generator.seed(std::random_device{}());
     }
 
     /**
@@ -818,11 +828,11 @@ class simulation_state
     [[nodiscard]] std::vector<std::size_t> negative_sidb_detection() const noexcept
     {
         std::vector<std::size_t> negative{};
-        negative.reserve(n_);
+        negative.reserve(num_sites);
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            if ((-local_potential(i) + land_->params().mu_minus) < -utils::math::ERROR_MARGIN)
+            if ((-local_potential(i) + landscape_ptr->params().mu_minus) < -utils::math::ERROR_MARGIN)
             {
                 negative.push_back(i);
             }
@@ -841,23 +851,24 @@ class simulation_state
     void adjacent_search(const double alpha, std::vector<std::size_t>& negative_indices) noexcept
     {
         double     dist_max     = 0.0;
-        const auto reserve_size = n_ - negative_indices.size();
+        const auto reserve_size = num_sites - negative_indices.size();
 
         std::vector<std::size_t> index_vector{};
         index_vector.reserve(reserve_size);
         std::vector<double> distance{};
         distance.reserve(reserve_size);
 
-        for (std::size_t unocc = 0; unocc < n_; ++unocc)
+        for (std::size_t unocc = 0; unocc < num_sites; ++unocc)
         {
-            if (cd_.charge_states()[unocc] != model::charge_state::NEUTRAL)
+            if (charge_distribution_state.charge_states()[unocc] != model::charge_state::NEUTRAL)
             {
                 continue;
             }
 
-            const auto dist_min = std::accumulate(
-                negative_indices.cbegin(), negative_indices.cend(), std::numeric_limits<double>::infinity(),
-                [&](const double acc, const std::size_t occ) { return std::min(acc, land_->nm_distance(unocc, occ)); });
+            const auto dist_min =
+                std::accumulate(negative_indices.cbegin(), negative_indices.cend(),
+                                std::numeric_limits<double>::infinity(), [&](const double acc, const std::size_t occ)
+                                { return std::min(acc, landscape_ptr->nm_distance(unocc, occ)); });
 
             index_vector.push_back(unocc);
             distance.push_back(dist_min);
@@ -883,16 +894,16 @@ class simulation_state
 
         std::uniform_int_distribution<std::size_t> dist(0, candidates.size() - 1);
 
-        const auto chosen = index_vector[candidates[dist(rng_)]];
+        const auto chosen = index_vector[candidates[dist(random_generator)]];
 
-        cd_.assign_charge_state_by_index(chosen, model::charge_state::NEGATIVE);
+        charge_distribution_state.assign_charge_state_by_index(chosen, model::charge_state::NEGATIVE);
         negative_indices.push_back(chosen);
 
-        cd_.assign_energy(cd_.energy() - local_int_pot_[chosen]);
+        charge_distribution_state.assign_energy(charge_distribution_state.energy() - internal_potential_values[chosen]);
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            local_int_pot_[i] -= land_->chargeless_potential(i, chosen);
+            internal_potential_values[i] -= landscape_ptr->chargeless_potential(i, chosen);
         }
     }
 
@@ -900,83 +911,83 @@ class simulation_state
     /**
      * The landscape.
      */
-    const potential_landscape* land_;
+    const potential_landscape* landscape_ptr;
     /**
      * Number of SiDBs.
      */
-    std::size_t n_;
+    std::size_t num_sites;
     /**
      * Energy model.
      */
-    energy_model model_;
+    energy_model selected_energy_model;
     /**
      * Index decoding.
      */
-    index_decoding decoding_;
+    index_decoding selected_index_decoding;
     /**
      * Base of the physical model.
      */
-    uint8_t base_;
+    uint8_t simulation_base;
     /**
      * Base the charge index is decoded in.
      */
-    uint8_t index_base_;
+    uint8_t charge_index_base;
     /**
      * Charge states and energy.
      */
-    charge_distribution cd_;
+    charge_distribution charge_distribution_state;
     /**
      * Local internal potential per SiDB (unit: V).
      */
-    std::vector<double> local_int_pot_;
+    std::vector<double> internal_potential_values;
     /**
      * Validity flag.
      */
-    bool valid_{false};
+    bool physically_valid{false};
     /**
      * Charge index over the SiDBs that are not in the sublayout and not the dependent SiDB.
      */
-    uint64_t charge_index_{0};
+    uint64_t charge_index_value{0};
     /**
      * Charge index over the sublayout.
      */
-    uint64_t sub_charge_index_{0};
+    uint64_t sublayout_charge_index{0};
     /**
      * Maximum charge index.
      */
-    uint64_t max_charge_index_{0};
+    uint64_t maximum_charge_index{0};
     /**
      * Maximum sublayout charge index.
      */
-    uint64_t max_sub_charge_index_{0};
+    uint64_t maximum_sublayout_charge_index{0};
     /**
      * The dependent SiDB.
      */
-    std::optional<std::size_t> dependent_{};
+    std::optional<std::size_t> dependent_sidb{};
     /**
      * Whether the dependent SiDB can be positively charged.
      */
-    bool dependent_in_sub_layout_{false};
+    bool dependent_in_sublayout{false};
     /**
      * SiDBs that can be positively charged, ascending.
      */
-    std::vector<std::size_t> three_state_{};
+    std::vector<std::size_t> three_state_sidb_indices{};
     /**
      * SiDBs that cannot be positively charged, ascending, without the dependent SiDB.
      */
-    std::vector<std::size_t> two_state_{};
+    std::vector<std::size_t> two_state_sidb_indices{};
     /**
      * The SiDB the last Gray-code step flipped and its previous sign; -1 if none.
      */
-    std::pair<int64_t, int8_t> history_gray_code_{-1, 0};
+    std::pair<int64_t, int8_t> gray_code_history{-1, 0};
     /**
      * The SiDBs the last tracked decoding flipped with their previous signs.
      */
-    std::vector<std::pair<std::size_t, int8_t>> history_{};
+    std::vector<std::pair<std::size_t, int8_t>> changed_sidb_history{};
     /**
      * Random generator of `adjacent_search`; one per state, so worker threads never share it.
      */
-    std::mt19937_64 rng_{std::random_device{}()};
+    std::mt19937_64 random_generator{std::random_device{}()};
     /**
      * The largest index of `digits` digits in `base`.
      */
@@ -989,24 +1000,24 @@ class simulation_state
      */
     void assign_base_number_to_three() noexcept
     {
-        base_       = 3;
-        index_base_ = 2;
+        simulation_base   = 3;
+        charge_index_base = 2;
 
-        if (dependent_.has_value())
+        if (dependent_sidb.has_value())
         {
-            if (!three_state_.empty())
+            if (!three_state_sidb_indices.empty())
             {
-                max_charge_index_     = max_index(2, n_ - 1 - three_state_.size());
-                max_sub_charge_index_ = max_index(3, three_state_.size());
+                maximum_charge_index           = max_index(2, num_sites - 1 - three_state_sidb_indices.size());
+                maximum_sublayout_charge_index = max_index(3, three_state_sidb_indices.size());
             }
         }
         else
         {
-            max_charge_index_     = max_index(3, n_);
-            max_sub_charge_index_ = max_index(3, three_state_.size());
+            maximum_charge_index           = max_index(3, num_sites);
+            maximum_sublayout_charge_index = max_index(3, three_state_sidb_indices.size());
         }
 
-        if (max_charge_index_ == 0)
+        if (maximum_charge_index == 0)
         {
             assign_charge_index(0);
         }
@@ -1017,30 +1028,30 @@ class simulation_state
      */
     void update_charge_state_of_dependent_cell() noexcept
     {
-        if (!dependent_.has_value())
+        if (!dependent_sidb.has_value())
         {
             return;
         }
 
-        const auto  d            = *dependent_;
-        const auto  loc_pot_cell = -local_int_pot_[d];
-        const auto& t            = land_->effective_charge_transition_thresholds(d);
-        const auto  current      = cd_.charge_states()[d];
+        const auto  d            = *dependent_sidb;
+        const auto  loc_pot_cell = -internal_potential_values[d];
+        const auto& t            = landscape_ptr->effective_charge_transition_thresholds(d);
+        const auto  current      = charge_distribution_state.charge_states()[d];
 
         const auto switch_to = [&](const model::charge_state cs)
         {
             const auto charge_diff = static_cast<double>(model::charge_state_to_sign(cs)) -
                                      static_cast<double>(model::charge_state_to_sign(current));
 
-            for (std::size_t i = 0; i < n_; ++i)
+            for (std::size_t i = 0; i < num_sites; ++i)
             {
                 if (i != d)
                 {
-                    local_int_pot_[i] += land_->chargeless_potential(i, d) * charge_diff;
+                    internal_potential_values[i] += landscape_ptr->chargeless_potential(i, d) * charge_diff;
                 }
             }
 
-            cd_.assign_charge_state_by_index(d, cs);
+            charge_distribution_state.assign_charge_state_by_index(d, cs);
         };
 
         if (loc_pot_cell < t[static_cast<std::size_t>(charge_transition_threshold_bounds::NEGATIVE_UPPER_BOUND)])
@@ -1053,7 +1064,8 @@ class simulation_state
         else if (loc_pot_cell > t[static_cast<std::size_t>(charge_transition_threshold_bounds::POSITIVE_LOWER_BOUND)])
         {
             // the dependent SiDB can only be positively charged in a three-state simulation
-            if ((index_base_ == 3 || !three_state_.empty()) && current != model::charge_state::POSITIVE)
+            if ((charge_index_base == 3 || !three_state_sidb_indices.empty()) &&
+                current != model::charge_state::POSITIVE)
             {
                 switch_to(model::charge_state::POSITIVE);
             }
@@ -1068,7 +1080,7 @@ class simulation_state
      */
     void gray_code_to_charge_distribution(const uint64_t new_gray_code, const uint64_t old_gray_code) noexcept
     {
-        history_gray_code_ = {-1, 0};
+        gray_code_history = {-1, 0};
 
         const std::bitset<64> r_new(new_gray_code);
         const std::bitset<64> r_old(old_gray_code);
@@ -1090,10 +1102,11 @@ class simulation_state
         const auto sign_new = static_cast<int8_t>(-1 * static_cast<int8_t>(r_new[index_changed]));
 
         // the dependent SiDB is skipped: indices at or past it shift by one
-        const auto sidb = dependent_.has_value() && index_changed >= *dependent_ ? index_changed + 1 : index_changed;
+        const auto sidb =
+            dependent_sidb.has_value() && index_changed >= *dependent_sidb ? index_changed + 1 : index_changed;
 
-        history_gray_code_ = {static_cast<int64_t>(sidb), sign_old};
-        cd_.assign_charge_state_by_index(sidb, model::sign_to_charge_state(sign_new));
+        gray_code_history = {static_cast<int64_t>(sidb), sign_old};
+        charge_distribution_state.assign_charge_state_by_index(sidb, model::sign_to_charge_state(sign_new));
     }
     /**
      * Decodes the charge index into charge states, skipping the dependent SiDB.
@@ -1102,27 +1115,28 @@ class simulation_state
         const charge_index_recomputation mode = charge_index_recomputation::FROM_SCRATCH) noexcept
     {
         // a charge index of zero corresponds to a layout with all SiDBs set to negative
-        if (charge_index_ == 0)
+        if (charge_index_value == 0)
         {
             assign_all_charge_states(model::charge_state::NEGATIVE);
             return;
         }
 
-        const auto base        = static_cast<uint64_t>(index_base_);
-        uint64_t   charge_quot = charge_index_;
-        auto       counter     = static_cast<int64_t>(n_) - 1;
+        const auto base        = static_cast<uint64_t>(charge_index_base);
+        uint64_t   charge_quot = charge_index_value;
+        auto       counter     = static_cast<int64_t>(num_sites) - 1;
 
         while (charge_quot > 0)
         {
-            const auto cs = model::sign_to_charge_state(static_cast<int8_t>(charge_quot % base) - 1);
+            const auto sign = static_cast<int8_t>(static_cast<int64_t>(charge_quot % base) - 1);
+            const auto cs   = model::sign_to_charge_state(sign);
 
             // the dependent SiDB is skipped
-            if (dependent_.has_value() && counter == static_cast<int64_t>(*dependent_))
+            if (dependent_sidb.has_value() && std::cmp_equal(counter, *dependent_sidb))
             {
                 counter -= 1;
             }
 
-            cd_.assign_charge_state_by_index(static_cast<std::size_t>(counter), cs);
+            charge_distribution_state.assign_charge_state_by_index(static_cast<std::size_t>(counter), cs);
 
             charge_quot /= base;
             counter -= 1;
@@ -1135,7 +1149,8 @@ class simulation_state
 
         for (int64_t i = 0; i <= counter; ++i)
         {
-            cd_.assign_charge_state_by_index(static_cast<std::size_t>(i), model::charge_state::NEGATIVE);
+            charge_distribution_state.assign_charge_state_by_index(static_cast<std::size_t>(i),
+                                                                   model::charge_state::NEGATIVE);
         }
     }
     /**
@@ -1144,57 +1159,57 @@ class simulation_state
      */
     void index_to_charge_distribution_tracked() noexcept
     {
-        assert(n_ > 1 && "There must be multiple SiDBs");
+        assert(num_sites > 1 && "There must be multiple SiDBs");
 
-        history_.clear();
-        history_.reserve(n_);
+        changed_sidb_history.clear();
+        changed_sidb_history.reserve(num_sites);
 
-        if (sub_charge_index_ == 0)
+        if (sublayout_charge_index == 0)
         {
-            for (const auto i : three_state_)
+            for (const auto i : three_state_sidb_indices)
             {
-                cd_.assign_charge_state_by_index(i, model::charge_state::NEGATIVE);
+                charge_distribution_state.assign_charge_state_by_index(i, model::charge_state::NEGATIVE);
             }
         }
 
-        if (charge_index_ == 0)
+        if (charge_index_value == 0)
         {
-            for (const auto i : two_state_)
+            for (const auto i : two_state_sidb_indices)
             {
-                cd_.assign_charge_state_by_index(i, model::charge_state::NEGATIVE);
+                charge_distribution_state.assign_charge_state_by_index(i, model::charge_state::NEGATIVE);
             }
         }
 
         const auto flip = [this](const std::size_t i, const model::charge_state cs)
         {
-            if (const auto old = cd_.charge_states()[i]; old != cs)
+            if (const auto old = charge_distribution_state.charge_states()[i]; old != cs)
             {
-                history_.emplace_back(i, model::charge_state_to_sign(old));
-                cd_.assign_charge_state_by_index(i, cs);
+                changed_sidb_history.emplace_back(i, model::charge_state_to_sign(old));
+                charge_distribution_state.assign_charge_state_by_index(i, cs);
             }
         };
 
         // first the sublayout of SiDBs that can be positively charged
-        auto quot    = sub_charge_index_;
-        auto counter = static_cast<int64_t>(three_state_.size()) - 1;
+        auto quot    = sublayout_charge_index;
+        auto counter = static_cast<int64_t>(three_state_sidb_indices.size()) - 1;
 
         while (quot > 0)
         {
-            flip(three_state_[static_cast<std::size_t>(counter)],
-                 model::sign_to_charge_state(static_cast<int8_t>(quot % 3) - 1));
+            const auto sign = static_cast<int8_t>(static_cast<int64_t>(quot % 3) - 1);
+            flip(three_state_sidb_indices[static_cast<std::size_t>(counter)], model::sign_to_charge_state(sign));
             quot /= 3;
             counter -= 1;
         }
 
         // then the SiDBs that can only be negatively or neutrally charged
-        quot    = charge_index_;
-        counter = static_cast<int64_t>(two_state_.size()) - 1;
+        quot    = charge_index_value;
+        counter = static_cast<int64_t>(two_state_sidb_indices.size()) - 1;
 
         while (quot > 0)
         {
-            flip(two_state_[static_cast<std::size_t>(counter)],
-                 model::sign_to_charge_state(static_cast<int8_t>(quot % index_base_) - 1));
-            quot /= index_base_;
+            const auto sign = static_cast<int8_t>(static_cast<int64_t>(quot % charge_index_base) - 1);
+            flip(two_state_sidb_indices[static_cast<std::size_t>(counter)], model::sign_to_charge_state(sign));
+            quot /= charge_index_base;
             counter -= 1;
         }
     }

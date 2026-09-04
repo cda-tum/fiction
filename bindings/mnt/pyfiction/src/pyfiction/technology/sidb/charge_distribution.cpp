@@ -17,17 +17,14 @@
 #include "pyfiction/documentation.hpp"
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
-#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 
-#include <cstddef>
-#include <cstdint>
 #include <functional>
-#include <vector>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
+// These headers register nanobind type casters without exposing directly referenced symbols.
 #include <nanobind/stl/optional.h>  // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/string.h>    // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/vector.h>    // NOLINT(misc-include-cleaner)
@@ -77,8 +74,10 @@ void charge_distribution(nanobind::module_& m)
              DOC(fiction_sidb_charge_distribution_charge_index))
         .def("same_charge_states", &charge_distribution::same_charge_states, py::arg("other"),
              DOC(fiction_sidb_charge_distribution_same_charge_states))
-        .def(py::self == py::self, DOC(fiction_sidb_charge_distribution_operator_eq))
-        .def(py::self != py::self)
+        // nanobind uses `py::self` on both sides to declare same-type operators.
+        .def(py::self == py::self,  // NOLINT(misc-redundant-expression)
+             DOC(fiction_sidb_charge_distribution_operator_eq))
+        .def(py::self != py::self)  // NOLINT(misc-redundant-expression)
         .def("__hash__", [](const charge_distribution& cd) { return std::hash<charge_distribution>{}(cd); })
         .def("__len__", &charge_distribution::size)
         .def("__repr__", [](const charge_distribution& cd)
