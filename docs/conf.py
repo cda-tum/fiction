@@ -14,8 +14,6 @@ documented at https://www.sphinx-doc.org/en/master/usage/configuration.html.
 
 from __future__ import annotations
 
-import os
-import subprocess  # ruff: ignore[suspicious-subprocess-import] - runs one constant command, `doxygen Doxyfile`
 import xml.etree.ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] - parses the docs build's own Doxygen output
 from typing import TYPE_CHECKING, ClassVar
 
@@ -154,12 +152,6 @@ texinfo_documents = [
 
 # -- Options for breathe --------------------------------------------------
 
-read_the_docs_build = os.environ.get("READTHEDOCS", None) == "True"
-
-if read_the_docs_build:
-    # `doxygen` comes from the Read the Docs build image's PATH
-    subprocess.call(["doxygen", "Doxyfile"])  # ruff: ignore[start-process-with-partial-path]
-
 breathe_projects = {"fiction": "doxyxml/xml"}
 breathe_default_project = "fiction"
 
@@ -179,7 +171,7 @@ class DocOverviewTableDirective(Directive):
         Returns:
             The table node, as the single element of the directive's node list.
         """
-        # the XML comes from the Doxygen run above, not from an untrusted source
+        # The XML comes from the documentation build's Doxygen run.
         doc = ET.parse(f"doxyxml/xml/{self.arguments[0]}.xml")  # ruff: ignore[suspicious-xml-element-tree-usage]
 
         table = nodes.table()

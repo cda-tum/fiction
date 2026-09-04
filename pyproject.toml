@@ -341,6 +341,7 @@ docs = [
     "breathe==4.36.0",
     "sphinx-rtd-theme==3.1.0",
     "sphinx-tabs==3.5.0",
+    "sphinx-autobuild==2025.8.25; python_version >= '3.11'",
 ]
 test = [
     "pytest>=9.0.1",
