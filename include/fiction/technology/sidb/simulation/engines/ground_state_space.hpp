@@ -348,8 +348,8 @@ class ground_state_space_impl
      * @param sidb_ix SiDB that receives the given potential projection from `c`.
      * @param pp Potential projection from `c` to `sidb_ix` to add.
      */
-    static constexpr void add_pot_projection(const cluster_ptr& c, const uint64_t sidb_ix,
-                                             const potential_projection& pp) noexcept
+    static void add_pot_projection(const cluster_ptr& c, const uint64_t sidb_ix,
+                                   const potential_projection& pp) noexcept
     {
         c->pot_projs[sidb_ix].add(pp);
     }
@@ -361,8 +361,8 @@ class ground_state_space_impl
      * @param rm_pst Projector state to move all occurrences of in the projection onto `sidb_ix`.
      * @param sidb_ix SiDB that receives the potential projections to be removed.
      */
-    static constexpr void remove_all_cluster_charge_state_occurrences(const cluster_projector_state& rm_pst,
-                                                                      const uint64_t                 sidb_ix) noexcept
+    static void remove_all_cluster_charge_state_occurrences(const cluster_projector_state& rm_pst,
+                                                            const uint64_t                 sidb_ix) noexcept
     {
         rm_pst.cluster->pot_projs[sidb_ix].remove_m_conf(rm_pst.multiset_conf);
     }
