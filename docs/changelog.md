@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Continuous integration:
+
+  - Added Python source coverage reports and separate C++ and Python coverage checks.
+
 - Documentation:
 
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.

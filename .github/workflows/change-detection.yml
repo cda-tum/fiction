@@ -234,6 +234,8 @@ jobs:
             .github/workflows/ci.yml
             .github/workflows/change-detection.yml
             .github/workflows/python-tests.yml
+            .github/workflows/python-coverage.yml
+            .codecov.yml
             !bindings/mnt/pyfiction/include/pyfiction/pybind11_mkdoc_docstrings.hpp
       - name: Set a flag for running the Python tests
         if: >-

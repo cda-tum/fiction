@@ -165,6 +165,23 @@ log_level = "INFO"
 testpaths = ["bindings/mnt/pyfiction/test"]
 
 
+[tool.coverage.run]
+source = ["mnt.pyfiction"]
+parallel = true
+relative_files = true
+patch = ["subprocess"]
+omit = ["*/test/*"]
+# Workers that only execute native bindings may collect no Python source lines.
+disable_warnings = ["no-data-collected"]
+
+[tool.coverage.report]
+exclude_also = [
+    '^\s*if TYPE_CHECKING:',
+    '^\s*@(?:typing\.)?overload',
+    '^\s*\.\.\.\s*$',
+]
+
+
 [tool.cibuildwheel]
 # cp310 builds the one abi3 wheel that serves every supported CPython; the later interpreters find
 # it already built, skip the build step, and go straight to `test-command`. That is the only place
@@ -341,6 +358,7 @@ docs = [
 ]
 test = [
     "pytest>=9.0.1",
+    "pytest-cov>=7.1.0",
     "pytest-sugar>=1.1.1",
     "pytest-xdist>=3.8.0",
 ]

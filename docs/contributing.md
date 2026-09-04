@@ -67,6 +67,22 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 
 - If your PR gets a "Changes requested" review, you will need to address the feedback and update your PR by pushing to the same branch. You don't need to close the PR and open a new one. Respond to review comments on the PR (e.g., with "done 👍"). Be sure to re-request review once you have made changes after a code review so that maintainers know that the requests have been addressed.
 
+## Python Coverage
+
+Run the test suite with coverage on one supported Python version:
+
+```sh
+uvx nox -s tests-3.12 -- --cov --cov-config=pyproject.toml --cov-report=term-missing --cov-report=xml
+```
+
+Coverage measures the Python source in `mnt.pyfiction`, including Python subprocesses.
+The report excludes the embedded test package and typing-only statements. Compiled C++
+binding code is not measured by `pytest-cov`.
+
+CI combines reports from the supported Python versions and platforms under Codecov's
+`python` flag. The `cpp` flag measures C++ headers. Each flag has its own project and
+patch status; Python project coverage is compared with the measured base revision.
+
 ## Code Review
 
 Two automated reviewers comment on every pull request, and they carry different weight.

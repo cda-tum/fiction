@@ -10,15 +10,33 @@ coverage:
   round: down
   status:
     patch:
-      default:
-        base: auto
-        target: 95%
-        threshold: 0.5%
+      default: false
     project:
-      default:
-        base: auto
-        target: 95%
-        threshold: 0.5%
+      default: false
+flag_management:
+  default_rules:
+    carryforward: true
+  individual_flags:
+    - name: cpp
+      paths:
+        - include/
+      statuses:
+        - type: project
+          target: 95%
+          threshold: 0.5%
+        - type: patch
+          target: 95%
+          threshold: 0.5%
+    - name: python
+      paths:
+        - bindings/mnt/pyfiction/**/*.py
+      statuses:
+        - type: project
+          target: auto
+          threshold: 0.5%
+        - type: patch
+          target: 95%
+          threshold: 0.5%
 parsers:
   gcov:
     branch_detection:

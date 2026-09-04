@@ -178,6 +178,16 @@ jobs:
     with:
       runs-on: ${{ matrix.runs-on }}
 
+  python-coverage:
+    name: 🐍 Coverage
+    permissions:
+      contents: read # required to check out the repository
+    needs: [change-detection, python-tests]
+    if: fromJSON(needs.change-detection.outputs.run-python-tests)
+    uses: ./.github/workflows/python-coverage.yml
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+
   packaging-sdist:
     name: 🐍 Packaging
     permissions:
@@ -335,6 +345,7 @@ jobs:
       - python-linter
       - docstrings
       - python-tests
+      - python-coverage
       - packaging-sdist
       - packaging-wheels
       - docker
@@ -359,7 +370,7 @@ jobs:
             ${{ !fromJSON(needs.change-detection.outputs.run-docstrings)
             && 'docstrings,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-python-tests)
-            && 'python-tests,' || '' }}
+            && 'python-tests,python-coverage,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-packaging)
             && 'packaging-sdist,packaging-wheels,' || '' }}
             ${{ !fromJSON(needs.change-detection.outputs.run-docker)
