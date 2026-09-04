@@ -119,7 +119,9 @@ jobs:
             include/fiction/**
             test/**
             cli/**
-            bindings/**
+            bindings/**/*.cpp
+            bindings/**/*.hpp
+            bindings/**/CMakeLists.txt
             experiments/**
             libs/**
             cmake/**
