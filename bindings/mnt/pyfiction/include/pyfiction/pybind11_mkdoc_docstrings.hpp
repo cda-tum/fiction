@@ -14529,6 +14529,9 @@ Args:
 Returns:
     The defect type.
 
+Raises:
+    sqd_parsing_error: if the label has no text.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_parse_dot_type =
@@ -14631,7 +14634,17 @@ static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_layout_impl_2 = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run =
+R"doc(Parses the stream and reports malformed numeric attributes as SQD
+parsing errors.
+
+Returns:
+    The parsed layout.
+
+Raises:
+    sqd_parsing_error: if the SQD input is malformed.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_update_bounding_box =
 R"doc(Updates the bounding box given by the maximum position of a cell in
@@ -14687,13 +14700,38 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect =
+R"doc(Reads a defect with finite, non-negative Coulomb material parameters.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord = R"doc()doc";
+Args:
+    defect: The defect element.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord =
+R"doc(Parses a lattice coordinate within the representable site range.
+
+Args:
+    latcoord: The lattice-coordinate element.
+
+Returns:
+    The lattice site.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run =
+R"doc(Parses the stream and reports malformed numeric attributes as SQD
+parsing errors.
+
+Returns:
+    The parsed layout.
+
+Raises:
+    sqd_parsing_error: if the SQD input is malformed.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader = R"doc()doc";
 
@@ -14706,7 +14744,7 @@ static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer = R"doc()doc";
 
@@ -15040,11 +15078,19 @@ static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception =
 R"doc(Exception thrown when an unsupported defect index is encountered in
 the parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception =
+R"doc(Args:
+    i: Unsupported index, or -1 if the input exceeds the int range.
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc(Unsupported index, or -1 for an index outside the int range.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which =
+R"doc(Returns:
+    Unsupported index, or -1 if the input exceeds the int range.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg =
 R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
@@ -15399,7 +15445,8 @@ static const char *mkd_doc_fiction_sidb_layout_affected_sidbs =
 R"doc(The sites whose SiDBs the defect at a given site would influence: the
 rectangle around the defect spanned by `model::defect_extent`, counted
 in unit cells along the lattice vectors and keeping the defect's basis
-site.
+site. The rectangle is clipped to the representable lattice-site
+coordinates.
 
 Args:
     s: Site of the defect.
@@ -24041,6 +24088,9 @@ Args:
 Returns:
     The site `(x, floor(row / 2), row mod 2)`.
 
+Raises:
+    std::out_of_range: if the row exceeds the range of lattice sites.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_sites_in_area =
@@ -24054,6 +24104,10 @@ Args:
 
 Returns:
     The sites in the rectangle in raster order.
+
+Raises:
+    std::length_error: if the rectangle exceeds the maximum vector
+                       size.
 
 )doc";
 
@@ -24304,6 +24358,9 @@ Args:
 
 Returns:
     Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
+
+Raises:
+    std::out_of_range: if the row exceeds the cube coordinate range.
 
 )doc";
 
