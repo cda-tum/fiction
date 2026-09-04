@@ -830,16 +830,10 @@ class cartesian_layout
   private:
     storage strg;
     /*
-     * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1,
-     * such that only complete dimer rows are considered.
+     * Initializer for a cartesian layout dimension.
      */
     constexpr OffsetCoordinateType initialize_dimension(const OffsetCoordinateType& coord) const
     {
-        if constexpr (std::is_same_v<OffsetCoordinateType, coords::siqad>)
-        {
-            return OffsetCoordinateType{coord.x, coord.y, 1};
-        }
-
         return coord;
     }
 };
