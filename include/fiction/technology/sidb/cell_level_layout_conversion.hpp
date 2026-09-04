@@ -38,7 +38,7 @@ namespace fiction::sidb
  * @return The lattice site of `c`.
  */
 template <typename Coordinate>
-[[nodiscard]] constexpr lattice_site to_lattice_site(const Coordinate& c) noexcept
+[[nodiscard]] constexpr lattice_site to_lattice_site(const Coordinate& c)
 {
     if constexpr (std::is_same_v<Coordinate, layouts::coords::siqad>)
     {

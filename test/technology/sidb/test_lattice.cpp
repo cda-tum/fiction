@@ -103,7 +103,7 @@ TEST_CASE("Lattice sites", "[lattice]")
 
         constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
         CHECK(row_of({0, min_row, 0}) == int64_t{2} * min_row);
-        CHECK(row_of({0, max_coordinate, 1}) == int64_t{2} * max_coordinate + 1);
+        CHECK(row_of({0, max_coordinate, 1}) == (int64_t{2} * max_coordinate) + 1);
         CHECK(site_at_row(0, row_of({0, min_row, 0})) == lattice_site{0, min_row, 0});
         CHECK(site_at_row(0, row_of({0, max_coordinate, 1})) == lattice_site{0, max_coordinate, 1});
         CHECK_THROWS_AS(site_at_row(0, row_of({0, min_row, 0}) - 1), std::out_of_range);

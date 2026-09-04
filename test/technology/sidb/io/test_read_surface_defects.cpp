@@ -25,6 +25,7 @@
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+#include <fiction/types.hpp>
 
 #include <fstream>
 #include <initializer_list>
