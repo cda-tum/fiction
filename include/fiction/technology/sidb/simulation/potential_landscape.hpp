@@ -100,12 +100,15 @@ class potential_landscape
 
         for (std::size_t i = 0; i < n_; ++i)
         {
-            for (std::size_t j = 0; j < n_; ++j)
+            for (std::size_t j = i + 1; j < n_; ++j)
             {
-                const auto d = lyt_.get_lattice().nm_distance((*sites_)[i], (*sites_)[j]);
+                const auto d   = lyt_.get_lattice().nm_distance((*sites_)[i], (*sites_)[j]);
+                const auto pot = chargeless_potential_at_distance(d);
 
                 distances_[(i * n_) + j]  = d;
-                potentials_[(i * n_) + j] = chargeless_potential_at_distance(d);
+                distances_[(j * n_) + i]  = d;
+                potentials_[(i * n_) + j] = pot;
+                potentials_[(j * n_) + i] = pot;
             }
         }
 
