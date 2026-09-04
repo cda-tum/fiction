@@ -20,6 +20,7 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
+#include "fiction/utils/stl/hash.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -331,19 +332,23 @@ class charge_distribution
 namespace std
 {
 /**
- * Hash for charge distributions, over the charge states.
+ * @brief Hash for charge distributions, over the charge states.
  */
 template <>
 struct hash<fiction::sidb::charge_distribution>
 {
+    /**
+     * @brief Computes a hash from the ordered charge states.
+     * @param cd Charge distribution to hash.
+     * @return Hash value of `cd`.
+     */
     std::size_t operator()(const fiction::sidb::charge_distribution& cd) const noexcept
     {
         std::size_t h = cd.size();
 
         for (const auto cs : cd.charge_states())
         {
-            h ^= static_cast<std::size_t>(static_cast<int8_t>(cs) + 2) +
-                 static_cast<std::size_t>(0x9e3779b97f4a7c15ULL) + (h << 6) + (h >> 2);
+            fiction::utils::stl::hash_combine(h, cs);
         }
 
         return h;
