@@ -177,6 +177,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Continuous integration:
   - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
+  - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
