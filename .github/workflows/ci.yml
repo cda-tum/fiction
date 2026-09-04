@@ -237,16 +237,14 @@ jobs:
   # `img.shields.io/github/check-runs/…?nameFilter=` needs: it matches the check run's name
   # exactly, and the jobs above carry their matrix entry in theirs
   # (`🐧 Test (ubuntu-24.04, g++-13) / 🐧 ubuntu-24.04 g++-13`), leaving nothing fixed to
-  # point at. They are `🚦 Check` in miniature and follow it for the same reasons: without
-  # `if: always()` a failed dependency skips the job, and a group that change detection
-  # skips has to conclude here anyway — a check run that never appears reads as a grey
-  # "no check runs" on the badge, not as success.
+  # point at. Like `🚦 Check`, they report failed and skipped dependencies. `!cancelled()`
+  # lets canceled runs release their concurrency slot without waiting for a summary runner.
   #
   # None of them belong in `required-checks-pass`. They restate jobs the guard already
   # covers, and branch protection has exactly one required context by design.
   cpp-tests-ubuntu-badge:
     name: 🐧 Ubuntu
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - change-detection
       - cpp-tests-ubuntu
@@ -262,7 +260,7 @@ jobs:
 
   cpp-tests-macos-badge:
     name: 🍎 macOS
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - change-detection
       - cpp-tests-macos
@@ -278,7 +276,7 @@ jobs:
 
   cpp-tests-windows-badge:
     name: 🪟 Windows
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - change-detection
       - cpp-tests-windows
@@ -297,7 +295,7 @@ jobs:
   # change-detection skip would leave the badge grey.
   docker-badge:
     name: 🐳 Docker Image
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - change-detection
       - docker
@@ -313,7 +311,7 @@ jobs:
 
   codeql-badge:
     name: 📝 CodeQL Analysis
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - change-detection
       - codeql
@@ -327,12 +325,11 @@ jobs:
             && 'codeql' || '' }}
           jobs: ${{ toJSON(needs) }}
 
-  # This job does nothing and is only used for branch protection. `if: always()` is what
-  # makes it usable as a required check: without it a failed dependency would *skip* the
-  # guard, and a skipped required context leaves a pull request waiting forever.
+  # Branch protection needs a result even when dependencies fail or skip. `!cancelled()`
+  # overrides the implicit success condition while allowing canceled workflows to stop.
   required-checks-pass:
     name: 🚦 Check
-    if: always()
+    if: ${{ !cancelled() }}
     needs:
       - change-detection
       - cpp-tests-ubuntu

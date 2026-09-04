@@ -164,6 +164,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Continuous integration:
+
+  - Canceled CI runs now stop summary jobs so newer commits can start.
+
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
