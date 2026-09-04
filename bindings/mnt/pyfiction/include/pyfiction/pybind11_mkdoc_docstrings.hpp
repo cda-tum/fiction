@@ -15450,6 +15450,9 @@ Template Args:
     Y: Integral type of `y`.
     Z: Integral type of `z`.
 
+Raises:
+    std::out_of_range: if a coordinate exceeds the lattice-site range.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_3 =
@@ -15462,6 +15465,9 @@ Args:
 Template Args:
     X: Integral type of `x`.
     Y: Integral type of `y`.
+
+Raises:
+    std::out_of_range: if a coordinate exceeds the lattice-site range.
 
 )doc";
 
