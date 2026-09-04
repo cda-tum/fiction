@@ -18,8 +18,8 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
@@ -28,6 +28,7 @@
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
@@ -37,7 +38,6 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -59,9 +59,9 @@ using namespace fiction::utils::math;
 
 TEST_CASE("Empty layout ClusterComplete simulation", "[clustercomplete]")
 {
-    layout lyt{};
+    const layout lyt{};
 
-    clustercomplete_params params{simulation_parameters{2, -0.32}};
+    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32}};
     params.validity_witness_partitioning_max_cluster_size_gss = 3;
     params.num_overlapping_witnesses_limit_gss                = 8;
 
@@ -80,7 +80,7 @@ TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]")
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{2, -0.32}};
+    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32}};
 
     SECTION("Multiple threads")
     {
@@ -106,15 +106,15 @@ TEST_CASE("ClusterComplete simulation of a single SiDB", "[clustercomplete]")
 static bool verify_clustercomplete_result(const charge_distribution&              qe_cd,
                                           const std::vector<charge_distribution>& cc_cds) noexcept
 {
-    return std::any_of(cc_cds.cbegin(), cc_cds.cend(),
-                       [&](const charge_distribution& cc_cd) { return cc_cd.same_charge_states(qe_cd); });
+    return std::ranges::any_of(cc_cds,
+                               [&](const charge_distribution& cc_cd) { return cc_cd.same_charge_states(qe_cd); });
 }
 
 static bool verify_clustercomplete_result_by_charge_indices(const charge_distribution&              qe_cd,
                                                             const std::vector<charge_distribution>& cc_cds) noexcept
 {
-    return std::any_of(cc_cds.cbegin(), cc_cds.cend(),
-                       [&](const auto& cc_cd) { return cc_cd.charge_index(3) == qe_cd.charge_index(3); });
+    return std::ranges::any_of(cc_cds,
+                               [&](const auto& cc_cd) { return cc_cd.charge_index(3) == qe_cd.charge_index(3); });
 }
 
 TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", "[clustercomplete]")
@@ -128,8 +128,9 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
     SECTION("Base 2")
     {
         const result& qe_res = quickexact(
-            lyt, quickexact_params{simulation_parameters{2}, quickexact_params::automatic_base_number_detection::OFF});
-        const result& cc_res = clustercomplete(lyt, clustercomplete_params{simulation_parameters{2}});
+            lyt, quickexact_params{.sim_params            = simulation_parameters{2},
+                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
+        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{2}});
 
         REQUIRE(qe_res.charge_distributions.size() == 1);
         CHECK(cc_res.charge_distributions.size() == 1);
@@ -144,8 +145,9 @@ TEST_CASE("ClusterComplete simulation of a 4 DB layout with a positive charge", 
     SECTION("Base 3")
     {
         const result& qe_res = quickexact(
-            lyt, quickexact_params{simulation_parameters{3}, quickexact_params::automatic_base_number_detection::OFF});
-        const result& cc_res = clustercomplete(lyt, clustercomplete_params{simulation_parameters{3}});
+            lyt, quickexact_params{.sim_params            = simulation_parameters{3},
+                                   .base_number_detection = quickexact_params::automatic_base_number_detection::OFF});
+        const result& cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = simulation_parameters{3}});
 
         REQUIRE(qe_res.charge_distributions.size() == 2);
         CHECK(cc_res.charge_distributions.size() == 2);
@@ -166,7 +168,7 @@ TEST_CASE("Exact Cluster Simulation of 2 Bestagon NAND gates", "[clustercomplete
 
     const auto cell_lyt = to_sidb_layout(apply_gate_library<sidb_cell_clk_lyt, bestagon_library>(gate_lyt));
 
-    clustercomplete_params params{simulation_parameters{2}};
+    clustercomplete_params params{.sim_params = simulation_parameters{2}};
 
     SECTION("Base 2, multiple threads")
     {
@@ -230,7 +232,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
     lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{2, -0.28}};
+    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.28}};
 
     SECTION("Check if ClusterComplete is deterministic")
     {
@@ -242,8 +244,8 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
         for (auto i = 0; i < 100; i++)
 #endif
         {
-            const auto simulation_results = clustercomplete(lyt, params);
-            auto&      charge_lyt_first   = simulation_results.charge_distributions.front();
+            const auto  simulation_results = clustercomplete(lyt, params);
+            const auto& charge_lyt_first   = simulation_results.charge_distributions.front();
             ground_state.insert(round_to_n_decimal_places(charge_lyt_first.energy(), 6));
             charge_index.insert(charge_lyt_first.charge_index(3));
         }
@@ -259,9 +261,9 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 un
 
         const auto simulation_results = clustercomplete(lyt, params);
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         CHECK(ground_state->num_positive_sidbs() > 0);
     }
@@ -397,7 +399,7 @@ TEST_CASE(
 {
     layout lyt{};
     lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
-    const clustercomplete_params params{simulation_parameters{2, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
     lyt.assign_defect({1, 2, 0},
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
 
@@ -413,7 +415,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one negatively charge def
     layout lyt{};
     lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{2, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
 
     lyt.assign_defect({1, 2, 0}, defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, 2});
     const auto simulation_results = clustercomplete(lyt, params);
@@ -428,7 +430,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one negatively charge def
     layout lyt{};
     lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     lyt.assign_defect({1, 6, 0}, defect{defect_type::UNKNOWN, -1, 0.3, params.sim_params.lambda_tf});
 
@@ -448,7 +450,7 @@ TEST_CASE("four SiDBs ClusterComplete simulation with one negatively charge defe
     lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{2, -0.15}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.15}};
 
     lyt.assign_defect({0, 0, 1},
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
@@ -469,7 +471,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one highly negatively cha
     layout lyt{};
     lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.1}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.1}};
 
     lyt.assign_defect({1, 2, 0},
                       defect{defect_type::UNKNOWN, -10, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
@@ -487,7 +489,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with one highly negatively cha
     layout lyt{};
     lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{2, -0.1}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.1}};
 
     lyt.assign_defect(
         {1, 2, 0}, defect{defect_type::UNKNOWN, -10, params.sim_params.epsilon_r, params.sim_params.lambda_tf * 10E-5});
@@ -505,7 +507,7 @@ TEST_CASE(
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{2, -0.1}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.1}};
 
     lyt.assign_defect({2, 0, 0},
                       defect{defect_type::UNKNOWN, -10, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
@@ -524,7 +526,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with local external potential"
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{2, -0.25}};
+    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
 
     params.local_external_potential.insert({{0, 0, 0}, -0.5});
 
@@ -539,7 +541,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with local external potential 
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{3, -0.25}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     params.local_external_potential.insert({{{0, 0, 0}, -1}});
     const auto simulation_results = clustercomplete(lyt, params);
@@ -553,7 +555,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{2, -0.25}};
+    clustercomplete_params params{.sim_params = simulation_parameters{2, -0.25}};
     params.global_potential = -0.26;
 
     const auto simulation_results = clustercomplete(lyt, params);
@@ -568,7 +570,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{3, -0.25}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
     params.global_potential = -1;
 
     const auto simulation_results = clustercomplete(lyt, params);
@@ -581,7 +583,7 @@ TEST_CASE("Single SiDB ClusterComplete simulation with global external potential
     layout lyt{};
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{3, -0.25}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
     params.global_potential = 1;
 
     const auto simulation_results = clustercomplete(lyt, params);
@@ -595,7 +597,7 @@ TEST_CASE("ClusterComplete simulation of a BDL pair", "[clustercomplete]")
     lyt.assign_cell_type({1, 3, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -634,7 +636,7 @@ TEST_CASE("ClusterComplete simulation of a two-pair BDL wire with one perturber"
     lyt.assign_cell_type({17, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({19, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, params);
     auto       size_before        = simulation_results.charge_distributions.size();
@@ -669,9 +671,7 @@ TEST_CASE("ClusterComplete simulation of a one-pair BDL wire with two perturbers
     lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({15, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const simulation_parameters params{2, -0.32};
-
-    const clustercomplete_params sim_params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, sim_params);
 
@@ -701,7 +701,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clusterc
     lyt.assign_cell_type({-7, 1, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({-7, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params sim_params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, sim_params);
 
@@ -738,7 +738,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, c
 
     lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params sim_params{simulation_parameters{2, -0.28}};
+    const clustercomplete_params sim_params{.sim_params = simulation_parameters{2, -0.28}};
 
     const auto simulation_results = clustercomplete(lyt, sim_params);
 
@@ -775,7 +775,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 an
     lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{3, -0.28}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     params.local_external_potential.insert({{{6, 2, 0}, -0.5}});
 
     const auto simulation_results = clustercomplete(lyt, params);
@@ -809,7 +809,7 @@ TEST_CASE("ClusterComplete simulation  of a Y-shape SiDB OR gate with input 01 a
     lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{3, -0.28}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     params.global_potential = -0.5;
 
     const auto simulation_results = clustercomplete(lyt, params);
@@ -843,7 +843,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 an
     lyt.assign_cell_type({10, 8, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({16, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-    clustercomplete_params params{simulation_parameters{3, -0.28}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     params.global_potential = -2;
 
     const auto simulation_results = clustercomplete(lyt, params);
@@ -870,7 +870,7 @@ TEST_CASE("ClusterComplete simulation of four SiDBs (far away)", "[clustercomple
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.28}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -889,7 +889,7 @@ TEST_CASE("ClusterComplete with one SiDB and one negatively charged defect in pr
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
     lyt.assign_defect({-1, -1, 1},
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = clustercomplete(lyt, params);
@@ -910,7 +910,7 @@ TEST_CASE("ClusterComplete simulation  of four SiDBs (far away) with one negativ
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.28}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
     lyt.assign_defect({1, 0, 0},
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
     const auto simulation_results = clustercomplete(lyt, params);
@@ -934,7 +934,7 @@ TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with two negative
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.28}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
     lyt.assign_defect({1, 0, 0},
                       defect{defect_type::UNKNOWN, -1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
@@ -964,7 +964,7 @@ TEST_CASE("ClusterComplete simulation of four SiDBs (far away) with one negative
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({30, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.28}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
     lyt.assign_defect({1, 0, 0},
                       defect{defect_type::UNKNOWN, 1, params.sim_params.epsilon_r, params.sim_params.lambda_tf});
@@ -991,15 +991,15 @@ TEST_CASE("three DBs next to each other", "[clustercomplete]")
     lyt.assign_cell_type({2, 3, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 4);
 
-    const auto ground_state = std::min_element(
-        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-        [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+    const auto ground_state =
+        std::ranges::min_element(simulation_results.charge_distributions,
+                                 [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
     CHECK(ground_state->get_charge_state({-1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(ground_state->get_charge_state({1, 3, 0}) == charge_state::POSITIVE);
@@ -1016,11 +1016,11 @@ TEST_CASE("three DBs next to each other, small mu-", "[clustercomplete]")
     lyt.assign_cell_type({2, 3, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.8}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.8}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
-    REQUIRE(simulation_results.charge_distributions.size() > 0);
+    REQUIRE(!simulation_results.charge_distributions.empty());
     const auto& charge_lyt_first = simulation_results.charge_distributions.front();
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
     CHECK(charge_lyt_first.get_charge_state({1, 3, 0}) == charge_state::NEGATIVE);
@@ -1037,15 +1037,15 @@ TEST_CASE("four DBs next to each other, small mu-", "[clustercomplete]")
     lyt.assign_cell_type({2, 3, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({3, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
     REQUIRE(simulation_results.charge_distributions.size() == 4);
 
-    const auto excited_state = *std::max_element(
-        simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-        [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+    const auto excited_state =
+        *std::ranges::max_element(simulation_results.charge_distributions,
+                                  [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
     CHECK_THAT(excited_state.energy(), Catch::Matchers::WithinAbs(0, ERROR_MARGIN));
 }
 
@@ -1061,7 +1061,7 @@ TEST_CASE("seven DBs next to each other, small mu-", "[clustercomplete]")
     lyt.assign_cell_type({5, 3, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({6, 3, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1085,7 +1085,7 @@ TEST_CASE("7 DBs next to each other (positively charged DBs occur)", "[clusterco
     lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1107,7 +1107,7 @@ TEST_CASE("7 DBs next to each other | only one physically valid charge distribut
     lyt.assign_cell_type({-1, -1, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({0, 2, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1123,7 +1123,7 @@ TEST_CASE("4 DBs next to each other (positively charged DBs occur)", "[clusterco
     lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({10, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.1}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.1}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1141,7 +1141,7 @@ TEST_CASE("6 DBs next to each other (positively charged DBs occur)", "[clusterco
     lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({10, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1159,11 +1159,11 @@ TEST_CASE("4 DBs close to each other", "[clustercomplete]")
     lyt.assign_cell_type({3, 0, 1}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({5, 0, 1}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.25}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.25}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
-    CHECK(simulation_results.charge_distributions.size() > 0);
+    CHECK(!simulation_results.charge_distributions.empty());
 }
 
 TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clustercomplete]")
@@ -1175,7 +1175,7 @@ TEST_CASE("3 DBs next to each other (positively charged DBs occur)", "[clusterco
     lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1209,7 +1209,7 @@ TEST_CASE("13 DBs which are all negatively charged", "[clustercomplete]")
 
     lyt.assign_cell_type({30, 15, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1243,7 +1243,7 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
     lyt.assign_cell_type({29, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     // clustercomplete parameters are initialized
-    clustercomplete_params params{simulation_parameters{3, -0.28}};
+    clustercomplete_params params{.sim_params = simulation_parameters{3, -0.28}};
 
     SECTION("Standard Physical Parameters")
     {
@@ -1253,9 +1253,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         CHECK(ground_state->num_negative_sidbs() == 5);
         CHECK(ground_state->num_neutral_sidbs() == 4);
@@ -1285,9 +1285,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         // check charge distribution of the ground state; BDL wire no longer works as intended
         CHECK(ground_state->get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
@@ -1313,9 +1313,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         // Due to the set µ-value, all SiDBs are negatively charged (electrostatic interaction is not strong enough to
         // change the charge state of individual SiDBs).
@@ -1341,9 +1341,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
 
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         // Due to the small lambda value, the electrostatic interaction is small. Hence, all SiDBs are negatively
         // charged.
@@ -1370,9 +1370,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
         REQUIRE(!simulation_results.charge_distributions.empty());
 
         // find the ground state, which is the charge distribution with the lowest energy
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         // check charge distribution of the ground state; BDL wire works as intended
         CHECK(ground_state->get_charge_state({0, 0, 0}) == charge_state::NEGATIVE);
@@ -1397,9 +1397,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
 
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         // The electrostatic interaction is small, due to the large relative permittivity.
         // Therefore, all SiDBs are negatively charged.
@@ -1425,9 +1425,9 @@ TEST_CASE("ClusterComplete simulation of a 3 DB Wire", "[clustercomplete]")
 
         REQUIRE(!simulation_results.charge_distributions.empty());
 
-        const auto ground_state = std::min_element(
-            simulation_results.charge_distributions.cbegin(), simulation_results.charge_distributions.cend(),
-            [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        const auto ground_state =
+            std::ranges::min_element(simulation_results.charge_distributions,
+                                     [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         // The electrostatic interaction is strong, due to the small relative permittivity.
         // Therefore, SiDBs can even be positively charged.
@@ -1455,7 +1455,7 @@ TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each 
 
     SECTION("Base 2")
     {
-        const clustercomplete_params params{simulation_parameters{2, -0.32, 1.0e-3}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 1.0e-3}};
 
         const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1464,7 +1464,7 @@ TEST_CASE("ClusterComplete simulation of two SiDBs placed directly next to each 
 
     SECTION("Base 3")
     {
-        const clustercomplete_params params{simulation_parameters{3, -0.32, 1.0e-3}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32, 1.0e-3}};
 
         const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1487,7 +1487,7 @@ TEST_CASE("ClusterComplete simulation of positively charged SiDBs", "[clustercom
     lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{3, -0.32}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1504,7 +1504,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
         lyt.assign_cell_type({1, 1, 1}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({1, 2, 0}, sidb_technology::cell_type::NORMAL);
 
-        const clustercomplete_params params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 2);
@@ -1534,7 +1534,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
         lyt.assign_cell_type({1, 11, 1}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({17, 11, 1}, sidb_technology::cell_type::NORMAL);
 
-        const clustercomplete_params params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 21);
@@ -1549,7 +1549,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
         lyt.assign_cell_type({3, 0, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({0, 1, 0}, sidb_technology::cell_type::NORMAL);
 
-        const clustercomplete_params params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 3);
@@ -1564,7 +1564,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
         lyt.assign_cell_type({9, 3, 0}, sidb_technology::cell_type::NORMAL);
         lyt.assign_cell_type({2, 4, 0}, sidb_technology::cell_type::NORMAL);
 
-        const clustercomplete_params params{simulation_parameters{3, -0.32}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{3, -0.32}};
 
         const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1613,7 +1613,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
 
         const simulation_parameters params{3, -0.32, 5.6, 5.0};
 
-        result cc_res = clustercomplete(lyt, clustercomplete_params{params});
+        result cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = params});
 
         std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
@@ -1693,7 +1693,7 @@ TEST_CASE("Special test cases", "[clustercomplete]")
 
         const simulation_parameters params{2, -0.32};
 
-        result cc_res = clustercomplete(lyt, clustercomplete_params{params});
+        result cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = params});
 
         std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
                   [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
@@ -1718,7 +1718,7 @@ TEST_CASE("ClusterComplete gate simulation of Si-111 surface", "[clustercomplete
 
     lyt.assign_cell_type({4, 14, 0}, sidb_technology::cell_type::NORMAL);
 
-    const clustercomplete_params params{simulation_parameters{2, -0.32, 5.6, 5}};
+    const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
     const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1741,7 +1741,7 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
     SECTION("no input applied")
     {
         const auto                   lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
-        const clustercomplete_params params{simulation_parameters{2, -0.32, 5.6, 5}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = clustercomplete(lyt, params);
 
@@ -1781,7 +1781,7 @@ TEST_CASE("ClusterComplete AND gate simulation of Si-111 surface", "[clustercomp
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
         lyt.assign_cell_type({23, 1, 1}, sidb_technology::cell_type::EMPTY);
 
-        const clustercomplete_params params{simulation_parameters{2, -0.32, 5.6, 5}};
+        const clustercomplete_params params{.sim_params = simulation_parameters{2, -0.32, 5.6, 5}};
 
         const auto simulation_results = clustercomplete(lyt, params);
         CHECK(simulation_results.charge_distributions.size() == 7);
