@@ -461,6 +461,7 @@ TEST_CASE("Render QCA tile clock labels in detailed SVG mode", "[write-qca-layou
     REQUIRE(document.Parse(svg.c_str()) == tinyxml2::XML_SUCCESS);
     CHECK(contains(svg, fmt::format(">{}</tspan>", clock + 1)) == !simple);
     CHECK(contains(svg, "<circle") == !simple);
+    CHECK_FALSE(contains(svg, "fill:#;"));
 }
 
 TEST_CASE("Write QCA SVG files with the selected detail level", "[write-qca-layout-svg]")
