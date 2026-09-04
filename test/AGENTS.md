@@ -45,11 +45,11 @@ so `technology/sidb/model/charge_state.hpp` is tested by
   and writes `quickexact(lyt, params)` rather than
   `sidb::simulation::engines::quickexact(lyt, params)`.
   - `fiction::layouts::coords` and `fiction::layouts::clocking` are never opened: bare
-    `offset`, `cube`, `siqad`, and `scheme` say nothing. Open `fiction::layouts` instead and
+    `offset`, `cube`, and `scheme` say nothing. Open `fiction::layouts` instead and
     write `coords::offset` and `clocking::scheme`. `detail` namespaces are never opened.
   - Opening a namespace can collide with a local alias or variable -- `using lattice = ...`
-    against `sidb::surfaces::lattice`, or a variable named `defect` against
-    `sidb::model::defect`. Rename the local one; the compiler names both candidates.
+    against `sidb::lattice`, or a variable named `defect` against `sidb::model::defect`.
+    Rename the local one; the compiler names both candidates.
   - The blueprints under `utils/blueprints/` stay fully qualified. A directive inside
     `namespace blueprints` reaches every translation unit that reopens it, and nearly every
     test does.

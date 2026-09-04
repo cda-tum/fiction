@@ -22,7 +22,6 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
@@ -52,7 +51,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Gate design propagates worker failures", "[design-sidb-gates]")
 {
-    auto lyt = to_sidb_layout(blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>());
+    auto         lyt = blueprints::two_input_one_output_skeleton_west_west();
     lattice_site invalid{100, 100, 0};
     invalid.z = 2;
     lyt.assign_defect(invalid, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
@@ -82,7 +81,7 @@ TEST_CASE("Reject an empty gate specification", "[design-sidb-gates]")
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
           "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
 
     design_gates_params params{
         .operational_params =
@@ -453,7 +452,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_one_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_one_output_bestagon_skeleton();
 
     SECTION("Random Generation")
     {
@@ -545,7 +544,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
 TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 {
-    auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
+    auto lyt = blueprints::and_gate_111();
 
     // delete canvas SiDBs
     for (const auto& c : lyt.dots_with_tag(dot_tag::LOGIC))
@@ -650,7 +649,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
 TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton();
 
     const design_gates_params params{
         .operational_params     = is_operational_params{.sim_params                = simulation_parameters{2, -0.32},
@@ -669,7 +668,7 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
 #ifdef NDEBUG
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -690,8 +689,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
 
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(
-        blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -712,8 +710,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
 
 TEST_CASE("Design AND gate with input left and output top-right with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    const auto lyt =
-        to_sidb_layout(blueprints::two_input_left_one_output_right_top_skeleton<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_left_one_output_right_top_skeleton();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -740,7 +737,7 @@ TEST_CASE("Design AND gate with input left and output top-right with QuickCell (
 
 TEST_CASE("Gate design propagates worker simulation errors", "[design-sidb-gates]")
 {
-    auto lyt = to_sidb_layout(blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>());
+    auto lyt = blueprints::two_input_one_output_skeleton_west_west();
     lyt.assign_defect({100, 100}, defect{defect_type::DB, -1});
     design_gates_params params{};
     params.operational_params.sim_engine      = engine::QUICKSIM;
@@ -753,7 +750,7 @@ TEST_CASE("Gate design propagates worker simulation errors", "[design-sidb-gates
 
 TEST_CASE("Random gate design bounds work without enumerating canvas layouts", "[design-sidb-gates]")
 {
-    auto lyt = to_sidb_layout(blueprints::two_input_one_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>());
+    auto                lyt = blueprints::two_input_one_output_bestagon_skeleton();
     design_gates_params params{.design_mode                    = design_gates_params::design_gates_mode::RANDOM,
                                .canvas                         = {{0, 0, 0}, {49, 0, 0}},
                                .number_of_canvas_sidbs         = 25,

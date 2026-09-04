@@ -294,12 +294,3 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
             CHECK(std::set<cartesian_layout<coords::offset>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
         });
 }
-
-TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
-{
-    using lyt = cartesian_layout<coords::siqad>;
-
-    CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
-    CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);
-    CHECK(lyt{aspect_ratio<lyt>{42, 42, 1}}.z() == 1);
-}

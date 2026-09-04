@@ -44,7 +44,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_fo2<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_fo2();
 
     const auto input_wires  = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
     const auto output_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);
@@ -92,8 +92,7 @@ TEST_CASE("Bestagon FO2 gate", "[verify-logic-match]")
 
 TEST_CASE("AND gate mirrored on the x-axis on the H-Si 111 surface", "[verify-logic-match]")
 {
-    const auto lyt = to_sidb_layout(blueprints::and_gate_111_mirrored_on_the_x_axis<sidb_111_cell_clk_lyt_siqad>(),
-                                    lattice::si_111_1x1());
+    const auto lyt = blueprints::and_gate_111_mirrored_on_the_x_axis();
 
     const auto input_wires  = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::INPUT);
     const auto output_wires = detect_bdl_wires(lyt, detect_bdl_wires_params{}, bdl_wire_selection::OUTPUT);

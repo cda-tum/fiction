@@ -36,8 +36,7 @@ using namespace fiction::qca;
 using namespace fiction::sidb;
 
 TEMPLATE_TEST_CASE("Cell-level layout traits", "[cell-level-layout]", qca_cell_clk_lyt, stacked_qca_cell_clk_lyt,
-                   inml_cell_clk_lyt, sidb_100_cell_clk_lyt, sidb_111_cell_clk_lyt, sidb_111_cell_clk_lyt_siqad,
-                   sidb_111_cell_clk_lyt_cube)
+                   inml_cell_clk_lyt, sidb_cell_clk_lyt, sidb_cell_clk_lyt_cube)
 {
     CHECK(is_cell_level_layout_v<TestType>);
     CHECK(has_foreach_cell_v<TestType>);
@@ -136,9 +135,8 @@ TEST_CASE("Cell technology", "[cell-level-layout]")
         CHECK(tech_impl_name<sidb_technology> == std::string{"SiDB"});
 
         CHECK(has_sidb_technology_v<sidb_cell_clk_lyt>);
-        CHECK(has_sidb_technology_v<sidb_cell_clk_lyt_siqad>);
 
-        sidb_cell_clk_lyt_siqad lyt{{15, 6}};
+        sidb_cell_clk_lyt lyt{{15, 6}};
         lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({2, 1}, sidb_technology::cell_type::INPUT);
         lyt.assign_cell_type({6, 2}, sidb_technology::cell_type::NORMAL);
