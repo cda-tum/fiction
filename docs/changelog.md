@@ -10,8 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Data structures:
 
-  - Added inclusive minimum/maximum bounds and signed iteration to cube-coordinate Cartesian
-    layouts
+  - Added signed, inclusive bounds and iteration for cube-coordinate Cartesian layouts
 
 - Documentation:
 
@@ -22,7 +21,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Python bindings:
 
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
-  - Added cube-coordinate Cartesian, clocked Cartesian, cell-level, and SiDB lattice layouts
+  - Added cube coordinates to Cartesian, clocked, cell-level, and SiDB lattice layouts
 
 ### Changed
 
