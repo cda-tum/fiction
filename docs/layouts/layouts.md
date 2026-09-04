@@ -44,19 +44,7 @@ io/io
 
 ```
 
-```{doxygenfunction} fiction::layouts::convert_layout_to_siqad_coordinates
-
-```
-
-```{doxygenfunction} fiction::layouts::convert_layout_to_fiction_coordinates
-
-```
-
 ```{doxygenfunction} fiction::layouts::random_coordinate
-
-```
-
-```{doxygenfunction} fiction::layouts::all_coordinates_in_spanned_area
 
 ```
 
@@ -69,8 +57,6 @@ io/io
 .. autofunction:: mnt.pyfiction.num_adjacent_coordinates
 
 .. autofunction:: mnt.pyfiction.normalize_layout_coordinates
-
-.. autofunction:: mnt.pyfiction.convert_layout_to_siqad_coordinates
 
 .. autofunction:: mnt.pyfiction.random_coordinate
 ```
