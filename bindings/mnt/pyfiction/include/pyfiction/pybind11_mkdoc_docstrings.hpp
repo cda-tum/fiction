@@ -14673,32 +14673,57 @@ R"doc(Draws an `sidb::layout` as an SVG image: the lattice points of the
 layout's bounding box, if requested, and every SiDB at its position on
 the layout's lattice.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc(Background color.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc(Layout to draw.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc(Output stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc(Drawing parameters.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run =
+R"doc(Draws the lattice and SiDBs with padding around the bounding box.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc()doc";
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc(SiDB fill color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc(SiDB border color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer =
+R"doc(Creates an SVG writer for a lattice layout.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader =
 R"doc(Reads an SQD file into an `sidb::layout`. The file's lattice
 definition selects the lattice; SiDBs and surface defects are placed
 at the `(n, m, l)` lattice coordinates the file names.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc(Input stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc(Layout being parsed.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot =
+R"doc(Adds a DB dot at its lattice coordinate with the specified cell type.
+
+Args:
+    db_dot: DB-dot element.
+
+Raises:
+    sqd_parsing_error: if the lattice-coordinate element is missing or
+                       invalid.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect =
 R"doc(Reads a defect with finite, non-negative Coulomb material parameters.
@@ -14719,7 +14744,19 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice =
+R"doc(Looks up a supported silicon lattice by name.
+
+Args:
+    name: Lattice name from the SQD layer.
+
+Returns:
+    The named lattice.
+
+Raises:
+    sqd_parsing_error: if the lattice name is unsupported.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run =
 R"doc(Parses the stream and reports malformed numeric attributes as SQD
@@ -14733,36 +14770,85 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader =
+R"doc(Creates an SQD reader with a layout name.
+
+Args:
+    s: Input stream.
+    name: Layout name.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer =
 R"doc(Writes an `sidb::layout` as an SQD file: the layout's lattice as the
 lattice layer, every SiDB as a `<dbdot>` at its `(n, m, l)` lattice
 coordinate, and every surface defect as a `<defect>`.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc(Layout to write.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer =
+R"doc(Creates an SQD writer for a lattice layout.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot = R"doc()doc";
+Args:
+    src: Layout to write.
+    s: Output stream.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot =
+R"doc(Appends a DB dot with its lattice coordinate and cell type.
+
+Args:
+    design: SQD design buffer.
+    s: Site of the SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect =
+R"doc(Appends a defect with its lattice coordinate and Coulomb parameters
+when charged.
+
+Args:
+    design: SQD design buffer.
+    s: Site of the defect.
+    d: Defect to write.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader =
 R"doc(Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of
 row `y` becomes the defect at column `x` of single-SiDB row `y`.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc(Matrix text read from the input stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc(Layout being populated.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run =
+R"doc(Assigns each matrix entry to its site on the H-Si(100)-2x1 lattice.
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader = R"doc()doc";
+Returns:
+    Layout containing the parsed defects.
+
+Raises:
+    unsupported_defect_index_exception: if an index is unsupported or
+                                        exceeds the integer range.
+    missing_position_exception: if a row is shorter than a preceding
+                                row.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader =
+R"doc(Reads the defect matrix text and sets the layout name.
+
+Args:
+    s: Input stream.
+    name: Layout name.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl = R"doc()doc";
 
@@ -14857,6 +14943,10 @@ Args:
     crop_layout: Whether to pad the bounding box by two columns and
                  one unit cell instead of printing it tight.
     draw_lattice: Whether to print empty lattice sites as dots.
+
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
 )doc";
 
@@ -15137,6 +15227,10 @@ Args:
     os: Output stream to write into.
     ps: Drawing parameters.
 
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_4 =
@@ -15150,6 +15244,8 @@ Args:
 
 Raises:
     std::ofstream::failure: if the file cannot be opened.
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
 )doc";
 
@@ -15345,9 +15441,9 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_2 =
 R"doc(Creates the site `(x, y, z)`.
 
 Args:
-    x: Steps along the first lattice vector.
-    y: Steps along the second lattice vector.
-    z: Basis site, 0 or 1.
+    x_coord: Steps along the first lattice vector.
+    y_coord: Steps along the second lattice vector.
+    basis_site: Basis site, 0 or 1.
 
 Template Args:
     X: Integral type of `x`.
@@ -15360,8 +15456,8 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_3 =
 R"doc(Creates the site `(x, y, 0)`.
 
 Args:
-    x: Steps along the first lattice vector.
-    y: Steps along the second lattice vector.
+    x_coord: Steps along the first lattice vector.
+    y_coord: Steps along the second lattice vector.
 
 Template Args:
     X: Integral type of `x`.
@@ -15379,6 +15475,10 @@ Args:
 
 Returns:
     Sum of both sites.
+
+Raises:
+    std::out_of_range: if a result coordinate exceeds the lattice-site
+                       range.
 
 )doc";
 
@@ -15414,6 +15514,10 @@ Args:
 
 Returns:
     Difference of both sites.
+
+Raises:
+    std::out_of_range: if a result coordinate exceeds the lattice-site
+                       range.
 
 )doc";
 
@@ -15481,7 +15585,7 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_layout_assign_cell_type =
 R"doc(Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes
-the SiDB from the site.
+the SiDB from the site. Allocation failure leaves the cells unchanged.
 
 Args:
     s: Site.
@@ -15700,7 +15804,8 @@ static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)
 
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
 R"doc(Moves the defect at one site to another, replacing whatever defect the
-target site held.
+target site held. An empty source or identical source and target
+leaves the defects unchanged.
 
 Args:
     source: Site holding the defect.
