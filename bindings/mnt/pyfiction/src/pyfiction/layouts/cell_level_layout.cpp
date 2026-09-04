@@ -24,7 +24,6 @@
 #include <fiction/layouts/bounding_box.hpp>
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/io/print_layout.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/layout_utils.hpp>  // NOLINT(misc-include-cleaner): Used in dependent template contexts below.
 #include <fiction/layouts/tile_based_layout.hpp>

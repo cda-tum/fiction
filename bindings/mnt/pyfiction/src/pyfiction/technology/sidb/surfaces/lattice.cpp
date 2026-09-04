@@ -22,7 +22,6 @@
 
 #include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
 #include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 
 #include <string>
 #include <utility>

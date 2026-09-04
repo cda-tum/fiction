@@ -553,6 +553,7 @@ TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
     CHECK(twoddwave4({3 + 4, 3 + 4}) == 2);
 }
 
+// NOLINTNEXTLINE(google-readability-function-size): the exhaustive coordinate table exceeds the threshold
 TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
@@ -905,6 +906,7 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
 }
 
+// NOLINTNEXTLINE(google-readability-function-size): the exhaustive coordinate table exceeds the threshold
 TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
