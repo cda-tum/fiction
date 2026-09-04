@@ -37,8 +37,11 @@
 :sync: python
 
 ```{eval-rst}
+
 .. autofunction:: mnt.pyfiction.read_sqd_layout
+
 .. autofunction:: mnt.pyfiction.read_sqd_layout_100
+
 .. autofunction:: mnt.pyfiction.read_sqd_layout_111
 
 .. autoclass:: mnt.pyfiction.sqd_parsing_error
@@ -78,10 +81,12 @@
 :sync: python
 
 ```{eval-rst}
+
 .. autofunction:: mnt.pyfiction.read_surface_defects
 
 .. autoclass:: mnt.pyfiction.unsupported_defect_index_exception
     :members:
+
 .. autoclass:: mnt.pyfiction.missing_position_exception
     :members:
 
@@ -119,6 +124,7 @@
 :sync: python
 
 ```{eval-rst}
+
 .. autofunction:: mnt.pyfiction.write_sqd_layout
 
 ```
@@ -159,8 +165,11 @@
 :sync: python
 
 ```{eval-rst}
+
 .. autoclass:: mnt.pyfiction.write_sidb_layout_svg_params
+
 .. autofunction:: mnt.pyfiction.write_sidb_layout_svg
+
 .. autofunction:: mnt.pyfiction.write_sidb_layout_svg_to_string
 
 ```

@@ -42,11 +42,16 @@ described by setting the vectors directly.
 :sync: python
 
 ```{eval-rst}
+
 .. autoclass:: mnt.pyfiction.lattice_site
     :members:
+
 .. autofunction:: mnt.pyfiction.row_of
+
 .. autofunction:: mnt.pyfiction.site_at_row
+
 .. autofunction:: mnt.pyfiction.sites_in_area
+
 .. autoclass:: mnt.pyfiction.lattice
     :members:
 
@@ -76,6 +81,7 @@ described by setting the vectors directly.
 :sync: python
 
 ```{eval-rst}
+
 .. autoclass:: mnt.pyfiction.sidb_layout
     :members:
 
