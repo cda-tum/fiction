@@ -1,7 +1,8 @@
 # AGENTS.md — documentation
 
-`docs/` is reStructuredText built by Sphinx, plus Doxygen for the C++ API. There is no
-local docs session in `noxfile.py`; Read the Docs builds a preview on every pull request.
+`docs/` is reStructuredText built by Sphinx, plus Doxygen for the C++ API. Run
+`uvx nox -s docs` for a local preview with live reload, or add `--non-interactive`
+to build and exit. Read the Docs uses the same session for pull request previews.
 
 ## Adding a page
 

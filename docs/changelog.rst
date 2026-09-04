@@ -10,6 +10,8 @@ Unreleased
 
 Added
 #####
+- Documentation:
+    - Added ``nox -s docs`` for local previews, link checks, and Read the Docs builds.
 - Python bindings:
     - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
 

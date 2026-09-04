@@ -16,10 +16,12 @@
 
 from __future__ import annotations
 
+import argparse
 import contextlib
 import os
 import shutil
 import tempfile
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import nox
@@ -160,3 +162,44 @@ def check_sdist(session: nox.Session) -> None:
     """
     session.install("check-sdist")
     session.run("check-sdist", "--inject-junk", *session.posargs)
+
+
+@nox.session(python="3.12", reuse_venv=True)
+def docs(session: nox.Session) -> None:
+    """Build documentation, serving interactive HTML builds with live reload.
+
+    Pass ``-b linkcheck`` to check links or ``--non-interactive`` to build and exit.
+    Additional arguments are passed to Sphinx.
+
+    Args:
+        session: Nox session that supplies arguments and controls interactive mode.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-b", dest="builder", default="html")
+    args, sphinx_args = parser.parse_known_args(session.posargs)
+    if shutil.which("doxygen") is None:
+        session.error("Doxygen is required. Install it and add it to PATH")
+
+    env = {
+        "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
+        "SKBUILD_BUILD_DIR": "build-pyfiction",
+        "SKBUILD_CMAKE_ARGS": "--preset=pyfiction",
+    }
+    session.run("uv", "sync", "--frozen", "--no-dev", "--group", "build", "--group", "docs", env=env)
+    with session.chdir("docs"):
+        session.run("doxygen", "Doxyfile", external=True)
+
+        serve = args.builder == "html" and session.interactive
+        command = ["sphinx-autobuild" if serve else "sphinx-build"]
+        if serve:
+            command.extend(["--ignore", "doxyxml/**", "--watch", "../include/fiction"])
+            command.extend(["--pre-build", "doxygen Doxyfile"])
+        session.run(
+            *command,
+            "-T",
+            "-b",
+            args.builder,
+            ".",
+            str(Path("_build") / args.builder),
+            *sphinx_args,
+        )

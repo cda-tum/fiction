@@ -113,3 +113,24 @@ This document was inspired by and partially adapted from
 - https://opensource.creativecommons.org/contributing-code/pr-guidelines/
 - https://yeoman.io/contributing/pull-request.html
 - https://github.com/scikit-build/scikit-build
+
+Building the Documentation
+##########################
+
+Install `uv <https://docs.astral.sh/uv/>`_, Doxygen, and the C++ build prerequisites
+listed in :doc:`getting_started`. The documentation session uses Python 3.12 and
+builds the checkout's Python bindings. Install Z3 and make its headers and library
+available to CMake, as required by the ``pyfiction`` preset.
+
+Run these commands from the repository root:
+
+.. code-block:: console
+
+   $ uvx nox -s docs
+   $ uvx nox --non-interactive -s docs
+   $ uvx nox -s docs -- -b linkcheck
+
+The first command serves an HTML preview with live reload. The second writes
+``docs/_build/html/index.html`` and exits. The third checks external links and
+writes its report to ``docs/_build/linkcheck``. Additional arguments after ``--``
+are passed to Sphinx. Read the Docs uses the same non-interactive build.
