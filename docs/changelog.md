@@ -18,6 +18,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Exposed `write_location_and_ground_state`, whose binding existed but was never registered
 
+- Tooling:
+
+  - Added EditorConfig settings that match the repository's formatters.
+
 ### Changed
 
 - Documentation:
