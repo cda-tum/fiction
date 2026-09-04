@@ -307,8 +307,9 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == engine::QUICKEXACT)
         {
             const sidb::simulation::engines::quickexact_params qe_params{
-                params.operational_params.sim_params,
-                sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
+                .sim_params = params.operational_params.sim_params,
+                .base_number_detection =
+                    sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
@@ -317,7 +318,8 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
-            const sidb::simulation::engines::clustercomplete_params cc_params{params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
+                                                                                  params.operational_params.sim_params};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -562,15 +564,17 @@ class critical_temperature_impl
         {
             // perform QuickExact exact simulation
             const sidb::simulation::engines::quickexact_params qe_params{
-                params.operational_params.sim_params,
-                fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
+                .sim_params = params.operational_params.sim_params,
+                .base_number_detection =
+                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
             return sidb::simulation::engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params cc_params{params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
+                                                                                  params.operational_params.sim_params};
             return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED

@@ -136,14 +136,16 @@ void time_to_solution(const Lyt& lyt, const sidb::simulation::engines::quicksim_
     if (tts_params.engine == exact_engine::QUICKEXACT)
     {
         const sidb::simulation::engines::quickexact_params params{
-            qs_params.sim_params, sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
+            .sim_params = qs_params.sim_params,
+            .base_number_detection =
+                sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
         st.algorithm      = sidb::simulation::engine_name(exact_engine::QUICKEXACT);
         simulation_result = sidb::simulation::engines::quickexact(lyt, params);
     }
 #if (FICTION_ALGLIB_ENABLED)
     else if (tts_params.engine == exact_engine::CLUSTERCOMPLETE)
     {
-        const sidb::simulation::engines::clustercomplete_params params{qs_params.sim_params};
+        const sidb::simulation::engines::clustercomplete_params params{.sim_params = qs_params.sim_params};
         st.algorithm      = sidb::simulation::engine_name(exact_engine::CLUSTERCOMPLETE);
         simulation_result = sidb::simulation::engines::clustercomplete(lyt, params);
     }

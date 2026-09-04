@@ -26,7 +26,6 @@
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <cstdint>
@@ -87,7 +86,7 @@ TEST_CASE("Benchmark simulators", "[benchmark]")
 
     BENCHMARK("QuickExact")
     {
-        const quickexact_params sim_params{simulation_parameters{2, -0.32}};
+        const quickexact_params sim_params{.sim_params = simulation_parameters{2, -0.32}};
         return quickexact<lattice_siqad>(lyt, sim_params);
     };
 

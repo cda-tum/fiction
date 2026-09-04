@@ -17,10 +17,10 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/traits.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <cstdint>
 #include <unordered_set>

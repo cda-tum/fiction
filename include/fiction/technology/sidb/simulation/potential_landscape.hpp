@@ -86,97 +86,102 @@ class potential_landscape
                                  const model::simulation_parameters& params = model::simulation_parameters{},
                                  const std::unordered_map<lattice_site, double>& local_external_potential  = {},
                                  const double                                    global_external_potential = 0.0) :
-            lyt_{lyt},
-            params_{params},
-            sites_{std::make_shared<const std::vector<lattice_site>>(lyt.sidbs())},
-            n_{sites_->size()},
-            distances_(n_ * n_, 0.0),
-            potentials_(n_ * n_, 0.0),
-            local_ext_pot_(n_, 0.0),
-            local_pot_caused_by_defects_(n_, 0.0),
-            thresholds_(n_)
+            layout_data{lyt},
+            simulation_parameters_data{params},
+            site_storage{std::make_shared<const std::vector<lattice_site>>(lyt.sidbs())},
+            num_sites{site_storage->size()},
+            distances(num_sites * num_sites, 0.0),
+            potentials(num_sites * num_sites, 0.0),
+            local_external_potentials(num_sites, 0.0),
+            defect_induced_potentials(num_sites, 0.0),
+            charge_transition_thresholds(num_sites)
     {
-        assert(params_.lambda_tf > 0.0 && "lambda_tf has to be > 0.0");
+        assert(simulation_parameters_data.lambda_tf > 0.0 && "lambda_tf has to be > 0.0");
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            for (std::size_t j = i + 1; j < n_; ++j)
+            for (std::size_t j = i + 1; j < num_sites; ++j)
             {
-                const auto d   = lyt_.get_lattice().nm_distance((*sites_)[i], (*sites_)[j]);
+                const auto d   = lyt.get_lattice().nm_distance((*site_storage)[i], (*site_storage)[j]);
                 const auto pot = chargeless_potential_at_distance(d);
 
-                distances_[(i * n_) + j]  = d;
-                distances_[(j * n_) + i]  = d;
-                potentials_[(i * n_) + j] = pot;
-                potentials_[(j * n_) + i] = pot;
+                distances[(i * num_sites) + j]  = d;
+                distances[(j * num_sites) + i]  = d;
+                potentials[(i * num_sites) + j] = pot;
+                potentials[(j * num_sites) + i] = pot;
             }
         }
 
-        for (const auto& [s, d] : lyt_.defects())
+        for (const auto& [s, d] : lyt.defects())
         {
-            if (model::is_charged_defect_type(d) && !lyt_.index_of(s).has_value())
+            if (model::is_charged_defect_type(d) && !lyt.index_of(s).has_value())
             {
-                defects_.emplace_back(s, d);
+                charged_defects.emplace_back(s, d);
             }
         }
 
-        defect_sidb_potentials_.resize(defects_.size() * n_, 0.0);
-        defect_defect_potentials_.resize(defects_.size() * defects_.size(), 0.0);
-        local_ext_pot_at_defect_.resize(defects_.size(), 0.0);
+        defect_sidb_potentials.resize(charged_defects.size() * num_sites, 0.0);
+        defect_defect_potentials.resize(charged_defects.size() * charged_defects.size(), 0.0);
+        local_external_potentials_at_defects.resize(charged_defects.size(), 0.0);
 
-        for (std::size_t d = 0; d < defects_.size(); ++d)
+        for (std::size_t d = 0; d < charged_defects.size(); ++d)
         {
-            const auto& [ds, defect] = defects_[d];
+            const auto& [ds, defect] = charged_defects[d];
 
-            for (std::size_t i = 0; i < n_; ++i)
+            for (std::size_t i = 0; i < num_sites; ++i)
             {
-                const auto dist = lyt_.get_lattice().nm_distance((*sites_)[i], ds);
+                const auto dist = lyt.get_lattice().nm_distance((*site_storage)[i], ds);
 
-                local_pot_caused_by_defects_[i] +=
+                defect_induced_potentials[i] +=
                     chargeless_potential_of_defect_at_distance(dist, defect) * static_cast<double>(defect.charge);
 
                 // an SiDB acts on a defect like a DB-type defect with the surface's own parameters
-                defect_sidb_potentials_[(d * n_) + i] = chargeless_potential_of_defect_at_distance(
-                    dist, model::defect{model::defect_type::DB, 0, params_.epsilon_r, params_.lambda_tf});
+                defect_sidb_potentials[(d * num_sites) + i] = chargeless_potential_of_defect_at_distance(
+                    dist, model::defect{model::defect_type::DB, 0, simulation_parameters_data.epsilon_r,
+                                        simulation_parameters_data.lambda_tf});
             }
 
-            for (std::size_t e = 0; e < defects_.size(); ++e)
+            for (std::size_t e = 0; e < charged_defects.size(); ++e)
             {
-                defect_defect_potentials_[(d * defects_.size()) + e] = chargeless_potential_of_defect_at_distance(
-                    lyt_.get_lattice().nm_distance(ds, defects_[e].first), defects_[e].second);
+                defect_defect_potentials[(d * charged_defects.size()) + e] = chargeless_potential_of_defect_at_distance(
+                    lyt.get_lattice().nm_distance(ds, charged_defects[e].first), charged_defects[e].second);
             }
         }
 
         for (const auto& [s, pot] : local_external_potential)
         {
-            if (const auto i = lyt_.index_of(s); i.has_value())
+            if (const auto i = lyt.index_of(s); i.has_value())
             {
-                local_ext_pot_[*i] += pot;
+                local_external_potentials[*i] += pot;
             }
             else
             {
-                for (std::size_t d = 0; d < defects_.size(); ++d)
+                for (std::size_t d = 0; d < charged_defects.size(); ++d)
                 {
-                    if (defects_[d].first == s)
+                    if (charged_defects[d].first == s)
                     {
-                        local_ext_pot_at_defect_[d] += pot;
+                        local_external_potentials_at_defects[d] += pot;
                     }
                 }
             }
         }
 
-        for (auto& pot : local_ext_pot_)
+        for (auto& pot : local_external_potentials)
         {
             pot += global_external_potential;
         }
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            thresholds_[i] = {
-                local_ext_pot_[i] - params_.mu_minus + utils::math::ERROR_MARGIN,   // DB- (UB)
-                local_ext_pot_[i] - params_.mu_plus() - utils::math::ERROR_MARGIN,  // DB+ (LB)
-                local_ext_pot_[i] - params_.mu_minus - utils::math::ERROR_MARGIN,   // DB0 (LB)
-                local_ext_pot_[i] - params_.mu_plus() + utils::math::ERROR_MARGIN,  // DB0 (UB)
+            charge_transition_thresholds[i] = {
+                local_external_potentials[i] - simulation_parameters_data.mu_minus +
+                    utils::math::ERROR_MARGIN,  // DB- (UB)
+                local_external_potentials[i] - simulation_parameters_data.mu_plus() -
+                    utils::math::ERROR_MARGIN,  // DB+ (LB)
+                local_external_potentials[i] - simulation_parameters_data.mu_minus -
+                    utils::math::ERROR_MARGIN,  // DB0 (LB)
+                local_external_potentials[i] - simulation_parameters_data.mu_plus() +
+                    utils::math::ERROR_MARGIN,  // DB0 (UB)
             };
         }
     }
@@ -187,7 +192,7 @@ class potential_landscape
      */
     [[nodiscard]] const layout& get_layout() const noexcept
     {
-        return lyt_;
+        return layout_data;
     }
     /**
      * The physical parameters.
@@ -196,7 +201,7 @@ class potential_landscape
      */
     [[nodiscard]] const model::simulation_parameters& params() const noexcept
     {
-        return params_;
+        return simulation_parameters_data;
     }
     /**
      * Number of SiDBs.
@@ -205,7 +210,7 @@ class potential_landscape
      */
     [[nodiscard]] std::size_t num_sidbs() const noexcept
     {
-        return n_;
+        return num_sites;
     }
     /**
      * The SiDB sites in raster order, shared with the charge distributions built over this landscape.
@@ -214,7 +219,7 @@ class potential_landscape
      */
     [[nodiscard]] const charge_distribution::site_list& sites() const noexcept
     {
-        return sites_;
+        return site_storage;
     }
     /**
      * The charged surface defects that enter the landscape.
@@ -223,7 +228,7 @@ class potential_landscape
      */
     [[nodiscard]] const std::vector<std::pair<lattice_site, model::defect>>& defects() const noexcept
     {
-        return defects_;
+        return charged_defects;
     }
     /**
      * Distance between two SiDBs.
@@ -234,7 +239,7 @@ class potential_landscape
      */
     [[nodiscard]] double nm_distance(const std::size_t i, const std::size_t j) const noexcept
     {
-        return distances_[(i * n_) + j];
+        return distances[(i * num_sites) + j];
     }
     /**
      * The chargeless potential one SiDB exerts on another, i.e., the potential of a unit charge at the distance of
@@ -246,7 +251,7 @@ class potential_landscape
      */
     [[nodiscard]] double chargeless_potential(const std::size_t i, const std::size_t j) const noexcept
     {
-        return potentials_[(i * n_) + j];
+        return potentials[(i * num_sites) + j];
     }
     /**
      * The external potential at an SiDB: its local external potential plus the global one.
@@ -256,7 +261,7 @@ class potential_landscape
      */
     [[nodiscard]] double local_external_potential(const std::size_t i) const noexcept
     {
-        return local_ext_pot_[i];
+        return local_external_potentials[i];
     }
     /**
      * The potential the charged surface defects exert on an SiDB.
@@ -266,7 +271,7 @@ class potential_landscape
      */
     [[nodiscard]] double local_potential_caused_by_defects(const std::size_t i) const noexcept
     {
-        return local_pot_caused_by_defects_[i];
+        return defect_induced_potentials[i];
     }
     /**
      * The charge transition thresholds of an SiDB, indexed by `charge_transition_threshold_bounds`.
@@ -277,7 +282,7 @@ class potential_landscape
     [[nodiscard]] const std::array<double, 4>&
     effective_charge_transition_thresholds(const std::size_t i) const noexcept
     {
-        return thresholds_[i];
+        return charge_transition_thresholds[i];
     }
     /**
      * The chargeless potential of a unit charge at a distance under the landscape's parameters.
@@ -292,7 +297,8 @@ class potential_landscape
             return 0.0;
         }
 
-        return (params_.k() / (distance * 1E-9) * std::exp(-distance / params_.lambda_tf) * model::ELEMENTARY_CHARGE);
+        return (simulation_parameters_data.k() / (distance * 1E-9) *
+                std::exp(-distance / simulation_parameters_data.lambda_tf) * model::ELEMENTARY_CHARGE);
     }
     /**
      * The chargeless potential a defect exerts at a distance, screened by the defect's own permittivity and screening
@@ -310,8 +316,8 @@ class potential_landscape
             return 0.0;
         }
 
-        return params_.k() * params_.epsilon_r / defect.epsilon_r / (distance * 1e-9) *
-               std::exp(-distance / defect.lambda_tf) * model::ELEMENTARY_CHARGE;
+        return simulation_parameters_data.k() * simulation_parameters_data.epsilon_r / defect.epsilon_r /
+               (distance * 1e-9) * std::exp(-distance / defect.lambda_tf) * model::ELEMENTARY_CHARGE;
     }
     /**
      * The local internal potentials of a charge distribution: at every SiDB, the potential of the charged SiDBs plus
@@ -322,16 +328,16 @@ class potential_landscape
      */
     [[nodiscard]] std::vector<double> local_internal_potentials(const charge_distribution& cd) const
     {
-        std::vector<double> pot{local_pot_caused_by_defects_};
+        std::vector<double> pot{defect_induced_potentials};
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
             double collect = 0.0;
 
-            for (std::size_t j = 0; j < n_; ++j)
+            for (std::size_t j = 0; j < num_sites; ++j)
             {
-                collect +=
-                    potentials_[(i * n_) + j] * static_cast<double>(model::charge_state_to_sign(cd.charge_states()[j]));
+                collect += potentials[(i * num_sites) + j] *
+                           static_cast<double>(model::charge_state_to_sign(cd.charge_states()[j]));
             }
 
             pot[i] += collect;
@@ -349,9 +355,9 @@ class potential_landscape
     {
         auto pot = local_internal_potentials(cd);
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
-            pot[i] += local_ext_pot_[i];
+            pot[i] += local_external_potentials[i];
         }
 
         return pot;
@@ -371,32 +377,32 @@ class potential_landscape
         double collect     = 0.0;
         double collect_ext = 0.0;
 
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
             const auto q = static_cast<double>(model::charge_state_to_sign(cd.charge_states()[i]));
 
-            collect_ext += local_ext_pot_[i] * q;
+            collect_ext += local_external_potentials[i] * q;
             collect += local_internal_potential[i] * q;
         }
 
-        for (std::size_t d = 0; d < defects_.size(); ++d)
+        for (std::size_t d = 0; d < charged_defects.size(); ++d)
         {
-            const auto q = static_cast<double>(defects_[d].second.charge);
+            const auto q = static_cast<double>(charged_defects[d].second.charge);
 
             double pot_at_defect = 0.0;
 
-            for (std::size_t e = 0; e < defects_.size(); ++e)
+            for (std::size_t e = 0; e < charged_defects.size(); ++e)
             {
-                pot_at_defect += defect_defect_potentials_[(d * defects_.size()) + e] *
-                                 static_cast<double>(defects_[e].second.charge);
+                pot_at_defect += defect_defect_potentials[(d * charged_defects.size()) + e] *
+                                 static_cast<double>(charged_defects[e].second.charge);
             }
-            for (std::size_t i = 0; i < n_; ++i)
+            for (std::size_t i = 0; i < num_sites; ++i)
             {
-                pot_at_defect += defect_sidb_potentials_[(d * n_) + i] *
+                pot_at_defect += defect_sidb_potentials[(d * num_sites) + i] *
                                  static_cast<double>(model::charge_state_to_sign(cd.charge_states()[i]));
             }
 
-            collect_ext += local_ext_pot_at_defect_[d] * q;
+            collect_ext += local_external_potentials_at_defects[d] * q;
             collect += pot_at_defect * q;
         }
 
@@ -423,10 +429,10 @@ class potential_landscape
     [[nodiscard]] bool is_population_stable(const charge_distribution& cd,
                                             const std::vector<double>& local_internal_potential) const noexcept
     {
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
             const auto  v = -local_internal_potential[i];
-            const auto& t = thresholds_[i];
+            const auto& t = charge_transition_thresholds[i];
 
             const bool valid =
                 (cd.charge_states()[i] == model::charge_state::NEGATIVE &&
@@ -455,14 +461,14 @@ class potential_landscape
     [[nodiscard]] bool is_configuration_stable(const charge_distribution& cd,
                                                const std::vector<double>& local_internal_potential) const noexcept
     {
-        for (std::size_t i = 0; i < n_; ++i)
+        for (std::size_t i = 0; i < num_sites; ++i)
         {
             if (cd.charge_states()[i] == model::charge_state::POSITIVE)  // we do nothing with SiDB+
             {
                 continue;
             }
 
-            for (std::size_t j = 0; j < n_; ++j)
+            for (std::size_t j = 0; j < num_sites; ++j)
             {
                 if (model::charge_state_to_sign(cd.charge_states()[j]) <=
                     model::charge_state_to_sign(cd.charge_states()[i]))
@@ -471,9 +477,9 @@ class potential_landscape
                 }
 
                 // energy change when a charge hops from i to j
-                const auto hop_del =
-                    local_ext_pot_[i] - local_ext_pot_[j] +
-                    (0.5 * (local_internal_potential[i] - local_internal_potential[j] - potentials_[(i * n_) + j]));
+                const auto hop_del = local_external_potentials[i] - local_external_potentials[j] +
+                                     (0.5 * (local_internal_potential[i] - local_internal_potential[j] -
+                                             potentials[(i * num_sites) + j]));
 
                 if (hop_del < -utils::math::ERROR_MARGIN)
                 {
@@ -524,55 +530,55 @@ class potential_landscape
     /**
      * The layout.
      */
-    layout lyt_;
+    layout layout_data;
     /**
      * Physical parameters.
      */
-    model::simulation_parameters params_;
+    model::simulation_parameters simulation_parameters_data;
     /**
      * SiDB sites in raster order.
      */
-    charge_distribution::site_list sites_;
+    charge_distribution::site_list site_storage;
     /**
      * Number of SiDBs.
      */
-    std::size_t n_;
+    std::size_t num_sites;
     /**
      * Distances between SiDBs, row-major N×N (unit: nm).
      */
-    std::vector<double> distances_;
+    std::vector<double> distances;
     /**
      * Chargeless potentials between SiDBs, row-major N×N (unit: V).
      */
-    std::vector<double> potentials_;
+    std::vector<double> potentials;
     /**
      * External potential per SiDB (unit: V).
      */
-    std::vector<double> local_ext_pot_;
+    std::vector<double> local_external_potentials;
     /**
      * Potential of the charged defects per SiDB (unit: V).
      */
-    std::vector<double> local_pot_caused_by_defects_;
+    std::vector<double> defect_induced_potentials;
     /**
      * Charge transition thresholds per SiDB (unit: V).
      */
-    std::vector<std::array<double, 4>> thresholds_;
+    std::vector<std::array<double, 4>> charge_transition_thresholds;
     /**
      * The charged defects with their sites.
      */
-    std::vector<std::pair<lattice_site, model::defect>> defects_{};
+    std::vector<std::pair<lattice_site, model::defect>> charged_defects{};
     /**
      * Chargeless potential every SiDB exerts on every defect, row-major D×N (unit: V).
      */
-    std::vector<double> defect_sidb_potentials_{};
+    std::vector<double> defect_sidb_potentials{};
     /**
      * Chargeless potential every defect exerts on every defect, row-major D×D (unit: V).
      */
-    std::vector<double> defect_defect_potentials_{};
+    std::vector<double> defect_defect_potentials{};
     /**
      * External potential per defect (unit: V).
      */
-    std::vector<double> local_ext_pot_at_defect_{};
+    std::vector<double> local_external_potentials_at_defects{};
 };
 
 }  // namespace fiction::sidb::simulation

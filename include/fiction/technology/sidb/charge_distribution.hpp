@@ -27,6 +27,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <iterator>
 #include <memory>
 #include <optional>
 #include <utility>
@@ -58,8 +59,8 @@ class charge_distribution
      * @param cs Charge state of every SiDB.
      */
     explicit charge_distribution(const layout& lyt, const model::charge_state cs = model::charge_state::NEGATIVE) :
-            sites_{std::make_shared<const std::vector<lattice_site>>(lyt.sidbs())},
-            states_(sites_->size(), cs)
+            site_storage{std::make_shared<const std::vector<lattice_site>>(lyt.sidbs())},
+            charge_state_values(site_storage->size(), cs)
     {}
     /**
      * Creates a distribution over a shared site list with every SiDB in one charge state.
@@ -68,8 +69,8 @@ class charge_distribution
      * @param cs Charge state of every SiDB.
      */
     explicit charge_distribution(site_list sites, const model::charge_state cs = model::charge_state::NEGATIVE) :
-            sites_{std::move(sites)},
-            states_(sites_ ? sites_->size() : 0, cs)
+            site_storage{std::move(sites)},
+            charge_state_values(site_storage ? site_storage->size() : 0, cs)
     {}
     /**
      * Creates a distribution over a shared site list from explicit charge states and an energy.
@@ -79,9 +80,9 @@ class charge_distribution
      * @param energy Electrostatic potential energy of the distribution (unit: eV).
      */
     charge_distribution(site_list sites, std::vector<model::charge_state> states, const double energy) :
-            sites_{std::move(sites)},
-            states_{std::move(states)},
-            energy_{energy}
+            site_storage{std::move(sites)},
+            charge_state_values{std::move(states)},
+            electrostatic_energy{energy}
     {}
     /**
      * The sites the distribution covers, in raster order.
@@ -92,7 +93,7 @@ class charge_distribution
     {
         static const std::vector<lattice_site> none{};
 
-        return sites_ ? *sites_ : none;
+        return site_storage ? *site_storage : none;
     }
     /**
      * The shared site list, to build further distributions over the same SiDBs.
@@ -101,7 +102,7 @@ class charge_distribution
      */
     [[nodiscard]] const site_list& shared_sites() const noexcept
     {
-        return sites_;
+        return site_storage;
     }
     /**
      * Number of SiDBs.
@@ -110,7 +111,7 @@ class charge_distribution
      */
     [[nodiscard]] std::size_t size() const noexcept
     {
-        return states_.size();
+        return charge_state_values.size();
     }
     /**
      * Whether the distribution covers no SiDB.
@@ -119,7 +120,7 @@ class charge_distribution
      */
     [[nodiscard]] bool empty() const noexcept
     {
-        return states_.empty();
+        return charge_state_values.empty();
     }
     /**
      * The index of a site in the distribution.
@@ -149,7 +150,7 @@ class charge_distribution
     {
         const auto i = index_of(s);
 
-        return i.has_value() ? states_[*i] : model::charge_state::NONE;
+        return i.has_value() ? charge_state_values[*i] : model::charge_state::NONE;
     }
     /**
      * The charge state of the SiDB at an index.
@@ -159,7 +160,7 @@ class charge_distribution
      */
     [[nodiscard]] model::charge_state get_charge_state_by_index(const std::size_t index) const noexcept
     {
-        return index < states_.size() ? states_[index] : model::charge_state::NONE;
+        return index < charge_state_values.size() ? charge_state_values[index] : model::charge_state::NONE;
     }
     /**
      * Assigns the charge state of the SiDB at a site. A site the distribution does not cover is ignored.
@@ -171,7 +172,7 @@ class charge_distribution
     {
         if (const auto i = index_of(s); i.has_value())
         {
-            states_[*i] = cs;
+            charge_state_values[*i] = cs;
         }
     }
     /**
@@ -182,7 +183,7 @@ class charge_distribution
      */
     void assign_charge_state_by_index(const std::size_t index, const model::charge_state cs) noexcept
     {
-        states_[index] = cs;
+        charge_state_values[index] = cs;
     }
     /**
      * Assigns one charge state to every SiDB.
@@ -191,7 +192,7 @@ class charge_distribution
      */
     void assign_all_charge_states(const model::charge_state cs) noexcept
     {
-        std::ranges::fill(states_, cs);
+        std::ranges::fill(charge_state_values, cs);
     }
     /**
      * All charge states in raster order.
@@ -200,7 +201,7 @@ class charge_distribution
      */
     [[nodiscard]] const std::vector<model::charge_state>& charge_states() const noexcept
     {
-        return states_;
+        return charge_state_values;
     }
     /**
      * The electrostatic potential energy of the distribution.
@@ -209,7 +210,7 @@ class charge_distribution
      */
     [[nodiscard]] double energy() const noexcept
     {
-        return energy_;
+        return electrostatic_energy;
     }
     /**
      * Sets the electrostatic potential energy of the distribution.
@@ -218,7 +219,7 @@ class charge_distribution
      */
     void assign_energy(const double e) noexcept
     {
-        energy_ = e;
+        electrostatic_energy = e;
     }
     /**
      * Applies a function to the site of every SiDB in raster order.
@@ -229,10 +230,7 @@ class charge_distribution
     template <typename Fn>
     void foreach_cell(Fn&& fn) const
     {
-        for (const auto& s : sites())
-        {
-            fn(s);
-        }
+        std::ranges::for_each(sites(), std::forward<Fn>(fn));
     }
     /**
      * Whether any SiDB has a given charge state.
@@ -242,7 +240,7 @@ class charge_distribution
      */
     [[nodiscard]] bool charge_exists(const model::charge_state cs) const noexcept
     {
-        return std::ranges::find(states_, cs) != states_.cend();
+        return std::ranges::find(charge_state_values, cs) != charge_state_values.cend();
     }
     /**
      * Number of negatively charged SiDBs.
@@ -251,7 +249,7 @@ class charge_distribution
      */
     [[nodiscard]] std::size_t num_negative_sidbs() const noexcept
     {
-        return static_cast<std::size_t>(std::ranges::count(states_, model::charge_state::NEGATIVE));
+        return static_cast<std::size_t>(std::ranges::count(charge_state_values, model::charge_state::NEGATIVE));
     }
     /**
      * Number of neutrally charged SiDBs.
@@ -260,7 +258,7 @@ class charge_distribution
      */
     [[nodiscard]] std::size_t num_neutral_sidbs() const noexcept
     {
-        return static_cast<std::size_t>(std::ranges::count(states_, model::charge_state::NEUTRAL));
+        return static_cast<std::size_t>(std::ranges::count(charge_state_values, model::charge_state::NEUTRAL));
     }
     /**
      * Number of positively charged SiDBs.
@@ -269,7 +267,7 @@ class charge_distribution
      */
     [[nodiscard]] std::size_t num_positive_sidbs() const noexcept
     {
-        return static_cast<std::size_t>(std::ranges::count(states_, model::charge_state::POSITIVE));
+        return static_cast<std::size_t>(std::ranges::count(charge_state_values, model::charge_state::POSITIVE));
     }
     /**
      * The charge index: the distribution read as a number in the given base with the first SiDB as the most
@@ -284,7 +282,7 @@ class charge_distribution
     {
         uint64_t index = 0;
 
-        for (const auto cs : states_)
+        for (const auto cs : charge_state_values)
         {
             index = (index * base) + static_cast<uint64_t>(model::charge_state_to_sign(cs) + int8_t{1});
         }
@@ -299,7 +297,7 @@ class charge_distribution
      */
     [[nodiscard]] bool same_charge_states(const charge_distribution& other) const noexcept
     {
-        return states_ == other.states_;
+        return charge_state_values == other.charge_state_values;
     }
     /**
      * Compares two distributions: same charge states and same energy.
@@ -309,22 +307,22 @@ class charge_distribution
      */
     [[nodiscard]] bool operator==(const charge_distribution& other) const noexcept
     {
-        return states_ == other.states_ && energy_ == other.energy_;
+        return charge_state_values == other.charge_state_values && electrostatic_energy == other.electrostatic_energy;
     }
 
   private:
     /**
      * The sites in raster order, shared with the other distributions of the same result.
      */
-    site_list sites_{};
+    site_list site_storage{};
     /**
      * One charge state per site.
      */
-    std::vector<model::charge_state> states_{};
+    std::vector<model::charge_state> charge_state_values{};
     /**
      * Electrostatic potential energy (unit: eV).
      */
-    double energy_{0.0};
+    double electrostatic_energy{0.0};
 };
 
 }  // namespace fiction::sidb

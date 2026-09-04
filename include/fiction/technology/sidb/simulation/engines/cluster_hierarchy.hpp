@@ -133,7 +133,7 @@ struct binary_cluster_hierarchy_node
  * @param lyt The layout to create a cluster hierarchy of.
  * @param linkage_method The agglomerative clustering linking heuristic that is used by ALGLIB.
  */
-[[nodiscard]] static binary_cluster_hierarchy_node cluster_hierarchy(
+[[nodiscard]] inline binary_cluster_hierarchy_node cluster_hierarchy(
     const layout&                    lyt,
     cluster_hierarchy_linkage_method linkage_method = cluster_hierarchy_linkage_method::MINIMUM_VARIANCE) noexcept
 {

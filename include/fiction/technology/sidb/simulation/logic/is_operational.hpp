@@ -1047,15 +1047,16 @@ class is_operational_impl
         {
             // perform QuickExact exact simulation
             const sidb::simulation::engines::quickexact_params qe_params{
-                parameters.sim_params,
-                fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
+                .sim_params = parameters.sim_params,
+                .base_number_detection =
+                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
             return sidb::simulation::engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params cc_params{parameters.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params = parameters.sim_params};
             return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED

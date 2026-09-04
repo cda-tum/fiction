@@ -400,8 +400,8 @@ class ground_state_space_impl
      * @param rst Receptor state at which the updates to the accumulation of externally received potential should be
      * made when necessary.
      */
-    void update_external_potential_projection(const cluster_projector_state& pst,
-                                              const cluster_receptor_state&  rst) const noexcept
+    static void update_external_potential_projection(const cluster_projector_state& pst,
+                                                     const cluster_receptor_state&  rst) noexcept
     {
         update_external_pot_projection_if_bound_removed<bound_direction::LOWER>(pst, rst);
         update_external_pot_projection_if_bound_removed<bound_direction::UPPER>(pst, rst);
@@ -916,7 +916,7 @@ class ground_state_space_impl
         composition.pot_bounds.initialize_complete_potential_bounds(top_cluster->num_sidbs());
 
         // perform physically informed space pruning for a multiset composition
-        for (cluster_projector_state& receiving_pst : composition.proj_states)
+        for (const cluster_projector_state& receiving_pst : composition.proj_states)
         {
             for (const uint64_t sidb_ix : receiving_pst.cluster->sidbs)
             {

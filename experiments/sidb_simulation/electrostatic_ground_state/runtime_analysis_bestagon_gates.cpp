@@ -17,7 +17,6 @@
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/layouts/coordinates.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
@@ -75,8 +74,8 @@ int main()  // NOLINT
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
     const simulation_parameters   sim_params{2, -0.32};
-    const quicksim_params         qs_params{sim_params};
-    const quickexact_params       qe_params{sim_params};
+    const quicksim_params         qs_params{.sim_params = sim_params};
+    const quickexact_params       qe_params{.sim_params = sim_params};
     const time_to_solution_params tts_params{};
 
     double      total_runtime_exhaustive      = 0.0;

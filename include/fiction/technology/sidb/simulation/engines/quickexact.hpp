@@ -28,15 +28,17 @@
 #include "fiction/technology/sidb/simulation/detail/simulation_state.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/gray_code_iterator.hpp"
-#include "fiction/utils/math/math_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::simulation::engines
