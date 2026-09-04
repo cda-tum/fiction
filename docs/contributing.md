@@ -128,3 +128,15 @@ are passed to Sphinx. Read the Docs uses the same non-interactive build.
 The docs dependency group requires Python 3.12 or newer. `uv.lock` records the
 versions used by local and hosted builds. HTML builds also produce `llms.txt`,
 `llms-full.txt`, and a Markdown copy of each page alongside its HTML file.
+
+### Citing Publications
+
+Add publication metadata to `docs/references.bib` and preserve existing citation keys.
+Use MyST citation roles such as `` {cite:p}`fiction` `` in documentation pages.
+The {doc}`publications` page renders the bibliography and provides a BibTeX download;
+keep algorithm and experiment links beside their citations. Run
+`prek run bibtex-tidy --all-files` to format entries and fields consistently.
+
+HTML pages include OpenGraph titles, descriptions, canonical URLs, and the project logo.
+Write a clear opening paragraph for each page's generated description. Keep the default
+image in `docs/_static/mnt_social.png` aligned with the project logo.
