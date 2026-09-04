@@ -285,7 +285,12 @@ class write_sqd_layout_impl
 
     std::ostream& os;
 
-    void generate_db_blocks(std::stringstream& design) noexcept
+    /**
+     * Appends the SiDB or QCA cell blocks to the SQD design.
+     *
+     * @param design SQD design buffer.
+     */
+    void generate_db_blocks(std::stringstream& design)
     {
         lyt.foreach_cell(
             [this, &design](const auto& c)
@@ -407,7 +412,12 @@ class write_sqd_layout_impl
         return it == siqad::defect_type_to_name.cend() ? "Unknown" : it->second;
     }
 
-    void generate_defect_blocks(std::stringstream& design) noexcept
+    /**
+     * Appends surface defect blocks when the layout exposes defects.
+     *
+     * @param design SQD design buffer.
+     */
+    void generate_defect_blocks(std::stringstream& design)
     {
         if constexpr (has_foreach_sidb_defect_v<Lyt>)
         {

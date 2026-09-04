@@ -192,6 +192,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
+  - SQD cell-level output now propagates exceptions from cell and defect formatting
   - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
   - SVG and text output now reject padding outside the lattice-site coordinate range
   - SQD readers now reject empty defect labels, invalid numeric values, and invalid Coulomb parameters.
