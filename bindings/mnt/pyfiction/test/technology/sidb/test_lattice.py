@@ -29,9 +29,14 @@ def test_lattice_site() -> None:
 
 
 def test_rows() -> None:
+    """Rows cover every lattice site and reject unrepresentable coordinates."""
     assert row_of(lattice_site(4, 3, 1)) == 7
     assert site_at_row(4, 7) == lattice_site(4, 3, 1)
     assert site_at_row(0, -1) == lattice_site(0, -1, 1)
+    for site in (lattice_site(0, -(2**31), 0), lattice_site(0, 2**31 - 1, 1)):
+        assert site_at_row(site.x, row_of(site)) == site
+    with pytest.raises(IndexError):
+        site_at_row(0, 2**32)
     assert sites_in_area(lattice_site(0, 0, 0), lattice_site(1, 0, 1)) == [
         lattice_site(0, 0, 0),
         lattice_site(1, 0, 0),

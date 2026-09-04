@@ -25,6 +25,9 @@
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
+#include <cstdint>
+#include <limits>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -44,6 +47,12 @@ TEST_CASE("Coordinate to site", "[cell-level-layout-conversion]")
     CHECK(to_cube(lattice_site{3, 3, 1}) == coords::cube{3, 7});
     CHECK(to_cube(lattice_site{-3, -1, 1}) == coords::cube{-3, -1});
     CHECK(to_lattice_site(to_cube(lattice_site{2, -4, 0})) == lattice_site{2, -4, 0});
+    constexpr auto min_coordinate = std::numeric_limits<int32_t>::min();
+    constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
+    CHECK(to_cube(site_at_row(0, min_coordinate)) == coords::cube{0, min_coordinate});
+    CHECK(to_cube(site_at_row(0, max_coordinate)) == coords::cube{0, max_coordinate});
+    CHECK_THROWS_AS(to_cube(lattice_site{0, min_coordinate, 0}), std::out_of_range);
+    CHECK_THROWS_AS(to_cube(lattice_site{0, max_coordinate, 1}), std::out_of_range);
 }
 
 TEST_CASE("Lattice of a layout type", "[cell-level-layout-conversion]")

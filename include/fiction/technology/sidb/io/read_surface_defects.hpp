@@ -46,14 +46,23 @@ namespace fiction::sidb::io
 class unsupported_defect_index_exception : public std::exception
 {
   public:
+    /**
+     * @param i Unsupported index, or -1 if the input exceeds the int range.
+     */
     explicit unsupported_defect_index_exception(const int i) noexcept : unsupported_index{i} {}
 
+    /**
+     * @return Unsupported index, or -1 if the input exceeds the int range.
+     */
     [[nodiscard]] int which() const noexcept
     {
         return unsupported_index;
     }
 
   private:
+    /**
+     * Unsupported index, or -1 for an index outside the int range.
+     */
     const int unsupported_index;
 };
 /**
@@ -143,10 +152,11 @@ class read_surface_defects_impl
             // iterate over the index matches
             for (auto x = 0u; x < row_matches.size(); ++x)
             {
-                const auto defect_index = std::stoi(row_matches[x].str());
+                int defect_index{-1};
 
                 try
                 {
+                    defect_index = std::stoi(row_matches[x].str());
                     // assign the defect
                     lyt.assign_defect({x, y}, sidb::model::defect{
                                                   defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});
@@ -219,10 +229,11 @@ class surface_defects_reader
 
             for (std::size_t x = 0; x < row_matches.size(); ++x)
             {
-                const auto defect_index = std::stoi(row_matches[x].str());
+                int defect_index{-1};
 
                 try
                 {
+                    defect_index = std::stoi(row_matches[x].str());
                     lyt.assign_defect(
                         site_at_row(static_cast<int32_t>(x), static_cast<int32_t>(y)),
                         sidb::model::defect{defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});

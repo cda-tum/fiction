@@ -33,6 +33,7 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>
 #include <unordered_set>
 
 using namespace fiction;
@@ -1270,8 +1271,47 @@ TEST_CASE("Read SQD layout into an sidb::layout without a lattice name", "[sqd]"
     CHECK(lyt.is_empty());
 }
 
+TEST_CASE("Malformed SQD defect values", "[sqd]")
+{
+    using defect_layout = surfaces::lattice<lattice_100, defect_surface<sidb_cell_clk_lyt_siqad>>;
+    for (const auto* value : {"<property_map><type_label><val/></type_label></property_map>",
+                              "<coulomb charge=\"x\" eps_r=\"5.6\" lambda_tf=\"5\"/>",
+                              "<coulomb charge=\"999999999999999999999999\" eps_r=\"5.6\" lambda_tf=\"5\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"x\" lambda_tf=\"5\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"1e9999\" lambda_tf=\"5\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"-1\" lambda_tf=\"5\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"nan\" lambda_tf=\"5\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"x\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"1e9999\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"-1\"/>",
+                              "<coulomb charge=\"-1\" eps_r=\"5.6\" lambda_tf=\"inf\"/>"})
+    {
+        const std::string document =
+            std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
+                        "<layer type=\"Defects\"><defect><incl_coords><latcoord n=\"0\" m=\"0\" l=\"0\"/>"
+                        "</incl_coords>"} +
+            value + "</defect></layer></design></siqad>";
+        std::istringstream stream{document};
+        CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
+        std::istringstream template_stream{document};
+        CHECK_THROWS_AS(read_sqd_layout<defect_layout>(template_stream), sqd_parsing_error);
+    }
+}
+
 TEST_CASE("SQD parsing error into an sidb::layout", "[sqd]")
 {
+    SECTION("invalid numeric coordinates")
+    {
+        for (const auto* attributes : {"n=\"x\" m=\"0\" l=\"0\"", "n=\"0\" m=\"x\" l=\"0\"", "n=\"0\" m=\"0\" l=\"x\"",
+                                       "n=\"999999999999999999999999\" m=\"0\" l=\"0\"",
+                                       "n=\"2147483648\" m=\"0\" l=\"0\"", "n=\"0\" m=\"-2147483649\" l=\"0\""})
+        {
+            std::istringstream stream{std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
+                                                  "<layer type=\"DB\"><dbdot><latcoord "} +
+                                      attributes + " /></dbdot></layer></design></siqad>"};
+            CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
+        }
+    }
     SECTION("unknown lattice")
     {
         static constexpr const char* sqd_layout = "<siqad>\n"

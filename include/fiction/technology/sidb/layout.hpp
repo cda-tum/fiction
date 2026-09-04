@@ -76,7 +76,7 @@ class layout
      *
      * @param lat New lattice.
      */
-    void set_lattice(const lattice& lat) noexcept
+    void set_lattice(const lattice& lat)
     {
         surface_lattice = lat;
     }
@@ -429,6 +429,7 @@ class layout
     /**
      * The sites whose SiDBs the defect at a given site would influence: the rectangle around the defect spanned by
      * `model::defect_extent`, counted in unit cells along the lattice vectors and keeping the defect's basis site.
+     * The rectangle is clipped to the representable lattice-site coordinates.
      *
      * @param s Site of the defect.
      * @param charged_defect_spacing_overwrite Horizontal and vertical extent to use for charged defects instead of the
@@ -449,9 +450,14 @@ class layout
             const auto [horizontal_extent, vertical_extent] =
                 model::defect_extent(d, charged_defect_spacing_overwrite, neutral_defect_spacing_overwrite);
 
-            for (auto y = s.y - vertical_extent; y <= s.y + vertical_extent; ++y)
+            const auto min_x = std::max<int64_t>(int64_t{s.x} - horizontal_extent, std::numeric_limits<int32_t>::min());
+            const auto max_x = std::min<int64_t>(int64_t{s.x} + horizontal_extent, std::numeric_limits<int32_t>::max());
+            const auto min_y = std::max<int64_t>(int64_t{s.y} - vertical_extent, std::numeric_limits<int32_t>::min());
+            const auto max_y = std::min<int64_t>(int64_t{s.y} + vertical_extent, std::numeric_limits<int32_t>::max());
+
+            for (auto y = min_y; y <= max_y; ++y)
             {
-                for (auto x = s.x - horizontal_extent; x <= s.x + horizontal_extent; ++x)
+                for (auto x = min_x; x <= max_x; ++x)
                 {
                     influenced.insert(lattice_site{x, y, s.z});
                 }
@@ -499,7 +505,7 @@ class layout
         }
 
         auto min_x = std::numeric_limits<int32_t>::max(), max_x = std::numeric_limits<int32_t>::min();
-        auto min_row = min_x, max_row = max_x;
+        auto min_row = std::numeric_limits<int64_t>::max(), max_row = std::numeric_limits<int64_t>::min();
 
         const auto extend = [&](const lattice_site& s) noexcept
         {
