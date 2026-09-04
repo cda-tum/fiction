@@ -68,107 +68,45 @@ class bounding_box_2d
         // empty layouts don't need further computation
         if (layout.is_empty())
         {
-            if constexpr (is_sidb_defect_surface_v<Lyt>)
-            {
-                if (layout.num_defects() == 0)
-                {
-                    return;
-                }
-            }
-            else
-            {
-                return;
-            }
+            return;
         }
 
         // Helper function to update bounding box
         const auto update_min_max = [](auto& min_coord, auto& max_coord, const auto& coord) noexcept
         {
-            if constexpr (has_siqad_coord_v<Lyt>)
-            {
-                auto coord_siqad    = coords::from_siqad<coords::cube>(coord);
-                auto min_coord_cube = coords::from_siqad<coords::cube>(min_coord);
-                auto max_coord_cube = coords::from_siqad<coords::cube>(max_coord);
-
-                min_coord_cube.x = std::min(min_coord_cube.x, coord_siqad.x);
-                max_coord_cube.x = std::max(max_coord_cube.x, coord_siqad.x);
-                min_coord_cube.y = std::min(min_coord_cube.y, coord_siqad.y);
-                max_coord_cube.y = std::max(max_coord_cube.y, coord_siqad.y);
-
-                min_coord = fiction::layouts::coords::to_siqad(min_coord_cube);
-                max_coord = fiction::layouts::coords::to_siqad(max_coord_cube);
-            }
-            else
-            {
-                min_coord.x = std::min(min_coord.x, coord.x);
-                max_coord.x = std::max(max_coord.x, coord.x);
-                min_coord.y = std::min(min_coord.y, coord.y);
-                max_coord.y = std::max(max_coord.y, coord.y);
-            }
+            min_coord.x = std::min(min_coord.x, coord.x);
+            max_coord.x = std::max(max_coord.x, coord.x);
+            min_coord.y = std::min(min_coord.y, coord.y);
+            max_coord.y = std::max(max_coord.y, coord.y);
         };
 
-        if constexpr (has_siqad_coord_v<Lyt>)
+        min = {std::numeric_limits<decltype(coordinate<Lyt>::x)>::max(),
+               std::numeric_limits<decltype(coordinate<Lyt>::y)>::max()};
+        max = {std::numeric_limits<decltype(coordinate<Lyt>::x)>::min(),
+               std::numeric_limits<decltype(coordinate<Lyt>::y)>::min()};
+
+        if constexpr (is_gate_level_layout_v<Lyt>)
         {
-            auto min_cell = coordinate<Lyt>{std::numeric_limits<decltype(cell<Lyt>::x)>::max(),
-                                            std::numeric_limits<decltype(cell<Lyt>::y)>::max(), 1};  // Initial z = 1
-            auto max_cell = coordinate<Lyt>{std::numeric_limits<decltype(cell<Lyt>::x)>::min(),
-                                            std::numeric_limits<decltype(cell<Lyt>::y)>::min(), 0};  // Initial z = 0
-
-            layout.foreach_cell([&](const auto& c) { update_min_max(min_cell, max_cell, c); });
-
-            min = min_cell;
-            max = max_cell;
-
-            if constexpr (is_sidb_defect_surface_v<Lyt>)
-            {
-                // Defect handling for SiDB defect surfaces
-                auto min_defect = min_cell;
-                auto max_defect = max_cell;
-
-                layout.foreach_sidb_defect([&](const auto& defect)
-                                           { update_min_max(min_defect, max_defect, defect.first); });
-
-                // Adjust min and max based on defects
-                min = {std::min(min.x, min_defect.x), std::min(min.y, min_defect.y), std::min(min.z, min_defect.z)};
-                max = {std::max(max.x, max_defect.x), std::max(max.y, max_defect.y), std::max(max.z, max_defect.z)};
-            }
+            layout.foreach_coordinate(
+                [&](const auto& c)
+                {
+                    if (!is_empty_coordinate(c))
+                    {
+                        update_min_max(min, max, c);
+                    }
+                });
         }
-        else
+
+        if constexpr (is_cell_level_layout_v<Lyt>)
         {
-            // Default coordinate system handling
-            min = {std::numeric_limits<decltype(coordinate<Lyt>::x)>::max(),
-                   std::numeric_limits<decltype(coordinate<Lyt>::y)>::max()};
-            max = {std::numeric_limits<decltype(coordinate<Lyt>::x)>::min(),
-                   std::numeric_limits<decltype(coordinate<Lyt>::y)>::min()};
-
-            if constexpr (is_gate_level_layout_v<Lyt>)
-            {
-                layout.foreach_coordinate(
-                    [&](const auto& c)
+            layout.foreach_cell(
+                [&](const auto& c)
+                {
+                    if (!layout.is_empty_cell(c))
                     {
-                        if (!is_empty_coordinate(c))
-                        {
-                            update_min_max(min, max, c);
-                        }
-                    });
-            }
-
-            if constexpr (is_cell_level_layout_v<Lyt>)
-            {
-                layout.foreach_cell(
-                    [&](const auto& c)
-                    {
-                        if (!layout.is_empty_cell(c))
-                        {
-                            update_min_max(min, max, c);
-                        }
-                    });
-            }
-
-            if constexpr (is_sidb_defect_surface_v<Lyt>)
-            {
-                layout.foreach_sidb_defect([&](const auto& defect) { update_min_max(min, max, defect.first); });
-            }
+                        update_min_max(min, max, c);
+                    }
+                });
         }
 
         // Final bounding box dimensions

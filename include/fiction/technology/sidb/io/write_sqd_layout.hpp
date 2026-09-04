@@ -10,19 +10,16 @@
 
 /**
  * @file
- * @brief Writer for SiDB and QCA layouts in the SQD format used by SiQAD.
+ * @brief Writer for SiDB layouts in the SQD format used by SiQAD.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  */
 
 #pragma once
 
-#include "fiction/technology/qca/technology.hpp"
-#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -39,7 +36,6 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace fiction::sidb::io
@@ -215,245 +211,6 @@ inline const std::unordered_map<sidb::model::defect_type, const char*> defect_ty
 
 }  // namespace siqad
 
-template <typename Lyt>
-class write_sqd_layout_impl
-{
-  public:
-    /**
-     * @param src Layout to serialize.
-     * @param s Stream receiving the SQD output.
-     */
-    write_sqd_layout_impl(Lyt src, std::ostream& s) : lyt{std::move(src)}, os{s} {}
-
-    void run()
-    {
-        std::stringstream header{}, gui{}, design{};
-
-        header << siqad::SQD_HEADER << siqad::OPEN_SIQAD;
-
-        const auto current_time = std::time(nullptr);
-        const auto time_str = fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time));
-
-        header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
-
-        std::vector<const char*> active_layers{};
-
-        if constexpr (is_sidb_lattice_111_v<Lyt>)
-        {
-            active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_111, siqad::SCREENSHOT_LAYER_DEFINITION,
-                             siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
-        }
-        else
-        {
-            active_layers = {siqad::LATTICE_LAYER_DEFINITION_SI_100, siqad::SCREENSHOT_LAYER_DEFINITION,
-                             siqad::SURFACE_LAYER_DEFINITION, siqad::ELECTRODE_LAYER_DEFINITION};
-        }
-
-        // add the defect layer if Lyt implements the defect interface
-        if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            active_layers.push_back(siqad::DEFECT_LAYER_DEFINITION);
-        }
-
-        design << fmt::format(siqad::LAYERS_BLOCK, fmt::join(active_layers, "")) << siqad::OPEN_DESIGN
-               << siqad::LATTICE_LAYER << siqad::MISC_LAYER;
-
-        design << siqad::OPEN_DB_LAYER;
-        generate_db_blocks(design);
-        design << siqad::CLOSE_DB_LAYER;
-
-        if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            design << siqad::OPEN_DEFECTS_LAYER;
-            generate_defect_blocks(design);
-            design << siqad::CLOSE_DEFECTS_LAYER;
-        }
-
-        design << siqad::ELECTRODE_LAYER;
-
-        design << siqad::CLOSE_DESIGN;
-
-        os << header.str();
-        os << gui.str();
-        os << design.str();
-
-        os << siqad::CLOSE_SIQAD;
-    }
-
-  private:
-    Lyt lyt;
-
-    std::ostream& os;
-
-    /**
-     * Appends the SiDB or QCA cell blocks to the SQD design.
-     *
-     * @param design SQD design buffer.
-     */
-    void generate_db_blocks(std::stringstream& design)
-    {
-        lyt.foreach_cell(
-            [this, &design](const auto& c)
-            {
-                // generate SiDB cells
-                if constexpr (has_sidb_technology_v<Lyt>)
-                {
-                    const auto type = this->lyt.get_cell_type(c);
-
-                    std::string type_str;
-
-                    switch (type)
-                    {
-                        case (sidb::sidb_technology::cell_type::NORMAL):
-                        {
-                            type_str = "";
-                            break;
-                        }
-                        case (sidb::sidb_technology::cell_type::INPUT):
-                        {
-                            type_str = fmt::format(siqad::DOT_TYPE, "input");
-                            break;
-                        }
-                        case (sidb::sidb_technology::cell_type::OUTPUT):
-                        {
-                            type_str = fmt::format(siqad::DOT_TYPE, "output");
-                            break;
-                        }
-                        case (sidb::sidb_technology::cell_type::LOGIC):
-                        {
-                            type_str = fmt::format(siqad::DOT_TYPE, "logic");
-                            break;
-                        }
-                            // LCOV_EXCL_START
-                        case (sidb::sidb_technology::cell_type::EMPTY):
-                        {
-                            // this case can never happen; it exists to comfort the compilers
-                            break;
-                        }
-                            // LCOV_EXCL_STOP
-                    }
-
-                    if constexpr (has_siqad_coord_v<Lyt>)
-                    {
-                        design << fmt::format(siqad::DBDOT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, c.x, c.y, c.z),
-                                              type_str, siqad::NORMAL_COLOR);
-                    }
-                    else
-                    {
-                        const auto siqad_coord = fiction::layouts::coords::to_siqad(c);
-
-                        design << fmt::format(
-                            siqad::DBDOT_BLOCK,
-                            fmt::format(siqad::LATTICE_COORDINATE, siqad_coord.x, siqad_coord.y, siqad_coord.z),
-                            type_str, siqad::NORMAL_COLOR);
-                    }
-                }
-                // generate QCA cell blocks
-                else if constexpr (has_qca_technology_v<Lyt>)
-                {
-                    const auto type = this->lyt.get_cell_type(c);
-
-                    const auto* color = siqad::NORMAL_COLOR;
-
-                    switch (type)
-                    {
-                        case (qca::qca_technology::cell_type::INPUT):
-                        {
-                            color = siqad::INPUT_COLOR;
-                            break;
-                        }
-                        case (qca::qca_technology::cell_type::OUTPUT):
-                        {
-                            color = siqad::OUTPUT_COLOR;
-                            break;
-                        }
-                        case (qca::qca_technology::cell_type::CONST_0):
-                        case (qca::qca_technology::cell_type::CONST_1):
-                        {
-                            color = siqad::CONST_COLOR;
-                            break;
-                        }
-                        case (qca::qca_technology::cell_type::EMPTY):
-                        case (qca::qca_technology::cell_type::NORMAL):
-                        {
-                            // both keep the `NORMAL_COLOR` the variable was initialized with
-                            break;
-                        }
-                    }
-
-                    if (!qca::qca_technology::is_const_1_cell(type))
-                    {
-                        // top left
-                        design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, c.y * 7, 0), "", color);
-                        // bottom right
-                        design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, (c.y * 7) + 3, 0),
-                                              "", color);
-                    }
-                    if (!qca::qca_technology::is_const_0_cell(type))
-                    {
-                        // top right
-                        design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, (c.x * 14) + 6, c.y * 7, 0), "",
-                                              color);
-                        // bottom left
-                        design << fmt::format(siqad::DBDOT_BLOCK,
-                                              fmt::format(siqad::LATTICE_COORDINATE, c.x * 14, (c.y * 7) + 3, 0), "",
-                                              color);
-                    }
-                }
-            });
-    }
-
-    [[nodiscard]] static const char* get_defect_type_name(const sidb::model::defect_type& type) noexcept
-    {
-        const auto it = siqad::defect_type_to_name.find(type);
-        return it == siqad::defect_type_to_name.cend() ? "Unknown" : it->second;
-    }
-
-    /**
-     * Appends surface defect blocks when the layout exposes defects.
-     *
-     * @param design SQD design buffer.
-     */
-    void generate_defect_blocks(std::stringstream& design)
-    {
-        if constexpr (has_foreach_sidb_defect_v<Lyt>)
-        {
-            lyt.foreach_sidb_defect(
-                [&design](const auto& cd)
-                {
-                    const auto& defect = cd.second;
-
-                    // layout is not based on SiQAD coordinates, coordinate transformation is performed
-                    if constexpr (has_siqad_coord_v<Lyt>)
-                    {
-                        const auto& cell = cd.first;
-
-                        design << fmt::format(
-                            siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
-                            sidb::model::is_charged_defect_type(defect) ?
-                                fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
-                                "",
-                            get_defect_type_name(defect.type));
-                    }
-                    else
-                    {
-                        const auto cell = fiction::layouts::coords::to_siqad(cd.first);
-
-                        design << fmt::format(
-                            siqad::DEFECT_BLOCK, fmt::format(siqad::LATTICE_COORDINATE, cell.x, cell.y, cell.z),
-                            sidb::model::is_charged_defect_type(defect) ?
-                                fmt::format(siqad::COULOMB, defect.charge, defect.epsilon_r, defect.lambda_tf) :
-                                "",
-                            get_defect_type_name(defect.type));
-                    }
-                });
-        }
-    }
-};
-
 /**
  * Writes an `sidb::layout` as an SQD file: the layout's lattice as the lattice layer, every SiDB as a `<dbdot>` at
  * its `(n, m, l)` lattice coordinate, and every surface defect as a `<defect>`.
@@ -585,54 +342,6 @@ class sqd_writer
 };
 
 }  // namespace detail
-
-/**
- * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
- * a physical simulator for the SiDB technology platform.
- *
- * If the provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
- *
- * This overload uses an output stream to write into.
- *
- * @tparam Lyt Cell-level SiDB or QCA layout type.
- * @param lyt The layout to be written.
- * @param os The output stream to write into.
- */
-template <typename Lyt>
-void write_sqd_layout(const Lyt& lyt, std::ostream& os)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_qca_technology_v<Lyt> || has_sidb_technology_v<Lyt>, "Lyt must be a QCA or SiDB layout");
-
-    detail::write_sqd_layout_impl p{lyt, os};
-
-    p.run();
-}
-/**
- * Writes a cell-level SiDB or QCA layout to an sqd file that is used by SiQAD (https://github.com/siqad/siqad),
- * a physical simulator for the SiDB technology platform.
- *
- * If the provided cell-level layout type can represent SiDB defects, they will be written to the file as well.
- *
- * This overload uses a file name to create and write into.
- *
- * @tparam Lyt Cell-level SiDB or QCA layout type.
- * @param lyt The layout to be written.
- * @param filename The file name to create and write into. Should preferably use the `.sqd` extension.
- */
-template <typename Lyt>
-void write_sqd_layout(const Lyt& lyt, const std::string_view& filename)
-{
-    std::ofstream os{std::string{filename}, std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("could not open file");
-    }
-
-    write_sqd_layout(lyt, os);
-    os.close();
-}
 
 /**
  * Writes an `sidb::layout` as an SQD file to a stream. The layout's lattice becomes the file's lattice layer, SiDBs

@@ -20,7 +20,6 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -1162,23 +1161,6 @@ class clustercomplete_impl
 [[nodiscard]] inline result clustercomplete(const layout& lyt, const clustercomplete_params& params = {}) noexcept
 {
     return detail::clustercomplete_impl{lyt, params}.run(params);
-}
-
-/**
- * *ClusterComplete* on a Cartesian SiDB cell-level layout: the layout is converted with `to_sidb_layout`, simulated,
- * and the result converted back with `to_legacy_result`. This overload serves the algorithms that still consume
- * `legacy_result`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt Layout to simulate.
- * @param params Parameter required for the simulation.
- * @return Simulation result over surfaces of `lyt`.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] legacy_result<Lyt> clustercomplete(const Lyt& lyt, const clustercomplete_params& params = {}) noexcept
-{
-    return to_legacy_result(clustercomplete(to_sidb_layout(lyt), params), lyt);
 }
 
 }  // namespace fiction::sidb::simulation::engines

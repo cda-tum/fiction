@@ -18,7 +18,7 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -756,47 +756,6 @@ inline double critical_temperature_non_gate_based(const layout& lyt, const criti
     }
 
     return p.get_critical_temperature();
-}
-
-// ---------------------------------------------------------------------------------------------------------------
-// Transitional: overloads for SiDB cell-level layouts, converted with `to_layout`. They serve the CLI and the
-// experiments that still run on such layouts and disappear once every consumer takes `sidb::layout`.
-// ---------------------------------------------------------------------------------------------------------------
-
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt The layout to simulate.
- * @param spec The Boolean function(s) the layout implements.
- * @param params Parameters.
- * @param pst Statistics.
- * @return The critical temperature (unit: K).
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-double critical_temperature_gate_based(const Lyt& lyt, const std::vector<TT>& spec,
-                                       const critical_temperature_params& params = {},
-                                       critical_temperature_stats*        pst    = nullptr)
-{
-    return critical_temperature_gate_based(to_sidb_layout(lyt), spec, params, pst);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to simulate.
- * @param params Parameters.
- * @param pst Statistics.
- * @return The critical temperature (unit: K).
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-double critical_temperature_non_gate_based(const Lyt& lyt, const critical_temperature_params& params = {},
-                                           critical_temperature_stats* pst = nullptr)
-{
-    return critical_temperature_non_gate_based(to_sidb_layout(lyt), params, pst);
 }
 
 }  // namespace fiction::sidb::simulation::analysis

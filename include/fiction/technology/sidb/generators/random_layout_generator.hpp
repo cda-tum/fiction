@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
@@ -215,61 +214,4 @@ generate_multiple_random_layouts(const generate_random_layout_params& params,
 
     return unique_lyts.empty() ? std::nullopt : std::optional{std::move(unique_lyts)};
 }
-/**
- * Transitional overload for SiDB cell-level layouts: the skeleton is converted with `to_sidb_layout` and the result
- * with `to_cell_level_layout`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param params Parameters.
- * @param skeleton The skeleton to place SiDBs on, if any.
- * @return The generated layout, or `std::nullopt`.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::optional<Lyt> generate_random_layout(const generate_random_layout_params& params,
-                                                        const std::optional<Lyt>&            skeleton = std::nullopt)
-{
-    const auto result = generate_random_layout(params, skeleton.has_value() ? std::optional{to_sidb_layout(*skeleton)} :
-                                                                              std::optional<layout>{});
-
-    if (!result.has_value())
-    {
-        return std::nullopt;
-    }
-
-    return to_cell_level_layout<Lyt>(*result);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see `generate_random_layout`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param params Parameters.
- * @param skeleton The skeleton to place SiDBs on, if any.
- * @return The layouts, or `std::nullopt`.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::optional<std::vector<Lyt>>
-generate_multiple_random_layouts(const generate_random_layout_params& params,
-                                 const std::optional<Lyt>&            skeleton = std::nullopt)
-{
-    const auto result = generate_multiple_random_layouts(
-        params, skeleton.has_value() ? std::optional{to_sidb_layout(*skeleton)} : std::optional<layout>{});
-
-    if (!result.has_value())
-    {
-        return std::nullopt;
-    }
-
-    std::vector<Lyt> converted{};
-    converted.reserve(result->size());
-
-    for (const auto& lyt : *result)
-    {
-        converted.push_back(to_cell_level_layout<Lyt>(lyt));
-    }
-
-    return converted;
-}
-
 }  // namespace fiction::sidb::generators

@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/random_layout_generator.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -706,35 +705,4 @@ template <typename TT>
 
     return result;
 }
-/**
- * Transitional overload for SiDB cell-level layouts: the skeleton is converted with `to_sidb_layout` and the gates
- * with `to_cell_level_layout`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param skeleton The skeleton.
- * @param spec The Boolean function(s) to implement; must not be empty.
- * @param params Parameters.
- * @param stats Statistics.
- * @return The designed gates.
- * @throws std::invalid_argument if `spec` is empty.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::vector<Lyt> design_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                            const design_gates_params& params = {}, design_gates_stats* stats = nullptr)
-{
-    const auto gates = design_gates(to_sidb_layout(skeleton), spec, params, stats);
-
-    std::vector<Lyt> converted{};
-    converted.reserve(gates.size());
-
-    for (const auto& g : gates)
-    {
-        converted.push_back(to_cell_level_layout<Lyt>(g));
-    }
-
-    return converted;
-}
-
 }  // namespace fiction::sidb::generators

@@ -18,12 +18,12 @@
 #pragma once
 
 #include "fiction/layouts/bounding_box.hpp"
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
@@ -33,6 +33,7 @@
 #include <array>
 #include <cmath>
 #include <cstdint>
+#include <exception>
 #include <fstream>
 #include <iostream>
 #include <optional>
@@ -40,6 +41,7 @@
 #include <string>
 #include <string_view>
 #include <tuple>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -158,269 +160,6 @@ static constexpr const char* PATH_DEFINITION_TEMPLATE = R"(
 )";
 
 }  // namespace svg
-
-template <typename Lyt>
-class write_sidb_layout_svg_impl
-{
-  public:
-    /**
-     * Constructor.
-     */
-    write_sidb_layout_svg_impl(const Lyt& layout, std::ostream& stream, const write_sidb_layout_svg_params& p = {}) :
-            lyt{layout},
-            os{stream},
-            ps{p}
-    {
-        set_colors();
-    }
-
-    /**
-     * Runs the SVG generation process.
-     */
-    void run()
-    {
-        generate_svg();
-    }
-
-  private:
-    /**
-     * The SiDB layout to be written.
-     */
-    const Lyt& lyt;
-    /**
-     * The output stream to write into.
-     */
-    std::ostream& os;
-    /**
-     * Parameters for the SVG generation.
-     */
-    const write_sidb_layout_svg_params ps{};
-    /**
-     * The color mode for the SVG output.
-     */
-    std::string background_color;
-    /**
-     * The color of the SiDB without charge information.
-     */
-    std::string sidb_color;
-    /**
-     * The edge color of the SiDB without charge information.
-     */
-    std::string sidb_edge_color;
-    /**
-     * Sets the colors based on the color mode.
-     */
-    void set_colors()
-    {
-        if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
-        {
-            // fiction namespace is needed to avoid windows and linux conflict
-            background_color = svg::BACKGROUND_COLOR_BRIGHT;
-            sidb_color       = svg::SIDB_DOT_BRIGHT_MODE;
-            sidb_edge_color  = svg::SIDB_DOT_LINE_COLOR_BRIGHT_MODE;
-        }
-        else
-        {
-            // fiction namespace is needed to avoid windows and linux conflict
-            background_color = svg::BACKGROUND_COLOR_DARK;
-            sidb_color       = svg::SIDB_DOT_DARK_MODE;
-            sidb_edge_color  = svg::SIDB_DOT_LINE_COLOR_DARK_MODE;
-        }
-    }
-
-    /**
-     * Generates an SVG string representing an H-Si lattice point.
-     *
-     * @param x The x-coordinate of the lattice point.
-     * @param y The y-coordinate of the lattice point.
-     * @param fill_color The fill color of the lattice point.
-     *
-     * @return The SVG string representing the lattice point.
-     */
-    [[nodiscard]] std::string generate_lattice_point(const double x, const double y,
-                                                     const std::string& fill_color) const
-    {
-        return fmt::format(R"(<use xlink:href="#lattice_point" x="{0}" y="{1}" style="fill:{2};"/>)", x, y, fill_color);
-    }
-
-    /**
-     * Generates an SVG string representing an SiDB.
-     *
-     * @param x The x-coordinate of the SiDB.
-     * @param y The y-coordinate of the SiDB.
-     * @param charge_state The charge state of the SiDB.
-     *
-     * @return The SVG string representing the SiDB.
-     */
-    [[nodiscard]] std::string
-    generate_sidb(const double x, const double y,
-                  const std::optional<sidb::model::charge_state>& charge_state = std::nullopt) const
-    {
-        std::string fill_color   = sidb_color;
-        std::string border_color = sidb_edge_color;
-
-        auto fill_opacity = 1.0;
-
-        if (charge_state.has_value())
-        {
-            switch (charge_state.value())
-            {
-                case sidb::model::charge_state::POSITIVE:
-                {
-                    fill_color   = svg::POSITIVE_COLOR;
-                    border_color = svg::POSITIVE_COLOR;
-                    break;
-                }
-                case sidb::model::charge_state::NEGATIVE:
-                {
-                    fill_color   = svg::NEGATIVE_COLOR;
-                    border_color = svg::NEGATIVE_COLOR;
-                    break;
-                }
-                case sidb::model::charge_state::NEUTRAL:
-                {
-                    fill_opacity = 0.0;
-                    break;
-                }
-                default:
-                {
-                    border_color = svg::NEUTRAL_COLOR;
-                    fill_opacity = 0.0;
-                    break;
-                }
-            }
-        }
-
-        return fmt::format(
-            R"(<use xlink:href="#sidb_color" x="{0}" y="{1}" style="fill:{2}; fill-opacity:{3}; stroke:{4}; stroke-width:{5};"/>)",
-            x, y, fill_color, fill_opacity, border_color, ps.sidb_border_width);
-    }
-
-    /**
-     * Generates the SVG layout with both H-Si lattice points and SiDBs.
-     */
-    void generate_svg() const
-    {
-        std::stringstream svg_content{};
-
-        // Prepare the PATH_DEFINITION_TEMPLATE with the sizes
-        const std::string path_definition_template =
-            fmt::format(svg::PATH_DEFINITION_TEMPLATE, ps.lattice_point_size, ps.sidb_size);
-
-        // Compute the bounding box of the layout
-        const auto bb        = layouts::bounding_box_2d{lyt};
-        const auto min_coord = bb.get_min();
-        const auto max_coord = bb.get_max();
-
-        if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
-        {
-            // Generate all lattice points
-            const auto all_coords = layouts::all_coordinates_in_spanned_area(min_coord, max_coord);
-
-            for (const auto& coord : all_coords)
-            {
-                // Shift coordinates for alignment
-                auto shifted_coord = coord;
-
-                shifted_coord.x += static_cast<decltype(shifted_coord.x)>(1);
-
-                if constexpr (has_siqad_coord_v<Lyt>)
-                {
-                    shifted_coord.y += static_cast<decltype(shifted_coord.y)>(1);
-                }
-                else
-                {
-                    shifted_coord.y += static_cast<decltype(shifted_coord.y)>(2);
-                }
-
-                const auto nm_pos = sidb::model::nm_position(lyt, shifted_coord);
-
-                svg_content << generate_lattice_point(nm_pos.first * 10, nm_pos.second * 10, svg::SI_LATTICE);
-            }
-        }
-
-        std::vector<cell<Lyt>> all_cells{};
-        all_cells.reserve(lyt.num_cells());
-        // collect all cells
-        lyt.foreach_cell([&all_cells](const auto& cell) { all_cells.push_back(cell); });
-        std::ranges::sort(all_cells);
-
-        for (const auto& cell : all_cells)
-        {
-            // Shift coordinates for alignment
-            auto shifted_cell = cell;
-
-            // shift for padding
-            shifted_cell.x += static_cast<decltype(shifted_cell.x)>(1);
-
-            if constexpr (has_siqad_coord_v<Lyt>)
-            {
-                shifted_cell.y += static_cast<decltype(shifted_cell.y)>(1);
-            }
-            else
-            {
-                shifted_cell.y += static_cast<decltype(shifted_cell.y)>(2);
-            }
-
-            const auto nm_pos = sidb::model::nm_position(lyt, shifted_cell);
-
-            if constexpr (is_charge_distribution_surface_v<Lyt>)
-            {
-                // If the layout has charge distribution information
-                const auto charge_state = lyt.get_charge_state(cell);
-                svg_content << generate_sidb(nm_pos.first * 10, nm_pos.second * 10, charge_state);
-            }
-            else
-            {
-                // Default SiDB dot without charge state
-                svg_content << generate_sidb(nm_pos.first * 10, nm_pos.second * 10);
-            }
-        };
-
-        auto shifted_max = max_coord;
-
-        // shift for padding
-
-        shifted_max.x += static_cast<decltype(shifted_max.x)>(2);
-
-        if constexpr (has_siqad_coord_v<Lyt>)
-        {
-            if (shifted_max.z == 1)
-            {
-                shifted_max.y += static_cast<decltype(shifted_max.y)>(2);
-                shifted_max.z = 0;
-            }
-            else
-            {
-                shifted_max.y += static_cast<decltype(shifted_max.y)>(1);
-                shifted_max.z = 1;
-            }
-        }
-
-        else
-        {
-            shifted_max.y += static_cast<decltype(shifted_max.y)>(3);
-        }
-
-        // Compute viewBox dimensions
-        const auto view_box_nm_min = sidb::model::nm_position(lyt, min_coord);
-        const auto view_box_nm_max = sidb::model::nm_position(lyt, shifted_max);
-
-        const auto viewbox_x      = view_box_nm_min.first * 10;
-        const auto viewbox_y      = view_box_nm_min.second * 10;
-        const auto viewbox_width  = (view_box_nm_max.first - view_box_nm_min.first) * 10;
-        const auto viewbox_height = (view_box_nm_max.second - view_box_nm_min.second) * 10;
-
-        // Generate background rectangle
-        const auto background_rect =
-            fmt::format(R"(<rect x="{0}" y="{1}" width="{2}" height="{3}" style="fill:{4};"/>)", viewbox_x, viewbox_y,
-                        viewbox_width, viewbox_height, background_color);
-
-        // Generate the final SVG content
-        os << fmt::format(svg::HEADER_TEMPLATE, FICTION_VERSION, FICTION_REPO, viewbox_x, viewbox_y, viewbox_width,
-                          viewbox_height, path_definition_template, background_rect, svg_content.str());
-    }
-};
 
 /**
  * Draws an `sidb::layout` as an SVG image: the lattice points of the layout's bounding box, if requested, and every
@@ -578,56 +317,6 @@ class sidb_layout_svg_writer
 };
 
 }  // namespace detail
-
-/**
- * Writes an SVG representation of an SiDB cell-level SiDB layout into an output stream.
- *
- * @note SiDB defects are not supported yet.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to be written.
- * @param os The output stream to write into.
- * @param ps Parameters.
- */
-template <typename Lyt>
-void write_sidb_layout_svg(const Lyt& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
-    static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
-
-    detail::write_sidb_layout_svg_impl<Lyt> p{lyt, os, ps};
-    p.run();
-}
-
-/**
- * Writes an SVG representation of an SiDB cell-level SiDB layout into a file.
- *
- * @note SiDB defects are not supported yet.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to be written.
- * @param filename The file name to create and write into.
- * @param ps Parameters.
- */
-template <typename Lyt>
-void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
-                           const write_sidb_layout_svg_params& ps = {})
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be a SiDB layout");
-    static_assert(!is_sidb_defect_surface_v<Lyt>, "SiDB defects are not supported");
-
-    std::ofstream os{std::string(filename), std::ofstream::out};
-
-    if (!os.is_open())
-    {
-        throw std::ofstream::failure("Could not open file");
-    }
-
-    write_sidb_layout_svg(lyt, os, ps);
-    os.close();
-}
 
 /**
  * Writes an `sidb::layout` as an SVG image to a stream: the lattice points of the layout's bounding box, if the

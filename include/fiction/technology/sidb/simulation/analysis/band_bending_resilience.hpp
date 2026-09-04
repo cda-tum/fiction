@@ -17,7 +17,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
@@ -122,26 +121,6 @@ band_bending_resilience(const layout& lyt, const std::vector<TT>& spec,
     }
 
     return minimal_pop_stability_for_all_inputs;
-}
-
-/**
- * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt The gate layout.
- * @param spec The Boolean function(s) the gate implements.
- * @param params Parameters.
- * @param transition_type The transition to consider; all transitions if omitted.
- * @return The minimum potential difference over all input patterns.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt> && has_sidb_technology_v<Lyt>)
-[[nodiscard]] double
-band_bending_resilience(const Lyt& lyt, const std::vector<TT>& spec, const band_bending_resilience_params& params = {},
-                        const std::optional<transition_type> transition_type = std::nullopt) noexcept
-{
-    return band_bending_resilience(to_sidb_layout(lyt), spec, params, transition_type);
 }
 
 }  // namespace fiction::sidb::simulation::analysis
