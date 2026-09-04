@@ -22,7 +22,15 @@ import pytest
 def test_directory_markers(
     pytester: pytest.Pytester, pytestconfig: pytest.Config, expression: str, passed: int, deselected: int
 ) -> None:
-    """New nested tests inherit markers, while unfiltered runs keep every test."""
+    """New nested tests inherit markers, while unfiltered runs keep every test.
+
+    Args:
+        pytester: Isolated pytest environment.
+        pytestconfig: Configuration providing the declared markers.
+        expression: Marker expression passed to pytest.
+        passed: Expected number of selected tests.
+        deselected: Expected number of deselected tests.
+    """
     test_dir = Path(__file__).resolve().parent
     pytester.makeconftest((test_dir / "conftest.py").read_text(encoding="utf-8"))
     pytester.makeini("[pytest]\nmarkers =\n" + "\n".join(f"    {m}" for m in pytestconfig.getini("markers")))
