@@ -178,7 +178,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Fixed
 
 - Data structures:
-  - `sidb::site_at_row` now handles the two smallest 32-bit rows without signed overflow
+  - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
+    defect influence clips to representable sites, and cube conversion rejects rows outside its range
 
 - Documentation:
 
@@ -191,6 +192,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
   - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
+  - SQD readers now reject empty defect labels, invalid numeric values, and invalid Coulomb parameters.
+    SQD output escapes lattice names, and defect-matrix readers report oversized indices with the documented exception
 
 - Python bindings:
 

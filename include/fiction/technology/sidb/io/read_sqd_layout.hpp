@@ -30,6 +30,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cmath>
 #include <cstdint>
 #include <fstream>
 #include <istream>
@@ -38,6 +39,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace fiction::sidb::io
@@ -54,7 +56,7 @@ class sqd_parsing_error : public std::runtime_error
      *
      * @param msg Error message.
      */
-    explicit sqd_parsing_error(const std::string_view& msg) noexcept : std::runtime_error(std::string{msg}) {}
+    explicit sqd_parsing_error(const std::string_view& msg) : std::runtime_error(std::string{msg}) {}
 };
 
 namespace detail
@@ -105,9 +107,15 @@ inline sidb::sidb_technology::cell_type parse_dot_type(const tinyxml2::XMLElemen
  *
  * @param label The label text.
  * @return The defect type.
+ * @throws sqd_parsing_error if the label has no text.
  */
-[[nodiscard]] inline sidb::model::defect_type parse_defect_label(const char* label) noexcept
+[[nodiscard]] inline sidb::model::defect_type parse_defect_label(const char* label)
 {
+    if (label == nullptr)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: no text in defect label");
+    }
+
     // maps defect names to their respective types
     static const std::unordered_map<std::string, sidb::model::defect_type> defect_name_to_type{
         {{"h-si", sidb::model::defect_type::NONE},
@@ -144,7 +152,14 @@ class read_sqd_layout_impl
 
     read_sqd_layout_impl(Lyt& tgt, std::istream& s) : lyt{tgt}, is{s} {}
 
+    /**
+     * Parses the stream and reports malformed numeric attributes as SQD parsing errors.
+     *
+     * @return The parsed layout.
+     * @throws sqd_parsing_error if the SQD input is malformed.
+     */
     Lyt run()
+    try
     {
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
@@ -239,6 +254,14 @@ class read_sqd_layout_impl
         lyt.resize(max_cell_pos);
 
         return lyt;
+    }
+    catch (const std::invalid_argument&)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: invalid numeric attribute");
+    }
+    catch (const std::out_of_range&)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: numeric attribute out of range");
     }
 
   private:
@@ -441,6 +464,11 @@ class read_sqd_layout_impl
                 charge    = std::stoll(charge_string);
                 eps_r     = std::stod(eps_r_string);
                 lambda_tf = std::stod(lambda_tf_string);
+
+                if (!std::isfinite(eps_r) || !std::isfinite(lambda_tf) || eps_r < 0.0 || lambda_tf < 0.0)
+                {
+                    throw sqd_parsing_error("Error parsing SQD file: invalid Coulomb material parameters");
+                }
             }
 
             std::ranges::for_each(
@@ -462,7 +490,14 @@ class sqd_reader
         lyt.set_layout_name(std::string{name});
     }
 
+    /**
+     * Parses the stream and reports malformed numeric attributes as SQD parsing errors.
+     *
+     * @return The parsed layout.
+     * @throws sqd_parsing_error if the SQD input is malformed.
+     */
     layout run()
+    try
     {
         // tinyXML2 does not support std::istream, so we have to read the whole file into a string first
         std::stringstream buffer{};
@@ -554,6 +589,14 @@ class sqd_reader
 
         return lyt;
     }
+    catch (const std::invalid_argument&)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: invalid numeric attribute");
+    }
+    catch (const std::out_of_range&)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: numeric attribute out of range");
+    }
 
   private:
     layout        lyt{};
@@ -572,6 +615,12 @@ class sqd_reader
 
         throw sqd_parsing_error("Error parsing SQD file: unknown lattice orientation");
     }
+    /**
+     * Parses a lattice coordinate within the representable site range.
+     *
+     * @param latcoord The lattice-coordinate element.
+     * @return The lattice site.
+     */
     [[nodiscard]] static lattice_site parse_latcoord(const tinyxml2::XMLElement* latcoord)
     {
         const auto n = latcoord->Attribute("n"), m = latcoord->Attribute("m"), l = latcoord->Attribute("l");
@@ -588,7 +637,13 @@ class sqd_reader
             throw sqd_parsing_error("Error parsing SQD file: dimer has invalid dot index");
         }
 
-        return {std::stoll(n), std::stoll(m), basis_site};
+        const auto x = std::stoll(n);
+        const auto y = std::stoll(m);
+        if (!std::in_range<int32_t>(x) || !std::in_range<int32_t>(y))
+        {
+            throw sqd_parsing_error("Error parsing SQD file: lattice coordinate out of range");
+        }
+        return {x, y, basis_site};
     }
     void parse_db_dot(const tinyxml2::XMLElement* db_dot)
     {
@@ -601,6 +656,11 @@ class sqd_reader
 
         lyt.assign_cell_type(parse_latcoord(latcoord), parse_dot_type(db_dot->FirstChildElement("type")));
     }
+    /**
+     * Reads a defect with finite, non-negative Coulomb material parameters.
+     *
+     * @param defect The defect element.
+     */
     void parse_defect(const tinyxml2::XMLElement* defect)
     {
         std::vector<lattice_site> incl_sites{};
@@ -645,6 +705,11 @@ class sqd_reader
             charge    = std::stoll(charge_string);
             eps_r     = std::stod(eps_r_string);
             lambda_tf = std::stod(lambda_tf_string);
+
+            if (!std::isfinite(eps_r) || !std::isfinite(lambda_tf) || eps_r < 0.0 || lambda_tf < 0.0)
+            {
+                throw sqd_parsing_error("Error parsing SQD file: invalid Coulomb material parameters");
+            }
         }
 
         for (const auto& s : incl_sites)

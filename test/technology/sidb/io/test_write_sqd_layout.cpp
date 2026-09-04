@@ -40,6 +40,8 @@
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
+#include <tinyxml2.h>
+
 #include <map>
 #include <sstream>
 #include <string>
@@ -307,6 +309,23 @@ TEST_CASE("Write defective surface SQD layout based on SiQAD coordinates", "[sqd
 
 TEST_CASE("Write and read back an sidb::layout", "[sqd]")
 {
+    SECTION("lattice names are XML text")
+    {
+        auto lat = sidb::lattice::si_100_2x1();
+        lat.name = "custom & <surface>";
+        const sidb::layout lyt{lat};
+        std::stringstream  stream{};
+        write_sqd_layout(lyt, stream);
+        tinyxml2::XMLDocument document{};
+        REQUIRE(document.Parse(stream.str().c_str()) == tinyxml2::XML_SUCCESS);
+        const auto* name = document.FirstChildElement("siqad")
+                               ->FirstChildElement("layers")
+                               ->FirstChildElement("layer_prop")
+                               ->FirstChildElement("lat_vec")
+                               ->FirstChildElement("name");
+        REQUIRE(name != nullptr);
+        CHECK(std::string{name->GetText()} == lat.name);
+    }
     SECTION("H-Si(100)-2x1 with defects")
     {
         sidb::layout lyt{sidb::lattice::si_100_2x1(), "Bestagon"};

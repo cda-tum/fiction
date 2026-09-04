@@ -22,7 +22,9 @@
 #include "fiction/traits.hpp"
 
 #include <cstdint>
+#include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 namespace fiction::sidb
 {
@@ -52,9 +54,14 @@ template <typename Coordinate>
  *
  * @param s Lattice site.
  * @return Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
+ * @throws std::out_of_range if the row exceeds the cube coordinate range.
  */
-[[nodiscard]] constexpr layouts::coords::cube to_cube(const lattice_site& s) noexcept
+[[nodiscard]] constexpr layouts::coords::cube to_cube(const lattice_site& s)
 {
+    if (!std::in_range<int32_t>(row_of(s)))
+    {
+        throw std::out_of_range("Lattice-site row exceeds the cube coordinate range");
+    }
     return {s.x, row_of(s), 0};
 }
 /**

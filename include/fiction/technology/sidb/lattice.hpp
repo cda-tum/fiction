@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <functional>
 #include <random>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -151,9 +152,9 @@ struct lattice_site
  * @param s Site.
  * @return Row of `s`.
  */
-[[nodiscard]] constexpr int32_t row_of(const lattice_site& s) noexcept
+[[nodiscard]] constexpr int64_t row_of(const lattice_site& s) noexcept
 {
-    return (2 * s.y) + s.z;
+    return (int64_t{2} * s.y) + s.z;
 }
 /**
  * The site at a given column and single-SiDB row, the inverse of `row_of`. Negative rows map to the unit cell below
@@ -162,10 +163,15 @@ struct lattice_site
  * @param x Column.
  * @param row Row counted in single SiDB rows.
  * @return The site `(x, floor(row / 2), row mod 2)`.
+ * @throws std::out_of_range if the row exceeds the range of lattice sites.
  */
-[[nodiscard]] constexpr lattice_site site_at_row(const int32_t x, const int32_t row) noexcept
+[[nodiscard]] constexpr lattice_site site_at_row(const int32_t x, const int64_t row)
 {
-    const int32_t y = row / 2 - static_cast<int32_t>(row % 2 < 0);
+    const auto y = (row / 2) - static_cast<int64_t>(row % 2 < 0);
+    if (!std::in_range<int32_t>(y))
+    {
+        throw std::out_of_range("Row exceeds the lattice-site coordinate range");
+    }
     return {x, y, row - (2 * y)};
 }
 /**
@@ -175,6 +181,7 @@ struct lattice_site
  * @param first_corner One corner of the rectangle.
  * @param second_corner The opposite corner.
  * @return The sites in the rectangle in raster order.
+ * @throws std::length_error if the rectangle exceeds the maximum vector size.
  */
 [[nodiscard]] inline std::vector<lattice_site> sites_in_area(const lattice_site& first_corner,
                                                              const lattice_site& second_corner)
@@ -185,13 +192,19 @@ struct lattice_site
     const auto max_row = std::max(row_of(first_corner), row_of(second_corner));
 
     std::vector<lattice_site> sites{};
-    sites.reserve(static_cast<std::size_t>(max_x - min_x + 1) * static_cast<std::size_t>(max_row - min_row + 1));
+    const auto                width  = static_cast<uint64_t>(int64_t{max_x} - min_x + 1);
+    const auto                height = static_cast<uint64_t>(max_row - min_row + 1);
+    if (width > sites.max_size() / height)
+    {
+        throw std::length_error("Lattice-site rectangle exceeds the maximum vector size");
+    }
+    sites.reserve(static_cast<std::size_t>(width * height));
 
     for (auto row = min_row; row <= max_row; ++row)
     {
-        for (auto x = min_x; x <= max_x; ++x)
+        for (int64_t x = min_x; x <= max_x; ++x)
         {
-            sites.push_back(site_at_row(x, row));
+            sites.push_back(site_at_row(static_cast<int32_t>(x), row));
         }
     }
 
@@ -216,7 +229,7 @@ template <std::uniform_random_bit_generator Rng>
     const auto max_row = std::max(row_of(first_corner), row_of(second_corner));
 
     return site_at_row(std::uniform_int_distribution<int32_t>{min_x, max_x}(rng),
-                       std::uniform_int_distribution<int32_t>{min_row, max_row}(rng));
+                       std::uniform_int_distribution<int64_t>{min_row, max_row}(rng));
 }
 
 /**

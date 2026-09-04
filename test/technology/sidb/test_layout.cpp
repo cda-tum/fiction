@@ -24,6 +24,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -232,5 +233,24 @@ TEST_CASE("Defects", "[layout]")
 
         lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
         CHECK(lyt.bounding_box() == std::pair{lattice_site{0, 0, 0}, lattice_site{7, 2, 0}});
+    }
+    SECTION("coordinate limits")
+    {
+        constexpr auto     min_coordinate = std::numeric_limits<int32_t>::min();
+        constexpr auto     max_coordinate = std::numeric_limits<int32_t>::max();
+        const lattice_site first{min_coordinate, min_coordinate, 0};
+        const lattice_site last{max_coordinate, max_coordinate, 1};
+        lyt.assign_defect(first, charged);
+        lyt.assign_defect(last, charged);
+        CHECK(lyt.bounding_box() == std::pair{first, last});
+
+        const auto lower = lyt.affected_sidbs(first, std::pair<uint16_t, uint16_t>{1, 1});
+        CHECK(lower.size() == 4);
+        CHECK(lower.contains(first));
+        CHECK(lower.contains({min_coordinate + 1, min_coordinate + 1, 0}));
+        const auto upper = lyt.affected_sidbs(last, std::pair<uint16_t, uint16_t>{1, 1});
+        CHECK(upper.size() == 4);
+        CHECK(upper.contains(last));
+        CHECK(upper.contains({max_coordinate - 1, max_coordinate - 1, 1}));
     }
 }

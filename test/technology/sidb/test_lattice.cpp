@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <limits>
 #include <random>
+#include <stdexcept>
 #include <unordered_set>
 #include <vector>
 
@@ -99,6 +100,14 @@ TEST_CASE("Lattice sites", "[lattice]")
         constexpr auto min_row = std::numeric_limits<int32_t>::min();
         CHECK(site_at_row(0, min_row) == lattice_site{0, min_row / 2, 0});
         CHECK(site_at_row(0, min_row + 1) == lattice_site{0, min_row / 2, 1});
+
+        constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
+        CHECK(row_of({0, min_row, 0}) == int64_t{2} * min_row);
+        CHECK(row_of({0, max_coordinate, 1}) == int64_t{2} * max_coordinate + 1);
+        CHECK(site_at_row(0, row_of({0, min_row, 0})) == lattice_site{0, min_row, 0});
+        CHECK(site_at_row(0, row_of({0, max_coordinate, 1})) == lattice_site{0, max_coordinate, 1});
+        CHECK_THROWS_AS(site_at_row(0, row_of({0, min_row, 0}) - 1), std::out_of_range);
+        CHECK_THROWS_AS(site_at_row(0, row_of({0, max_coordinate, 1}) + 1), std::out_of_range);
     }
     SECTION("string and format")
     {
@@ -148,6 +157,22 @@ TEST_CASE("Sites in an area", "[lattice]")
             CHECK(row_of(s) >= row_of(nw));
             CHECK(row_of(s) <= row_of(se));
         }
+    }
+    SECTION("coordinate limits")
+    {
+        constexpr auto     min_coordinate = std::numeric_limits<int32_t>::min();
+        constexpr auto     max_coordinate = std::numeric_limits<int32_t>::max();
+        const lattice_site first{max_coordinate - 1, max_coordinate, 0};
+        const lattice_site last{max_coordinate, max_coordinate, 1};
+        CHECK(sites_in_area(first, last) == std::vector<lattice_site>{first,
+                                                                      {max_coordinate, max_coordinate, 0},
+                                                                      {max_coordinate - 1, max_coordinate, 1},
+                                                                      last});
+        CHECK_THROWS_AS(sites_in_area({min_coordinate, min_coordinate, 0}, last), std::length_error);
+
+        // NOLINTNEXTLINE(cert-msc32-c, cert-msc51-cpp): a fixed seed keeps the random-site test reproducible.
+        std::mt19937_64 rng{42};
+        CHECK(random_site_in_area(last, last, rng) == last);
     }
 }
 

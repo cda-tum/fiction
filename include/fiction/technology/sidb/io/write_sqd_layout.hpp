@@ -29,6 +29,7 @@
 #include <fmt/chrono.h>
 #include <fmt/format.h>
 #include <fmt/ranges.h>
+#include <tinyxml2.h>
 
 #include <cassert>
 #include <ctime>
@@ -452,6 +453,9 @@ class sqd_writer
   public:
     sqd_writer(const layout& src, std::ostream& s) : lyt{src}, os{s} {}
 
+    /**
+     * Writes the layout with XML-escaped lattice text.
+     */
     void run()
     {
         std::stringstream header{}, design{};
@@ -463,8 +467,10 @@ class sqd_writer
 
         header << fmt::format(siqad::PROGRAM_BLOCK, "layout simulation", FICTION_VERSION, FICTION_REPO, time_str);
 
+        tinyxml2::XMLPrinter lattice_name{};
+        lattice_name.PushText(lyt.get_lattice().name.c_str());
         const auto lattice_layer =
-            fmt::format(siqad::LATTICE_LAYER_DEFINITION, lyt.get_lattice().name, lyt.get_lattice().a1.first,
+            fmt::format(siqad::LATTICE_LAYER_DEFINITION, lattice_name.CStr(), lyt.get_lattice().a1.first,
                         lyt.get_lattice().a1.second, lyt.get_lattice().a2.first, lyt.get_lattice().a2.second,
                         lyt.get_lattice().basis[0].first, lyt.get_lattice().basis[0].second,
                         lyt.get_lattice().basis[1].first, lyt.get_lattice().basis[1].second);
