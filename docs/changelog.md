@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Code quality:
+
+  - Added QCA SVG regression tests for colors, detail modes, tile labels, and file output.
+
 - Documentation:
 
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
