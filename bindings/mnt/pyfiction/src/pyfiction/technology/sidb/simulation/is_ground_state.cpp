@@ -30,19 +30,11 @@ void is_ground_state(nanobind::module_& m)
     namespace py = nanobind;
 
     m.def("is_ground_state",
-          static_cast<bool (*)(const fiction::sidb::simulation::result&, const fiction::sidb::simulation::result&)>(
+          static_cast<bool (*)(const fiction::sidb::simulation::result&,
+                               const fiction::sidb::simulation::result&)>(
               &fiction::sidb::simulation::is_ground_state),
-          py::arg("heuristic_results"), py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state_2));
-    m.def("is_ground_state",
-          static_cast<bool (*)(const fiction::sidb::simulation::legacy_result<py_sidb_100_lattice>&,
-                               const fiction::sidb::simulation::legacy_result<py_sidb_100_lattice>&)>(
-              &fiction::sidb::simulation::is_ground_state<py_sidb_100_lattice>),
-          py::arg("heuristic_results"), py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
-    m.def("is_ground_state",
-          static_cast<bool (*)(const fiction::sidb::simulation::legacy_result<py_sidb_111_lattice>&,
-                               const fiction::sidb::simulation::legacy_result<py_sidb_111_lattice>&)>(
-              &fiction::sidb::simulation::is_ground_state<py_sidb_111_lattice>),
-          py::arg("heuristic_results"), py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
+          py::arg("heuristic_results"), py::arg("exhaustive_results"),
+          DOC(fiction_sidb_simulation_is_ground_state));
 }
 
 }  // namespace pyfiction

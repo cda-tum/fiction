@@ -62,14 +62,6 @@ void quickexact(nanobind::module_& m)
 
     m.def("quickexact", quickexact_pointer, py::arg("lyt"), py::arg("params") = quickexact_params{},
           DOC(fiction_sidb_simulation_engines_quickexact));
-
-    // transitional overloads over the Cartesian SiDB cell-level layouts that return `legacy_result`; they go away
-    // once every consumer takes `sidb_layout`. NOTE: registered after the `sidb_layout` overload, since Python
-    // resolves the first matching one.
-    m.def("quickexact", &fiction::sidb::simulation::engines::quickexact<py_sidb_100_lattice>, py::arg("lyt"),
-          py::arg("params") = quickexact_params{}, DOC(fiction_sidb_simulation_engines_quickexact_2));
-    m.def("quickexact", &fiction::sidb::simulation::engines::quickexact<py_sidb_111_lattice>, py::arg("lyt"),
-          py::arg("params") = quickexact_params{}, DOC(fiction_sidb_simulation_engines_quickexact_2));
 }
 
 }  // namespace pyfiction

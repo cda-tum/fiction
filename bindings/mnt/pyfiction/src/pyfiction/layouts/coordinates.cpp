@@ -170,73 +170,6 @@ void cube_coordinate(nanobind::module_& m)
     py::implicitly_convertible<py::tuple, py_cube_coordinate>();
 }
 
-/**
- * Signed SiQAD coordinates.
- */
-void siqad_coordinate(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    py::class_<py_siqad_coordinate>(m, "siqad_coordinate", DOC(fiction_layouts_coords_siqad))
-        .def(py::init<>(), DOC(fiction_layouts_coords_siqad_siqad))
-        .def(py::init<const decltype(py_siqad_coordinate().x), const decltype(py_siqad_coordinate().y),
-                      const decltype(py_siqad_coordinate().z)>(),
-             py::arg("x"), py::arg("y"), py::arg("z") = 0, DOC(fiction_layouts_coords_siqad_siqad_2))
-        .def(py::init<const py_siqad_coordinate>(), py::arg("c"))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<py_siqad_coordinate> self, const py::tuple& t)
-            {
-                const auto size = t.size();
-
-                if (size == 2)
-                {
-                    new (self.p) py_siqad_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1]))};
-                    return;
-                }
-                if (size == 3)
-                {
-                    new (self.p) py_siqad_coordinate{py::int_(py::handle(t[0])), py::int_(py::handle(t[1])),
-                                                     py::int_(py::handle(t[2]))};
-                    return;
-                }
-
-                throw std::runtime_error("Wrong number of dimensions provided for coordinate");
-            },
-            py::arg("tuple_repr"))
-
-        .def_prop_rw(
-            "x", [](py_siqad_coordinate& self) -> decltype(self.x) { return self.x; },
-            [](py_siqad_coordinate& self, const decltype(self.x) value) { self.x = value; },
-            DOC(fiction_layouts_coords_siqad_x))
-        .def_prop_rw(
-            "y", [](py_siqad_coordinate& self) -> decltype(self.y) { return self.y; },
-            [](py_siqad_coordinate& self, const decltype(self.y) value) { self.y = value; },
-            DOC(fiction_layouts_coords_siqad_y))
-        .def_prop_rw(
-            "z", [](py_siqad_coordinate& self) -> decltype(self.z) { return self.z; },
-            [](py_siqad_coordinate& self, const decltype(self.z) value) { self.z = value; },
-            DOC(fiction_layouts_coords_siqad_z))
-
-        // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
-        .def(py::self == py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_eq))
-        .def(py::self != py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_ne))
-        .def(py::self < py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_lt))
-        .def(py::self > py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_gt))
-        .def(py::self <= py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_le))
-        .def(py::self >= py::self, py::arg("other"), DOC(fiction_layouts_coords_siqad_operator_ge))
-        // NOLINTEND(misc-redundant-expression)
-
-        .def("__repr__", &py_siqad_coordinate::str, DOC(fiction_layouts_coords_siqad_str))
-        .def(
-            "__hash__", [](const py_siqad_coordinate& self) { return std::hash<py_siqad_coordinate>{}(self); },
-            "Returns a hash value of the coordinate.")
-
-        ;
-
-    py::implicitly_convertible<py::tuple, py_siqad_coordinate>();
-}
-
 void coordinate_utility(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -245,25 +178,11 @@ void coordinate_utility(nanobind::module_& m)
           DOC(fiction_layouts_coords_area_of));
     m.def("cube_area", &fiction::layouts::coords::area_of<py_cube_coordinate>, py::arg("coord"),
           DOC(fiction_layouts_coords_area_of));
-    m.def("siqad_area", &fiction::layouts::coords::area_of<py_siqad_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_area_of));
 
     m.def("offset_volume", &fiction::layouts::coords::volume_of<py_offset_coordinate>, py::arg("coord"),
           DOC(fiction_layouts_coords_volume_of));
     m.def("cube_volume", &fiction::layouts::coords::volume_of<py_cube_coordinate>, py::arg("coord"),
           DOC(fiction_layouts_coords_volume_of));
-    m.def("siqad_volume", &fiction::layouts::coords::volume_of<py_siqad_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_volume_of));
-
-    m.def("to_offset_coord", &fiction::layouts::coords::from_siqad<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_from_siqad));
-    m.def("to_cube_coord", &fiction::layouts::coords::from_siqad<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_from_siqad));
-
-    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad<py_offset_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_to_siqad));
-    m.def("to_siqad_coord", &fiction::layouts::coords::to_siqad<py_cube_coordinate>, py::arg("coord"),
-          DOC(fiction_layouts_coords_to_siqad));
 }
 
 }  // namespace pyfiction
