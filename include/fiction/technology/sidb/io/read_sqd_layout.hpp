@@ -40,7 +40,6 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace fiction::sidb::io
@@ -723,10 +722,6 @@ class sqd_reader
 
         const auto x = std::stoll(n);
         const auto y = std::stoll(m);
-        if (!std::in_range<int32_t>(x) || !std::in_range<int32_t>(y))
-        {
-            throw sqd_parsing_error("Error parsing SQD file: lattice coordinate out of range");
-        }
         return {x, y, basis_site};
     }
     /**
