@@ -48,7 +48,10 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         CHECK(result.size() == 1);
         const auto state = result.get_nth_state(0);
         REQUIRE(state.has_value());
-        CHECK_THAT(state->electrostatic_potential_energy, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        if (state.has_value())
+        {
+            CHECK_THAT(state->electrostatic_potential_energy, Catch::Matchers::WithinAbs(0.0, 0.00001));
+        }
     }
 
     SECTION("one layout with one SiDB placed")
@@ -90,10 +93,16 @@ TEST_CASE("Test calculate_energy_distribution function", "[energy-distribution]"
         // smaller than the one of the first
         const auto ground_state = result.get_nth_state(0);
         REQUIRE(ground_state.has_value());
-        CHECK(ground_state->degeneracy == 2);
+        if (ground_state.has_value())
+        {
+            CHECK(ground_state->degeneracy == 2);
+        }
 
         const auto excited_state = result.get_nth_state(1);
         REQUIRE(excited_state.has_value());
-        CHECK(excited_state->degeneracy == 1);
+        if (excited_state.has_value())
+        {
+            CHECK(excited_state->degeneracy == 1);
+        }
     }
 }

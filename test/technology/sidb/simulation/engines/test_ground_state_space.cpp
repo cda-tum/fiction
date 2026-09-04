@@ -18,11 +18,11 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
@@ -56,7 +56,7 @@ using namespace fiction::utils::math;
 
 TEST_CASE("Empty layout Ground State Space construction", "[ground-state-space]")
 {
-    layout lyt{};
+    const layout lyt{};
 
     const ground_state_space_results& res = ground_state_space(lyt);
 
@@ -106,14 +106,14 @@ TEST_CASE("Ground State Space construction of two SiDBs directly next to each ot
     SECTION("Base 2")
     {
         const ground_state_space_results& res =
-            ground_state_space(lyt, ground_state_space_params{simulation_parameters{2}});
+            ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{2}});
         CHECK(res.top_cluster->charge_space.empty());
     }
 
     SECTION("Base 3")
     {
         const ground_state_space_results& res =
-            ground_state_space(lyt, ground_state_space_params{simulation_parameters{3}});
+            ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{3}});
         CHECK(!res.top_cluster->charge_space.empty());
     }
 }
@@ -132,7 +132,7 @@ TEST_CASE("Ground State Space construction of a 7 DB layout", "[ground-state-spa
     lyt.assign_cell_type({4, 8, 1}, sidb_technology::cell_type::NORMAL);
 
     const ground_state_space_results& gss_res =
-        ground_state_space(lyt, ground_state_space_params{simulation_parameters{2}});
+        ground_state_space(lyt, ground_state_space_params{.sim_params = simulation_parameters{2}});
 
     CHECK(mockturtle::to_seconds(gss_res.runtime) > 0.0);
 
