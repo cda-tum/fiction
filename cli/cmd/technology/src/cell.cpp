@@ -24,6 +24,8 @@
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
@@ -133,7 +135,7 @@ void cell_command::execute()
     }
     else if (library == "BESTAGON")
     {
-        const auto apply_sidb_bestagon = [this](auto&& lyt_ptr) -> std::optional<fiction::sidb_100_cell_clk_lyt_ptr>
+        const auto apply_sidb_bestagon = [this](auto&& lyt_ptr) -> std::optional<fiction::sidb_layout_ptr>
         {
             using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
@@ -141,9 +143,9 @@ void cell_command::execute()
             {
                 if constexpr (fiction::has_pointy_top_hex_orientation_v<Lyt>)
                 {
-                    return std::make_shared<fiction::sidb_100_cell_clk_lyt>(
-                        fiction::physical_design::apply_gate_library<fiction::sidb_100_cell_clk_lyt,
-                                                                     fiction::sidb::bestagon_library>(*lyt_ptr));
+                    return std::make_shared<fiction::sidb::layout>(fiction::sidb::to_sidb_layout(
+                        fiction::physical_design::apply_gate_library<fiction::sidb_cell_clk_lyt,
+                                                                     fiction::sidb::bestagon_library>(*lyt_ptr)));
                 }
                 else
                 {

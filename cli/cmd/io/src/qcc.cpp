@@ -59,13 +59,17 @@ void qcc_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::cli::name_of(*lyt_ptr); };
 
     const auto write_qcc = [this, &get_name](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (fiction::has_inml_technology_v<Lyt>)
+        if constexpr (fiction::cli::is_sidb_store_v<Lyt>)
+        {
+            env->out() << fmt::format("[e] {} is an SiDB layout\n", get_name(lyt_ptr));
+        }
+        else if constexpr (fiction::has_inml_technology_v<Lyt>)
         {
             fiction::inml::io::write_qcc_layout(*lyt_ptr, filename, ps);
         }

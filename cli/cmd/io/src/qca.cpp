@@ -62,13 +62,17 @@ void qca_command::execute()
         ps.create_inter_layer_via_cells = false;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::cli::name_of(*lyt_ptr); };
 
     const auto write_qca = [this, &get_name](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (fiction::has_qca_technology_v<Lyt>)
+        if constexpr (fiction::cli::is_sidb_store_v<Lyt>)
+        {
+            env->out() << fmt::format("[e] {} is an SiDB layout\n", get_name(lyt_ptr));
+        }
+        else if constexpr (fiction::has_qca_technology_v<Lyt>)
         {
             fiction::qca::io::write_qca_layout(*lyt_ptr, filename, ps);
         }

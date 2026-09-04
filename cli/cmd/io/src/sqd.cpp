@@ -18,7 +18,6 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
@@ -36,7 +35,7 @@ namespace alice
 {
 
 sqd_command::sqd_command(const environment::ptr& e) :
-        command(e, "Generates a SiQAD file for the current QCA or SiDB cell layout in store. "
+        command(e, "Generates a SiQAD file for the current SiDB layout in store. "
                    "SiQAD can be used to perform physical simulations.")
 {
     add_option("filename", filename, "SQD file name");
@@ -53,19 +52,19 @@ void sqd_command::execute()
         return;
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
+    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::cli::name_of(*lyt_ptr); };
 
-    const auto write_sqd = [this, &get_name](auto&& lyt_ptr)
+    const auto write_sqd = [this](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (fiction::has_qca_technology_v<Lyt> || fiction::has_sidb_technology_v<Lyt>)
+        if constexpr (fiction::cli::is_sidb_store_v<Lyt>)
         {
-            fiction::sidb::io::write_sqd_layout(*lyt_ptr, filename);
+            fiction::sidb::io::write_sqd_layout(fiction::cli::sidb_layout_of(*lyt_ptr), filename);
         }
         else
         {
-            env->out() << fmt::format("[e] {}'s cell technology is not QCA or SiDB but {}\n", get_name(lyt_ptr),
+            env->out() << fmt::format("[e] {}'s cell technology is not SiDB but {}\n", fiction::cli::name_of(*lyt_ptr),
                                       fiction::tech_impl_name<fiction::technology<Lyt>>);
         }
     };
