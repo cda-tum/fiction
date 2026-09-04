@@ -96,6 +96,25 @@ repos:
         exclude: (^|/)AGENTS\.md$
         priority: 6
 
+  # Format the publication bibliography.
+  - repo: https://github.com/FlamingTempura/bibtex-tidy
+    rev: v1.14.0
+    hooks:
+      - id: bibtex-tidy
+        args:
+          [
+            "--align=20",
+            "--curly",
+            "--months",
+            "--blank-lines",
+            "--sort",
+            "--sort-fields",
+            "--no-escape",
+            "--trailing-commas",
+            "--remove-empty-fields",
+          ]
+        priority: 6
+
   # CMake format and lint the CMakeLists.txt files
   - repo: https://github.com/cheshirekow/cmake-format-precommit
     rev: v0.6.13

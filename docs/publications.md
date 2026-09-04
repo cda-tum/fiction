@@ -2,383 +2,126 @@
 
 # Publications
 
-_fiction_ is academic software, thus, many of its built-in algorithms have been published as scientific papers.
+_fiction_ provides design automation for field-coupled nanocomputing (FCN).
+If you use _fiction_, please cite the framework report and the Munich Nanotech Toolkit paper
+{cite:p}`fiction,mnt`.
 
-A brief technical report summarizing the features of _fiction_ v0.2.1 is available at [arXiv](https://arxiv.org/abs/1905.02477).
+{download}`Download the bibliography as BibTeX <references.bib>`.
 
-If you use _fiction_ in your work, we would appreciate if you cited
+## Algorithms and Gate Libraries
 
-> Marcel Walter, Robert Wille, Frank Sill Torres, Daniel Große and Rolf Drechsler: "fiction: An Open Source Framework
-> for the Design of Field-coupled Nanocomputing Circuits", 2019, **arXiv:1905.02477**.
-
-```tex
-@misc{fiction,
-  author = {Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
-  title = {{fiction: An Open Source Framework for the Design of Field-coupled Nanocomputing Circuits}},
-  archivePrefix = {arXiv},
-  eprint = {1905.02477},
-  note = {arXiv:1905.02477},
-  year = {2019},
-  month = {May}
-}
-```
-
-and
-
-> Marcel Walter, Jan Drewniok, Simon Hofmann, Benjamin Hien, and Robert Wille: "The Munich Nanotech Toolkit (MNT)",
-> IEEE International Conference on Nanotechnology (IEEE NANO), 2024.
-
-```tex
-@inproceedings{mnt,
-  author = {Walter, Marcel and Drewniok, Jan and Hofmann, Simon and Hien, Benjamin and Wille, Robert},
-  title = {{The Munich Nanotech Toolkit (MNT)}},
-  booktitle = {IEEE International Conference on Nanotechnology (IEEE NANO)},
-  pages = {454--459},
-  year = {2024}
-}
-```
-
-Furthermore, if you use any of the design automation algorithms, please consider citing their respective papers as well.
+If you use an algorithm or gate library, please also cite its corresponding papers.
 
 - {ref}`Exact physical design <exact>` (`exact`):
-
-  ```tex
-  @inproceedings{walter2018exact,
-    title={{An Exact Method for Design Exploration of Quantum-dot Cellular Automata}},
-    author={Walter, Marcel and Wille, Robert and Gro{\ss}e, Daniel and Sill Torres, Frank and Drechsler, Rolf},
-    booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
-    pages = {503--508},
-    year={2018}
-  }
-  ```
+  {cite:p}`walter2018exact`
 
 - {ref}`Scalable physical design <ortho>` (`ortho`):
-
-  ```tex
-  @inproceedings{walter2019ortho,
-    title={{Scalable Design for Field-coupled Nanocomputing Circuits}},
-    author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and Gro{\ss}e, Daniel and Drechsler, Rolf},
-    booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
-    pages={197--202},
-    year={2019},
-    publisher={ACM New York, NY, USA}
-  }
-  ```
+  {cite:p}`walter2019ortho`
 
 - {ref}`Equivalence checking <equiv>` (`equiv`):
-
-  ```tex
-  @inproceedings{walter2020equiv,
-    title={{Verification for Field-coupled Nanocomputing Circuits}},
-    author={Walter, Marcel and Wille, Robert and Sill Torres, Frank and D. Gro{\ss}e and Drechsler, Rolf},
-    booktitle={Design Automation Conference (DAC)},
-    year={2020}
-  }
-  ```
+  {cite:p}`walter2020equiv`
 
 - {ref}`Multi-path routing <color_routing>` (`color_routing`):
-
-  ```tex
-  @inproceedings{walter2022colorrouting,
-    title={{Efficient Multi-Path Signal Routing for Field-coupled Nanotechnologies}},
-    author={Walter, Marcel and Wille, Robert},
-    booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-    year={2022}
-  }
-  ```
+  {cite:p}`walter2022colorrouting`
 
   [Multi-path routing experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/color_routing)
 
 - {ref}`QuickSim <quicksim>` (`quicksim`):
-
-  ```tex
-  @inproceedings{drewniok2023quicksim,
-    title={{\emph{QuickSim}: Efficient \emph{and} Accurate Physical Simulation of Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={817--822},
-    year={2023}
-  }
-  ```
+  {cite:p}`drewniok2023quicksim`
 
   [QuickSim experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/electrostatic_ground_state)
 
 - {ref}`QuickExact <quickexact>` (`quickexact`):
-
-  ```tex
-  @inproceedings{drewniok2024quickexact,
-    title={{The Need for Speed: Efficient Exact Simulation of Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-    booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
-    pages={576--581},
-    year={2024}
-  }
-  ```
+  {cite:p}`drewniok2024quickexact`
 
   [QuickExact experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/electrostatic_ground_state)
 
 - {ref}`ClusterComplete <clustercomplete>` (`clustercomplete`):
-
-  ```tex
-  @inproceedings{lambooy2026clustercomplete,
-    title={{Mastering the Exponential Complexity of Exact Physical Simulation of Silicon Dangling Bonds}},
-    author={Lambooy, Willem and Drewniok, Jan and Walter, Marcel and Wille, Robert},
-    booktitle={Asia and South Pacific Design Automation Conference (ASP-DAC)},
-    year={2026}
-  }
-  ```
+  {cite:p}`lambooy2026clustercomplete`
 
 - {ref}`Critical temperature simulation <critical_temperature>` (`critical_temperature`):
-
-  ```tex
-  @inproceedings{drewniok2023temperature,
-    title={{Temperature Behavior of Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={925--930},
-    year={2023}
-  }
-  ```
+  {cite:p}`drewniok2023temperature`
 
   [Critical temperature experiment scripts](https://github.com/cda-tum/fiction/tree/main/experiments/sidb_simulation/temperature)
 
 - {ref}`Operational domain computation <opdom>` (`opdom`):
-
-  ```tex
-  @inproceedings{walter2023opdom,
-    title={{Reducing the Complexity of Operational Domain Computation in Silicon Dangling Bond Logic}},
-    author={Walter, Marcel and Drewniok, Jan and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-    booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-    year={2023}
-  }
-  ```
-
-  ```tex
-  @inproceedings{walter2025domainexplorer,
-    title={{The Operational Domain Explorer: A Comprehensive Framework to Unveil the Thermal Landscape of Silicon Dangling Bond Logic Beyond Conventional Operability}},
-    author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    year={2025}
-  }
-  ```
+  {cite:p}`walter2023opdom,walter2025domainexplorer`
 
   - [Operational domain experiment scripts](https://github.com/cda-tum/fiction/tree/main/experiments/operational_domain)
   - [Operational Domain Explorer](https://github.com/cda-tum/mnt-opdom-explorer)
 
 - {ref}`SiDB gate design <gate_design>` (`gate_design`):
-
-  ```tex
-  @inproceedings{drewniok2023gatedesigner,
-    title={{Minimal Design of SiDB Gates: An Optimal Basis for Circuits Based on Silicon Dangling Bonds}},
-    author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-    booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-    year={2023}
-  }
-  ```
-
-  ```tex
-  @inproceedings{drewniok2025efficientgatedesign,
-    title={{Towards Fast Automatic Design of Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-    booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
-    year={2025}
-  }
-  ```
-
-  ```tex
-  @article{drewniok2025quickcell,
-    title={{QuickCell: Fast Automatic Design of Standard Cells for Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze and Walus, Konrad and Wille, Robert},
-    journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
-    year={2025}
-  }
-  ```
+  {cite:p}`drewniok2023gatedesigner,drewniok2025efficientgatedesign,drewniok2025quickcell`
 
   [Gate design experiment scripts](https://github.com/cda-tum/fiction/tree/main/experiments/standard_cell_design)
 
 - {ref}`Mapping Cartesian to hexagonal layouts <hexagonalization>` (`hexagonalization`):
-
-  ```tex
-  @inproceedings{hofmann2023hexagonalization,
-    title={{Scalable Physical Design for Silicon Dangling Bond Logic: How a 45\textdegree~Turn Prevents the Reinvention of the Wheel}},
-    author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={872--877},
-    year={2023}
-  }
-  ```
+  {cite:p}`hofmann2023hexagonalization`
 
   [Hexagonalization experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/hexagonalization)
 
 - {ref}`Post-layout optimization <post_layout_optimization>` (`post_layout_optimization`):
-
-  ```tex
-  @inproceedings{hofmann2023postlayout,
-    title={{Post-Layout Optimization for Field-coupled Nanotechnologies}},
-    author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-    booktitle={International Symposium on Nanoscale Architectures (NANOARCH)},
-    year={2023}
-  }
-  ```
+  {cite:p}`hofmann2023postlayout`
 
   [Post-layout optimization experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/post_layout_optimization)
-
-  ```tex
-  @article{hofmann2025scalablepostlayout,
-    title={{Efficient and Scalable Post-Layout Optimization for Field-coupled Nanotechnologies}},
-    author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-    journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems (TCAD)},
-    year={2025},
-    volume={44},
-    number={10},
-    pages={3790--3803},
-    doi={10.1109/TCAD.2025.3549354}
-  }
-  ```
+  {cite:p}`hofmann2025scalablepostlayout`
 
   [Scalable post-layout optimization experiment script](https://github.com/cda-tum/fiction/blob/main/experiments/post_layout_optimization/scalable_post_layout_optimization.cpp)
 
 - {ref}`Wiring reduction <wiring_reduction>` (`wiring_reduction`):
-
-  ```tex
-  @inproceedings{hofmann2024wiring,
-    title = {{Late Breaking Results: Wiring Reduction for Field-coupled Nanotechnologies}},
-    author = {Hofmann, Simon and Walter, Marcel and Wille, Robert},
-    booktitle={Design Automation Conference (DAC)},
-    year = {2024}
-  }
-  ```
+  {cite:p}`hofmann2024wiring`
 
   [Wiring reduction experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/wiring_reduction)
 
 - {ref}`Graph-oriented layout design <graph_oriented_layout_design>` (`gold`):
-
-  ```tex
-  @inproceedings{hofmann2024gold,
-    title={{A* is Born: Efficient and Scalable Physical Design for Field-coupled Nanocomputing}},
-    author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={80--85},
-    year={2024}
-  }
-  ```
+  {cite:p}`hofmann2024gold`
 
   [Graph-oriented layout design experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/graph_oriented_layout_design)
-
-  ```tex
-  @inproceedings{hofmann2025goldcost,
-    title={{Physical Design for Field-coupled Nanocomputing with Discretionary Cost Objectives}},
-    author={Hofmann, Simon and Walter, Marcel and Wille, Robert},
-    booktitle={IEEE CASS Latin America Symposium on Circuits and Systems (LASCAS)},
-    pages={1--5},
-    year={2025}
-  }
-  ```
+  {cite:p}`hofmann2025goldcost`
 
   [Graph-oriented layout design with discretionary cost objectives experiment script](https://github.com/cda-tum/fiction/blob/main/experiments/graph_oriented_layout_design/gold_cost_objectives.cpp)
 
 - {ref}`SAT-based clock number assignment <determine_clocking>`:
-
-  ```tex
-  @inproceedings{walter2024clocknumber,
-    title={{Ending the Tyranny of the Clock: SAT-Based Clock Number Assignment for Field-coupled Nanotechnologies}},
-    author={Walter, Marcel and Drewniok, Jan and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={68--73},
-    year={2024}
-  }
-  ```
+  {cite:p}`walter2024clocknumber`
 
   [Clock number assignment experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/clock_number_assignment)
 
 - Towards Defect-Aware Physical Design of Silicon Dangling Bond Logic:
-
-  ```tex
-  @inproceedings{walter2024defectaware,
-    title={{Towards Atomic Defect-Aware Physical Design of Silicon Dangling Bond Logic on the H-Si(100)-$2\times1$ Surface}},
-    author={Walter, Marcel and Croshaw, Jeremiah and Ng, Samuel Sze Hang and Walus, Konrad and Wolkow, Robert and Wille, Robert},
-    booktitle={Design, Automation and Test in Europe Conference \& Exhibition (DATE)},
-    pages={1--2},
-    year={2024}
-  }
-  ```
+  {cite:p}`walter2024defectaware`
 
   [Towards defect-aware physical design of silicon dangling bond logic experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/defect_aware_physical_design)
 
 - {ref}`QuickTrace: An Efficient Contour Tracing Algorithm for Defect Robustness Simulation of Silicon Dangling Bond Logic <defect_influence>`
-
-  ```tex
-  @inproceedings{drewniok2025quicktrace,
-    title={{QuickTrace: An Efficient Contour Tracing Algorithm for Defect Robustness Simulation of Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Wille, Robert},
-    booktitle={2025 IEEE International Symposium on Circuits and Systems (ISCAS)},
-    pages={1--5},
-    year={2025}
-  }
-  ```
+  {cite:p}`drewniok2025quicktrace`
 
   [QuickTrace experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/quicktrace)
 
 - {ref}`On-the-fly Defect-Aware Design of Circuits <on_the_fly_design>`:
-
-  ```tex
-  @inproceedings{drewniok2024ontheflydesign,
-    title={{On-the-fly Defect-Aware Design of Circuits based on Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={30--35},
-    year={2024}
-  }
-  ```
+  {cite:p}`drewniok2024ontheflydesign`
 
   [On-the-fly defect-aware design of circuits experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/physical_design_with_on_the_fly_gate_design)
 
 - {ref}`Unifying Figures of Merit for Silicon Dangling Bond Logic <band_bending_resilience>`:
-
-  ```tex
-  @inproceedings{drewniok2024figuresofmerit,
-    title={{Unifying Figures of Merit: A Versatile Cost Function for Silicon Dangling Bond Logic}},
-    author={Drewniok, Jan and Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={91--96},
-    year={2024}
-  }
-  ```
+  {cite:p}`drewniok2024figuresofmerit`
 
 - {ref}`Alternative Silicon Orientations <alternative_hsi_lattices>`:
-
-  ```tex
-  @inproceedings{ng2024latorientations,
-    title={{Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations}},
-    author={Ng, Samuel Sze Hang and Drewniok, Jan and Walter, Marcel and Retallick, Jacob and Wille, Robert and Walus, Konrad},
-    booktitle={IEEE International Conference on Nanotechnology (IEEE NANO)},
-    pages={57--92},
-    year={2024}
-  }
-  ```
+  {cite:p}`ng2024latorientations`
 
 - {ref}`SiDB Bestagon library <bestagon>`:
-
-  ```tex
-  @inproceedings{walter2022hexagons,
-    title={{Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic}},
-    author={Walter, Marcel and Ng, Samuel Sze Hang and Walus, Konrad and Wille, Robert},
-    booktitle={Design Automation Conference (DAC)},
-    pages = {739--744},
-    year={2022}
-  }
-  ```
+  {cite:p}`walter2022hexagons`
 
   [Bestagon experiment script](https://github.com/cda-tum/fiction/tree/main/experiments/bestagon)
 
 - {ref}`Molecular QCA library <molQCA>`:
+  {cite:p}`hien2025molqca`
 
-  ```tex
-  @inproceedings{hien2025molqca,
-    title={Bridging the Gap Between Molecular FCN and Design Automation with SIM(7)-MolPDK: A Physically Simulated Standard-Cell Library},
-    author={Hien, Benjamin and Quinci, Danilo and Ardesi, Yuri and Beretta, Giuliana and Ravera, Federico and Walter, Marcel and Wille, Robert},
-    booktitle={2025 IEEE Latin American Conference on Nanotechnology (LANANO)},
-    pages={19--24},
-    year={2025}
-  }
-  ```
+## Related Publications
+
+The bibliography also includes FCN, QCA, and SiDB publications co-authored by Marcel Walter.
+These cover related tools, technology studies, and design methods; inclusion does not imply
+that a method is implemented in _fiction_. Workshop presentations and conference papers are
+listed separately when they are distinct publications.
+
+```{bibliography}
+:all:
+```
