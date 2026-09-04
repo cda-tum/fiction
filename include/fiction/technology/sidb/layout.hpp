@@ -51,6 +51,10 @@ class layout
      */
     using cell_type = sidb_technology::cell_type;
     /**
+     * The cell technology this layout implements, so that `fiction::technology<layout>` names `sidb_technology`.
+     */
+    using technology = sidb_technology;
+    /**
      * Creates an empty layout on the H-Si(100)-2x1 lattice.
      */
     layout() = default;

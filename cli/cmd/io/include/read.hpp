@@ -61,10 +61,6 @@ class read_command final : public command
      * Flag to indicate that files should be sorted by file size.
      */
     bool sort = false;
-    /**
-     * Identifier of H-Si lattice orientation.
-     */
-    std::string orientation{"100"};
 };
 
 }  // namespace alice

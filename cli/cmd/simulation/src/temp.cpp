@@ -18,10 +18,8 @@
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -116,66 +114,56 @@ void temp_command::execute()
         }
     }
 
-    const auto get_name = [](auto&& lyt_ptr) -> std::string { return fiction::networks::get_name(*lyt_ptr); };
-
-    const auto temp = [this, &ts, &get_name](auto&& lyt_ptr)
+    const auto temp = [this, &ts](auto&& lyt_ptr)
     {
         using Lyt = typename std::decay_t<decltype(lyt_ptr)>::element_type;
 
-        if constexpr (!fiction::has_sidb_technology_v<Lyt>)
+        if constexpr (!fiction::cli::is_sidb_store_v<Lyt>)
         {
-            env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", get_name(lyt_ptr));
-            return;
+            env->out() << fmt::format("[e] '{}' is not an SiDB layout\n", fiction::cli::name_of(*lyt_ptr));
         }
-
-        if constexpr (fiction::is_charge_distribution_surface_v<Lyt>)
+        else
         {
-            env->out() << fmt::format("[w] '{}' already possesses a charge distribution; no simulation is conducted\n",
-                                      get_name(lyt_ptr));
-            return;
-        }
+            const auto& lyt  = fiction::cli::sidb_layout_of(*lyt_ptr);
+            const auto  name = fiction::cli::name_of(*lyt_ptr);
 
-        const auto sim_engine = fiction::sidb::simulation::get_engine(sim_engine_str);
+            const auto sim_engine = fiction::sidb::simulation::get_engine(sim_engine_str);
 
-        if (!sim_engine.has_value())
-        {
-            env->out() << fmt::format("[e] '{}' is not a supported SiDB simulation engine\n", sim_engine_str);
-            return;
-        }
+            if (!sim_engine.has_value())
+            {
+                env->out() << fmt::format("[e] '{}' is not a supported SiDB simulation engine\n", sim_engine_str);
+                return;
+            }
 
-        params.operational_params.sim_engine = sim_engine.value();
+            params.operational_params.sim_engine = sim_engine.value();
+            params.operational_params.sim_params = physical_params;
 
-        params.operational_params.sim_params = physical_params;
-
-        // To aid the compiler
-        if constexpr (fiction::has_sidb_technology_v<Lyt> && !fiction::is_charge_distribution_surface_v<Lyt>)
-        {
             if (is_set("gate_based"))
             {
-                if (lyt_ptr->num_pis() == 0 || lyt_ptr->num_pos() == 0)
+                if (lyt.num_pis() == 0 || lyt.num_pos() == 0)
                 {
                     env->out() << fmt::format("[e] '{}' requires primary input and output cells to simulate its "
                                               "Boolean function\n",
-                                              get_name(lyt_ptr));
+                                              name);
                     return;
                 }
 
                 const auto tt_ptr = ts.current();
 
-                ct = fiction::sidb::simulation::analysis::critical_temperature_gate_based(
-                    *lyt_ptr, std::vector{*tt_ptr}, params, &stats);
+                ct = fiction::sidb::simulation::analysis::critical_temperature_gate_based(lyt, std::vector{*tt_ptr},
+                                                                                          params, &stats);
             }
             else
             {
-                ct = fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(*lyt_ptr, params, &stats);
+                ct = fiction::sidb::simulation::analysis::critical_temperature_non_gate_based(lyt, params, &stats);
             }
 
             if (stats.num_valid_lyt == 0)
             {
-                env->out() << fmt::format("[e] ground state of '{}' could not be determined\n", get_name(lyt_ptr));
+                env->out() << fmt::format("[e] ground state of '{}' could not be determined\n", name);
             }
 
-            env->out() << fmt::format("[i] critical temperature of '{}' is {}{} K\n", get_name(lyt_ptr),
+            env->out() << fmt::format("[i] critical temperature of '{}' is {}{} K\n", name,
                                       (ct == params.max_temperature ? "> " : ""), ct);
 
             if (stats.num_valid_lyt > 1)
