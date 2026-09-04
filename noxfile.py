@@ -186,7 +186,6 @@ def docs(session: nox.Session) -> None:
         "SKBUILD_CMAKE_ARGS": "--preset=pyfiction",
     }
     session.run("uv", "sync", "--frozen", "--no-dev", "--group", "build", "--group", "docs", env=env)
-    session.run("python", "-m", "unittest", "discover", "-s", "docs/_tests")
     with session.chdir("docs"):
         serve = args.builder == "html" and session.interactive
         command = ["sphinx-autobuild" if serve else "sphinx-build"]

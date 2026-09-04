@@ -37,7 +37,7 @@ extensions = [
     "nanobind_autodoc",
 ]
 source_suffix = [".md"]
-exclude_patterns = ["_build", "_tests", "doxyxml", "**/AGENTS.md", "AGENTS.md", "Thumbs.db", ".DS_Store"]
+exclude_patterns = ["_build", "doxyxml", "**/AGENTS.md", "AGENTS.md", "Thumbs.db", ".DS_Store"]
 myst_enable_extensions = ["amsmath", "colon_fence", "deflist", "dollarmath", "substitution"]
 myst_heading_anchors = 3
 myst_substitutions = {"version": version, "release": release}

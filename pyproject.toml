@@ -297,8 +297,6 @@ required-imports = ["from __future__ import annotations"]
 ]
 # `docs/conf.py` is run by path, not imported as a module, so an `__init__.py` would be wrong
 "docs/**" = ["T20", "A", "implicit-namespace-package"]
-# The docs session uses unittest from the standard library without installing pytest.
-"docs/_tests/**" = ["pytest-unittest-assertion"]
 "noxfile.py" = ["T20", "banned-api"]
 "scripts/**" = ["T20"]  # maintenance scripts report progress on stdout
 "*.pyi" = ["overload-with-docstring", "docstring-in-stub"]  # pydocstyle
