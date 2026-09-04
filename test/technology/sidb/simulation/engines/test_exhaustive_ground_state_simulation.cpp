@@ -16,7 +16,8 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "fiction/technology/sidb/simulation/result.hpp"
@@ -37,7 +38,7 @@ using namespace fiction::utils::math;
 
 TEST_CASE("Empty layout ExGS simulation", "[exhaustive-ground-state-simulation]")
 {
-    layout lyt{};
+    const layout lyt{};
 
     const simulation_parameters params{2, -0.32};
 

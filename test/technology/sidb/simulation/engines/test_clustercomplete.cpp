@@ -1615,8 +1615,8 @@ TEST_CASE("Special test cases", "[clustercomplete]")
 
         result cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = params});
 
-        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        std::ranges::sort(cc_res.charge_distributions,
+                          [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         REQUIRE(cc_res.charge_distributions.size() == 2);
 
@@ -1695,8 +1695,8 @@ TEST_CASE("Special test cases", "[clustercomplete]")
 
         result cc_res = clustercomplete(lyt, clustercomplete_params{.sim_params = params});
 
-        std::sort(cc_res.charge_distributions.begin(), cc_res.charge_distributions.end(),
-                  [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
+        std::ranges::sort(cc_res.charge_distributions,
+                          [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
         CHECK(cc_res.charge_distributions.size() == 2);
     }
