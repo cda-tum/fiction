@@ -175,6 +175,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Continuous integration:
+  - Allocation-failure layout tests now link independently of the optional jemalloc allocator.
+
 - Data structures:
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
