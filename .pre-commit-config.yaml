@@ -43,6 +43,10 @@ exclude: "^vendors/|^benchmarks/|bindings/mnt/pyfiction/include/pyfiction/pybind
 # than 9 so that `ruff-check` at 8 lints the header in the same pass. Its `types_or` is what
 # makes it disjoint from `nb-clean`, which also sits at 7 and takes `types: [text]`, so both
 # would otherwise receive the same notebooks.
+#
+# Every formatter uses LF. `mixed-line-ending` enforces that policy before the language
+# formatters run. `license-tools` ignores whitespace-only differences because it otherwise
+# rewrites a license-only file with the host newline and changes LF back to CRLF on Windows.
 
 repos:
   # Standard hooks
@@ -70,6 +74,7 @@ repos:
       - id: end-of-file-fixer
         priority: 1
       - id: mixed-line-ending
+        args: ["--fix=lf"]
         priority: 2
       - id: trailing-whitespace
         priority: 3
