@@ -36,7 +36,6 @@ flag_management:
           threshold: 0.5%
         - type: patch
           target: 95%
-          threshold: 0.5%
 parsers:
   gcov:
     branch_detection:
