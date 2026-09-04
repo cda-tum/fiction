@@ -193,33 +193,6 @@ class cartesian_layout
         return strg->dimension.z;
     }
     /**
-     * Returns the distance between the minimum and maximum x-coordinates.
-     *
-     * @return Layout size in x-direction.
-     */
-    [[nodiscard]] uint64_t x_size() const noexcept
-    {
-        return dimension_size(x_min(), x());
-    }
-    /**
-     * Returns the distance between the minimum and maximum y-coordinates.
-     *
-     * @return Layout size in y-direction.
-     */
-    [[nodiscard]] uint64_t y_size() const noexcept
-    {
-        return dimension_size(y_min(), y());
-    }
-    /**
-     * Returns the distance between the minimum and maximum z-coordinates.
-     *
-     * @return Layout size in z-direction.
-     */
-    [[nodiscard]] uint64_t z_size() const noexcept
-    {
-        return dimension_size(z_min(), z());
-    }
-    /**
      * Returns the layout's number of faces depending on the coordinate type.
      *
      * @return Area of layout.
@@ -228,24 +201,11 @@ class cartesian_layout
     {
         if constexpr (std::is_same_v<coordinate, coords::siqad>)
         {
-            return (x_size() + 1) * ((2 * y_size()) + z_size() + 1);
+            return (dimension_size(x_min(), x()) + 1) *
+                   ((2 * dimension_size(y_min(), y())) + dimension_size(z_min(), z()) + 1);
         }
 
-        return (x_size() + 1) * (y_size() + 1);
-    }
-    /**
-     * Returns the layout's number of coordinate positions.
-     *
-     * @return Volume of layout.
-     */
-    [[nodiscard]] auto volume() const noexcept
-    {
-        if constexpr (std::is_same_v<coordinate, coords::siqad>)
-        {
-            return area();
-        }
-
-        return area() * (z_size() + 1);
+        return (dimension_size(x_min(), x()) + 1) * (dimension_size(y_min(), y()) + 1);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
@@ -255,19 +215,29 @@ class cartesian_layout
      */
     void resize(const aspect_ratio& ar) noexcept
     {
-        resize(coordinate{0, 0, 0}, ar);
+        const coordinate origin{0, 0, 0};
+        const auto       initialized_maximum = initialize_dimension(ar);
+
+        assert(origin.x <= initialized_maximum.x && origin.y <= initialized_maximum.y &&
+               origin.z <= initialized_maximum.z && "Layout maximum must not be below the origin");
+
+        strg->minimum   = origin;
+        strg->dimension = initialized_maximum;
     }
     /**
      * Updates the layout's inclusive minimum and maximum coordinates, effectively resizing it.
+     *
+     * This overload is available for cube-coordinate layouts.
      *
      * @param minimum New minimum coordinate.
      * @param maximum New maximum coordinate.
      * @pre No component of `minimum` exceeds the corresponding component of `maximum`.
      */
     void resize(const coordinate& minimum, const coordinate& maximum) noexcept
+        requires std::is_same_v<coordinate, coords::cube>
     {
-        const auto initialized_minimum = initialize_minimum(minimum);
-        const auto initialized_maximum = initialize_dimension(maximum);
+        const coordinate initialized_minimum{minimum.x, minimum.y, minimum.z};
+        const coordinate initialized_maximum{maximum.x, maximum.y, maximum.z};
 
         assert(initialized_minimum.x <= initialized_maximum.x && initialized_minimum.y <= initialized_maximum.y &&
                initialized_minimum.z <= initialized_maximum.z &&
@@ -291,17 +261,14 @@ class cartesian_layout
     {
         auto nc = c;
 
-        if (c.y <= y_min())
+        if (c.y < y_min())
         {
-            if (c.y < y_min())
-            {
-                nc.d = 1;
-            }
-
-            return nc;
+            nc.d = 1;
         }
-
-        --nc.y;
+        else if (c.y > y_min())
+        {
+            --nc.y;
+        }
 
         return nc;
     }
@@ -317,18 +284,15 @@ class cartesian_layout
     {
         auto nec = c;
 
-        if (c.x >= x() || c.y <= y_min())
+        if (c.x > x() || c.y < y_min())
         {
-            if (c.x > x() || c.y < y_min())
-            {
-                nec.d = 1;
-            }
-
-            return nec;
+            nec.d = 1;
         }
-
-        ++nec.x;
-        --nec.y;
+        else if (c.x < x() && c.y > y_min())
+        {
+            ++nec.x;
+            --nec.y;
+        }
 
         return nec;
     }
@@ -412,18 +376,15 @@ class cartesian_layout
     {
         auto swc = c;
 
-        if (c.x <= x_min() || c.y >= y())
+        if (c.x < x_min() || c.y > y())
         {
-            if (c.x < x_min() || c.y > y())
-            {
-                swc.d = 1;
-            }
-
-            return swc;
+            swc.d = 1;
         }
-
-        --swc.x;
-        ++swc.y;
+        else if (c.x > x_min() && c.y < y())
+        {
+            --swc.x;
+            ++swc.y;
+        }
 
         return swc;
     }
@@ -438,17 +399,14 @@ class cartesian_layout
     {
         auto wc = c;
 
-        if (c.x <= x_min())
+        if (c.x < x_min())
         {
-            if (c.x < x_min())
-            {
-                wc.d = 1;
-            }
-
-            return wc;
+            wc.d = 1;
         }
-
-        --wc.x;
+        else if (c.x > x_min())
+        {
+            --wc.x;
+        }
 
         return wc;
     }
@@ -464,18 +422,15 @@ class cartesian_layout
     {
         auto nwc = c;
 
-        if (c.x <= x_min() || c.y <= y_min())
+        if (c.x < x_min() || c.y < y_min())
         {
-            if (c.x < x_min() || c.y < y_min())
-            {
-                nwc.d = 1;
-            }
-
-            return nwc;
+            nwc.d = 1;
         }
-
-        --nwc.x;
-        --nwc.y;
+        else if (c.x > x_min() && c.y > y_min())
+        {
+            --nwc.x;
+            --nwc.y;
+        }
 
         return nwc;
     }
@@ -512,17 +467,14 @@ class cartesian_layout
     {
         auto bc = c;
 
-        if (c.z <= z_min())
+        if (c.z < z_min())
         {
-            if (c.z < z_min())
-            {
-                bc.d = 1;
-            }
-
-            return bc;
+            bc.d = 1;
         }
-
-        --bc.z;
+        else if (c.z > z_min())
+        {
+            --bc.z;
+        }
 
         return bc;
     }
@@ -985,23 +937,6 @@ class cartesian_layout
                                                            const CoordinateValue maximum) noexcept
     {
         return static_cast<uint64_t>(static_cast<int64_t>(maximum) - static_cast<int64_t>(minimum));
-    }
-
-    /**
-     * Initializes a Cartesian layout's minimum coordinate. For SiQAD coordinates, the z-value is set to 0 such that
-     * only complete dimer rows are considered.
-     *
-     * @param coord Minimum coordinate to initialize.
-     * @return Initialized minimum coordinate.
-     */
-    constexpr OffsetCoordinateType initialize_minimum(const OffsetCoordinateType& coord) const
-    {
-        if constexpr (std::is_same_v<OffsetCoordinateType, coords::siqad>)
-        {
-            return OffsetCoordinateType{coord.x, coord.y, 0};
-        }
-
-        return OffsetCoordinateType{coord.x, coord.y, coord.z};
     }
 
     /*

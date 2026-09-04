@@ -312,14 +312,10 @@ TEST_CASE("Cartesian layout with signed bounds", "[cartesian-layout]")
     CHECK(lyt.x() == 1);
     CHECK(lyt.y() == 1);
     CHECK(lyt.z() == 1);
-    CHECK(lyt.x_size() == 3);
-    CHECK(lyt.y_size() == 2);
-    CHECK(lyt.z_size() == 2);
     CHECK(lyt.area() == 12);
-    CHECK(lyt.volume() == 36);
 
     const std::vector<coordinate> coordinates{lyt.coordinates().begin(), lyt.coordinates().end()};
-    REQUIRE(coordinates.size() == lyt.volume());
+    REQUIRE(coordinates.size() == 36);
     CHECK(coordinates.front() == coordinate{-2, -1, -1});
     CHECK(coordinates.back() == coordinate{1, 1, 1});
 
@@ -373,15 +369,6 @@ TEST_CASE("Cartesian layout with signed bounds", "[cartesian-layout]")
                                                      coordinate{1, maximum_component, maximum_component},
                                                      coordinate{0, 0, 0}};
     CHECK((*overflow_start).is_dead());
-
-    lyt.resize({-4, -3, -2}, {2, 3, 1});
-
-    CHECK(lyt.x_min() == -4);
-    CHECK(lyt.y_min() == -3);
-    CHECK(lyt.z_min() == -2);
-    CHECK(lyt.x() == 2);
-    CHECK(lyt.y() == 3);
-    CHECK(lyt.z() == 1);
 }
 
 TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")
@@ -391,8 +378,4 @@ TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1
     CHECK(lyt{aspect_ratio<lyt>{0, 0}}.z() == 1);
     CHECK(lyt{aspect_ratio<lyt>{9, 9}}.z() == 1);
     CHECK(lyt{aspect_ratio<lyt>{42, 42, 1}}.z() == 1);
-
-    lyt signed_layout{{2, 3}};
-    signed_layout.resize({-2, -3, 1}, {2, 3, 0});
-    CHECK(signed_layout.z_min() == 0);
 }

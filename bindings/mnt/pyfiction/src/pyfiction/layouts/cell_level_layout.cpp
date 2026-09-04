@@ -139,40 +139,59 @@ void fcn_technology_cell_level_layout(nanobind::module_& m, const std::string& c
     }
 
     using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology, Coordinate>;
+    using coordinate                          = fiction::coordinate<py_cartesian_technology_cell_layout>;
+
+    constexpr auto supports_explicit_minimum =
+        requires(py_cartesian_technology_cell_layout& lyt, const coordinate& minimum, const coordinate& maximum) {
+            lyt.resize(minimum, maximum);
+        };
 
     /**
      * Cell-level clocked Cartesian layout.
      */
-    py::class_<py_cartesian_technology_cell_layout,
-               fiction::layouts::clocked_layout<
-                   fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<Coordinate>>>>(
-        m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout))
-        .def(py::init<>(), DOC(fiction_layouts_cell_level_layout_cell_level_layout))
+    auto layout = py::class_<py_cartesian_technology_cell_layout,
+                             fiction::layouts::clocked_layout<
+                                 fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<Coordinate>>>>(
+        m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout));
+
+    layout.def(py::init<>(), DOC(fiction_layouts_cell_level_layout_cell_level_layout));
+
+    if constexpr (supports_explicit_minimum)
+    {
+        layout
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<py_cartesian_technology_cell_layout> self,
+                   const std::pair<coordinate, coordinate>&                    dimension)
+                { construct_layout_from_bounds(self, dimension); },
+                py::arg("dimension"), "Constructs a cell-level layout from inclusive minimum and maximum coordinates.")
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<py_cartesian_technology_cell_layout> self,
+                   const std::pair<coordinate, coordinate>& dimension, const std::string& scheme_name,
+                   const std::string& layout_name)
+                {
+                    if (const auto scheme =
+                            fiction::layouts::clocking::get_scheme<py_cartesian_technology_cell_layout>(scheme_name);
+                        scheme.has_value())
+                    {
+                        construct_layout_from_bounds(self, dimension, *scheme, layout_name);
+                        return;
+                    }
+
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                },
+                py::arg("dimension"), py::arg("clocking_scheme"), py::arg("layout_name") = "",
+                "Constructs a named cell-level layout from coordinate bounds and a clocking scheme.");
+    }
+
+    layout
         .def(
             "__init__",
             [](py::pointer_and_handle<py_cartesian_technology_cell_layout>       self,
                const fiction::aspect_ratio<py_cartesian_technology_cell_layout>& dimension)
             { new (self.p) py_cartesian_technology_cell_layout{validate_layout_maximum(dimension)}; },
             py::arg("dimension"), DOC(fiction_layouts_cell_level_layout_cell_level_layout))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<py_cartesian_technology_cell_layout> self, const py::tuple& dimension)
-            {
-                using coordinate = fiction::coordinate<py_cartesian_technology_cell_layout>;
-
-                const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
-                if (parsed_dimension.minimum.has_value())
-                {
-                    new (self.p) py_cartesian_technology_cell_layout{coordinate{0, 0, 0}};
-                    self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                    return;
-                }
-
-                new (self.p) py_cartesian_technology_cell_layout{parsed_dimension.maximum};
-            },
-            py::arg("dimension"),
-            "Constructs a cell-level layout from a maximum coordinate or an inclusive (minimum, maximum) coordinate "
-            "pair.")
         .def(
             "__init__",
             [](py::pointer_and_handle<py_cartesian_technology_cell_layout>       self,
@@ -192,33 +211,6 @@ void fcn_technology_cell_level_layout(nanobind::module_& m, const std::string& c
             },
             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave", py::arg("layout_name") = "",
             DOC(fiction_layouts_cell_level_layout_cell_level_layout_2))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<py_cartesian_technology_cell_layout> self, const py::tuple& dimension,
-               const std::string& scheme_name, const std::string& layout_name)
-            {
-                using coordinate = fiction::coordinate<py_cartesian_technology_cell_layout>;
-
-                if (const auto scheme =
-                        fiction::layouts::clocking::get_scheme<py_cartesian_technology_cell_layout>(scheme_name);
-                    scheme.has_value())
-                {
-                    const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
-                    if (parsed_dimension.minimum.has_value())
-                    {
-                        new (self.p) py_cartesian_technology_cell_layout{coordinate{0, 0, 0}, *scheme, layout_name};
-                        self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                        return;
-                    }
-
-                    new (self.p) py_cartesian_technology_cell_layout{parsed_dimension.maximum, *scheme, layout_name};
-                    return;
-                }
-
-                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-            },
-            py::arg("dimension"), py::arg("clocking_scheme"), py::arg("layout_name") = "",
-            "Constructs a named cell-level layout from coordinate bounds and a clocking scheme.")
 
         .def("assign_cell_type", &py_cartesian_technology_cell_layout::assign_cell_type, py::arg("c"), py::arg("ct"),
              DOC(fiction_layouts_cell_level_layout_assign_cell_type))

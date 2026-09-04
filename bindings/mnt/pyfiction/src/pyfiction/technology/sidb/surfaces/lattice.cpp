@@ -25,6 +25,7 @@
 #include <fiction/types.hpp>
 
 #include <string>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
@@ -49,36 +50,35 @@ void sidb_lattice_cell_level_layout(nanobind::module_& m, const std::string& cla
     namespace py = nanobind;
 
     using py_sidb_lattice = py_sidb_lattice<LatticeOrientation, SidbLayout>;
+    using coordinate      = fiction::coordinate<SidbLayout>;
+
+    constexpr auto supports_explicit_minimum = requires(py_sidb_lattice& lyt, const coordinate& minimum,
+                                                        const coordinate& maximum) { lyt.resize(minimum, maximum); };
 
     /**
      * SiDB lattice.
      */
-    py::class_<py_sidb_lattice, SidbLayout>(m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout))
-        .def(py::init<>(), "Default constructor.")
+    auto layout =
+        py::class_<py_sidb_lattice, SidbLayout>(m, class_name.c_str(), DOC(fiction_layouts_cell_level_layout));
+
+    layout.def(py::init<>(), "Default constructor.");
+
+    if constexpr (supports_explicit_minimum)
+    {
+        layout.def(
+            "__init__",
+            [](py::pointer_and_handle<py_sidb_lattice> self, const std::pair<coordinate, coordinate>& dimension,
+               const std::string& name) { construct_layout_from_bounds(self, dimension, name); },
+            py::arg("dimension"), py::arg("name") = "",
+            "Constructs a named SiDB lattice from inclusive minimum and maximum coordinates.");
+    }
+
+    layout
         .def(
             "__init__",
             [](py::pointer_and_handle<py_sidb_lattice> self, const fiction::aspect_ratio<SidbLayout>& dimension,
                const std::string& name) { new (self.p) py_sidb_lattice{validate_layout_maximum(dimension), name}; },
             py::arg("dimension"), py::arg("name") = "", DOC(fiction_sidb_surfaces_lattice))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<py_sidb_lattice> self, const py::tuple& dimension, const std::string& name)
-            {
-                using coordinate = fiction::coordinate<SidbLayout>;
-
-                const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
-                if (parsed_dimension.minimum.has_value())
-                {
-                    new (self.p) py_sidb_lattice{coordinate{0, 0, 0}, name};
-                    self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                    return;
-                }
-
-                new (self.p) py_sidb_lattice{parsed_dimension.maximum, name};
-            },
-            py::arg("dimension"), py::arg("name") = "",
-            "Constructs a named SiDB lattice from a maximum coordinate or an inclusive (minimum, maximum) coordinate "
-            "pair.")
         .def("clone", &py_sidb_lattice::clone)
 
         ;

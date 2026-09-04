@@ -128,25 +128,13 @@ using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<
  */
 using py_qca_layout = py_cartesian_cell_layout<fiction::qca::qca_technology>;
 /**
- * QCA cell layout with cube coordinates.
- */
-using py_qca_layout_cube = py_cartesian_cell_layout<fiction::qca::qca_technology, py_cube_coordinate>;
-/**
  * iNML cell layout.
  */
 using py_inml_layout = py_cartesian_cell_layout<fiction::inml::inml_technology>;
 /**
- * iNML cell layout with cube coordinates.
- */
-using py_inml_layout_cube = py_cartesian_cell_layout<fiction::inml::inml_technology, py_cube_coordinate>;
-/**
  * MolQCA cell layout.
  */
 using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_qca_technology>;
-/**
- * MolQCA cell layout with cube coordinates.
- */
-using py_mol_qca_layout_cube = py_cartesian_cell_layout<fiction::qca::mol_qca_technology, py_cube_coordinate>;
 /**
  * SiDB cell layout.
  */
@@ -166,17 +154,9 @@ using py_sidb_lattice = fiction::sidb::surfaces::lattice<LatticeOrientation, Sid
  */
 using py_sidb_100_lattice = py_sidb_lattice<fiction::sidb::surfaces::lattice_100>;
 /**
- * SiDB cell layout with cube coordinates (with specified H-Si(100)-2x1 lattice orientation).
- */
-using py_sidb_100_lattice_cube = py_sidb_lattice<fiction::sidb::surfaces::lattice_100, py_sidb_layout_cube>;
-/**
  * SiDB cell layout (with specified H-Si(111)-1x1 lattice orientation).
  */
 using py_sidb_111_lattice = py_sidb_lattice<fiction::sidb::surfaces::lattice_111>;
-/**
- * SiDB cell layout with cube coordinates (with specified H-Si(111)-1x1 lattice orientation).
- */
-using py_sidb_111_lattice_cube = py_sidb_lattice<fiction::sidb::surfaces::lattice_111, py_sidb_layout_cube>;
 
 /**
  * Charge distribution surface. This is a special SiDB cell-level layout that is used for the SiDB simulation

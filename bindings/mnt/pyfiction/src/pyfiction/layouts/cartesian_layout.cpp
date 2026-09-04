@@ -26,6 +26,7 @@
 #include <cstdint>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <nanobind/nanobind.h>
@@ -48,34 +49,42 @@ void cartesian_layout(nanobind::module_& m, const char* class_name)
 {
     namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
 
+    using coordinate = fiction::coordinate<CartesianLyt>;
+
+    constexpr auto supports_explicit_minimum = requires(CartesianLyt& lyt, const coordinate& minimum,
+                                                        const coordinate& maximum) { lyt.resize(minimum, maximum); };
+
     /**
      * Cartesian layout.
      */
-    py::class_<CartesianLyt>(m, class_name, DOC(fiction_cartesian_layout_overridden))
-        .def(py::init<>(), DOC(fiction_layouts_cartesian_layout_cartesian_layout))
+    auto layout = py::class_<CartesianLyt>(m, class_name, DOC(fiction_cartesian_layout_overridden));
+
+    layout.def(py::init<>(), DOC(fiction_layouts_cartesian_layout_cartesian_layout));
+
+    if constexpr (supports_explicit_minimum)
+    {
+        layout
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<CartesianLyt> self, const std::pair<coordinate, coordinate>& dimension)
+                { construct_layout_from_bounds(self, dimension); }, py::arg("dimension"),
+                "Constructs a layout from inclusive minimum and maximum coordinates.")
+            .def(
+                "resize",
+                [](CartesianLyt& lyt, const std::pair<coordinate, coordinate>& dimension)
+                {
+                    validate_layout_bounds(dimension);
+                    lyt.resize(dimension.first, dimension.second);
+                },
+                py::arg("dimension"), "Resizes the layout to inclusive minimum and maximum coordinates.");
+    }
+
+    layout
         .def(
             "__init__",
             [](py::pointer_and_handle<CartesianLyt> self, const fiction::aspect_ratio<CartesianLyt>& dimension)
             { new (self.p) CartesianLyt{validate_layout_maximum(dimension)}; }, py::arg("dimension"),
             DOC(fiction_layouts_cartesian_layout_cartesian_layout))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<CartesianLyt> self, const py::tuple& dimension)
-            {
-                using coordinate = fiction::coordinate<CartesianLyt>;
-
-                const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
-                if (parsed_dimension.minimum.has_value())
-                {
-                    new (self.p) CartesianLyt{coordinate{0, 0, 0}};
-                    self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                    return;
-                }
-
-                new (self.p) CartesianLyt{parsed_dimension.maximum};
-            },
-            py::arg("dimension"),
-            "Constructs a layout from a maximum coordinate or an inclusive (minimum, maximum) coordinate pair.")
         .def(
             "coord", [](const CartesianLyt& layout, const int64_t x, const int64_t y, const int64_t z)
             { return layout.coord(x, y, z); }, py::arg("x"), py::arg("y"), py::arg("z") = 0l,
@@ -86,28 +95,11 @@ void cartesian_layout(nanobind::module_& m, const char* class_name)
         .def("x_min", &CartesianLyt::x_min, DOC(fiction_layouts_cartesian_layout_x_min))
         .def("y_min", &CartesianLyt::y_min, DOC(fiction_layouts_cartesian_layout_y_min))
         .def("z_min", &CartesianLyt::z_min, DOC(fiction_layouts_cartesian_layout_z_min))
-        .def("x_size", &CartesianLyt::x_size, DOC(fiction_layouts_cartesian_layout_x_size))
-        .def("y_size", &CartesianLyt::y_size, DOC(fiction_layouts_cartesian_layout_y_size))
-        .def("z_size", &CartesianLyt::z_size, DOC(fiction_layouts_cartesian_layout_z_size))
         .def("area", &CartesianLyt::area, DOC(fiction_layouts_cartesian_layout_area))
-        .def("volume", &CartesianLyt::volume, DOC(fiction_layouts_cartesian_layout_volume))
         .def(
-            "resize",
-            [](CartesianLyt& lyt, const py::object& dimension)
-            {
-                using coordinate = fiction::coordinate<CartesianLyt>;
-
-                const auto parsed_dimension = parse_layout_dimension<coordinate>(dimension);
-                if (parsed_dimension.minimum.has_value())
-                {
-                    lyt.resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                    return;
-                }
-
-                lyt.resize(parsed_dimension.maximum);
-            },
-            py::arg("dimension"),
-            "Resizes the layout from a maximum coordinate or an inclusive (minimum, maximum) coordinate pair.")
+            "resize", [](CartesianLyt& lyt, const fiction::aspect_ratio<CartesianLyt>& dimension)
+            { lyt.resize(validate_layout_maximum(dimension)); }, py::arg("dimension"),
+            DOC(fiction_layouts_cartesian_layout_resize))
 
         .def("north", &CartesianLyt::north, py::arg("c"), DOC(fiction_layouts_cartesian_layout_north))
         .def("north_east", &CartesianLyt::north_east, py::arg("c"), DOC(fiction_layouts_cartesian_layout_north_east))
@@ -178,7 +170,6 @@ void cartesian_layout(nanobind::module_& m, const char* class_name)
             [](const CartesianLyt& lyt)
             {
                 std::vector<fiction::coordinate<CartesianLyt>> coords{};
-                coords.reserve(lyt.volume());
                 lyt.foreach_coordinate([&coords](const auto& c) { coords.push_back(c); });
                 return coords;
             },

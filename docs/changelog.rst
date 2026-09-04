@@ -10,8 +10,8 @@ Unreleased
 
 Added
 #####
-- Cartesian layouts:
-    - Added inclusive minimum/maximum bounds, size and volume queries, and signed coordinate iteration
+- Data structures:
+    - Added inclusive minimum/maximum bounds and signed iteration to cube-coordinate Cartesian layouts
 - Python bindings:
     - Exposed ``write_location_and_ground_state``, whose binding existed but was never registered
     - Added cube-coordinate Cartesian, clocked Cartesian, cell-level, and SiDB lattice layouts

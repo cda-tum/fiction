@@ -168,18 +168,17 @@ struct offset
         return offset{static_cast<uint64_t>(*this) | static_cast<uint64_t>(offset{})};
     }
     /**
-     * Wraps the coordinate within the inclusive bounds from `minimum` to `maximum`. If x exceeds its maximum, x is
-     * reset to its minimum and y is increased. If y exceeds its maximum, y is reset to its minimum and z is increased.
-     * If z exceeds its maximum, the coordinate becomes a dead copy of `maximum`.
+     * Wraps the coordinate within the inclusive bounds from the origin to `maximum`. If x exceeds its maximum, x is
+     * reset to zero and y is increased. If y exceeds its maximum, y is reset to zero and z is increased. If z exceeds
+     * its maximum, the coordinate becomes a dead copy of `maximum`.
      *
      * @param maximum Maximum coordinate to wrap against.
-     * @param minimum Minimum coordinate to wrap to. Defaults to the origin.
      */
-    void wrap(const offset& maximum, const offset& minimum = {0, 0, 0}) noexcept
+    void wrap(const offset& maximum) noexcept
     {
         if (x > maximum.x)
         {
-            x = minimum.x;
+            x = 0;
 
             if (y >= maximum.y)
             {
@@ -189,7 +188,7 @@ struct offset
                     return;
                 }
 
-                y = minimum.y;
+                y = 0;
                 ++z;
             }
             else
@@ -206,7 +205,7 @@ struct offset
             }
             else
             {
-                y = minimum.y;
+                y = 0;
                 ++z;
             }
         }
@@ -688,55 +687,29 @@ struct siqad
         return dead_coord;
     }
     /**
-     * Wraps the coordinate within the inclusive bounds from `minimum` to `maximum` in SiQAD row order. If x exceeds its
-     * maximum, it is reset to its minimum before advancing to the next dimer position. If the resulting coordinate is
+     * Wraps the coordinate within the inclusive bounds from the origin to `maximum` in SiQAD row order. If x exceeds
+     * its maximum, it is reset to zero before advancing to the next dimer position. If the resulting coordinate is
      * outside the y- or z-bounds, it becomes a dead copy of `maximum`.
      *
      * @param maximum Maximum coordinate to wrap against.
-     * @param minimum Minimum coordinate to wrap to. Defaults to the origin.
      */
-    void wrap(const siqad& maximum, const siqad& minimum = {0, 0, 0}) noexcept
+    void wrap(const siqad& maximum) noexcept
     {
         if (x > maximum.x)
         {
-            x = minimum.x;
+            x = 0;
 
-            if (minimum.z == maximum.z)
+            if (z != 0 && y >= maximum.y)
             {
-                z = minimum.z;
-
-                if (y >= maximum.y)
-                {
-                    *this = maximum.get_dead();
-                    return;
-                }
-
-                ++y;
+                *this = maximum.get_dead();
+                return;
             }
-            else if (z >= maximum.z)
-            {
-                z = minimum.z;
 
-                if (y >= maximum.y)
-                {
-                    *this = maximum.get_dead();
-                    return;
-                }
-
-                ++y;
-            }
-            else
-            {
-                z = maximum.z;
-            }
+            y += z;
+            z = !z;
         }
 
-        if (z < minimum.z || z > maximum.z)
-        {
-            *this = maximum.get_dead();
-        }
-
-        if (y > maximum.y)
+        if (z > maximum.z || y > maximum.y)
         {
             *this = maximum.get_dead();
         }
@@ -1018,7 +991,7 @@ class coordinate_iterator
      *
      * @param maximum Maximum boundary within to enumerate. Iteration wraps at its limits.
      * @param start Starting coordinate to enumerate first.
-     * @param minimum Minimum boundary to wrap to. Defaults to the origin.
+     * @param minimum Minimum boundary for cube coordinates. Must be the origin for other coordinate types.
      */
     constexpr explicit coordinate_iterator(const CoordinateType& maximum, const CoordinateType& start,
                                            const CoordinateType& minimum = {0, 0, 0}) noexcept
@@ -1026,16 +999,30 @@ class coordinate_iterator
                      std::same_as<CoordinateType, siqad>
             : maximum{maximum}, minimum{minimum}, coord{start}
     {
-        assert(minimum.x <= maximum.x && minimum.y <= maximum.y && minimum.z <= maximum.z &&
+        if constexpr (!std::is_same_v<CoordinateType, cube>)
+        {
+            assert(minimum.x == 0 && minimum.y == 0 && minimum.z == 0 &&
+                   "Offset and SiQAD coordinate iteration starts at the origin");
+            this->minimum = CoordinateType{0, 0, 0};
+        }
+
+        assert(this->minimum.x <= maximum.x && this->minimum.y <= maximum.y && this->minimum.z <= maximum.z &&
                "Minimum coordinate must not exceed maximum coordinate");
 
         // Make sure the start iterator is within the lower boundary.
-        coord.x = std::max(coord.x, minimum.x);
-        coord.y = std::max(coord.y, minimum.y);
-        coord.z = std::max(coord.z, minimum.z);
+        coord.x = std::max(coord.x, this->minimum.x);
+        coord.y = std::max(coord.y, this->minimum.y);
+        coord.z = std::max(coord.z, this->minimum.z);
 
         // Then handle coordinates that are beyond the upper boundary.
-        coord.wrap(maximum, minimum);
+        if constexpr (std::is_same_v<CoordinateType, cube>)
+        {
+            coord.wrap(maximum, this->minimum);
+        }
+        else
+        {
+            coord.wrap(maximum);
+        }
     }
     /**
      * Increments the iterator, while keeping it within the boundary. Also defined on iterators that are out of bounds.

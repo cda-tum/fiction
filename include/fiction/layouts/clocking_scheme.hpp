@@ -205,18 +205,13 @@ namespace detail
 /**
  * Maps a coordinate component to an index within a periodically repeated cutout.
  *
- * @tparam Coordinate Coordinate component type.
  * @param coordinate Coordinate component.
  * @param period Cutout period.
  * @return Index in `[0, period)`.
  */
-template <typename Coordinate>
-[[nodiscard]] constexpr std::size_t cutout_index(const Coordinate coordinate, const std::size_t period) noexcept
+[[nodiscard]] constexpr std::size_t cutout_index(const int64_t coordinate, const int64_t period) noexcept
 {
-    const auto signed_period = static_cast<int64_t>(period);
-    const auto remainder     = static_cast<int64_t>(coordinate) % signed_period;
-
-    return static_cast<std::size_t>(remainder < 0 ? remainder + signed_period : remainder);
+    return static_cast<std::size_t>(((coordinate % period) + period) % period);
 }
 
 }  // namespace detail

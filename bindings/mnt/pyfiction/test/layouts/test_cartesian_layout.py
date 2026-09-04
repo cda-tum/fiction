@@ -34,21 +34,22 @@ def test_cube_coordinate_bounds():
 
     assert (layout.x_min(), layout.y_min(), layout.z_min()) == (-2, -1, 0)
     assert (layout.x(), layout.y(), layout.z()) == (1, 2, 1)
-    assert (layout.x_size(), layout.y_size(), layout.z_size()) == (3, 3, 1)
     assert layout.area() == 16
-    assert layout.volume() == 32
 
     coordinates = layout.coordinates()
     assert coordinates[0] == cube_coordinate(-2, -1, 0)
     assert coordinates[-1] == cube_coordinate(1, 2, 1)
-    assert len(coordinates) == layout.volume()
+    assert len(coordinates) == 32
     assert layout.west((-2, 0)) == cube_coordinate(-2, 0)
     assert layout.north((0, -1)) == cube_coordinate(0, -1)
 
 
-def test_cube_coordinate_maximum_must_not_be_below_origin():
+def test_cube_coordinate_bounds_validation():
     with pytest.raises(ValueError, match="maximum must not be below the origin"):
         cartesian_layout_cube(cube_coordinate(-1, -1))
+
+    with pytest.raises(ValueError, match="minimum must not exceed its maximum"):
+        cartesian_layout_cube(((1, 1), (0, 0)))
 
     negative_layout = cartesian_layout_cube(((-3, -2, -1), (-1, -1, -1)))
     assert (negative_layout.x_min(), negative_layout.y_min(), negative_layout.z_min()) == (-3, -2, -1)

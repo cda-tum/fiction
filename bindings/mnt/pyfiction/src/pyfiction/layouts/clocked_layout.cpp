@@ -27,6 +27,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
@@ -57,34 +58,41 @@ void clocked_layout(nanobind::module_& m, const std::string& class_name)
     /**
      * Clocked Cartesian layout.
      */
-    py::class_<ClockedLyt, LytBase>(m, class_name.c_str(), DOC(fiction_is_clocked_layout))
-        .def(py::init<>(), DOC(fiction_layouts_clocked_layout_clocked_layout))
+    auto layout = py::class_<ClockedLyt, LytBase>(m, class_name.c_str(), DOC(fiction_is_clocked_layout));
+
+    layout.def(py::init<>(), DOC(fiction_layouts_clocked_layout_clocked_layout));
+
+    if constexpr (supports_explicit_minimum)
+    {
+        layout
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<ClockedLyt> self, const std::pair<coordinate, coordinate>& dimension)
+                { construct_layout_from_bounds(self, dimension); }, py::arg("dimension"),
+                "Constructs a clocked layout from inclusive minimum and maximum coordinates.")
+            .def(
+                "__init__",
+                [](py::pointer_and_handle<ClockedLyt> self, const std::pair<coordinate, coordinate>& dimension,
+                   const std::string& scheme_name)
+                {
+                    if (const auto scheme = fiction::layouts::clocking::get_scheme<ClockedLyt>(scheme_name);
+                        scheme.has_value())
+                    {
+                        construct_layout_from_bounds(self, dimension, *scheme);
+                        return;
+                    }
+
+                    throw std::runtime_error("Given name does not refer to a supported clocking scheme");
+                },
+                py::arg("dimension"), py::arg("clocking_scheme"),
+                "Constructs a clocked layout from coordinate bounds and a clocking scheme.");
+    }
+
+    layout
         .def(
             "__init__", [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension)
             { new (self.p) ClockedLyt{validate_layout_maximum(dimension)}; }, py::arg("dimension"),
             DOC(fiction_layouts_clocked_layout_clocked_layout))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<ClockedLyt> self, const py::tuple& dimension)
-            {
-                const auto parsed_dimension = parse_layout_dimension<coordinate, supports_explicit_minimum>(dimension);
-                if (parsed_dimension.minimum.has_value())
-                {
-                    if constexpr (supports_explicit_minimum)
-                    {
-                        new (self.p) ClockedLyt{coordinate{0, 0, 0}};
-                        self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                        return;
-                    }
-                }
-
-                new (self.p) ClockedLyt{parsed_dimension.maximum};
-            },
-            py::arg("dimension"),
-            supports_explicit_minimum ?
-                "Constructs a clocked layout from a maximum coordinate or an inclusive (minimum, maximum) coordinate "
-                "pair." :
-                "Constructs a clocked layout from a maximum coordinate.")
         .def(
             "__init__",
             [](py::pointer_and_handle<ClockedLyt> self, const fiction::aspect_ratio<ClockedLyt>& dimension,
@@ -100,36 +108,9 @@ void clocked_layout(nanobind::module_& m, const std::string& class_name)
                 throw std::runtime_error("Given name does not refer to a supported clocking scheme");
             },
             py::arg("dimension"), py::arg("clocking_scheme") = "2DDWave",
-            DOC(fiction_layouts_clocked_layout_clocked_layout_2))
-        .def(
-            "__init__",
-            [](py::pointer_and_handle<ClockedLyt> self, const py::tuple& dimension, const std::string& scheme_name)
-            {
-                if (const auto scheme = fiction::layouts::clocking::get_scheme<ClockedLyt>(scheme_name);
-                    scheme.has_value())
-                {
-                    const auto parsed_dimension =
-                        parse_layout_dimension<coordinate, supports_explicit_minimum>(dimension);
-                    if (parsed_dimension.minimum.has_value())
-                    {
-                        if constexpr (supports_explicit_minimum)
-                        {
-                            new (self.p) ClockedLyt{coordinate{0, 0, 0}, *scheme};
-                            self.p->resize(*parsed_dimension.minimum, parsed_dimension.maximum);
-                            return;
-                        }
-                    }
+            DOC(fiction_layouts_clocked_layout_clocked_layout_2));
 
-                    new (self.p) ClockedLyt{parsed_dimension.maximum, *scheme};
-                    return;
-                }
-
-                throw std::runtime_error("Given name does not refer to a supported clocking scheme");
-            },
-            py::arg("dimension"), py::arg("clocking_scheme"),
-            supports_explicit_minimum ? "Constructs a clocked layout from coordinate bounds and a clocking scheme." :
-                                        "Constructs a clocked layout from a maximum coordinate and a clocking scheme.")
-
+    layout
         .def("assign_clock_number", &ClockedLyt::assign_clock_number, py::arg("cz"), py::arg("cn"),
              DOC(fiction_layouts_clocked_layout_assign_clock_number))
         .def("get_clock_number", &ClockedLyt::get_clock_number, py::arg("cz"),
