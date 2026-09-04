@@ -19,9 +19,14 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 
+#include <cstdint>
+#include <limits>
 #include <set>
+#include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -293,6 +298,87 @@ TEST_CASE("Cartesian cardinal operations", "[cartesian-layout]")
         {
             CHECK(std::set<cartesian_layout<coords::offset>::coordinate>{{{4, 5}, {5, 4}, {6, 5}, {5, 6}}}.count(adj));
         });
+}
+
+TEST_CASE("Cartesian layout with signed bounds", "[cartesian-layout]")
+{
+    using layout     = cartesian_layout<coords::cube>;
+    using coordinate = layout::coordinate;
+
+    layout lyt{{1, 1, 1}};
+    lyt.resize({-2, -1, -1}, {1, 1, 1});
+
+    CHECK(lyt.x_min() == -2);
+    CHECK(lyt.y_min() == -1);
+    CHECK(lyt.z_min() == -1);
+    CHECK(lyt.x() == 1);
+    CHECK(lyt.y() == 1);
+    CHECK(lyt.z() == 1);
+    CHECK(lyt.area() == 12);
+
+    const std::vector<coordinate> coordinates{lyt.coordinates().begin(), lyt.coordinates().end()};
+    REQUIRE(coordinates.size() == 36);
+    CHECK(coordinates.front() == coordinate{-2, -1, -1});
+    CHECK(coordinates.back() == coordinate{1, 1, 1});
+
+    const std::vector<coordinate> ground_coordinates{lyt.ground_coordinates().begin(), lyt.ground_coordinates().end()};
+    REQUIRE(ground_coordinates.size() == lyt.area());
+    CHECK(ground_coordinates.front() == coordinate{-2, -1, -1});
+    CHECK(ground_coordinates.back() == coordinate{1, 1, -1});
+
+    CHECK(lyt.is_within_bounds({-2, -1, -1}));
+    CHECK(lyt.is_within_bounds({1, 1, 1}));
+    CHECK(!lyt.is_within_bounds({-3, -1, -1}));
+    CHECK(!lyt.is_within_bounds({1, 2, 1}));
+
+    CHECK(lyt.north({0, 0, 0}) == coordinate{0, -1, 0});
+    CHECK(lyt.west({0, 0, 0}) == coordinate{-1, 0, 0});
+    CHECK(lyt.below({0, 0, 0}) == coordinate{0, 0, -1});
+    CHECK(lyt.north({0, -1, 0}) == coordinate{0, -1, 0});
+    CHECK(lyt.west({-2, 0, 0}) == coordinate{-2, 0, 0});
+    CHECK(lyt.below({0, 0, -1}) == coordinate{0, 0, -1});
+    CHECK(lyt.north({0, -2, 0}).is_dead());
+    CHECK(lyt.west({-3, 0, 0}).is_dead());
+    CHECK(lyt.below({0, 0, -2}).is_dead());
+    CHECK(lyt.northern_border_of({0, 0, 0}) == coordinate{0, -1, 0});
+    CHECK(lyt.western_border_of({0, 0, 0}) == coordinate{-2, 0, 0});
+    CHECK(lyt.is_ground_layer({0, 0, -1}));
+    CHECK(lyt.is_crossing_layer({0, 0, 0}));
+
+    lyt.resize({2, 3, 1});
+
+    CHECK(lyt.x_min() == 0);
+    CHECK(lyt.y_min() == 0);
+    CHECK(lyt.z_min() == 0);
+    CHECK(lyt.x() == 2);
+    CHECK(lyt.y() == 3);
+    CHECK(lyt.z() == 1);
+
+    layout dead_endpoint_layout{};
+    dead_endpoint_layout.resize(coordinate{}, coordinate{1, 0, 0});
+    const std::vector<coordinate> live_coordinates{dead_endpoint_layout.coordinates().begin(),
+                                                   dead_endpoint_layout.coordinates().end()};
+    CHECK(live_coordinates == std::vector<coordinate>{{0, 0, 0}, {1, 0, 0}});
+
+    constexpr auto maximum_component = std::numeric_limits<int32_t>::max();
+    layout         extreme_layout{};
+    extreme_layout.resize({maximum_component, 0, 0}, {maximum_component, 1, 0});
+    const std::vector<coordinate> extreme_coordinates{extreme_layout.coordinates().begin(),
+                                                      extreme_layout.coordinates().end()};
+    CHECK(extreme_coordinates == std::vector<coordinate>{{maximum_component, 0, 0}, {maximum_component, 1, 0}});
+
+    const coords::coordinate_iterator overflow_start{coordinate{0, maximum_component, maximum_component},
+                                                     coordinate{1, maximum_component, maximum_component},
+                                                     coordinate{0, 0, 0}};
+    CHECK((*overflow_start).is_dead());
+
+    constexpr auto   minimum_component = std::numeric_limits<int32_t>::min();
+    const coordinate minimum{minimum_component, minimum_component, 0};
+    const coordinate maximum{maximum_component, maximum_component, 0};
+
+    layout oversized_layout{};
+    CHECK_THROWS_AS(oversized_layout.resize(minimum, maximum), std::overflow_error);
+    CHECK(oversized_layout.area() == 1);
 }
 
 TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")

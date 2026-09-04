@@ -13,6 +13,7 @@
  * @brief The concrete network and layout types the Python bindings instantiate.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author Simon Hofmann (simon1hofmann)
  */
 
 #pragma once
@@ -59,6 +60,10 @@ using py_siqad_coordinate  = fiction::layouts::coords::siqad;
  */
 using py_cartesian_layout = fiction::layouts::cartesian_layout<py_offset_coordinate>;
 /**
+ * Cartesian layout with cube coordinates.
+ */
+using py_cartesian_layout_cube = fiction::layouts::cartesian_layout<py_cube_coordinate>;
+/**
  * Shifted Cartesian layout.
  */
 using py_shifted_cartesian_layout =
@@ -72,6 +77,11 @@ using py_hexagonal_layout = fiction::layouts::hexagonal_layout<py_offset_coordin
  */
 using py_cartesian_clocked_layout =
     fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<py_cartesian_layout>>;
+/**
+ * Cartesian clocked layout with cube coordinates.
+ */
+using py_cartesian_clocked_layout_cube =
+    fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<py_cartesian_layout_cube>>;
 /**
  * Shifted Cartesian clocked layout.
  */
@@ -109,8 +119,10 @@ using py_hexagonal_obstruction_layout = fiction::layouts::obstruction_layout<py_
 /**
  * Cartesian cell layout.
  */
-template <typename Technology>
-using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<Technology, py_cartesian_clocked_layout>;
+template <typename Technology, typename Coordinate = py_offset_coordinate>
+using py_cartesian_cell_layout = fiction::layouts::cell_level_layout<
+    Technology, fiction::layouts::clocked_layout<
+                    fiction::layouts::tile_based_layout<fiction::layouts::cartesian_layout<Coordinate>>>>;
 /**
  * QCA cell layout.
  */
@@ -127,12 +139,16 @@ using py_mol_qca_layout = py_cartesian_cell_layout<fiction::qca::mol_qca_technol
  * SiDB cell layout.
  */
 using py_sidb_layout = py_cartesian_cell_layout<fiction::sidb::sidb_technology>;
+/**
+ * SiDB cell layout with cube coordinates.
+ */
+using py_sidb_layout_cube = py_cartesian_cell_layout<fiction::sidb::sidb_technology, py_cube_coordinate>;
 
 /**
  * SiDB lattice layout.
  */
-template <typename LatticeOrientation>
-using py_sidb_lattice = fiction::sidb::surfaces::lattice<LatticeOrientation, py_sidb_layout>;
+template <typename LatticeOrientation, typename SidbLayout = py_sidb_layout>
+using py_sidb_lattice = fiction::sidb::surfaces::lattice<LatticeOrientation, SidbLayout>;
 /**
  * SiDB cell layout (with specified H-Si(100)-2x1 lattice orientation).
  */

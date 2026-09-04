@@ -24,10 +24,10 @@
 #include <algorithm>
 #include <array>
 #include <cctype>
+#include <cstddef>
 #include <cstdint>
 #include <exception>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
@@ -197,6 +197,24 @@ enum class num_clks : uint8_t
      */
     FOUR
 };
+
+namespace detail
+{
+
+/**
+ * Maps a coordinate component to an index within a periodically repeated cutout.
+ *
+ * @param coordinate Coordinate component.
+ * @param period Cutout period.
+ * @return Index in `[0, period)`.
+ */
+[[nodiscard]] constexpr std::size_t cutout_index(const int64_t coordinate, const int64_t period) noexcept
+{
+    return static_cast<std::size_t>(((coordinate % period) + period) % period);
+}
+
+}  // namespace detail
+
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 /**
@@ -245,7 +263,7 @@ static auto columnar(const num_clks& n = num_clks::FOUR) noexcept
         static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 1, 2}}, {{0, 1, 2}}, {{0, 1, 2}}}};
 
-        return cutout[cz.y % 3ul][cz.x % 3ul];
+        return cutout[detail::cutout_index(cz.y, 3u)][detail::cutout_index(cz.x, 3u)];
     };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function columnar_4_clock_function =
@@ -254,7 +272,7 @@ static auto columnar(const num_clks& n = num_clks::FOUR) noexcept
         static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}, {{0, 1, 2, 3}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     switch (n)
@@ -289,7 +307,7 @@ static auto row(const num_clks& n = num_clks::FOUR) noexcept
         static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 0, 0}}, {{1, 1, 1}}, {{2, 2, 2}}}};
 
-        return cutout[cz.y % 3ul][cz.x % 3ul];
+        return cutout[detail::cutout_index(cz.y, 3u)][detail::cutout_index(cz.x, 3u)];
     };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function row_4_clock_function =
@@ -298,7 +316,7 @@ static auto row(const num_clks& n = num_clks::FOUR) noexcept
         static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 0, 0, 0}}, {{1, 1, 1, 1}}, {{2, 2, 2, 2}}, {{3, 3, 3, 3}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     switch (n)
@@ -333,7 +351,7 @@ static auto twoddwave(const num_clks& n = num_clks::FOUR) noexcept
         static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 3u>, 3u> cutout{
             {{{0, 1, 2}}, {{1, 2, 0}}, {{2, 0, 1}}}};
 
-        return cutout[cz.y % 3ul][cz.x % 3ul];
+        return cutout[detail::cutout_index(cz.y, 3u)][detail::cutout_index(cz.x, 3u)];
     };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function twoddwave_4_clock_function =
@@ -342,7 +360,7 @@ static auto twoddwave(const num_clks& n = num_clks::FOUR) noexcept
         static constexpr std::array<std::array<typename scheme<clock_zone<Lyt>>::clock_number, 4u>, 4u> cutout{
             {{{0, 1, 2, 3}}, {{1, 2, 3, 0}}, {{2, 3, 0, 1}}, {{3, 0, 1, 2}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     switch (n)
@@ -412,28 +430,36 @@ static auto twoddwave_hex(const num_clks& n = num_clks::FOUR) noexcept
     // clang-format on
 
     static const typename scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return odd_3_cutout[detail::cutout_index(cz.y, 6u)][detail::cutout_index(cz.x, 3u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function odd_row_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return odd_4_cutout[cz.y % 8ul][cz.x % 4ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return odd_4_cutout[detail::cutout_index(cz.y, 8u)][detail::cutout_index(cz.x, 4u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return even_3_cutout[cz.y % 6ul][cz.x % 3ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return even_3_cutout[detail::cutout_index(cz.y, 6u)][detail::cutout_index(cz.x, 3u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function even_row_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return even_4_cutout[cz.y % 8ul][cz.x % 4ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return even_4_cutout[detail::cutout_index(cz.y, 8u)][detail::cutout_index(cz.x, 4u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return odd_3_cutout[cz.x % 6ul][cz.y % 3ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return odd_3_cutout[detail::cutout_index(cz.x, 6u)][detail::cutout_index(cz.y, 3u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function odd_column_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return odd_4_cutout[cz.x % 8ul][cz.y % 4ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return odd_4_cutout[detail::cutout_index(cz.x, 8u)][detail::cutout_index(cz.y, 4u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_3_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return even_3_cutout[cz.x % 6ul][cz.y % 3ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return even_3_cutout[detail::cutout_index(cz.x, 6u)][detail::cutout_index(cz.y, 3u)]; };
 
     static const typename scheme<clock_zone<Lyt>>::clock_function even_column_twoddwave_hex_4_clock_function =
-        [](const clock_zone<Lyt>& cz) noexcept { return even_4_cutout[cz.x % 8ul][cz.y % 4ul]; };
+        [](const clock_zone<Lyt>& cz) noexcept
+    { return even_4_cutout[detail::cutout_index(cz.x, 8u)][detail::cutout_index(cz.y, 4u)]; };
 
     if constexpr (is_hexagonal_layout_v<Lyt>)
     {
@@ -563,7 +589,7 @@ static auto use() noexcept
              {{2, 3, 0, 1}},
              {{1, 0, 3, 2}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     return scheme{USE_NAME, use_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 4u, true};
@@ -592,7 +618,7 @@ static auto res() noexcept
              {{1, 2, 3, 0}},
              {{0, 3, 2, 1}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     return scheme{RES_NAME, res_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
@@ -621,7 +647,7 @@ static auto esr() noexcept
              {{1, 2, 3, 0}},
              {{0, 3, 2, 1}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     return scheme{ESR_NAME, esr_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
@@ -650,7 +676,7 @@ static auto cfe() noexcept
              {{0, 1, 0, 1}},
              {{3, 2, 3, 2}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     return scheme{CFE_NAME, cfe_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
@@ -678,7 +704,7 @@ static auto ripple() noexcept
             {{0, 1, 2, 3}},
             {{3, 2, 1, 0}}}};
 
-       return cutout[cz.y % 4ul][cz.x % 4ul];
+       return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
    };
 
    return scheme{RIPPLE_NAME, ripple_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
@@ -707,7 +733,7 @@ static auto srs() noexcept
              {{3, 2, 3, 0}},
              {{0, 1, 2, 1}}}};
 
-        return cutout[cz.y % 4ul][cz.x % 4ul];
+        return cutout[detail::cutout_index(cz.y, 4u)][detail::cutout_index(cz.x, 4u)];
     };
 
     return scheme{SRS_NAME, srs_clock_function, std::min(Lyt::max_fanin_size, 3u), 3u, 4u, true};
@@ -737,7 +763,7 @@ static auto bancs() noexcept
              {{1, 2, 0}},
              {{0, 2, 1}}}};
 
-        return cutout[cz.y % 6ul][cz.x % 3ul];
+        return cutout[detail::cutout_index(cz.y, 6u)][detail::cutout_index(cz.x, 3u)];
     };
 
     return scheme{BANCS_NAME, bancs_clock_function, std::min(Lyt::max_fanin_size, 2u), 2u, 3u, true};

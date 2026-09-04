@@ -10,7 +10,13 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import sidb_100_lattice, sidb_111_lattice, sidb_technology
+from mnt.pyfiction import (
+    sidb_100_lattice,
+    sidb_100_lattice_cube,
+    sidb_111_lattice,
+    sidb_111_lattice_cube,
+    sidb_technology,
+)
 
 
 def test_qca_cell_layout_inheritance():
@@ -27,6 +33,16 @@ def test_qca_cell_layout_inheritance():
 
     for t in layout.adjacent_coordinates((2, 2)):
         assert t in [(1, 2), (2, 1), (3, 2), (2, 3)]
+
+
+@pytest.mark.parametrize("sidb_lattice", [sidb_100_lattice_cube, sidb_111_lattice_cube])
+def test_cube_coordinate_bounds(sidb_lattice):
+    layout = sidb_lattice(((-2, -1), (1, 1)), "Cube lattice")
+
+    layout.assign_cell_type((-1, 0), sidb_technology.cell_type.NORMAL)
+
+    assert layout.cells() == [(-1, 0)]
+    assert (layout.x_min(), layout.y_min()) == (-2, -1)
 
 
 @pytest.mark.parametrize(

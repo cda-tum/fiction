@@ -463,6 +463,16 @@ TEST_CASE("3-phase 2DDWave", "[clocking-scheme]")
     CHECK(twoddwave3({2 + 3, 2 + 3}) == 1);
 }
 
+TEST_CASE("3-phase clocking repeats across negative cube coordinates", "[clocking-scheme]")
+{
+    using clk_lyt = clocked_layout<cartesian_layout<coords::cube>>;
+
+    const auto twoddwave3 = clocking::twoddwave<clk_lyt>(clocking::num_clks::THREE);
+
+    CHECK(twoddwave3({-1, 0}) == twoddwave3({2, 0}));
+    CHECK(twoddwave3({0, -1}) == twoddwave3({0, 2}));
+}
+
 TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
 {
     using clk_lyt = clocked_layout<cartesian_layout<coords::offset>>;
@@ -543,6 +553,7 @@ TEST_CASE("4-phase 2DDWave", "[clocking-scheme]")
     CHECK(twoddwave4({3 + 4, 3 + 4}) == 2);
 }
 
+// NOLINTNEXTLINE(*-function-size): exhaustive coordinate table
 TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")
@@ -895,6 +906,7 @@ TEST_CASE("3-phase 2DDWaveHex", "[clocking-scheme]")
     }
 }
 
+// NOLINTNEXTLINE(*-function-size): exhaustive coordinate table
 TEST_CASE("4-phase 2DDWaveHex", "[clocking-scheme]")
 {
     SECTION("odd row")

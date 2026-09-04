@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @brief Cartesian grid layout addressed by offset coordinates.
+ * @brief Cartesian grid layout addressed by coordinates.
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
@@ -26,8 +26,10 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -36,8 +38,7 @@ namespace fiction::layouts
 {
 
 /**
- * A layout type that utilizes offset coordinates to represent a Cartesian grid. Its faces are organized in the
- * following way:
+ * A layout type that utilizes coordinates to represent a Cartesian grid. Its faces are organized in the following way:
  *
  * \verbatim
    +-------+-------+-------+-------+
@@ -68,8 +69,20 @@ class cartesian_layout
 
     struct cartesian_layout_storage
     {
-        explicit cartesian_layout_storage(const aspect_ratio& ar) noexcept : dimension{ar} {};
+        /**
+         * Creates storage whose minimum is the origin and whose maximum is `ar`.
+         *
+         * @param ar Maximum coordinate.
+         */
+        explicit cartesian_layout_storage(const aspect_ratio& ar) noexcept : minimum{0, 0, 0}, dimension{ar}
+        {
+            assert(minimum.x <= dimension.x && minimum.y <= dimension.y && minimum.z <= dimension.z &&
+                   "Layout maximum must not be below the origin");
+        }
 
+        /** Minimum coordinate. */
+        coordinate minimum;
+        /** Maximum coordinate. */
         aspect_ratio dimension;
     };
 
@@ -85,6 +98,7 @@ class cartesian_layout
      * in the ASCII layout above `ar = (3,2)`. Consequently, with `ar = (0,0)`, the layout has exactly one coordinate.
      *
      * @param ar Highest possible position in the layout.
+     * @pre No component of `ar` is below the origin.
      */
     explicit cartesian_layout(const aspect_ratio& ar = {}) :
             strg{std::make_shared<cartesian_layout_storage>(initialize_dimension(ar))}
@@ -127,6 +141,33 @@ class cartesian_layout
 
 #pragma region Structural properties
     /**
+     * Returns the layout's minimum x-coordinate.
+     *
+     * @return Minimum x-coordinate.
+     */
+    [[nodiscard]] auto x_min() const noexcept
+    {
+        return strg->minimum.x;
+    }
+    /**
+     * Returns the layout's minimum y-coordinate.
+     *
+     * @return Minimum y-coordinate.
+     */
+    [[nodiscard]] auto y_min() const noexcept
+    {
+        return strg->minimum.y;
+    }
+    /**
+     * Returns the layout's minimum z-coordinate.
+     *
+     * @return Minimum z-coordinate.
+     */
+    [[nodiscard]] auto z_min() const noexcept
+    {
+        return strg->minimum.z;
+    }
+    /**
      * Returns the layout's x-dimension, i.e., returns the biggest x-value that still belongs to the layout.
      *
      * @return x-dimension.
@@ -160,16 +201,61 @@ class cartesian_layout
      */
     [[nodiscard]] auto area() const noexcept
     {
-        return fiction::layouts::coords::area_of(strg->dimension);
+        if constexpr (std::is_same_v<coordinate, coords::siqad>)
+        {
+            return (dimension_size(x_min(), x()) + 1) *
+                   ((2 * dimension_size(y_min(), y())) + dimension_size(z_min(), z()) + 1);
+        }
+
+        return (dimension_size(x_min(), x()) + 1) * (dimension_size(y_min(), y()) + 1);
     }
     /**
      * Updates the layout's dimensions, effectively resizing it.
      *
      * @param ar New aspect ratio.
+     * @pre No component of `ar` is below the origin.
      */
     void resize(const aspect_ratio& ar) noexcept
     {
-        strg->dimension = initialize_dimension(ar);
+        const coordinate origin{0, 0, 0};
+        const auto       initialized_maximum = initialize_dimension(ar);
+
+        assert(origin.x <= initialized_maximum.x && origin.y <= initialized_maximum.y &&
+               origin.z <= initialized_maximum.z && "Layout maximum must not be below the origin");
+
+        strg->minimum   = origin;
+        strg->dimension = initialized_maximum;
+    }
+    /**
+     * Updates the layout's inclusive minimum and maximum coordinates, effectively resizing it.
+     *
+     * This overload is available for cube-coordinate layouts.
+     *
+     * @param minimum New minimum coordinate.
+     * @param maximum New maximum coordinate.
+     * @pre No component of `minimum` exceeds the corresponding component of `maximum`.
+     * @throws std::overflow_error If the inclusive layout area exceeds `uint64_t`.
+     */
+    void resize(const coordinate& minimum, const coordinate& maximum)
+        requires std::is_same_v<coordinate, coords::cube>
+    {
+        const coordinate initialized_minimum{minimum.x, minimum.y, minimum.z};
+        const coordinate initialized_maximum{maximum.x, maximum.y, maximum.z};
+
+        assert(initialized_minimum.x <= initialized_maximum.x && initialized_minimum.y <= initialized_maximum.y &&
+               initialized_minimum.z <= initialized_maximum.z &&
+               "Minimum coordinate must not exceed maximum coordinate");
+
+        const auto width  = dimension_size(initialized_minimum.x, initialized_maximum.x) + 1;
+        const auto height = dimension_size(initialized_minimum.y, initialized_maximum.y) + 1;
+
+        if (height > std::numeric_limits<uint64_t>::max() / width)
+        {
+            throw std::overflow_error{"Layout area exceeds uint64_t"};
+        }
+
+        strg->minimum   = initialized_minimum;
+        strg->dimension = initialized_maximum;
     }
 
 #pragma endregion
@@ -184,13 +270,16 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.y == 0ull)
-        {
-            return c;
-        }
-
         auto nc = c;
-        --nc.y;
+
+        if (c.y < y_min())
+        {
+            nc.d = 1;
+        }
+        else if (c.y > y_min())
+        {
+            --nc.y;
+        }
 
         return nc;
     }
@@ -204,14 +293,17 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_east(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == x() || c.y == 0ull)
-        {
-            return c;
-        }
-
         auto nec = c;
-        ++nec.x;
-        --nec.y;
+
+        if (c.x > x() || c.y < y_min())
+        {
+            nec.d = 1;
+        }
+        else if (c.x < x() && c.y > y_min())
+        {
+            ++nec.x;
+            --nec.y;
+        }
 
         return nec;
     }
@@ -295,11 +387,11 @@ class cartesian_layout
     {
         auto swc = c;
 
-        if (c.y > y())
+        if (c.x < x_min() || c.y > y())
         {
             swc.d = 1;
         }
-        else if (c.x > 0ull && c.y < y())
+        else if (c.x > x_min() && c.y < y())
         {
             --swc.x;
             ++swc.y;
@@ -316,13 +408,16 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull)
-        {
-            return c;
-        }
-
         auto wc = c;
-        --wc.x;
+
+        if (c.x < x_min())
+        {
+            wc.d = 1;
+        }
+        else if (c.x > x_min())
+        {
+            --wc.x;
+        }
 
         return wc;
     }
@@ -336,14 +431,17 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType north_west(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.x == 0ull || c.y == 0ull)
-        {
-            return c;
-        }
-
         auto nwc = c;
-        --nwc.x;
-        --nwc.y;
+
+        if (c.x < x_min() || c.y < y_min())
+        {
+            nwc.d = 1;
+        }
+        else if (c.x > x_min() && c.y > y_min())
+        {
+            --nwc.x;
+            --nwc.y;
+        }
 
         return nwc;
     }
@@ -378,13 +476,16 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr OffsetCoordinateType below(const OffsetCoordinateType& c) const noexcept
     {
-        if (c.z == 0ull)
-        {
-            return c;
-        }
-
         auto bc = c;
-        --bc.z;
+
+        if (c.z < z_min())
+        {
+            bc.d = 1;
+        }
+        else if (c.z > z_min())
+        {
+            --bc.z;
+        }
 
         return bc;
     }
@@ -536,7 +637,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_at_northern_border(const OffsetCoordinateType& c) const noexcept
     {
-        return c.y == 0ull;
+        return c.y == y_min();
     }
     /**
      * Returns whether the given coordinate is located at the layout's eastern border where x is maximal.
@@ -566,7 +667,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_at_western_border(const OffsetCoordinateType& c) const noexcept
     {
-        return c.x == 0ull;
+        return c.x == x_min();
     }
     /**
      * Returns whether the given coordinate is located at any of the layout's borders where x or y are either minimal or
@@ -589,7 +690,7 @@ class cartesian_layout
      */
     [[nodiscard]] OffsetCoordinateType northern_border_of(const OffsetCoordinateType& c) const noexcept
     {
-        return {c.x, 0ull, c.z};
+        return {c.x, y_min(), c.z};
     }
     /**
      * Returns the coordinate with the same y and z values as a given coordinate but that is located at the layout's
@@ -622,7 +723,7 @@ class cartesian_layout
      */
     [[nodiscard]] OffsetCoordinateType western_border_of(const OffsetCoordinateType& c) const noexcept
     {
-        return {0ull, c.y, c.z};
+        return {x_min(), c.y, c.z};
     }
     /**
      * Returns whether the given coordinate is located in the ground layer where z is minimal.
@@ -632,7 +733,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_ground_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z == decltype(c.z){0};
+        return c.z == z_min();
     }
     /**
      * Returns whether the given coordinate is located in a crossing layer where z is not minimal.
@@ -642,7 +743,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_crossing_layer(const OffsetCoordinateType& c) const noexcept
     {
-        return c.z > decltype(c.z){0};
+        return c.z > z_min();
     }
     /**
      * Returns whether the given coordinate is located within the layout bounds.
@@ -652,7 +753,7 @@ class cartesian_layout
      */
     [[nodiscard]] constexpr bool is_within_bounds(const OffsetCoordinateType& c) const noexcept
     {
-        return c.x <= x() && c.y <= y() && c.z <= z();
+        return x_min() <= c.x && c.x <= x() && y_min() <= c.y && c.y <= y() && z_min() <= c.z && c.z <= z();
     }
 
 #pragma endregion
@@ -673,8 +774,9 @@ class cartesian_layout
     [[nodiscard]] auto coordinates(const OffsetCoordinateType& start = {}, const OffsetCoordinateType& stop = {}) const
     {
         return std::ranges::subrange{
-            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop}};
+            coords::coordinate_iterator{strg->dimension, start.is_dead() ? strg->minimum : start, strg->minimum},
+            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop,
+                                        strg->minimum}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout between `start` and `stop`. The iteration order is
@@ -690,8 +792,9 @@ class cartesian_layout
                             const OffsetCoordinateType& stop = {}) const
     {
         mockturtle::detail::foreach_element(
-            coords::coordinate_iterator{strg->dimension, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop},
+            coords::coordinate_iterator{strg->dimension, start.is_dead() ? strg->minimum : start, strg->minimum},
+            coords::coordinate_iterator{strg->dimension, stop.is_dead() ? strg->dimension.get_dead() : stop,
+                                        strg->minimum},
             std::forward<Fn>(fn));
     }
     /**
@@ -706,13 +809,14 @@ class cartesian_layout
     [[nodiscard]] auto ground_coordinates(const OffsetCoordinateType& start = {},
                                           const OffsetCoordinateType& stop  = {}) const
     {
-        assert(start.z == 0 && stop.z == 0);
+        assert((start.is_dead() || start.z == z_min()) && (stop.is_dead() || stop.z == z_min()));
 
-        const auto ground_layer = aspect_ratio{x(), y(), 0};
+        const auto ground_min = coordinate{x_min(), y_min(), z_min()};
+        const auto ground_max = coordinate{x(), y(), z_min()};
 
         return std::ranges::subrange{
-            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop}};
+            coords::coordinate_iterator{ground_max, start.is_dead() ? ground_min : start, ground_min},
+            coords::coordinate_iterator{ground_max, stop.is_dead() ? ground_max.get_dead() : stop, ground_min}};
     }
     /**
      * Applies a function to all coordinates accessible in the layout's ground layer between `start` and `stop`. The
@@ -727,13 +831,14 @@ class cartesian_layout
     void foreach_ground_coordinate(Fn&& fn, const OffsetCoordinateType& start = {},
                                    const OffsetCoordinateType& stop = {}) const
     {
-        assert(start.z == 0 && stop.z == 0);
+        assert((start.is_dead() || start.z == z_min()) && (stop.is_dead() || stop.z == z_min()));
 
-        const auto ground_layer = aspect_ratio{x(), y(), 0};
+        const auto ground_min = coordinate{x_min(), y_min(), z_min()};
+        const auto ground_max = coordinate{x(), y(), z_min()};
 
         mockturtle::detail::foreach_element(
-            coords::coordinate_iterator{ground_layer, start.is_dead() ? OffsetCoordinateType{0, 0} : start},
-            coords::coordinate_iterator{ground_layer, stop.is_dead() ? ground_layer.get_dead() : stop},
+            coords::coordinate_iterator{ground_max, start.is_dead() ? ground_min : start, ground_min},
+            coords::coordinate_iterator{ground_max, stop.is_dead() ? ground_max.get_dead() : stop, ground_min},
             std::forward<Fn>(fn));
     }
     /**
@@ -829,6 +934,22 @@ class cartesian_layout
 
   private:
     storage strg;
+
+    /**
+     * Returns the distance between a minimum and maximum coordinate component.
+     *
+     * @tparam CoordinateValue Coordinate component type.
+     * @param minimum Minimum component value.
+     * @param maximum Maximum component value.
+     * @return Distance between `minimum` and `maximum`.
+     */
+    template <typename CoordinateValue>
+    [[nodiscard]] static constexpr uint64_t dimension_size(const CoordinateValue minimum,
+                                                           const CoordinateValue maximum) noexcept
+    {
+        return static_cast<uint64_t>(static_cast<int64_t>(maximum) - static_cast<int64_t>(minimum));
+    }
+
     /*
      * Initializer for a cartesian layout dimension. When using SiQAD coordinates, it will default the z value to 1,
      * such that only complete dimer rows are considered.
@@ -840,7 +961,7 @@ class cartesian_layout
             return OffsetCoordinateType{coord.x, coord.y, 1};
         }
 
-        return coord;
+        return OffsetCoordinateType{coord.x, coord.y, coord.z};
     }
 };
 
