@@ -194,6 +194,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - I/O:
   - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points
+  - SVG and text output now reject padding outside the lattice-site coordinate range
   - SQD readers now reject empty defect labels, invalid numeric values, and invalid Coulomb parameters.
     SQD output escapes lattice names, and defect-matrix readers report oversized indices with the documented exception
 

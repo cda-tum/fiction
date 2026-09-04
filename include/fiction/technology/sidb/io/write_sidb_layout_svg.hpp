@@ -428,6 +428,13 @@ class write_sidb_layout_svg_impl
 class sidb_layout_svg_writer
 {
   public:
+    /**
+     * Creates an SVG writer for a lattice layout.
+     *
+     * @param layout Layout to draw.
+     * @param stream Output stream.
+     * @param p Drawing parameters.
+     */
     sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p) :
             lyt{layout},
             os{stream},
@@ -447,14 +454,20 @@ class sidb_layout_svg_writer
         }
     }
 
+    /**
+     * Draws the lattice and SiDBs with padding around the bounding box.
+     *
+     * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
+     */
     void run() const
     {
         std::stringstream svg_content{};
 
         const auto [min_site, max_site] = lyt.bounding_box();
+        const auto padded_max           = max_site + lattice_site{2, 1, 1};
 
         // sites are drawn one column and one unit cell away from the top-left corner as padding
-        const auto padded = [](const lattice_site& s) noexcept { return lattice_site{s.x + 1, s.y + 1, s.z}; };
+        const auto padded = [](const lattice_site& s) { return s + lattice_site{1, 1}; };
 
         if (ps.lattice_mode == write_sidb_layout_svg_params::sidb_lattice_mode::SHOW_LATTICE)
         {
@@ -477,10 +490,6 @@ class sidb_layout_svg_writer
                     x * 10, y * 10, sidb_color, 1.0, sidb_edge_color, ps.sidb_border_width);
             });
 
-        // the view box extends two columns and one unit cell past the bottom-right site
-        const auto padded_max = max_site.z == 1 ? lattice_site{max_site.x + 2, max_site.y + 2, 0} :
-                                                  lattice_site{max_site.x + 2, max_site.y + 1, 1};
-
         const auto [min_x, min_y] = lyt.get_lattice().nm_position(min_site);
         const auto [max_x, max_y] = lyt.get_lattice().nm_position(padded_max);
 
@@ -500,12 +509,30 @@ class sidb_layout_svg_writer
     }
 
   private:
-    const layout&                      lyt;
-    std::ostream&                      os;
+    /**
+     * Layout to draw.
+     */
+    const layout& lyt;
+    /**
+     * Output stream.
+     */
+    std::ostream& os;
+    /**
+     * Drawing parameters.
+     */
     const write_sidb_layout_svg_params ps;
-    std::string                        background_color{};
-    std::string                        sidb_color{};
-    std::string                        sidb_edge_color{};
+    /**
+     * Background color.
+     */
+    std::string background_color{};
+    /**
+     * SiDB fill color.
+     */
+    std::string sidb_color{};
+    /**
+     * SiDB border color.
+     */
+    std::string sidb_edge_color{};
 };
 
 }  // namespace detail
@@ -567,6 +594,7 @@ void write_sidb_layout_svg(const Lyt& lyt, const std::string_view& filename,
  * @param lyt Layout to draw.
  * @param os Output stream to write into.
  * @param ps Drawing parameters.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
 inline void write_sidb_layout_svg(const layout& lyt, std::ostream& os, const write_sidb_layout_svg_params& ps = {})
 {
@@ -580,6 +608,7 @@ inline void write_sidb_layout_svg(const layout& lyt, std::ostream& os, const wri
  * @param filename File to write into.
  * @param ps Drawing parameters.
  * @throws std::ofstream::failure if the file cannot be opened.
+ * @throws std::out_of_range if padding exceeds the lattice-site coordinate range.
  */
 inline void write_sidb_layout_svg(const layout& lyt, const std::string_view& filename,
                                   const write_sidb_layout_svg_params& ps = {})
