@@ -231,8 +231,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
     SECTION("defect-free")
     {
         static const auto black_list =
-            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_100_cell_clk_lyt>(gate_lyt,
-                                                                                                 defect_layout);
+            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_cell_clk_lyt>(gate_lyt, defect_layout);
 
         CHECK(black_list.empty());
     }
@@ -241,8 +240,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         defect_layout.assign_defect(site_at_row(30, 45), defect{defect_type::SI_VACANCY});
 
         static const auto black_list =
-            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_100_cell_clk_lyt>(gate_lyt,
-                                                                                                 defect_layout);
+            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_cell_clk_lyt>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 
@@ -261,8 +259,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         defect_layout.assign_defect(site_at_row(30, 45), defect{defect_type::SILOXANE});
 
         static const auto black_list =
-            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_100_cell_clk_lyt>(gate_lyt,
-                                                                                                 defect_layout);
+            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_cell_clk_lyt>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 
@@ -279,8 +276,7 @@ TEST_CASE("SiDB Bestagon gate library with simple defects", "[sidb-surface-analy
         defect_layout.assign_defect(site_at_row(45, 34), defect{defect_type::RAISED_SI});
 
         static const auto black_list =
-            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_100_cell_clk_lyt>(gate_lyt,
-                                                                                                 defect_layout);
+            surface_analysis<bestagon_library, hex_even_col_gate_clk_lyt, sidb_cell_clk_lyt>(gate_lyt, defect_layout);
 
         CHECK(black_list.size() == 1);
 

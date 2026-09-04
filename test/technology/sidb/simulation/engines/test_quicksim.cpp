@@ -1030,7 +1030,7 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 {
     SECTION("no input applied")
     {
-        const auto            lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        const auto            lyt = blueprints::and_gate_111();
         const quicksim_params params{.sim_params      = simulation_parameters{2, -0.32, 5.6, 5},
                                      .iteration_steps = 3000,
                                      .alpha           = 0.5};
@@ -1071,7 +1071,7 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
     SECTION("10 input applied")
     {
-        auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        auto lyt = blueprints::and_gate_111();
         lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);
         lyt.assign_cell_type({23, 1, 1}, sidb_technology::cell_type::EMPTY);
 
@@ -1115,7 +1115,7 @@ TEST_CASE("QuickSim AND gate simulation on the Si-111 surface", "[quicksim]")
 
     SECTION("timeout with 100 ms")
     {
-        auto                  lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>());
+        auto                  lyt = blueprints::and_gate_111();
         const quicksim_params params{.sim_params      = simulation_parameters{2, -0.32, 5.6, 5},
                                      .iteration_steps = 300000,
                                      .alpha           = 0.5,

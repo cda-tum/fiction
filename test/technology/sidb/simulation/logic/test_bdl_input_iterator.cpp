@@ -290,7 +290,7 @@ TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
 
 TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_and_gate();
 
     const auto& lat = lyt;
 
@@ -431,7 +431,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 
 TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_and_gate();
 
     const auto& lat = lyt;
 

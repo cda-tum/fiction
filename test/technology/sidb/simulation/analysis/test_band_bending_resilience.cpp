@@ -38,11 +38,9 @@ using namespace fiction::sidb::simulation::analysis;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
 
-using test_layout = sidb_cell_clk_lyt_siqad;
-
 TEST_CASE("Single SiDB", "[band-bending-resilience]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_and_gate<test_layout>());
+    const auto lyt = blueprints::bestagon_and_gate();
 
     constexpr auto params =
         band_bending_resilience_params{.assess_population_stability_params = physical_population_stability_params{

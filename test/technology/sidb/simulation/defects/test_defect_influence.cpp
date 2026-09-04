@@ -164,7 +164,7 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
 
 TEST_CASE("novel designed AND Gate influence distance function which fails again", "[defect-influence]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_and<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_and();
 
     const auto& cube_lyt = lyt;
 
@@ -205,7 +205,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 TEST_CASE("Tests for determining the defect influence distance for an AND gate when considering ground state changes",
           "[defect-influence]")
 {
-    const auto  lyt      = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto  lyt      = blueprints::siqad_and_gate();
     const auto& lyt_cube = lyt;
 
     SECTION("Si Vacancy")
