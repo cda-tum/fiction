@@ -124,3 +124,7 @@ The first command serves an HTML preview with live reload. The second writes
 `docs/_build/html/index.html` and exits. The third checks external links and
 writes its report to `docs/_build/linkcheck`. Additional arguments after `--`
 are passed to Sphinx. Read the Docs uses the same non-interactive build.
+
+The docs dependency group requires Python 3.12 or newer. `uv.lock` records the
+versions used by local and hosted builds. HTML builds also produce `llms.txt`,
+`llms-full.txt`, and a Markdown copy of each page alongside its HTML file.

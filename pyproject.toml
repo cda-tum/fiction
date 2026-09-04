@@ -119,11 +119,7 @@ FICTION_PYTHON_BINDINGS = "ON"
 
 [[tool.scikit-build.overrides]]
 if.env.READTHEDOCS = "True"
-inherit.cmake.define = "append"
-cmake.define.FICTION_ENABLE_IPO = "OFF"
 cmake.args = [
-    "-DCMAKE_VERBOSE_MAKEFILE=ON",
-    "-DCMAKE_CXX_FLAGS=-O0",
     "-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=mold",
     "-DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=mold",
     "-DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=mold"
@@ -334,16 +330,14 @@ build = [
     "nanobind~=3.0.0",
 ]
 docs = [
-    "sphinx==8.1.3; python_version < '3.11'",
-    "sphinx==8.2.3; python_version >= '3.11'",
-    "breathe==4.36.0",
-    "myst-parser==4.0.1; python_version < '3.11'",
-    "myst-parser==5.1.0; python_version >= '3.11'",
-    "furo==2025.12.19",
-    "sphinx-design==0.6.1; python_version < '3.11'",
-    "sphinx-design==0.7.0; python_version >= '3.11'",
-    "sphinx-copybutton==0.5.2",
-    "sphinx-autobuild==2025.8.25; python_version >= '3.11'",
+    "sphinx>=8.2.3",
+    "breathe>=4.36.0",
+    "myst-parser>=5.1.0",
+    "furo>=2025.12.19",
+    "sphinx-design>=0.7.0",
+    "sphinx-copybutton>=0.5.2",
+    "sphinx-autobuild>=2025.8.25",
+    "sphinx-llm>=1.0.0",
 ]
 test = [
     "pytest>=9.0.1",
@@ -355,3 +349,6 @@ dev = [
     { include-group = "test" },
     "nox>=2025.11.12",
 ]
+
+[tool.uv.dependency-groups]
+docs = { requires-python = ">=3.12" }

@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
   - Added `nox -s docs` for local previews, link checks, and Read the Docs builds.
   - Added synchronized C++/Python tabs and code copy buttons.
+  - Added `llms.txt`, `llms-full.txt`, and Markdown exports of documentation pages.
 
 - Python bindings:
 

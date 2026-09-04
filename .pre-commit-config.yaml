@@ -90,7 +90,6 @@ repos:
       - id: rumdl
         files: ^docs/.*\.md$
         exclude: (^|/)AGENTS\.md$
-        args: [--flavor, myst]
         priority: 8
       - id: rumdl-fmt
         files: ^docs/.*\.md$
@@ -168,7 +167,7 @@ repos:
         additional_dependencies:
           - nox
           - pytest
-          - sphinx==8.2.3
+          - sphinx>=8.2.3
           # `experiments/` plots with `matplotlib` and holds its surfaces in `numpy` arrays
           - matplotlib
           - numpy
