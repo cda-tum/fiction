@@ -70,13 +70,20 @@ struct lattice_site
      * @param x_coord Steps along the first lattice vector.
      * @param y_coord Steps along the second lattice vector.
      * @param basis_site Basis site, 0 or 1.
+     * @throws std::out_of_range if a coordinate exceeds the lattice-site range.
      */
     template <std::integral X, std::integral Y, std::integral Z>
-    constexpr lattice_site(const X x_coord, const Y y_coord, const Z basis_site) noexcept :
-            x{static_cast<int32_t>(x_coord)},
-            y{static_cast<int32_t>(y_coord)},
+    constexpr lattice_site(const X x_coord, const Y y_coord, const Z basis_site) :
             z{static_cast<uint8_t>(static_cast<uint8_t>(basis_site) & 1u)}
-    {}
+    {
+        // Unary plus promotes character and bool coordinates to types accepted by std::in_range.
+        if (!std::in_range<int32_t>(+x_coord) || !std::in_range<int32_t>(+y_coord))
+        {
+            throw std::out_of_range("Coordinate exceeds the lattice-site range");
+        }
+        x = static_cast<int32_t>(+x_coord);
+        y = static_cast<int32_t>(+y_coord);
+    }
     /**
      * Creates the site `(x, y, 0)`.
      *
@@ -84,11 +91,10 @@ struct lattice_site
      * @tparam Y Integral type of `y`.
      * @param x_coord Steps along the first lattice vector.
      * @param y_coord Steps along the second lattice vector.
+     * @throws std::out_of_range if a coordinate exceeds the lattice-site range.
      */
     template <std::integral X, std::integral Y>
-    constexpr lattice_site(const X x_coord, const Y y_coord) noexcept :
-            x{static_cast<int32_t>(x_coord)},
-            y{static_cast<int32_t>(y_coord)}
+    constexpr lattice_site(const X x_coord, const Y y_coord) : lattice_site{x_coord, y_coord, 0}
     {}
     /**
      * Compares two sites for equality.
