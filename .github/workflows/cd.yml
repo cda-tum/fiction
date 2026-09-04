@@ -20,7 +20,7 @@ jobs:
     name: 🐍 Packaging
     permissions:
       contents: read # required to check out the repository
-    uses: ./.github/workflows/packaging-sdist.yml
+    uses: $/.github/workflows/packaging-sdist.yml
 
   build-wheels:
     name: 🐍 Packaging
@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         runs-on: [ubuntu-24.04, ubuntu-24.04-arm, macos-15, windows-2025]
-    uses: ./.github/workflows/packaging-wheels.yml
+    uses: $/.github/workflows/packaging-wheels.yml
     with:
       runs-on: ${{ matrix.runs-on }}
 
@@ -76,7 +76,7 @@ jobs:
       attestations: write # required to publish the build provenance attestation on release
       id-token: write # required by actions/attest-build-provenance to mint the attestation
     if: github.event_name == 'release' && github.event.action == 'published'
-    uses: ./.github/workflows/docker.yml
+    uses: $/.github/workflows/docker.yml
     with:
       push: true
     secrets:
