@@ -117,10 +117,9 @@ If you use an algorithm or gate library, please also cite its corresponding pape
 
 ## Related Publications
 
-The bibliography also includes FCN, QCA, and SiDB publications co-authored by Marcel Walter.
+The bibliography also includes further papers published by the Chair for Design Automation at TUM.
 These cover related tools, technology studies, and design methods; inclusion does not imply
-that a method is implemented in _fiction_. Workshop presentations and conference papers are
-listed separately when they are distinct publications.
+that a method is implemented in _fiction_.
 
 ```{bibliography}
 :all:
