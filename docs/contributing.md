@@ -44,6 +44,7 @@ Nevertheless, please try to follow the guidelines below as well as you can to he
 - Document your code thoroughly and write readable code.
 - Keep your code clean. Remove any debug statements, left-over comments, or code unrelated to your contribution.
 - Follow the style and conventions used throughout the project.
+- Enable EditorConfig support in your editor to apply the repository's indentation, line endings, and final-newline settings. The formatter hooks check the full style.
 - Run `clang-format` and `clang-tidy` to check your code for style and linting errors before committing.
 - We recommend installing [prek](https://prek.j178.dev/) and running `prek install` once so that formatting and linting checks run automatically before every commit.
 
