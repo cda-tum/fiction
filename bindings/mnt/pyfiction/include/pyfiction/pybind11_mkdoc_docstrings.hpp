@@ -14745,16 +14745,57 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice =
-R"doc(Looks up a supported silicon lattice by name.
+R"doc(Reads explicit two-site lattice geometry, or a predefined lattice when
+geometry is absent.
 
 Args:
     name: Lattice name from the SQD layer.
+    element: Lattice definition element.
 
 Returns:
-    The named lattice.
+    The lattice defined by the layer.
 
 Raises:
-    sqd_parsing_error: if the lattice name is unsupported.
+    sqd_parsing_error: if the geometry is incomplete, the basis count
+                       is not two, or a name-only lattice is unknown.
+    std::invalid_argument: if a geometry component is not numeric.
+    std::out_of_range: if a geometry component exceeds the range of a
+                       double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_number =
+R"doc(Parses a finite lattice number without trailing non-whitespace
+characters.
+
+Args:
+    text: Numeric XML text or attribute.
+
+Returns:
+    The parsed number.
+
+Raises:
+    sqd_parsing_error: if the number is missing, non-finite, or has
+                       trailing characters.
+    std::invalid_argument: if the text is not numeric.
+    std::out_of_range: if the number exceeds the range of a double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_vector =
+R"doc(Parses a lattice vector or basis site with finite components.
+
+Args:
+    element: Vector element with x and y attributes.
+
+Returns:
+    The vector.
+
+Raises:
+    sqd_parsing_error: if the element or a component is missing or
+                       malformed.
+    std::invalid_argument: if a component is not numeric.
+    std::out_of_range: if a component exceeds the range of a double.
 
 )doc";
 
@@ -14900,9 +14941,21 @@ static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_wri
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks =
+R"doc(Appends the SiDB or QCA cell blocks to the SQD design.
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks = R"doc()doc";
+Args:
+    design: SQD design buffer.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks =
+R"doc(Appends surface defect blocks when the layout exposes defects.
+
+Args:
+    design: SQD design buffer.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_get_defect_type_name = R"doc()doc";
 
@@ -15039,6 +15092,9 @@ static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_5 =
 R"doc(Reads an SQD file from a stream into an `sidb::layout`. The lattice
 comes from the file's lattice definition; SiDBs and surface defects
 are placed at the `(n, m, l)` lattice coordinates the file names.
+Explicit geometry must contain finite vectors and two basis sites.
+Without geometry, the reader accepts the two predefined reconstruction
+names and defaults to H-Si(100)-2x1 when the name is absent.
 
 Args:
     is: The input stream to read from.
@@ -15048,8 +15104,8 @@ Returns:
     The layout read from the stream.
 
 Raises:
-    sqd_parsing_error: if the file is malformed or names an unknown
-                       lattice.
+    sqd_parsing_error: if the file is malformed or a name-only lattice
+                       is unknown.
 
 )doc";
 
@@ -15065,8 +15121,8 @@ Returns:
     The layout read from the file.
 
 Raises:
-    sqd_parsing_error: if the file is malformed or names an unknown
-                       lattice.
+    sqd_parsing_error: if the file is malformed or a name-only lattice
+                       is unknown.
     std::ifstream::failure: if the file cannot be opened.
 
 )doc";
