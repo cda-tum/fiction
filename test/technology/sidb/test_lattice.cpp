@@ -77,6 +77,23 @@ TEST_CASE("Lattice sites", "[lattice]")
         CHECK(lattice_site{3, 4, 0} - lattice_site{2, 3, 1} == lattice_site{1, 0, 1});
         CHECK(lattice_site{0, 0, 0} - lattice_site{2, 1} == lattice_site{-2, -1, 0});
     }
+    SECTION("arithmetic rejects unrepresentable sites")
+    {
+        constexpr auto min_coordinate = std::numeric_limits<int32_t>::min();
+        constexpr auto max_coordinate = std::numeric_limits<int32_t>::max();
+        CHECK_THROWS_AS((lattice_site{max_coordinate, 0} + lattice_site{1, 0}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{min_coordinate, 0} + lattice_site{-1, 0}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, max_coordinate} + lattice_site{0, 1}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, min_coordinate} + lattice_site{0, -1}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, max_coordinate, 1} + lattice_site{0, 0, 1}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{max_coordinate, 0} - lattice_site{-1, 0}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{min_coordinate, 0} - lattice_site{1, 0}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, max_coordinate} - lattice_site{0, -1}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, min_coordinate} - lattice_site{0, 1}), std::out_of_range);
+        CHECK_THROWS_AS((lattice_site{0, min_coordinate, 0} - lattice_site{0, 0, 1}), std::out_of_range);
+        CHECK(lattice_site{0, min_coordinate, 1} + lattice_site{0, -1, 1} == lattice_site{0, min_coordinate, 0});
+        CHECK(lattice_site{0, max_coordinate, 0} - lattice_site{0, -1, 1} == lattice_site{0, max_coordinate, 1});
+    }
     SECTION("rows")
     {
         CHECK(row_of({4, 0, 0}) == 0);

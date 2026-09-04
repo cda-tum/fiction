@@ -119,10 +119,17 @@ struct lattice_site
      *
      * @param other Site to add.
      * @return Sum of both sites.
+     * @throws std::out_of_range if a result coordinate exceeds the lattice-site range.
      */
-    [[nodiscard]] constexpr lattice_site operator+(const lattice_site& other) const noexcept
+    [[nodiscard]] constexpr lattice_site operator+(const lattice_site& other) const
     {
-        return {x + other.x, y + other.y + (z & other.z), z ^ other.z};
+        const auto result_x = int64_t{x} + other.x;
+        const auto result_y = (int64_t{y} + other.y) + (z & other.z);
+        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
+        {
+            throw std::out_of_range("Lattice-site addition exceeds the coordinate range");
+        }
+        return {result_x, result_y, z ^ other.z};
     }
     /**
      * Subtracts another site from this one, borrowing from the previous unit cell along the second lattice vector when
@@ -130,10 +137,17 @@ struct lattice_site
      *
      * @param other Site to subtract.
      * @return Difference of both sites.
+     * @throws std::out_of_range if a result coordinate exceeds the lattice-site range.
      */
-    [[nodiscard]] constexpr lattice_site operator-(const lattice_site& other) const noexcept
+    [[nodiscard]] constexpr lattice_site operator-(const lattice_site& other) const
     {
-        return {x - other.x, y - other.y - static_cast<int32_t>(z == 0u && other.z != 0u), z ^ other.z};
+        const auto result_x = int64_t{x} - other.x;
+        const auto result_y = (int64_t{y} - other.y) - static_cast<int64_t>(z == 0u && other.z != 0u);
+        if (!std::in_range<int32_t>(result_x) || !std::in_range<int32_t>(result_y))
+        {
+            throw std::out_of_range("Lattice-site subtraction exceeds the coordinate range");
+        }
+        return {result_x, result_y, z ^ other.z};
     }
     /**
      * Returns a string representation of the form `"(x,y,z)"`.

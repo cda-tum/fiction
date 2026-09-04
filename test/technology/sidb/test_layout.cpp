@@ -23,8 +23,11 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <cstdlib>
 #include <functional>
 #include <limits>
+#include <new>
+#include <optional>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -32,6 +35,117 @@
 using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
+
+namespace
+{
+/**
+ * Number of successful allocations before the test injects a failure; unset disables injection.
+ */
+// NOLINTNEXTLINE(cppcoreguidelines-avoid-non-const-global-variables): Test allocation control.
+thread_local std::optional<std::size_t> allocation_budget{};
+}  // namespace
+/**
+ * Allocates memory and injects a failure when the test allocation budget is exhausted.
+ *
+ * @param size Requested byte count.
+ * @return Allocated memory.
+ * @throws std::bad_alloc if allocation fails or the test exhausts its budget.
+ */
+void* operator new(const std::size_t size)
+{
+    if (allocation_budget.has_value())
+    {
+        if (*allocation_budget == 0)
+        {
+            allocation_budget.reset();
+            throw std::bad_alloc{};
+        }
+        --*allocation_budget;
+    }
+    // The global new replacement must use malloc to avoid recursion.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
+    if (auto* const memory = std::malloc(size == 0 ? 1 : size))
+    {
+        return memory;
+    }
+    throw std::bad_alloc{};
+}
+/**
+ * Releases memory allocated by the test's global allocation replacement.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory) noexcept
+{
+    // Matches malloc in the global new replacement.
+    // NOLINTNEXTLINE(cppcoreguidelines-no-malloc,cppcoreguidelines-owning-memory)
+    std::free(memory);
+}
+/**
+ * Releases a sized allocation through the matching global deallocator.
+ *
+ * @param memory Memory to release.
+ */
+void operator delete(void* const memory, std::size_t) noexcept
+{
+    ::operator delete(memory);
+}
+namespace
+{
+/**
+ * Exercises every allocation failure in a layout update and checks that each failure preserves the layout.
+ *
+ * @param original Layout before the update.
+ * @param update Mutation to exercise.
+ * @return Layout after a successful update.
+ */
+layout check_allocation_failures(const layout& original, const std::function<void(layout&)>& update)
+{
+    for (std::size_t failure = 0;; ++failure)
+    {
+        auto candidate = original;
+        try
+        {
+            allocation_budget = failure;
+            update(candidate);
+            allocation_budget.reset();
+            return candidate;
+        }
+        catch (const std::bad_alloc&)
+        {
+            allocation_budget.reset();
+            CHECK(candidate == original);
+        }
+        catch (...)
+        {
+            allocation_budget.reset();
+            throw;
+        }
+    }
+}
+}  // namespace
+
+TEST_CASE("Layout updates preserve data when allocation fails", "[layout]")
+{
+    SECTION("cell insertion")
+    {
+        const auto result = check_allocation_failures(
+            layout{}, [](layout& lyt) { lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL); });
+        CHECK(result.num_cells() == 1);
+        CHECK(result.get_cell_type({0, 0, 0}) == sidb_technology::cell_type::NORMAL);
+    }
+    SECTION("defect movement")
+    {
+        layout       original{};
+        const defect vacancy{defect_type::SI_VACANCY, -1, 5.6, 5.0};
+        original.assign_defect({0, 0, 0}, vacancy);
+        const auto result =
+            check_allocation_failures(original, [](layout& lyt) { lyt.move_defect({0, 0, 0}, {1, 0, 0}); });
+        CHECK(result.num_defects() == 1);
+        CHECK(result.get_defect({0, 0, 0}).type == defect_type::NONE);
+        CHECK(result.get_defect({1, 0, 0}) == vacancy);
+    }
+}
 
 TEST_CASE("Empty layout", "[layout]")
 {
@@ -203,6 +317,14 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.num_defects() == 2);
         CHECK(lyt.get_defect({5, 2, 0}).type == defect_type::NONE);
         CHECK(lyt.get_defect({6, 2, 0}) == charged);
+    }
+    SECTION("moves from empty sites and to the same site preserve defects")
+    {
+        const auto original = lyt;
+        lyt.move_defect({9, 9, 0}, {5, 2, 0});
+        CHECK(lyt == original);
+        lyt.move_defect({5, 2, 0}, {5, 2, 0});
+        CHECK(lyt == original);
     }
     SECTION("affected SiDBs")
     {

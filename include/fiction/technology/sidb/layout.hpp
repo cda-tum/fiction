@@ -103,6 +103,7 @@ class layout
 
     /**
      * Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes the SiDB from the site.
+     * Allocation failure leaves the cells unchanged.
      *
      * @param s Site.
      * @param ct Cell type to assign.
@@ -126,8 +127,16 @@ class layout
         }
         else if (ct != cell_type::EMPTY)
         {
-            cell_sites.insert(it, s);
-            cell_types.insert(std::next(cell_types.cbegin(), static_cast<std::ptrdiff_t>(i)), ct);
+            const auto inserted = cell_sites.insert(it, s);
+            try
+            {
+                cell_types.insert(std::next(cell_types.cbegin(), static_cast<std::ptrdiff_t>(i)), ct);
+            }
+            catch (...)
+            {
+                cell_sites.erase(inserted);
+                throw;
+            }
         }
     }
     /**
@@ -331,6 +340,7 @@ class layout
     }
     /**
      * Moves the defect at one site to another, replacing whatever defect the target site held.
+     * An empty source or identical source and target leaves the defects unchanged.
      *
      * @param source Site holding the defect.
      * @param target Site to move the defect to.
@@ -338,7 +348,12 @@ class layout
     void move_defect(const lattice_site& source, const lattice_site& target)
     {
         const auto d = get_defect(source);
+        if (source == target || d.type == model::defect_type::NONE)
+        {
+            return;
+        }
 
+        // Defects and sites have nonthrowing moves; erasure leaves capacity for reinsertion.
         assign_defect(source, model::defect{model::defect_type::NONE});
         assign_defect(target, d);
     }
