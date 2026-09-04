@@ -251,8 +251,11 @@ template <typename Lyt>
                 lyt.foreach_sidb_defect(
                     [&b](const auto& cd)
                     {
-                        if (const auto& [cell, defect] = cd; defect.type != sidb::model::defect_type::NONE &&
-                                                             sidb::model::is_charged_defect_type(defect))
+                        const auto& cell   = cd.first;
+                        const auto& defect = cd.second;
+
+                        if (defect.type != sidb::model::defect_type::NONE &&
+                            sidb::model::is_charged_defect_type(defect))
                         {
                             b.add_sidb_defect_to_potential_landscape(cell, defect);
                         }
