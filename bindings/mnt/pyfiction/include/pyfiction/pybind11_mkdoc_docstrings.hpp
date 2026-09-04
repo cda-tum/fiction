@@ -562,17 +562,11 @@ static const char *mkd_doc_fiction_fcn_unsupported_gate_type_exception_where = R
 
 static const char *mkd_doc_fiction_get_ntk_type_name = R"doc()doc";
 
-static const char *mkd_doc_fiction_get_sidb_lattice_name = R"doc()doc";
-
 static const char *mkd_doc_fiction_get_tech_cell_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_get_tech_impl_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_above = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_assign_charge_state = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_assign_sidb_defect = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_below = R"doc()doc";
 
@@ -604,11 +598,7 @@ static const char *mkd_doc_fiction_has_foreach_outgoing_clocked_zone = R"doc()do
 
 static const char *mkd_doc_fiction_has_foreach_real_pi = R"doc()doc";
 
-static const char *mkd_doc_fiction_has_foreach_sidb_defect = R"doc()doc";
-
 static const char *mkd_doc_fiction_has_foreach_tile = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_charge_state = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_functional_implementations = R"doc()doc";
 
@@ -617,8 +607,6 @@ static const char *mkd_doc_fiction_has_get_gate_ports = R"doc()doc";
 static const char *mkd_doc_fiction_has_get_layout_name = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_get_real_pi = R"doc()doc";
-
-static const char *mkd_doc_fiction_has_get_sidb_defect = R"doc()doc";
 
 static const char *mkd_doc_fiction_has_is_and3 = R"doc()doc";
 
@@ -1046,8 +1034,6 @@ static const char *mkd_doc_fiction_is_cartesian_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_cell_level_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_is_charge_distribution_surface = R"doc()doc";
-
 static const char *mkd_doc_fiction_is_clocked_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_coordinate_layout = R"doc()doc";
@@ -1058,49 +1044,16 @@ static const char *mkd_doc_fiction_is_hexagonal_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_shifted_cartesian_layout = R"doc()doc";
 
-static const char *mkd_doc_fiction_is_sidb_defect_surface = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_sidb_lattice = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_sidb_lattice_100 = R"doc()doc";
-
-static const char *mkd_doc_fiction_is_sidb_lattice_111 = R"doc()doc";
-
 static const char *mkd_doc_fiction_is_tile_based_layout = R"doc()doc";
 
 static const char *mkd_doc_fiction_is_virtual_network_type = R"doc()doc";
 
 static const char *mkd_doc_fiction_layouts = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_all_coordinates_in_spanned_area =
-R"doc(Generates a vector of all coordinates within an area spanned by two
-coordinates.
-
-This function calculates and returns a list of all coordinates within
-a rectangular area defined by two corner coordinates, inclusive of the
-boundaries. The coordinates are generated in a top-to-bottom, left-to-
-right order, covering the entire area between the two specified
-corners.
-
-Args:
-    cell_first_corner: The cell defining the first corner of the area.
-    cell_second_corner: The cell defining the second corner of the
-                        area.
-
-Template Args:
-    CoordinateType: Coordinate Type.
-
-Returns:
-    A vector containing all cells within the specified area.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_are_cell_layouts_identical =
 R"doc(This function checks whether the given layouts `first_lyt` and
-`second_lyt` are identical by comparing various properties such as the
-number of cells, the types of cells, defects (if applicable), and
-charge states (if applicable). The comparison is done in a detailed
-manner depending on the specific layout type.
+`second_lyt` are identical by comparing the number of cells and the
+types of cells.
 
 Args:
     first_lyt: The first layout to compare.
@@ -1932,10 +1885,8 @@ front of `are_cell_layouts_identical`. Different layouts may share a
 digest, so a digest match still has to be confirmed with
 `are_cell_layouts_identical`.
 
-The digest covers the cells and their types, the defects of an
-`sidb::surfaces::defect_surface`, and the charge states of a
-`charge_distribution_surface`. Following `are_cell_layouts_identical`,
-it ignores the layout's aspect ratio.
+The digest covers the cells and their types. Following
+`are_cell_layouts_identical`, it ignores the layout's aspect ratio.
 
 Args:
     lyt: The layout to digest.
@@ -2915,48 +2866,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_convert_layout_to_fiction_coordinates =
-R"doc(Converts the coordinates of a given SiDB cell-level layout (cds and
-defect surface can be layered on top) to alternative coordinates, such
-as `coords::offset` or `coords::cube`. Returns a new layout equivalent
-to the original layout but based on the specified coordinate system.
-
-Args:
-    lyt: The layout that is to be converted to a new layout based on
-         fiction coordinates.
-
-Template Args:
-    LytDest: Source SiDB cell-level layout type.
-    LytSrc: Target SiDB cell-level layout type.
-
-Returns:
-    A new equivalent layout based on fiction coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_convert_layout_to_siqad_coordinates =
-R"doc(Converts the coordinates of a given cell-level layout (cds and defect
-surface can be layered on top) to SiQAD coordinates. A new equivalent
-layout based on SiQAD coordinates is returned.
-
-Args:
-    lyt: The layout that is to be converted to a new layout based on
-         SiQAD coordinates.
-
-Template Args:
-    Lyt: SiDB cell-level layout type based on fiction coordinates,
-         e.g., `coords::offset` or `coords::cube`.
-
-Returns:
-    A new equivalent layout based on SiQAD coordinates.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_coords_area_of =
 R"doc(Computes the area of a given coordinate assuming its origin is (0, 0,
-0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)` by default. The
-exception is SiQAD coordinates, for which it computes :math:`(|x| + 1)
-\cdot (2 \cdot |y| + |z| + 1)`.
+0). Calculates :math:`(|x| + 1) \cdot (|y| + 1)`.
 
 Args:
     coord: Coordinate.
@@ -2977,11 +2889,10 @@ Template Args:
     CoordinateType: Type of coordinate to enumerate.
 
 Note:
-    Only `offset`, `cube`, and `siqad` are supported. This is enforced
-    on the boundary-and-start constructor via a `requires` clause
-    rather than on the class itself, so that the default constructor
-    (required for `std::semiregular`) remains usable for any
-    `CoordinateType`.)doc";
+    Only `offset` and `cube` are supported. This is enforced on the
+    boundary-and-start constructor via a `requires` clause rather than
+    on the class itself, so that the default constructor (required for
+    `std::semiregular`) remains usable for any `CoordinateType`.)doc";
 
 static const char *mkd_doc_fiction_layouts_coords_coordinate_iterator_aspect_ratio =
 R"doc(Boundary within to enumerate. Not `const`:
@@ -3236,20 +3147,6 @@ static const char *mkd_doc_fiction_layouts_coords_cube_y = R"doc(y coordinate.)d
 
 static const char *mkd_doc_fiction_layouts_coords_cube_z = R"doc(z coordinate.)doc";
 
-static const char *mkd_doc_fiction_layouts_coords_from_siqad =
-R"doc(Converts SiQAD coordinates to other coordinates (offset, cube).
-
-Args:
-    coord: SiQAD coordinate to convert.
-
-Template Args:
-    CoordinateType: The desired coordinate type.
-
-Returns:
-    Coordinate of type `CoordinateType`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_coords_offset =
 R"doc(Unsigned offset coordinates.
 
@@ -3449,195 +3346,6 @@ static const char *mkd_doc_fiction_layouts_coords_offset_z = R"doc(1 bit for the
 
 static const char *mkd_doc_fiction_layouts_coords_operator_lshift = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_coords_siqad =
-R"doc(SiQAD coordinates.
-
-Coordinates span from :math:`(-2^{31}, -2^{31}, 0)` to :math:`(2^{31}
-- 1 , 2^{31} - 1, 1)`. `x` is the SiDB's x-coordinate, `y` is the
-dimer pair's row number, and `z` represents the two possible SiDB
-positions in one SiDB dimer pair. Each coordinate has a dead indicator
-`d` that can be used to represent that it is not in use.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_d = R"doc(MSB acts as dead indicator.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_get_dead =
-R"doc(Returns a dead copy of the coordinate, i.e., (1, x, y, z).
-
-Returns:
-    A dead copy of the coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_is_dead =
-R"doc(Returns whether the coordinate is dead.
-
-Returns:
-    True iff coordinate is dead.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_add =
-R"doc(Adds another coordinate to this one and returns the result. Does not
-modify this coordinate.
-
-Args:
-    other: Coordinate to add.
-
-Returns:
-    Sum of both coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_eq =
-R"doc(Compares against another coordinate for equality. Respects the dead
-indicator.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    True iff both coordinates are identical.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_ge =
-R"doc(Determine whether this coordinate is "greater than or equal to"
-another one. This is the case if this one is not "less than" the
-other.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    True iff this coordinate is "greater than or equal to" the other
-    coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_gt =
-R"doc(Determine whether this coordinate is "greater than" another one. This
-is the case if the other one is "less than".
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    True iff this coordinate is "greater than" the other coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_le =
-R"doc(Determine whether this coordinate is "less than or equal to" another
-one. This is the case if this one is not "greater than" the other.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    True iff this coordinate is "less than or equal to" the other
-    coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_lt =
-R"doc(Determine whether this coordinate is "less than" another one. This is
-the case if y is smaller, or if y is equal but z is smaller, or if z
-and y are equal but x is smaller.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    True iff this coordinate is "less than" the other coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_ne =
-R"doc(Compares against another coordinate for inequality. Respects the dead
-indicator.
-
-Args:
-    other: Right-hand side coordinate.
-
-Returns:
-    True iff both coordinates are not identical.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_operator_sub =
-R"doc(Subtracts another coordinate from this one and returns the result.
-Does not modify this coordinate.
-
-Args:
-    other: Coordinate to subtract.
-
-Returns:
-    Difference of both coordinates.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_siqad = R"doc(Default constructor. Creates a dead coordinate at (0, 0, 0).)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_siqad_2 =
-R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, z_).
-
-Args:
-    x_: x position.
-    y_: y position.
-    z_: z position.
-
-Template Args:
-    X: Type of x.
-    Y: Type of y.
-    Z: Type of z.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_siqad_3 =
-R"doc(Standard constructor. Creates a non-dead coordinate at (x_, y_, 0).
-
-Args:
-    x_: x position.
-    y_: y position.
-
-Template Args:
-    X: Type of x.
-    Y: Type of y.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_str =
-R"doc(Returns a string representation of the coordinate of the form "(x, y,
-z)" that does not respect the dead indicator.
-
-Returns:
-    String representation of the form "(x, y, z)".
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_wrap =
-R"doc(Wraps the coordinate with respect to the given aspect ratio by
-iterating over the dimensions in the order defined by the coordinate
-type. For any dimension of the coordinate that is strictly larger than
-the associated dimension of the aspect ratio, this dimension will be
-wrapped to zero, and the next dimension is increased. The resulting
-coordinate becomes a dead copy of the aspect ratio if it is not
-contained in the aspect ratio after iterating. An example use case of
-this function is the coordinate iterator, which implements iterator
-advancing by first incrementing the x dimension, then wrapping the
-coordinate to the boundary within to enumerate.
-
-Args:
-    aspect_ratio: Aspect ratio to wrap the coordinate to.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_x = R"doc(31 bit for the x coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_y = R"doc(31 bit for the y coordinate.)doc";
-
-static const char *mkd_doc_fiction_layouts_coords_siqad_z = R"doc(1 bit for the z coordinate.)doc";
-
 static const char *mkd_doc_fiction_layouts_coords_to_cube =
 R"doc(Converts offset coordinates to cube coordinates.
 
@@ -3657,25 +3365,9 @@ Note:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_coords_to_siqad =
-R"doc(Converts any coordinate type to SiQAD coordinates.
-
-Args:
-    coord: Coordinate to convert.
-
-Template Args:
-    CoordinateType: Coordinate type to convert.
-
-Returns:
-    SiQAD coordinate representation of `coord`.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_coords_volume_of =
 R"doc(Computes the volume of a given coordinate assuming its origin is (0,
-0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)` by
-default. For SiQAD coordinates, which are planar by definition, the
-area is returned.
+0, 0). Calculates :math:`(|x| + 1) \cdot (|y| + 1) \cdot (|z| + 1)`.
 
 Args:
     coord: Coordinate.
@@ -5964,28 +5656,6 @@ Args:
 
 Template Args:
     Lyt: Gate-level layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_io_print_sidb_layout =
-R"doc(Writes a simplified 2D representation of an SiDB layout (SiDB and
-defect charges are supported) to an output stream.
-
-Args:
-    os: Output stream to write into.
-    lyt: The layout of which the information is to be printed.
-    lat_color: Flag to utilize color escapes for the lattice, charge
-               states, and atomic defects.
-    crop_layout: Flag to print the 2D bounding box of the layout,
-                 while leaving a maximum padding of one dimer row and
-                 two columns.
-    draw_lattice: Flag to enable lattice background drawing.
-
-Template Args:
-    Lyt: SiDB cell-level layout with charge-information based on SiQAD
-         coordinates or defect-information, e.g., a
-         `charge_distribution_surface` or
-         `sidb::surfaces::defect_surface`.
 
 )doc";
 
@@ -14094,8 +13764,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_charge_distribution_charge_state_values = R"doc(One charge state per site.)doc";
-
 static const char *mkd_doc_fiction_sidb_charge_distribution_charge_states =
 R"doc(All charge states in raster order.
 
@@ -14103,8 +13771,6 @@ Returns:
     The charge states.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_charge_distribution_electrostatic_energy = R"doc(Electrostatic potential energy (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_charge_distribution_empty =
 R"doc(Whether the distribution covers no SiDB.
@@ -14121,6 +13787,8 @@ Returns:
     Energy (unit: eV).
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_charge_distribution_energy_2 = R"doc(Electrostatic potential energy (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_charge_distribution_foreach_cell =
 R"doc(Applies a function to the site of every SiDB in raster order.
@@ -14226,10 +13894,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_charge_distribution_site_storage =
-R"doc(The sites in raster order, shared with the other distributions of the
-same result.)doc";
-
 static const char *mkd_doc_fiction_sidb_charge_distribution_sites =
 R"doc(The sites the distribution covers, in raster order.
 
@@ -14238,6 +13902,10 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_charge_distribution_sites_2 =
+R"doc(The sites in raster order, shared with the other distributions of the
+same result.)doc";
+
 static const char *mkd_doc_fiction_sidb_charge_distribution_size =
 R"doc(Number of SiDBs.
 
@@ -14245,6 +13913,8 @@ Returns:
     Number of SiDBs.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_charge_distribution_states = R"doc(One charge state per site.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception =
 R"doc(This exception is thrown when an error occurs during the design of an
@@ -14286,7 +13956,7 @@ followed by simulation, random placement, and pruning only.
 
 Args:
     skeleton: The skeleton with its input and output wires.
-    spec: The Boolean function(s) to implement; must not be empty.
+    spec: The Boolean function(s) to implement.
     params: Parameters.
     stats: Statistics.
 
@@ -14295,32 +13965,6 @@ Template Args:
 
 Returns:
     The designed gates.
-
-Raises:
-    std::invalid_argument: if `spec` is empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_design_gates_2 =
-R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
-converted with `to_sidb_layout` and the gates with
-`to_cell_level_layout`.
-
-Args:
-    skeleton: The skeleton.
-    spec: The Boolean function(s) to implement; must not be empty.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The designed gates.
-
-Raises:
-    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -14342,15 +13986,9 @@ static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_ga
 R"doc(*QuickCell*: prune the canvas layouts with the filters of the
 operational check, then simulate the rest.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM =
-R"doc(Place canvas SiDBs at random until an operational gate is found or the
-attempt limit is reached.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM = R"doc(Place canvas SiDBs at random until an operational gate is found.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(The design mode.)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_maximal_random_design_attempts =
-R"doc(Maximum number of layouts evaluated by random gate design across all
-threads.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
@@ -14537,22 +14175,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_generators_generate_multiple_random_layouts_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see
-`generate_random_layout`.
-
-Args:
-    params: Parameters.
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The layouts, or `std::nullopt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout =
 R"doc(Generates a random SiDB layout by placing SiDBs at random sites of an
 area, optionally on top of a skeleton. The skeleton's lattice, cells,
@@ -14568,23 +14190,6 @@ Args:
 Returns:
     The generated layout, or `std::nullopt` if not all SiDBs could be
     placed within the attempt limit.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_2 =
-R"doc(Transitional overload for SiDB cell-level layouts: the skeleton is
-converted with `to_sidb_layout` and the result with
-`to_cell_level_layout`.
-
-Args:
-    params: Parameters.
-    skeleton: The skeleton to place SiDBs on, if any.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The generated layout, or `std::nullopt`.
 
 )doc";
 
@@ -14619,47 +14224,38 @@ static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Physical parameters for the positive charge check.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
-R"doc(Checks whether a gate can be designed on a skeleton with defects at
+R"doc(This function evaluates whether it is impossible to design an SiDB
+gate for a given truth table and a given skeleton with atomic defects.
+It determines the possible charge states at the output BDL pairs.
+Atomic defects can cause a BDL pair to be neutrally charged only.
+Thus, the BDL pair would not work as intended.
+
+
+
+Checks whether a gate can be designed on a skeleton with defects at
 all: if the charged defects push one SiDB of an output BDL pair past
 its neutral transition threshold for any input pattern, that SiDB can
 never be negatively charged, the pair loses its BDL property, and no
 canvas can fix that.
 
 Args:
+    skeleton_with_defects: An SiDB skeleton layout with atomic
+                           defects.
+    spec: A vector of truth tables (each truth table is representing
+          one output) representing the gate's intended functionality.
+    params: Parameters to determine if the gate design is impossible.
     skeleton_with_defects: The skeleton, including the defects of the
                            surface it sits on.
-    spec: The Boolean function(s) to implement; must not be empty.
-    params: Parameters.
-
-Template Args:
-    TT: Truth table type.
-
-Returns:
-    `true` if no gate can be designed on the skeleton.
-
-Raises:
-    std::invalid_argument: if `spec` is empty.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible_2 =
-R"doc(Transitional overload for SiDB cell-level layouts, converted with
-`to_sidb_layout`; see the `layout` overload.
-
-Args:
-    skeleton_with_defects: The skeleton with defects.
-    spec: The Boolean function(s) to implement; must not be empty.
+    spec: The Boolean function(s) to implement.
     params: Parameters.
 
 Template Args:
     Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
+    TT: The truth table type. TT: Truth table type.
 
 Returns:
-    `true` if no gate can be designed on the skeleton.
-
-Raises:
-    std::invalid_argument: if `spec` is empty.
+    `true` if gate design is impossible, `false` otherwise. `true` if
+    no gate can be designed on the skeleton.
 
 )doc";
 
@@ -14802,9 +14398,6 @@ Args:
 Returns:
     The defect type.
 
-Raises:
-    sqd_parsing_error: if the label has no text.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_parse_dot_type =
@@ -14819,437 +14412,78 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_dimer_to_cell =
-R"doc(Converts a dimer position to a cell position. Additionally updates the
-maximum cell position parsed so far.
-
-Args:
-    n: The x-coordinate of the dimer.
-    m: The y-coordinate of the dimer.
-    l: 0 for the upper dot, 1 for the lower dot.
-
-Returns:
-    The cell position converted from the dimer position.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_is = R"doc(The input stream from which the SQD file is read.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_lyt = R"doc(The layout to which the parsed cells are added.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_max_cell_pos = R"doc(The maximum position of a cell in the layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_db_dot =
-R"doc(Parses the <type> attribute of a <dbdot> element from the SQD file and
-returns the corresponding cell type.
-
-
-
-Parses a <dbdot> element from the SQD file and adds the respective dot
-to the layout.
-
-Args:
-    db_dot: The <dbdot> element. db_dot: The <dbdot> element.
-
-Returns:
-    The cell type specified by the <dbdot> element. If non is
-    specified, the cell type is assumed to be normal.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_defect =
-R"doc(Parses a <val> attribute of a <type_label> element of a <property_map>
-element from the SQD file and converts it to the respective SiDB
-defect type.
-
-
-
-Parses a <defect> element from the SQD file and adds the respective
-defect to the layout if it implements the has_assign_sidb_defect
-function..
-
-Args:
-    label: The <type_label> element's <val> attribute. label: The
-           <defect> element.
-
-Returns:
-    The SiDB defect type corresponding to the given label.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_lat_type =
-R"doc(Parses a <latcoord> element from the SQD file and returns its
-specified cell position.
-
-Args:
-    latcoord: The <latcoord> element.
-
-Returns:
-    The cell position specified by the <latcoord> element.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_parse_latcoord =
-R"doc(Parses a <latcoord> element from the SQD file and returns its
-specified cell position.
-
-Args:
-    latcoord: The <latcoord> element.
-
-Returns:
-    The cell position specified by the <latcoord> element.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_layout_impl_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run =
-R"doc(Parses the stream and reports malformed numeric attributes as SQD
-parsing errors.
-
-Returns:
-    The parsed layout.
-
-Raises:
-    sqd_parsing_error: if the SQD input is malformed.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_update_bounding_box =
-R"doc(Updates the bounding box given by the maximum position of a cell in
-the layout
-
-Args:
-    cell: The cell to challenge the stored maximum position of a cell
-          in the layout against.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_defect_matrix = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_max_cell_pos = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_read_surface_defects_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_read_surface_defects_impl_run = R"doc()doc";
-
 static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer =
 R"doc(Draws an `sidb::layout` as an SVG image: the lattice points of the
 layout's bounding box, if requested, and every SiDB at its position on
 the layout's lattice.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc(Background color.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_cd =
-R"doc(Charge distribution to draw, or `nullptr` to use the default SiDB
-color.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_cd = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc(Layout to draw.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc(Output stream.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc(Drawing parameters.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run =
-R"doc(Draws the lattice and SiDBs with padding around the bounding box.
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run = R"doc()doc";
 
-Raises:
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc()doc";
 
-)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc(SiDB fill color.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc(SiDB border color.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer =
-R"doc(Creates an SVG writer for a lattice layout.
-
-Args:
-    layout: Layout to draw.
-    stream: Output stream.
-    p: Drawing parameters.
-    charges: Charge distribution to draw, or `nullptr` to use the
-             default SiDB color.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader =
 R"doc(Reads an SQD file into an `sidb::layout`. The file's lattice
 definition selects the lattice; SiDBs and surface defects are placed
 at the `(n, m, l)` lattice coordinates the file names.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc(Input stream.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc(Layout being parsed.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot =
-R"doc(Adds a DB dot at its lattice coordinate with the specified cell type.
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot = R"doc()doc";
 
-Args:
-    db_dot: DB-dot element.
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect = R"doc()doc";
 
-Raises:
-    sqd_parsing_error: if the lattice-coordinate element is missing or
-                       invalid.
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord = R"doc()doc";
 
-)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect =
-R"doc(Reads a defect with finite, non-negative Coulomb material parameters.
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run = R"doc()doc";
 
-Args:
-    defect: The defect element.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord =
-R"doc(Parses a lattice coordinate within the representable site range.
-
-Args:
-    latcoord: The lattice-coordinate element.
-
-Returns:
-    The lattice site.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice =
-R"doc(Reads explicit two-site lattice geometry, or a predefined lattice when
-geometry is absent.
-
-Args:
-    name: Lattice name from the SQD layer.
-    element: Lattice definition element.
-
-Returns:
-    The lattice defined by the layer.
-
-Raises:
-    sqd_parsing_error: if the geometry is incomplete, the basis count
-                       is not two, or a name-only lattice is unknown.
-    std::invalid_argument: if a geometry component is not numeric.
-    std::out_of_range: if a geometry component exceeds the range of a
-                       double.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_number =
-R"doc(Parses a finite lattice number without trailing non-whitespace
-characters.
-
-Args:
-    text: Numeric XML text or attribute.
-
-Returns:
-    The parsed number.
-
-Raises:
-    sqd_parsing_error: if the number is missing, non-finite, or has
-                       trailing characters.
-    std::invalid_argument: if the text is not numeric.
-    std::out_of_range: if the number exceeds the range of a double.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_vector =
-R"doc(Parses a lattice vector or basis site with finite components.
-
-Args:
-    element: Vector element with x and y attributes.
-
-Returns:
-    The vector.
-
-Raises:
-    sqd_parsing_error: if the element or a component is missing or
-                       malformed.
-    std::invalid_argument: if a component is not numeric.
-    std::out_of_range: if a component exceeds the range of a double.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run =
-R"doc(Parses the stream and reports malformed numeric attributes as SQD
-parsing errors.
-
-Returns:
-    The parsed layout.
-
-Raises:
-    sqd_parsing_error: if the SQD input is malformed.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader =
-R"doc(Creates an SQD reader with a layout name.
-
-Args:
-    s: Input stream.
-    name: Layout name.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer =
 R"doc(Writes an `sidb::layout` as an SQD file: the layout's lattice as the
 lattice layer, every SiDB as a `<dbdot>` at its `(n, m, l)` lattice
 coordinate, and every surface defect as a `<defect>`.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc(Layout to write.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer =
-R"doc(Creates an SQD writer for a lattice layout.
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer = R"doc()doc";
 
-Args:
-    src: Layout to write.
-    s: Output stream.
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot = R"doc()doc";
 
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot =
-R"doc(Appends a DB dot with its lattice coordinate and cell type.
-
-Args:
-    design: SQD design buffer.
-    s: Site of the SiDB.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect =
-R"doc(Appends a defect with its lattice coordinate and Coulomb parameters
-when charged.
-
-Args:
-    design: SQD design buffer.
-    s: Site of the defect.
-    d: Defect to write.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader =
 R"doc(Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of
 row `y` becomes the defect at column `x` of single-SiDB row `y`.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc(Matrix text read from the input stream.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc(Layout being populated.)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run =
-R"doc(Assigns each matrix entry to its site on the H-Si(100)-2x1 lattice.
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run = R"doc()doc";
 
-Returns:
-    Layout containing the parsed defects.
-
-Raises:
-    unsupported_defect_index_exception: if an index is unsupported or
-                                        exceeds the integer range.
-    missing_position_exception: if a row is shorter than a preceding
-                                row.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader =
-R"doc(Reads the defect matrix text and sets the layout name.
-
-Args:
-    s: Input stream.
-    name: Layout name.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_background_color = R"doc(The color mode for the SVG output.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_generate_lattice_point =
-R"doc(Generates an SVG string representing an H-Si lattice point.
-
-Args:
-    x: The x-coordinate of the lattice point.
-    y: The y-coordinate of the lattice point.
-    fill_color: The fill color of the lattice point.
-
-Returns:
-    The SVG string representing the lattice point.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_generate_sidb =
-R"doc(Generates an SVG string representing an SiDB.
-
-Args:
-    x: The x-coordinate of the SiDB.
-    y: The y-coordinate of the SiDB.
-    charge_state: The charge state of the SiDB.
-
-Returns:
-    The SVG string representing the SiDB.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_generate_svg = R"doc(Generates the SVG layout with both H-Si lattice points and SiDBs.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_lyt = R"doc(The SiDB layout to be written.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_os = R"doc(The output stream to write into.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_ps = R"doc(Parameters for the SVG generation.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_run = R"doc(Runs the SVG generation process.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_set_colors = R"doc(Sets the colors based on the color mode.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_sidb_color = R"doc(The color of the SiDB without charge information.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_sidb_edge_color = R"doc(The edge color of the SiDB without charge information.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_write_sidb_layout_svg_impl = R"doc(Constructor.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks =
-R"doc(Appends the SiDB or QCA cell blocks to the SQD design.
-
-Args:
-    design: SQD design buffer.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks =
-R"doc(Appends surface defect blocks when the layout exposes defects.
-
-Args:
-    design: SQD design buffer.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_get_defect_type_name = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_lyt = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_os = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_write_sqd_layout_impl =
-R"doc(Args:
-    src: Layout to serialize.
-    s: Stream receiving the SQD output.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_missing_position_exception =
 R"doc(Exception thrown when a missing SiDB position is encountered in the
@@ -15279,10 +14513,6 @@ Args:
     crop_layout: Whether to pad the bounding box by two columns and
                  one unit cell instead of printing it tight.
     draw_lattice: Whether to print empty lattice sites as dots.
-
-Raises:
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
 
 )doc";
 
@@ -15318,97 +14548,9 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_sqd_layout =
-R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
-stream. The format is used by SiQAD (https://github.com/siqad/siqad).
-
-If the provided cell-level layout type can represent SiDB defects,
-they will be parsed from the sqd file as well.
-
-May throw an `sqd_parsing_exception` if the sqd file is malformed.
-
-Args:
-    is: The input stream to read from.
-    name: The name to give to the generated layout.
-
-Template Args:
-    Lyt: The layout type to be created from an input. Must be an SiDB
-         lattice cell-level SiDB layout.
-
-Returns:
-    The cell-level SiDB layout read from the sqd file.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_2 =
-R"doc(Reads a cell-level SiDB layout from an sqd file provided as an input
-stream. The format is used by SiQAD (https://github.com/siqad/siqad).
-
-If The provided cell-level layout type can represent SiDB defects,
-they will be parsed from the sqd file as well.
-
-May throw an `sqd_parsing_exception` if the sqd file is malformed.
-
-This is an in-place version of read_sqd_layout that utilizes the given
-layout as a target to write to.
-
-Args:
-    lyt: The layout to write to.
-    is: The input stream to read from.
-
-Template Args:
-    Lyt: The layout type to be created from an input. Must be an SiDB
-         lattice cell-level SiDB layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_3 =
-R"doc(Reads a cell-level SiDB layout from an sqd file provided as a file
-name. The format is used by SiQAD (https://github.com/siqad/siqad).
-
-If The provided cell-level layout type can represent SiDB defects,
-they will be parsed from the sqd file as well.
-
-May throw an `sqd_parsing_exception` if the sqd file is malformed.
-
-Args:
-    filename: The file name to open and read from.
-    name: The name to give to the generated layout.
-
-Template Args:
-    Lyt: The layout type to be created from an input. Must be an SiDB
-         lattice cell-level SiDB layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_4 =
-R"doc(Reads a cell-level SiDB layout from an sqd file provided as a file
-name. The format is used by SiQAD (https://github.com/siqad/siqad).
-
-If The provided cell-level layout type can represent SiDB defects,
-they will be parsed from the sqd file as well.
-
-May throw an `sqd_parsing_exception` if the sqd file is malformed.
-
-This is an in-place version of `read_sqd_layout` that utilizes the
-given layout as a target to write to.
-
-Args:
-    lyt: The layout to write to.
-    filename: The file name to open and read from.
-
-Template Args:
-    Lyt: The layout type to be created from an input. Must be an SiDB
-         lattice cell-level SiDB layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_5 =
 R"doc(Reads an SQD file from a stream into an `sidb::layout`. The lattice
 comes from the file's lattice definition; SiDBs and surface defects
 are placed at the `(n, m, l)` lattice coordinates the file names.
-Explicit geometry must contain finite vectors and two basis sites.
-Without geometry, the reader accepts the two predefined reconstruction
-names and defaults to H-Si(100)-2x1 when the name is absent.
 
 Args:
     is: The input stream to read from.
@@ -15418,12 +14560,12 @@ Returns:
     The layout read from the stream.
 
 Raises:
-    sqd_parsing_error: if the file is malformed or a name-only lattice
-                       is unknown.
+    sqd_parsing_error: if the file is malformed or names an unknown
+                       lattice.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_6 =
+static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_2 =
 R"doc(Reads an SQD file into an `sidb::layout`. See the stream overload for
 the file's interpretation.
 
@@ -15435,59 +14577,13 @@ Returns:
     The layout read from the file.
 
 Raises:
-    sqd_parsing_error: if the file is malformed or a name-only lattice
-                       is unknown.
+    sqd_parsing_error: if the file is malformed or names an unknown
+                       lattice.
     std::ifstream::failure: if the file cannot be opened.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_read_surface_defects =
-R"doc(Reads a defective SiDB surface from a text file provided as an input
-stream. The format is rudimentary and consists of a simple 2D array of
-integers representing defect indices printed by Python.
-
-May throw a `missing_sidb_position_exception` or an
-`unsupported_defect_index_exception`.
-
-Args:
-    is: The input stream to read from.
-    name: The name to give to the generated layout.
-
-Template Args:
-    Lyt: The layout type underlying the SiDB surface. Must be a cell-
-         level SiDB layout.
-
-Note:
-    For testing purposes, a Python script that generates defective
-    surfaces is provided in the
-    `experiments/defect_aware_physical_design` directory.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_read_surface_defects_2 =
-R"doc(Reads a defective SiDB surface from a text file provided as a file
-name. The format is rudimentary and consists of a simple 2D array of
-integers representing defect indices printed by Python.
-
-May throw a `missing_sidb_position_exception` or an
-`unsupported_defect_index_exception`.
-
-Args:
-    filename: The file name to open and read from.
-    name: The name to give to the generated layout.
-
-Template Args:
-    Lyt: The layout type underlying the SiDB surface. Must be a cell-
-         level SiDB layout.
-
-Note:
-    For testing purposes, a Python script that generates defective
-    surfaces is provided in the
-    `experiments/defect_aware_physical_design` directory.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_read_surface_defects_3 =
 R"doc(Reads a defect matrix from a stream into a defects-only `sidb::layout`
 on the H-Si(100)-2x1 lattice. Each `[...]` row lists one defect index
 per column; entry `x` of row `y` becomes the defect at column `x` of
@@ -15508,7 +14604,7 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_read_surface_defects_4 =
+static const char *mkd_doc_fiction_sidb_io_read_surface_defects_2 =
 R"doc(Reads a defect matrix from a file into a defects-only `sidb::layout`.
 See the stream overload for the format.
 
@@ -15538,55 +14634,13 @@ static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception =
 R"doc(Exception thrown when an unsupported defect index is encountered in
 the parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception =
-R"doc(Args:
-    i: Unsupported index, or -1 if the input exceeds the int range.
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception = R"doc()doc";
 
-)doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc(Unsupported index, or -1 for an index outside the int range.)doc";
-
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which =
-R"doc(Returns:
-    Unsupported index, or -1 if the input exceeds the int range.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg =
-R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
-output stream.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-    ps: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Note:
-    SiDB defects are not supported yet.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_2 =
-R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into a
-file.
-
-Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into.
-    ps: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Note:
-    SiDB defects are not supported yet.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_3 =
 R"doc(Writes an `sidb::layout` as an SVG image to a stream: the lattice
 points of the layout's bounding box, if the parameters ask for them,
 and every SiDB at its position on the layout's lattice. Surface
@@ -15597,13 +14651,9 @@ Args:
     os: Output stream to write into.
     ps: Drawing parameters.
 
-Raises:
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
-
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_4 =
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_2 =
 R"doc(Writes an `sidb::layout` as an SVG image. See the stream overload for
 the image's content.
 
@@ -15614,12 +14664,10 @@ Args:
 
 Raises:
     std::ofstream::failure: if the file cannot be opened.
-    std::out_of_range: if padding exceeds the lattice-site coordinate
-                       range.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_5 =
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_3 =
 R"doc(Writes an `sidb::layout` with a charge distribution as an SVG image to
 a stream: as the layout overload, with every SiDB colored by its
 charge state.
@@ -15632,7 +14680,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_6 =
+static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_4 =
 R"doc(Writes an `sidb::layout` with a charge distribution as an SVG image.
 See the stream overload for the image's content.
 
@@ -15674,45 +14722,6 @@ static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_lat
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_params_sidb_size = R"doc(Size of the SiDB in SVG units.)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sqd_layout =
-R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
-SiQAD (https://github.com/siqad/siqad), a physical simulator for the
-SiDB technology platform.
-
-If the provided cell-level layout type can represent SiDB defects,
-they will be written to the file as well.
-
-This overload uses an output stream to write into.
-
-Args:
-    lyt: The layout to be written.
-    os: The output stream to write into.
-
-Template Args:
-    Lyt: Cell-level SiDB or QCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_2 =
-R"doc(Writes a cell-level SiDB or QCA layout to an sqd file that is used by
-SiQAD (https://github.com/siqad/siqad), a physical simulator for the
-SiDB technology platform.
-
-If the provided cell-level layout type can represent SiDB defects,
-they will be written to the file as well.
-
-This overload uses a file name to create and write into.
-
-Args:
-    lyt: The layout to be written.
-    filename: The file name to create and write into. Should
-              preferably use the `.sqd` extension.
-
-Template Args:
-    Lyt: Cell-level SiDB or QCA layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_3 =
 R"doc(Writes an `sidb::layout` as an SQD file to a stream. The layout's
 lattice becomes the file's lattice layer, SiDBs are written at their
 `(n, m, l)` lattice coordinates, and surface defects, if any, in a
@@ -15724,7 +14733,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_4 =
+static const char *mkd_doc_fiction_sidb_io_write_sqd_layout_2 =
 R"doc(Writes an `sidb::layout` as an SQD file. See the stream overload for
 the file's content.
 
@@ -15781,19 +14790,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_lattice_of =
-R"doc(The lattice a cell-level layout type is tagged with: H-Si(111)-1x1 for
-a `lattice<lattice_111, …>` layout and H-Si(100)-2x1 for every other
-SiDB layout.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type.
-
-Returns:
-    The lattice of `CellLyt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_lattice_operator_eq =
 R"doc(Compares two lattices for equality.
 
@@ -15839,17 +14835,14 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_2 =
 R"doc(Creates the site `(x, y, z)`.
 
 Args:
-    x_coord: Steps along the first lattice vector.
-    y_coord: Steps along the second lattice vector.
-    basis_site: Basis site, 0 or 1.
+    x: Steps along the first lattice vector.
+    y: Steps along the second lattice vector.
+    z: Basis site, 0 or 1.
 
 Template Args:
     X: Integral type of `x`.
     Y: Integral type of `y`.
     Z: Integral type of `z`.
-
-Raises:
-    std::out_of_range: if a coordinate exceeds the lattice-site range.
 
 )doc";
 
@@ -15857,15 +14850,12 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_3 =
 R"doc(Creates the site `(x, y, 0)`.
 
 Args:
-    x_coord: Steps along the first lattice vector.
-    y_coord: Steps along the second lattice vector.
+    x: Steps along the first lattice vector.
+    y: Steps along the second lattice vector.
 
 Template Args:
     X: Integral type of `x`.
     Y: Integral type of `y`.
-
-Raises:
-    std::out_of_range: if a coordinate exceeds the lattice-site range.
 
 )doc";
 
@@ -15879,10 +14869,6 @@ Args:
 
 Returns:
     Sum of both sites.
-
-Raises:
-    std::out_of_range: if a result coordinate exceeds the lattice-site
-                       range.
 
 )doc";
 
@@ -15919,10 +14905,6 @@ Args:
 Returns:
     Difference of both sites.
 
-Raises:
-    std::out_of_range: if a result coordinate exceeds the lattice-site
-                       range.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_site_str =
@@ -15953,8 +14935,7 @@ static const char *mkd_doc_fiction_sidb_layout_affected_sidbs =
 R"doc(The sites whose SiDBs the defect at a given site would influence: the
 rectangle around the defect spanned by `model::defect_extent`, counted
 in unit cells along the lattice vectors and keeping the defect's basis
-site. The rectangle is clipped to the representable lattice-site
-coordinates.
+site.
 
 Args:
     s: Site of the defect.
@@ -15989,7 +14970,7 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_layout_assign_cell_type =
 R"doc(Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes
-the SiDB from the site. Allocation failure leaves the cells unchanged.
+the SiDB from the site.
 
 Args:
     s: Site.
@@ -16209,8 +15190,7 @@ static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)
 
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
 R"doc(Moves the defect at one site to another, replacing whatever defect the
-target site held. An empty source or identical source and target
-leaves the defects unchanged.
+target site held.
 
 Args:
     source: Site holding the defect.
@@ -16545,37 +15525,6 @@ Args:
 
 Returns:
     `true` iff `defect` has a positive charge value.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_nm_distance =
-R"doc(Computes the distance between two SiDB cells in nanometers (unit: nm).
-
-Args:
-    source: The source cell.
-    target: The target cell.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The distance between the two cells in nanometers (unit: nm).
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_model_nm_position =
-R"doc(Computes the position of a cell in nanometers from the layout origin
-in an SiDB layout (unit: nm).
-
-Args:
-    c: The cell to compute the position for.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    A pair representing the `(x,y)` position of `c` in nanometers from
-    the layout origin.
 
 )doc";
 
@@ -16987,26 +15936,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_2 =
-R"doc(Transitional overload for SiDB cell-level layouts, converted with
-`to_sidb_layout`; see the `layout` overload.
-
-Args:
-    lyt: The gate layout.
-    spec: The Boolean function(s) the gate implements.
-    params: Parameters.
-    transition_type: The transition to consider; all transitions if
-                     omitted.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The minimum potential difference over all input patterns.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_analysis_band_bending_resilience_params =
 R"doc(This struct stores the parameters required to simulate the band
 bending resilience of an SiDB layout)doc";
@@ -17096,26 +16025,6 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_distribution =
-R"doc(This function takes in a vector of `charge_distribution_surface`
-objects and returns a map containing the system energy and the number
-of occurrences of that energy in the input vector. To compare two
-energy values for equality, the comparison uses a tolerance specified
-by `constants::ERROR_MARGIN`.
-
-Args:
-    charge_distributions: A vector of `charge_distribution_surface`
-                          objects for which the energy distribution is
-                          computed.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Energy distribution.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_calculate_energy_distribution_2 =
 R"doc(The energy distribution of a set of charge distributions: every
 distinct energy with the number of distinct charge distributions that
 have it. Distributions with identical charge states count once.
@@ -17153,23 +16062,6 @@ the given physical parameters. See the `potential_landscape` overload.
 Args:
     lyt: The layout to check.
     sim_params: The physical parameters.
-
-Returns:
-    `true` if at least one SiDB can be positively charged, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_can_positive_charges_occur_3 =
-R"doc(Transitional overload for SiDB cell-level layouts, which are converted
-with `to_sidb_layout` first.
-
-Args:
-    lyt: The layout to check.
-    sim_params: The physical parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
 
 Returns:
     `true` if at least one SiDB can be positively charged, `false`
@@ -17247,25 +16139,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_gate_based_3 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to simulate.
-    spec: The Boolean function(s) the layout implements.
-    params: Parameters.
-    pst: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The critical temperature (unit: K).
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_non_gate_based =
 R"doc(For *Non-gate-based Critical Temperature* simulation, the Critical
 Temperature is defined as follows: The temperature at which the
@@ -17280,23 +16153,6 @@ Args:
 
 Returns:
     The critical temperature (unit: K)
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_critical_temperature_non_gate_based_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to simulate.
-    params: Parameters.
-    pst: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The critical temperature (unit: K).
 
 )doc";
 
@@ -17357,36 +16213,28 @@ static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temp
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature = R"doc(Critical temperature [K].)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature_impl =
-R"doc(Initializes the algorithm for a layout.
-
-Args:
-    source_layout: The layout to simulate.
-    ps: Parameters for the critical temperature algorithm.
-    st: Statistics of the process.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature_impl = R"doc()doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_critical_temperature_impl_2 =
 R"doc(Constructor to initialize the algorithm with a pre-generated input
 configuration.
 
 None of the BDL detection results depend on the simulation parameters,
-so a caller that simulates the same layout under many parameter
-settings can determine them once and pass them to every call. The
-layouts and the detection results are not copied, are only read, and
-must outlive this object; the same ones may be shared by concurrently
-running instances.
+so a caller that simulates the same lyt_ under many parameter settings
+can determine them once and pass them to every call. The layouts and
+the detection results are not copied, are only read, and must outlive
+this object; the same ones may be shared by concurrently running
+instances.
 
 Args:
-    input_pattern_lyts: One layout per input pattern, indexed by input
+    input_pattern_lyts: One lyt_ per input pattern, indexed by input
                         pattern, as generated by
                         `generate_bdl_input_pattern_layouts`.
     ps: Parameters for the critical temperature algorithm.
     st: Statistics of the process.
-    output_pairs: Output BDL pairs of the layout.
-    input_wires: BDL input wires of the layout.
-    output_wires: BDL output wires of the layout.
+    output_pairs: Output BDL pairs of the lyt_.
+    input_wires: BDL input wires of the lyt_.
+    output_wires: BDL output wires of the lyt_.
 
 )doc";
 
@@ -17401,11 +16249,11 @@ Args:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_gate_based_simulation =
-R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
+R"doc(*Gate-based Critical Temperature* Simulation of a SiDB lyt_ for a
 given Boolean function.
 
 Args:
-    spec: Expected Boolean function of the layout given as a multi-
+    spec: Expected Boolean function of the lyt_ given as a multi-
           output truth table.
 
 Template Args:
@@ -17436,7 +16284,7 @@ Args:
          with the corresponding state type (i.e. transparent,
          erroneous).
     min_energy: Minimal energy of all physically valid charge
-                distributions of a given layout (unit: eV).
+                distributions of a given lyt_ (unit: eV).
 
 Returns:
     State type (i.e. transparent, erroneous) of the ground state is
@@ -17445,7 +16293,7 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_layout_with_input_pattern =
-R"doc(Returns the layout with the given input pattern applied.
+R"doc(Returns the lyt_ with the given input pattern applied.
 
 Reads from the pre-generated input pattern layouts if they were
 supplied, and drives the BDL input iterator to the requested pattern
@@ -17455,12 +16303,14 @@ Args:
     input_pattern: The input pattern to apply.
 
 Returns:
-    The layout with `input_pattern` applied.
+    The lyt_ with `input_pattern` applied.
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_lyt = R"doc(SiDB cell-level lyt_.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_non_gate_based_simulation =
-R"doc(*Gate-based Critical Temperature* Simulation of a SiDB layout for a
+R"doc(*Gate-based Critical Temperature* Simulation of a SiDB lyt_ for a
 given Boolean function.
 
 )doc";
@@ -17468,12 +16318,12 @@ given Boolean function.
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_params = R"doc(Parameters for the critical_temperature algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_physical_simulation_of_layout =
-R"doc(This function conducts physical simulation of the given layout (gate
-layout with certain input combination). The simulation results are
+R"doc(This function conducts physical simulation of the given lyt_ (gate
+lyt_ with certain input combination). The simulation results are
 stored in the `sim_result_100` variable.
 
 Args:
-    lyt_with_input_pattern: The SiDB layout with a given input
+    lyt_with_input_pattern: The SiDB lyt_ with a given input
                             combination applied.
 
 Returns:
@@ -17492,8 +16342,6 @@ here. Not owned by this object.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_pre_detected_output_bdl_wires =
 R"doc(Pre-detected output BDL wires, or `nullptr` if they are to be detected
 here. Not owned by this object.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_sidb_layout = R"doc(SiDB cell-level layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_critical_temperature_impl_stats = R"doc(Statistics.)doc";
 
@@ -17547,6 +16395,8 @@ Args:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_layout = R"doc(The layout to analyze.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_params = R"doc(Parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_physical_population_stability_impl =
@@ -17567,8 +16417,6 @@ Returns:
     charge distribution.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_detail_physical_population_stability_impl_sidb_layout = R"doc(The layout to analyze.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_analysis_energy_distribution =
 R"doc(This class is used to store the energy distribution of an SiDB layout.
@@ -17791,8 +16639,7 @@ Args:
 
 Returns:
     The parameter points where `cd` is physically valid, each with its
-    excited-state number; empty if `cd` does not cover the layout's
-    SiDBs in raster order.
+    excited-state number.
 
 )doc";
 
@@ -17839,21 +16686,6 @@ Args:
     qs_params: *QuickSim* parameters.
     tts_params: TTS parameters.
     ps: Statistics.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_analysis_time_to_solution_2 =
-R"doc(Transitional overload for SiDB cell-level layouts, converted with
-`to_sidb_layout`; see the `layout` overload.
-
-Args:
-    lyt: The layout to simulate.
-    qs_params: *QuickSim* parameters.
-    tts_params: TTS parameters.
-    ps: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
 
 )doc";
 
@@ -17946,27 +16778,6 @@ static const char *mkd_doc_fiction_sidb_simulation_charge_transition_threshold_b
 static const char *mkd_doc_fiction_sidb_simulation_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(The lower bound check against `mu_plus` to validate DB+.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_check_simulation_results_for_equivalence =
-R"doc(This function compares two SiDB simulation results for equivalence.
-Two results are considered equivalent if they have the same number of
-charge distributions and if each corresponding charge distribution has
-the same electrostatic potential energy and charge states for all
-cells.
-
-Args:
-    result1: The first SiDB simulation result to compare.
-    result2: The second SiDB simulation result to compare.
-
-Template Args:
-    Lyt: The SiDB cell-level layout type used in the simulation
-         results.
-
-Returns:
-    `true` if the two simulation results are equivalent, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_check_simulation_results_for_equivalence_2 =
 R"doc(Whether two simulation results of the same layout are equivalent: the
 same number of distinct charge distributions, and, sorted by charge
 index, pairwise the same charge states and energies within
@@ -18031,13 +16842,6 @@ Template Args:
 Returns:
     The defect influence domain.
 
-Raises:
-    std::invalid_argument: if `step_size` is zero.
-                           std::invalid_argument: if `spec` is empty.
-                           std::invalid_argument: if
-                           `params.additional_scanning_area` contains
-                           a negative value.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_grid_search_2 =
@@ -18055,12 +16859,6 @@ Args:
 
 Returns:
     The defect influence domain.
-
-Raises:
-    std::invalid_argument: if `step_size` is zero.
-                           std::invalid_argument: if
-                           `params.additional_scanning_area` contains
-                           a negative value.
 
 )doc";
 
@@ -18094,7 +16892,7 @@ influences an SiDB gate, which needs far fewer evaluations than a grid
 search.
 
 Args:
-    lyt: The gate layout.
+    lyt: The gate layout; it must not hold defects of its own.
     spec: The Boolean function(s) it implements.
     samples: Number of starting rows to try.
     params: Parameters.
@@ -18106,11 +16904,6 @@ Template Args:
 Returns:
     The defect influence domain.
 
-Raises:
-    std::invalid_argument: if `spec` is empty. std::invalid_argument:
-                           if `params.additional_scanning_area`
-                           contains a negative value.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace_2 =
@@ -18118,7 +16911,7 @@ R"doc(*QuickTrace* without a specification: traces the contour of the region
 in which a defect changes the ground state of an SiDB layout.
 
 Args:
-    lyt: The layout.
+    lyt: The layout; it must not hold defects of its own.
     samples: Number of starting rows to try.
     params: Parameters; the influence definition has to be
             `GROUND_STATE_CHANGE`.
@@ -18126,10 +16919,6 @@ Args:
 
 Returns:
     The defect influence domain.
-
-Raises:
-    std::invalid_argument: if `params.additional_scanning_area`
-                           contains a negative value.
 
 )doc";
 
@@ -18150,11 +16939,6 @@ Template Args:
 Returns:
     The defect influence domain.
 
-Raises:
-    std::invalid_argument: if `spec` is empty. std::invalid_argument:
-                           if `params.additional_scanning_area`
-                           contains a negative value.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_random_sampling_2 =
@@ -18170,10 +16954,6 @@ Args:
 
 Returns:
     The defect influence domain.
-
-Raises:
-    std::invalid_argument: if `params.additional_scanning_area`
-                           contains a negative value.
 
 )doc";
 
@@ -18209,13 +16989,16 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base_layout = R"doc(The layout before placing the candidate defect.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base =
+R"doc(The layout without any defects; the ground state comparison places the
+defect itself.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_defect_influence_impl =
 R"doc(Constructor.
 
 Args:
-    lyt: The layout to analyze.
+    lyt: The layout to analyze; it must not hold defects of its own
+         for the contour trace.
     ps: Parameters.
     st: Statistics.
 
@@ -18227,7 +17010,7 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influen
 R"doc(Compares the ground states of a layout with and without the defect.
 
 Args:
-    lyt_without_candidate: The layout without the candidate defect.
+    lyt_without_defect: The layout without the defect.
     defect_pos: The defect position.
 
 Returns:
@@ -18302,7 +17085,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_layout_to_analyze = R"doc(The layout to analyze.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_layout = R"doc(The layout to analyze.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_log_stats = R"doc(Writes the counters into the statistics.)doc";
 
@@ -18380,6 +17163,17 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influen
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_stats = R"doc(Statistics.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_without_defects =
+R"doc(Returns a copy of a layout without its defects.
+
+Args:
+    lyt: The layout.
+
+Returns:
+    The layout without defects.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl =
 R"doc(Implementation of the displacement robustness analysis. Displacements
 are measured in columns and rows (`2y + z`), so a displacement of one
@@ -18442,7 +17236,7 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_generator = R"doc(Random generator for shuffling.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_layout_to_analyze = R"doc(The gate layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_layout = R"doc(The gate layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl_params = R"doc(Parameters.)doc";
 
@@ -18482,10 +17276,6 @@ Template Args:
 Returns:
     The displacement robustness domain.
 
-Raises:
-    std::out_of_range: if a displacement exceeds the lattice-site
-                       range.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_determine_probability_of_fabricating_operational_gate =
@@ -18505,10 +17295,6 @@ Template Args:
 
 Returns:
     The probability.
-
-Raises:
-    std::out_of_range: if a displacement exceeds the lattice-site
-                       range.
 
 )doc";
 
@@ -18538,9 +17324,7 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_RANDOM = R"doc(A random share of the displaced layouts is analyzed.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_variations =
-R"doc(Maximum displacement in columns and rows; the displaced sites must
-remain representable.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_variations = R"doc(Maximum displacement in columns and rows.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs that are not displaced.)doc";
 
@@ -18710,9 +17494,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_changed_sidb_history = R"doc(The SiDBs the last tracked decoding flipped with their previous signs.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_base_2 = R"doc(Base of the physical model.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_distribution_state = R"doc(Charge states and energy.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_cd = R"doc(Charge states and energy.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_distribution_to_index =
 R"doc(Recomputes the charge index (and the sublayout index) from the charge
@@ -18735,7 +17519,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_base = R"doc(Base the charge index is decoded in.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_2 =
+R"doc(Charge index over the SiDBs that are not in the sublayout and not the
+dependent SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_of_sub_layout =
 R"doc(The charge index of the sublayout of SiDBs that can be positively
@@ -18746,19 +17532,21 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_value =
-R"doc(Charge index over the SiDBs that are not in the sublayout and not the
-dependent SiDB.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_current =
-R"doc(The current charge distribution with its energy.
+R"doc(The current charge distribution with its energy and the charge index
+recomputed in the plain base of the landscape's parameters, as
+consumers of a simulation result expect.
 
 Returns:
-    A constant reference to the stored charge distribution.
+    A copy of the charge states and the energy.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_declare_physically_valid = R"doc(Marks the current charge states physically valid without checking.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_decoding = R"doc(Index decoding.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent = R"doc(The dependent SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_cell =
 R"doc(The dependent SiDB, if any.
@@ -18768,9 +17556,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_in_sublayout = R"doc(Whether the dependent SiDB can be positively charged.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_sidb = R"doc(The dependent SiDB.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_in_sub_layout = R"doc(Whether the dependent SiDB can be positively charged.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_energy =
 R"doc(The energy of the current charge states.
@@ -18801,15 +17587,17 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_gray_code_history =
-R"doc(The SiDB the last Gray-code step flipped and its previous sign; -1 if
-none.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_gray_code_to_charge_distribution =
 R"doc(Flips the one SiDB in which two Gray codes differ and records it for
 the incremental potential update.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_history = R"doc(The SiDBs the last tracked decoding flipped with their previous signs.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_history_gray_code =
+R"doc(The SiDB the last Gray-code step flipped and its previous sign; -1 if
+none.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_increase_charge_index_by_one =
 R"doc(Steps the charge index up by one and decodes it.
@@ -18843,6 +17631,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_base_2 = R"doc(Base the charge index is decoded in.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_decoding = R"doc(How a charge index is decoded.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_decoding_PLAIN = R"doc(Decode the whole index.)doc";
@@ -18863,8 +17653,6 @@ into charge states and records every SiDB that flipped, as
 QuickExact's incremental potential update needs.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_internal_potential_values = R"doc(Local internal potential per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_is_configuration_stable =
 R"doc(Whether no charge hop lowers the energy of the current charge states.
@@ -18894,6 +17682,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_land = R"doc(The landscape.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_landscape =
 R"doc(The landscape.
 
@@ -18902,7 +17692,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_landscape_ptr = R"doc(The landscape.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_local_int_pot = R"doc(Local internal potential per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_local_internal_potential =
 R"doc(The local internal potential at an SiDB: charged SiDBs plus charged
@@ -18943,6 +17733,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_charge_index_2 = R"doc(Maximum charge index.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_charge_index_sub_layout =
 R"doc(The largest sublayout charge index.
 
@@ -18953,9 +17745,11 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_index = R"doc(The largest index of `digits` digits in `base`.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_maximum_charge_index = R"doc(Maximum charge index.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_sub_charge_index = R"doc(Maximum sublayout charge index.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_maximum_sublayout_charge_index = R"doc(Maximum sublayout charge index.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_model = R"doc(Energy model.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_n = R"doc(Number of SiDBs.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_negative_sidb_detection =
 R"doc(The SiDBs whose local potential forces them negative regardless of the
@@ -18983,14 +17777,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_num_sites = R"doc(Number of SiDBs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_physically_valid = R"doc(Validity flag.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_random_generator =
-R"doc(Random generator of `adjacent_search`; one per state, so worker
-threads never share it.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_recompute_energy =
 R"doc(Recomputes the energy from the current charge states and local
 internal potentials.
@@ -19010,11 +17796,9 @@ flips recorded.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_selected_energy_model = R"doc(Energy model.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_selected_index_decoding = R"doc(Index decoding.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_simulation_base = R"doc(Base of the physical model.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_rng =
+R"doc(Random generator of `adjacent_search`; one per state, so worker
+threads never share it.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_simulation_state =
 R"doc(Creates a state over a landscape with every SiDB in one charge state
@@ -19036,9 +17820,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_sublayout_charge_index = R"doc(Charge index over the sublayout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_sub_charge_index = R"doc(Charge index over the sublayout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_three_state_sidb_indices = R"doc(SiDBs that can be positively charged, ascending.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_three_state = R"doc(SiDBs that can be positively charged, ascending.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_three_state_sidbs =
 R"doc(The SiDBs that can be positively charged, ascending.
@@ -19048,7 +17832,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_two_state_sidb_indices =
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_two_state =
 R"doc(SiDBs that cannot be positively charged, ascending, without the
 dependent SiDB.)doc";
 
@@ -19087,6 +17871,8 @@ Args:
                   recompute from scratch.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_valid = R"doc(Validity flag.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_validity_check =
 R"doc(Recomputes the validity flag: population stability of every SiDB, then
@@ -19239,24 +18025,6 @@ Args:
 
 Returns:
     Simulation results.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_engines_clustercomplete_2 =
-R"doc(*ClusterComplete* on a Cartesian SiDB cell-level layout: the layout is
-converted with `to_sidb_layout`, simulated, and the result converted
-back with `to_legacy_result`. This overload serves the algorithms that
-still consume `legacy_result`.
-
-Args:
-    lyt: Layout to simulate.
-    params: Parameter required for the simulation.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Simulation result over surfaces of `lyt`.
 
 )doc";
 
@@ -20547,8 +19315,10 @@ contains all singleton clusters, which is then returned.
 Args:
     c: Cluster to add to the clst if it is a singleton, otherwise this
        function is called recursively on each of its children.
-    land: Potential landscape that supplies the initial electrostatic
-          potentials.
+    local_potential_bound_containers: Charge distribution surface
+                                      objects containing information
+                                      on the initial minimum and
+                                      maximum electrostatic potential.
 
 Returns:
     The clst that contains only singleton clusters, one for each SiDB
@@ -20629,9 +19399,9 @@ Args:
          cluster associated with the projector state onto the
          receiving SiDB.
     sidb_ix: The receiving SiDB.
-    composition_pot_bounds: Pointer to the additional composition
-                            information. This pointer must be non-null
-                            in composition analysis mode.
+    composition_pot_bounds: This optional parameter supplies the
+                            additional composition information when
+                            available.
 
 Template Args:
     mode: This selects the potential bound analysis mode. Intuitively,
@@ -20653,8 +19423,7 @@ R"doc(Constructor. Invokes the algorithm with the given parameters on the
 given layout.
 
 Args:
-    land: Potential landscape to construct the *Ground State Space*
-          of.
+    lyt: Layout to construct the *Ground State Space* of.
     parameters: The parameters that *Ground State Space* will use
                 throughout the construction.
 
@@ -20740,10 +19509,9 @@ configuration can be declared invalid for this cluster.
 Args:
     pst: The projector state for which the potential bound analysis is
          to be performed.
-    composition_potential_bounds: Pointer to the additional
-                                  composition information. This
-                                  pointer must be non-null in
-                                  composition analysis mode.
+    composition_potential_bounds: This optional parameter supplies the
+                                  additional composition information
+                                  when available.
 
 Template Args:
     mode: The potential bound analysis mode that switches the function
@@ -21442,24 +20210,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_exhaustive_ground_state_simulation_2 =
-R"doc(*ExGS* on a Cartesian SiDB cell-level layout: the layout is converted
-with `to_sidb_layout`, simulated, and the result converted back with
-`to_legacy_result`. This overload serves the algorithms that still
-consume `legacy_result`.
-
-Args:
-    lyt: Layout to simulate.
-    params: Physical parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Simulation result over surfaces of `lyt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_engines_ground_state_space =
 R"doc(The *Ground State Space* algorithm constructs a cluster hierarchy over
 the SiDBs of a potential landscape and prunes every cluster charge
@@ -21600,24 +20350,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_2 =
-R"doc(*QuickExact* on a Cartesian SiDB cell-level layout: the layout is
-converted with `to_sidb_layout`, simulated, and the result converted
-back with `to_legacy_result`. This overload serves the algorithms that
-still consume `legacy_result`.
-
-Args:
-    lyt: Layout to simulate.
-    params: Parameter required for the simulation.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Simulation result over surfaces of `lyt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params = R"doc(This struct stores the parameters for the *QuickExact* algorithm.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_engines_quickexact_params_automatic_base_number_detection = R"doc(Modes to use for the *QuickExact* algorithm.)doc";
@@ -21667,25 +20399,6 @@ Returns:
     The physically valid charge distributions found, or `std::nullopt`
     if the layout is empty, holds charged defects, the iteration count
     is zero, the timeout was hit, or no valid distribution was found.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_engines_quicksim_2 =
-R"doc(*QuickSim* on a Cartesian SiDB cell-level layout: the layout is
-converted with `to_sidb_layout`, simulated, and the result converted
-back with `to_legacy_result`. This overload serves the algorithms that
-still consume `legacy_result`.
-
-Args:
-    lyt: Layout to simulate.
-    ps: *QuickSim* parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Simulation result over surfaces of `lyt`, or `std::nullopt` as the
-    `layout` overload returns it.
 
 )doc";
 
@@ -21797,53 +20510,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_os = R"doc(Output stream used for writing the simulation sim_result.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_sim_result = R"doc(Simulation results.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_location_and_ground_state_impl_write_location_and_ground_state_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_obtain_ordered_cells =
-R"doc(Obtains all cells in the surfaces and orders them by their position to
-achieve a reproducible output.
-
-Returns:
-    An ordering of cells.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_ordered_cells = R"doc(A reproducible ordering of cells in the surfaces.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_os = R"doc(The output stream to write to.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_run = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_sim_result = R"doc(The simulation sim_result to write.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_electron_distributions = R"doc(Writes all charge distributions to the output stream in XML format.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_engine_info = R"doc(Writes the engine information to the output stream in XML format.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_physical_locations =
-R"doc(Writes the physical locations of all SiDBs to the output stream in XML
-format.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_simulation_parameters =
-R"doc(Writes both the `simulation_parameters` as well as the
-`additional_simulation_parameters` to the output stream in XML format.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_detail_write_sqd_sim_result_impl_write_sqd_sim_result_impl = R"doc()doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_io_write_defect_influence_domain =
 R"doc(Writes a CSV representation of an defect influence domain to the
 specified output stream. The data are written as rows, each
@@ -21899,36 +20565,6 @@ R"doc(The tag used to represent the non-influential value of a defect
 position.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state =
-R"doc(Writes the coordinates of all SiDBs of a layout together with the
-charge distribution of the ground state(s) to a file.
-
-This overload uses an output stream to write into.
-
-Args:
-    sim_result: The simulation sim_result to write.
-    os: The output stream to write into.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_2 =
-R"doc(Writes the coordinates of all SiDBs of a layout together with the
-charge distribution of the ground state(s) to a file.
-
-This overload uses a file name to create and write into.
-
-Args:
-    filename: The file name to create and write into.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-    sim_result: The simulation sim_result to write.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_3 =
 R"doc(Writes the SiDB positions of a simulation result and the charge states
 of its ground states as CSV to a stream.
 
@@ -21938,7 +20574,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_4 =
+static const char *mkd_doc_fiction_sidb_simulation_io_write_location_and_ground_state_2 =
 R"doc(Writes the SiDB positions of a simulation result and the charge states
 of its ground states as CSV.
 
@@ -22075,39 +20711,6 @@ option for 3D plots because the non-operational samples would shadow
 the operational samples anyway.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result =
-R"doc(Writes an SiDB simulation sim_result to an XML file that is used by
-SiQAD (https://github.com/siqad/siqad), a physical simulator for the
-SiDB technology platform.
-
-This overload uses an output stream to write into.
-
-Args:
-    sim_result: The simulation sim_result to write.
-    os: The output stream to write into.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_2 =
-R"doc(Writes an SiDB simulation sim_result to an XML file that is used by
-SiQAD (https://github.com/siqad/siqad), a physical simulator for the
-SiDB technology platform.
-
-This overload uses a file name to create and write into.
-
-Args:
-    sim_result: The simulation sim_result to write.
-    filename: The file name to create and write into. Should
-              preferably use the `.xml` extension.
-
-Template Args:
-    Lyt: SiDB cell-level SiDB layout type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_3 =
 R"doc(Writes a simulation result as a SiQAD simulation result file to a
 stream.
 
@@ -22117,7 +20720,7 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_4 =
+static const char *mkd_doc_fiction_sidb_simulation_io_write_sqd_sim_result_2 =
 R"doc(Writes a simulation result as a SiQAD simulation result file.
 
 Args:
@@ -22130,27 +20733,6 @@ Raises:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_is_ground_state =
-R"doc(This function checks if the elstrostatic ground state of an SiDB
-layout is found by a heuristic for the physical simulation (e.g.,
-*QuickSim* or *SimAnneal*).
-
-Args:
-    heuristic_results: Simulation results obtained from a heuristic
-                       physical simulation.
-    exact_results: Simulation results obtained from an exact physical
-                   simulation.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Returns `true` if the ground state is contained in the simulation
-    result provided by the heuristic physical simulation. `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_is_ground_state_2 =
 R"doc(Whether a heuristic simulation found every ground state an exact
 simulation found: the two results have the same number of ground
 states and every exact ground state appears among the heuristic ones.
@@ -22165,49 +20747,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result =
-R"doc(The former result type over `charge_distribution_surface` copies, kept
-for the algorithms that still consume it. New code uses `result`;
-`to_legacy_result` converts between the two.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_additional_simulation_parameters =
-R"doc(Additional named simulation parameters. This is used to store
-algorithm-dependent parameters that are not part of the
-`sidb::model::simulation_parameters` struct.
-
-The key of the map is the name of the parameter, the element is the
-value of the parameter.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_algorithm_name = R"doc(Name of the algorithm used to determine the charge distributions.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_charge_distributions = R"doc(Charge distributions determined by the algorithm.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_groundstates =
-R"doc(This function computes the ground state of the charge distributions.
-
-Returns:
-    A vector of charge distributions with the minimal energy.
-
-Note:
-    If degenerate states exist in the simulation result, this function
-    will return multiple ground states that all possess the same
-    system energy.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_legacy_result =
-R"doc(Default constructor. It only exists to allow for the use of
-`static_assert` statements that restrict the type of `Lyt`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_sim_params = R"doc(Physical parameters used in the simulation.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_legacy_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator =
 R"doc(Iterator that assigns the input patterns to the input BDL pairs of an
 SiDB layout. Incrementing the iterator advances the input pattern;
@@ -22219,11 +20758,11 @@ the `i`-th input pair in layout order, with the first pair as the most
 significant bit.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator =
-R"doc(Detects the input BDL pairs and wires of `source_layout` and applies
-input pattern `0`.
+R"doc(Detects the input BDL pairs and wires of `lyt` and applies input
+pattern `0`.
 
 Args:
-    source_layout: The layout to iterate over.
+    lyt: The layout to iterate over.
     ps: Parameters for the BDL pair and wire detection and the input
         encoding.
 
@@ -22234,15 +20773,13 @@ R"doc(Like the constructor above but with input wires that are already
 known.
 
 Args:
-    source_layout: The layout to iterate over.
+    lyt: The layout to iterate over.
     ps: Parameters for the BDL pair detection and the input encoding.
-    source_input_wires: The input wires of `source_layout`.
+    input_wires: The input wires of `lyt`.
 
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_current_input_index = R"doc(The current input pattern.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_detected_input_wires = R"doc(The input wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_determine_last_bdl_for_each_wire =
 R"doc(Finds, for each input wire, the BDL pair farthest from the wire's
@@ -22272,15 +20809,11 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_input_pairs = R"doc(The input BDL pairs in layout order.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_is_valid =
-R"doc(Whether every input BDL pair belongs to a complete detected wire.
-
-Returns:
-    `true` if input patterns can be applied.
-
-)doc";
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_input_wires = R"doc(The input wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_last_bdl_for_each_wire = R"doc(For each input wire, the BDL pair farthest from its input pair.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_lyt = R"doc(The layout with the current input pattern applied.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs =
 R"doc(Number of input BDL pairs.
@@ -22464,8 +20997,6 @@ wire, whereas a `0` is produced by positioning the perturber farther
 away (as described in https://dl.acm.org/doi/10.1145/3489517.3530525).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_set_all_inputs = R"doc(Applies the current input pattern to the input pairs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_sidb_layout = R"doc(The layout with the current input pattern applied.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_upper_input_closer_to_wire_end =
 R"doc(For each input pair, whether its upper SiDB is the one closer to the
@@ -22784,26 +21315,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_contour_tracing_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    samples: Number of random samples.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_critical_temperature_domain = R"doc(Default constructor.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_critical_temperature_domain_2 =
@@ -22865,26 +21376,6 @@ Raises:
                            and contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_flood_fill_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    samples: Number of random samples.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
 
 )doc";
 
@@ -22950,25 +21441,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_grid_search_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_maximum_ct =
 R"doc(Finds the maximum critical temperature in the domain.
 
@@ -23024,26 +21496,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_critical_temperature_domain_random_sampling_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    samples: Number of random samples.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_canvas_of =
 R"doc(Collects the logic cells of a layout into a canvas layout on the same
 lattice.
@@ -23065,23 +21517,6 @@ Args:
 
 Template Args:
     TT: Truth table type.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_collect_bdl_input_pattern_layouts =
-R"doc(Materializes the layout of every input pattern reachable by the given
-BDL input iterator.
-
-Args:
-    bii: BDL input iterator to enumerate. It is left at input index
-         :math:`2^n`.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    Deep copies of the layout for each of the :math:`2^n` input
-    patterns, indexed by input pattern.
 
 )doc";
 
@@ -23263,15 +21698,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_has_valid_bdl_configuration =
-R"doc(Whether the input and output BDL topology supports the requested
-Boolean function.
-
-Returns:
-    `true` if every input pattern and output can be evaluated.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_input_bdl_wires = R"doc(The input BDL wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_input_pattern_layouts = R"doc(Caller-supplied layouts, one per input pattern, or `nullptr`.)doc";
@@ -23389,6 +21815,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_layout = R"doc(The layout to check.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_layout_with_input_pattern =
 R"doc(The layout with an input pattern applied.
 
@@ -23447,8 +21875,6 @@ Args:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_sidb_layout = R"doc(The layout to check.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_simulator_invocations = R"doc(Number of simulator invocations.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_truth_table = R"doc(The Boolean function(s) to implement.)doc";
@@ -23491,143 +21917,6 @@ R"doc(No physically valid charge distribution exists for the expected input
 and output pins.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_layout_invalidity_reason_POTENTIAL_POSITIVE_CHARGES = R"doc(Positive charges may occur.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_aggregate_bdl_pairs =
-R"doc(Aggregates BDL pairs of specified types into a set.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    A set of BDL pairs containing all pairs of the specified types.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_bdl_wires = R"doc(All detected BDL wires.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_detect_bdl_wires =
-R"doc(This function operates in two main phases:
-
-1. **Aggregation**: It first collects all BDL pairs of the specified
-   types.
-
-2. **Wire Detection**: The function then iterates through the
-   collected BDL pairs:
-   - For each initial BDL pair, it searches for neighboring BDL pairs
-     located above or below. - If a neighboring BDL pair is found, it
-     is added to the current wire. - This process repeats until no
-     additional neighboring BDL pairs can be found.
-
-Once a wire is fully constructed, all BDL pairs belonging to that wire
-are removed from the initial collection. The function then proceeds to
-detect the next wire using any remaining BDL pairs.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_filter_wires =
-R"doc(This function filters the wires from the `bdl_wires` collection based
-on the current `selection`. If `selection` is set to
-`bdl_wire_selection::INPUT`, it returns all wires containing an input
-cell. If `selection` is set to `bdl_wire_selection::OUTPUT`, it
-returns all wires containing an output cell. If `selection` is set to
-any other value, it returns all the wires.
-
-The function also ensures that all selected wires of the same type
-have the same length. If wires of different lengths are found, an
-assertion is triggered.
-
-Args:
-    selection: The type of wires to filter by, specified by the
-               `bdl_wire_selection` enum.
-
-Returns:
-    A vector of filtered `legacy_bdl_wire` objects based on the
-    current selection. If no wires match the selection criteria, an
-    empty vector is returned.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_filter_wires_by_type =
-R"doc(This function scans through the `bdl_wires` and selects those
-containing BDL pair cells of the specified type. It also checks that
-all selected wires have the same length and triggers an assertion if
-wires of different lengths are found.
-
-Args:
-    type: The type of the BDL pair cells to filter by.
-
-Returns:
-    A vector of `legacy_bdl_wire` objects containing cells of the
-    specified type. If no such wires are found, an empty vector is
-    returned.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_find_bdl_neighbor_above =
-R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
-given set of BDL pairs that is above a specified BDL pair. The
-function returns the first BDL pair that meets the following criteria:
-- The distance between the upper SiDB of the given BDL pair and the
-  lower SiDB of the candidate BDL pair is less
-than the specified inter-BDL distance.
-- The candidate BDL pair is not equal to the given BDL pair (ignoring
-  the type of SiDBs). - The y-coordinate of the upper SiDB of the
-  given BDL pair is less than the y-coordinate of the lower SiDB of
-  the
-candidate BDL pair.
-
-Args:
-    given_bdl: The BDL pair to find a neighbor for.
-    bdl_pairs: A set of BDL pairs to search within.
-    inter_bdl_distance: The maximum allowable distance between the
-                        lower SiDB of the given BDL pair and the upper
-                        SiDB of the potential neighbor BDL pair.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    A std::optional containing the first BDL pair that meets the
-    criteria, or std::nullopt if no such pair is found.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_find_bdl_neighbor_below =
-R"doc(This function searches for the first Binary-dot Logic (BDL) pair in a
-given set of BDL pairs that is below a specified BDL pair. The
-function returns the first BDL pair that meets the following criteria:
-- The distance between the lower SiDB of the given BDL pair and the
-  upper SiDB of the candidate BDL pair is less
-than the specified inter-BDL distance.
-- The candidate BDL pair is not equal to the given BDL pair (ignoring
-  the type of SiDBs). - The y-coordinate of the lower SiDB of the
-  given BDL pair is less than the y-coordinate of the upper SiDB of
-  the
-candidate BDL pair.
-
-Args:
-    given_bdl: The BDL pair to find a neighbor for.
-    bdl_pairs: A set of BDL pairs to search within.
-    inter_bdl_distance: The maximum allowable distance between the
-                        lower SiDB of the given BDL pair and the upper
-                        SiDB of the potential neighbor BDL pair.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    A `std::optional` containing the first BDL pair that meets the
-    criteria, or `std::nullopt` if no such pair is found.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_layout = R"doc(SiDB cell-level layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_legacy_detect_bdl_wires_impl = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_legacy_detect_bdl_wires_impl_params = R"doc(Parameters for detecting BDL wires.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_make_impl =
 R"doc(Builds the implementation for a layout with optional wires and canvas:
@@ -23781,7 +22070,7 @@ physically valid, it is determined whether the CDS is the ground state
 or the n-th excited state.
 
 Args:
-    cd: Charge distribution to evaluate.
+    lyt: SiDB layout that is simulated and compared to the given CDS.
 
 Returns:
     All physically valid physical parameters and the excited state
@@ -23913,6 +22202,8 @@ computation has finished.
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_lyt = R"doc(The SiDB layout to investigate.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_moore_neighborhood =
 R"doc(Returns the Moore neighborhood of the given step point. The Moore
 neighborhood is the set of all points that differ from `sp` by at most
@@ -23972,15 +22263,15 @@ taken from the parameters and floored at `1`.)doc";
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_op_domain = R"doc(The operational domain of the layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_operational_domain_impl =
-R"doc(Standard constructor. Initializes the layout, the truth table, the
+R"doc(Standard constructor. Initializes the lyt, the truth table, the
 parameters and the statistics. Also detects the output BDL pair, which
-is necessary for the operational domain computation. The layout must
-have exactly one output BDL pair.
+is necessary for the operational domain computation. The lyt must have
+exactly one output BDL pair.
 
 Args:
-    source_layout: SiDB cell-level layout to be evaluated.
-    tt: Expected Boolean function of the layout given as a multi-
-        output truth table.
+    lyt: SiDB cell-level lyt to be evaluated.
+    tt: Expected Boolean function of the lyt given as a multi-output
+        truth table.
     ps: Parameters for the operational domain computation.
     st: Statistics of the process.
 
@@ -23991,7 +22282,7 @@ R"doc(Additional Constructor. Initializes the layout, the parameters and the
 statistics.
 
 Args:
-    source_layout: SiDB layout to be evaluated.
+    lyt: SiDB layout to be evaluated.
     ps: Parameters for the operational domain computation.
     st: Statistics of the process.
 
@@ -24027,8 +22318,6 @@ Args:
     dim: Sweep dimension to set the value `val` to.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_sidb_layout = R"doc(The SiDB layout to investigate.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detail_operational_domain_impl_simulate_operational_status_in_parallel =
 R"doc(Simulates the operational status of the given points in parallel. It
@@ -24230,32 +22519,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_2 =
-R"doc(This algorithm detects BDL pairs in an SiDB layout. It does so by
-first collecting all dots of the given type and then uniquely pairing
-them up based on their distance. Lower and upper distance thresholds
-can be defined (defaults = 0.75 nm and 1.5 nm, respectively) to narrow
-down the range in which SiDBs could be considered a BDL pair. The
-distance between two dots is computed using the
-`sidb::model::nm_distance` function. The algorithm returns a vector of
-BDL pairs.
-
-Args:
-    lyt: The layout to detect BDL pairs in.
-    type: Optional parameter to specify the SiDB type for which BDL
-          pairs should be detected. If omitted, the function will
-          detect BDL pairs for all types. Valid types include `INPUT`,
-          `OUTPUT`, `NORMAL`, among others.
-    params: Parameters for the BDL pair detection algorithm.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    A vector of BDL pairs.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_params = R"doc(Parameters for the BDL pair detection algorithms.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_pairs_params_maximum_distance =
@@ -24282,28 +22545,6 @@ Args:
 
 Returns:
     The detected wires.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_detect_bdl_wires_2 =
-R"doc(This function identifies BDL wires in a given SiDB cell-level layout
-by detecting BDL pairs and linking them based on their spatial
-relationships. The function supports selection of different types of
-wires, such as input wires, output wires, or all wires.
-
-Args:
-    lyt: The SiDB layout to detect BDL wires in.
-    params: Parameters used for detecting BDL wires.
-    wire_selection: The type of wires to detect, specified by the
-                    `bdl_wire_selection` enum. Default is
-                    `bdl_wire_selection::ALL`.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    A vector of BDL wires, where each wire is represented as a vector
-    of BDL pairs.
 
 )doc";
 
@@ -24344,48 +22585,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_3 =
-R"doc(Generates the SiDB layout of every input pattern of a BDL layout. For
-an :math:`n`-input BDL layout, this returns :math:`2^n` layouts, where
-the layout at index :math:`i` has the input pattern :math:`i` applied,
-using the same encoding as `legacy_bdl_input_iterator`.
-
-Since the input configuration of a layout does not depend on the
-physical simulation parameters, algorithms that evaluate the same
-layout under many parameter settings can generate these layouts once
-and reuse them, instead of re-deriving them for every evaluation. The
-returned layouts are independent deep copies and can be read
-concurrently.
-
-Args:
-    lyt: The SiDB BDL layout to enumerate the input patterns of.
-    ps: Parameters for the BDL input iterator.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    One layout per input pattern, indexed by input pattern.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_generate_bdl_input_pattern_layouts_4 =
-R"doc(Generates the SiDB layout of every input pattern of a BDL layout,
-reusing pre-detected input BDL wires.
-
-Args:
-    lyt: The SiDB BDL layout to enumerate the input patterns of.
-    ps: Parameters for the BDL input iterator.
-    input_wires: Pre-detected input BDL wires.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    One layout per input pattern, indexed by input pattern.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational =
 R"doc(Determines whether kinks are the reason the layout is non-operational.
 
@@ -24417,24 +22616,6 @@ Args:
     canvas_lyt: The canvas; defaults to none.
 
 Template Args:
-    TT: Truth table type.
-
-Returns:
-    `true` if the layout is non-operational because of kinks.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_is_kink_induced_non_operational_3 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    params: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
     TT: Truth table type.
 
 Returns:
@@ -24507,24 +22688,6 @@ Returns:
 Raises:
     std::invalid_argument: if `spec` is empty or the number of layouts
                            does not match the number of patterns.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_is_operational_4 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    params: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The operational status and the number of simulator invocations.
 
 )doc";
 
@@ -24644,457 +22807,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_kink_induced_non_operational_input_patterns_3 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    params: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The kink-induced non-operational input patterns.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator =
-R"doc(Iterator that iterates over all possible input states of a BDL layout.
-There are :math:`2^n` possible input states for an :math:`n`-input BDL
-layout, each with a unique input index. The input index is interpreted
-as a binary number, where the :math:`i`-th bit represents the input
-state of the :math:`i`-th input BDL pair. If the bit is `1`, the lower
-BDL dot is set and the upper BDL dot removed. If the bit is `0`, the
-upper BDL dot is removed and the lower BDL dot set. The iterator
-creates and stores a deep-copy of the given layout. The state
-enumeration wraps around, i.e., after the last possible input state,
-the first input state is set again.
-
-The iterator satisfies the requirements of
-`LegacyRandomAccessIterator` and can be used in iterator-based `for`
-loops.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_current_input_index =
-R"doc(The current input index. There are :math:`2^n` possible input states
-for an :math:`n`-input BDL layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_determine_last_bdl_for_each_wire =
-R"doc(This function iterates through each wire in `input_bdl_wires`,
-identifies the first BDL pair of type `INPUT`, and then finds the BDL
-pair within the same wire that has the maximum distance from the
-starting pair. The resulting last BDL pairs are stored in
-`last_bdl_for_each_wire`.
-
-Note:
-    Assumes that `input_bdl_wires` and `last_bdl_for_each_wire` are
-    accessible within the scope.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_determine_upper_input_closer_to_wire_end =
-R"doc(Determines, for each input BDL pair, whether its upper dot is closer
-to the end of its wire than its lower dot.
-
-`set_all_inputs` needs only this comparison, not the distances
-themselves, and both operands are fixed for this object's lifetime.
-Evaluating it once here keeps the two `sidb::model::nm_distance` calls
-per input pair out of every increment.
-
-Returns:
-    One flag per input BDL pair, indexed like `input_pairs`.
-
-Note:
-    Assumes that `input_pairs` and `last_bdl_for_each_wire` are
-    already initialized.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_get_current_input_index =
-R"doc(Returns the current input index.
-
-Returns:
-    The current input index.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_input_bdl_wires = R"doc(The detected input BDL wires.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_input_pairs = R"doc(The detected input BDL pairs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_last_bdl_for_each_wire = R"doc(Last BDL pairs for each BDL wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_layout = R"doc(The layout to iterate over.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_legacy_bdl_input_iterator =
-R"doc(Standard constructor. It alters the layout to set the first input
-state, which assigns binary `0` to all input BDL pairs.
-
-Args:
-    lyt: The SiDB BDL layout to iterate over.
-    ps: Parameters for the BDL input iterator.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_legacy_bdl_input_iterator_2 =
-R"doc(Constructor with pre-detected input wires and directions. It alters
-the layout to set the first input state, which assigns binary `0` to
-all input BDL pairs.
-
-Args:
-    lyt: The SiDB BDL layout to iterate over.
-    ps: Parameters for the BDL input iterator.
-    input_wires: Pre-detected input BDL wires.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_num_input_pairs =
-R"doc(Returns the total number of input BDL pairs of the given SiDB gate
-layout.
-
-Returns:
-    The number of input BDL pairs.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_num_inputs = R"doc(The amount of input BDL pairs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_add =
-R"doc(Addition operator. Computes the input state of the current iterator
-plus the given integer.
-
-Args:
-    m: The amount of input states to skip.
-
-Returns:
-    The input state of the current iterator plus the given integer.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_array =
-R"doc(Subscript operator. Computes the input state of the current iterator
-plus the given integer.
-
-Args:
-    m: The amount of input states to skip.
-
-Returns:
-    The input state of the current iterator plus the given integer.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_assign =
-R"doc(Assignment operator. Sets the input state to the given integer.
-
-Args:
-    m: The input state to set.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_dec =
-R"doc(Prefix decrement operator. Sets the previous input state.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_dec_2 =
-R"doc(Postfix decrement operator. Sets the previous input state.
-
-Returns:
-    Copy of `this` before decrementing.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_eq =
-R"doc(Equality operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is equal to `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_ge =
-R"doc(Greater-or-equal-than operator. Compares the current input index with
-the given integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is greater than or equal to `m`,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_gt =
-R"doc(Greater-than operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is greater than `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_iadd =
-R"doc(Addition assignment operator. Sets a next input state.
-
-Args:
-    m: The amount of input states to skip.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_inc =
-R"doc(Prefix increment operator. Sets the next input state.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_inc_2 =
-R"doc(Postfix increment operator. Sets the next input state.
-
-Returns:
-    Copy of `this` before incrementing.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_isub =
-R"doc(Subtraction assignment operator. Sets a previous input state.
-
-Args:
-    m: The amount of input states to skip.
-
-Returns:
-    Reference to `this`.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_le =
-R"doc(Less-or-equal-than operator. Compares the current input index with the
-given integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is less than or equal to `m`,
-    `false` otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_lt =
-R"doc(Less-than operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is less than `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_mul =
-R"doc(Dereference operator. Returns a reference to the layout with the
-current input state.
-
-Returns:
-    Reference to the current layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_ne =
-R"doc(Inequality operator. Compares the current input index with the given
-integer.
-
-Args:
-    m: Integer to compare with.
-
-Returns:
-    `true` if the current input index is not equal to `m`, `false`
-    otherwise.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_sub =
-R"doc(Subtraction operator. Computes the input state of the current iterator
-minus the given integer.
-
-Args:
-    m: The amount of input states to skip.
-
-Returns:
-    The input state of the current iterator minus the given integer.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_operator_sub_2 =
-R"doc(Subtraction operator. Computes the difference between the current
-input index and the given iterator ones.
-
-Args:
-    other: Iterator to compute the difference with.
-
-Returns:
-    The difference between the current input index and the given
-    iterator ones.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_params = R"doc(Parameters for the BDL input iterator.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_set_all_inputs =
-R"doc(Sets all input cells of the layout according to the current input
-index. The input index is interpreted as a binary number, where the
-:math:`i`-th bit represents the input state of the :math:`i`-th input
-BDL pair. If the bit is `1`, the lower BDL dot is set and the upper
-BDL dot removed. If the bit is `0`, the upper BDL dot is removed and
-the lower BDL dot set.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_input_iterator_upper_input_closer_to_wire_end =
-R"doc(For each input BDL pair, whether its upper dot is closer to the end of
-its wire than its lower dot.
-
-This only depends on `input_pairs` and `last_bdl_for_each_wire`, both
-of which are fixed for this object's lifetime, so it is determined
-once here instead of on every increment in `set_all_inputs`.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire =
-R"doc(This struct encapsulates a vector of `bdl_pair` objects, representing
-the pairs of SiDBs in the BDL wire.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_add_bdl_pair =
-R"doc(Add a BDL pair to the wire.
-
-Args:
-    pair: The BDL pair to add.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_erase_bdl_pair =
-R"doc(Erase a specific BDL pair from the wire.
-
-Args:
-    pair: The BDL pair to remove. The pair is compared using the
-          equality operator (operator==).
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_find_bdl_pair_by_type =
-R"doc(Find the first Binary-dot Logic (BDL) pair of a specified type in the
-wire.
-
-Args:
-    t: Type of BDL pair to search for
-       (`sidb::sidb_technology::cell_type::INPUT`,
-       `sidb::sidb_technology::cell_type::OUTPUT`, etc.).
-
-Returns:
-    Optional containing the first BDL pair with the specified type
-    `t`, or `std::nullopt` if no such BDL pair is found.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_first_bdl_pair = R"doc(First BDL pair of the wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_last_bdl_pair = R"doc(Last BDL pair of the wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire = R"doc(Default constructor for an empty BDL wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire_2 =
-R"doc(Constructor to initialize the BDL wire with a given vector of BDL
-pairs.
-
-Also updates the start and end BDL pairs based on the given vector.
-
-Args:
-    p: The vector of BDL pairs to initialize the wire with.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire_3 =
-R"doc(Copy constructor.
-
-Creates a new `legacy_bdl_wire` object as a copy of another
-`legacy_bdl_wire` object.
-
-Args:
-    other: The `legacy_bdl_wire` object to copy from.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_legacy_bdl_wire_4 =
-R"doc(Move constructor.
-
-Transfers ownership of the BDL pairs, port, and start/end pairs from
-another `legacy_bdl_wire` object.
-
-Args:
-    other: The `legacy_bdl_wire` object to move from.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_operator_assign =
-R"doc(Move assignment operator.
-
-Transfers ownership of the BDL pairs, port, and start/end pairs from
-another `legacy_bdl_wire` object.
-
-Args:
-    other: The `legacy_bdl_wire` object to move from.
-
-Returns:
-    A reference to the updated object.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_operator_assign_2 =
-R"doc(Copy assignment operator.
-
-Copies the content of another `legacy_bdl_wire` object, including
-start and end pairs.
-
-Args:
-    other: The `legacy_bdl_wire` object to copy from.
-
-Returns:
-    A reference to the updated object.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_pairs = R"doc(Vector of BDL pairs representing the wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_port = R"doc(Port of the BDL wire.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_legacy_bdl_wire_update_direction = R"doc(Update the port of the wire based on the current BDL pairs.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain =
 R"doc(An operational domain is a set of simulation parameter values for
 which a given SiDB layout is logically operational. This means that a
@@ -25178,26 +22890,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_contour_tracing_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    samples: Number of random samples.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_dimensions =
 R"doc(The dimensions to sweep over. The first dimension is the x dimension,
 the second dimension is the y dimension, etc.)doc";
@@ -25256,26 +22948,6 @@ Raises:
                            and contour tracing additionally require at
                            least two sweep dimensions; grid search and
                            random sampling accept any number.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_flood_fill_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    samples: Number of random samples.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
 
 )doc";
 
@@ -25340,25 +23012,6 @@ Raises:
                            requested without rejecting kinks or on a
                            layout without `LOGIC` cells. Any number of
                            sweep dimensions is accepted.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_grid_search_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
 
 )doc";
 
@@ -25436,26 +23089,6 @@ Raises:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_random_sampling_2 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    samples: Number of random samples.
-    params: Parameters.
-    stats: Statistics.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The domain.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_ratio =
 R"doc(Calculates the ratio of operational parameter points surrounding a
 specified parameter point to the total number of parameter points in
@@ -25483,25 +23116,6 @@ Template Args:
 Returns:
     The ratio of operational parameter points to the total number of
     parameter points in the parameter space.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_domain_ratio_2 =
-R"doc(Transitional overload for SiDB cell-level layouts, converted with
-`to_sidb_layout`; see the `layout` overload.
-
-Args:
-    lyt: The layout to investigate.
-    spec: The Boolean function(s) the layout implements.
-    pp: The parameter point to start the flood fill from.
-    params: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: Truth table type.
-
-Returns:
-    The ratio of operational parameter points.
 
 )doc";
 
@@ -25571,24 +23185,6 @@ Args:
     canvas_lyt: The canvas; defaults to none.
 
 Template Args:
-    TT: Truth table type.
-
-Returns:
-    The operational input patterns.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_logic_operational_input_patterns_3 =
-R"doc(Transitional overload for SiDB cell-level layouts; see the `layout`
-overload.
-
-Args:
-    lyt: The layout to check.
-    spec: The Boolean function(s) it has to implement.
-    params: Parameters.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
     TT: Truth table type.
 
 Returns:
@@ -25716,10 +23312,6 @@ shared read-only by worker threads.
 
 Distances are stored in nm, potentials in V, energies in eV.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_charge_transition_thresholds = R"doc(Charge transition thresholds per SiDB (unit: V).)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_charged_defects = R"doc(The charged defects with their sites.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_chargeless_potential =
 R"doc(The chargeless potential one SiDB exerts on another, i.e., the
 potential of a unit charge at the distance of the two.
@@ -25762,8 +23354,6 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_de
 R"doc(Chargeless potential every defect exerts on every defect, row-major
 D×D (unit: V).)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_induced_potentials = R"doc(Potential of the charged defects per SiDB (unit: V).)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_sidb_potentials =
 R"doc(Chargeless potential every SiDB exerts on every defect, row-major D×N
 (unit: V).)doc";
@@ -25775,6 +23365,8 @@ Returns:
     Site-defect pairs.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defects_2 = R"doc(The charged defects with their sites.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_distances = R"doc(Distances between SiDBs, row-major N×N (unit: nm).)doc";
 
@@ -25889,7 +23481,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_layout_data = R"doc(The layout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_ext_pot = R"doc(External potential per SiDB (unit: V).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_ext_pot_at_defect = R"doc(External potential per defect (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_external_potential =
 R"doc(The external potential at an SiDB: its local external potential plus
@@ -25903,10 +23497,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_external_potentials = R"doc(External potential per SiDB (unit: V).)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_external_potentials_at_defects = R"doc(External potential per defect (unit: V).)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_internal_potentials =
 R"doc(The local internal potentials of a charge distribution: at every SiDB,
 the potential of the charged SiDBs plus the potential of the charged
@@ -25919,6 +23509,8 @@ Returns:
     Local internal potential per SiDB (unit: V).
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_pot_caused_by_defects = R"doc(Potential of the charged defects per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_potential_caused_by_defects =
 R"doc(The potential the charged surface defects exert on an SiDB.
@@ -25943,6 +23535,10 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_lyt = R"doc(The layout.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_n = R"doc(Number of SiDBs.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_nm_distance =
 R"doc(Distance between two SiDBs.
 
@@ -25963,8 +23559,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_num_sites = R"doc(Number of SiDBs.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_params =
 R"doc(The physical parameters.
 
@@ -25972,6 +23566,8 @@ Returns:
     The parameters.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_params_2 = R"doc(Physical parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potential_landscape =
 R"doc(Builds the landscape of a layout.
@@ -25991,10 +23587,6 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potentials = R"doc(Chargeless potentials between SiDBs, row-major N×N (unit: V).)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_simulation_parameters_data = R"doc(Physical parameters.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_site_storage = R"doc(SiDB sites in raster order.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_sites =
 R"doc(The SiDB sites in raster order, shared with the charge distributions
 built over this landscape.
@@ -26003,6 +23595,10 @@ Returns:
     The shared site list.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_sites_2 = R"doc(SiDB sites in raster order.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_thresholds = R"doc(Charge transition thresholds per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_result =
 R"doc(The unified return type of every SiDB simulation algorithm: the name
@@ -26056,24 +23652,6 @@ static const char *mkd_doc_fiction_sidb_simulation_result_sim_params = R"doc(Phy
 
 static const char *mkd_doc_fiction_sidb_simulation_result_simulation_runtime = R"doc(Total simulation runtime in seconds.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_to_legacy_result =
-R"doc(Converts a result into the former representation over
-`charge_distribution_surface` copies of a cell-level layout, for the
-algorithms that still consume it. Each distribution's charge states
-are assigned to the surface and its potentials and energy recomputed.
-
-Args:
-    res: Result to convert.
-    lyt: The cell-level layout the result's layout was converted from.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-
-Returns:
-    The result over surfaces of `lyt`.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_site_at_row =
 R"doc(The site at a given column and single-SiDB row, the inverse of
 `row_of`. Negative rows map to the unit cell below them, so `(x, -1)`
@@ -26085,9 +23663,6 @@ Args:
 
 Returns:
     The site `(x, floor(row / 2), row mod 2)`.
-
-Raises:
-    std::out_of_range: if the row exceeds the range of lattice sites.
 
 )doc";
 
@@ -26102,10 +23677,6 @@ Args:
 
 Returns:
     The sites in the rectangle in raster order.
-
-Raises:
-    std::length_error: if the rectangle exceeds the maximum vector
-                       size.
 
 )doc";
 
@@ -26156,162 +23727,9 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_skeleton_bestagon_library_skeleton_bestagon_library = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_surfaces = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_2 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_3 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_4 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_5 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_6 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_cds_configuration = R"doc(An enumeration of modes for the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_cds_configuration_CHARGE_LOCATION_AND_ELECTROSTATIC =
-R"doc(In addition to the location of the charge states, the electrostatic
-computation is conducted and stored.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_cds_configuration_CHARGE_LOCATION_ONLY =
-R"doc(The charge distribution is exclusively used to store the charge
-states.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_history =
-R"doc(An enumeration of modes to decide if the previous charge distribution
-is used to simply the computation of the properties of a new charge
-distribution.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_history_CONSIDER = R"doc(The previous charge distribution is used.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_history_NEGLECT =
-R"doc(The previous charge distribution is not used. Hence, the local
-electrostatic potential of the given charge distribution is calculated
-from scratch.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_mode =
-R"doc(An enumeration of modes for handling the charge distribution when
-assigning a charge index to the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_mode_KEEP_CHARGE_DISTRIBUTION =
-R"doc(The charge distribution is kept and is not updated after a charge
-index is assigned to the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_mode_UPDATE_CHARGE_DISTRIBUTION =
-R"doc(The charge distribution is updated after the charge index is assigned
-to the charge distribution surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_distribution_surface =
-R"doc(A layout type to layer on top of any SiDB cell-level layout. It
-implements an interface to store and access SiDBs' charge states.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    has_charge_distribution_interface: Automatically determines
-                                       whether a charge distribution
-                                       interface is already present.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_index_mode =
-R"doc(An enumeration of modes for handling the charge index during charge
-state assignment.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_index_mode_KEEP_CHARGE_INDEX =
-R"doc(The charge state is assigned to the cell but the old charge index is
-kept.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_index_mode_UPDATE_CHARGE_INDEX =
-R"doc(The charge state is assigned to the cell and the charge index is
-updated.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_index_recomputation =
-R"doc(An enumeration of modes to specifying if the charge index should be
-recomputed fully.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_index_recomputation_FROM_SCRATCH = R"doc(The charge index is recomputed from scratch.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_index_recomputation_IGNORE_LEADING_ZEROES =
-R"doc(The charge index is recomputed with the leading zeroes ignored. This
-optimization can be applied if we know that the charge index was
-incremented after the last charge index computation.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds =
-R"doc(An enumeration of charge transition threshold bounds to test against
-for population stability assessment.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_NEGATIVE_UPPER_BOUND = R"doc(For the upper bound check against mu_minus to validate DB-.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_NEUTRAL_LOWER_BOUND = R"doc(For the lower bound check against mu_minus to validate DB0.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_NEUTRAL_UPPER_BOUND = R"doc(For the upper bound check against mu_plus to validate DB0.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_charge_transition_threshold_bounds_POSITIVE_LOWER_BOUND = R"doc(For the lower bound check against mu_plus to validate DB+.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_defect_surface =
-R"doc(A layout type to layer on top of any SiDB cell-level layout. It
-implements an interface to store and access fabrication defects on the
-H-Si(100) 2x1 surface.
-
-Template Args:
-    Lyt: SiDB cell-level layout type.
-    has_sidb_defect_surface: Automatically determines whether a defect
-                             interface is already present.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_defect_surface_params = R"doc(This struct stores parameters for the `defect_surface`)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_defect_surface_params_ignore =
-R"doc(Specifies which defects are to be ignored, e.g., when they are not
-relevant for the current analysis.
-
-Note:
-    Ignored defects are not stored in the surface instance!)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_dependent_cell_mode = R"doc(An enumeration of modes for the dependent cell.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_dependent_cell_mode_FIXED =
-R"doc(The charge state of the dependent cell is not changed based on the
-local electrostatic potential at its position.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_dependent_cell_mode_VARIABLE =
-R"doc(The charge state of the dependent cell is changed based on the local
-electrostatic potential at its position.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_energy_calculation =
-R"doc(An enumeration of modes for calculation of the electrostatic potential
-energy of a given charge distribution.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_energy_calculation_KEEP_OLD_ENERGY_VALUE =
-R"doc(The electrostatic potential energy of a given charge distribution is
-not updated after it is changed.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_energy_calculation_UPDATE_ENERGY =
-R"doc(The electrostatic potential energy of a given charge distribution is
-updated after it is changed.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_lattice =
-R"doc(A layout type to layer on top of an SiDB cell-level layout. It
-implements an interface for different lattice orientations of the H-Si
-crystal.
-
-Template Args:
-    LatticeOrientation: Type of the lattice orientation.
-    Lyt: SiDB cell-level layout type.
-    has_sidb_lattice_interface: Automatically determines whether an
-                                SiDB lattice interface is already
-                                present.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_lattice_100 = R"doc(H-Si(100)-2x1 surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_lattice_100_lattice_100 = R"doc()doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_lattice_111 = R"doc(H-Si(111)-1x1 surface.)doc";
-
-static const char *mkd_doc_fiction_sidb_surfaces_lattice_111_lattice_111 = R"doc()doc";
-
 static const char *mkd_doc_fiction_sidb_to_cell =
-R"doc(The coordinate of a lattice site in a given SiDB cell-level layout
-type: the site itself for SiQAD coordinates, the column and single-
-SiDB row otherwise.
+R"doc(The coordinate of a lattice site in a given Cartesian SiDB cell-level
+layout type: the column and the single-SiDB row.
 
 Args:
     s: Lattice site.
@@ -26325,12 +23743,10 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_to_cell_level_layout =
-R"doc(Converts a `sidb::layout` back into a Cartesian SiDB cell-level
-layout: cell types, inputs, outputs, the layout name, and, for defect
-surfaces, the surface defects carry over. The layout's lattice is not
-represented in the cell-level type and is dropped. This is the inverse
-of `to_sidb_layout` for the algorithms that still hand out cell-level
-layouts.
+R"doc(Converts an `sidb::layout` into a Cartesian SiDB cell-level layout:
+cell types, inputs, outputs, and the layout name carry over. The
+layout's lattice and its defects are not represented in the cell-level
+type and are dropped. This is the inverse of `to_sidb_layout`.
 
 Args:
     lyt: The layout to convert.
@@ -26353,22 +23769,19 @@ Args:
 Returns:
     Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
 
-Raises:
-    std::out_of_range: if the row exceeds the cube coordinate range.
-
 )doc";
 
 static const char *mkd_doc_fiction_sidb_to_lattice_site =
-R"doc(The lattice site a cell-level layout coordinate refers to. SiQAD
-coordinates map one-to-one; Cartesian coordinates count single SiDB
-rows, so row `y` becomes unit cell `y / 2`, basis site `y mod 2`.
+R"doc(The lattice site a Cartesian cell-level layout coordinate refers to:
+the coordinate counts single SiDB rows, so row `y` becomes unit cell
+`y / 2`, basis site `y mod 2`.
 
 Args:
     c: Coordinate.
 
 Template Args:
-    Coordinate: Coordinate type: `layouts::coords::offset`, `cube`, or
-                `siqad`.
+    Coordinate: Coordinate type: `layouts::coords::offset` or
+                `layouts::coords::cube`.
 
 Returns:
     The lattice site of `c`.
@@ -26376,29 +23789,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_sidb_to_sidb_layout =
-R"doc(Converts an SiDB cell-level layout into an `sidb::layout` on the given
-lattice. Cell types, inputs, outputs, the layout name, and surface
-defects carry over; cell names, cell modes, tile sizes, and clocking
-do not.
+R"doc(Converts a Cartesian SiDB cell-level layout, as produced by placement
+and routing, into an `sidb::layout` on the given lattice. Cell types,
+inputs, outputs, and the layout name carry over; cell names, cell
+modes, tile sizes, and clocking do not.
 
 Args:
     lyt: Layout to convert.
-    lat: Lattice of the resulting layout.
-
-Template Args:
-    CellLyt: SiDB cell-level layout type.
-
-Returns:
-    The SiDB layout.
-
-)doc";
-
-static const char *mkd_doc_fiction_sidb_to_sidb_layout_2 =
-R"doc(Converts an SiDB cell-level layout into an `sidb::layout` on the
-lattice the layout type is tagged with, see `lattice_of`.
-
-Args:
-    lyt: Layout to convert.
+    lat: Lattice of the resulting layout; H-Si(100) 2x1 by default.
 
 Template Args:
     CellLyt: SiDB cell-level layout type.
@@ -29152,8 +26550,6 @@ static const char *mkd_doc_fmt_formatter_3 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_4 = R"doc()doc";
 
-static const char *mkd_doc_fmt_formatter_5 = R"doc()doc";
-
 static const char *mkd_doc_fmt_formatter_format = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_format_2 = R"doc()doc";
@@ -29162,8 +26558,6 @@ static const char *mkd_doc_fmt_formatter_format_3 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_format_4 = R"doc()doc";
 
-static const char *mkd_doc_fmt_formatter_format_5 = R"doc()doc";
-
 static const char *mkd_doc_fmt_formatter_parse = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_parse_2 = R"doc()doc";
@@ -29171,8 +26565,6 @@ static const char *mkd_doc_fmt_formatter_parse_2 = R"doc()doc";
 static const char *mkd_doc_fmt_formatter_parse_3 = R"doc()doc";
 
 static const char *mkd_doc_fmt_formatter_parse_4 = R"doc()doc";
-
-static const char *mkd_doc_fmt_formatter_parse_5 = R"doc()doc";
 
 static const char *mkd_doc_formatter = R"doc(`fmt` formatter for lattice sites, printing `(x,y,z)`.)doc";
 
@@ -29211,17 +26603,15 @@ static const char *mkd_doc_std_hash_3 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_4 = R"doc()doc";
 
-static const char *mkd_doc_std_hash_5 = R"doc()doc";
+static const char *mkd_doc_std_hash_5 = R"doc(Hash for charge distributions, over the charge states.)doc";
 
-static const char *mkd_doc_std_hash_6 = R"doc(Hash for charge distributions, over the charge states.)doc";
+static const char *mkd_doc_std_hash_6 = R"doc(Hash for lattice sites.)doc";
 
-static const char *mkd_doc_std_hash_7 = R"doc(Hash for lattice sites.)doc";
+static const char *mkd_doc_std_hash_7 = R"doc(Hash for SiDB layouts, over the SiDBs and their cell types.)doc";
 
-static const char *mkd_doc_std_hash_8 = R"doc(Hash for SiDB layouts, over the SiDBs and their cell types.)doc";
+static const char *mkd_doc_std_hash_8 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
 
-static const char *mkd_doc_std_hash_9 = R"doc(Provides a hash implementation for `fiction::defect`.)doc";
-
-static const char *mkd_doc_std_hash_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_9 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call = R"doc()doc";
 
@@ -29234,17 +26624,6 @@ static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
 static const char *mkd_doc_std_hash_operator_call_5 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_6 =
-R"doc(Computes a hash from the ordered charge states.
-
-Args:
-    cd: Charge distribution to hash.
-
-Returns:
-    Hash value of `cd`.
-
-)doc";
-
-static const char *mkd_doc_std_hash_operator_call_7 =
 R"doc(Args:
     s: Site to hash.
 
@@ -29253,7 +26632,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_8 =
+static const char *mkd_doc_std_hash_operator_call_7 =
 R"doc(Args:
     lyt: Layout to hash.
 
@@ -29262,7 +26641,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_9 =
+static const char *mkd_doc_std_hash_operator_call_8 =
 R"doc(Computes the hash value of a given SiDB defect.
 
 Every member that `fiction::defect`'s equality operator compares
@@ -29276,7 +26655,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_10 = R"doc()doc";
+static const char *mkd_doc_std_hash_operator_call_9 = R"doc()doc";
 
 static const char *mkd_doc_std_iterator_traits = R"doc()doc";
 

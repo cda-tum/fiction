@@ -33,50 +33,6 @@
 namespace pyfiction
 {
 
-namespace detail
-{
-
-/**
- * @brief Registers SQD import for H-Si(100)-2x1 cell-level layouts.
- *
- * @param m Python module.
- */
-void read_sqd_layout_100(nanobind::module_& m)
-{
-    namespace py = nanobind;
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    py_sidb_100_lattice (*const read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::sidb::io::read_sqd_layout<py_sidb_100_lattice>;
-
-    m.def("read_sqd_layout_100", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-          DOC(fiction_sidb_io_read_sqd_layout_3));
-}
-
-/**
- * @brief Registers SQD import for H-Si(111)-1x1 cell-level layouts.
- *
- * @param m Python module.
- */
-void read_sqd_layout_111(nanobind::module_& m)
-{
-    namespace py = nanobind;
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    py_sidb_111_lattice (*const read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::sidb::io::read_sqd_layout<py_sidb_111_lattice>;
-
-    m.def("read_sqd_layout_111", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-          DOC(fiction_sidb_io_read_sqd_layout_3));
-}
-
-}  // namespace detail
-
-/**
- * @brief Registers SQD import and parsing errors.
- *
- * @param m Python module.
- */
 void read_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -88,15 +44,11 @@ void read_sqd_layout(nanobind::module_& m)
         PyExc_RuntimeError);  // NOLINT(misc-include-cleaner): Included through nanobind.h
     // NOLINTEND(bugprone-throw-keyword-missing,bugprone-unused-raii)
 
-    detail::read_sqd_layout_100(m);
-    detail::read_sqd_layout_111(m);
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    fiction::sidb::layout (*const read_sqd_layout_function_pointer)(const std::string_view&, const std::string_view&) =
-        &fiction::sidb::io::read_sqd_layout;
-
-    m.def("read_sqd_layout", read_sqd_layout_function_pointer, py::arg("filename"), py::arg("layout_name") = "",
-          DOC(fiction_sidb_io_read_sqd_layout_6));
+    m.def("read_sqd_layout",
+          static_cast<fiction::sidb::layout (*)(const std::string_view&, const std::string_view&)>(
+              &fiction::sidb::io::read_sqd_layout),
+          py::arg("filename"), py::arg("layout_name") = "",
+          DOC(fiction_sidb_io_read_sqd_layout_2));
 }
 
 }  // namespace pyfiction

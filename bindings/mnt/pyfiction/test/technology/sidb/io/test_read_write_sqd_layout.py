@@ -14,8 +14,6 @@ from mnt.pyfiction import (
     lattice,
     lattice_site,
     read_sqd_layout,
-    read_sqd_layout_100,
-    read_sqd_layout_111,
     sidb_technology,
     write_sqd_layout,
 )
@@ -25,9 +23,9 @@ if TYPE_CHECKING:
 
 
 def test_read_write(resources_dir: Path) -> None:
-    """The SQD readers accept fixtures for both silicon lattice orientations."""
-    read_sqd_layout_100(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
-    read_sqd_layout_111(str(resources_dir / "AND_mu_032_111_surface.sqd"))
+    """The SQD reader accepts fixtures for both silicon lattice orientations."""
+    read_sqd_layout(str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"))
+    read_sqd_layout(str(resources_dir / "AND_mu_032_111_surface.sqd"))
 
 
 def test_read_write_sidb_layout(resources_dir: Path, tmp_path: Path) -> None:

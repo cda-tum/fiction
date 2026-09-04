@@ -28,8 +28,8 @@
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/technology/inml/technology.hpp>
 #include <fiction/technology/qca/technology.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
+#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 
@@ -131,10 +131,6 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
         cell_type.value("FANOUT_COUPLER_MAGNET", Technology::cell_type::FANOUT_COUPLER_MAGNET,
                         DOC(fiction_inml_inml_technology_cell_type_FANOUT_COUPLER_MAGNET));
     }
-    else if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
-    {
-        cell_type.value("LOGIC", Technology::cell_type::LOGIC);
-    }
     // NOTE: more technologies go here
 
     using py_cartesian_technology_cell_layout = py_cartesian_cell_layout<Technology>;
@@ -142,11 +138,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
     /**
      * Cell-level clocked Cartesian layout.
      */
-    // `sidb_layout` names the lattice-based `fiction::sidb::layout`; the Cartesian cell-level layout that
-    // `apply_gate_library` produces keeps a distinct name.
-    const auto class_name = std::is_same_v<Technology, fiction::sidb::sidb_technology> ?
-                                std::string{"sidb_cell_level_layout"} :
-                                fmt::format("{}_layout", tech_name);
+    const auto class_name = fmt::format("{}_layout", tech_name);
 
     py::class_<py_cartesian_technology_cell_layout,
                fiction::layouts::clocked_layout<fiction::layouts::tile_based_layout<
@@ -245,15 +237,7 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
             {
                 std::stringstream stream{};
 
-                if constexpr (std::is_same_v<Technology, fiction::sidb::sidb_technology>)
-                {
-                    fiction::layouts::io::print_layout(fiction::layouts::convert_layout_to_siqad_coordinates(lyt),
-                                                       stream);
-                }
-                else
-                {
-                    fiction::layouts::io::print_layout(lyt, stream);
-                }
+                fiction::layouts::io::print_layout(lyt, stream);
 
                 return stream.str();
             },
@@ -274,7 +258,6 @@ void cell_level_layout(nanobind::module_& m)
     detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::qca::mol_qca_technology>(m);
     detail::fcn_technology_cell_level_layout<fiction::inml::inml_technology>(m);
-    detail::fcn_technology_cell_level_layout<fiction::sidb::sidb_technology>(m);
 }
 
 }  // namespace pyfiction

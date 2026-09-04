@@ -37,44 +37,6 @@
 
 namespace pyfiction
 {
-namespace detail
-{
-/**
- * @brief Registers SVG file and string export for the layout type.
- *
- * @tparam Lyt SiDB layout type.
- * @param m Python module.
- */
-template <typename Lyt>
-void write_sidb_layout_svg_impl(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    // Pointers to the original functions
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_sidb_layout_svg_pointer)(const Lyt&, const std::string_view&,
-                                                const fiction::sidb::io::write_sidb_layout_svg_params&) =
-        &fiction::sidb::io::write_sidb_layout_svg<Lyt>;
-
-    // SiDB plot
-    m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
-          py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-          DOC(fiction_sidb_io_write_sidb_layout_svg));
-
-    // Register the function to return an SVG as a string
-    m.def(
-        "write_sidb_layout_svg_to_string",
-        [](const Lyt& layout, const fiction::sidb::io::write_sidb_layout_svg_params& params) -> std::string
-        {
-            std::ostringstream oss;                                         // Create an in-memory output stream
-            fiction::sidb::io::write_sidb_layout_svg(layout, oss, params);  // Write to the stream
-            return oss.str();                                               // Return the string content
-        },
-        py::arg("layout"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-        DOC(fiction_sidb_io_write_sidb_layout_svg));
-}
-
-}  // namespace detail
 
 /**
  * @brief Registers SVG export and its rendering parameters.
@@ -115,22 +77,13 @@ void write_sidb_layout_svg(nanobind::module_& m)
 
         ;
 
-    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_111>(m);
-    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface_100>(m);
-    detail::write_sidb_layout_svg_impl<py_charge_distribution_surface>(m);
-
-    detail::write_sidb_layout_svg_impl<py_sidb_111_lattice>(m);
-    detail::write_sidb_layout_svg_impl<py_sidb_100_lattice>(m);
-    detail::write_sidb_layout_svg_impl<py_sidb_layout>(m);
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_sidb_layout_svg_pointer)(const fiction::sidb::layout&, const std::string_view&,
-                                                const fiction::sidb::io::write_sidb_layout_svg_params&) =
-        &fiction::sidb::io::write_sidb_layout_svg;
-
-    m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
+    m.def("write_sidb_layout_svg",
+          static_cast<void (*)(const fiction::sidb::layout&, const std::string_view&,
+                               const fiction::sidb::io::write_sidb_layout_svg_params&)>(
+              &fiction::sidb::io::write_sidb_layout_svg),
+          py::arg("layout"), py::arg("filename"),
           py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-          DOC(fiction_sidb_io_write_sidb_layout_svg_4));
+          DOC(fiction_sidb_io_write_sidb_layout_svg_2));
 
     m.def(
         "write_sidb_layout_svg_to_string",
@@ -141,16 +94,15 @@ void write_sidb_layout_svg(nanobind::module_& m)
             return oss.str();
         },
         py::arg("layout"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-        DOC(fiction_sidb_io_write_sidb_layout_svg_3));
+        DOC(fiction_sidb_io_write_sidb_layout_svg));
 
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_sidb_layout_svg_cd_pointer)(
-        const fiction::sidb::layout&, const fiction::sidb::charge_distribution&, const std::string_view&,
-        const fiction::sidb::io::write_sidb_layout_svg_params&) = &fiction::sidb::io::write_sidb_layout_svg;
-
-    m.def("write_sidb_layout_svg", write_sidb_layout_svg_cd_pointer, py::arg("layout"), py::arg("charge_distribution"),
+    m.def("write_sidb_layout_svg",
+          static_cast<void (*)(const fiction::sidb::layout&, const fiction::sidb::charge_distribution&,
+                               const std::string_view&, const fiction::sidb::io::write_sidb_layout_svg_params&)>(
+              &fiction::sidb::io::write_sidb_layout_svg),
+          py::arg("layout"), py::arg("charge_distribution"),
           py::arg("filename"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-          DOC(fiction_sidb_io_write_sidb_layout_svg_6));
+          DOC(fiction_sidb_io_write_sidb_layout_svg_4));
 
     m.def(
         "write_sidb_layout_svg_to_string",
@@ -163,7 +115,7 @@ void write_sidb_layout_svg(nanobind::module_& m)
         },
         py::arg("layout"), py::arg("charge_distribution"),
         py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-        DOC(fiction_sidb_io_write_sidb_layout_svg_5));
+        DOC(fiction_sidb_io_write_sidb_layout_svg_3));
 }
 
 }  // namespace pyfiction

@@ -32,47 +32,15 @@
 namespace pyfiction
 {
 
-namespace detail
-{
-/**
- * @brief Registers SQD export.
- *
- * @tparam Lyt SiDB layout type.
- * @param m Python module.
- */
-template <typename Lyt>
-void write_sqd_layout(nanobind::module_& m)
-{
-    namespace py = nanobind;  // NOLINT(misc-unused-alias-decls)
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_sqd_layout_function_pointer)(const Lyt&, const std::string_view&) =
-        &fiction::sidb::io::write_sqd_layout<Lyt>;
-
-    m.def("write_sqd_layout", write_sqd_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          DOC(fiction_sidb_io_write_sqd_layout));
-}
-}  // namespace detail
-
-/**
- * @brief Registers SQD export.
- *
- * @param m Python module.
- */
 void write_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;
 
-    detail::write_sqd_layout<py_sidb_111_lattice>(m);
-    detail::write_sqd_layout<py_sidb_100_lattice>(m);
-    detail::write_sqd_layout<py_sidb_layout>(m);
-
-    // NOLINTNEXTLINE(misc-const-correctness)
-    void (*const write_sqd_layout_function_pointer)(const fiction::sidb::layout&, const std::string_view&) =
-        &fiction::sidb::io::write_sqd_layout;
-
-    m.def("write_sqd_layout", write_sqd_layout_function_pointer, py::arg("layout"), py::arg("filename"),
-          DOC(fiction_sidb_io_write_sqd_layout_4));
+    m.def("write_sqd_layout",
+          static_cast<void (*)(const fiction::sidb::layout&, const std::string_view&)>(
+              &fiction::sidb::io::write_sqd_layout),
+          py::arg("layout"), py::arg("filename"),
+          DOC(fiction_sidb_io_write_sqd_layout_2));
 }
 
 }  // namespace pyfiction
