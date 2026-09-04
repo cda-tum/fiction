@@ -1,0 +1,7 @@
+[global]
+flavor = "myst"
+# Keep long API signatures, shell prompts, HTML figures, and labels before titles.
+disable = ["MD013", "MD014", "MD033", "MD041"]
+
+[MD024]
+siblings-only = true

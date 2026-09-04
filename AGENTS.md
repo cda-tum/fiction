@@ -94,7 +94,7 @@ Cutting one of these is a defect, not minimalism:
   answer.
 - Anything the task explicitly asked for. If the maintainer wants the full version after you
   argue for the small one, build it and stop re-arguing.
-- What this repository mandates: the Doxygen block on every symbol, the `docs/changelog.rst`
+- What this repository mandates: the Doxygen block on every symbol, the `docs/changelog.md`
   entry, the boxes in `.github/pull_request_template.md`.
 - The check. Non-trivial logic — a branch, a loop, a lifetime, a bound — leaves behind one
   runnable test that fails if the logic breaks. Match the style of the tests around it and
@@ -187,7 +187,7 @@ constraint at the site, not as an account of a past attempt — "`std::unordered
 is not usable here because the iteration order feeds the gate ordering", not "switched away
 from `std::unordered_map` because it broke the gate ordering".
 
-`docs/changelog.rst` is the one exception, because naming the delta between two releases is
+`docs/changelog.md` is the one exception, because naming the delta between two releases is
 its whole purpose. The word "now" marks the boundary: "`hexagonalization` now rejects empty
 layouts" is a good changelog entry, and a bad Doxygen comment on `hexagonalization`, which
 should say that the function rejects empty layouts.
@@ -221,7 +221,7 @@ automatically, open the file yourself** — several do not.
 
 Everything else: `include/fiction/` is the header-only C++20 library; `vendors/` holds
 third-party sources and is never modified; `benchmarks/` is input data. Build presets live
-in `CMakePresets.json` and are documented in `docs/getting_started.rst`.
+in `CMakePresets.json` and are documented in `docs/getting_started.md`.
 
 ## Commands
 
@@ -264,7 +264,7 @@ CodeRabbit findings are suggestions; disagreeing with a stated reason is a norma
 and LLM reviewers skew conservative. CodeRabbit skips drafts, and marking a draft ready
 does not trigger a pass — ask for one with a `@coderabbitai review` comment. Reply to
 comments; never resolve them — resolution belongs to the reviewer. Full workflow:
-`docs/contributing.rst`, "Code Review".
+`docs/contributing.md`, "Code Review".
 
 ## Git and GitHub
 
@@ -387,7 +387,7 @@ enforces the following:
   - Run `prek run -a` before finishing a task.
   - Write tests for new functionality (`test/` for C++, `bindings/mnt/pyfiction/test/` for
     Python).
-  - Update `docs/changelog.rst`'s `Unreleased` section for any user-facing change; see
+  - Update `docs/changelog.md`'s `Unreleased` section for any user-facing change; see
     `docs/AGENTS.md` for the entry style.
   - Satisfy every box in `.github/pull_request_template.md` before calling a PR done.
   - Use `const` correctness and braced initialization.

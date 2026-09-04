@@ -45,7 +45,6 @@ cmake-build-*
 build*
 docs/_build/
 docs/doxyxml/
-docs/html/
 */_dep/
 
 # Cache files
@@ -112,3 +111,4 @@ AGENTS.local.md
 
 # compiler cache written by the Windows CI jobs
 .sccache/
+.rumdl_cache/
