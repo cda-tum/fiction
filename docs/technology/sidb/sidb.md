@@ -8,7 +8,6 @@ io/io
 layout
 model/model
 simulation/simulation
-surfaces/surfaces
 ```
 
 ## Silicon Dangling Bonds (SiDB)

@@ -56,8 +56,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Algorithms:
   - **Breaking:** _QuickExact_, _QuickSim_, _ExGS_, _ClusterComplete_, and _Ground State Space_
-    simulate `sidb::layout` and return the non-template `sidb::simulation::result`. The former
-    result remains available as `legacy_result<Lyt>` while consumers migrate
+    simulate `sidb::layout` and return the non-template `sidb::simulation::result`
   - _QuickSim_ returns `std::nullopt` for layouts with charged surface defects
   - On the same machine, _ClusterComplete_ runs 2–4× faster (29-SiDB crossing: 11.4 → 5.1 ms;
     56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
@@ -67,7 +66,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** SiDB defect analyses, generators, and gate libraries use `sidb::layout`
   - Their parameters use `lattice_site` for canvases, scan areas, and fixed SiDBs
   - Defect-influence and displacement-robustness domains are non-template types
-  - Gate designers retain cell-level overloads while the remaining consumers migrate
   - Random gate design stops after `maximal_random_design_attempts` candidate layouts
   - Gate-design and defect-influence APIs reject empty specifications
   - `on_the_fly_gate_library` measures the distance between a defect and the gate's SiDBs on the surface's
@@ -93,6 +91,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - I/O:
   - `write_sidb_layout_svg` and `print_sidb_layout` color an `sidb::layout` from an optional
     `charge_distribution`
+
+- **Breaking:** The CLI's cell-layout store holds `sidb::layout` and `sidb::simulation::result` for SiDB layouts.
+  `read --sqd` parses any SQD file into an `sidb::layout`; the file names its lattice, so the
+  `--lattice_orientation` option is gone. `cell` with the Bestagon library yields an `sidb::layout`.
+  _QuickExact_, _QuickSim_, and _ClusterComplete_ store their `result`, which `print`, `show`, `sqd`, and the
+  store statistics render with its ground state. `temp` and `opdom` accept both types
 
 - **Breaking:** Restructured `include/fiction/` so that the directory a header lives in tells
   you what the header is about, and introduced nested namespaces mirroring that tree
@@ -230,6 +234,32 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed
 
+### Removed
+
+- **Breaking:** The template SiDB stack. Gone are `sidb::surfaces::lattice`, `defect_surface`,
+  `charge_distribution_surface`, and the lattice orientation tags; `model/nm_position.hpp` and
+  `model/nm_distance.hpp` (use `lattice::nm_position` and `lattice::nm_distance`); the SiQAD coordinate
+  `layouts::coords::siqad` with `from_siqad`/`to_siqad` (an SQD file's `(n, m, l)` triple is a
+  `lattice_site`); the type aliases `sidb_cell_clk_lyt_siqad`, `sidb_100_*`, `sidb_111_*`, `cds_*`, and
+  `sidb_defect_*` (`sidb_cell_clk_lyt` and `sidb_cell_clk_lyt_cube` stay as placement targets, converted with
+  `to_sidb_layout`); the traits `is_siqad_coord_v`, `has_siqad_coord_v`, `is_charge_distribution_surface_v`,
+  `is_sidb_lattice*_v`, `is_sidb_defect_surface_v`, `has_*_sidb_defect_v`, and `has_*_charge_state_v`;
+  `convert_layout_to_siqad_coordinates`, `convert_layout_to_fiction_coordinates`, and
+  `all_coordinates_in_spanned_area` (use `sidb::sites_in_area`); the SiDB branches of `bounding_box_2d`,
+  `print_layout`, `are_cell_layouts_identical`, and `cell_layout_digest`; every `template <typename Lyt>`
+  overload of the SiDB simulation, analysis, generator, and I/O functions together with `legacy_result`,
+  `legacy_bdl_wire`, and `legacy_bdl_input_iterator`
+- **Breaking:** The SQD writer takes an `sidb::layout` and no longer accepts QCA layouts, which it wrote as four
+  dangling bonds per cell. The CLI's `sqd` command also takes an `sidb::layout`
+- **Breaking:** In Python, `sidb_cell_level_layout`, `sidb_100_lattice`, `sidb_111_lattice`,
+  `charge_distribution_surface` and its `_100`/`_111` twins with the `charge_index_mode`,
+  `dependent_cell_mode`, `energy_calculation`, `charge_distribution_history`, and `charge_distribution_mode`
+  enums, `sidb_simulation_result_100`/`_111`, `read_sqd_layout_100`/`_111`, `sidb_lattice_mode`,
+  `sidb_nm_position`, `sidb_nm_distance_100`/`_111`, `siqad_coordinate`, `siqad_area`, `siqad_volume`,
+  `to_siqad_coord`, `to_offset_coord`, `to_cube_coord`, and `convert_layout_to_siqad_coordinates`. Use
+  `sidb_layout`, `lattice`, `lattice_site`, `charge_distribution`, `sidb_simulation_result`, and
+  `read_sqd_layout`; `area` accepts an `sidb_layout`
+
 ### Fixed
 
 - Continuous integration:
@@ -248,9 +278,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.
   - Restored Python API entries and method signatures, and formatted generated docstrings.
 
-- `types.hpp`: `sidb_111_cell_clk_lyt_siqad_ptr`, `cds_sidb_cell_clk_lyt_cube`,
-  `cds_sidb_111_cell_clk_lyt_siqad_ptr`, and `cds_sidb_111_cell_clk_lyt_cube_ptr` pointed at
-  the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
+- `types.hpp`: a `static_assert` per `*_ptr` alias pins each to the type its name says
 
 - I/O:
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
@@ -265,8 +293,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exposed `missing_required_gates_exception` so callers can catch technology-mapping failures.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
-  - `write_sqd_sim_result` accepts the `sidb_simulation_result_100` and `_111` results
-    Python produces; it was bound for a result type Python cannot construct
 
 ## v0.8.0 - 2026-09-02
 

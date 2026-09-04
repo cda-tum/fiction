@@ -322,7 +322,7 @@ simulators are currently supported:
 - `qca <filename>` creates a [QCADesigner](https://waluslab.ece.ubc.ca/qcadesigner/) QCA file
 - `qcc <filename>` creates a [ToPoliNano](https://topolinano.polito.it/) design component QCC file
 - `qll <filename>` creates a [ToPoliNano & MagCAD](https://topolinano.polito.it/) or [SCERPA](https://ieeexplore.ieee.org/document/8935211) layout QLL file
-- `sqd <filename>` creates a [SiQAD](https://github.com/siqad/siqad) SQD file
+- `sqd <filename>` creates a [SiQAD](https://github.com/siqad/siqad) SQD file from an SiDB layout
 - `fqca <filename>` creates a [QCA-STACK](https://github.com/wlambooy/QCA-STACK) FQCA file
 
 If no filename is given, the stored layout name will be used and the file will be written to the current folder.
