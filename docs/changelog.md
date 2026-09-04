@@ -177,6 +177,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Data structures:
+  - `sidb::site_at_row` now handles the two smallest 32-bit rows without signed overflow
+
 - Documentation:
 
   - API links now reveal their language tab. Fixed dark code contrast, source links, and CLI navigation.

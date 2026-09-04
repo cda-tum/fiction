@@ -165,7 +165,7 @@ struct lattice_site
  */
 [[nodiscard]] constexpr lattice_site site_at_row(const int32_t x, const int32_t row) noexcept
 {
-    const int32_t y = row >= 0 ? row / 2 : -((-row + 1) / 2);
+    const int32_t y = row / 2 - static_cast<int32_t>(row % 2 < 0);
     return {x, y, row - (2 * y)};
 }
 /**

@@ -24,6 +24,7 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <limits>
 #include <random>
 #include <unordered_set>
 #include <vector>
@@ -94,6 +95,10 @@ TEST_CASE("Lattice sites", "[lattice]")
 
         CHECK(site_at_row(0, -1) == lattice_site{0, -1, 1});
         CHECK(site_at_row(0, -2) == lattice_site{0, -1, 0});
+
+        constexpr auto min_row = std::numeric_limits<int32_t>::min();
+        CHECK(site_at_row(0, min_row) == lattice_site{0, min_row / 2, 0});
+        CHECK(site_at_row(0, min_row + 1) == lattice_site{0, min_row / 2, 1});
     }
     SECTION("string and format")
     {
