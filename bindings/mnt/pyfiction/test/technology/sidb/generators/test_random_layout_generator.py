@@ -31,37 +31,37 @@ def test_area_with_one_sidb_100_lattice():
     assert cell.y == 10
 
 
-def test_area_with_five_sidb_layout():
+def test_area_with_five_sidb_layout() -> None:
+    """The generator places five SiDBs in the requested Cartesian area."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 5
-    print(params.number_of_sidbs)
     params.coordinate_pair = ((0, 0), (10, 10))
     result_lyt = generate_random_sidb_layout(params, sidb_cell_level_layout())
     assert result_lyt.num_cells() == 5
 
 
-def test_area_with_five_sidb_100_lattice():
+def test_area_with_five_sidb_100_lattice() -> None:
+    """The generator places five SiDBs on an H-Si(100)-2x1 lattice."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 5
-    print(params.number_of_sidbs)
     params.coordinate_pair = ((0, 0), (10, 10))
     result_lyt = generate_random_sidb_layout(params, sidb_100_lattice())
     assert result_lyt.num_cells() == 5
 
 
-def test_area_with_five_sidbs_cds_100():
+def test_area_with_five_sidbs_cds_100() -> None:
+    """The generator populates an H-Si(100)-2x1 charge-distribution surface."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 5
-    print(params.number_of_sidbs)
     params.coordinate_pair = ((0, 0), (10, 10))
     result_lyt = generate_random_sidb_layout(params, charge_distribution_surface_100())
     assert result_lyt.num_cells() == 5
 
 
-def test_area_with_five_sidbs_cds_111():
+def test_area_with_five_sidbs_cds_111() -> None:
+    """The generator populates an H-Si(111)-1x1 charge-distribution surface."""
     params = generate_random_sidb_layout_params()
     params.number_of_sidbs = 5
-    print(params.number_of_sidbs)
     params.coordinate_pair = ((0, 0), (10, 10))
     result_lyt = generate_random_sidb_layout(params, charge_distribution_surface_111())
     assert result_lyt.num_cells() == 5

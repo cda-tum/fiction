@@ -27,6 +27,11 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers surface-defect import.
+ *
+ * @param m Python module.
+ */
 void read_surface_defects(nanobind::module_& m)
 {
     namespace py = nanobind;

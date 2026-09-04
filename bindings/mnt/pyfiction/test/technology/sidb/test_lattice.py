@@ -14,6 +14,7 @@ from mnt.pyfiction import lattice, lattice_site, row_of, site_at_row, sites_in_a
 
 
 def test_lattice_site() -> None:
+    """Lattice sites support coordinates, ordering, arithmetic, and hashing."""
     origin = lattice_site()
     assert (origin.x, origin.y, origin.z) == (0, 0, 0)
 
@@ -46,6 +47,7 @@ def test_rows() -> None:
 
 
 def test_predefined_lattices() -> None:
+    """Predefined silicon lattices map sites to nanometer positions."""
     si_100 = lattice.si_100_2x1()
     assert si_100.name == "Si(100) 2x1"
     assert si_100.nm_position(lattice_site(1, 1, 1)) == pytest.approx((0.384, 0.993))
@@ -58,6 +60,7 @@ def test_predefined_lattices() -> None:
 
 
 def test_custom_lattice() -> None:
+    """Custom lattice vectors and basis sites determine physical positions."""
     square = lattice("square", (5.0, 0.0), (0.0, 5.0), [(0.0, 0.0), (2.5, 2.5)])
     assert square.nm_position(lattice_site(2, 3, 1)) == pytest.approx((1.25, 1.75))
     assert repr(square) == "square"

@@ -37,6 +37,11 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers SiDB layouts and their cell and defect operations.
+ *
+ * @param m Python module.
+ */
 void layout(nanobind::module_& m)
 {
     namespace py = nanobind;

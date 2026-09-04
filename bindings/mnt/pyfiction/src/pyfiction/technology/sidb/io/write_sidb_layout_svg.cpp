@@ -38,6 +38,12 @@ namespace pyfiction
 {
 namespace detail
 {
+/**
+ * @brief Registers SVG file and string export for the layout type.
+ *
+ * @tparam Lyt SiDB layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void write_sidb_layout_svg_impl(nanobind::module_& m)
 {
@@ -69,6 +75,11 @@ void write_sidb_layout_svg_impl(nanobind::module_& m)
 
 }  // namespace detail
 
+/**
+ * @brief Registers SVG export and its rendering parameters.
+ *
+ * @param m Python module.
+ */
 void write_sidb_layout_svg(nanobind::module_& m)
 {
     namespace py = nanobind;

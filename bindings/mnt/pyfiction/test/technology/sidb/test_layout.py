@@ -12,6 +12,7 @@ from mnt.pyfiction import lattice, lattice_site, sidb_defect, sidb_defect_type, 
 
 
 def test_empty_layout() -> None:
+    """Empty layouts retain their lattice and name without cells or defects."""
     lyt = sidb_layout()
     assert lyt.is_empty()
     assert lyt.num_cells() == 0
@@ -25,6 +26,7 @@ def test_empty_layout() -> None:
 
 
 def test_cells() -> None:
+    """Cell types determine layout traversal, terminals, bounds, and equality."""
     lyt = sidb_layout()
     lyt.assign_cell_type(lattice_site(3, 1, 0), sidb_technology.cell_type.OUTPUT)
     lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.INPUT)
@@ -53,6 +55,7 @@ def test_cells() -> None:
 
 
 def test_defects() -> None:
+    """Defects retain charge data and move between lattice sites."""
     lyt = sidb_layout()
     vacancy = sidb_defect(sidb_defect_type.SI_VACANCY, -1, 5.6, 5.0)
     lyt.assign_defect(lattice_site(5, 2, 0), vacancy)

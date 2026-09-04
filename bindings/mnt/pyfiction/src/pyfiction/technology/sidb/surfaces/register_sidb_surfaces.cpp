@@ -19,9 +19,24 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers H-Si(100)-2x1 and H-Si(111)-1x1 cell-level layouts.
+ *
+ * @param m Python module.
+ */
 void lattice_surface(nanobind::module_& m);
+/**
+ * @brief Registers SiDB charge-distribution surfaces.
+ *
+ * @param m Python module.
+ */
 void charge_distribution_surface(nanobind::module_& m);
 
+/**
+ * @brief Registers SiDB lattice and charge-distribution surfaces.
+ *
+ * @param m Python module.
+ */
 void register_sidb_surfaces(nanobind::module_& m)
 {
     lattice_surface(m);
