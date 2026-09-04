@@ -227,7 +227,8 @@ cds_light_mode = (
 )
 
 
-def test_write_sidb_cell_level_layout_to_svg(sidb_cell_level_layout):
+def test_write_sidb_cell_level_layout_to_svg(sidb_cell_level_layout: sidb_100_lattice) -> None:
+    """Cell-level layouts render the expected SVG in both color modes."""
     sidb_cell_level_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
     params = write_sidb_layout_svg_params()
@@ -238,11 +239,11 @@ def test_write_sidb_cell_level_layout_to_svg(sidb_cell_level_layout):
 
     params.color_background = color_mode.LIGHT
     generated_svg_cell_level_light_mode = write_sidb_layout_svg_to_string(sidb_cell_level_layout, params)
-    print(cell_level_light_mode)
     assert normalize_svg(generated_svg_cell_level_light_mode) == normalize_svg(cell_level_light_mode)
 
 
-def test_write_sidb_charge_distribution_to_svg(sidb_cell_level_layout):
+def test_write_sidb_charge_distribution_to_svg(sidb_cell_level_layout: sidb_100_lattice) -> None:
+    """Charge-distribution surfaces render charge states in both color modes."""
     sidb_cell_level_layout.assign_cell_type((3, 3), sidb_technology.cell_type.NORMAL)
 
     cds = charge_distribution_surface_100(sidb_cell_level_layout)
@@ -263,6 +264,7 @@ def test_write_sidb_charge_distribution_to_svg(sidb_cell_level_layout):
 
 
 def test_sidb_layout_svg() -> None:
+    """Lattice layouts render occupied sites and their surrounding lattice."""
     lyt = sidb_layout()
     lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
     lyt.assign_cell_type(lattice_site(1, 0, 1), sidb_technology.cell_type.NORMAL)

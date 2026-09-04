@@ -34,6 +34,12 @@ namespace pyfiction
 
 namespace detail
 {
+/**
+ * @brief Registers SQD export.
+ *
+ * @tparam Lyt SiDB layout type.
+ * @param m Python module.
+ */
 template <typename Lyt>
 void write_sqd_layout(nanobind::module_& m)
 {
@@ -48,6 +54,11 @@ void write_sqd_layout(nanobind::module_& m)
 }
 }  // namespace detail
 
+/**
+ * @brief Registers SQD export.
+ *
+ * @param m Python module.
+ */
 void write_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;

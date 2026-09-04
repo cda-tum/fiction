@@ -60,6 +60,12 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers the cell technology and cell-level layout bindings.
+ *
+ * @tparam Technology FCN cell technology.
+ * @param m Python module.
+ */
 template <typename Technology>
 void fcn_technology_cell_level_layout(nanobind::module_& m)
 {
@@ -258,6 +264,11 @@ void fcn_technology_cell_level_layout(nanobind::module_& m)
 
 }  // namespace detail
 
+/**
+ * @brief Registers cell-level layouts for the supported FCN technologies.
+ *
+ * @param m Python module.
+ */
 void cell_level_layout(nanobind::module_& m)
 {
     detail::fcn_technology_cell_level_layout<fiction::qca::qca_technology>(m);

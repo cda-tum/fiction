@@ -36,6 +36,11 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers SQD import for H-Si(100)-2x1 cell-level layouts.
+ *
+ * @param m Python module.
+ */
 void read_sqd_layout_100(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -48,6 +53,11 @@ void read_sqd_layout_100(nanobind::module_& m)
           DOC(fiction_sidb_io_read_sqd_layout_3));
 }
 
+/**
+ * @brief Registers SQD import for H-Si(111)-1x1 cell-level layouts.
+ *
+ * @param m Python module.
+ */
 void read_sqd_layout_111(nanobind::module_& m)
 {
     namespace py = nanobind;
@@ -62,6 +72,11 @@ void read_sqd_layout_111(nanobind::module_& m)
 
 }  // namespace detail
 
+/**
+ * @brief Registers SQD import and parsing errors.
+ *
+ * @param m Python module.
+ */
 void read_sqd_layout(nanobind::module_& m)
 {
     namespace py = nanobind;

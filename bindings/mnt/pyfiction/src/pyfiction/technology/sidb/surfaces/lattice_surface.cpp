@@ -45,6 +45,12 @@ namespace pyfiction
 namespace detail
 {
 
+/**
+ * @brief Registers the cell-level layout for the lattice orientation.
+ *
+ * @tparam LatticeOrientation SiDB lattice orientation.
+ * @param m Python module.
+ */
 template <typename LatticeOrientation>
 void sidb_lattice_cell_level_layout(nanobind::module_& m)
 {
@@ -71,6 +77,11 @@ void sidb_lattice_cell_level_layout(nanobind::module_& m)
 
 }  // namespace detail
 
+/**
+ * @brief Registers H-Si(100)-2x1 and H-Si(111)-1x1 cell-level layouts.
+ *
+ * @param m Python module.
+ */
 void lattice_surface(nanobind::module_& m)
 {
     detail::sidb_lattice_cell_level_layout<fiction::sidb::surfaces::lattice_100>(m);

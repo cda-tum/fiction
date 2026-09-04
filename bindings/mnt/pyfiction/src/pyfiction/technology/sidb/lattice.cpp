@@ -33,6 +33,11 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers SiDB lattice sites, lattice geometry, and row conversions.
+ *
+ * @param m Python module.
+ */
 void lattice(nanobind::module_& m)
 {
     namespace py = nanobind;
