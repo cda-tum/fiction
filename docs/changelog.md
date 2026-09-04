@@ -9,11 +9,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Added
 
 - Data structures:
-  - `sidb::lattice` describes an H-Si surface as two lattice vectors plus a two-site basis, with
-    `si_100_2x1()` and `si_111_1x1()` predefined; `sidb::lattice_site` is the `(x, y, z)` site an
-    SiDB occupies, and `sidb::layout` places SiDBs and surface defects on one lattice without any
-    template parameter. `to_sidb_layout` converts the Cartesian cell-level layouts that placement and
-    routing produce
+  - `sidb::lattice` describes H-Si geometry, `sidb::lattice_site` identifies a site, and
+    `sidb::layout` stores cells and defects without templates. `to_sidb_layout` converts
+    Cartesian cell-level layouts
 
 - Documentation:
 

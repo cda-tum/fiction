@@ -195,12 +195,25 @@ class read_surface_defects_impl
 class surface_defects_reader
 {
   public:
+    /**
+     * Reads the defect matrix text and sets the layout name.
+     *
+     * @param s Input stream.
+     * @param name Layout name.
+     */
     surface_defects_reader(std::istream& s, const std::string_view& name) :
             defect_matrix{std::istreambuf_iterator<char>(s), {}}  // read the stream into a string to perform regex
     {
         lyt.set_layout_name(std::string{name});
     }
 
+    /**
+     * Assigns each matrix entry to its site on the H-Si(100)-2x1 lattice.
+     *
+     * @return Layout containing the parsed defects.
+     * @throws unsupported_defect_index_exception if an index is unsupported or exceeds the integer range.
+     * @throws missing_position_exception if a row is shorter than a preceding row.
+     */
     layout run()
     {
         // each match is one row
@@ -250,8 +263,13 @@ class surface_defects_reader
     }
 
   private:
+    /**
+     * Layout being populated.
+     */
     layout lyt{};
-
+    /**
+     * Matrix text read from the input stream.
+     */
     const std::string defect_matrix;
 };
 

@@ -485,6 +485,12 @@ class read_sqd_layout_impl
 class sqd_reader
 {
   public:
+    /**
+     * Creates an SQD reader with a layout name.
+     *
+     * @param s Input stream.
+     * @param name Layout name.
+     */
     sqd_reader(std::istream& s, const std::string_view& name) : is{s}
     {
         lyt.set_layout_name(std::string{name});
@@ -599,9 +605,22 @@ class sqd_reader
     }
 
   private:
-    layout        lyt{};
+    /**
+     * Layout being parsed.
+     */
+    layout lyt{};
+    /**
+     * Input stream.
+     */
     std::istream& is;
 
+    /**
+     * Looks up a supported silicon lattice by name.
+     *
+     * @param name Lattice name from the SQD layer.
+     * @return The named lattice.
+     * @throws sqd_parsing_error if the lattice name is unsupported.
+     */
     [[nodiscard]] static lattice parse_lattice(const std::string& name)
     {
         if (name == lattice::si_111_1x1().name)
@@ -645,6 +664,12 @@ class sqd_reader
         }
         return {x, y, basis_site};
     }
+    /**
+     * Adds a DB dot at its lattice coordinate with the specified cell type.
+     *
+     * @param db_dot DB-dot element.
+     * @throws sqd_parsing_error if the lattice-coordinate element is missing or invalid.
+     */
     void parse_db_dot(const tinyxml2::XMLElement* db_dot)
     {
         const auto* const latcoord = db_dot->FirstChildElement("latcoord");
