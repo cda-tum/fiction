@@ -183,6 +183,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
   - Lattice-site construction and arithmetic now reject coordinate overflow; cell insertion preserves the layout on
     allocation failure, and moving a defect from an empty site leaves the target unchanged
+  - Moving a defect now preserves its target when the site arguments refer to stored defects.
 
 - Documentation:
 

@@ -318,6 +318,14 @@ TEST_CASE("Defects", "[layout]")
         CHECK(lyt.get_defect({5, 2, 0}).type == defect_type::NONE);
         CHECK(lyt.get_defect({6, 2, 0}) == charged);
     }
+    SECTION("move using sites borrowed from the layout")
+    {
+        lyt.move_defect(lyt.defects()[0].first, lyt.defects()[1].first);
+        CHECK(lyt.num_defects() == 2);
+        CHECK(lyt.get_defect({0, 0, 0}).type == defect_type::NONE);
+        CHECK(lyt.get_defect({1, 0, 1}) == positive);
+        CHECK(lyt.get_defect({5, 2, 0}) == charged);
+    }
     SECTION("moves from empty sites and to the same site preserve defects")
     {
         const auto original = lyt;

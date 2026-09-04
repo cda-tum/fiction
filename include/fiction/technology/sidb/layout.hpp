@@ -345,7 +345,7 @@ class layout
      * @param source Site holding the defect.
      * @param target Site to move the defect to.
      */
-    void move_defect(const lattice_site& source, const lattice_site& target)
+    void move_defect(const lattice_site source, const lattice_site target)
     {
         const auto d = get_defect(source);
         if (source == target || d.type == model::defect_type::NONE)
