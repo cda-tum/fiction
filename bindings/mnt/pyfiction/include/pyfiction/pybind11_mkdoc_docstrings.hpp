@@ -14060,6 +14060,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_charge_distribution_charge_state_values = R"doc(One charge state per site.)doc";
+
 static const char *mkd_doc_fiction_sidb_charge_distribution_charge_states =
 R"doc(All charge states in raster order.
 
@@ -14067,6 +14069,8 @@ Returns:
     The charge states.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_charge_distribution_electrostatic_energy = R"doc(Electrostatic potential energy (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_charge_distribution_empty =
 R"doc(Whether the distribution covers no SiDB.
@@ -14083,8 +14087,6 @@ Returns:
     Energy (unit: eV).
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_charge_distribution_energy_2 = R"doc(Electrostatic potential energy (unit: eV).)doc";
 
 static const char *mkd_doc_fiction_sidb_charge_distribution_foreach_cell =
 R"doc(Applies a function to the site of every SiDB in raster order.
@@ -14190,6 +14192,10 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_charge_distribution_site_storage =
+R"doc(The sites in raster order, shared with the other distributions of the
+same result.)doc";
+
 static const char *mkd_doc_fiction_sidb_charge_distribution_sites =
 R"doc(The sites the distribution covers, in raster order.
 
@@ -14198,10 +14204,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_charge_distribution_sites_2 =
-R"doc(The sites in raster order, shared with the other distributions of the
-same result.)doc";
-
 static const char *mkd_doc_fiction_sidb_charge_distribution_size =
 R"doc(Number of SiDBs.
 
@@ -14209,8 +14211,6 @@ Returns:
     Number of SiDBs.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_charge_distribution_states = R"doc(One charge state per site.)doc";
 
 static const char *mkd_doc_fiction_sidb_gate_design_exception =
 R"doc(This exception is thrown when an error occurs during the design of an
@@ -14784,6 +14784,9 @@ Args:
 Returns:
     The defect type.
 
+Raises:
+    sqd_parsing_error: if the label has no text.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_parse_dot_type =
@@ -14886,7 +14889,17 @@ static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_read_sqd_layout_impl_2 = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_run =
+R"doc(Parses the stream and reports malformed numeric attributes as SQD
+parsing errors.
+
+Returns:
+    The parsed layout.
+
+Raises:
+    sqd_parsing_error: if the SQD input is malformed.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_read_sqd_layout_impl_update_bounding_box =
 R"doc(Updates the bounding box given by the maximum position of a cell in
@@ -14915,73 +14928,229 @@ R"doc(Draws an `sidb::layout` as an SVG image: the lattice points of the
 layout's bounding box, if requested, and every SiDB at its position on
 the layout's lattice.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_background_color = R"doc(Background color.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_cd = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_cd =
+R"doc(Charge distribution to draw, or `nullptr` to use the default SiDB
+color.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_lyt = R"doc(Layout to draw.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_os = R"doc(Output stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_ps = R"doc(Drawing parameters.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_run =
+R"doc(Draws the lattice and SiDBs with padding around the bounding box.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc()doc";
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_color = R"doc(SiDB fill color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_edge_color = R"doc(SiDB border color.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sidb_layout_svg_writer_sidb_layout_svg_writer =
+R"doc(Creates an SVG writer for a lattice layout.
+
+Args:
+    layout: Layout to draw.
+    stream: Output stream.
+    p: Drawing parameters.
+    charges: Charge distribution to draw, or `nullptr` to use the
+             default SiDB color.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader =
 R"doc(Reads an SQD file into an `sidb::layout`. The file's lattice
 definition selects the lattice; SiDBs and surface defects are placed
 at the `(n, m, l)` lattice coordinates the file names.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_is = R"doc(Input stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_lyt = R"doc(Layout being parsed.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_db_dot =
+R"doc(Adds a DB dot at its lattice coordinate with the specified cell type.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect = R"doc()doc";
+Args:
+    db_dot: DB-dot element.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord = R"doc()doc";
+Raises:
+    sqd_parsing_error: if the lattice-coordinate element is missing or
+                       invalid.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_defect =
+R"doc(Reads a defect with finite, non-negative Coulomb material parameters.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader = R"doc()doc";
+Args:
+    defect: The defect element.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_latcoord =
+R"doc(Parses a lattice coordinate within the representable site range.
+
+Args:
+    latcoord: The lattice-coordinate element.
+
+Returns:
+    The lattice site.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice =
+R"doc(Reads explicit two-site lattice geometry, or a predefined lattice when
+geometry is absent.
+
+Args:
+    name: Lattice name from the SQD layer.
+    element: Lattice definition element.
+
+Returns:
+    The lattice defined by the layer.
+
+Raises:
+    sqd_parsing_error: if the geometry is incomplete, the basis count
+                       is not two, or a name-only lattice is unknown.
+    std::invalid_argument: if a geometry component is not numeric.
+    std::out_of_range: if a geometry component exceeds the range of a
+                       double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_number =
+R"doc(Parses a finite lattice number without trailing non-whitespace
+characters.
+
+Args:
+    text: Numeric XML text or attribute.
+
+Returns:
+    The parsed number.
+
+Raises:
+    sqd_parsing_error: if the number is missing, non-finite, or has
+                       trailing characters.
+    std::invalid_argument: if the text is not numeric.
+    std::out_of_range: if the number exceeds the range of a double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_parse_lattice_vector =
+R"doc(Parses a lattice vector or basis site with finite components.
+
+Args:
+    element: Vector element with x and y attributes.
+
+Returns:
+    The vector.
+
+Raises:
+    sqd_parsing_error: if the element or a component is missing or
+                       malformed.
+    std::invalid_argument: if a component is not numeric.
+    std::out_of_range: if a component exceeds the range of a double.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_run =
+R"doc(Parses the stream and reports malformed numeric attributes as SQD
+parsing errors.
+
+Returns:
+    The parsed layout.
+
+Raises:
+    sqd_parsing_error: if the SQD input is malformed.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_reader_sqd_reader =
+R"doc(Creates an SQD reader with a layout name.
+
+Args:
+    s: Input stream.
+    name: Layout name.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer =
 R"doc(Writes an `sidb::layout` as an SQD file: the layout's lattice as the
 lattice layer, every SiDB as a `<dbdot>` at its `(n, m, l)` lattice
 coordinate, and every surface defect as a `<defect>`.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_lyt = R"doc(Layout to write.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_os = R"doc(Output stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_run = R"doc(Writes the layout with XML-escaped lattice text.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_sqd_writer =
+R"doc(Creates an SQD writer for a lattice layout.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot = R"doc()doc";
+Args:
+    src: Layout to write.
+    s: Output stream.
 
-static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect = R"doc()doc";
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_db_dot =
+R"doc(Appends a DB dot with its lattice coordinate and cell type.
+
+Args:
+    design: SQD design buffer.
+    s: Site of the SiDB.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_sqd_writer_write_defect =
+R"doc(Appends a defect with its lattice coordinate and Coulomb parameters
+when charged.
+
+Args:
+    design: SQD design buffer.
+    s: Site of the defect.
+    d: Defect to write.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader =
 R"doc(Reads a defect matrix into a defects-only `sidb::layout`: entry `x` of
 row `y` becomes the defect at column `x` of single-SiDB row `y`.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_defect_matrix = R"doc(Matrix text read from the input stream.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_lyt = R"doc(Layout being populated.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_run =
+R"doc(Assigns each matrix entry to its site on the H-Si(100)-2x1 lattice.
 
-static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader = R"doc()doc";
+Returns:
+    Layout containing the parsed defects.
+
+Raises:
+    unsupported_defect_index_exception: if an index is unsupported or
+                                        exceeds the integer range.
+    missing_position_exception: if a row is shorter than a preceding
+                                row.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_surface_defects_reader_surface_defects_reader =
+R"doc(Reads the defect matrix text and sets the layout name.
+
+Args:
+    s: Input stream.
+    name: Layout name.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl = R"doc()doc";
 
@@ -15033,9 +15202,21 @@ static const char *mkd_doc_fiction_sidb_io_detail_write_sidb_layout_svg_impl_wri
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl = R"doc()doc";
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_db_blocks =
+R"doc(Appends the SiDB or QCA cell blocks to the SQD design.
 
-static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks = R"doc()doc";
+Args:
+    design: SQD design buffer.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_generate_defect_blocks =
+R"doc(Appends surface defect blocks when the layout exposes defects.
+
+Args:
+    design: SQD design buffer.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_detail_write_sqd_layout_impl_get_defect_type_name = R"doc()doc";
 
@@ -15080,6 +15261,10 @@ Args:
     crop_layout: Whether to pad the bounding box by two columns and
                  one unit cell instead of printing it tight.
     draw_lattice: Whether to print empty lattice sites as dots.
+
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
 )doc";
 
@@ -15203,6 +15388,9 @@ static const char *mkd_doc_fiction_sidb_io_read_sqd_layout_5 =
 R"doc(Reads an SQD file from a stream into an `sidb::layout`. The lattice
 comes from the file's lattice definition; SiDBs and surface defects
 are placed at the `(n, m, l)` lattice coordinates the file names.
+Explicit geometry must contain finite vectors and two basis sites.
+Without geometry, the reader accepts the two predefined reconstruction
+names and defaults to H-Si(100)-2x1 when the name is absent.
 
 Args:
     is: The input stream to read from.
@@ -15212,8 +15400,8 @@ Returns:
     The layout read from the stream.
 
 Raises:
-    sqd_parsing_error: if the file is malformed or names an unknown
-                       lattice.
+    sqd_parsing_error: if the file is malformed or a name-only lattice
+                       is unknown.
 
 )doc";
 
@@ -15229,8 +15417,8 @@ Returns:
     The layout read from the file.
 
 Raises:
-    sqd_parsing_error: if the file is malformed or names an unknown
-                       lattice.
+    sqd_parsing_error: if the file is malformed or a name-only lattice
+                       is unknown.
     std::ifstream::failure: if the file cannot be opened.
 
 )doc";
@@ -15332,11 +15520,19 @@ static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception =
 R"doc(Exception thrown when an unsupported defect index is encountered in
 the parsed file.)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_defect_index_exception =
+R"doc(Args:
+    i: Unsupported index, or -1 if the input exceeds the int range.
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc()doc";
+)doc";
 
-static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which = R"doc()doc";
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_unsupported_index = R"doc(Unsupported index, or -1 for an index outside the int range.)doc";
+
+static const char *mkd_doc_fiction_sidb_io_unsupported_defect_index_exception_which =
+R"doc(Returns:
+    Unsupported index, or -1 if the input exceeds the int range.
+
+)doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg =
 R"doc(Writes an SVG representation of an SiDB cell-level SiDB layout into an
@@ -15383,6 +15579,10 @@ Args:
     os: Output stream to write into.
     ps: Drawing parameters.
 
+Raises:
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_io_write_sidb_layout_svg_4 =
@@ -15396,6 +15596,8 @@ Args:
 
 Raises:
     std::ofstream::failure: if the file cannot be opened.
+    std::out_of_range: if padding exceeds the lattice-site coordinate
+                       range.
 
 )doc";
 
@@ -15619,14 +15821,17 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_2 =
 R"doc(Creates the site `(x, y, z)`.
 
 Args:
-    x: Steps along the first lattice vector.
-    y: Steps along the second lattice vector.
-    z: Basis site, 0 or 1.
+    x_coord: Steps along the first lattice vector.
+    y_coord: Steps along the second lattice vector.
+    basis_site: Basis site, 0 or 1.
 
 Template Args:
     X: Integral type of `x`.
     Y: Integral type of `y`.
     Z: Integral type of `z`.
+
+Raises:
+    std::out_of_range: if a coordinate exceeds the lattice-site range.
 
 )doc";
 
@@ -15634,12 +15839,15 @@ static const char *mkd_doc_fiction_sidb_lattice_site_lattice_site_3 =
 R"doc(Creates the site `(x, y, 0)`.
 
 Args:
-    x: Steps along the first lattice vector.
-    y: Steps along the second lattice vector.
+    x_coord: Steps along the first lattice vector.
+    y_coord: Steps along the second lattice vector.
 
 Template Args:
     X: Integral type of `x`.
     Y: Integral type of `y`.
+
+Raises:
+    std::out_of_range: if a coordinate exceeds the lattice-site range.
 
 )doc";
 
@@ -15653,6 +15861,10 @@ Args:
 
 Returns:
     Sum of both sites.
+
+Raises:
+    std::out_of_range: if a result coordinate exceeds the lattice-site
+                       range.
 
 )doc";
 
@@ -15689,6 +15901,10 @@ Args:
 Returns:
     Difference of both sites.
 
+Raises:
+    std::out_of_range: if a result coordinate exceeds the lattice-site
+                       range.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_lattice_site_str =
@@ -15719,7 +15935,8 @@ static const char *mkd_doc_fiction_sidb_layout_affected_sidbs =
 R"doc(The sites whose SiDBs the defect at a given site would influence: the
 rectangle around the defect spanned by `model::defect_extent`, counted
 in unit cells along the lattice vectors and keeping the defect's basis
-site.
+site. The rectangle is clipped to the representable lattice-site
+coordinates.
 
 Args:
     s: Site of the defect.
@@ -15754,7 +15971,7 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_layout_assign_cell_type =
 R"doc(Assigns a cell type to a site. Assigning `cell_type::EMPTY` removes
-the SiDB from the site.
+the SiDB from the site. Allocation failure leaves the cells unchanged.
 
 Args:
     s: Site.
@@ -15973,7 +16190,8 @@ static const char *mkd_doc_fiction_sidb_layout_layout_name = R"doc(Layout name.)
 
 static const char *mkd_doc_fiction_sidb_layout_move_defect =
 R"doc(Moves the defect at one site to another, replacing whatever defect the
-target site held.
+target site held. An empty source or identical source and target
+leaves the defects unchanged.
 
 Args:
     source: Site holding the defect.
@@ -18608,9 +18826,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_base_2 = R"doc(Base of the physical model.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_changed_sidb_history = R"doc(The SiDBs the last tracked decoding flipped with their previous signs.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_cd = R"doc(Charge states and energy.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_distribution_state = R"doc(Charge states and energy.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_distribution_to_index =
 R"doc(Recomputes the charge index (and the sublayout index) from the charge
@@ -18633,9 +18851,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_2 =
-R"doc(Charge index over the SiDBs that are not in the sublayout and not the
-dependent SiDB.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_base = R"doc(Base the charge index is decoded in.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_of_sub_layout =
 R"doc(The charge index of the sublayout of SiDBs that can be positively
@@ -18645,6 +18861,10 @@ Returns:
     The sublayout charge index.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_charge_index_value =
+R"doc(Charge index over the SiDBs that are not in the sublayout and not the
+dependent SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_current =
 R"doc(The current charge distribution with its energy and the charge index
@@ -18658,10 +18878,6 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_declare_physically_valid = R"doc(Marks the current charge states physically valid without checking.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_decoding = R"doc(Index decoding.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent = R"doc(The dependent SiDB.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_cell =
 R"doc(The dependent SiDB, if any.
 
@@ -18670,7 +18886,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_in_sub_layout = R"doc(Whether the dependent SiDB can be positively charged.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_in_sublayout = R"doc(Whether the dependent SiDB can be positively charged.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_dependent_sidb = R"doc(The dependent SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_energy =
 R"doc(The energy of the current charge states.
@@ -18701,17 +18919,15 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_gray_code_history =
+R"doc(The SiDB the last Gray-code step flipped and its previous sign; -1 if
+none.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_gray_code_to_charge_distribution =
 R"doc(Flips the one SiDB in which two Gray codes differ and records it for
 the incremental potential update.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_history = R"doc(The SiDBs the last tracked decoding flipped with their previous signs.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_history_gray_code =
-R"doc(The SiDB the last Gray-code step flipped and its previous sign; -1 if
-none.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_increase_charge_index_by_one =
 R"doc(Steps the charge index up by one and decodes it.
@@ -18745,8 +18961,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_base_2 = R"doc(Base the charge index is decoded in.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_decoding = R"doc(How a charge index is decoded.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_index_decoding_PLAIN = R"doc(Decode the whole index.)doc";
@@ -18767,6 +18981,8 @@ into charge states and records every SiDB that flipped, as
 QuickExact's incremental potential update needs.
 
 )doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_internal_potential_values = R"doc(Local internal potential per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_is_configuration_stable =
 R"doc(Whether no charge hop lowers the energy of the current charge states.
@@ -18796,8 +19012,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_land = R"doc(The landscape.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_landscape =
 R"doc(The landscape.
 
@@ -18806,7 +19020,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_local_int_pot = R"doc(Local internal potential per SiDB (unit: V).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_landscape_ptr = R"doc(The landscape.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_local_internal_potential =
 R"doc(The local internal potential at an SiDB: charged SiDBs plus charged
@@ -18847,8 +19061,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_charge_index_2 = R"doc(Maximum charge index.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_charge_index_sub_layout =
 R"doc(The largest sublayout charge index.
 
@@ -18859,11 +19071,9 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_index = R"doc(The largest index of `digits` digits in `base`.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_max_sub_charge_index = R"doc(Maximum sublayout charge index.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_maximum_charge_index = R"doc(Maximum charge index.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_model = R"doc(Energy model.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_n = R"doc(Number of SiDBs.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_maximum_sublayout_charge_index = R"doc(Maximum sublayout charge index.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_negative_sidb_detection =
 R"doc(The SiDBs whose local potential forces them negative regardless of the
@@ -18891,6 +19101,14 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_num_sites = R"doc(Number of SiDBs.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_physically_valid = R"doc(Validity flag.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_random_generator =
+R"doc(Random generator of `adjacent_search`; one per state, so worker
+threads never share it.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_recompute_energy =
 R"doc(Recomputes the energy from the current charge states and local
 internal potentials.
@@ -18910,9 +19128,11 @@ flips recorded.
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_rng =
-R"doc(Random generator of `adjacent_search`; one per state, so worker
-threads never share it.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_selected_energy_model = R"doc(Energy model.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_selected_index_decoding = R"doc(Index decoding.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_simulation_base = R"doc(Base of the physical model.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_simulation_state =
 R"doc(Creates a state over a landscape with every SiDB in one charge state
@@ -18934,9 +19154,9 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_sub_charge_index = R"doc(Charge index over the sublayout.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_sublayout_charge_index = R"doc(Charge index over the sublayout.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_three_state = R"doc(SiDBs that can be positively charged, ascending.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_three_state_sidb_indices = R"doc(SiDBs that can be positively charged, ascending.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_three_state_sidbs =
 R"doc(The SiDBs that can be positively charged, ascending.
@@ -18946,7 +19166,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_two_state =
+static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_two_state_sidb_indices =
 R"doc(SiDBs that cannot be positively charged, ascending, without the
 dependent SiDB.)doc";
 
@@ -18985,8 +19205,6 @@ Args:
                   recompute from scratch.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_valid = R"doc(Validity flag.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_validity_check =
 R"doc(Recomputes the validity flag: population stability of every SiDB, then
@@ -20531,9 +20749,9 @@ Args:
          cluster associated with the projector state onto the
          receiving SiDB.
     sidb_ix: The receiving SiDB.
-    composition_pot_bounds: This optional parameter supplies the
-                            additional composition information when
-                            available.
+    composition_pot_bounds: Pointer to the additional composition
+                            information. This pointer must be non-null
+                            in composition analysis mode.
 
 Template Args:
     mode: This selects the potential bound analysis mode. Intuitively,
@@ -20641,9 +20859,10 @@ configuration can be declared invalid for this cluster.
 Args:
     pst: The projector state for which the potential bound analysis is
          to be performed.
-    composition_potential_bounds: This optional parameter supplies the
-                                  additional composition information
-                                  when available.
+    composition_potential_bounds: Pointer to the additional
+                                  composition information. This
+                                  pointer must be non-null in
+                                  composition analysis mode.
 
 Template Args:
     mode: The potential bound analysis mode that switches the function
@@ -25003,6 +25222,10 @@ shared read-only by worker threads.
 
 Distances are stored in nm, potentials in V, energies in eV.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_charge_transition_thresholds = R"doc(Charge transition thresholds per SiDB (unit: V).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_charged_defects = R"doc(The charged defects with their sites.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_chargeless_potential =
 R"doc(The chargeless potential one SiDB exerts on another, i.e., the
 potential of a unit charge at the distance of the two.
@@ -25045,6 +25268,8 @@ static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_de
 R"doc(Chargeless potential every defect exerts on every defect, row-major
 D×D (unit: V).)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_induced_potentials = R"doc(Potential of the charged defects per SiDB (unit: V).)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defect_sidb_potentials =
 R"doc(Chargeless potential every SiDB exerts on every defect, row-major D×N
 (unit: V).)doc";
@@ -25056,8 +25281,6 @@ Returns:
     Site-defect pairs.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_defects_2 = R"doc(The charged defects with their sites.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_distances = R"doc(Distances between SiDBs, row-major N×N (unit: nm).)doc";
 
@@ -25172,9 +25395,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_ext_pot = R"doc(External potential per SiDB (unit: V).)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_ext_pot_at_defect = R"doc(External potential per defect (unit: V).)doc";
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_layout_data = R"doc(The layout.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_external_potential =
 R"doc(The external potential at an SiDB: its local external potential plus
@@ -25188,6 +25409,10 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_external_potentials = R"doc(External potential per SiDB (unit: V).)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_external_potentials_at_defects = R"doc(External potential per defect (unit: V).)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_internal_potentials =
 R"doc(The local internal potentials of a charge distribution: at every SiDB,
 the potential of the charged SiDBs plus the potential of the charged
@@ -25200,8 +25425,6 @@ Returns:
     Local internal potential per SiDB (unit: V).
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_pot_caused_by_defects = R"doc(Potential of the charged defects per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_local_potential_caused_by_defects =
 R"doc(The potential the charged surface defects exert on an SiDB.
@@ -25226,10 +25449,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_lyt = R"doc(The layout.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_n = R"doc(Number of SiDBs.)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_nm_distance =
 R"doc(Distance between two SiDBs.
 
@@ -25250,6 +25469,8 @@ Returns:
 
 )doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_num_sites = R"doc(Number of SiDBs.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_params =
 R"doc(The physical parameters.
 
@@ -25257,8 +25478,6 @@ Returns:
     The parameters.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_params_2 = R"doc(Physical parameters.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potential_landscape =
 R"doc(Builds the landscape of a layout.
@@ -25278,6 +25497,10 @@ Args:
 
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_potentials = R"doc(Chargeless potentials between SiDBs, row-major N×N (unit: V).)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_simulation_parameters_data = R"doc(Physical parameters.)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_site_storage = R"doc(SiDB sites in raster order.)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_sites =
 R"doc(The SiDB sites in raster order, shared with the charge distributions
 built over this landscape.
@@ -25286,10 +25509,6 @@ Returns:
     The shared site list.
 
 )doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_sites_2 = R"doc(SiDB sites in raster order.)doc";
-
-static const char *mkd_doc_fiction_sidb_simulation_potential_landscape_thresholds = R"doc(Charge transition thresholds per SiDB (unit: V).)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_result =
 R"doc(The unified return type of every SiDB simulation algorithm: the name
@@ -25373,6 +25592,9 @@ Args:
 Returns:
     The site `(x, floor(row / 2), row mod 2)`.
 
+Raises:
+    std::out_of_range: if the row exceeds the range of lattice sites.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_sites_in_area =
@@ -25386,6 +25608,10 @@ Args:
 
 Returns:
     The sites in the rectangle in raster order.
+
+Raises:
+    std::length_error: if the rectangle exceeds the maximum vector
+                       size.
 
 )doc";
 
@@ -25652,6 +25878,9 @@ Args:
 
 Returns:
     Cube coordinate at column `x` and single-SiDB row `2 * y + z`.
+
+Raises:
+    std::out_of_range: if the row exceeds the cube coordinate range.
 
 )doc";
 
@@ -28531,6 +28760,17 @@ static const char *mkd_doc_std_hash_operator_call_4 = R"doc()doc";
 static const char *mkd_doc_std_hash_operator_call_5 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_6 =
+R"doc(Computes a hash from the ordered charge states.
+
+Args:
+    cd: Charge distribution to hash.
+
+Returns:
+    Hash value of `cd`.
+
+)doc";
+
+static const char *mkd_doc_std_hash_operator_call_7 =
 R"doc(Args:
     s: Site to hash.
 
@@ -28539,7 +28779,7 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_std_hash_operator_call_7 =
+static const char *mkd_doc_std_hash_operator_call_8 =
 R"doc(Args:
     lyt: Layout to hash.
 
@@ -28547,8 +28787,6 @@ Returns:
     Hash of the SiDB sites and cell types.
 
 )doc";
-
-static const char *mkd_doc_std_hash_operator_call_8 = R"doc()doc";
 
 static const char *mkd_doc_std_hash_operator_call_9 =
 R"doc(Computes the hash value of a given SiDB defect.
