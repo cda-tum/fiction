@@ -1919,8 +1919,7 @@ TEST_CASE("critical_temperature_domain class member functions", "[operational-do
     CHECK(ctdom.get_dimension(2) == sweep_parameter::MU_MINUS);
 }
 
-TEST_CASE("Bestagon AND gate operational domain and temperature computation, using siqad coordinates",
-          "[operational-domain]")
+TEST_CASE("Bestagon AND gate operational domain and temperature computation", "[operational-domain]")
 {
     const auto lyt = blueprints::bestagon_and();
 

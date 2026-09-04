@@ -721,7 +721,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB arrangement", "[clusterc
 }
 
 TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, check energy and charge "
-          "distribution, using siqad coordinates",
+          "distribution",
           "[clustercomplete]")
 {
     layout lyt{};
@@ -759,7 +759,7 @@ TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01, c
 }
 
 TEST_CASE("ClusterComplete simulation of a Y-shape SiDB OR gate with input 01 and local external potential at "
-          "perturber, using siqad coordinates",
+          "perturber",
           "[clustercomplete]")
 {
     layout lyt{};

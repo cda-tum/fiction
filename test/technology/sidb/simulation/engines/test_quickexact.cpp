@@ -397,7 +397,7 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB arrangement", "[quickexact]"
 }
 
 TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check energy and charge "
-          "distribution, using siqad coordinates",
+          "distribution",
           "[quickexact]")
 {
     layout lyt{};
@@ -434,10 +434,8 @@ TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01, check
     CHECK_THAT(charge_lyt_first.energy(), Catch::Matchers::WithinAbs(0.4662582096, ERROR_MARGIN));
 }
 
-TEST_CASE(
-    "QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and local external potential at perturber, using "
-    "siqad coordinates",
-    "[quickexact]")
+TEST_CASE("QuickExact simulation of a Y-shaped SiDB OR gate with input 01 and local external potential at perturber",
+          "[quickexact]")
 {
     layout lyt{};
 
