@@ -54,3 +54,9 @@ def test_cube_coordinate_bounds_validation():
     negative_layout = cartesian_layout_cube(((-3, -2, -1), (-1, -1, -1)))
     assert (negative_layout.x_min(), negative_layout.y_min(), negative_layout.z_min()) == (-3, -2, -1)
     assert (negative_layout.x(), negative_layout.y(), negative_layout.z()) == (-1, -1, -1)
+
+    minimum_component = -(2**31)
+    maximum_component = (2**31) - 1
+    overflowing_bounds = ((minimum_component, minimum_component), (maximum_component, maximum_component))
+    with pytest.raises(OverflowError):
+        cartesian_layout_cube(overflowing_bounds)

@@ -76,8 +76,9 @@ void construct_layout_from_bounds(nanobind::pointer_and_handle<Layout>     self,
                                   const std::pair<Coordinate, Coordinate>& bounds, const Args&... args)
 {
     validate_layout_bounds(bounds);
-    new (self.p) Layout{Coordinate{0, 0, 0}, args...};
-    self.p->resize(bounds.first, bounds.second);
+    Layout layout{Coordinate{0, 0, 0}, args...};
+    layout.resize(bounds.first, bounds.second);
+    new (self.p) Layout{std::move(layout)};
 }
 
 }  // namespace pyfiction

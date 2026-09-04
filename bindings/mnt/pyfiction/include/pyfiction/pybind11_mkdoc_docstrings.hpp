@@ -1507,19 +1507,6 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_initialize_dimension = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_initialize_minimum =
-R"doc(Initializes a Cartesian layout's minimum coordinate. For SiQAD
-coordinates, the z-value is set to 0 such that only complete dimer
-rows are considered.
-
-Args:
-    coord: Minimum coordinate to initialize.
-
-Returns:
-    Initialized minimum coordinate.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_cartesian_layout_is_above =
 R"doc(Returns `true` iff coordinate `c2` is directly above coordinate `c1`.
 
@@ -1842,9 +1829,15 @@ static const char *mkd_doc_fiction_layouts_cartesian_layout_resize_2 =
 R"doc(Updates the layout's inclusive minimum and maximum coordinates,
 effectively resizing it.
 
+This overload is available for cube-coordinate layouts.
+
 Args:
     minimum: New minimum coordinate.
     maximum: New maximum coordinate.
+
+Raises:
+    std::overflow_error: If the inclusive layout area exceeds
+                         `uint64_t`.
 
 Precondition:
     No component of `minimum` exceeds the corresponding component of
@@ -1909,14 +1902,6 @@ Returns:
 
 static const char *mkd_doc_fiction_layouts_cartesian_layout_strg = R"doc()doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_volume =
-R"doc(Returns the layout's number of coordinate positions.
-
-Returns:
-    Volume of layout.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_cartesian_layout_west =
 R"doc(Returns the coordinate that is directly adjacent in western direction
 of a given coordinate `c`, i.e., the face whose x-dimension is lower
@@ -1960,14 +1945,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_x_size =
-R"doc(Returns the distance between the minimum and maximum x-coordinates.
-
-Returns:
-    Layout size in x-direction.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_cartesian_layout_y =
 R"doc(Returns the layout's y-dimension, i.e., returns the biggest y-value
 that still belongs to the layout.
@@ -1985,14 +1962,6 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_layouts_cartesian_layout_y_size =
-R"doc(Returns the distance between the minimum and maximum y-coordinates.
-
-Returns:
-    Layout size in y-direction.
-
-)doc";
-
 static const char *mkd_doc_fiction_layouts_cartesian_layout_z =
 R"doc(Returns the layout's z-dimension, i.e., returns the biggest z-value
 that still belongs to the layout.
@@ -2007,14 +1976,6 @@ R"doc(Returns the layout's minimum z-coordinate.
 
 Returns:
     Minimum z-coordinate.
-
-)doc";
-
-static const char *mkd_doc_fiction_layouts_cartesian_layout_z_size =
-R"doc(Returns the distance between the minimum and maximum z-coordinates.
-
-Returns:
-    Layout size in z-direction.
 
 )doc";
 
@@ -2743,9 +2704,6 @@ Args:
     coordinate: Coordinate component.
     period: Cutout period.
 
-Template Args:
-    Coordinate: Coordinate component type.
-
 Returns:
     Index in `[0, period)`.
 
@@ -3129,7 +3087,8 @@ Args:
     maximum: Maximum boundary within to enumerate. Iteration wraps at
              its limits.
     start: Starting coordinate to enumerate first.
-    minimum: Minimum boundary to wrap to. Defaults to the origin.
+    minimum: Minimum boundary for cube coordinates. Must be the origin
+             for other coordinate types.
 
 )doc";
 
@@ -3535,15 +3494,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_coords_offset_wrap =
-R"doc(Wraps the coordinate within the inclusive bounds from `minimum` to
-`maximum`. If x exceeds its maximum, x is reset to its minimum and y
-is increased. If y exceeds its maximum, y is reset to its minimum and
-z is increased. If z exceeds its maximum, the coordinate becomes a
-dead copy of `maximum`.
+R"doc(Wraps the coordinate within the inclusive bounds from the origin to
+`maximum`. If x exceeds its maximum, x is reset to zero and y is
+increased. If y exceeds its maximum, y is reset to zero and z is
+increased. If z exceeds its maximum, the coordinate becomes a dead
+copy of `maximum`.
 
 Args:
     maximum: Maximum coordinate to wrap against.
-    minimum: Minimum coordinate to wrap to. Defaults to the origin.
 
 )doc";
 
@@ -3722,15 +3680,14 @@ Returns:
 )doc";
 
 static const char *mkd_doc_fiction_layouts_coords_siqad_wrap =
-R"doc(Wraps the coordinate within the inclusive bounds from `minimum` to
+R"doc(Wraps the coordinate within the inclusive bounds from the origin to
 `maximum` in SiQAD row order. If x exceeds its maximum, it is reset to
-its minimum before advancing to the next dimer position. If the
-resulting coordinate is outside the y- or z-bounds, it becomes a dead
-copy of `maximum`.
+zero before advancing to the next dimer position. If the resulting
+coordinate is outside the y- or z-bounds, it becomes a dead copy of
+`maximum`.
 
 Args:
     maximum: Maximum coordinate to wrap against.
-    minimum: Minimum coordinate to wrap to. Defaults to the origin.
 
 )doc";
 

@@ -24,6 +24,7 @@
 #include <cstdint>
 #include <limits>
 #include <set>
+#include <stdexcept>
 #include <vector>
 
 using namespace fiction;
@@ -369,6 +370,14 @@ TEST_CASE("Cartesian layout with signed bounds", "[cartesian-layout]")
                                                      coordinate{1, maximum_component, maximum_component},
                                                      coordinate{0, 0, 0}};
     CHECK((*overflow_start).is_dead());
+
+    constexpr auto   minimum_component = std::numeric_limits<int32_t>::min();
+    const coordinate minimum{minimum_component, minimum_component, 0};
+    const coordinate maximum{maximum_component, maximum_component, 0};
+
+    layout oversized_layout{};
+    CHECK_THROWS_AS(oversized_layout.resize(minimum, maximum), std::overflow_error);
+    CHECK(oversized_layout.area() == 1);
 }
 
 TEST_CASE("Cartesian layouts with SiQAD coordinates must have a z dimension of 1")

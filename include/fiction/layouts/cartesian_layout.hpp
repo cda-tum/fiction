@@ -26,8 +26,10 @@
 #include <cassert>
 #include <cstdint>
 #include <functional>
+#include <limits>
 #include <memory>
 #include <ranges>
+#include <stdexcept>
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -232,8 +234,9 @@ class cartesian_layout
      * @param minimum New minimum coordinate.
      * @param maximum New maximum coordinate.
      * @pre No component of `minimum` exceeds the corresponding component of `maximum`.
+     * @throws std::overflow_error If the inclusive layout area exceeds `uint64_t`.
      */
-    void resize(const coordinate& minimum, const coordinate& maximum) noexcept
+    void resize(const coordinate& minimum, const coordinate& maximum)
         requires std::is_same_v<coordinate, coords::cube>
     {
         const coordinate initialized_minimum{minimum.x, minimum.y, minimum.z};
@@ -242,6 +245,14 @@ class cartesian_layout
         assert(initialized_minimum.x <= initialized_maximum.x && initialized_minimum.y <= initialized_maximum.y &&
                initialized_minimum.z <= initialized_maximum.z &&
                "Minimum coordinate must not exceed maximum coordinate");
+
+        const auto width  = dimension_size(initialized_minimum.x, initialized_maximum.x) + 1;
+        const auto height = dimension_size(initialized_minimum.y, initialized_maximum.y) + 1;
+
+        if (height > std::numeric_limits<uint64_t>::max() / width)
+        {
+            throw std::overflow_error{"Layout area exceeds uint64_t"};
+        }
 
         strg->minimum   = initialized_minimum;
         strg->dimension = initialized_maximum;
