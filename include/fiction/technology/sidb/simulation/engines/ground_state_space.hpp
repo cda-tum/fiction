@@ -630,15 +630,15 @@ class ground_state_space_impl
      * @param pst The projector state that, together with a receiving SiDB, yields a pair of bounds on the potential
      * projection from the cluster associated with the projector state onto the receiving SiDB.
      * @param sidb_ix The receiving SiDB.
-     * @param composition_pot_bounds This optional parameter supplies the additional composition information when
-     * available.
+     * @param composition_pot_bounds Pointer to the additional composition information. This pointer must be non-null
+     * in composition analysis mode.
      * @return A pair of doubles that represent the lower and upper bound of the potential projection onto the given
      * SiDB.
      */
     template <potential_bound_analysis_mode mode>
     [[nodiscard]] static std::pair<double, double>
     get_received_potential_bounds(const cluster_projector_state& pst, const uint64_t sidb_ix,
-                                  const std::optional<complete_potential_bounds_store>& composition_pot_bounds) noexcept
+                                  const complete_potential_bounds_store* composition_pot_bounds) noexcept
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
@@ -650,10 +650,12 @@ class ground_state_space_impl
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
+            assert(composition_pot_bounds != nullptr);
+
             // this considers the flattened self-projection of the previous level
-            return {composition_pot_bounds.value().get<bound_direction::LOWER>(sidb_ix) +
+            return {composition_pot_bounds->get<bound_direction::LOWER>(sidb_ix) +
                         pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::LOWER>(sidb_ix),
-                    composition_pot_bounds.value().get<bound_direction::UPPER>(sidb_ix) +
+                    composition_pot_bounds->get<bound_direction::UPPER>(sidb_ix) +
                         pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::UPPER>(sidb_ix)};
         }
     }
@@ -664,14 +666,14 @@ class ground_state_space_impl
      * @tparam mode The potential bound analysis mode that switches the function between analysing a multiset charge
      * configuration either with or without composition information.
      * @param pst The projector state for which the potential bound analysis is to be performed.
-     * @param composition_potential_bounds This optional parameter supplies the additional composition information when
-     * available.
+     * @param composition_potential_bounds Pointer to the additional composition information. This pointer must be
+     * non-null in composition analysis mode.
      * @return `false` if and only if `pst` can be excluded from the *Ground State Space*.
      */
     template <potential_bound_analysis_mode mode>
-    [[nodiscard]] bool perform_potential_bound_analysis(const cluster_projector_state& pst,
-                                                        const std::optional<complete_potential_bounds_store>&
-                                                            composition_potential_bounds = std::nullopt) const noexcept
+    [[nodiscard]] bool perform_potential_bound_analysis(
+        const cluster_projector_state&         pst,
+        const complete_potential_bounds_store* composition_potential_bounds = nullptr) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -931,7 +933,7 @@ class ground_state_space_impl
             }
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_COMPOSITION>(
-                    receiving_pst, composition.pot_bounds))
+                    receiving_pst, &composition.pot_bounds))
             {
                 return false;
             }
