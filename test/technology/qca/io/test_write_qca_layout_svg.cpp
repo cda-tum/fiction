@@ -15,6 +15,7 @@
  * @author Marcel Walter (marcelwa)
  */
 
+#include <catch2/catch_message.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -28,7 +29,6 @@
 #include <fmt/format.h>
 #include <tinyxml2.h>
 
-#include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <filesystem>

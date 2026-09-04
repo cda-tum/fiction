@@ -19,29 +19,24 @@
 
 #pragma once
 
-#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
 #include <exception>
 #include <fstream>
 #include <iostream>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <tuple>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace fiction::qca::io
 {
