@@ -15,7 +15,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
@@ -29,6 +28,7 @@
 #include <fmt/format.h>
 #include <tinyxml2.h>
 
+#include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <filesystem>
@@ -43,22 +43,18 @@ using namespace fiction::qca;
 using namespace fiction::qca::io;
 
 /**
- * This function takes an SVG string as input and returns a new string with all
- * whitespace characters removed. The purpose is to create a compact representation
- * of the SVG content, which can be useful for comparisons, optimizations, or transmission.
+ * Removes whitespace from SVG output for snapshot comparisons.
  *
  * @param svg The input SVG string to be normalized.
  * @return A string with all whitespace characters removed.
  */
-[[nodiscard]] static std::string normalize_svg(const std::string& svg) noexcept
+[[nodiscard]] static std::string normalize_svg(const std::string& svg)
 {
     std::string result = svg;
-
-    // Remove all whitespace (spaces, tabs, newlines)
-    std::erase_if(result, ::isspace);
+    std::erase_if(result, [](const unsigned char c) { return std::isspace(c) != 0; });
 
     return result;
-};
+}
 
 /**
  * Checks whether `text` contains `substring`.
@@ -320,6 +316,11 @@ style="fill:#000000;stroke:#000000;" />
 </g>
 </svg>)SVG",
                 FICTION_VERSION, FICTION_REPO);
+
+TEST_CASE("Normalize SVG whitespace without changing UTF-8 text", "[write-qca-layout-svg]")
+{
+    CHECK(normalize_svg(" \t<svg>\r\n\xc2\xb5</svg> ") == "<svg>\xc2\xb5</svg>");
+}
 
 TEST_CASE("Reject molQCA crossings in simple SVG mode", "[write-mol-qca-layout-svg]")
 {
