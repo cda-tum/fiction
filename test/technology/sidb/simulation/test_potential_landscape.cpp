@@ -53,10 +53,11 @@ TEST_CASE("Potential landscape of a three-SiDB layout", "[potential-landscape]")
         CHECK(land.get_layout() == lyt);
 
         CHECK_THAT(land.nm_distance(0, 1), WithinAbs(1.92, 1E-5));
+        CHECK_THAT(land.nm_distance(0, 1), WithinAbs(land.nm_distance(1, 0), 1E-12));
         CHECK_THAT(land.nm_distance(1, 2), WithinAbs(0.768, 1E-5));
         CHECK(land.nm_distance(1, 1) == 0.0);
         CHECK(land.chargeless_potential(1, 1) == 0.0);
-        CHECK(land.chargeless_potential(0, 1) == land.chargeless_potential(1, 0));
+        CHECK_THAT(land.chargeless_potential(0, 1), WithinAbs(land.chargeless_potential(1, 0), 1E-12));
         CHECK(land.chargeless_potential(1, 2) > land.chargeless_potential(0, 1));
         CHECK_THAT(land.chargeless_potential(1, 2), WithinAbs(land.chargeless_potential_at_distance(0.768), 1E-12));
         CHECK(land.local_external_potential(0) == 0.0);
