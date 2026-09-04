@@ -64,3 +64,11 @@ def test_custom_lattice() -> None:
     square = lattice("square", (5.0, 0.0), (0.0, 5.0), [(0.0, 0.0), (2.5, 2.5)])
     assert square.nm_position(lattice_site(2, 3, 1)) == pytest.approx((1.25, 1.75))
     assert repr(square) == "square"
+
+
+def test_arithmetic_boundaries() -> None:
+    """Lattice-site arithmetic reports unrepresentable coordinates as IndexError."""
+    with pytest.raises(IndexError):
+        _ = lattice_site(2**31 - 1, 0) + lattice_site(1, 0)
+    with pytest.raises(IndexError):
+        _ = lattice_site(0, -(2**31), 0) - lattice_site(0, 0, 1)
