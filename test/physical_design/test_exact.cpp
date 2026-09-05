@@ -27,12 +27,12 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/physical_design/apply_gate_library.hpp>
 #include <fiction/physical_design/exact.hpp>
+#include <fiction/physical_design/surface_analysis.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/fcn/cell_ports.hpp>
 #include <fiction/technology/inml/topolinano_library.hpp>
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
-#include <fiction/technology/sidb/surface_analysis.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
