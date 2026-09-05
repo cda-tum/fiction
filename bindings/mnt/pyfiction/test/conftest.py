@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from mnt.pyfiction import read_technology_network, technology_network
+from mnt.pyfiction import cartesian_gate_layout, orthogonal, read_technology_network, technology_network
 
 RESOURCES_DIR = Path(__file__).resolve().parent / "resources"
 pytest_plugins = ["pytester"]
@@ -69,3 +69,13 @@ def mux21() -> technology_network:
         The ``mux21.v`` network as a ``technology_network``.
     """
     return read_technology_network(str(RESOURCES_DIR / "mux21.v"))
+
+
+@pytest.fixture
+def mux21_layout(mux21: technology_network) -> cartesian_gate_layout:
+    """The ``mux21`` network placed and routed with ``orthogonal``.
+
+    Returns:
+        A 2DDWave-clocked Cartesian gate-level layout.
+    """
+    return orthogonal(mux21)

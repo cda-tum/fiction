@@ -394,6 +394,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     reading past the parameter vector
   - The Python bindings compile when Z3 support is disabled
   - `write_sqd_layout` owns its Python filename during export on Windows
+  - `is_clocking_scheme`, `set_name`, and `get_name` accept Python strings, and the `time_total`
+    and `runtime` members of the statistics classes are readable; the casters were missing
+  - `write_dot_layout` draws shifted-Cartesian layouts instead of writing nothing
+  - The readers raise `RuntimeError` with the parser's diagnostics instead of printing them
+  - `energy_state` and `sidb_lattice_mode` are importable from `mnt.pyfiction`
 
 - Tooling:
 

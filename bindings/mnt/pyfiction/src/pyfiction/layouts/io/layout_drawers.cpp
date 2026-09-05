@@ -53,6 +53,12 @@ void write_dot_layout(nanobind::module_& m)
                 fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_cartesian_drawer<Lyt>>(
                     lyt, filename);
             }
+            else if constexpr (fiction::is_shifted_cartesian_layout_v<Lyt>)
+            {
+                fiction::layouts::io::write_dot_layout<Lyt,
+                                                       fiction::layouts::io::gate_layout_shifted_cartesian_drawer<Lyt>>(
+                    lyt, filename);
+            }
             else if constexpr (fiction::is_hexagonal_layout_v<Lyt>)
             {
                 fiction::layouts::io::write_dot_layout<Lyt, fiction::layouts::io::gate_layout_hexagonal_drawer<Lyt>>(
