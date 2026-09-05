@@ -31,6 +31,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdint>
 #include <cstdlib>
 #include <limits>
 #include <stdexcept>
