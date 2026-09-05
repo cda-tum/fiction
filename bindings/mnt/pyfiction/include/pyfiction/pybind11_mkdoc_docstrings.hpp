@@ -14607,38 +14607,23 @@ static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params
 static const char *mkd_doc_fiction_sidb_generators_generate_random_layout_params_sim_params = R"doc(Physical parameters for the positive charge check.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_is_gate_design_impossible =
-R"doc(This function evaluates whether it is impossible to design an SiDB
-gate for a given truth table and a given skeleton with atomic defects.
-It determines the possible charge states at the output BDL pairs.
-Atomic defects can cause a BDL pair to be neutrally charged only.
-Thus, the BDL pair would not work as intended.
-
-
-
-Checks whether a gate can be designed on a skeleton with defects at
+R"doc(Checks whether a gate can be designed on a skeleton with defects at
 all: if the charged defects push one SiDB of an output BDL pair past
 its neutral transition threshold for any input pattern, that SiDB can
 never be negatively charged, the pair loses its BDL property, and no
 canvas can fix that.
 
 Args:
-    skeleton_with_defects: An SiDB skeleton layout with atomic
-                           defects.
-    spec: A vector of truth tables (each truth table is representing
-          one output) representing the gate's intended functionality.
-    params: Parameters to determine if the gate design is impossible.
     skeleton_with_defects: The skeleton, including the defects of the
                            surface it sits on.
     spec: The Boolean function(s) to implement.
     params: Parameters.
 
 Template Args:
-    Lyt: SiDB cell-level layout type.
-    TT: The truth table type. TT: Truth table type.
+    TT: Truth table type.
 
 Returns:
-    `true` if gate design is impossible, `false` otherwise. `true` if
-    no gate can be designed on the skeleton.
+    `true` if no gate can be designed on the skeleton.
 
 )doc";
 
@@ -18028,6 +18013,9 @@ Template Args:
 Returns:
     The defect influence domain.
 
+Raises:
+    std::invalid_argument: if `step_size` is zero.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_grid_search_2 =
@@ -18045,6 +18033,9 @@ Args:
 
 Returns:
     The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `step_size` is zero.
 
 )doc";
 
