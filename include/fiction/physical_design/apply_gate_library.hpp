@@ -20,6 +20,8 @@
 
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"
 
 #include <optional>
@@ -87,7 +89,7 @@ class apply_gate_library_impl
      * @param defect_lyt Optional defect surface.
      * @return A `CellLyt` object representing the generated cell layout.
      */
-    [[nodiscard]] CellLyt run_static_gate_library(const std::optional<CellLyt>& defect_surface = std::nullopt)
+    [[nodiscard]] CellLyt run_static_gate_library()
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -126,22 +128,6 @@ class apply_gate_library_impl
             cell_lyt.set_layout_name(gate_lyt.get_layout_name());
         }
 
-        if constexpr (is_sidb_defect_surface_v<CellLyt>)
-        {
-            if (defect_surface.has_value())
-            {
-                // due to issue with windows-2019 Visual Studio 16 2019 and v142. It doesn't compile without using
-                // "copy_lyt". When using "cell_lyt.assign_defect(...)" inside the lambda function, it results in
-                // the error: "error C2059: syntax error: '.'".
-                auto copy_lyt = cell_lyt.clone();
-                // copy the original defects over to the circuit since they are gone when converting the gate-level
-                // layout to the cell-level layout.
-                defect_surface.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
-                                                           { copy_lyt.assign_defect(def.first, def.second); });
-                return copy_lyt;
-            }
-        }
-
         return cell_lyt;
     }
     /**
@@ -158,8 +144,8 @@ class apply_gate_library_impl
      * @return A `CellLyt` object representing the generated cell layout.
      */
     template <typename Params>
-    [[nodiscard]] auto run_parameterized_gate_library(const Params&                 params,
-                                                      const std::optional<CellLyt>& defect_surface = std::nullopt)
+    [[nodiscard]] auto run_parameterized_gate_library(const Params&                      params,
+                                                      const std::optional<sidb::layout>& defect_surface = std::nullopt)
     {
 #if (PROGRESS_BARS)
         // initialize a progress bar
@@ -197,22 +183,6 @@ class apply_gate_library_impl
 
         // if available, recover layout name
         cell_lyt.set_layout_name(networks::get_name(gate_lyt));
-
-        if constexpr (is_sidb_defect_surface_v<CellLyt>)
-        {
-            if (defect_surface.has_value())
-            {
-                // due to issue with windows-2019 Visual Studio 16 2019 and v142. It doesn't compile without using
-                // "copy_lyt". When using "cell_lyt.assign_defect(...)" inside the lambda function, it results in
-                // the error: "error C2059: syntax error: '.'".
-                auto copy_lyt = cell_lyt.clone();
-                // copy the original defects over to the circuit since they are gone when converting the gate-level
-                // layout to the cell-level layout.
-                defect_surface.value().foreach_sidb_defect([this, &copy_lyt](const auto& def)
-                                                           { copy_lyt.assign_defect(def.first, def.second); });
-                return copy_lyt;
-            }
-        }
 
         return cell_lyt;
     }
@@ -321,35 +291,36 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 }
 
 /**
- * Applies a gate library to a given gate-level layout and maps the SiDB and defect locations onto a defect surface. The
- * gate library type should provide all functions specified in gate_library. It is, thus, easiest to extend
- * gate_library to implement a new gate library. Examples are `qca_one_library`, `topolinano_library`, and
- * `sidb::bestagon_library`.
+ * Applies a static gate library to a gate-level layout on a defective SiDB surface: the gates are placed on a
+ * Cartesian SiDB cell-level layout as with `apply_gate_library`, the result is converted with `to_sidb_layout`,
+ * and the surface's defects are copied into it.
  *
- * May pass through, and thereby throw, an `unsupported_gate_type_exception` or an
- * `unsupported_gate_orientation_exception`.
- *
- * @tparam CellLyt Type of the returned cell-level layout.
- * @tparam GateLibrary Type of the gate library to apply.
- * @tparam GateLyt Type of the gate-level layout to apply the library to.
+ * @tparam CellLyt SiDB cell-level layout type the gates are placed on.
+ * @tparam GateLibrary Gate library type.
+ * @tparam GateLyt Gate-level layout type.
  * @param lyt The gate-level layout.
- * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
+ * @param defect_surface The surface with the defects.
+ * @return The SiDB layout with the gates and the defects.
  */
-template <typename DefectLyt, typename GateLibrary, typename GateLyt>
-[[nodiscard]] DefectLyt apply_gate_library_to_defective_surface(const GateLyt& lyt, const DefectLyt& defect_surface)
+template <typename CellLyt, typename GateLibrary, typename GateLyt>
+[[nodiscard]] sidb::layout apply_gate_library_to_defective_surface(const GateLyt&      lyt,
+                                                                   const sidb::layout& defect_surface)
 {
-    static_assert(is_cell_level_layout_v<DefectLyt>, "DefectLyt is not a cell-level layout");
-    static_assert(is_sidb_defect_surface_v<DefectLyt>, "DefectLyt is not an SiDB defect surface");
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
+    static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
+                  "CellLyt and GateLibrary must implement the same technology");
 
-    static_assert(std::is_same_v<technology<DefectLyt>, technology<GateLibrary>>,
-                  "DefectLyt and GateLibrary must implement the same technology");
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    detail::apply_gate_library_impl<DefectLyt, GateLibrary, GateLyt> p{lyt};
+    auto result = sidb::to_sidb_layout(p.run_static_gate_library(), defect_surface.get_lattice());
 
-    return p.run_static_gate_library(defect_surface);
+    defect_surface.foreach_defect([&result](const auto& sd) { result.assign_defect(sd.first, sd.second); });
+
+    return result;
 }
 /**
  * Applies a parameterized gate library to a given
@@ -387,39 +358,39 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Par
 }
 
 /**
- * Applies a defect-aware parameterized gate library to a given
- * gate-level layout and, thereby, creates and returns a cell-level layout.
+ * Applies a parameterized gate library to a gate-level layout on a defective SiDB surface: the library designs
+ * every gate with the surface's defects near its tile in place, the gates are placed on a Cartesian SiDB
+ * cell-level layout, the result is converted with `to_sidb_layout`, and the surface's defects are copied into it.
  *
- * May pass through, and thereby throw, an `unsupported_gate_type_exception`, an
- * `unsupported_gate_orientation_exception` and any further custom exceptions of the gate libraries.
- *
- * @tparam DefectLyt Type of the returned cell-level layout.
- * @tparam GateLibrary Type of the gate library to apply.
- * @tparam GateLyt Type of the gate-level layout to apply the library to.
- * @tparam Params Type of the parameter used for SiDB on-the-fly gate library.
+ * @tparam CellLyt SiDB cell-level layout type the gates are placed on; it has to use cube coordinates.
+ * @tparam GateLibrary Gate library type.
+ * @tparam GateLyt Gate-level layout type.
+ * @tparam Params Parameter type of the gate library.
  * @param lyt The gate-level layout.
- * @param params Parameter for the gate library.
- * @param defect_lyt Defect surface.
- * @return A cell-level layout that implements `lyt`'s gate types with building blocks defined in `GateLibrary`.
+ * @param params Parameters of the gate library.
+ * @param defect_surface The surface with the defects.
+ * @return The SiDB layout with the gates and the defects.
  */
-template <typename DefectLyt, typename GateLibrary, typename GateLyt, typename Params>
-[[nodiscard]] DefectLyt apply_parameterized_gate_library_to_defective_surface(const GateLyt& lyt, const Params& params,
-                                                                              const DefectLyt& defect_surface)
+template <typename CellLyt, typename GateLibrary, typename GateLyt, typename Params>
+[[nodiscard]] sidb::layout apply_parameterized_gate_library_to_defective_surface(const GateLyt&      lyt,
+                                                                                 const Params&       params,
+                                                                                 const sidb::layout& defect_surface)
 {
-    static_assert(is_cell_level_layout_v<DefectLyt>, "DefectLyt is not a cell-level layout");
-    static_assert(is_sidb_defect_surface_v<DefectLyt>, "DefectLyt is not an SiDB defect surface");
+    static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
+    static_assert(has_sidb_technology_v<CellLyt>, "CellLyt is not an SiDB layout");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
-    static_assert(has_cube_coord_v<DefectLyt>, "DefectLyt must be based on cube coordinates");
+    static_assert(has_cube_coord_v<CellLyt>, "CellLyt must be based on cube coordinates");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");
+    static_assert(std::is_same_v<technology<CellLyt>, technology<GateLibrary>>,
+                  "CellLyt and GateLibrary must implement the same technology");
 
-    static_assert(std::is_same_v<technology<DefectLyt>, technology<GateLibrary>>,
-                  "DefectLyt and GateLibrary must implement the same technology");
+    detail::apply_gate_library_impl<CellLyt, GateLibrary, GateLyt> p{lyt};
 
-    detail::apply_gate_library_impl<DefectLyt, GateLibrary, GateLyt> p{lyt};
+    auto result = sidb::to_sidb_layout(p.template run_parameterized_gate_library<Params>(params, defect_surface),
+                                       defect_surface.get_lattice());
 
-    // Run the gate library with the parameters
-    const DefectLyt result = p.template run_parameterized_gate_library<Params>(params, defect_surface);
+    defect_surface.foreach_defect([&result](const auto& sd) { result.assign_defect(sd.first, sd.second); });
 
     return result;
 }
