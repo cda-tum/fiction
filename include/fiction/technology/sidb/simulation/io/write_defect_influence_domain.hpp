@@ -23,8 +23,8 @@
 
 #include <fstream>
 #include <ostream>
+#include <string>
 #include <string_view>
-#include <tuple>
 
 namespace fiction::sidb::simulation::io
 {
@@ -94,7 +94,7 @@ inline void write_defect_influence_domain(const defects::defect_influence_domain
                                           const std::string_view&                     filename,
                                           const write_defect_influence_domain_params& params = {})
 {
-    std::ofstream os{filename.data(), std::ofstream::out};
+    std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())
     {

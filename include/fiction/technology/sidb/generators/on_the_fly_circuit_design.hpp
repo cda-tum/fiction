@@ -31,6 +31,7 @@
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>
 
+#include <cstdint>
 #include <cstdio>
 #include <optional>
 #include <stdexcept>
