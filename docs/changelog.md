@@ -228,8 +228,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Python bindings:
 
-  - **Breaking:** The Python class `sidb_layout` now names the lattice-based `sidb::layout`. The Cartesian
-    SiDB cell-level layout is `sidb_cell_level_layout`
+  - **Breaking:** The Python class `sidb_layout` names the lattice-based `sidb::layout`
 
   - **Breaking:** `critical_temperature_stats.is_ground_state_transparent` is renamed
     `energy_between_ground_state_and_first_erroneous`, the member it always exposed

@@ -516,9 +516,7 @@ class operational_domain_impl
                 (logic_cells.size() > 0)) &&
                "No logic cells found in the layout");
 
-        // the canvas layout is created which is defined by the logic cells. The cell type matches the one the
-        // `is_operational` entry points assign to the canvases they build themselves; the canvas is only ever used to
-        // construct a `charge_distribution_surface`, which reads positions and charges, so the two behave identically
+        // The canvas contains the LOGIC sites that the filter-only operational analysis evaluates.
         canvas_lyt.set_lattice(source_layout.get_lattice());
 
         for (const auto& c : logic_cells)

@@ -780,7 +780,7 @@ struct potential_projection
      * Constructor for a potential projection from a singleton cluster, thereby lifting a value in the potential matrix
      * to a potential projection.
      * @param inter_sidb_pot Potential value of which the absolute value may be found in the potential matrix in an
-     * associated `charge_distribution_surface` object.
+     * associated `potential_landscape` object.
      * @param cs Charge state associated with the singleton cluster projector for this potential projection.
      */
     potential_projection(const double inter_sidb_pot, const model::charge_state cs) noexcept :
@@ -861,7 +861,7 @@ struct potential_projection_order
      * Constructor for a potential projection from a singleton cluster onto an SiDB.
      *
      * @param inter_sidb_pot The chargeless potential between the SiDB in the singleton cluster and the one projected
-     * onto, as found in the potential matrix in an associated `charge_distribution_surface` object.
+     * onto, as found in the potential matrix in an associated `potential_landscape` object.
      * @param base The simulation base. This defines whether positive charges are considered.
      */
     potential_projection_order(const double inter_sidb_pot, const uint8_t base) noexcept :
@@ -995,7 +995,7 @@ using clustering = phmap::flat_hash_set<cluster_ptr, cluster_ptr_hash>;
 /**
  * This struct defined the fully decorated cluster hierarchy type which follows the structure of a "general tree". It
  * contains multiple stores:
- * - a set of indices that correspond to the SiDBs as stored in a `charge_distribution_surface` object,
+ * - a set of indices that correspond to the SiDBs as stored in a `potential_landscape` object,
  * - a store of potential bounds for each SiDB in the cluster that give the fraction of the local electrostatic
  * potential that is received from outside the cluster, and
  * - a store containing the potential projection orders onto each SiDB, inside and outside the cluster.
