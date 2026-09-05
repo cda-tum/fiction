@@ -14286,7 +14286,7 @@ followed by simulation, random placement, and pruning only.
 
 Args:
     skeleton: The skeleton with its input and output wires.
-    spec: The Boolean function(s) to implement.
+    spec: The Boolean function(s) to implement; must not be empty.
     params: Parameters.
     stats: Statistics.
 
@@ -14295,6 +14295,9 @@ Template Args:
 
 Returns:
     The designed gates.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -14305,7 +14308,7 @@ converted with `to_sidb_layout` and the gates with
 
 Args:
     skeleton: The skeleton.
-    spec: The Boolean function(s) to implement.
+    spec: The Boolean function(s) to implement; must not be empty.
     params: Parameters.
     stats: Statistics.
 
@@ -14315,6 +14318,9 @@ Template Args:
 
 Returns:
     The designed gates.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -14336,9 +14342,15 @@ static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_ga
 R"doc(*QuickCell*: prune the canvas layouts with the filters of the
 operational check, then simulate the rest.)doc";
 
-static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM = R"doc(Place canvas SiDBs at random until an operational gate is found.)doc";
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_gates_mode_RANDOM =
+R"doc(Place canvas SiDBs at random until an operational gate is found or the
+attempt limit is reached.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_design_mode = R"doc(The design mode.)doc";
+
+static const char *mkd_doc_fiction_sidb_generators_design_gates_params_maximal_random_design_attempts =
+R"doc(Maximum number of layouts evaluated by random gate design across all
+threads.)doc";
 
 static const char *mkd_doc_fiction_sidb_generators_design_gates_params_number_of_canvas_sidbs = R"doc(Number of canvas SiDBs.)doc";
 
@@ -14616,7 +14628,7 @@ canvas can fix that.
 Args:
     skeleton_with_defects: The skeleton, including the defects of the
                            surface it sits on.
-    spec: The Boolean function(s) to implement.
+    spec: The Boolean function(s) to implement; must not be empty.
     params: Parameters.
 
 Template Args:
@@ -14624,6 +14636,9 @@ Template Args:
 
 Returns:
     `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -14633,7 +14648,7 @@ R"doc(Transitional overload for SiDB cell-level layouts, converted with
 
 Args:
     skeleton_with_defects: The skeleton with defects.
-    spec: The Boolean function(s) to implement.
+    spec: The Boolean function(s) to implement; must not be empty.
     params: Parameters.
 
 Template Args:
@@ -14642,6 +14657,9 @@ Template Args:
 
 Returns:
     `true` if no gate can be designed on the skeleton.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -18015,6 +18033,7 @@ Returns:
 
 Raises:
     std::invalid_argument: if `step_size` is zero.
+                           std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -18069,7 +18088,7 @@ influences an SiDB gate, which needs far fewer evaluations than a grid
 search.
 
 Args:
-    lyt: The gate layout; it must not hold defects of its own.
+    lyt: The gate layout.
     spec: The Boolean function(s) it implements.
     samples: Number of starting rows to try.
     params: Parameters.
@@ -18081,6 +18100,9 @@ Template Args:
 Returns:
     The defect influence domain.
 
+Raises:
+    std::invalid_argument: if `spec` is empty.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_defect_influence_quicktrace_2 =
@@ -18088,7 +18110,7 @@ R"doc(*QuickTrace* without a specification: traces the contour of the region
 in which a defect changes the ground state of an SiDB layout.
 
 Args:
-    lyt: The layout; it must not hold defects of its own.
+    lyt: The layout.
     samples: Number of starting rows to try.
     params: Parameters; the influence definition has to be
             `GROUND_STATE_CHANGE`.
@@ -18115,6 +18137,9 @@ Template Args:
 
 Returns:
     The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `spec` is empty.
 
 )doc";
 
@@ -18166,16 +18191,13 @@ Returns:
 
 )doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base_layout =
-R"doc(The layout without any defects; the ground state comparison places the
-defect itself.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_base_layout = R"doc(The layout before placing the candidate defect.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_defect_influence_impl =
 R"doc(Constructor.
 
 Args:
-    lyt: The layout to analyze; it must not hold defects of its own
-         for the contour trace.
+    lyt: The layout to analyze.
     ps: Parameters.
     st: Statistics.
 
@@ -18187,7 +18209,7 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influen
 R"doc(Compares the ground states of a layout with and without the defect.
 
 Args:
-    lyt_without_defect: The layout without the defect.
+    lyt_without_candidate: The layout without the candidate defect.
     defect_pos: The defect position.
 
 Returns:
@@ -18340,17 +18362,6 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influen
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_stats = R"doc(Statistics.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_detail_defect_influence_impl_without_defects =
-R"doc(Returns a copy of a layout without its defects.
-
-Args:
-    lyt: The layout.
-
-Returns:
-    The layout without defects.
-
-)doc";
-
 static const char *mkd_doc_fiction_sidb_simulation_defects_detail_displacement_robustness_domain_impl =
 R"doc(Implementation of the displacement robustness analysis. Displacements
 are measured in columns and rows (`2y + z`), so a displacement of one
@@ -18453,6 +18464,10 @@ Template Args:
 Returns:
     The displacement robustness domain.
 
+Raises:
+    std::out_of_range: if a displacement exceeds the lattice-site
+                       range.
+
 )doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_determine_probability_of_fabricating_operational_gate =
@@ -18472,6 +18487,10 @@ Template Args:
 
 Returns:
     The probability.
+
+Raises:
+    std::out_of_range: if a displacement exceeds the lattice-site
+                       range.
 
 )doc";
 
@@ -18501,7 +18520,9 @@ static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustne
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_analysis_mode_RANDOM = R"doc(A random share of the displaced layouts is analyzed.)doc";
 
-static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_variations = R"doc(Maximum displacement in columns and rows.)doc";
+static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_displacement_variations =
+R"doc(Maximum displacement in columns and rows; the displaced sites must
+remain representable.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_defects_displacement_robustness_domain_params_fixed_sidbs = R"doc(SiDBs that are not displaced.)doc";
 
