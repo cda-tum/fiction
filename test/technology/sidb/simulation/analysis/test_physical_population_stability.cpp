@@ -246,7 +246,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
 TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], [quality]")
 {
-    SECTION("using siqad coordinates")
+    SECTION("on the H-Si(100) 2x1 lattice")
     {
         layout lyt{};
 

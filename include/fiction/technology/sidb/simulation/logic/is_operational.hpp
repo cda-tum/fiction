@@ -21,7 +21,6 @@
 
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -1395,81 +1394,6 @@ template <typename TT>
     detail::is_operational_impl<TT> p{lyt, spec, params_with_rejecting_kinks, input_bdl_wire, output_bdl_wire};
 
     return run(p);
-}
-
-// ---------------------------------------------------------------------------------------------------------------
-// Transitional: overloads for SiDB cell-level layouts, converted with `to_sidb_layout`. They serve the algorithms
-// that still run on such layouts and disappear once every consumer takes `sidb::layout`.
-// ---------------------------------------------------------------------------------------------------------------
-
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return The operational status and the number of simulator invocations.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::pair<operational_status, std::size_t>
-is_operational(const Lyt& lyt, const std::vector<TT>& spec, const is_operational_params& params = {}) noexcept
-{
-    return is_operational(to_sidb_layout(lyt), spec, params);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return The operational input patterns.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t> operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                                            const is_operational_params& params = {}) noexcept
-{
-    return operational_input_patterns(to_sidb_layout(lyt), spec, params);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return The kink-induced non-operational input patterns.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] std::set<uint64_t>
-kink_induced_non_operational_input_patterns(const Lyt& lyt, const std::vector<TT>& spec,
-                                            const is_operational_params& params = {}) noexcept
-{
-    return kink_induced_non_operational_input_patterns(to_sidb_layout(lyt), spec, params);
-}
-/**
- * Transitional overload for SiDB cell-level layouts; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt The layout to check.
- * @param spec The Boolean function(s) it has to implement.
- * @param params Parameters.
- * @return `true` if the layout is non-operational because of kinks.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] bool is_kink_induced_non_operational(const Lyt& lyt, const std::vector<TT>& spec,
-                                                   const is_operational_params& params = {}) noexcept
-{
-    return is_kink_induced_non_operational(to_sidb_layout(lyt), spec, params);
 }
 
 }  // namespace fiction::sidb::simulation::logic

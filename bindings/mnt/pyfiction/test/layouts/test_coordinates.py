@@ -12,12 +12,11 @@ import operator
 
 import pytest
 
-from mnt.pyfiction import cube_coordinate, offset_coordinate, siqad_coordinate
+from mnt.pyfiction import cube_coordinate, offset_coordinate
 
 COORDINATE_TYPES = [
     pytest.param(offset_coordinate, id="offset"),
     pytest.param(cube_coordinate, id="cube"),
-    pytest.param(siqad_coordinate, id="siqad"),
 ]
 
 

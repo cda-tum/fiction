@@ -16,7 +16,6 @@
  * @author Benjamin Hien (hibenj)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
 #include "fiction/utils/version_info.hpp"
@@ -26,9 +25,7 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
-#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 
@@ -47,7 +44,6 @@ using namespace fiction;
 using namespace fiction::sidb;
 using namespace fiction::sidb::io;
 using namespace fiction::sidb::model;
-using namespace fiction::sidb::surfaces;
 
 /**
  * Removes whitespace from an SVG string for comparison.
@@ -407,280 +403,6 @@ inline const std::string EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION =
 </svg>)",
                 FICTION_VERSION, FICTION_REPO);
 
-TEMPLATE_TEST_CASE("Generate SiDB layout in SVG for cell-level layout and charge distribution surface",
-                   "[write-sidb-layout-svg]", sidb_cell_clk_lyt_cube, sidb_100_cell_clk_lyt_cube, sidb_100_cell_clk_lyt,
-                   sidb_cell_clk_lyt)
-{
-    TestType layout{{4, 4}};
-
-    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 3}, sidb_technology::cell_type::NORMAL);
-
-    SECTION("cell-level layout")
-    {
-        SECTION("light mode")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const std::string normalized_generated_svg = normalize_svg(generated_svg);
-            const std::string normalized_expected_svg  = normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-
-        SECTION("dark mode")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const auto normalized_generated_svg = normalize_svg(generated_svg);
-            const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-
-        SECTION("dark mode and hidden lattice")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{
-                .color_background = write_sidb_layout_svg_params::color_mode::DARK,
-                .lattice_mode     = write_sidb_layout_svg_params::sidb_lattice_mode::HIDE_LATTICE};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const auto normalized_generated_svg = normalize_svg(generated_svg);
-            const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_HIDE_LATTICE);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-    }
-    SECTION("charge distribution")
-    {
-        charge_distribution_surface cds{layout};
-        cds.assign_charge_state({0, 0}, charge_state::POSITIVE);
-        cds.assign_charge_state({1, 1}, charge_state::NEGATIVE);
-        cds.assign_charge_state({1, 0}, charge_state::NEUTRAL);
-        cds.assign_charge_state({3, 3}, charge_state::NEUTRAL);
-
-        SECTION("light mode")
-        {
-
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(cds, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const std::string normalized_generated_svg = normalize_svg(generated_svg);
-            const std::string normalized_expected_svg  = normalize_svg(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-
-        SECTION("dark mode")
-        {
-
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(cds, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const auto normalized_generated_svg = normalize_svg(generated_svg);
-            const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-    }
-};
-
-TEMPLATE_TEST_CASE(
-    "Generate SiDB layout in SiQAD coordinates in SVG for cell-level layout and charge distribution surface",
-    "[write-sidb-layout-svg]", sidb_cell_clk_lyt_siqad, sidb_100_cell_clk_lyt_siqad)
-{
-    TestType layout{{4, 4}};
-
-    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
-
-    SECTION("cell-level layout")
-    {
-        SECTION("light mode")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const std::string normalized_generated_svg = normalize_svg(generated_svg);
-            const std::string normalized_expected_svg  = normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-
-        SECTION("dark mode")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const auto normalized_generated_svg = normalize_svg(generated_svg);
-            const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-    }
-    SECTION("charge distribution")
-    {
-        charge_distribution_surface cds{layout};
-        cds.assign_charge_state({0, 0}, charge_state::POSITIVE);
-        cds.assign_charge_state({1, 0, 1}, charge_state::NEGATIVE);
-        cds.assign_charge_state({1, 0}, charge_state::NEUTRAL);
-        cds.assign_charge_state({3, 1, 1}, charge_state::NEUTRAL);
-
-        SECTION("light mode")
-        {
-
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(cds, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const std::string normalized_generated_svg = normalize_svg(generated_svg);
-            const std::string normalized_expected_svg  = normalize_svg(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-
-        SECTION("dark mode")
-        {
-
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(cds, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const auto normalized_generated_svg = normalize_svg(generated_svg);
-            const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-    }
-};
-
-TEMPLATE_TEST_CASE("Generate SiDB layout on the H-Si(111)-1x1 surface in SVG for cell-level layout",
-                   "[write-sidb-layout-svg]", sidb_111_cell_clk_lyt_cube, sidb_111_cell_clk_lyt)
-{
-    TestType layout{{4, 4}};
-
-    layout.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 1}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({1, 0}, sidb_technology::cell_type::NORMAL);
-    layout.assign_cell_type({3, 3}, sidb_technology::cell_type::NORMAL);
-
-    SECTION("cell-level layout")
-    {
-        SECTION("light mode")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::LIGHT};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const std::string normalized_generated_svg = normalize_svg(generated_svg);
-            const std::string normalized_expected_svg  = normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL_111);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-
-        SECTION("dark mode")
-        {
-            std::stringstream os_light_cds;
-
-            write_sidb_layout_svg_params const params{.color_background =
-                                                          write_sidb_layout_svg_params::color_mode::DARK};
-            write_sidb_layout_svg(layout, os_light_cds, params);
-
-            // Retrieve the SVG content
-            const auto generated_svg = os_light_cds.str();
-
-            // Normalize both SVG strings
-            const auto normalized_generated_svg = normalize_svg(generated_svg);
-            const auto normalized_expected_svg  = normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_111);
-
-            // Perform the comparison
-            REQUIRE(normalized_generated_svg == normalized_expected_svg);
-        }
-    }
-}
-
 TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
 {
     sidb::layout lyt{};
@@ -716,15 +438,32 @@ TEST_CASE("Generate SVG for an sidb::layout", "[write-sidb-layout-svg]")
 
         CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_HIDE_LATTICE));
     }
-    SECTION("H-Si(111)-1x1 surface")
-    {
-        lyt.set_lattice(sidb::lattice::si_111_1x1());
+}
 
+TEST_CASE("Generate SVG for an sidb::layout on the H-Si(111)-1x1 surface", "[write-sidb-layout-svg]")
+{
+    sidb::layout lyt{sidb::lattice::si_111_1x1()};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 1}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({1, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({3, 1, 1}, sidb_technology::cell_type::NORMAL);
+
+    SECTION("light mode")
+    {
         std::stringstream os{};
 
         write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
 
         CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CELL_LEVEL_111));
+    }
+    SECTION("dark mode")
+    {
+        std::stringstream os{};
+
+        write_sidb_layout_svg(lyt, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
+
+        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CELL_LEVEL_111));
     }
 }
 

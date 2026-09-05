@@ -124,7 +124,7 @@ int main()  // NOLINT
 
     for (const auto& [gate, truth_table] : gates)
     {
-        auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(fmt::format("{}/{}.sqd", folder, gate), gate);
+        auto lyt = read_sqd_layout(fmt::format("{}/{}.sqd", folder, gate), gate);
 
         // operational domain stats
         operational_domain_stats op_domain_stats_gs{};

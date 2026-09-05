@@ -59,7 +59,8 @@ void area_command::execute()
 
     const auto calculate_area = [this](auto&& lyt_ptr)
     {
-        using tech = typename std::decay<decltype(lyt_ptr)>::type::element_type::technology;
+        using Lyt  = typename std::decay_t<decltype(lyt_ptr)>::element_type;
+        using tech = typename fiction::cli::store_technology<Lyt>::type;
 
         const double width_nm  = is_set("width") ? width : tech::CELL_WIDTH;
         const double height_nm = is_set("height") ? height : tech::CELL_HEIGHT;
@@ -68,7 +69,14 @@ void area_command::execute()
 
         const fiction::fcn::area_params<tech> ps{width_nm, height_nm, hspace_nm, vspace_nm};
 
-        fiction::fcn::area(*lyt_ptr, ps, &st);
+        if constexpr (fiction::cli::is_sidb_store_v<Lyt>)
+        {
+            st.area = fiction::fcn::area(fiction::cli::sidb_layout_of(*lyt_ptr), ps, &st);
+        }
+        else
+        {
+            st.area = fiction::fcn::area(*lyt_ptr, ps, &st);
+        }
     };
 
     std::visit(calculate_area, lyt);

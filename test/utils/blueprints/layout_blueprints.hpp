@@ -24,6 +24,9 @@
 #include <fiction/layouts/clocking_scheme.hpp>
 #include <fiction/technology/inml/technology.hpp>
 #include <fiction/technology/qca/technology.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <kitty/constructors.hpp>
@@ -938,137 +941,118 @@ CellLyt single_layer_inml_crosswire() noexcept
  * This layout represents a BDL wire comprising of 3 BDL pairs and an output perturber SiDB.
  *
  */
-template <typename Lyt>
-[[nodiscard]] Lyt bdl_wire() noexcept
+[[nodiscard]] inline fiction::sidb::layout bdl_wire() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
+    lyt.set_layout_name("BDL wire");
 
-    Lyt lyt{{24, 0}, "BDL wire"};
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({3, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({3, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({6, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 0, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 0, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 0, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({18, 0, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({20, 0, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({18, 0, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({20, 0, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
     // output perturber
-    lyt.assign_cell_type({24, 0, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 0, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 /**
  * This layout represents the AND Gate, as proposed in the paper
  * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob
  * Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel,
  * Robert A. Wolkow, and Konrad Walus in IEEE TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
  */
-template <typename Lyt>
-Lyt siqad_and_gate() noexcept
+[[nodiscard]] inline fiction::sidb::layout siqad_and_gate() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({4, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 6, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 7, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 6, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 7, 0}, Lyt::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 /**
  * This layout represents the OR Gate, as proposed in the paper
  * titled \"SiQAD: A Design and Simulation Tool for Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob
  * Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel,
  * Robert A. Wolkow, and Konrad Walus in IEEE TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
  */
-template <typename Lyt>
-Lyt siqad_or_gate() noexcept
+[[nodiscard]] inline fiction::sidb::layout siqad_or_gate() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({16, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({14, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({16, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({14, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({4, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 5, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 6, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({8, 5, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({8, 6, 1}, Lyt::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({8, 8, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 8, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 /**
  * This layout represents the NAND Gate, as proposed in the paper titled \"SiQAD: A Design and Simulation Tool for
  * Atomic Silicon Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian
  * Livadaru, Taleana Huff, Mohammad Rashidi, Wyatt Vine, Thomas Dienel, Robert A. Wolkow, and Konrad Walus in IEEE
  * TRANSACTIONS ON NANOTECHNOLOGY, Volume 19, 2020.
  */
-template <typename Lyt>
-Lyt siqad_nand_gate() noexcept
+[[nodiscard]] inline fiction::sidb::layout siqad_nand_gate() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 1}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({20, 0, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({18, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({20, 0, 1}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({18, 1, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({4, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 2, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 3, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 2, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 3, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({16, 2, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 3, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 4, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 5, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({10, 4, 1}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({10, 5, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 8, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({10, 9, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({10, 8, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({10, 9, 1}, Lyt::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({10, 12, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 12, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 /**
  * This layout represents the AND Gate, as proposed in the paper
  * titled \"Hexagons are the Bestagons: Design Automation for Silicon Dangling Bond Logic\" by
@@ -1076,46 +1060,41 @@ Lyt siqad_nand_gate() noexcept
  *
  * (https://github.com/cda-tum/mnt-bestagon-library/blob/main/bestagon-gates/2i1o_and/21_hex_inputsdbp_and_v19.sqd)
  */
-template <typename Lyt>
-Lyt bestagon_and_gate() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_and_gate() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({23, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 8, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 /**
  * This layout represents the AND Gate implemented on the H-Si(111)-1x1 surface, as proposed in the paper
  * titled \"Unlocking Flexible Silicon Dangling Bond Logic Designs on Alternative Silicon Orientations\" by
@@ -1125,93 +1104,81 @@ Lyt bestagon_and_gate() noexcept
  *
  *  @tparam Lyt SiDB cell-level layout type based on SiQAD-coordinates.
  */
-template <typename Lyt>
-Lyt and_gate_111() noexcept
+[[nodiscard]] inline fiction::sidb::layout and_gate_111() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{fiction::sidb::lattice::si_111_1x1()};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({1, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({1, 1, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({25, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({23, 1, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({25, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({23, 1, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({4, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({21, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({21, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 5, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 5, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({5, 5, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 5, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({17, 8, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 8, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({9, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({15, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({9, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({13, 17, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({16, 18, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({10, 18, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({13, 17, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({10, 18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({15, 21, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 23, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 21, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 23, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({19, 25, 1}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({21, 27, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({19, 25, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({21, 27, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({23, 29, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({23, 29, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
-template <typename Lyt>
-Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
+[[nodiscard]] inline fiction::sidb::layout and_gate_111_mirrored_on_the_x_axis() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::is_sidb_lattice_111_v<Lyt>, "Lyt should have 111 as lattice orientation");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{fiction::sidb::lattice::si_111_1x1()};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({1, -2, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({1, -2, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({25, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({23, -2, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({25, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({23, -2, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({4, -4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({21, -4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({4, -4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({21, -4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({5, -6, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, -6, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({5, -6, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, -6, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, -8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, -8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({17, -8, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, -8, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({9, -10, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({15, -10, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({9, -10, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({15, -10, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({13, -17, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({16, -18, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({10, -18, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({13, -17, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({16, -18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({10, -18, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({15, -22, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({17, -23, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({15, -22, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({17, -23, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({19, -26, 1}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({21, -27, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({19, -26, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({21, -27, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({23, -30, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({23, -30, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 /**
  * This layout represents a crossing gate, as proposed in the paper titled \"Hexagons are the Bestagons: Design
  * Automation for Silicon Dangling Bond Logic\" authored by Marcel Walter, Samuel Sze Hang Ng, Konrad Walus, and Robert
@@ -1219,111 +1186,101 @@ Lyt and_gate_111_mirrored_on_the_x_axis() noexcept
  *
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
-template <typename Lyt>
-[[nodiscard]] Lyt bestagon_crossing() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_crossing() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({20, 8, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({14, 9, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({14, 11, 1}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({20, 12, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({24, 13, 1}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({16, 13, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({20, 8, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({14, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({14, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({20, 12, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({24, 13, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 13, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
-template <typename Lyt>
-Lyt crossing_bestagon_shape_input_down_output_up() noexcept
+[[nodiscard]] inline fiction::sidb::layout crossing_bestagon_shape_input_down_output_up() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({16, 10, 1}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({17, 12, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 7, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({16, 10, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 12, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 20, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 20, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents an AND gate, as proposed in the paper titled \"Hexagons are the Bestagons: Design
@@ -1332,49 +1289,44 @@ Lyt crossing_bestagon_shape_input_down_output_up() noexcept
  *
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
-template <typename Lyt>
-[[nodiscard]] Lyt bestagon_and() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_and() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({23, 9, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 9, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 11, 1}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 8, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({23, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 9, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents a FO2 gate, as proposed in the paper titled \"Hexagons are the Bestagons: Design
@@ -1383,46 +1335,41 @@ template <typename Lyt>
  *
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
-template <typename Lyt>
-Lyt bestagon_fo2() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_fo2() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
+    fiction::sidb::layout lyt{};
 
-    Lyt lyt{};
-
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({18, 6, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 7, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({18, 6, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({21, 11, 1}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({17, 11, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({18, 13, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({21, 11, 1}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 11, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({18, 13, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents an 2-input-2-output Bestagon skeleton, as proposed in the paper titled \"Hexagons are the
@@ -1431,104 +1378,94 @@ Lyt bestagon_fo2() noexcept
  *
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
-template <typename Lyt>
-[[nodiscard]] Lyt two_input_two_output_bestagon_skeleton() noexcept
+[[nodiscard]] inline fiction::sidb::layout two_input_two_output_bestagon_skeleton() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents an 2-input-2-output Bestagon skeleton with output at the top and input at the bottom.
  *
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
-template <typename Lyt>
-[[nodiscard]] Lyt two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
+[[nodiscard]] inline fiction::sidb::layout two_input_two_output_bestagon_skeleton_input_down_output_up() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({0, 20, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 20, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 20, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents an 2-input-1-output Bestagon skeleton, as proposed in the paper titled \"Hexagons are the
@@ -1537,180 +1474,160 @@ template <typename Lyt>
  *
  * (https://github.com/cda-tum/mnt-bestagon-library)
  */
-template <typename Lyt>
-[[nodiscard]] Lyt two_input_one_output_bestagon_skeleton() noexcept
+[[nodiscard]] inline fiction::sidb::layout two_input_one_output_bestagon_skeleton() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wire
-    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
-template <typename Lyt>
-[[nodiscard]] Lyt bestagon_xor() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_xor() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas
-    lyt.assign_cell_type({15, 7, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 8, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 11, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({15, 7, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 11, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wire
-    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents an AND gate with the typical Bestagon skeleton. However, it shows kinks in the I/O pins for
  * certain input pattern.
  */
-template <typename Lyt>
-[[nodiscard]] Lyt and_gate_with_kink_states() noexcept
+[[nodiscard]] inline fiction::sidb::layout and_gate_with_kink_states() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({19, 7, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({17, 11, 0}, Lyt::cell_type::LOGIC);
-    lyt.assign_cell_type({21, 10, 0}, Lyt::cell_type::LOGIC);
+    lyt.assign_cell_type({19, 7, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({17, 11, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
+    lyt.assign_cell_type({21, 10, 0}, fiction::sidb::sidb_technology::cell_type::LOGIC);
 
     // output wire
-    lyt.assign_cell_type({19, 13, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 14, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 14, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents an SiDB skeleton with a Bestagon shape.
  * The layout features input on the left side and output on the right-top.
  */
-template <typename Lyt>
-Lyt two_input_left_one_output_right_top_skeleton() noexcept
+[[nodiscard]] inline fiction::sidb::layout two_input_left_one_output_right_top_skeleton() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // first input wire
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // second input wire
-    lyt.assign_cell_type({0, 15, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 14, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({6, 13, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 12, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({12, 11, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 10, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({0, 15, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 14, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({6, 13, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 12, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 11, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 10, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wire
-    lyt.assign_cell_type({26, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 3, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({34, 2, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({26, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 3, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({34, 2, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({38, 1, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({38, 1, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents the double wire, as proposed in the paper titled \"Hexagons are the
@@ -1719,65 +1636,60 @@ Lyt two_input_left_one_output_right_top_skeleton() noexcept
  *
  * (https://dl.acm.org/doi/10.1145/3489517.3530525)
  */
-template <typename Lyt>
-Lyt bestagon_double_wire() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_double_wire() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
     // left SiDBs
-    lyt.assign_cell_type({14, 7, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({10, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({11, 11, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({14, 12, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 7, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({10, 9, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({11, 11, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 12, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // right SiDBs
-    lyt.assign_cell_type({24, 7, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 9, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({27, 11, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 12, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 7, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 9, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({27, 11, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 12, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents the half adder gate, as proposed in the paper titled \"Hexagons are the
@@ -1786,103 +1698,93 @@ Lyt bestagon_double_wire() noexcept
  *
  * (https://dl.acm.org/doi/10.1145/3489517.3530525)
  */
-template <typename Lyt>
-[[nodiscard]] Lyt bestagon_ha() noexcept
+[[nodiscard]] inline fiction::sidb::layout bestagon_ha() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({0, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({38, 0, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({0, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({38, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({36, 1, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({2, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({36, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({6, 2, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({32, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({32, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({30, 3, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({30, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({14, 5, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // canvas SiDBs
-    lyt.assign_cell_type({17, 8, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({17, 12, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 13, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 8, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 12, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 13, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     // output wires
-    lyt.assign_cell_type({14, 15, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({24, 15, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({14, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({24, 15, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({12, 16, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({26, 16, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({12, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 16, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({8, 17, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({30, 17, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({8, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({30, 17, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({6, 18, 0}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({32, 18, 0}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({6, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({32, 18, 0}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({2, 19, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({36, 19, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({2, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 19, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 /**
  * This layout represents a 2-input-1-output skeleton, where one input and output wire have a port direction to the
  * west.
  */
-template <typename Lyt>
-Lyt two_input_one_output_skeleton_west_west() noexcept
+[[nodiscard]] inline fiction::sidb::layout two_input_one_output_skeleton_west_west() noexcept
 {
-    static_assert(fiction::is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(fiction::has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-    static_assert(fiction::has_siqad_coord_v<Lyt>, "Lyt is not based on SiQAD coordinates");
-
-    Lyt lyt{};
+    fiction::sidb::layout lyt{};
 
     // input wires
-    lyt.assign_cell_type({4, 9, 1}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({1, 9, 1}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({4, 9, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({1, 9, 1}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({14, 0, 0}, Lyt::cell_type::INPUT);
-    lyt.assign_cell_type({16, 1, 0}, Lyt::cell_type::INPUT);
+    lyt.assign_cell_type({14, 0, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({16, 1, 0}, fiction::sidb::sidb_technology::cell_type::INPUT);
 
-    lyt.assign_cell_type({26, 4, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({28, 5, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({26, 4, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({28, 5, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({19, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({16, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({16, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({11, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({8, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({11, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({8, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({36, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({39, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({36, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({39, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({44, 9, 1}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({47, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({44, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({47, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({22, 3, 0}, Lyt::cell_type::NORMAL);
-    lyt.assign_cell_type({20, 2, 0}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({22, 3, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({20, 2, 0}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({52, 9, 1}, Lyt::cell_type::OUTPUT);
-    lyt.assign_cell_type({55, 9, 1}, Lyt::cell_type::OUTPUT);
+    lyt.assign_cell_type({52, 9, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
+    lyt.assign_cell_type({55, 9, 1}, fiction::sidb::sidb_technology::cell_type::OUTPUT);
 
-    lyt.assign_cell_type({60, 9, 1}, Lyt::cell_type::NORMAL);
+    lyt.assign_cell_type({60, 9, 1}, fiction::sidb::sidb_technology::cell_type::NORMAL);
 
     return lyt;
-};
+}
 
 }  // namespace blueprints

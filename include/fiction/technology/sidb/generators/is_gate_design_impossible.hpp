@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
@@ -116,23 +115,4 @@ template <typename TT>
 
     return false;
 }
-/**
- * Transitional overload for SiDB cell-level layouts, converted with `to_sidb_layout`; see the `layout` overload.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param skeleton_with_defects The skeleton with defects.
- * @param spec The Boolean function(s) to implement; must not be empty.
- * @param params Parameters.
- * @return `true` if no gate can be designed on the skeleton.
- * @throws std::invalid_argument if `spec` is empty.
- */
-template <typename Lyt, typename TT>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] bool is_gate_design_impossible(const Lyt& skeleton_with_defects, const std::vector<TT>& spec,
-                                             const is_gate_design_impossible_params& params = {})
-{
-    return is_gate_design_impossible(to_sidb_layout(skeleton_with_defects), spec, params);
-}
-
 }  // namespace fiction::sidb::generators

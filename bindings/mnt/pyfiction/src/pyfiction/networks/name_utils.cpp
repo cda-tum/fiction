@@ -18,6 +18,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/networks/name_utils.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
@@ -61,7 +62,7 @@ void name_utils(nanobind::module_& m)
     detail::get_name<py_hexagonal_gate_layout>(m);
     detail::get_name<py_qca_layout>(m);
     detail::get_name<py_inml_layout>(m);
-    detail::get_name<py_sidb_layout>(m);
+    detail::get_name<fiction::sidb::layout>(m);
     detail::get_name<py_logic_network>(m);
 
     detail::set_name<py_cartesian_obstruction_layout>(m);
@@ -72,7 +73,7 @@ void name_utils(nanobind::module_& m)
     detail::set_name<py_hexagonal_gate_layout>(m);
     detail::set_name<py_qca_layout>(m);
     detail::set_name<py_inml_layout>(m);
-    detail::set_name<py_sidb_layout>(m);
+    detail::set_name<fiction::sidb::layout>(m);
     detail::set_name<py_logic_network>(m);
 }
 

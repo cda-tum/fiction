@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -69,19 +68,4 @@ namespace fiction::sidb::simulation::analysis
 {
     return can_positive_charges_occur(potential_landscape{lyt, sim_params});
 }
-/**
- * Transitional overload for SiDB cell-level layouts, which are converted with `to_sidb_layout` first.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt The layout to check.
- * @param sim_params The physical parameters.
- * @return `true` if at least one SiDB can be positively charged, `false` otherwise.
- */
-template <typename Lyt>
-    requires(is_cell_level_layout_v<Lyt>)
-[[nodiscard]] bool can_positive_charges_occur(const Lyt& lyt, const model::simulation_parameters& sim_params) noexcept
-{
-    return can_positive_charges_occur(to_sidb_layout(lyt), sim_params);
-}
-
 }  // namespace fiction::sidb::simulation::analysis

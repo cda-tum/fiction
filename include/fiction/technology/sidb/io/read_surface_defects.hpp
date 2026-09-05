@@ -20,7 +20,6 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/surfaces/defect_surface.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
@@ -111,81 +110,6 @@ inline constexpr std::array<sidb::model::defect_type, 11> INDEX_TO_DEFECT{
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
 
-template <typename Lyt>
-class read_surface_defects_impl
-{
-  public:
-    explicit read_surface_defects_impl(std::istream& s, const std::string_view& name) :
-            lyt{sidb::surfaces::defect_surface{Lyt{{}, name.data()}}},
-            defect_matrix{std::istreambuf_iterator<char>(s), {}}  // read the stream into a string to perform regex
-    {}
-
-    sidb::surfaces::defect_surface<Lyt> run()
-    {
-        // each match is one row
-        const std::vector<std::smatch> matrix_matches{
-            std::sregex_iterator(std::cbegin(defect_matrix), std::cend(defect_matrix), defects::RE_DEFECT_MATRIX),
-            std::sregex_iterator()};
-
-        // iterate over the row matches
-        for (auto y = 0u; y < matrix_matches.size(); ++y)
-        {
-            // get the match as a string
-            const auto row_str = matrix_matches[y].str();
-
-            // each match is a defect index
-            const std::vector<std::smatch> row_matches{
-                std::sregex_iterator(std::cbegin(row_str), std::cend(row_str), defects::RE_ROW_INDICES),
-                std::sregex_iterator()};
-
-            // track x-dimension of the surface
-            if (row_matches.size() - 1 > static_cast<std::size_t>(max_cell_pos.x))
-            {
-                max_cell_pos.x = static_cast<decltype(max_cell_pos.x)>(row_matches.size() - 1);
-            }
-            else if (static_cast<decltype(max_cell_pos.x)>(row_matches.size() - 1) < max_cell_pos.x)
-            {
-                // row y has fewer SiDBs than previous rows
-                throw missing_position_exception(y);
-            }
-
-            // iterate over the index matches
-            for (auto x = 0u; x < row_matches.size(); ++x)
-            {
-                int defect_index{-1};
-
-                try
-                {
-                    defect_index = std::stoi(row_matches[x].str());
-                    // assign the defect
-                    lyt.assign_defect({x, y}, sidb::model::defect{
-                                                  defects::INDEX_TO_DEFECT.at(static_cast<std::size_t>(defect_index))});
-                }
-                catch (const std::out_of_range&)
-                {
-                    // defect index does not match any supported defects
-                    throw unsupported_defect_index_exception(defect_index);
-                }
-            }
-        }
-
-        // y-dimension of the surface
-        max_cell_pos.y = static_cast<decltype(max_cell_pos.y)>(matrix_matches.empty() ? 0 : matrix_matches.size() - 1);
-
-        // resize the layout to fit all surface defects
-        lyt.resize(max_cell_pos);
-
-        return lyt;
-    }
-
-  private:
-    sidb::surfaces::defect_surface<Lyt> lyt;
-
-    const std::string defect_matrix;
-
-    cell<Lyt> max_cell_pos{};
-};
-
 #pragma GCC diagnostic pop
 
 /**
@@ -274,61 +198,6 @@ class surface_defects_reader
 };
 
 }  // namespace detail
-
-/**
- * Reads a defective SiDB surface from a text file provided as an input stream. The format is rudimentary and consists
- * of a simple 2D array of integers representing defect indices printed by Python.
- *
- * May throw a `missing_sidb_position_exception` or an `unsupported_defect_index_exception`.
- *
- * @note For testing purposes, a Python script that generates defective surfaces is provided in the
- * `experiments/defect_aware_physical_design` directory.
- *
- * @tparam Lyt The layout type underlying the SiDB surface. Must be a cell-level SiDB layout.
- * @param is The input stream to read from.
- * @param name The name to give to the generated layout.
- */
-template <typename Lyt>
-sidb::surfaces::defect_surface<Lyt> read_surface_defects(std::istream& is, const std::string_view& name = "")
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
-
-    detail::read_surface_defects_impl<Lyt> p{is, name};
-
-    const auto lyt = p.run();
-
-    return lyt;
-}
-/**
- * Reads a defective SiDB surface from a text file provided as a file name. The format is rudimentary and consists
- * of a simple 2D array of integers representing defect indices printed by Python.
- *
- * May throw a `missing_sidb_position_exception` or an `unsupported_defect_index_exception`.
- *
- * @note For testing purposes, a Python script that generates defective surfaces is provided in the
- * `experiments/defect_aware_physical_design` directory.
- *
- * @tparam Lyt The layout type underlying the SiDB surface. Must be a cell-level SiDB layout.
- * @param filename The file name to open and read from.
- * @param name The name to give to the generated layout.
- */
-template <typename Lyt>
-sidb::surfaces::defect_surface<Lyt> read_surface_defects(const std::string_view& filename,
-                                                         const std::string_view& name = "")
-{
-    std::ifstream is{std::string{filename}, std::ifstream::in};
-
-    if (!is.is_open())
-    {
-        throw std::ifstream::failure("could not open file");
-    }
-
-    const auto lyt = read_surface_defects<Lyt>(is, name);
-    is.close();
-
-    return lyt;
-}
 
 /**
  * Reads a defect matrix from a stream into a defects-only `sidb::layout` on the H-Si(100)-2x1 lattice. Each `[...]`

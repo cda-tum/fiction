@@ -59,7 +59,7 @@ TEST_CASE("Reject an empty gate specification", "[design-sidb-gates]")
 TEST_CASE("Design AND gate with skeleton, where one input wire and the output wire are orientated to the east.",
           "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_one_output_skeleton_west_west<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_one_output_skeleton_west_west();
 
     design_gates_params params{
         .operational_params =
@@ -104,11 +104,7 @@ TEST_CASE("Design AND gate with skeleton, where one input wire and the output wi
 
 TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[design-sidb-gates]")
 {
-    using offset_layout = sidb_100_cell_clk_lyt;
-    using siqad_layout  = sidb_100_cell_clk_lyt_siqad;
-    using cube_layout   = sidb_100_cell_clk_lyt_cube;
-
-    siqad_layout lyt{};
+    layout lyt{};
 
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
     lyt.assign_cell_type({2, 1, 0}, sidb_technology::cell_type::INPUT);
@@ -146,39 +142,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
-
-        // using cube coordinates
-        const auto                lyt_in_cube_coord = convert_layout_to_fiction_coordinates<cube_layout>(lyt);
-        const design_gates_params params_cube{
-            .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
-            .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas                 = {{10, 4, 0}, {10, 4, 0}},
-            .number_of_canvas_sidbs = 1};
-
-        const auto found_gate_layouts_cube =
-            design_gates(lyt_in_cube_coord, std::vector<tt>{create_xnor_tt()}, params_cube);
-
-        REQUIRE(found_gate_layouts_cube.size() == 1);
-        CHECK(found_gate_layouts_cube[0].num_cells() == 14);
-        CHECK(found_gate_layouts_cube[0].get_cell_type({10, 8}) == siqad_layout::technology::cell_type::LOGIC);
-
-        // using offset coordinates
-        const auto                lyt_in_offset_coord = convert_layout_to_fiction_coordinates<offset_layout>(lyt);
-        const design_gates_params params_offset{
-            .operational_params =
-                is_operational_params{.sim_params = simulation_parameters{2, -0.32}, .sim_engine = engine::QUICKEXACT},
-            .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-            .canvas                 = {{10, 4, 0}, {10, 4, 0}},
-            .number_of_canvas_sidbs = 1};
-
-        const auto found_gate_layouts_offset =
-            design_gates(lyt_in_offset_coord, std::vector<tt>{create_xnor_tt()}, params_offset);
-
-        REQUIRE(found_gate_layouts_offset.size() == 1);
-        CHECK(found_gate_layouts_offset[0].num_cells() == 14);
-        CHECK(found_gate_layouts_offset[0].get_cell_type({10, 8}) == offset_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == sidb_technology::cell_type::LOGIC);
     }
     SECTION("Four cells in canvas, design all gates with one SiDB in the canvas")
     {
@@ -210,7 +174,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == sidb_technology::cell_type::LOGIC);
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == engine::QUICKEXACT);
     }
@@ -230,7 +194,7 @@ TEST_CASE("Use SiQAD XNOR skeleton and generate SiQAD XNOR gate, exhaustive", "[
 
         REQUIRE(found_gate_layouts.size() == 1);
         CHECK(found_gate_layouts[0].num_cells() == 14);
-        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == siqad_layout::technology::cell_type::LOGIC);
+        CHECK(found_gate_layouts[0].get_cell_type({10, 4, 0}) == sidb_technology::cell_type::LOGIC);
         CHECK(mockturtle::to_seconds(stats.time_total) > 0.0);
         CHECK(stats.sim_engine == engine::QUICKSIM);
     }
@@ -411,7 +375,7 @@ TEST_CASE("Use FO2 Bestagon gate without SiDB at {17, 11, 0} and generate origin
 
 TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_one_output_bestagon_skeleton<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_one_output_bestagon_skeleton();
 
     SECTION("Random Generation")
     {
@@ -503,7 +467,7 @@ TEST_CASE("Design AND Bestagon shaped gate", "[design-sidb-gates]")
 
 TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 {
-    auto lyt = to_sidb_layout(blueprints::and_gate_111<sidb_111_cell_clk_lyt_siqad>(), lattice::si_111_1x1());
+    auto lyt = blueprints::and_gate_111();
 
     // delete canvas SiDBs
     for (const auto& c : lyt.cells_of_type(sidb_technology::cell_type::LOGIC))
@@ -608,7 +572,7 @@ TEST_CASE("Design NOR Bestagon shaped gate on H-Si 111", "[design-sidb-gates]")
 
 TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton();
 
     const design_gates_params params{
         .operational_params     = is_operational_params{.sim_params                = simulation_parameters{2, -0.32},
@@ -627,7 +591,7 @@ TEST_CASE("Design hexagonal CX gate with pruning only", "[design-sidb-gates]")
 #ifdef NDEBUG
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(blueprints::two_input_two_output_bestagon_skeleton<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -648,8 +612,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell", "[design-sidb-gates]"
 
 TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    const auto lyt = to_sidb_layout(
-        blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_two_output_bestagon_skeleton_input_down_output_up();
 
     SECTION("Exhaustive Generation, QuickCell")
     {
@@ -670,8 +633,7 @@ TEST_CASE("Design Bestagon shaped CX gate with QuickCell (flipped)", "[design-si
 
 TEST_CASE("Design AND gate with input left and output top-right with QuickCell (flipped)", "[design-sidb-gates]")
 {
-    const auto lyt =
-        to_sidb_layout(blueprints::two_input_left_one_output_right_top_skeleton<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::two_input_left_one_output_right_top_skeleton();
 
     SECTION("Exhaustive Generation, QuickCell")
     {

@@ -44,7 +44,7 @@ using namespace fiction::synthesis;
 
 TEST_CASE("Single SiDB", "[calculate-energy-and-state-type]")
 {
-    const auto bestagon_and = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto bestagon_and = blueprints::bestagon_and_gate();
 
     auto bii = bdl_input_iterator{bestagon_and};
 

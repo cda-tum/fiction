@@ -16,7 +16,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/result.hpp>
 
@@ -97,33 +96,6 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
     return result;
 }
 
-/**
- * Transitional binding of `legacy_result` over one Cartesian SiDB cell-level layout type; it goes away once every
- * consumer takes `sidb_simulation_result`.
- */
-template <typename Lyt>
-void legacy_result_impl(nanobind::module_& m, const std::string& lattice)
-{
-    using legacy = fiction::sidb::simulation::legacy_result<Lyt>;
-
-    py::class_<legacy>(m, fmt::format("sidb_simulation_result{}", lattice).c_str(),
-                       DOC(fiction_sidb_simulation_legacy_result))
-        .def(py::init<>(), "Default constructor.")
-        .def_rw("algorithm_name", &legacy::algorithm_name, DOC(fiction_sidb_simulation_legacy_result_algorithm_name))
-        .def_rw("simulation_runtime", &legacy::simulation_runtime,
-                DOC(fiction_sidb_simulation_legacy_result_simulation_runtime))
-        .def_rw("charge_distributions", &legacy::charge_distributions,
-                DOC(fiction_sidb_simulation_legacy_result_charge_distributions))
-        .def_rw("simulation_parameters", &legacy::sim_params, DOC(fiction_sidb_simulation_legacy_result_sim_params))
-        .def_prop_ro(
-            "additional_simulation_parameters",
-            [](const legacy& self) { return convert_map_to_py(self.additional_simulation_parameters); },
-            DOC(fiction_sidb_simulation_legacy_result_additional_simulation_parameters))
-        .def("groundstates", &legacy::groundstates, DOC(fiction_sidb_simulation_legacy_result_groundstates))
-
-        ;
-}
-
 }  // namespace detail
 
 void result(nanobind::module_& m)
@@ -150,9 +122,6 @@ void result(nanobind::module_& m)
         .def("groundstates", &result::groundstates, DOC(fiction_sidb_simulation_result_groundstates))
 
         ;
-
-    detail::legacy_result_impl<py_sidb_100_lattice>(m, "_100");
-    detail::legacy_result_impl<py_sidb_111_lattice>(m, "_111");
 }
 
 }  // namespace pyfiction

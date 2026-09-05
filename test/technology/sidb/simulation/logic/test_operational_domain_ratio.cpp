@@ -121,7 +121,7 @@ TEST_CASE("BDL wire operational domain computation", "[compute-operational-ratio
 
 TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_nand_gate<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_nand_gate();
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;
@@ -169,7 +169,7 @@ TEST_CASE("SiQAD NAND gate", "[compute-operational-ratio]")
 #ifdef NDEBUG
 TEST_CASE("Bestagon AND gate", "[compute-operational-ratio]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_and_gate<sidb_100_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_and_gate();
 
     simulation_parameters sim_params{};
     sim_params.base = 2;

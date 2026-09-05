@@ -18,7 +18,6 @@
 #pragma once
 
 #include "fiction/technology/sidb/charge_distribution.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <algorithm>
@@ -181,89 +180,6 @@ class energy_distribution
      */
     std::map<double, uint64_t> distribution;
 };
-/**
- * This function takes in a vector of `charge_distribution_surface` objects and returns a map containing the system
- * energy and the number of occurrences of that energy in the input vector. To compare two energy values for equality,
- * the comparison uses a tolerance specified by `constants::ERROR_MARGIN`.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param charge_distributions A vector of `charge_distribution_surface` objects for which the energy distribution is
- * computed.
- * @return Energy distribution.
- */
-template <typename Lyt>
-[[nodiscard]] energy_distribution
-calculate_energy_distribution(const std::vector<sidb::surfaces::charge_distribution_surface<Lyt>>& charge_distributions)
-{
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-
-    energy_distribution distribution{};
-
-    std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> cds_updated_charge_index{};
-    cds_updated_charge_index.reserve(charge_distributions.size());
-
-    // collect all unique charge indices
-    std::set<uint64_t> unique_charge_index{};
-
-    for (auto& lyt : charge_distributions)
-    {
-        lyt.charge_distribution_to_index_general();
-        unique_charge_index.insert(lyt.get_charge_index_and_base().first);
-        cds_updated_charge_index.push_back(lyt);
-    }
-
-    std::vector<sidb::surfaces::charge_distribution_surface<Lyt>> unique_cds{};
-    unique_cds.reserve(unique_charge_index.size());
-
-    std::set<double> unique_energies{};
-
-    for (const auto& charge_index : unique_charge_index)
-    {
-        for (const auto& lyt : cds_updated_charge_index)
-        {
-            if (lyt.get_charge_index_and_base().first == charge_index)
-            {
-                // Check if the energy is already in the unique set with tolerance
-                bool       is_unique = true;
-                const auto energy    = lyt.get_electrostatic_potential_energy();
-                for (const auto& unique_energy : unique_energies)
-                {
-                    if (std::fabs(energy - unique_energy) < fiction::utils::math::ERROR_MARGIN)
-                    {
-                        is_unique = false;
-                        break;
-                    }
-                }
-
-                // Add the layout and energy if it's unique
-                if (is_unique)
-                {
-                    unique_energies.insert(energy);
-                }
-
-                unique_cds.push_back(lyt);
-
-                break;
-            }
-        }
-    }
-
-    for (const auto& energy : unique_energies)
-    {
-        const auto number_of_states_with_given_energy = static_cast<uint64_t>(std::ranges::count_if(
-            unique_cds,
-            [&energy](const auto& lyt)
-            {
-                return std::abs(lyt.get_electrostatic_potential_energy() - energy) < fiction::utils::math::ERROR_MARGIN;
-            }));
-
-        distribution.add_energy_state(energy_state(energy, number_of_states_with_given_energy));
-    }
-
-    return distribution;
-}
-
 /**
  * The energy distribution of a set of charge distributions: every distinct energy with the number of distinct charge
  * distributions that have it. Distributions with identical charge states count once.

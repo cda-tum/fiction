@@ -18,6 +18,7 @@
 
 #pragma once
 
+#include "fiction/layouts/clocking_scheme.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/networks/name_utils.hpp"
 #include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
@@ -277,7 +278,6 @@ template <typename CellLyt, typename GateLibrary, typename GateLyt>
 [[nodiscard]] CellLyt apply_gate_library(const GateLyt& lyt)
 {
     static_assert(is_cell_level_layout_v<CellLyt>, "CellLyt is not a cell-level layout");
-    static_assert(!has_siqad_coord_v<CellLyt>, "CellLyt cannot have SiQAD coordinates");
     static_assert(is_gate_level_layout_v<GateLyt>, "GateLyt is not a gate-level layout");
     static_assert(mockturtle::has_is_constant_v<GateLyt>, "GateLyt does not implement the is_constant function");
     static_assert(mockturtle::has_foreach_node_v<GateLyt>, "GateLyt does not implement the foreach_node function");

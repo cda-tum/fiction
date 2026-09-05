@@ -28,7 +28,6 @@ namespace pyfiction
 void register_layouts(nanobind::module_& m);
 void register_networks(nanobind::module_& m);
 void register_sidb_model(nanobind::module_& m);
-void register_sidb_surfaces(nanobind::module_& m);
 void register_sidb_simulation(nanobind::module_& m);
 void register_fcn(nanobind::module_& m);
 void register_layouts_io(nanobind::module_& m);
@@ -63,7 +62,6 @@ NB_MODULE(pyfiction, m)
     pyfiction::register_networks(m);
     pyfiction::register_sidb_model(m);
     pyfiction::register_sidb(m);
-    pyfiction::register_sidb_surfaces(m);
     pyfiction::register_sidb_simulation(m);
     pyfiction::register_fcn(m);
     pyfiction::register_layouts_io(m);

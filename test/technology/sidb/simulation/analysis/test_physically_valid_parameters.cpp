@@ -138,7 +138,7 @@ TEST_CASE(
     "Determine physical parameters for CDS (default physical parameters) of Bestagon AND gate, 10 input combination",
     "[determine-physically-valid-parameters], [quality]")
 {
-    auto bestagon_and = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
+    auto bestagon_and = blueprints::bestagon_and_gate();
 
     bestagon_and.assign_cell_type({36, 1, 0}, sidb_technology::cell_type::EMPTY);
     bestagon_and.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::EMPTY);

@@ -32,7 +32,6 @@
 
 .. autofunction:: mnt.pyfiction.inml_layout.bounding_box_2d
 
-.. autofunction:: mnt.pyfiction.sidb_cell_level_layout.bounding_box_2d
 ```
 
 :::

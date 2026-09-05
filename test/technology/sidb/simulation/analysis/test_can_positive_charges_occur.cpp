@@ -55,7 +55,7 @@ TEST_CASE("One BDL pair with one perturber", "[can-positive-charges-occur]")
     }
 }
 
-TEST_CASE("Y-shaped SiDB OR gate with input 01, using siqad coordinates", "[can-positive-charges-occur]")
+TEST_CASE("Y-shaped SiDB OR gate with input 01", "[can-positive-charges-occur]")
 {
     layout lyt{};
 

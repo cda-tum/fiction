@@ -21,7 +21,6 @@ namespace pyfiction
 
 void offset_coordinate(nanobind::module_& m);
 void cube_coordinate(nanobind::module_& m);
-void siqad_coordinate(nanobind::module_& m);
 void coordinate_utility(nanobind::module_& m);
 void cartesian_layout(nanobind::module_& m);
 void shifted_cartesian_layout(nanobind::module_& m);
@@ -36,7 +35,6 @@ void register_layouts(nanobind::module_& m)
 {
     offset_coordinate(m);
     cube_coordinate(m);
-    siqad_coordinate(m);
     coordinate_utility(m);
     cartesian_layout(m);
     shifted_cartesian_layout(m);

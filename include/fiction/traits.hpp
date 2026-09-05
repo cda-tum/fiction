@@ -24,9 +24,6 @@
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/technology/inml/technology.hpp"
 #include "fiction/technology/qca/technology.hpp"
-#include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
-#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/technology/sidb/technology.hpp"
 
 #include <mockturtle/traits.hpp>
@@ -588,8 +585,6 @@ template <typename CoordinateType>
 inline constexpr const bool is_offset_coord_v = std::is_same_v<CoordinateType, layouts::coords::offset>;
 template <typename CoordinateType>
 inline constexpr const bool is_cube_coord_v = std::is_same_v<CoordinateType, layouts::coords::cube>;
-template <typename CoordinateType>
-inline constexpr const bool is_siqad_coord_v = std::is_same_v<CoordinateType, layouts::coords::siqad>;
 
 template <typename Lyt>
 inline constexpr const bool has_qca_technology_v = std::is_same_v<technology<Lyt>, qca::qca_technology>;
@@ -603,8 +598,6 @@ template <typename Lyt>
 inline constexpr const bool has_offset_coord_v = is_offset_coord_v<coordinate<Lyt>>;
 template <typename Lyt>
 inline constexpr const bool has_cube_coord_v = is_cube_coord_v<coordinate<Lyt>>;
-template <typename Lyt>
-inline constexpr const bool has_siqad_coord_v = is_siqad_coord_v<coordinate<Lyt>>;
 
 #pragma region is_cell_level_layout
 template <class Lyt, class = void>
@@ -624,24 +617,6 @@ struct is_cell_level_layout<
 
 template <class Lyt>
 inline constexpr bool is_cell_level_layout_v = is_cell_level_layout<Lyt>::value;
-#pragma endregion
-
-#pragma region is_charge_distribution_surface
-template <class Lyt, class = void>
-struct is_charge_distribution_surface : std::false_type
-{};
-
-template <class Lyt>
-struct is_charge_distribution_surface<
-    Lyt, std::enable_if_t<
-             is_cell_level_layout_v<Lyt>,
-             std::void_t<typename Lyt::storage,
-                         decltype(std::declval<Lyt>().assign_charge_state(cell<Lyt>(), sidb::model::charge_state())),
-                         decltype(std::declval<Lyt>().get_charge_state(cell<Lyt>()))>>> : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool is_charge_distribution_surface_v = is_charge_distribution_surface<Lyt>::value;
 #pragma endregion
 
 #pragma region has_is_empty_cell
@@ -701,132 +676,6 @@ inline constexpr bool has_get_layout_name_v = has_get_layout_name<Ntk>::value;
 #pragma endregion
 
 /**
- * SiDB lattice orientations
- */
-
-template <typename Lyt>
-using lattice_orientation = typename Lyt::orientation;
-
-template <typename Lyt, typename LatticeOrientation>
-inline constexpr const bool has_given_lattice_orientation_v =
-    std::is_same_v<typename Lyt::orientation, LatticeOrientation>;
-
-#pragma region is_sidb_lattice
-template <typename Lyt, typename = void>
-struct is_sidb_lattice : std::false_type
-{};
-
-template <typename Lyt>
-struct is_sidb_lattice<Lyt, std::enable_if_t<is_cell_level_layout_v<Lyt>, std::void_t<typename Lyt::orientation>>>
-        : std::true_type
-{};
-
-template <typename Lyt>
-constexpr bool is_sidb_lattice_v = is_sidb_lattice<Lyt>::value;
-#pragma endregion
-
-#pragma region is_sidb_lattice_100
-template <typename Lyt, typename = void>
-struct is_sidb_lattice_100 : std::false_type
-{};
-
-template <typename Lyt>
-struct is_sidb_lattice_100<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::surfaces::lattice_100>, std::true_type,
-                             std::false_type>
-{};
-
-template <typename Lyt>
-constexpr bool is_sidb_lattice_100_v = is_sidb_lattice_100<Lyt>::value;
-#pragma endregion
-
-#pragma region is_sidb_lattice_111
-template <typename Lyt, typename = void>
-struct is_sidb_lattice_111 : std::false_type
-{};
-
-template <typename Lyt>
-struct is_sidb_lattice_111<Lyt, std::enable_if_t<is_sidb_lattice_v<Lyt>>>
-        : std::conditional_t<has_given_lattice_orientation_v<Lyt, sidb::surfaces::lattice_111>, std::true_type,
-                             std::false_type>
-{};
-
-template <typename Lyt>
-constexpr bool is_sidb_lattice_111_v = is_sidb_lattice_111<Lyt>::value;
-#pragma endregion
-
-/**
- * SiDB defect surface
- */
-
-#pragma region is_sidb_defect_surface
-template <class Lyt, class = void>
-struct is_sidb_defect_surface : std::false_type
-{};
-
-// SFINAE-enabled specialization for Lyt satisfying certain conditions
-template <class Lyt>
-struct is_sidb_defect_surface<
-    Lyt,
-    std::void_t<typename Lyt::storage,  // Check if Lyt has a nested type 'storage'
-                decltype(std::declval<Lyt>().assign_defect(
-                    std::declval<cell<Lyt>>(), std::declval<sidb::model::defect>())),  // Check if calling
-                                                                                       // 'assign_defect' is valid
-                decltype(std::declval<Lyt>().get_defect(std::declval<cell<Lyt>>()))>>
-        : std::true_type  // Check if calling 'get_defect' is valid
-{};
-
-// Helper variable template for easy access to the trait value
-template <class Lyt>
-inline constexpr bool is_sidb_defect_surface_v = is_sidb_defect_surface<Lyt>::value;
-#pragma endregion
-
-#pragma region has_assign_sidb_defect
-template <class Lyt, class = void>
-struct has_assign_sidb_defect : std::false_type
-{};
-
-template <class Lyt>
-struct has_assign_sidb_defect<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_defect(coordinate<Lyt>(), sidb::model::defect()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_assign_sidb_defect_v = has_assign_sidb_defect<Lyt>::value;
-#pragma endregion
-
-#pragma region has_get_sidb_defect
-template <class Lyt, class = void>
-struct has_get_sidb_defect : std::false_type
-{};
-
-template <class Lyt>
-struct has_get_sidb_defect<Lyt, std::void_t<decltype(std::declval<Lyt>().get_defect(coordinate<Lyt>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_get_sidb_defect_v = has_get_sidb_defect<Lyt>::value;
-#pragma endregion
-
-#pragma region has_foreach_sidb_defect
-template <class Lyt, class = void>
-struct has_foreach_sidb_defect : std::false_type
-{};
-
-template <class Lyt>
-struct has_foreach_sidb_defect<Lyt,
-                               std::void_t<decltype(std::declval<Lyt>().foreach_sidb_defect(
-                                   std::declval<void(std::pair<coordinate<Lyt>, sidb::model::defect>, uint32_t)>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_foreach_sidb_defect_v = has_foreach_sidb_defect<Lyt>::value;
-#pragma endregion
-
-/**
  * SiDB simulation domain
  */
 #pragma region has_dimensions
@@ -842,39 +691,6 @@ struct has_dimensions<T, std::void_t<decltype(std::declval<T>().dimensions)>> : 
 template <typename T>
 constexpr bool has_dimensions_v = has_dimensions<T>::value;
 
-#pragma endregion
-
-/**
- * Charge distribution surfaces
- */
-
-#pragma region has_assign_charge_state
-template <class Lyt, class = void>
-struct has_assign_charge_state : std::false_type
-{};
-
-template <class Lyt>
-struct has_assign_charge_state<
-    Lyt, std::void_t<decltype(std::declval<Lyt>().assign_charge_state(coordinate<Lyt>(), sidb::model::charge_state()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_assign_charge_state_v = has_assign_charge_state<Lyt>::value;
-#pragma endregion
-
-#pragma region has_get_charge_state
-template <class Lyt, class = void>
-struct has_get_charge_state : std::false_type
-{};
-
-template <class Lyt>
-struct has_get_charge_state<Lyt, std::void_t<decltype(std::declval<Lyt>().get_charge_state(coordinate<Lyt>()))>>
-        : std::true_type
-{};
-
-template <class Lyt>
-inline constexpr bool has_get_charge_state_v = has_get_charge_state<Lyt>::value;
 #pragma endregion
 
 /**

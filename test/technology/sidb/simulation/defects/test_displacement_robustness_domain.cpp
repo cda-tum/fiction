@@ -66,7 +66,7 @@ void check_identical_information_of_stats_and_domain(const displacement_robustne
 TEST_CASE("Determine the SiDB gate displacement robustness of the Y-shaped SiDB AND gate",
           "[displacement-robustness-domain]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_and_gate();
 
     displacement_robustness_domain_params params{};
     params.displacement_variations       = {1, 1};
@@ -142,7 +142,7 @@ TEST_CASE("Determine the probability of fabricating an operational SiQAD Y-shape
           "rate (p) of 0.3",
           "[displacement-robustness-domain]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_and_gate();
 
     SECTION("only one displacement variation, SiQAD coordinate")
     {
@@ -162,7 +162,7 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
           "of 0.1",
           "[displacement-robustness-domain]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bestagon_and_gate();
 
     SECTION("one displacement variation in x-direction")
     {
@@ -184,7 +184,7 @@ TEST_CASE("Determine the probability of fabricating an operational Bestagon AND 
 TEST_CASE("Determine the probability of fabricating an operational BDL wire with a fabrication error rate (p) of 0.1",
           "[displacement-robustness-domain]")
 {
-    const auto lyt = to_sidb_layout(blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::bdl_wire();
 
     SECTION("one displacement variation in y-direction")
     {

@@ -18,6 +18,8 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/fcn/area.hpp>
+#include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 
 #include <nanobind/nanobind.h>
@@ -62,7 +64,25 @@ void area(nanobind::module_& m)
 {
     detail::area<py_qca_layout>(m);
     detail::area<py_inml_layout>(m);
-    detail::area<py_sidb_layout>(m);
+
+    namespace py    = nanobind;
+    using sidb_tech = fiction::sidb::sidb_technology;
+
+    m.def(
+        "area",
+        [](const fiction::sidb::layout& lyt, const double width, const double height, const double hspace,
+           const double vspace)
+        {
+            fiction::fcn::area_stats                   stats{};
+            const fiction::fcn::area_params<sidb_tech> params{.width  = width,
+                                                              .height = height,
+                                                              .hspace = hspace,
+                                                              .vspace = vspace};
+            return fiction::fcn::area(lyt, params, &stats);
+        },
+        py::arg("layout"), py::arg("width") = sidb_tech::CELL_WIDTH, py::arg("height") = sidb_tech::CELL_HEIGHT,
+        py::arg("hspace") = sidb_tech::CELL_HSPACE, py::arg("vspace") = sidb_tech::CELL_VSPACE,
+        DOC(fiction_fcn_area_3));
 }
 
 }  // namespace pyfiction

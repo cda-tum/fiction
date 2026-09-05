@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pytest
 
-from mnt.pyfiction import area, inml_layout, qca_layout, sidb_cell_level_layout
+from mnt.pyfiction import area, inml_layout, lattice_site, qca_layout, sidb_layout, sidb_technology
 
 
 def test_qca_area() -> None:
@@ -26,6 +26,11 @@ def test_inml_area() -> None:
 
 
 def test_sidb_area() -> None:
-    """Cartesian SiDB layout dimensions determine physical area."""
-    lyt = sidb_cell_level_layout((4, 4))
+    """SiDB sites determine the physical area of a lattice layout."""
+    lyt = sidb_layout()
+    assert area(lyt) == pytest.approx(0.0, abs=1e-7)
+
+    # four columns and four single-SiDB rows
+    lyt.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    lyt.assign_cell_type(lattice_site(4, 2, 0), sidb_technology.cell_type.NORMAL)
     assert area(lyt) == pytest.approx(2.359296, abs=1e-7)

@@ -29,9 +29,9 @@ namespace detail
 {
 
 /**
- * The energy of a `charge_distribution` or of a `charge_distribution_surface`.
+ * The energy of a charge distribution.
  *
- * @tparam T `charge_distribution` or `charge_distribution_surface`.
+ * @tparam T Charge distribution type with `energy()` or `get_electrostatic_potential_energy()`.
  * @param cd The distribution.
  * @return Its electrostatic potential energy (unit: eV).
  */
@@ -51,8 +51,8 @@ template <typename T>
 }  // namespace detail
 
 /**
- * Returns an iterator to the charge distribution of minimum energy contained in a range of
- * `charge_distribution_surface` objects. If the range is empty, `last` is returned.
+ * Returns an iterator to the charge distribution of minimum energy contained in a range. If the range is empty,
+ * `last` is returned.
  *
  * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
  * @param first Begin of the range to examine.
@@ -70,8 +70,8 @@ template <typename InputIt>
 }
 
 /**
- * Computes the minimum energy of a range of `charge_distribution_surface` objects. If the range is empty, infinity is
- * returned to indicate no valid energy value exists.
+ * Computes the minimum energy of a range of charge distributions. If the range is empty, infinity is returned to
+ * indicate no valid energy value exists.
  *
  * @tparam InputIt Must meet the requirements of `LegacyInputIterator`.
  * @param first Begin of the range to examine.

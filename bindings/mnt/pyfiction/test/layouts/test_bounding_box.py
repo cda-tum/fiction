@@ -22,7 +22,6 @@ from mnt.pyfiction import (
     read_technology_network,
     shifted_cartesian_gate_layout,
     shifted_cartesian_obstruction_layout,
-    sidb_cell_level_layout,
 )
 
 
@@ -110,7 +109,6 @@ def test_update_gate_level_bounding_box(mux21):
     [
         pytest.param(lambda: qca_layout((2, 2, 0), "2DDWave", "Layout"), id="qca_layout"),
         pytest.param(lambda: inml_layout((2, 2, 0), "2DDWave", "Layout"), id="inml_layout"),
-        pytest.param(lambda: sidb_cell_level_layout((2, 2, 0), "2DDWave", "Layout"), id="sidb_cell_level_layout"),
     ],
 )
 def test_bounding_box_around_cell_level_layout(make_layout):

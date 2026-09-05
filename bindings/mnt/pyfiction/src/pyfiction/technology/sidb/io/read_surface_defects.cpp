@@ -51,7 +51,7 @@ void read_surface_defects(nanobind::module_& m)
         const std::string_view&, const std::string_view&) = &fiction::sidb::io::read_surface_defects;
 
     m.def("read_surface_defects", read_surface_defects_function_pointer, py::arg("filename"),
-          py::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_4));
+          py::arg("layout_name") = "", DOC(fiction_sidb_io_read_surface_defects_2));
 }
 
 }  // namespace pyfiction
