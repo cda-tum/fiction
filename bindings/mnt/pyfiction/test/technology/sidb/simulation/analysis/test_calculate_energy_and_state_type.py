@@ -9,6 +9,7 @@
 from __future__ import annotations
 
 from itertools import pairwise
+from typing import TYPE_CHECKING
 
 import pytest
 
@@ -25,6 +26,9 @@ from mnt.pyfiction import (
     state_type,
 )
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 # The Bestagon AND gate, evaluated at input pattern 01, has five physically valid charge
 # distributions. The two lowest-energy ones encode AND(0, 1) = 0; the three above them do not.
 # Energies in eV, taken from the C++ suite, which asserts the same five constants against the same
@@ -38,7 +42,12 @@ EXPECTED_ENERGIES_AND_STATE_TYPES = [
 ]
 
 
-def test_calculate_energy_and_state_type(resources_dir):
+def test_calculate_energy_and_state_type(resources_dir: Path) -> None:
+    """Validate energy ordering, state types, and occupation probability.
+
+    Args:
+        resources_dir: Directory that contains the test layout.
+    """
     layout = read_sqd_layout(str(resources_dir / "21_hex_inputsdbp_and_v19.sqd"))
 
     # advance the iterator to input pattern 01
