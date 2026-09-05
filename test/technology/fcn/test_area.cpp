@@ -27,6 +27,9 @@
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
+#include <cstdint>
+#include <limits>
+
 using namespace fiction;
 using namespace fiction::fcn;
 using namespace fiction::inml;
@@ -115,5 +118,16 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(1.536, 0.0001));
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(3.456, 0.0001));
+    }
+    SECTION("SiDB layout spanning the full column range")
+    {
+        layout lyt{};
+        lyt.assign_cell_type({std::numeric_limits<int32_t>::min(), 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({std::numeric_limits<int32_t>::max(), 0}, sidb_technology::cell_type::NORMAL);
+
+        area_stats stats{};
+        CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(0.0, 0.000001));
+
+        CHECK_THAT(stats.width, Catch::Matchers::WithinRel(4'294'967'295.0 * sidb_technology::CELL_HSPACE, 0.000001));
     }
 }

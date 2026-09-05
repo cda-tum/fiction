@@ -37,6 +37,9 @@
 
 #include <cmath>
 #include <cstdint>
+#include <optional>
+#include <stdexcept>
+#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -47,6 +50,26 @@ using namespace fiction::sidb::simulation::defects;
 using namespace fiction::sidb::simulation::logic;
 using namespace fiction::synthesis;
 using namespace fiction::utils::math;
+
+TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
+{
+    const auto params =
+        defect_influence_params{.influence_def     = defect_influence_params::influence_definition::GROUND_STATE_CHANGE,
+                                .number_of_threads = 1};
+
+    SECTION("zero step size")
+    {
+        CHECK_THROWS_AS(defect_influence_grid_search(layout{}, params, 0), std::invalid_argument);
+    }
+
+    SECTION("empty layout")
+    {
+        const auto domain = defect_influence_grid_search(layout{}, params);
+        const auto value  = domain.contains({0, 0});
+
+        CHECK(value == std::optional{std::tuple{defect_influence_status::NON_INFLUENTIAL}});
+    }
+}
 
 TEST_CASE("novel designed AND Gate influence distance function which fails again", "[defect-influence]")
 {

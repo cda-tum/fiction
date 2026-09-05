@@ -39,6 +39,7 @@
 #include <cstdlib>
 #include <optional>
 #include <random>
+#include <stdexcept>
 #include <thread>
 #include <unordered_set>
 #include <utility>
@@ -173,6 +174,11 @@ class defect_influence_impl
     [[nodiscard]] defect_influence_domain grid_search(const std::size_t                     step_size,
                                                       const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
+        if (step_size == 0)
+        {
+            throw std::invalid_argument{"step_size must be greater than zero"};
+        }
+
         const mockturtle::stopwatch stop{stats.time_total};
 
         const auto positions = all_positions();
@@ -182,7 +188,7 @@ class defect_influence_impl
                         {
                             const auto& p = positions[i];
 
-                            if (static_cast<std::size_t>(std::abs(p.x)) % step_size == 0 &&
+                            if (static_cast<std::size_t>(std::abs(int64_t{p.x})) % step_size == 0 &&
                                 static_cast<std::size_t>(std::abs(row_of(p))) % step_size == 0)
                             {
                                 is_defect_influential(spec, p);
@@ -295,7 +301,7 @@ class defect_influence_impl
             {
                 const auto status = is_defect_influential(spec, next_point);
 
-                if (status == defect_influence_status::INFLUENTIAL || !layout_to_analyze.is_empty_cell(next_point))
+                if (status == defect_influence_status::INFLUENTIAL)
                 {
                     backtrack_point       = current_contour_point;
                     current_contour_point = next_point;
@@ -545,7 +551,7 @@ class defect_influence_impl
     {
         if (layout_to_analyze.is_empty())
         {
-            return defect_influence_status::INFLUENTIAL;
+            return defect_influence_status::NON_INFLUENTIAL;
         }
 
         if (lyt_without_defect.get_cell_type(defect_pos) != sidb_technology::cell_type::EMPTY)
@@ -730,6 +736,7 @@ class defect_influence_impl
  * @param step_size Only positions whose column and row are multiples of this are evaluated.
  * @param stats Statistics.
  * @return The defect influence domain.
+ * @throws std::invalid_argument if `step_size` is zero.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -759,6 +766,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
  * @param step_size Only positions whose column and row are multiples of this are evaluated.
  * @param stats Statistics.
  * @return The defect influence domain.
+ * @throws std::invalid_argument if `step_size` is zero.
  */
 [[nodiscard]] inline defect_influence_domain defect_influence_grid_search(const layout&                  lyt,
                                                                           const defect_influence_params& params    = {},

@@ -25,6 +25,7 @@
 
 #include <fmt/format.h>
 
+#include <cstdint>
 #include <iostream>
 
 namespace fiction::fcn
@@ -166,7 +167,7 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technolog
     {
         const auto [nw, se] = lyt.bounding_box();
 
-        const auto x_size = se.x - nw.x;
+        const auto x_size = int64_t{se.x} - int64_t{nw.x};
         const auto y_size = sidb::row_of(se) - sidb::row_of(nw);
 
         st.width  = (static_cast<double>(x_size + 1) * ps.width) + (static_cast<double>(x_size) * ps.hspace);
