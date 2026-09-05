@@ -29,7 +29,6 @@
 #include <fiction/networks/technology_network.hpp>
 #include <fiction/technology/inml/technology.hpp>
 #include <fiction/technology/qca/technology.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 
 #include <kitty/dynamic_truth_table.hpp>
 #include <mockturtle/views/names_view.hpp>

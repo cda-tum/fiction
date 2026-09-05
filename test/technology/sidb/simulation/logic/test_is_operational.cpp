@@ -135,7 +135,7 @@ TEST_CASE("Test is_physical_validity_feasible for empty canvas", "[is-operationa
 
 TEST_CASE("Incomplete BDL wire set is non-operational", "[is-operational]")
 {
-    const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+    const auto lyt = blueprints::siqad_or_gate();
 
     const auto [status, simulator_invocations] =
         is_operational(lyt, std::vector<tt>{create_id_tt()}, is_operational_params{}, std::vector<bdl_wire>{},

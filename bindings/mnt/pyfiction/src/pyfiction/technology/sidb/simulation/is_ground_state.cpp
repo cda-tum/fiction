@@ -15,7 +15,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/is_ground_state.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
@@ -30,11 +29,9 @@ void is_ground_state(nanobind::module_& m)
     namespace py = nanobind;
 
     m.def("is_ground_state",
-          static_cast<bool (*)(const fiction::sidb::simulation::result&,
-                               const fiction::sidb::simulation::result&)>(
+          static_cast<bool (*)(const fiction::sidb::simulation::result&, const fiction::sidb::simulation::result&)>(
               &fiction::sidb::simulation::is_ground_state),
-          py::arg("heuristic_results"), py::arg("exhaustive_results"),
-          DOC(fiction_sidb_simulation_is_ground_state));
+          py::arg("heuristic_results"), py::arg("exhaustive_results"), DOC(fiction_sidb_simulation_is_ground_state));
 }
 
 }  // namespace pyfiction

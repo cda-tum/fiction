@@ -15,14 +15,12 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
 #include <sstream>
-#include <string>
 #include <string_view>
 
 #include <nanobind/nanobind.h>
@@ -81,8 +79,7 @@ void write_sidb_layout_svg(nanobind::module_& m)
           static_cast<void (*)(const fiction::sidb::layout&, const std::string_view&,
                                const fiction::sidb::io::write_sidb_layout_svg_params&)>(
               &fiction::sidb::io::write_sidb_layout_svg),
-          py::arg("layout"), py::arg("filename"),
-          py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+          py::arg("layout"), py::arg("filename"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
           DOC(fiction_sidb_io_write_sidb_layout_svg_2));
 
     m.def(
@@ -100,8 +97,8 @@ void write_sidb_layout_svg(nanobind::module_& m)
           static_cast<void (*)(const fiction::sidb::layout&, const fiction::sidb::charge_distribution&,
                                const std::string_view&, const fiction::sidb::io::write_sidb_layout_svg_params&)>(
               &fiction::sidb::io::write_sidb_layout_svg),
-          py::arg("layout"), py::arg("charge_distribution"),
-          py::arg("filename"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+          py::arg("layout"), py::arg("charge_distribution"), py::arg("filename"),
+          py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
           DOC(fiction_sidb_io_write_sidb_layout_svg_4));
 
     m.def(

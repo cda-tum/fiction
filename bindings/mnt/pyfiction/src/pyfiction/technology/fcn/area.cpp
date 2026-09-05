@@ -74,7 +74,10 @@ void area(nanobind::module_& m)
            const double vspace)
         {
             fiction::fcn::area_stats                   stats{};
-            const fiction::fcn::area_params<sidb_tech> params{width, height, hspace, vspace};
+            const fiction::fcn::area_params<sidb_tech> params{.width  = width,
+                                                              .height = height,
+                                                              .hspace = hspace,
+                                                              .vspace = vspace};
             return fiction::fcn::area(lyt, params, &stats);
         },
         py::arg("layout"), py::arg("width") = sidb_tech::CELL_WIDTH, py::arg("height") = sidb_tech::CELL_HEIGHT,

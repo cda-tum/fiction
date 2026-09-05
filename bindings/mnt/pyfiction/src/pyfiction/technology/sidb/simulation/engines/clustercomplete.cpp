@@ -18,7 +18,6 @@
 #if (FICTION_ALGLIB_ENABLED)
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
