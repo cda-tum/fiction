@@ -341,6 +341,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
+  - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export.
 
 - I/O:
 
@@ -359,6 +360,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
+  - `write_sqd_layout` owns its Python filename during export on Windows
 
 - Tooling:
 

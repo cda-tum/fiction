@@ -13,21 +13,23 @@
  * @brief Exact physical design of the Bestagon SiDB gate library's benchmark set.
  * @author Marcel Walter (marcelwa)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #if (FICTION_Z3_SOLVER)
 
 #include "fiction_experiments.hpp"
 
-#include <fiction/networks/technology_network.hpp>           // technology-mapped network type
-#include <fiction/physical_design/apply_gate_library.hpp>    // layout conversion to cell-level
-#include <fiction/physical_design/exact.hpp>                 // SMT-based physical design of FCN layouts
-#include <fiction/synthesis/technology_mapping_library.hpp>  // pre-defined gate types for technology mapping
-#include <fiction/technology/fcn/area.hpp>                   // area requirement calculations
-#include <fiction/technology/sidb/bestagon_library.hpp>      // a pre-defined SiDB gate library
-#include <fiction/technology/sidb/io/write_sqd_layout.hpp>   // writer for SiQAD files (physical simulation)
-#include <fiction/technology/sidb/technology.hpp>            // cell implementations
-#include <fiction/types.hpp>                                 // pre-defined types suitable for the FCN domain
+#include <fiction/networks/technology_network.hpp>                   // technology-mapped network type
+#include <fiction/physical_design/apply_gate_library.hpp>            // layout conversion to cell-level
+#include <fiction/physical_design/exact.hpp>                         // SMT-based physical design of FCN layouts
+#include <fiction/synthesis/technology_mapping_library.hpp>          // pre-defined gate types for technology mapping
+#include <fiction/technology/fcn/area.hpp>                           // area requirement calculations
+#include <fiction/technology/sidb/bestagon_library.hpp>              // a pre-defined SiDB gate library
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>  // conversion to the physical SiDB layout
+#include <fiction/technology/sidb/io/write_sqd_layout.hpp>           // writer for SiQAD files (physical simulation)
+#include <fiction/technology/sidb/technology.hpp>                    // cell implementations
+#include <fiction/types.hpp>                                         // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
@@ -174,7 +176,7 @@ int main()  // NOLINT
             area(cell_level_layout, area_ps, &area_stats);
 
             // write a SiQAD simulation file
-            write_sqd_layout(cell_level_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
+            write_sqd_layout(to_sidb_layout(cell_level_layout), fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // log results
             bestagon_exp(benchmark, xag.num_pis(), xag.num_pos(), xag.num_gates(), depth_xag.depth(),
