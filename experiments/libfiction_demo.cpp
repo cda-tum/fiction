@@ -58,7 +58,6 @@ using namespace fiction::networks::io;
 using namespace fiction::physical_design;
 using namespace fiction::qca;
 using namespace fiction::qca::io;
-using namespace fiction::sidb::io;
 using namespace fiction::synthesis;
 
 template <typename Ntk>
