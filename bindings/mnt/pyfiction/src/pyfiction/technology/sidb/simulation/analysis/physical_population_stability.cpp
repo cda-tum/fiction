@@ -16,10 +16,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
-#include <fiction/technology/sidb/lattice.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 
 #include <nanobind/nanobind.h>

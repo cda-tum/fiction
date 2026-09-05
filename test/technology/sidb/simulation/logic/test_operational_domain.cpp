@@ -15,7 +15,6 @@
  * @author Jan Drewniok (Drewniok)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -25,7 +24,6 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
@@ -33,7 +31,6 @@
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/surfaces/defect_surface.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -675,7 +672,7 @@ TEST_CASE("BDL wire operational domain computation", "[operational-domain]")
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1428,7 +1425,7 @@ TEST_CASE("Contour tracing does not retrace an already enclosed area", "[operati
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1510,7 +1507,7 @@ TEST_CASE("Parallel flood fill yields deterministic results", "[operational-doma
     // output perturber
     lyt.assign_cell_type({24, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     simulation_parameters sim_params{};
     sim_params.base = 2;
@@ -1618,7 +1615,7 @@ TEST_CASE("SiQAD's AND gate operational domain computation", "[operational-domai
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     simulation_parameters sim_params{};
     sim_params.base     = 2;

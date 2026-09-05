@@ -206,22 +206,30 @@ struct bdl_wire
         // input and output cells are present
         if (input_exists && output_exists)
         {
-            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
-            last_bdl_pair  = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+            const auto input_pair  = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
+            const auto output_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
+
+            if (!input_pair.has_value() || !output_pair.has_value())
+            {
+                port.dir = fcn::port_direction::NONE;
+                return;
+            }
+
+            first_bdl_pair = *input_pair;
+            last_bdl_pair  = *output_pair;
 
             // determine the port of the wire based on the position of input and output BDL pairs
-            if (first_bdl_pair.value() < last_bdl_pair)
+            if (*input_pair < *output_pair)
             {
                 port.dir = fcn::port_direction::SOUTH;
 
-                if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y ||
-                    first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
+                if (input_pair->lower.y == output_pair->lower.y || input_pair->upper.y == output_pair->upper.y)
                 {
                     port.dir = fcn::port_direction::EAST;
                 }
             }
             // if the input BDL pair is at the same position as the output BDL pair, the wire has no port
-            else if (first_bdl_pair.value().equal_ignore_type(last_bdl_pair.value()))
+            else if (input_pair->equal_ignore_type(*output_pair))
             {
                 assert(false && "input and output BDL pairs are at the same position");
                 port.dir = fcn::port_direction::NONE;
@@ -230,8 +238,7 @@ struct bdl_wire
             {
                 port.dir = fcn::port_direction::NORTH;
 
-                if (first_bdl_pair.value().lower.y == last_bdl_pair.value().lower.y &&
-                    first_bdl_pair.value().upper.y == last_bdl_pair.value().upper.y)
+                if (input_pair->lower.y == output_pair->lower.y && input_pair->upper.y == output_pair->upper.y)
                 {
                     port.dir = fcn::port_direction::WEST;
                 }
@@ -240,35 +247,32 @@ struct bdl_wire
         // only input cells are present
         else if (input_exists)
         {
-            first_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT).value();
+            const auto input_pair = find_bdl_pair_by_type(sidb_technology::cell_type::INPUT);
 
-            auto max_distance = 0.0;
-
-            for (const auto& pair : pairs)
+            if (!input_pair.has_value())
             {
-                const auto distance = index_distance(pair.lower, first_bdl_pair.value().lower);
-
-                if (distance > max_distance)
-                {
-                    max_distance  = distance;
-                    last_bdl_pair = pair;
-                }
+                port.dir = fcn::port_direction::NONE;
+                return;
             }
 
+            const auto farthest_pair = std::ranges::max_element(
+                pairs, {}, [&input_pair](const auto& pair) { return index_distance(pair.lower, input_pair->lower); });
+
+            first_bdl_pair = *input_pair;
+            last_bdl_pair  = *farthest_pair;
+
             // the input and final BDL pairs share the y-coordinate and the input pair is to the left --> EAST
-            if (first_bdl_pair.value().lower.x < last_bdl_pair.value().lower.x &&
-                first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
+            if (input_pair->lower.x < farthest_pair->lower.x && input_pair->has_same_y_coordinate(*farthest_pair))
             {
                 port.dir = fcn::port_direction::EAST;
             }
             // the lower cell of the input BDL pair is below the lower cell of the final BDL pair --> NORTH
-            else if (first_bdl_pair.value().lower.y > last_bdl_pair.value().lower.y)
+            else if (input_pair->lower.y > farthest_pair->lower.y)
             {
                 port.dir = fcn::port_direction::NORTH;
             }
             // the input BDL pair is to the right of the final BDL pair --> WEST
-            else if (first_bdl_pair.value().lower.x > last_bdl_pair.value().lower.x &&
-                     first_bdl_pair.value().has_same_y_coordinate(last_bdl_pair.value()))
+            else if (input_pair->lower.x > farthest_pair->lower.x && input_pair->has_same_y_coordinate(*farthest_pair))
             {
                 port.dir = fcn::port_direction::WEST;
             }
@@ -280,35 +284,33 @@ struct bdl_wire
         // only output cells are present
         else
         {
-            last_bdl_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT).value();
+            const auto output_pair = find_bdl_pair_by_type(sidb_technology::cell_type::OUTPUT);
 
-            auto max_distance = 0.0;
-
-            for (const auto& pair : pairs)
+            if (!output_pair.has_value())
             {
-                const auto distance = index_distance(pair.lower, last_bdl_pair.value().upper);
-
-                if (distance > max_distance)
-                {
-                    max_distance   = distance;
-                    first_bdl_pair = pair;
-                }
+                port.dir = fcn::port_direction::NONE;
+                return;
             }
 
+            const auto farthest_pair = std::ranges::max_element(
+                pairs, {}, [&output_pair](const auto& pair) { return index_distance(pair.lower, output_pair->upper); });
+
+            first_bdl_pair = *farthest_pair;
+            last_bdl_pair  = *output_pair;
+
             // the output and first BDL pairs share the y-coordinate and the output pair is to the left --> WEST
-            if (last_bdl_pair.value().lower.x < first_bdl_pair.value().lower.x &&
-                last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
+            if (output_pair->lower.x < farthest_pair->lower.x && output_pair->has_same_y_coordinate(*farthest_pair))
             {
                 port.dir = fcn::port_direction::WEST;
             }
             // the lower cell of the output BDL pair is below the lower cell of the first BDL pair --> SOUTH
-            else if (last_bdl_pair.value().lower.y > first_bdl_pair.value().lower.y)
+            else if (output_pair->lower.y > farthest_pair->lower.y)
             {
                 port.dir = fcn::port_direction::SOUTH;
             }
             // the output BDL pair is to the right of the first BDL pair --> EAST
-            else if (last_bdl_pair.value().lower.x > first_bdl_pair.value().lower.x &&
-                     last_bdl_pair.value().has_same_y_coordinate(first_bdl_pair.value()))
+            else if (output_pair->lower.x > farthest_pair->lower.x &&
+                     output_pair->has_same_y_coordinate(*farthest_pair))
             {
                 port.dir = fcn::port_direction::EAST;
             }

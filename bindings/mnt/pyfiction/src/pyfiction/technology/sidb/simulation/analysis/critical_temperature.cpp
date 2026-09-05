@@ -24,7 +24,6 @@
 #include <fiction/technology/sidb/simulation/analysis/critical_temperature.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
-#include <fiction/traits.hpp>
 
 #include <sstream>
 #include <vector>

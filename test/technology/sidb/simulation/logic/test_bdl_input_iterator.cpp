@@ -178,7 +178,7 @@ TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
     lyt.assign_cell_type({18, 0, 0}, sidb_technology::cell_type::OUTPUT);
     lyt.assign_cell_type({20, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     bdl_input_iterator bii{lat};
 
@@ -256,7 +256,7 @@ TEST_CASE("Mirrored BDL wire iteration", "[bdl-input-iterator]")
     lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::OUTPUT);
     lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::OUTPUT);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     bdl_input_iterator bii{lat};
 
@@ -281,7 +281,7 @@ TEST_CASE("SiQAD's AND gate iteration", "[bdl-input-iterator]")
 {
     const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     const detect_bdl_wires_params params{.threshold_bdl_interdistance = 2.0};
 
@@ -422,7 +422,7 @@ TEST_CASE("Generate BDL input pattern layouts", "[bdl-input-iterator]")
 {
     const auto lyt = to_sidb_layout(blueprints::siqad_and_gate<sidb_cell_clk_lyt_siqad>());
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     const bdl_input_iterator_params params{.bdl_wire_params =
                                                detect_bdl_wires_params{.threshold_bdl_interdistance = 2.0}};

@@ -61,8 +61,9 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
     operational_domain_params op_domain_params{};
     op_domain_params.operational_params.sim_params = sim_params;
 
-    op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 4.1, 6.0, 0.1},
-                                         operational_domain_value_range{sweep_parameter::LAMBDA_TF, 4.1, 6.0, 0.1}};
+    op_domain_params.sweep_dimensions = {
+        operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R, .min = 4.1, .max = 6.0, .step = 0.1},
+        operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF, .min = 4.1, .max = 6.0, .step = 0.1}};
 
     SECTION("Using the typical ground state as given CDS")
     {
@@ -106,19 +107,19 @@ TEST_CASE("Determine physical parameters for CDS of SiQAD Y-shaped AND gate, 10 
 
         const auto p1 = valid_parameters.contains(parameter_point{{5.9, 5.5}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(p1.value()) == 1);
+        CHECK(std::get<0>(p1.value_or(decltype(p1)::value_type{})) == 1);
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(p2.value()) == 0);
+        CHECK(std::get<0>(p2.value_or(decltype(p2)::value_type{})) == 0);
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.8, 4.4}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(p3.value()) == 0);
+        CHECK(std::get<0>(p3.value_or(decltype(p3)::value_type{})) == 0);
 
         const auto p4 = valid_parameters.contains(parameter_point{{6.0, 6.0}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(p4.value()) == 1);
+        CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 1);
     }
 }
 
@@ -141,8 +142,14 @@ TEST_CASE(
 
     SECTION("Using the ground state of default physical parameters as given CDS, two dimensional sweep")
     {
-        op_domain_params.sweep_dimensions = {operational_domain_value_range{sweep_parameter::EPSILON_R, 5.0, 5.9, 0.1},
-                                             operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.9, 0.1}};
+        op_domain_params.sweep_dimensions = {operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R,
+                                                                            .min       = 5.0,
+                                                                            .max       = 5.9,
+                                                                            .step      = 0.1},
+                                             operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF,
+                                                                            .min       = 5.0,
+                                                                            .max       = 5.9,
+                                                                            .step      = 0.1}};
 
         cd.assign_charge_state({38, 0, 0}, charge_state::NEGATIVE);
         cd.assign_charge_state({2, 1, 0}, charge_state::NEGATIVE);
@@ -178,27 +185,35 @@ TEST_CASE(
 
         const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(p1.value()) == 0);
+        CHECK(std::get<0>(p1.value_or(decltype(p1)::value_type{})) == 0);
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.0, 5.9}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(p2.value()) == 2);
+        CHECK(std::get<0>(p2.value_or(decltype(p2)::value_type{})) == 2);
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.4, 5.3}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(p3.value()) == 1);
+        CHECK(std::get<0>(p3.value_or(decltype(p3)::value_type{})) == 1);
 
         const auto p4 = valid_parameters.contains(parameter_point{{5.8, 5.3}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(p4.value()) == 0);
+        CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 0);
     }
 
     SECTION("Using the ground state of default physical parameters as given CDS, three dimensional sweep")
     {
-        op_domain_params.sweep_dimensions = {
-            operational_domain_value_range{sweep_parameter::EPSILON_R, 5.5, 5.7, 0.1},
-            operational_domain_value_range{sweep_parameter::LAMBDA_TF, 5.0, 5.2, 0.1},
-            operational_domain_value_range{sweep_parameter::MU_MINUS, -0.33, -0.31, 0.01}};
+        op_domain_params.sweep_dimensions = {operational_domain_value_range{.dimension = sweep_parameter::EPSILON_R,
+                                                                            .min       = 5.5,
+                                                                            .max       = 5.7,
+                                                                            .step      = 0.1},
+                                             operational_domain_value_range{.dimension = sweep_parameter::LAMBDA_TF,
+                                                                            .min       = 5.0,
+                                                                            .max       = 5.2,
+                                                                            .step      = 0.1},
+                                             operational_domain_value_range{.dimension = sweep_parameter::MU_MINUS,
+                                                                            .min       = -0.33,
+                                                                            .max       = -0.31,
+                                                                            .step      = 0.01}};
 
         cd.assign_charge_state({38, 0, 0}, charge_state::NEGATIVE);
         cd.assign_charge_state({2, 1, 0}, charge_state::NEGATIVE);
@@ -233,18 +248,18 @@ TEST_CASE(
         REQUIRE(valid_parameters.size() == 27);
         const auto p1 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.32}});
         REQUIRE(p1.has_value());
-        CHECK(std::get<0>(p1.value()) == 0);
+        CHECK(std::get<0>(p1.value_or(decltype(p1)::value_type{})) == 0);
 
         const auto p2 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.33}});
         REQUIRE(p2.has_value());
-        CHECK(std::get<0>(p2.value()) == 0);
+        CHECK(std::get<0>(p2.value_or(decltype(p2)::value_type{})) == 0);
 
         const auto p3 = valid_parameters.contains(parameter_point{{5.6, 5.0, -0.31}});
         REQUIRE(p3.has_value());
-        CHECK(std::get<0>(p3.value()) == 1);
+        CHECK(std::get<0>(p3.value_or(decltype(p3)::value_type{})) == 1);
 
         const auto p4 = valid_parameters.contains(parameter_point{{5.7, 5.2, -0.33}});
         REQUIRE(p4.has_value());
-        CHECK(std::get<0>(p4.value()) == 0);
+        CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 0);
     }
 }

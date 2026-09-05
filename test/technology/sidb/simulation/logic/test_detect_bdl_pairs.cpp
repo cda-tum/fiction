@@ -61,7 +61,7 @@ TEST_CASE("BDL wire", "[detect-bdl-pairs]")
     params.minimum_distance = 0.2;
     params.maximum_distance = 2.2;
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT, params);
     const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT, params);
@@ -92,7 +92,7 @@ TEST_CASE("Atomic wire BDL detection", "[detect-bdl-pairs]")
 
     detect_bdl_pairs_params params{};
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     SECTION("default minimum distance")
     {
@@ -194,7 +194,7 @@ TEST_CASE("BDL wire BDL detection", "[detect-bdl-pairs]")
     // set default minimum distance to 0 for testing
     params.minimum_distance = 0;
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     SECTION("default maximum distance")
     {
@@ -270,7 +270,7 @@ TEST_CASE("SiQAD's AND gate BDL detection", "[detect-bdl-pairs]")
 
     lyt.assign_cell_type({10, 9, 1}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     const auto input_bdl_pairs  = detect_bdl_pairs(lat, sidb_technology::cell_type::INPUT);
     const auto output_bdl_pairs = detect_bdl_pairs(lat, sidb_technology::cell_type::OUTPUT);
@@ -330,7 +330,7 @@ TEST_CASE("Bestagon fan-out BDL detection", "[detect-bdl-pairs]")
     lyt.assign_cell_type({4, 20, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({38, 20, 0}, sidb_technology::cell_type::NORMAL);
 
-    const layout lat{lyt};
+    const auto& lat = lyt;
 
     SECTION("Detect different BDL pair types")
     {

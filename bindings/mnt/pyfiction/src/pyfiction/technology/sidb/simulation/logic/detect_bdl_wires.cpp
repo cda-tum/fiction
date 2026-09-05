@@ -25,7 +25,6 @@
 #include <vector>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/operators.h>
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/set.h>            // NOLINT(misc-include-cleaner)
@@ -79,8 +78,10 @@ void detect_bdl_wires(nanobind::module_& m)
              DOC(fiction_sidb_simulation_logic_bdl_wire_erase_bdl_pair))
         .def("find_bdl_pair_by_type", &bdl_wire::find_bdl_pair_by_type, py::arg("t"),
              DOC(fiction_sidb_simulation_logic_bdl_wire_find_bdl_pair_by_type))
-        .def(py::self == py::self, DOC(fiction_sidb_simulation_logic_bdl_wire_operator_eq))
-        .def(py::self != py::self);
+        .def(
+            "__eq__", [](const bdl_wire& lhs, const bdl_wire& rhs) { return lhs == rhs; },
+            DOC(fiction_sidb_simulation_logic_bdl_wire_operator_eq))
+        .def("__ne__", [](const bdl_wire& lhs, const bdl_wire& rhs) { return lhs != rhs; });
 
     m.def(
         "detect_bdl_wires",

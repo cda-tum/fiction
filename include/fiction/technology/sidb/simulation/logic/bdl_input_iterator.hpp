@@ -26,6 +26,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <vector>
@@ -82,29 +83,31 @@ class bdl_input_iterator
 {
   public:
     /**
-     * Detects the input BDL pairs and wires of `lyt` and applies input pattern `0`.
+     * Detects the input BDL pairs and wires of `source_layout` and applies input pattern `0`.
      *
-     * @param lyt The layout to iterate over.
+     * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair and wire detection and the input encoding.
      */
-    explicit bdl_input_iterator(const layout& lyt, const bdl_input_iterator_params& ps = {}) noexcept :
-            bdl_input_iterator{lyt, ps, detect_bdl_wires(lyt, ps.bdl_wire_params, bdl_wire_selection::INPUT)}
+    explicit bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps = {}) noexcept :
+            bdl_input_iterator{source_layout, ps,
+                               detect_bdl_wires(source_layout, ps.bdl_wire_params, bdl_wire_selection::INPUT)}
     {}
     /**
      * Like the constructor above but with input wires that are already known.
      *
-     * @param lyt The layout to iterate over.
+     * @param source_layout The layout to iterate over.
      * @param ps Parameters for the BDL pair detection and the input encoding.
-     * @param input_wires The input wires of `lyt`.
+     * @param source_input_wires The input wires of `source_layout`.
      */
-    bdl_input_iterator(const layout& lyt, const bdl_input_iterator_params& ps,
-                       const std::vector<bdl_wire>& input_wires) noexcept :
-            lyt_{lyt},
-            input_pairs_{detect_bdl_pairs(lyt, sidb_technology::cell_type::INPUT, ps.bdl_wire_params.bdl_pairs_params)},
-            input_wires_{input_wires},
-            last_bdl_for_each_wire_{determine_last_bdl_for_each_wire()},
-            upper_input_closer_to_wire_end_{determine_upper_input_closer_to_wire_end()},
-            params_{ps}
+    bdl_input_iterator(const layout& source_layout, const bdl_input_iterator_params& ps,
+                       const std::vector<bdl_wire>& source_input_wires) noexcept :
+            sidb_layout{source_layout},
+            input_pairs{detect_bdl_pairs(source_layout, sidb_technology::cell_type::INPUT,
+                                         ps.bdl_wire_params.bdl_pairs_params)},
+            detected_input_wires{source_input_wires},
+            last_bdl_for_each_wire{determine_last_bdl_for_each_wire()},
+            upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
+            params{ps}
     {
         set_all_inputs();
     }
@@ -115,7 +118,7 @@ class bdl_input_iterator
      */
     [[nodiscard]] const layout& operator*() const noexcept
     {
-        return lyt_;
+        return sidb_layout;
     }
     /**
      * Advances to the next input pattern.
@@ -124,7 +127,7 @@ class bdl_input_iterator
      */
     bdl_input_iterator& operator++() noexcept
     {
-        ++current_input_index_;
+        ++current_input_index;
         set_all_inputs();
 
         return *this;
@@ -162,7 +165,7 @@ class bdl_input_iterator
      */
     bdl_input_iterator& operator+=(const int m) noexcept
     {
-        current_input_index_ = static_cast<uint64_t>(static_cast<int64_t>(current_input_index_) + m);
+        current_input_index = static_cast<uint64_t>(static_cast<int64_t>(current_input_index) + m);
         set_all_inputs();
 
         return *this;
@@ -187,7 +190,7 @@ class bdl_input_iterator
      */
     bdl_input_iterator& operator--() noexcept
     {
-        --current_input_index_;
+        --current_input_index;
         set_all_inputs();
 
         return *this;
@@ -212,7 +215,7 @@ class bdl_input_iterator
      */
     bdl_input_iterator& operator-=(const int m) noexcept
     {
-        current_input_index_ = static_cast<uint64_t>(static_cast<int64_t>(current_input_index_) - m);
+        current_input_index = static_cast<uint64_t>(static_cast<int64_t>(current_input_index) - m);
         set_all_inputs();
 
         return *this;
@@ -225,7 +228,7 @@ class bdl_input_iterator
      */
     bdl_input_iterator& operator=(const uint64_t m) noexcept
     {
-        current_input_index_ = m;
+        current_input_index = m;
         set_all_inputs();
 
         return *this;
@@ -248,7 +251,7 @@ class bdl_input_iterator
      */
     [[nodiscard]] int64_t operator-(const bdl_input_iterator& other) const noexcept
     {
-        return static_cast<int64_t>(current_input_index_) - static_cast<int64_t>(other.current_input_index_);
+        return static_cast<int64_t>(current_input_index) - static_cast<int64_t>(other.current_input_index);
     }
     /**
      * Compares the current input pattern with `m`.
@@ -258,7 +261,7 @@ class bdl_input_iterator
      */
     [[nodiscard]] auto operator<=>(const uint64_t m) const noexcept
     {
-        return current_input_index_ <=> m;
+        return current_input_index <=> m;
     }
     /**
      * Whether the current input pattern is `m`.
@@ -268,7 +271,7 @@ class bdl_input_iterator
      */
     [[nodiscard]] bool operator==(const uint64_t m) const noexcept
     {
-        return current_input_index_ == m;
+        return current_input_index == m;
     }
     /**
      * Number of input BDL pairs.
@@ -277,7 +280,7 @@ class bdl_input_iterator
      */
     [[nodiscard]] uint64_t num_input_pairs() const noexcept
     {
-        return input_pairs_.size();
+        return input_pairs.size();
     }
     /**
      * The current input pattern.
@@ -286,38 +289,38 @@ class bdl_input_iterator
      */
     [[nodiscard]] uint64_t get_current_input_index() const noexcept
     {
-        return current_input_index_;
+        return current_input_index;
     }
 
   private:
     /**
      * The layout with the current input pattern applied.
      */
-    layout lyt_;
+    layout sidb_layout;
     /**
      * The input BDL pairs in layout order.
      */
-    std::vector<bdl_pair<lattice_site>> input_pairs_;
+    std::vector<bdl_pair<lattice_site>> input_pairs;
     /**
      * The input wires.
      */
-    std::vector<bdl_wire> input_wires_;
+    std::vector<bdl_wire> detected_input_wires;
     /**
      * For each input wire, the BDL pair farthest from its input pair.
      */
-    std::vector<bdl_pair<lattice_site>> last_bdl_for_each_wire_;
+    std::vector<bdl_pair<lattice_site>> last_bdl_for_each_wire;
     /**
      * For each input pair, whether its upper SiDB is the one closer to the wire's end.
      */
-    std::vector<bool> upper_input_closer_to_wire_end_;
+    std::vector<bool> upper_input_closer_to_wire_end;
     /**
      * The current input pattern.
      */
-    uint64_t current_input_index_{0};
+    uint64_t current_input_index{0};
     /**
      * Parameters.
      */
-    bdl_input_iterator_params params_;
+    bdl_input_iterator_params params;
     /**
      * Finds, for each input wire, the BDL pair farthest from the wire's input pair.
      *
@@ -325,12 +328,12 @@ class bdl_input_iterator
      */
     [[nodiscard]] std::vector<bdl_pair<lattice_site>> determine_last_bdl_for_each_wire() const noexcept
     {
-        const auto& lat = lyt_.get_lattice();
+        const auto& lat = sidb_layout.get_lattice();
 
         std::vector<bdl_pair<lattice_site>> end_bdls{};
-        end_bdls.reserve(input_wires_.size());
+        end_bdls.reserve(detected_input_wires.size());
 
-        for (const auto& wire : input_wires_)
+        for (const auto& wire : detected_input_wires)
         {
             const auto start = std::ranges::find_if(wire.pairs, [](const auto& bdl)
                                                     { return bdl.type == sidb_technology::cell_type::INPUT; });
@@ -359,17 +362,17 @@ class bdl_input_iterator
      */
     [[nodiscard]] std::vector<bool> determine_upper_input_closer_to_wire_end() const noexcept
     {
-        const auto& lat = lyt_.get_lattice();
+        const auto& lat = sidb_layout.get_lattice();
 
         std::vector<bool> upper_is_closer{};
-        upper_is_closer.reserve(input_pairs_.size());
+        upper_is_closer.reserve(input_pairs.size());
 
-        for (std::size_t i = 0; i < input_pairs_.size(); ++i)
+        for (std::size_t i = 0; i < input_pairs.size(); ++i)
         {
-            const auto& input_i = input_pairs_[i];
+            const auto& input_i = input_pairs[i];
             // both distances are measured against the upper dot of the wire's last BDL pair
-            const auto to_upper = lat.nm_distance(input_i.upper, last_bdl_for_each_wire_[i].upper);
-            const auto to_lower = lat.nm_distance(input_i.lower, last_bdl_for_each_wire_[i].upper);
+            const auto to_upper = lat.nm_distance(input_i.upper, last_bdl_for_each_wire[i].upper);
+            const auto to_lower = lat.nm_distance(input_i.lower, last_bdl_for_each_wire[i].upper);
 
             upper_is_closer.push_back(to_upper < to_lower);
         }
@@ -381,47 +384,47 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        assert(input_pairs_.size() == input_wires_.size() && "number of inputs and number of wires don't match");
+        assert(input_pairs.size() == detected_input_wires.size() && "number of inputs and number of wires don't match");
 
-        const auto num_inputs = input_pairs_.size();
+        const auto num_inputs = input_pairs.size();
 
         for (std::size_t i = 0; i < num_inputs; ++i)
         {
-            const auto& input_i = input_pairs_[i];
+            const auto& input_i = input_pairs[i];
 
-            const bool bit_set = (current_input_index_ & (uint64_t{1} << (num_inputs - 1 - i))) != 0;
+            const bool bit_set = (current_input_index & (uint64_t{1} << (num_inputs - 1 - i))) != 0;
 
             if (bit_set)
             {
-                if (upper_input_closer_to_wire_end_[i])
+                if (upper_input_closer_to_wire_end[i])
                 {
-                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
-                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
+                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
                 }
                 else
                 {
-                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
-                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
+                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
                 }
             }
-            else if (params_.input_bdl_config ==
+            else if (params.input_bdl_config ==
                      bdl_input_iterator_params::input_bdl_configuration::PERTURBER_DISTANCE_ENCODED)
             {
-                if (upper_input_closer_to_wire_end_[i])
+                if (upper_input_closer_to_wire_end[i])
                 {
-                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
-                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::INPUT);
+                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
                 }
                 else
                 {
-                    lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
-                    lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
+                    sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+                    sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::INPUT);
                 }
             }
             else
             {
-                lyt_.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
-                lyt_.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
+                sidb_layout.assign_cell_type(input_i.upper, sidb_technology::cell_type::EMPTY);
+                sidb_layout.assign_cell_type(input_i.lower, sidb_technology::cell_type::EMPTY);
             }
         }
     }

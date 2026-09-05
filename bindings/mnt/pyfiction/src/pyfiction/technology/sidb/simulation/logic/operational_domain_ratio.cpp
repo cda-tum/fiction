@@ -19,6 +19,7 @@
 #include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain_ratio.hpp>
 
 #include <vector>

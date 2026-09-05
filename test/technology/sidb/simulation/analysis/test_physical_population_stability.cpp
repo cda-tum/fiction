@@ -15,7 +15,6 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
@@ -243,8 +242,6 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
 TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], [quality]")
 {
-    constexpr auto population_stability_params = physical_population_stability_params{};
-
     SECTION("using siqad coordinates")
     {
         layout lyt{};
@@ -289,7 +286,7 @@ TEST_CASE("Bestagon CX gate input 11", "[assess-physical-population-stability], 
 
         CHECK(lyt.num_cells() == 27);
 
-        const layout lat{lyt};
+        const auto& lat = lyt;
 
         const auto result = physical_population_stability(lat, params);
         REQUIRE(result.size() == 20);
