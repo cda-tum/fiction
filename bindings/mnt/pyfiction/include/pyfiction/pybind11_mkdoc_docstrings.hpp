@@ -17788,7 +17788,8 @@ Args:
 
 Returns:
     The parameter points where `cd` is physically valid, each with its
-    excited-state number.
+    excited-state number; empty if `cd` does not cover the layout's
+    SiDBs in raster order.
 
 )doc";
 
