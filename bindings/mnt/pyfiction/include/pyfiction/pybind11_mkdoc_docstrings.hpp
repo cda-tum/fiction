@@ -22429,6 +22429,14 @@ Returns:
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_input_pairs = R"doc(The input BDL pairs in layout order.)doc";
 
+static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_is_valid =
+R"doc(Whether every input BDL pair belongs to a complete detected wire.
+
+Returns:
+    `true` if input patterns can be applied.
+
+)doc";
+
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_last_bdl_for_each_wire = R"doc(For each input wire, the BDL pair farthest from its input pair.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_logic_bdl_input_iterator_num_input_pairs =
@@ -23409,6 +23417,15 @@ R"doc(Number of simulator invocations so far.
 
 Returns:
     The count.
+
+)doc";
+
+static const char *mkd_doc_fiction_sidb_simulation_logic_detail_is_operational_impl_has_valid_bdl_configuration =
+R"doc(Whether the input and output BDL topology supports the requested
+Boolean function.
+
+Returns:
+    `true` if every input pattern and output can be evaluated.
 
 )doc";
 
