@@ -161,6 +161,11 @@ class defect_influence_impl
             params{ps},
             stats{st}
     {
+        if (params.additional_scanning_area.first < 0 || params.additional_scanning_area.second < 0)
+        {
+            throw std::invalid_argument{"additional_scanning_area must not contain negative values"};
+        }
+
         determine_scanning_area();
     }
     /**
@@ -733,6 +738,7 @@ class defect_influence_impl
  * @return The defect influence domain.
  * @throws std::invalid_argument if `step_size` is zero.
  * @throws std::invalid_argument if `spec` is empty.
+ * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -768,6 +774,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
  * @param stats Statistics.
  * @return The defect influence domain.
  * @throws std::invalid_argument if `step_size` is zero.
+ * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain defect_influence_grid_search(const layout&                  lyt,
                                                                           const defect_influence_params& params    = {},
@@ -797,6 +804,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
  * @param stats Statistics.
  * @return The defect influence domain.
  * @throws std::invalid_argument if `spec` is empty.
+ * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -830,6 +838,7 @@ defect_influence_random_sampling(const layout& lyt, const std::vector<TT>& spec,
  * @param params Parameters; the influence definition has to be `GROUND_STATE_CHANGE`.
  * @param stats Statistics.
  * @return The defect influence domain.
+ * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain
 defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
@@ -859,6 +868,7 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
  * @param stats Statistics.
  * @return The defect influence domain.
  * @throws std::invalid_argument if `spec` is empty.
+ * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 template <typename TT>
 [[nodiscard]] defect_influence_domain
@@ -893,6 +903,7 @@ defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, cons
  * @param params Parameters; the influence definition has to be `GROUND_STATE_CHANGE`.
  * @param stats Statistics.
  * @return The defect influence domain.
+ * @throws std::invalid_argument if `params.additional_scanning_area` contains a negative value.
  */
 [[nodiscard]] inline defect_influence_domain defect_influence_quicktrace(const layout& lyt, const std::size_t samples,
                                                                          const defect_influence_params& params = {},
