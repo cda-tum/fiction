@@ -109,7 +109,10 @@ class bdl_input_iterator
             upper_input_closer_to_wire_end{determine_upper_input_closer_to_wire_end()},
             params{ps}
     {
-        set_all_inputs();
+        if (is_valid())
+        {
+            set_all_inputs();
+        }
     }
     /**
      * The layout with the current input pattern applied.
@@ -283,6 +286,17 @@ class bdl_input_iterator
         return input_pairs.size();
     }
     /**
+     * Whether every input BDL pair belongs to a complete detected wire.
+     *
+     * @return `true` if input patterns can be applied.
+     */
+    [[nodiscard]] bool is_valid() const noexcept
+    {
+        return input_pairs.size() == detected_input_wires.size() &&
+               input_pairs.size() == last_bdl_for_each_wire.size() &&
+               input_pairs.size() == upper_input_closer_to_wire_end.size();
+    }
+    /**
      * The current input pattern.
      *
      * @return The pattern.
@@ -367,6 +381,11 @@ class bdl_input_iterator
         std::vector<bool> upper_is_closer{};
         upper_is_closer.reserve(input_pairs.size());
 
+        if (input_pairs.size() != last_bdl_for_each_wire.size())
+        {
+            return upper_is_closer;
+        }
+
         for (std::size_t i = 0; i < input_pairs.size(); ++i)
         {
             const auto& input_i = input_pairs[i];
@@ -384,7 +403,7 @@ class bdl_input_iterator
      */
     void set_all_inputs() noexcept
     {
-        assert(input_pairs.size() == detected_input_wires.size() && "number of inputs and number of wires don't match");
+        assert(is_valid() && "number of inputs and number of complete wires don't match");
 
         const auto num_inputs = input_pairs.size();
 

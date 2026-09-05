@@ -159,6 +159,15 @@ TEST_CASE("Empty layout iteration", "[bdl-input-iterator]")
     CHECK((*bii_cm).num_cells() == 0);
 }
 
+TEST_CASE("Incomplete BDL wire set", "[bdl-input-iterator]")
+{
+    const auto lyt = to_sidb_layout(blueprints::siqad_or_gate<sidb_cell_clk_lyt_siqad>());
+
+    const bdl_input_iterator bii{lyt, bdl_input_iterator_params{}, std::vector<bdl_wire>{}};
+
+    CHECK_FALSE(bii.is_valid());
+}
+
 TEST_CASE("BDL wire iteration", "[bdl-input-iterator]")
 {
 

@@ -371,6 +371,11 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() noexcept
     {
+        if (!has_valid_bdl_configuration())
+        {
+            return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+        }
+
         if (canvas_filtering_applicable)
         {
             for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
@@ -450,7 +455,10 @@ class is_operational_impl
     [[nodiscard]] std::pair<operational_status, non_operationality_reason>
     verify_logic_match_of_cd(const charge_distribution& cd, const uint64_t input_pattern) const noexcept
     {
-        assert(!output_bdl_pairs.empty() && "No output cell provided.");
+        if (output_bdl_pairs.size() != truth_table.size() || output_bdl_wires.size() != truth_table.size())
+        {
+            return {operational_status::NON_OPERATIONAL, non_operationality_reason::LOGIC_MISMATCH};
+        }
 
         for (std::size_t output = 0; output < output_bdl_pairs.size(); ++output)
         {
@@ -500,10 +508,17 @@ class is_operational_impl
     [[nodiscard]] std::vector<std::pair<uint64_t, non_operationality_reason>>
     determine_non_operational_input_patterns_and_non_operationality_reason() noexcept
     {
-        assert((truth_table.size() == output_bdl_wires.size()) &&
-               "Number of truth tables and output BDL pairs does not match");
-
         std::vector<std::pair<uint64_t, non_operationality_reason>> non_operational{};
+
+        if (!has_valid_bdl_configuration())
+        {
+            for (uint64_t i = 0; i < truth_table.front().num_bits(); ++i)
+            {
+                non_operational.emplace_back(i, non_operationality_reason::LOGIC_MISMATCH);
+            }
+
+            return non_operational;
+        }
 
         for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
         {
@@ -785,6 +800,16 @@ class is_operational_impl
      * Caller-supplied layouts, one per input pattern, or `nullptr`.
      */
     const std::vector<layout>* input_pattern_layouts{nullptr};
+    /**
+     * Whether the input and output BDL topology supports the requested Boolean function.
+     *
+     * @return `true` if every input pattern and output can be evaluated.
+     */
+    [[nodiscard]] bool has_valid_bdl_configuration() const noexcept
+    {
+        return (input_pattern_layouts != nullptr || bii.is_valid()) && output_bdl_pairs.size() == truth_table.size() &&
+               output_bdl_wires.size() == truth_table.size();
+    }
     /**
      * Assigns a charge state to the SiDB at `site` without touching the charge index.
      *
