@@ -360,6 +360,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Exposed the defect-matrix reader exceptions at the package root.
   - `parameter_point.__getitem__` raises `IndexError` for an out-of-range index instead of
     reading past the parameter vector
+  - The Python bindings compile when Z3 support is disabled
   - `write_sqd_layout` owns its Python filename during export on Windows
 
 - Tooling:
