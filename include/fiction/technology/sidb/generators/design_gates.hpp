@@ -176,6 +176,7 @@ class design_gates_impl
      * @param ps Parameters.
      * @param st Statistics.
      */
+    // NOLINTBEGIN(modernize-pass-by-value): Passing the large stored snapshots by value adds a copy.
     design_gates_impl(const layout& skeleton, const std::vector<TT>& spec, const design_gates_params& ps,
                       design_gates_stats& st) :
             skeleton_layout{skeleton},
@@ -194,6 +195,7 @@ class design_gates_impl
         stats.number_of_layouts = all_canvas_layouts.size();
         stats.sim_engine        = params.operational_params.sim_engine;
     }
+    // NOLINTEND(modernize-pass-by-value)
     /**
      * Simulates every combination of canvas SiDBs.
      *

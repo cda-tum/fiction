@@ -156,6 +156,7 @@ class displacement_robustness_domain_impl
      * @param ps Parameters.
      * @param st Statistics.
      */
+    // NOLINTBEGIN(modernize-pass-by-value): Passing the large stored snapshot by value adds a copy.
     displacement_robustness_domain_impl(const layout& lyt, const std::vector<TT>& spec,
                                         const displacement_robustness_domain_params& ps,
                                         displacement_robustness_domain_stats&        st) :
@@ -179,6 +180,7 @@ class displacement_robustness_domain_impl
         sidbs_of_the_original_layout.reserve(layout_to_analyze.num_cells());
         layout_to_analyze.foreach_cell([this](const auto& c) { sidbs_of_the_original_layout.push_back(c); });
     }
+    // NOLINTEND(modernize-pass-by-value)
     /**
      * Generates the displaced layouts and checks each for operability.
      *

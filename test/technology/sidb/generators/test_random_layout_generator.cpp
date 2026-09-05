@@ -178,11 +178,10 @@ TEST_CASE("Random SiDB layout generation", "[random-sidb-layout-generator]")
     {
         const auto corners = std::pair{lattice_site{0, 0}, lattice_site{1, 0}};
 
-        constexpr uint64_t seed      = 1;
-        auto&              generator = fiction::sidb::generators::detail::random_generator();
-        generator.seed(seed);
+        auto&      generator         = fiction::sidb::generators::detail::random_generator();
+        const auto generator_state   = generator;
         const auto first_random_site = random_site_in_area(corners.first, corners.second, generator);
-        generator.seed(seed);
+        generator                    = generator_state;
 
         auto skeleton = layout{};
         skeleton.assign_cell_type(first_random_site, sidb_technology::cell_type::INPUT);
