@@ -13,6 +13,7 @@
  * @brief Python bindings for `fiction/technology/sidb/simulation/result.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -44,7 +45,13 @@ namespace detail
 
 namespace py = nanobind;
 
-// Helper function to convert std::any to Python objects
+/**
+ * Converts a supported simulation parameter to a Python value.
+ *
+ * @param value C++ simulation parameter.
+ * @return The Python value.
+ * @throws std::runtime_error if the stored type is unsupported or conversion fails.
+ */
 inline py::object convert_any_to_py(const std::any& value)
 {
     try
@@ -78,6 +85,13 @@ inline py::object convert_any_to_py(const std::any& value)
     throw std::runtime_error(std::string("Unsupported type in std::any: ") + value.type().name());
 }
 
+/**
+ * Converts named simulation parameters to a Python dictionary.
+ *
+ * @param map Named C++ simulation parameters.
+ * @return Python dictionary.
+ * @throws std::runtime_error if a parameter cannot be converted.
+ */
 inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any>& map)
 {
     nanobind::dict result;
@@ -98,8 +112,11 @@ inline py::dict convert_map_to_py(const std::unordered_map<std::string, std::any
 }
 
 /**
- * Transitional binding of `legacy_result` over one Cartesian SiDB cell-level layout type; it goes away once every
- * consumer takes `sidb_simulation_result`.
+ * Registers `legacy_result` over one Cartesian SiDB cell-level layout type.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param m Python module.
+ * @param lattice Lattice name suffix.
  */
 template <typename Lyt>
 void legacy_result_impl(nanobind::module_& m, const std::string& lattice)
@@ -126,6 +143,11 @@ void legacy_result_impl(nanobind::module_& m, const std::string& lattice)
 
 }  // namespace detail
 
+/**
+ * @brief Registers SiDB simulation results.
+ *
+ * @param m Python module.
+ */
 void result(nanobind::module_& m)
 {
     namespace py = nanobind;

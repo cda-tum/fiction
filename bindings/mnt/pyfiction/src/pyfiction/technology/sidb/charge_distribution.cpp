@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/charge_distribution.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -30,6 +31,11 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers SiDB charge distributions.
+ *
+ * @param m Python module.
+ */
 void charge_distribution(nanobind::module_& m)
 {
     namespace py = nanobind;

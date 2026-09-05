@@ -13,6 +13,7 @@
  * @brief Writer for SiDB simulation results in SiQAD's XML format.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -296,8 +297,17 @@ class write_sqd_sim_result_impl
 class sqd_sim_result_writer
 {
   public:
+    /**
+     * Creates a SiQAD simulation-result writer.
+     *
+     * @param src Simulation result.
+     * @param s Output stream.
+     */
     sqd_sim_result_writer(const sidb::simulation::result& src, std::ostream& s) : sim_result{src}, os{s} {}
 
+    /**
+     * Writes the complete SiQAD simulation-result document.
+     */
     void run()
     {
         os << siqad::XML_HEADER << siqad::OPEN_SIM_OUT;
@@ -311,9 +321,18 @@ class sqd_sim_result_writer
     }
 
   private:
+    /**
+     * Simulation result to write.
+     */
     const sidb::simulation::result& sim_result;
-    std::ostream&                   os;
+    /**
+     * Output stream.
+     */
+    std::ostream& os;
 
+    /**
+     * Writes the engine name, version, and runtime.
+     */
     void write_engine_info()
     {
         const auto current_time = std::time(nullptr);
@@ -322,6 +341,9 @@ class sqd_sim_result_writer
                           sim_result.simulation_runtime.count());
     }
 
+    /**
+     * Writes the physical and additional simulation parameters.
+     */
     void write_simulation_parameters()
     {
         os << siqad::OPEN_SIM_PARAMS;
@@ -340,6 +362,9 @@ class sqd_sim_result_writer
         os << siqad::CLOSE_SIM_PARAMS;
     }
 
+    /**
+     * Writes the SiDB positions in ångström.
+     */
     void write_physical_locations()
     {
         os << siqad::OPEN_PHYSLOC;
@@ -353,6 +378,9 @@ class sqd_sim_result_writer
         os << siqad::CLOSE_PHYSLOC;
     }
 
+    /**
+     * Writes the charge distributions in energy order.
+     */
     void write_electron_distributions()
     {
         os << siqad::OPEN_ELEC_DIST;

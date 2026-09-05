@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/simulation/potential_landscape.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -34,6 +35,11 @@
 namespace pyfiction
 {
 
+/**
+ * @brief Registers SiDB potential landscapes and charge-transition bounds.
+ *
+ * @param m Python module.
+ */
 void potential_landscape(nanobind::module_& m)
 {
     namespace py = nanobind;

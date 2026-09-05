@@ -284,8 +284,7 @@ class charge_distribution
     }
     /**
      * The charge index: the distribution read as a number in the given base with the first SiDB as the most
-     * significant digit and digit `sign + 1` per SiDB. Two distributions over the same sites have the same index iff
-     * they assign the same charge states. The index wraps around past 64 base-2 digits, so it identifies
+     * significant digit and digit `sign + 1` per SiDB. The index wraps around past 64 base-2 digits, so it identifies
      * distributions uniquely only for layouts of at most 64 (base 2) or 40 (base 3) SiDBs.
      *
      * @param base Base of the index, 2 or 3.
