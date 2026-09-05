@@ -238,7 +238,8 @@ class layout
     }
     /**
      * Applies a function to every SiDB site in raster order. `fn` takes the site and optionally its index, and may
-     * return `false` to stop the traversal.
+     * return `false` to stop the traversal. The layout must not be modified during the traversal; collect the sites
+     * with `cells_of_type` first to add or remove SiDBs.
      *
      * @tparam Fn Callable on `(const lattice_site&)` or `(const lattice_site&, std::size_t)`.
      * @param fn Function to apply.

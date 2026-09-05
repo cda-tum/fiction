@@ -42,17 +42,16 @@
 .. autoclass:: mnt.pyfiction.displacement_analysis_mode
    :members:
 
-.. autofunction:: mnt.pyfiction.displacement_robustness_domain_params
+.. autoclass:: mnt.pyfiction.displacement_robustness_domain_params
+   :members:
 
-.. autofunction:: mnt.pyfiction.displacement_robustness_domain_stats
+.. autoclass:: mnt.pyfiction.displacement_robustness_domain_stats
+   :members:
 
-.. autofunction:: mnt.pyfiction.displacement_robustness_domain_100
+.. autoclass:: mnt.pyfiction.displacement_robustness_domain
+   :members:
 
-.. autofunction:: mnt.pyfiction.displacement_robustness_domain_111
-
-.. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_100
-
-.. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain_111
+.. autofunction:: mnt.pyfiction.determine_displacement_robustness_domain
 ```
 
 :::
@@ -81,27 +80,27 @@
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_grid_search(const Lyt& lyt, const std::vector<TT>& spec, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, const defect_influence_params& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_grid_search(const Lyt& lyt, const defect_influence_params<cell<Lyt>>& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_grid_search(const layout& lyt, const defect_influence_params& params = {}, const std::size_t step_size = 1, defect_influence_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_random_sampling(const Lyt& lyt, const std::vector<TT>& spec, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_random_sampling(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_random_sampling(const Lyt& lyt, std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_random_sampling(const layout& lyt, const std::size_t samples, const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_quicktrace(const Lyt& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, const std::size_t samples, const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
 
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_quicktrace(const Lyt& lyt, const std::size_t samples, const defect_influence_params<cell<Lyt>>& params = {}, defect_influence_stats*                   stats  = nullptr)
+```{doxygenfunction} fiction::sidb::simulation::defects::defect_influence_quicktrace(const layout& lyt, const std::size_t samples, const defect_influence_params& params = {}, defect_influence_stats* stats = nullptr)
 
 ```
 
