@@ -18,7 +18,8 @@ from mnt.pyfiction import (
 )
 
 
-def test_three_sidbs_100_lattice():
+def test_three_sidbs_100_lattice() -> None:
+    """Check population stability on the Si(100) lattice."""
     layout = sidb_layout()
     layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(0, 1, 1), sidb_technology.cell_type.NORMAL)
@@ -35,7 +36,8 @@ def test_three_sidbs_100_lattice():
     assert len(result) == 1
 
 
-def test_three_sidbs_111_lattice():
+def test_three_sidbs_111_lattice() -> None:
+    """Check population stability on the Si(111) lattice."""
     layout = sidb_layout(lattice.si_111_1x1())
     layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(0, 1, 1), sidb_technology.cell_type.NORMAL)

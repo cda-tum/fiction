@@ -8,6 +8,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
 from mnt.pyfiction import (
@@ -34,12 +36,20 @@ from mnt.pyfiction import (
     sidb_technology,
 )
 
+if TYPE_CHECKING:
+    from pathlib import Path
+
 
 @pytest.mark.parametrize(
     "lat",
     [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
 )
-def test_perturber_and_sidb_pair(lat):
+def test_perturber_and_sidb_pair(lat: lattice) -> None:
+    """Check non-gate critical temperature on both supported lattices.
+
+    Args:
+        lat: Lattice used for the test layout.
+    """
     layout = sidb_layout(lat)
     layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(4, 0, 1), sidb_technology.cell_type.NORMAL)
@@ -57,7 +67,12 @@ def test_perturber_and_sidb_pair(lat):
     assert stats.num_valid_lyt == 1
 
 
-def test_gate_based_simulation(resources_dir):
+def test_gate_based_simulation(resources_dir: Path) -> None:
+    """Check gate-based critical temperature for an XOR gate.
+
+    Args:
+        resources_dir: Directory that contains the test layout.
+    """
     layout = read_sqd_layout(str(resources_dir / "hex_21_inputsdbp_xor_v1.sqd"), "xor_gate")
     params = critical_temperature_params()
 
@@ -73,7 +88,12 @@ def test_gate_based_simulation(resources_dir):
     assert stats.algorithm_name == "QuickExact"
 
 
-def test_bestagon_inv(resources_dir):
+def test_bestagon_inv(resources_dir: Path) -> None:
+    """Check a Bestagon inverter with QuickSim.
+
+    Args:
+        resources_dir: Directory that contains the test layout.
+    """
     layout = read_sqd_layout(
         str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
         "inverter_input_0",
@@ -93,7 +113,12 @@ def test_bestagon_inv(resources_dir):
     assert stats.num_valid_lyt > 1
 
 
-def test_bestagon_inv_with_different_mu(resources_dir):
+def test_bestagon_inv_with_different_mu(resources_dir: Path) -> None:
+    """Check a Bestagon inverter at a different chemical potential.
+
+    Args:
+        resources_dir: Directory that contains the test layout.
+    """
     layout = read_sqd_layout(
         str(resources_dir / "hex_11_inputsdbp_inv_straight_v0_manual.sqd"),
         "inverter_input_0",
@@ -113,7 +138,8 @@ def test_bestagon_inv_with_different_mu(resources_dir):
     assert stats.algorithm_name == "QuickExact"
 
 
-def test_critical_temperature_with_input_pattern_layouts():
+def test_critical_temperature_with_input_pattern_layouts() -> None:
+    """Compare pre-generated input layouts with the layout-based overload."""
     lyt = sidb_layout()
 
     lyt.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.INPUT)

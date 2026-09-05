@@ -54,19 +54,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
     56-SiDB NAND: 19.7 → 3.3 s). _QuickSim_ improves by one third, _ExGS_ by one quarter with
     10,000× less heap traffic, and _QuickExact_ holds speed with 28× less heap traffic
   - Potential landscape construction computes each symmetric SiDB interaction once
-  - **Breaking:** The logic and analysis algorithms of the SiDB simulation (BDL pair and wire detection, the BDL input
-    iterator, `is_operational` and its pattern queries, `verify_logic_match`, the operational and critical
-    temperature domains, `operational_domain_ratio`, `critical_temperature`, `time_to_solution`,
-    `physical_population_stability`, `physically_valid_parameters`, `band_bending_resilience`,
-    `can_positive_charges_occur`, and `calculate_energy_and_state_type`) take a `sidb::layout` and work on
-    `bdl_pair<lattice_site>`, the non-template `bdl_wire` and `bdl_input_iterator`, `charge_distribution`,
-    and `result`. The pruning filters of `is_operational` enumerate the canvas on a `potential_landscape`.
-    `verify_logic_match` and `calculate_energy_and_state_type_with_kinks_rejected` take the layout the charge
-    distributions belong to, `physically_valid_parameters` takes the layout and the charge distribution to check,
-    and `population_stability_information` is a plain struct over `lattice_site`. The former template versions
-    of `bdl_wire` and `bdl_input_iterator` remain as `legacy_bdl_wire` and `legacy_bdl_input_iterator`,
-    and the algorithms keep cell-level layout overloads, until the gate designers, defect analyses, CLI, and
-    experiments are ported
+  - **Breaking:** SiDB logic and analysis algorithms use `sidb::layout` and non-template simulation types
 
 - Data structures:
   - Simulation results store charge states and energy beside one shared layout and potential

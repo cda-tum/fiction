@@ -21,7 +21,8 @@ from mnt.pyfiction import (
 )
 
 
-def test_one_sidb_100_lattice():
+def test_one_sidb_100_lattice() -> None:
+    """Check physical parameter validity on the Si(100) lattice."""
     layout = sidb_layout()
     layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
 
@@ -36,7 +37,8 @@ def test_one_sidb_100_lattice():
         valid_parameters.get_excited_state_number_for_parameter(parameter_point([15, 15]))
 
 
-def test_one_sidb_111_lattice():
+def test_one_sidb_111_lattice() -> None:
+    """Check physical parameter validity on the Si(111) lattice."""
     layout = sidb_layout(lattice.si_111_1x1())
     layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
 
