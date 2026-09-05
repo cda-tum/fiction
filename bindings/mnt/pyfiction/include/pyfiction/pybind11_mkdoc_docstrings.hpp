@@ -18867,12 +18867,10 @@ R"doc(Charge index over the SiDBs that are not in the sublayout and not the
 dependent SiDB.)doc";
 
 static const char *mkd_doc_fiction_sidb_simulation_detail_simulation_state_current =
-R"doc(The current charge distribution with its energy and the charge index
-recomputed in the plain base of the landscape's parameters, as
-consumers of a simulation result expect.
+R"doc(The current charge distribution with its energy.
 
 Returns:
-    A copy of the charge states and the energy.
+    A constant reference to the stored charge distribution.
 
 )doc";
 
@@ -20665,10 +20663,8 @@ contains all singleton clusters, which is then returned.
 Args:
     c: Cluster to add to the clst if it is a singleton, otherwise this
        function is called recursively on each of its children.
-    local_potential_bound_containers: Charge distribution surface
-                                      objects containing information
-                                      on the initial minimum and
-                                      maximum electrostatic potential.
+    land: Potential landscape that supplies the initial electrostatic
+          potentials.
 
 Returns:
     The clst that contains only singleton clusters, one for each SiDB
@@ -20773,7 +20769,8 @@ R"doc(Constructor. Invokes the algorithm with the given parameters on the
 given layout.
 
 Args:
-    lyt: Layout to construct the *Ground State Space* of.
+    land: Potential landscape to construct the *Ground State Space*
+          of.
     parameters: The parameters that *Ground State Space* will use
                 throughout the construction.
 
