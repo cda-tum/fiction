@@ -347,8 +347,6 @@ TEST_CASE("QuickExact simulation of a one-pair BDL wire with two perturbers", "[
     lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
     lyt.assign_cell_type({15, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    const simulation_parameters params{2, -0.32};
-
     const quickexact_params sim_params{.sim_params = simulation_parameters{3, -0.32}};
 
     const auto simulation_results = quickexact(lyt, sim_params);
