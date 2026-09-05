@@ -120,3 +120,36 @@ def test_charged_defect():
 
     # a negative defect makes the neutral distribution more attractive than the negative one
     assert landscape.energy(charge_distribution(layout)) > landscape.energy(neutral)
+
+
+def test_input_boundaries() -> None:
+    """Landscape queries reject missing indices and distributions over different sites."""
+    for landscape in (potential_landscape(sidb_layout()), potential_landscape(three_sidbs())):
+        index = landscape.num_sidbs()
+        with pytest.raises(IndexError):
+            landscape.nm_distance(0, index)
+        with pytest.raises(IndexError):
+            landscape.nm_distance(index, 0)
+        with pytest.raises(IndexError):
+            landscape.chargeless_potential(0, index)
+        with pytest.raises(IndexError):
+            landscape.local_external_potential(index)
+        with pytest.raises(IndexError):
+            landscape.local_potential_caused_by_defects(index)
+        with pytest.raises(IndexError):
+            landscape.effective_charge_transition_thresholds(index)
+    landscape = potential_landscape(three_sidbs())
+    other = three_sidbs()
+    other.assign_cell_type(lattice_site(7, 0, 0), sidb_technology.cell_type.EMPTY)
+    other.assign_cell_type(lattice_site(8, 0, 0), sidb_technology.cell_type.NORMAL)
+    for cd in (charge_distribution(), charge_distribution(other)):
+        with pytest.raises(ValueError, match="SiDB sites"):
+            landscape.local_internal_potentials(cd)
+        with pytest.raises(ValueError, match="SiDB sites"):
+            landscape.local_potentials(cd)
+        with pytest.raises(ValueError, match="SiDB sites"):
+            landscape.energy(cd)
+        with pytest.raises(ValueError, match="SiDB sites"):
+            landscape.is_physically_valid(cd)
+        with pytest.raises(ValueError, match="SiDB sites"):
+            landscape.evaluate(cd)

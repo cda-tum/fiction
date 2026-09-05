@@ -13,6 +13,7 @@
  * @brief The unified result type every SiDB simulation algorithm returns.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -88,10 +89,11 @@ struct result
      * @param distribution Index into `charge_distributions`.
      * @param s Site of the SiDB.
      * @return The charge state, `charge_state::NONE` if `s` holds no SiDB.
+     * @throws std::out_of_range if the distribution index is out of range.
      */
-    [[nodiscard]] model::charge_state charge_state(const std::size_t distribution, const lattice_site& s) const noexcept
+    [[nodiscard]] model::charge_state charge_state(const std::size_t distribution, const lattice_site& s) const
     {
-        return charge_distributions[distribution].get_charge_state(s);
+        return charge_distributions.at(distribution).get_charge_state(s);
     }
     /**
      * The charge distributions of minimal energy. Distributions with identical charge states count once.

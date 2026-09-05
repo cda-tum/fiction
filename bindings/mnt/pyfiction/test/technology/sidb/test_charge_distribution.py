@@ -122,3 +122,11 @@ def test_equality_and_mutability() -> None:
 
     a.assign_energy(2.0)
     assert a.energy() == 2.0
+
+
+def test_assignment_index_boundary() -> None:
+    """Out-of-range writes raise IndexError and getters retain the NONE sentinel."""
+    for cd in (charge_distribution(), charge_distribution(three_sidbs())):
+        with pytest.raises(IndexError):
+            cd.assign_charge_state_by_index(cd.size(), sidb_charge_state.NEGATIVE)
+        assert cd.get_charge_state_by_index(cd.size()) == sidb_charge_state.NONE

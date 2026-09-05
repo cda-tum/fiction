@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/simulation/potential_landscape.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -28,7 +29,10 @@
 #include <fiction/technology/sidb/technology.hpp>
 
 #include <cstddef>
+#include <limits>
+#include <stdexcept>
 #include <unordered_map>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -127,4 +131,50 @@ TEST_CASE("Potential landscape with a charged defect", "[potential-landscape]")
 
     // a negative defect makes the neutral distribution more attractive than the negative one
     CHECK(land.energy(charge_distribution{lyt, charge_state::NEGATIVE}) > land.energy(neutral));
+}
+
+TEST_CASE("Potential-landscape input boundaries", "[potential-landscape]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 0}, sidb_technology::cell_type::NORMAL);
+    const potential_landscape land{lyt};
+    layout                    other{};
+    other.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    other.assign_cell_type({6, 0}, sidb_technology::cell_type::NORMAL);
+    const std::vector<double> potentials(2, 0.0);
+    for (const auto& invalid : {charge_distribution{}, charge_distribution{other}})
+    {
+        CHECK_THROWS_AS(land.local_internal_potentials(invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.local_potentials(invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.energy(invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.energy(invalid, potentials), std::invalid_argument);
+        CHECK_THROWS_AS(land.is_population_stable(invalid, potentials), std::invalid_argument);
+        CHECK_THROWS_AS(land.is_configuration_stable(invalid, potentials), std::invalid_argument);
+        CHECK_THROWS_AS(land.is_physically_valid(invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.evaluate(invalid), std::invalid_argument);
+    }
+    const charge_distribution shared{land.sites()};
+    const charge_distribution copied{lyt};
+    CHECK(land.energy(shared) == land.energy(copied));
+    for (const auto& invalid : {std::vector<double>{}, std::vector<double>(3, 0.0)})
+    {
+        CHECK_THROWS_AS(land.energy(shared, invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.is_population_stable(shared, invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.is_configuration_stable(shared, invalid), std::invalid_argument);
+        CHECK_THROWS_AS(land.is_physically_valid(shared, invalid), std::invalid_argument);
+    }
+    for (const auto& landscape : {potential_landscape{layout{}}, land})
+    {
+        for (const auto index : {landscape.num_sidbs(), std::numeric_limits<std::size_t>::max()})
+        {
+            CHECK_THROWS_AS(landscape.nm_distance(0, index), std::out_of_range);
+            CHECK_THROWS_AS(landscape.nm_distance(index, 0), std::out_of_range);
+            CHECK_THROWS_AS(landscape.chargeless_potential(0, index), std::out_of_range);
+            CHECK_THROWS_AS(landscape.chargeless_potential(index, 0), std::out_of_range);
+            CHECK_THROWS_AS(landscape.local_external_potential(index), std::out_of_range);
+            CHECK_THROWS_AS(landscape.local_potential_caused_by_defects(index), std::out_of_range);
+            CHECK_THROWS_AS(landscape.effective_charge_transition_thresholds(index), std::out_of_range);
+        }
+    }
 }

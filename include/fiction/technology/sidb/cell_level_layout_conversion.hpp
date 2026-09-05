@@ -75,9 +75,10 @@ template <typename Coordinate>
  * @tparam CellLyt SiDB cell-level layout type.
  * @param s Lattice site.
  * @return The cell of `CellLyt` at `s`.
+ * @throws std::out_of_range if the site cannot be represented by the target coordinate type.
  */
 template <typename CellLyt>
-[[nodiscard]] constexpr cell<CellLyt> to_cell(const lattice_site& s) noexcept
+[[nodiscard]] constexpr cell<CellLyt> to_cell(const lattice_site& s)
 {
     if constexpr (has_siqad_coord_v<CellLyt>)
     {
@@ -85,7 +86,16 @@ template <typename CellLyt>
     }
     else
     {
-        return {s.x, row_of(s)};
+        const auto c = to_cube(s);
+        if constexpr (has_offset_coord_v<CellLyt>)
+        {
+            if (c.x < 0 || c.y < 0)
+            {
+                throw std::out_of_range(
+                    "Negative lattice-site coordinates cannot be represented by offset coordinates");
+            }
+        }
+        return {c.x, c.y};
     }
 }
 /**

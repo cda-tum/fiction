@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/result.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -28,6 +29,8 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+
+#include <stdexcept>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -150,4 +153,13 @@ TEST_CASE("Determine the groundstate of a two BDL pair wire with input 1 applied
 
     const auto ground_state = results.groundstates();
     REQUIRE(ground_state.size() == 2);
+}
+
+TEST_CASE("Simulation-result distribution index boundaries", "[sidb-simulation-result]")
+{
+    result res{};
+    CHECK_THROWS_AS(res.charge_state(0, {}), std::out_of_range);
+    res.charge_distributions.emplace_back();
+    CHECK(res.charge_state(0, {}) == charge_state::NONE);
+    CHECK_THROWS_AS(res.charge_state(1, {}), std::out_of_range);
 }

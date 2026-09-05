@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/charge_distribution.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -24,6 +25,7 @@
 
 #include <functional>
 #include <memory>
+#include <stdexcept>
 #include <unordered_set>
 #include <vector>
 
@@ -127,4 +129,25 @@ TEST_CASE("Charge distribution over a layout", "[charge-distribution]")
         CHECK(cd.sites().empty());
         CHECK(cd.get_charge_state({0, 0, 0}) == charge_state::NONE);
     }
+}
+
+TEST_CASE("Charge-distribution boundaries", "[charge-distribution]")
+{
+    const auto sites = std::make_shared<const std::vector<lattice_site>>(std::vector<lattice_site>{{0, 0}, {1, 0}});
+    CHECK_THROWS_AS((charge_distribution{sites, {charge_state::NEGATIVE}, 0.0}), std::invalid_argument);
+    CHECK_THROWS_AS((charge_distribution{nullptr, {charge_state::NEGATIVE}, 0.0}), std::invalid_argument);
+    for (const auto& invalid_sites :
+         {std::vector<lattice_site>{{1, 0}, {0, 0}}, std::vector<lattice_site>{{0, 0}, {0, 0}}})
+    {
+        const auto shared = std::make_shared<const std::vector<lattice_site>>(invalid_sites);
+        CHECK_THROWS_AS(charge_distribution{shared}, std::invalid_argument);
+        CHECK_THROWS_AS((charge_distribution{shared, {charge_state::NEGATIVE, charge_state::NEUTRAL}, 0.0}),
+                        std::invalid_argument);
+    }
+    charge_distribution empty{};
+    CHECK_THROWS_AS(empty.assign_charge_state_by_index(0, charge_state::NEGATIVE), std::out_of_range);
+    CHECK(empty.get_charge_state_by_index(0) == charge_state::NONE);
+    charge_distribution cd{sites};
+    CHECK_THROWS_AS(cd.assign_charge_state_by_index(cd.size(), charge_state::NEUTRAL), std::out_of_range);
+    CHECK(cd.num_negative_sidbs() == 2);
 }

@@ -13,6 +13,7 @@
  * @brief The charge states of the SiDBs of one layout plus the electrostatic potential energy they yield.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -23,7 +24,6 @@
 #include "fiction/utils/stl/hash.hpp"
 
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -31,6 +31,7 @@
 #include <iterator>
 #include <memory>
 #include <optional>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -66,27 +67,34 @@ class charge_distribution
     /**
      * Creates a distribution over a shared site list with every SiDB in one charge state.
      *
-     * @param sites Sites in raster order.
+     * @param sites Distinct sites in raster order; callers must not mutate the shared list.
      * @param cs Charge state of every SiDB.
+     * @throws std::invalid_argument if the sites are not distinct and in raster order.
      */
     explicit charge_distribution(site_list sites, const model::charge_state cs = model::charge_state::NEGATIVE) :
             site_storage{std::move(sites)},
             charge_state_values(site_storage ? site_storage->size() : 0, cs)
-    {}
+    {
+        validate_sites();
+    }
     /**
      * Creates a distribution over a shared site list from explicit charge states and an energy.
      *
-     * @param sites Sites in raster order.
+     * @param sites Distinct sites in raster order; callers must not mutate the shared list.
      * @param states One charge state per site.
      * @param energy Electrostatic potential energy of the distribution (unit: eV).
+     * @throws std::invalid_argument if the site and state counts differ or sites are not distinct and in raster order.
      */
     charge_distribution(site_list sites, std::vector<model::charge_state> states, const double energy) :
             site_storage{std::move(sites)},
             charge_state_values{std::move(states)},
             electrostatic_energy{energy}
     {
-        assert((site_storage ? site_storage->size() : 0) == charge_state_values.size() &&
-               "one charge state per site required");
+        if (this->sites().size() != charge_state_values.size())
+        {
+            throw std::invalid_argument("One charge state per site required");
+        }
+        validate_sites();
     }
     /**
      * The sites the distribution covers, in raster order.
@@ -184,11 +192,11 @@ class charge_distribution
      *
      * @param index Index in raster order.
      * @param cs Charge state to assign.
+     * @throws std::out_of_range if the index is out of range.
      */
-    void assign_charge_state_by_index(const std::size_t index, const model::charge_state cs) noexcept
+    void assign_charge_state_by_index(const std::size_t index, const model::charge_state cs)
     {
-        assert(index < charge_state_values.size() && "index out of range");
-        charge_state_values[index] = cs;
+        charge_state_values.at(index) = cs;
     }
     /**
      * Assigns one charge state to every SiDB.
@@ -316,6 +324,18 @@ class charge_distribution
     }
 
   private:
+    /**
+     * Checks the shared site's ordering and uniqueness.
+     *
+     * @throws std::invalid_argument if the sites are not distinct and in raster order.
+     */
+    void validate_sites() const
+    {
+        if (std::ranges::adjacent_find(sites(), std::greater_equal{}) != sites().cend())
+        {
+            throw std::invalid_argument("Charge-distribution sites must be distinct and in raster order");
+        }
+    }
     /**
      * The sites in raster order, shared with the other distributions of the same result.
      */

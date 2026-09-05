@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -120,7 +121,7 @@ template <typename Lyt>
 
 /**
  * Whether two simulation results of the same layout are equivalent: the same number of distinct charge distributions,
- * and, sorted by charge index, pairwise the same charge states and energies within `ERROR_MARGIN`.
+ * and, sorted by charge states, pairwise the same charge states and energies within `ERROR_MARGIN`.
  *
  * @param result1 First result.
  * @param result2 Second result.
@@ -139,24 +140,14 @@ template <typename Lyt>
         return false;
     }
 
-    const auto index = [](const charge_distribution& cd) { return cd.charge_index(3); };
-
     for (auto* res : {&result1, &result2})
     {
-        std::set<uint64_t> unique{};
-
-        for (const auto& cd : res->charge_distributions)
-        {
-            unique.insert(index(cd));
-        }
-
-        if (unique.size() != res->charge_distributions.size())
+        std::ranges::sort(res->charge_distributions, {}, &charge_distribution::charge_states);
+        if (std::ranges::adjacent_find(res->charge_distributions, &charge_distribution::same_charge_states) !=
+            res->charge_distributions.cend())
         {
             return false;
         }
-
-        std::ranges::sort(res->charge_distributions,
-                          [&index](const auto& lhs, const auto& rhs) { return index(lhs) < index(rhs); });
     }
 
     for (std::size_t i = 0; i < result1.charge_distributions.size(); ++i)

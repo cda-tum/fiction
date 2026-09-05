@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -26,6 +27,10 @@
 #include <fiction/technology/sidb/simulation/potential_landscape.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
+
+#include <cstddef>
+#include <cstdint>
+#include <string_view>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -106,4 +111,31 @@ TEST_CASE("Several tests", "[equivalence-check-for-simulation-results]")
         results2.charge_distributions.at(0).assign_charge_state(site_at_row(0, 0), charge_state::POSITIVE);
         CHECK(!check_simulation_results_for_equivalence(results1, results2));
     }
+}
+
+TEST_CASE("Simulation equivalence beyond the charge-index range", "[equivalence-check-for-simulation-results]")
+{
+    // Base-3 digits of 2^64 collide with zero in a 64-bit charge index.
+    constexpr std::string_view digits{"11112220022122120101211020120210210211221"};
+    layout                     lyt{};
+    for (std::size_t i = 0; i < digits.size(); ++i)
+    {
+        lyt.assign_cell_type({i, 0}, sidb_technology::cell_type::NORMAL);
+    }
+    const charge_distribution zero{lyt};
+    auto                      wrapped = zero;
+    for (std::size_t i = 0; i < digits.size(); ++i)
+    {
+        wrapped.assign_charge_state_by_index(i, sign_to_charge_state(static_cast<int8_t>(digits[i] - '1')));
+    }
+    REQUIRE(zero.charge_index(3) == wrapped.charge_index(3));
+    result res{};
+    res.lyt                  = lyt;
+    res.charge_distributions = {zero, wrapped};
+    CHECK(check_simulation_results_for_equivalence(res, res));
+    auto reordered                 = res;
+    reordered.charge_distributions = {wrapped, zero};
+    CHECK(check_simulation_results_for_equivalence(res, reordered));
+    reordered.charge_distributions = {zero, zero};
+    CHECK(!check_simulation_results_for_equivalence(res, reordered));
 }

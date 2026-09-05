@@ -235,6 +235,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - SiDB result equivalence now compares complete charge distributions beyond the 64-bit charge-index range.
+  - SiDB simulation APIs now reject invalid indices, mismatched distribution sites, and invalid potential-vector sizes.
+  - SiDB cell conversion now rejects coordinates outside the target coordinate range.
   - Lattice sites now reject invalid basis indices in construction, geometry queries, and cube conversion.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range

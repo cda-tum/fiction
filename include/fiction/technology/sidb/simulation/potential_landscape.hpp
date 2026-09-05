@@ -13,6 +13,7 @@
  * @brief The static electrostatics of an SiDB layout under one set of physical parameters.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -32,6 +33,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -236,9 +238,12 @@ class potential_landscape
      * @param i Index of the first SiDB.
      * @param j Index of the second SiDB.
      * @return Distance (unit: nm).
+     * @throws std::out_of_range if an SiDB index is out of range.
      */
-    [[nodiscard]] double nm_distance(const std::size_t i, const std::size_t j) const noexcept
+    [[nodiscard]] double nm_distance(const std::size_t i, const std::size_t j) const
     {
+        validate_index(i);
+        validate_index(j);
         return distances[(i * num_sites) + j];
     }
     /**
@@ -248,9 +253,12 @@ class potential_landscape
      * @param i Index of the SiDB the potential acts on.
      * @param j Index of the SiDB that exerts it.
      * @return Chargeless potential (unit: V).
+     * @throws std::out_of_range if an SiDB index is out of range.
      */
-    [[nodiscard]] double chargeless_potential(const std::size_t i, const std::size_t j) const noexcept
+    [[nodiscard]] double chargeless_potential(const std::size_t i, const std::size_t j) const
     {
+        validate_index(i);
+        validate_index(j);
         return potentials[(i * num_sites) + j];
     }
     /**
@@ -258,31 +266,33 @@ class potential_landscape
      *
      * @param i Index of the SiDB.
      * @return External potential (unit: V).
+     * @throws std::out_of_range if an SiDB index is out of range.
      */
-    [[nodiscard]] double local_external_potential(const std::size_t i) const noexcept
+    [[nodiscard]] double local_external_potential(const std::size_t i) const
     {
-        return local_external_potentials[i];
+        return local_external_potentials.at(i);
     }
     /**
      * The potential the charged surface defects exert on an SiDB.
      *
      * @param i Index of the SiDB.
      * @return Defect potential (unit: V).
+     * @throws std::out_of_range if an SiDB index is out of range.
      */
-    [[nodiscard]] double local_potential_caused_by_defects(const std::size_t i) const noexcept
+    [[nodiscard]] double local_potential_caused_by_defects(const std::size_t i) const
     {
-        return defect_induced_potentials[i];
+        return defect_induced_potentials.at(i);
     }
     /**
      * The charge transition thresholds of an SiDB, indexed by `charge_transition_threshold_bounds`.
      *
      * @param i Index of the SiDB.
      * @return The four thresholds (unit: V).
+     * @throws std::out_of_range if an SiDB index is out of range.
      */
-    [[nodiscard]] const std::array<double, 4>&
-    effective_charge_transition_thresholds(const std::size_t i) const noexcept
+    [[nodiscard]] const std::array<double, 4>& effective_charge_transition_thresholds(const std::size_t i) const
     {
-        return charge_transition_thresholds[i];
+        return charge_transition_thresholds.at(i);
     }
     /**
      * The chargeless potential of a unit charge at a distance under the landscape's parameters.
@@ -324,10 +334,12 @@ class potential_landscape
      * the potential of the charged defects. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
      * @return Local internal potential per SiDB (unit: V).
      */
     [[nodiscard]] std::vector<double> local_internal_potentials(const charge_distribution& cd) const
     {
+        validate_distribution(cd);
         std::vector<double> pot{defect_induced_potentials};
 
         for (std::size_t i = 0; i < num_sites; ++i)
@@ -349,6 +361,7 @@ class potential_landscape
      * The local potentials of a charge distribution: internal plus external potential per SiDB. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
      * @return Local potential per SiDB (unit: V).
      */
     [[nodiscard]] std::vector<double> local_potentials(const charge_distribution& cd) const
@@ -368,12 +381,16 @@ class potential_landscape
      * energy of the defect charges. O(N + D·N) for D charged defects.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
+     * @throws std::invalid_argument if the potential vector does not contain one value per SiDB.
      * @param local_internal_potential Local internal potential per SiDB, as `local_internal_potentials` computes it.
      * @return Energy (unit: eV).
      */
     [[nodiscard]] double energy(const charge_distribution& cd,
-                                const std::vector<double>& local_internal_potential) const noexcept
+                                const std::vector<double>& local_internal_potential) const
     {
+        validate_distribution(cd, local_internal_potential);
+
         double collect     = 0.0;
         double collect_ext = 0.0;
 
@@ -412,6 +429,7 @@ class potential_landscape
      * The electrostatic potential energy of a charge distribution. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
      * @return Energy (unit: eV).
      */
     [[nodiscard]] double energy(const charge_distribution& cd) const
@@ -423,12 +441,16 @@ class potential_landscape
      * (0/-) transition, a positive one above the (+/0) transition, a neutral one in between.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
+     * @throws std::invalid_argument if the potential vector does not contain one value per SiDB.
      * @param local_internal_potential Local internal potential per SiDB.
      * @return `true` iff the population stability holds for every SiDB.
      */
     [[nodiscard]] bool is_population_stable(const charge_distribution& cd,
-                                            const std::vector<double>& local_internal_potential) const noexcept
+                                            const std::vector<double>& local_internal_potential) const
     {
+        validate_distribution(cd, local_internal_potential);
+
         for (std::size_t i = 0; i < num_sites; ++i)
         {
             const auto  v = -local_internal_potential[i];
@@ -455,12 +477,16 @@ class potential_landscape
      * Whether no charge hop between two SiDBs lowers the energy, i.e., the distribution is configuration stable.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
+     * @throws std::invalid_argument if the potential vector does not contain one value per SiDB.
      * @param local_internal_potential Local internal potential per SiDB.
      * @return `true` iff no energetically favored hop exists.
      */
     [[nodiscard]] bool is_configuration_stable(const charge_distribution& cd,
-                                               const std::vector<double>& local_internal_potential) const noexcept
+                                               const std::vector<double>& local_internal_potential) const
     {
+        validate_distribution(cd, local_internal_potential);
+
         for (std::size_t i = 0; i < num_sites; ++i)
         {
             if (cd.charge_states()[i] == model::charge_state::POSITIVE)  // we do nothing with SiDB+
@@ -494,11 +520,13 @@ class potential_landscape
      * Whether a charge distribution is physically valid: population stable and configuration stable.
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
+     * @throws std::invalid_argument if the potential vector does not contain one value per SiDB.
      * @param local_internal_potential Local internal potential per SiDB.
      * @return `true` iff both stability criteria hold.
      */
     [[nodiscard]] bool is_physically_valid(const charge_distribution& cd,
-                                           const std::vector<double>& local_internal_potential) const noexcept
+                                           const std::vector<double>& local_internal_potential) const
     {
         return is_population_stable(cd, local_internal_potential) &&
                is_configuration_stable(cd, local_internal_potential);
@@ -507,6 +535,7 @@ class potential_landscape
      * Whether a charge distribution is physically valid. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
      * @return `true` iff both stability criteria hold.
      */
     [[nodiscard]] bool is_physically_valid(const charge_distribution& cd) const
@@ -517,6 +546,7 @@ class potential_landscape
      * Evaluates a charge distribution: returns a copy with its energy set. O(N²).
      *
      * @param cd Charge distribution over this landscape's SiDBs.
+     * @throws std::invalid_argument if the distribution sites differ from the landscape.
      * @return `cd` with its energy assigned.
      */
     [[nodiscard]] charge_distribution evaluate(charge_distribution cd) const
@@ -527,6 +557,47 @@ class potential_landscape
     }
 
   private:
+    /**
+     * Validates an SiDB index before matrix indexing.
+     *
+     * @param index SiDB index.
+     * @throws std::out_of_range if the index is out of range.
+     */
+    void validate_index(const std::size_t index) const
+    {
+        if (index >= num_sites)
+        {
+            throw std::out_of_range("SiDB index out of range");
+        }
+    }
+    /**
+     * Checks that a distribution covers the landscape's sites.
+     *
+     * @param cd Charge distribution.
+     * @throws std::invalid_argument if the site lists or cardinalities differ.
+     */
+    void validate_distribution(const charge_distribution& cd) const
+    {
+        if (cd.size() != num_sites || (cd.shared_sites() != site_storage && cd.sites() != *site_storage))
+        {
+            throw std::invalid_argument("Charge distribution must cover the landscape's SiDB sites");
+        }
+    }
+    /**
+     * Checks a distribution and its cached local internal potentials.
+     *
+     * @param cd Charge distribution.
+     * @param internal_potentials Local internal potential per SiDB.
+     * @throws std::invalid_argument if the sites differ or the potential count differs from the SiDB count.
+     */
+    void validate_distribution(const charge_distribution& cd, const std::vector<double>& internal_potentials) const
+    {
+        validate_distribution(cd);
+        if (internal_potentials.size() != num_sites)
+        {
+            throw std::invalid_argument("One local internal potential per SiDB required");
+        }
+    }
     /**
      * The layout.
      */

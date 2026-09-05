@@ -124,3 +124,14 @@ def test_degenerate_ground_states():
     result.charge_distributions = [excited, left, right, left]
 
     assert len(result.groundstates()) == 2
+
+
+def test_distribution_index_boundary() -> None:
+    """Missing distribution indices raise IndexError, including on empty results."""
+    result = sidb_simulation_result()
+    with pytest.raises(IndexError):
+        result.charge_state(0, lattice_site())
+    result.charge_distributions = [charge_distribution()]
+    assert result.charge_state(0, lattice_site()) == sidb_charge_state.NONE
+    with pytest.raises(IndexError):
+        result.charge_state(1, lattice_site())
