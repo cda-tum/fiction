@@ -20,10 +20,10 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -82,17 +82,22 @@ int main()  // NOLINT
 
     static const std::string folder = fmt::format("{}/gate_skeletons/skeleton_bestagons_with_tags", EXPERIMENTS_PATH);
 
+    const is_operational_params operational_params{.sim_params                = simulation_parameters{2, -0.32},
+                                                   .sim_engine                = engine::QUICKEXACT,
+                                                   .input_bdl_iterator_params = bdl_input_iterator_params{},
+                                                   .op_condition =
+                                                       is_operational_params::operational_condition::REJECT_KINKS};
+
     // 1-input, 1-output gates with straight I/O pins
     const auto skeleton_1i1o_straight =
         read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i1o_straight.sqd"));
 
     design_gates_params params_1i1o_straight{
-        is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{},
-                              is_operational_params::operational_condition::REJECT_KINKS},
-        design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-        {{13, 6, 0}, {23, 14, 0}},
-        3,
-        design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        .operational_params     = operational_params,
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{13, 6, 0}, {23, 14, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
     // ------------------------------------------------
 
     // 1-input, 1-output gates with diagonal I/O pins
@@ -100,47 +105,43 @@ int main()  // NOLINT
         read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i1o_diagonal.sqd"));
 
     design_gates_params params_1i1o_diagonal{
-        is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT, bdl_input_iterator_params{},
-                              is_operational_params::operational_condition::REJECT_KINKS},
-        design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-        {{14, 6, 0}, {24, 14, 0}},
-        3,
-        design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+        .operational_params     = operational_params,
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{14, 6, 0}, {24, 14, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
     // ------------------------------------------------
 
     // 2-input, 1-output gates
     const auto skeleton_2i1o = read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i1o.sqd"));
 
-    design_gates_params params_2i1o{is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
-                                                          bdl_input_iterator_params{},
-                                                          is_operational_params::operational_condition::REJECT_KINKS},
-                                    design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-                                    {{14, 6, 0}, {24, 12, 0}},
-                                    3,
-                                    design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+    design_gates_params params_2i1o{
+        .operational_params     = operational_params,
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{14, 6, 0}, {24, 12, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
 
     // 1-input, 2-output gates
     const auto skeleton_1i2o = read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_1i2o.sqd"));
 
-    design_gates_params params_1i2o{is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
-                                                          bdl_input_iterator_params{},
-                                                          is_operational_params::operational_condition::REJECT_KINKS},
-                                    design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-                                    {{15, 8, 0}, {23, 14, 0}},
-                                    3,
-                                    design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+    design_gates_params params_1i2o{
+        .operational_params     = operational_params,
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{15, 8, 0}, {23, 14, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
     // ------------------------------------------------
 
     // 2-input, 2-output gates
     const auto skeleton_2i2o = read_sqd_layout(fmt::format("{}/{}", folder, "skeleton_hex_inputsdbp_2i2o.sqd"));
 
-    design_gates_params params_2i2o{is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
-                                                          bdl_input_iterator_params{},
-                                                          is_operational_params::operational_condition::REJECT_KINKS},
-                                    design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
-                                    {{14, 6, 0}, {24, 13, 0}},
-                                    3,
-                                    design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
+    design_gates_params params_2i2o{
+        .operational_params     = operational_params,
+        .design_mode            = design_gates_params::design_gates_mode::AUTOMATIC_EXHAUSTIVE_GATE_DESIGNER,
+        .canvas                 = {{14, 6, 0}, {24, 13, 0}},
+        .number_of_canvas_sidbs = 3,
+        .termination_cond       = design_gates_params::termination_condition::ALL_COMBINATIONS_ENUMERATED};
     // ------------------------------------------------
 
     for (const auto& [truth_table, gate_name] : truth_tables_and_names)

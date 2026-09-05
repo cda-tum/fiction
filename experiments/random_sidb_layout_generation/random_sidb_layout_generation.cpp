@@ -17,7 +17,8 @@
 
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
-#include <fiction/types.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 
 #include <fmt/format.h>
 
@@ -25,9 +26,9 @@
 #include <cstdlib>
 #include <filesystem>
 #include <iostream>
+#include <span>
 #include <string>
 #include <unordered_map>
-#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -79,13 +80,13 @@ int main(int argc, const char* argv[])  // NOLINT
                                                          {"--num_layouts", "10"},
                                                          {"--step", "1"}};
 
-    std::vector<std::string> arguments(argv + 1, argv + argc);  // Convert argv to a vector of strings
+    const std::span<const char* const> arguments{argv, static_cast<std::size_t>(argc)};
 
     // Parse command-line arguments
-    for (size_t i = 0; i < arguments.size(); ++i)
+    for (std::size_t i = 1; i < arguments.size(); ++i)
     {
-        const std::string& arg = arguments[i];
-        if (options.count(arg) > 0)
+        const std::string arg{arguments[i]};
+        if (options.contains(arg))
         {
             if (i + 1 < arguments.size())
             {
@@ -194,13 +195,14 @@ int main(int argc, const char* argv[])  // NOLINT
                     std::cout << "Folder already exists.\n";
                 }
 
-                const generate_random_layout_params params{{site_at_row(nw_x, nw_y), site_at_row(se_x, se_y)},
-                                                           number_of_placed_sidbs,
-                                                           charges,
-                                                           simulation_parameters{3, -0.32},
-                                                           static_cast<uint64_t>(10E6),
-                                                           number_of_layouts};
-                const auto                          unique_lyts = generate_multiple_random_layouts(params);
+                const generate_random_layout_params params{
+                    .coordinate_pair                    = {site_at_row(nw_x, nw_y), site_at_row(se_x, se_y)},
+                    .number_of_sidbs                    = number_of_placed_sidbs,
+                    .positive_sidbs                     = charges,
+                    .sim_params                         = simulation_parameters{3, -0.32},
+                    .maximal_attempts                   = static_cast<uint64_t>(10E6),
+                    .number_of_unique_generated_layouts = number_of_layouts};
+                const auto unique_lyts = generate_multiple_random_layouts(params);
 
                 if (unique_lyts.has_value())
                 {

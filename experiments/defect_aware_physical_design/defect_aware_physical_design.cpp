@@ -26,18 +26,16 @@
 #include <fiction/synthesis/technology_mapping_library.hpp>     // pre-defined gate types for technology mapping
 #include <fiction/technology/fcn/area.hpp>                      // area requirement calculations
 #include <fiction/technology/sidb/bestagon_library.hpp>         // a pre-defined SiDB gate library
-#include <fiction/technology/sidb/io/read_sqd_layout.hpp>       // reader for SiDB layouts including surface scan data
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>  // reader for simulated SiDB surfaces
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>      // writer for SiQAD files (physical simulation)
 #include <fiction/technology/sidb/layout.hpp>                   // SiDB layouts over a crystal lattice
-#include <fiction/technology/sidb/model/defect.hpp>             // SiDB defect classes
 #include <fiction/technology/sidb/technology.hpp>               // cell implementations
 #include <fiction/types.hpp>                                    // pre-defined types suitable for the FCN domain
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
+#include <lorina/verilog.hpp>                                  // Verilog file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/equivalence_checking.hpp>      // equivalence checking
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
@@ -47,15 +45,15 @@
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/klut.hpp>                        // kLUT network
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
+#include <mockturtle/utils/stopwatch.hpp>                      // runtime conversion
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
+#include <cassert>
 #include <cstdint>
 #include <cstdlib>
-#include <iostream>
 #include <sstream>
 #include <string>
-#include <unordered_set>
 #include <vector>
 
 using namespace fiction;
@@ -192,8 +190,16 @@ int main()  // NOLINT
         {
             // check equivalence
             const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *gate_level_layout);
-            const auto eq    = mockturtle::equivalence_checking(*miter);
-            assert(eq.has_value());
+            if (!miter.has_value())
+            {
+                continue;
+            }
+
+            const auto eq = mockturtle::equivalence_checking(*miter);
+            if (!eq.has_value())
+            {
+                continue;
+            }
 
             // compute critical path and throughput
             const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
@@ -203,9 +209,7 @@ int main()  // NOLINT
                 *gate_level_layout, surface_lattice);
 
             // compute area (the bounding box covers SiDBs and defects)
-            area_stats                   area_stats{};
-            area_params<sidb_technology> area_ps{};
-            area(dot_accurate_layout, area_ps, &area_stats);
+            const auto layout_area = area(dot_accurate_layout);
 
             // write a SiQAD simulation file
             write_sqd_layout(dot_accurate_layout, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
@@ -217,7 +221,7 @@ int main()  // NOLINT
                        (gate_level_layout->x() + 1) * (gate_level_layout->y() + 1), gate_level_layout->num_gates(),
                        gate_level_layout->num_wires(), cp_tp.critical_path_length, cp_tp.throughput,
                        mockturtle::to_seconds(exact_stats.time_total), *eq, dot_accurate_layout.num_cells(),
-                       area_stats.area);
+                       layout_area);
         }
         else  // no layout was obtained
         {

@@ -80,9 +80,9 @@ struct area_stats
      */
     void report(std::ostream& out = std::cout) const
     {
-        out << fmt::format("[i] Width  = {:.2f} nm", width) << std::endl;
-        out << fmt::format("[i] Height = {:.2f} nm", height) << std::endl;
-        out << fmt::format("[i] Area   = {:.2f} nm²", area) << std::endl;
+        out << fmt::format("[i] Width  = {:.2f} nm", width) << '\n';
+        out << fmt::format("[i] Height = {:.2f} nm", height) << '\n';
+        out << fmt::format("[i] Area   = {:.2f} nm²", area) << '\n';
     }
 };
 
@@ -104,11 +104,11 @@ double area(const Lyt& lyt, const area_params<technology<Lyt>>& ps = {}, area_st
 
     area_stats st{};
 
-    st.width  = static_cast<double>(lyt.x() + 1) * ps.width + static_cast<double>(lyt.x()) * ps.hspace;
-    st.height = static_cast<double>(lyt.y() + 1) * ps.height + static_cast<double>(lyt.y()) * ps.vspace;
+    st.width  = (static_cast<double>(lyt.x() + 1) * ps.width) + (static_cast<double>(lyt.x()) * ps.hspace);
+    st.height = (static_cast<double>(lyt.y() + 1) * ps.height) + (static_cast<double>(lyt.y()) * ps.vspace);
     st.area   = st.width * st.height;
 
-    if (pst)
+    if (pst != nullptr)
     {
         *pst = st;
     }
@@ -134,11 +134,13 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technolog
 
     area_stats st{};
 
-    st.width  = static_cast<double>(bb.get_x_size() + 1) * ps.width + static_cast<double>(bb.get_x_size()) * ps.hspace;
-    st.height = static_cast<double>(bb.get_y_size() + 1) * ps.height + static_cast<double>(bb.get_y_size()) * ps.vspace;
-    st.area   = st.width * st.height;
+    st.width =
+        (static_cast<double>(bb.get_x_size() + 1) * ps.width) + (static_cast<double>(bb.get_x_size()) * ps.hspace);
+    st.height =
+        (static_cast<double>(bb.get_y_size() + 1) * ps.height) + (static_cast<double>(bb.get_y_size()) * ps.vspace);
+    st.area = st.width * st.height;
 
-    if (pst)
+    if (pst != nullptr)
     {
         *pst = st;
     }
@@ -167,12 +169,12 @@ double area(const layouts::bounding_box_2d<Lyt>& bb, const area_params<technolog
         const auto x_size = se.x - nw.x;
         const auto y_size = sidb::row_of(se) - sidb::row_of(nw);
 
-        st.width  = static_cast<double>(x_size + 1) * ps.width + static_cast<double>(x_size) * ps.hspace;
-        st.height = static_cast<double>(y_size + 1) * ps.height + static_cast<double>(y_size) * ps.vspace;
+        st.width  = (static_cast<double>(x_size + 1) * ps.width) + (static_cast<double>(x_size) * ps.hspace);
+        st.height = (static_cast<double>(y_size + 1) * ps.height) + (static_cast<double>(y_size) * ps.vspace);
         st.area   = st.width * st.height;
     }
 
-    if (pst)
+    if (pst != nullptr)
     {
         *pst = st;
     }

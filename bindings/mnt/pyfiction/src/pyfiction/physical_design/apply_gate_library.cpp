@@ -24,7 +24,6 @@
 #include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 

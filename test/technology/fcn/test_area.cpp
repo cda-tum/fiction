@@ -100,7 +100,7 @@ TEST_CASE("Area computation for different technologies", "[area]")
         lyt.assign_cell_type({4, 2, 0}, sidb_technology::cell_type::NORMAL);
 
         area_stats stats{};
-        area(lyt, area_params<sidb_technology>{}, &stats);
+        CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(2.359296, 0.000001));
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(1.536, 0.0001));
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(1.536, 0.0001));
@@ -108,7 +108,7 @@ TEST_CASE("Area computation for different technologies", "[area]")
 
         // defects extend the bounding box
         lyt.assign_defect({4, 4, 1}, model::defect{model::defect_type::DB, -1});
-        area(lyt, area_params<sidb_technology>{}, &stats);
+        CHECK_THAT(area(lyt, area_params<sidb_technology>{}, &stats), Catch::Matchers::WithinAbs(5.308416, 0.000001));
 
         CHECK_THAT(stats.width, Catch::Matchers::WithinAbs(1.536, 0.0001));
         CHECK_THAT(stats.height, Catch::Matchers::WithinAbs(3.456, 0.0001));

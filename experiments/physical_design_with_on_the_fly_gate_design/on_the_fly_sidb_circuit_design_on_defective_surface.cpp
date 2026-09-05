@@ -24,10 +24,10 @@
 #include <fiction/technology/sidb/generators/on_the_fly_circuit_design.hpp>
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>

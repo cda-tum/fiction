@@ -19,11 +19,11 @@
 #include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
 #include "fiction/technology/sidb/generators/design_gates.hpp"
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_clearance.hpp"
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/types.hpp"
 #include "fiction_experiments.hpp"
 
