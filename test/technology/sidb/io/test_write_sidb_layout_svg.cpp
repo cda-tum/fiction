@@ -32,12 +32,16 @@
 
 #include <fmt/format.h>
 
+#include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <limits>
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -56,6 +60,37 @@ using namespace fiction::sidb::surfaces;
     std::string result = svg;
     std::erase_if(result, [](const unsigned char c) { return std::isspace(c) != 0; });
     return result;
+}
+
+/**
+ * Separates charge-marker elements from an SVG document and sorts them for order-independent comparison.
+ *
+ * @param svg SVG document.
+ * @return The normalized document without charge markers and the sorted charge-marker elements.
+ * @throws std::invalid_argument if a charge-marker element is not closed.
+ */
+[[nodiscard]] static std::pair<std::string, std::vector<std::string>> parse_svg_charge_elements(const std::string& svg)
+{
+    constexpr std::string_view marker{R"(<use xlink:href="#sidb_color")"};
+
+    std::string              document = normalize_svg(svg);
+    std::vector<std::string> elements{};
+
+    for (auto begin = document.find(marker); begin != std::string::npos; begin = document.find(marker))
+    {
+        const auto end = document.find("/>", begin);
+        if (end == std::string::npos)
+        {
+            throw std::invalid_argument{"unclosed SiDB charge marker"};
+        }
+
+        elements.emplace_back(document.substr(begin, end + 2 - begin));
+        document.erase(begin, end + 2 - begin);
+    }
+
+    std::ranges::sort(elements);
+
+    return {std::move(document), std::move(elements)};
 }
 
 inline const std::string EXPECTED_SVG_LIGHT_CELL_LEVEL =
@@ -732,7 +767,7 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 
         write_sidb_layout_svg(lyt, cd, os, {.color_background = write_sidb_layout_svg_params::color_mode::LIGHT});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION));
+        CHECK(parse_svg_charge_elements(os.str()) == parse_svg_charge_elements(EXPECTED_SVG_LIGHT_CHARGE_DISTRIBUTION));
     }
     SECTION("dark mode")
     {
@@ -740,6 +775,6 @@ TEST_CASE("Generate SVG for an sidb::layout with a charge distribution", "[write
 
         write_sidb_layout_svg(lyt, cd, os, {.color_background = write_sidb_layout_svg_params::color_mode::DARK});
 
-        CHECK(normalize_svg(os.str()) == normalize_svg(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION));
+        CHECK(parse_svg_charge_elements(os.str()) == parse_svg_charge_elements(EXPECTED_SVG_DARK_CHARGE_DISTRIBUTION));
     }
 }

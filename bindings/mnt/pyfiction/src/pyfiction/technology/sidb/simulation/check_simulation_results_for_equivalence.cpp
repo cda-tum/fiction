@@ -15,6 +15,7 @@
  */
 
 #include "pyfiction/documentation.hpp"
+#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/check_simulation_results_for_equivalence.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
@@ -31,9 +32,19 @@ void check_simulation_results_for_equivalence(nanobind::module_& m)
     // NOLINTNEXTLINE(misc-const-correctness)
     bool (*const equivalence_pointer)(fiction::sidb::simulation::result, fiction::sidb::simulation::result) =
         &fiction::sidb::simulation::check_simulation_results_for_equivalence;
+    bool (*const equivalence_100_pointer)(fiction::sidb::simulation::legacy_result<py_sidb_100_lattice>,
+                                          fiction::sidb::simulation::legacy_result<py_sidb_100_lattice>) =
+        &fiction::sidb::simulation::check_simulation_results_for_equivalence<py_sidb_100_lattice>;
+    bool (*const equivalence_111_pointer)(fiction::sidb::simulation::legacy_result<py_sidb_111_lattice>,
+                                          fiction::sidb::simulation::legacy_result<py_sidb_111_lattice>) =
+        &fiction::sidb::simulation::check_simulation_results_for_equivalence<py_sidb_111_lattice>;
 
     m.def("check_simulation_results_for_equivalence", equivalence_pointer, py::arg("result1"), py::arg("result2"),
           DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence_2));
+    m.def("check_simulation_results_for_equivalence", equivalence_100_pointer, py::arg("result1"), py::arg("result2"),
+          DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
+    m.def("check_simulation_results_for_equivalence", equivalence_111_pointer, py::arg("result1"), py::arg("result2"),
+          DOC(fiction_sidb_simulation_check_simulation_results_for_equivalence));
 }
 
 }  // namespace pyfiction

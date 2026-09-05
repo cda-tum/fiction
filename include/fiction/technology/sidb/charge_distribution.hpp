@@ -23,6 +23,7 @@
 #include "fiction/utils/stl/hash.hpp"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
@@ -83,7 +84,10 @@ class charge_distribution
             site_storage{std::move(sites)},
             charge_state_values{std::move(states)},
             electrostatic_energy{energy}
-    {}
+    {
+        assert((site_storage ? site_storage->size() : 0) == charge_state_values.size() &&
+               "one charge state per site required");
+    }
     /**
      * The sites the distribution covers, in raster order.
      *
@@ -183,6 +187,7 @@ class charge_distribution
      */
     void assign_charge_state_by_index(const std::size_t index, const model::charge_state cs) noexcept
     {
+        assert(index < charge_state_values.size() && "index out of range");
         charge_state_values[index] = cs;
     }
     /**

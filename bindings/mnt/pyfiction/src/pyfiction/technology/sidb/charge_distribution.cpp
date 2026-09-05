@@ -20,8 +20,6 @@
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
 
-#include <functional>
-
 #include <nanobind/nanobind.h>
 #include <nanobind/operators.h>
 // These headers register nanobind type casters without exposing directly referenced symbols.
@@ -78,7 +76,6 @@ void charge_distribution(nanobind::module_& m)
         .def(py::self == py::self,  // NOLINT(misc-redundant-expression)
              DOC(fiction_sidb_charge_distribution_operator_eq))
         .def(py::self != py::self)  // NOLINT(misc-redundant-expression)
-        .def("__hash__", [](const charge_distribution& cd) { return std::hash<charge_distribution>{}(cd); })
         .def("__len__", &charge_distribution::size)
         .def("__repr__", [](const charge_distribution& cd)
              { return fiction::sidb::model::charge_configuration_to_string(cd.charge_states()); })

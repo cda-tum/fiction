@@ -10,6 +10,8 @@
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from mnt.pyfiction import (
     automatic_base_number_detection,
     lattice,
@@ -23,8 +25,13 @@ from mnt.pyfiction import (
     sidb_technology,
 )
 
+if TYPE_CHECKING:
+    from pathlib import Path
 
-def test_three_sidbs():
+
+def test_three_sidbs() -> None:
+    """QuickExact simulates a three-SiDB layout."""
+
     layout = sidb_layout()
     layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
@@ -55,7 +62,9 @@ def test_three_sidbs():
     assert len(result.charge_distributions) <= 2
 
 
-def test_perturber_and_sidb_pair_111():
+def test_perturber_and_sidb_pair_111() -> None:
+    """QuickExact finds the H-Si(111)-1x1 ground state."""
+
     layout = sidb_layout(lattice.si_111_1x1())
     layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(1, 0, 0), sidb_technology.cell_type.NORMAL)
@@ -86,7 +95,13 @@ def test_perturber_and_sidb_pair_111():
     )
 
 
-def test_simulate_all_inputs_of_and_gate(resources_dir):
+def test_simulate_all_inputs_of_and_gate(resources_dir: Path) -> None:
+    """QuickExact finds a charge distribution for every AND-gate input.
+
+    Args:
+        resources_dir: Directory that contains the test layout.
+    """
+
     and_gate = read_sqd_layout(str(resources_dir / "Bestagon_AND_mu_025_v0.sqd"))
     physical_parameters = sidb_simulation_parameters()
     physical_parameters.base = 2

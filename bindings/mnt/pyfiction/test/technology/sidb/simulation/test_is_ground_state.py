@@ -18,6 +18,10 @@ from mnt.pyfiction import (
     lattice,
     lattice_site,
     potential_landscape,
+    quickexact,
+    quickexact_params,
+    sidb_100_lattice,
+    sidb_111_lattice,
     sidb_charge_state,
     sidb_layout,
     sidb_simulation_parameters,
@@ -30,7 +34,13 @@ from mnt.pyfiction import (
     "lat",
     [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
 )
-def test_three_sidbs(lat):
+def test_three_sidbs(lat: lattice) -> None:
+    """Ground-state matching supports both non-template lattices.
+
+    Args:
+        lat: Lattice to test.
+    """
+
     layout = sidb_layout(lat)
 
     layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
@@ -66,5 +76,26 @@ def test_three_sidbs(lat):
     assert not is_ground_state(heuristic_results, exact_results)
 
 
-def test_empty_results():
+def test_empty_results() -> None:
+    """Empty results contain no ground state."""
+
     assert not is_ground_state(sidb_simulation_result(), sidb_simulation_result())
+
+
+@pytest.mark.parametrize(
+    "layout",
+    [pytest.param(sidb_100_lattice(), id="100"), pytest.param(sidb_111_lattice(), id="111")],
+)
+def test_legacy_results(layout: sidb_100_lattice | sidb_111_lattice) -> None:
+    """Ground-state matching accepts transitional simulation results.
+
+    Args:
+        layout: Cell-level layout to test.
+    """
+
+    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.NORMAL)
+
+    result = quickexact(layout, quickexact_params())
+
+    assert is_ground_state(result, result)

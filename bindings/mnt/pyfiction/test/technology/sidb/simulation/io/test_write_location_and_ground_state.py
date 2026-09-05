@@ -26,6 +26,12 @@ if TYPE_CHECKING:
 
 
 def test_write_location_and_ground_state(tmp_path: Path) -> None:
+    """The writer emits one row per SiDB.
+
+    Args:
+        tmp_path: Temporary output directory.
+    """
+
     layout = sidb_layout()
     layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
     layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)

@@ -163,6 +163,8 @@ class clustercomplete_impl
 
         if (!gss_stats.top_cluster)
         {
+            sim_result.simulation_runtime += gss_stats.runtime;
+
             return sim_result;
         }
 
