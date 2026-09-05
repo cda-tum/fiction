@@ -116,6 +116,17 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
 
         CHECK(domain.size() == 1);
     }
+
+    SECTION("negative additional scanning area")
+    {
+        auto lyt = layout{};
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+
+        auto invalid_params                     = params;
+        invalid_params.additional_scanning_area = {-1, 0};
+
+        CHECK_THROWS_AS(defect_influence_quicktrace(lyt, 1, invalid_params), std::invalid_argument);
+    }
 }
 
 TEST_CASE("novel designed AND Gate influence distance function which fails again", "[defect-influence]")
