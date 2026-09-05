@@ -22,6 +22,7 @@
 
 #include <fiction/layouts/cartesian_layout.hpp>
 #include <fiction/layouts/clocked_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/gate_level_layout.hpp>
 #include <fiction/layouts/tile_based_layout.hpp>
 #include <fiction/networks/technology_network.hpp>
@@ -34,8 +35,7 @@
 #include <mockturtle/networks/mig.hpp>
 #include <mockturtle/networks/xag.hpp>
 #include <mockturtle/traits.hpp>
-
-#include <type_traits>
+#include <mockturtle/views/names_view.hpp>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -119,6 +119,24 @@ TEST_CASE("Simple network conversion", "[network-conversion]")
 
         to_x(tec);
     }
+}
+
+TEST_CASE("Technology network inverters and buffers survive conversion", "[network-conversion]")
+{
+    // a multiplexer whose select signal is inverted by an inverter node and whose output passes a buffer,
+    // as the readers build technology networks
+    technology_network tec{};
+
+    const auto a = tec.create_pi();
+    const auto b = tec.create_pi();
+    const auto s = tec.create_pi();
+
+    const auto not_s = tec.create_not(s);
+    const auto mux   = tec.create_or(tec.create_and(a, not_s), tec.create_and(b, s));
+
+    tec.create_po(tec.create_buf(mux));
+
+    to_x(tec);
 }
 
 TEST_CASE("Complex network conversion", "[network-conversion]")

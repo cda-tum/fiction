@@ -329,6 +329,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
   - Gate design enumerates, counts, and randomly samples only empty, defect-free canvas sites.
   - Combination enumeration throws `std::length_error` when its result cannot fit in a vector.
+  - `convert_network` keeps the inverters of a technology network when the target network
+    type has no `create_node`; before, an AIG, XAG, or MIG converted from one lost them
 
 - Build system:
 

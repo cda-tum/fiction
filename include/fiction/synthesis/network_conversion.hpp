@@ -167,6 +167,16 @@ class convert_network_impl<NtkDest, NtkSrc, false>
                         return true;
                     }
                 }
+                // a technology network keeps inverters as nodes; a target without `create_node` takes them as
+                // complemented signals
+                if constexpr (fiction::has_is_inv_v<TopoNtkSrc> && mockturtle::has_create_not_v<NtkDest>)
+                {
+                    if (ntk.is_inv(g))
+                    {
+                        old2new[g] = ntk_dest.create_not(children[0]);
+                        return true;
+                    }
+                }
                 if constexpr (mockturtle::has_node_function_v<TopoNtkSrc> && mockturtle::has_create_node_v<NtkDest>)
                 {
                     old2new[g] = ntk_dest.create_node(children, ntk.node_function(g));
