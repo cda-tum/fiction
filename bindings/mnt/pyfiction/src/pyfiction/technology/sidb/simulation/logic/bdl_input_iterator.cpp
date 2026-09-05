@@ -67,6 +67,9 @@ void bdl_input_iterator(nanobind::module_& m)
         .def(py::init<const layout&, const bdl_input_iterator_params&>(), py::arg("lyt"),
              py::arg("params") = bdl_input_iterator_params{},
              DOC(fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator))
+        .def(
+            "__iter__", [](bdl_input_iterator& self) -> bdl_input_iterator& { return self; },
+            py::rv_policy::reference_internal)
         .def(py::init<const layout&, const bdl_input_iterator_params&, const std::vector<bdl_wire>&>(), py::arg("lyt"),
              py::arg("params"), py::arg("input_wires"),
              DOC(fiction_sidb_simulation_logic_bdl_input_iterator_bdl_input_iterator_2))

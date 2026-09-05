@@ -135,6 +135,8 @@ def test_automatic_bdl_wire_iteration(bdl_wire: sidb_layout) -> None:
     layout = bdl_wire
     bii = bdl_input_iterator(layout)
 
+    assert iter(bii) is bii
+
     input_pattern_layouts = list(bii)
     assert len(input_pattern_layouts) == 2
 
