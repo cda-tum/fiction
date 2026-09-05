@@ -440,9 +440,8 @@ namespace detail
 }
 
 /**
- * This function validates the given parameters for the operational domain computation. It checks if the minimum
- * value of any sweep dimension is larger than the corresponding maximum value, and if the step size of any sweep
- * dimension is negative or zero. Additionally, it checks the preconditions of the operational domain sketch.
+ * Validates the sweep count, finite ordered bounds, positive finite steps, point counts, and the preconditions
+ * of the operational domain sketch.
  *
  * The sketch, i.e., `operational_analysis_strategy::FILTER_ONLY`, determines the operational status by filtering
  * alone. It has two preconditions: the filtering steps are only defined when kinks are rejected, and they enumerate
@@ -450,7 +449,6 @@ namespace detail
  * evaluates nothing and silently falls back to a full simulation of the entire parameter space. Since that is the
  * exhaustive cost the sketch exists to avoid, an unmet precondition is rejected instead of being absorbed.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout the operational domain is computed for.
  * @param params The operational domain parameters to validate.
  * @param min_sweep_dimensions The number of sweep dimensions the calling algorithm requires at least. Grid search and
@@ -545,39 +543,10 @@ class operational_domain_impl
             canvas_lyt.assign_cell_type(c, sidb_technology::cell_type::LOGIC);
         }
 
-        indices.reserve(num_dimensions);
-        values.reserve(num_dimensions);
-
-        for (auto d = 0u; d < num_dimensions; ++d)
-        {
-            op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
-
-            // generate the step points for the dimension
-            indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
-            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
-
-            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
-            // ignored in the operational domain calculation
-            if ((params.sweep_dimensions.at(d).min +
-                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
-                    params.sweep_dimensions.at(d).max >
-                fiction::utils::math::ERROR_MARGIN)
-            {
-                indices.at(d).pop_back();
-            }
-
-            values.emplace_back();
-
-            // generate the values for the dimension
-            for (const auto i : indices.at(d))
-            {
-                values.at(d).push_back(params.sweep_dimensions.at(d).min +
-                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
-            }
-        }
+        initialize_sweep();
     }
     /**
-     * Additional Constructor. Initializes the layout, the parameters and the statistics.
+     * Initializes the layout, parameters, and statistics for a physical-validity sweep.
      *
      * @param source_layout SiDB layout to be evaluated.
      * @param ps Parameters for the operational domain computation.
@@ -594,36 +563,7 @@ class operational_domain_impl
             num_dimensions{params.sweep_dimensions.size()}
     {
 
-        indices.reserve(num_dimensions);
-        values.reserve(num_dimensions);
-
-        for (auto d = 0u; d < num_dimensions; ++d)
-        {
-            op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
-
-            // generate the step points for the dimension
-            indices.push_back(std::vector<std::size_t>(num_steps(d) + 1));
-            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
-
-            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
-            // ignored in the operational domain calculation
-            if ((params.sweep_dimensions.at(d).min +
-                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
-                    params.sweep_dimensions.at(d).max >
-                fiction::utils::math::ERROR_MARGIN)
-            {
-                indices.at(d).pop_back();
-            }
-
-            values.emplace_back();
-
-            // generate the values for the dimension
-            for (const auto i : indices.at(d))
-            {
-                values.at(d).push_back(params.sweep_dimensions.at(d).min +
-                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
-            }
-        }
+        initialize_sweep();
     }
     /**
      * Performs a grid search over the specified parameter ranges with the specified step sizes. The grid search
@@ -1227,6 +1167,44 @@ class operational_domain_impl
 
   private:
     /**
+     * Builds the indices and values of each validated sweep dimension.
+     *
+     * @throws std::invalid_argument if a sweep range is invalid or exceeds the storage range.
+     */
+    void initialize_sweep()
+    {
+        indices.reserve(num_dimensions);
+        values.reserve(num_dimensions);
+
+        for (auto d = 0u; d < num_dimensions; ++d)
+        {
+            op_domain.add_dimension(params.sweep_dimensions.at(d).dimension);
+
+            // generate the step points for the dimension
+            indices.push_back(std::vector<std::size_t>(num_sweep_steps(params.sweep_dimensions.at(d)) + 1));
+            std::iota(indices.at(d).begin(), indices.at(d).end(), 0ul);
+
+            // if the value of the parameter is greater than params.max after num_x_steps() steps, this value is
+            // ignored in the operational domain calculation
+            if ((params.sweep_dimensions.at(d).min +
+                 (static_cast<double>(indices.at(d).size() - 1) * params.sweep_dimensions.at(d).step)) -
+                    params.sweep_dimensions.at(d).max >
+                fiction::utils::math::ERROR_MARGIN)
+            {
+                indices.at(d).pop_back();
+            }
+
+            values.emplace_back();
+
+            // generate the values for the dimension
+            for (const auto i : indices.at(d))
+            {
+                values.at(d).push_back(params.sweep_dimensions.at(d).min +
+                                       (static_cast<double>(i) * params.sweep_dimensions.at(d).step));
+            }
+        }
+    }
+    /**
      * The SiDB layout to investigate.
      */
     const layout& sidb_layout;
@@ -1378,19 +1356,6 @@ class operational_domain_impl
 
         return step_point{step_values};
     }
-    /**
-     * Calculates the number of steps in the given dimension based on the provided parameters.
-     *
-     * @param dimension Sweep dimension index.
-     * @return The number of steps in the given dimension.
-     * @throws std::invalid_argument if the range is invalid or exceeds the storage range.
-     * @throws std::out_of_range if the dimension index is out of range.
-     */
-    [[nodiscard]] std::size_t num_steps(const std::size_t dimension) const
-    {
-        return num_sweep_steps(params.sweep_dimensions.at(dimension));
-    }
-
     /**
      * Helper function that sets the value of a sweep dimension in the simulation parameters.
      *

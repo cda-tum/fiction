@@ -13,6 +13,7 @@
  * @brief Minimum potential that induces a charge transition in an SiDB layout.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -48,21 +49,6 @@ struct band_bending_resilience_params
      */
     sidb::simulation::logic::bdl_input_iterator_params bdl_iterator_params{};
 };
-/**
- * Calculates the band bending resilience. This is the minimum electrostatic potential required to induce a charge
- * change in an SiDB layout among all possible input combinations which was proposed in \"Unifying Figures of Merit: A
- * Versatile Cost Function for Silicon Dangling Bond Logic\" by J. Drewniok, M. Walter, S. S. H. Ng, K. Walus, and R.
- * Wille in IEEE NANO 2024 (https://ieeexplore.ieee.org/abstract/document/10628671).
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @tparam TT Truth table type.
- * @param lyt Layout for which the band bending resilience is calculated.
- * @param spec Expected Boolean function of the layout, provided as a multi-output truth table.
- * @param params Parameters for assessing physical population stability.
- * @param transition_type The optional type of charge transition to consider. This can be used if one is only interested
- * in a specific type of charge transition.
- * @return The minimum potential (in V) required for charge change across all input combinations.
- */
 /**
  * Calculates the band bending resilience of an SiDB gate: the minimum potential change (unit: V) that any charge
  * transition requires in the ground state of any input pattern. A larger value means the gate tolerates more band
