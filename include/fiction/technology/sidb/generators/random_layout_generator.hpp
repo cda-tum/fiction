@@ -17,17 +17,18 @@
 
 #pragma once
 
-#include "fiction/layouts/layout_utils.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/traits.hpp"
 
-#include <algorithm>
-#include <cstddef>
 #include <cstdint>
 #include <optional>
-#include <unordered_map>
+#include <random>
 #include <unordered_set>
 #include <utility>
 #include <vector>
@@ -36,147 +37,128 @@ namespace fiction::sidb::generators
 {
 
 /**
- * This struct stores the parameters for the `generate_random_layout` algorithm.
+ * Parameters of the random layout generator.
  */
-template <typename CoordinateType>
 struct generate_random_layout_params
 {
     /**
-     * An enumeration of modes to use for the generation of random SiDB layouts to control control the appearance of
-     * positive charges.
+     * Whether positively charged SiDBs may occur in the generated layout.
      */
     enum class positive_charges : uint8_t
     {
         /**
-         * Positive charges can occur (i.e. SiDBs can be placed right next to each other).
+         * Positive charges are allowed.
          */
         ALLOWED,
         /**
-         * Positive charges are not allowed to occur (i.e. SiDBs need to be separated by a few lattice points).
+         * Positive charges are forbidden: SiDBs that would enable them are removed again.
          */
         FORBIDDEN,
         /**
-         * Positive charges can occur, which means that the `can_positive_charges_occur` function returns `true`.
+         * Positive charges have to be possible: generation is repeated until they are.
          */
         MAY_OCCUR
     };
     /**
-     * Two coordinates that span the region where SiDBs may be placed (order is not important). The first coordinate is
-     * the upper left corner and the second coordinate is the lower right corner of the area.
+     * The area to place SiDBs in, as two opposite corners.
      */
-    std::pair<CoordinateType, CoordinateType> coordinate_pair;
+    std::pair<lattice_site, lattice_site> coordinate_pair{};
     /**
-     * Number of SiDBs that are placed on the layout.
+     * Number of SiDBs to place.
      */
     uint64_t number_of_sidbs = 0;
     /**
-     * If positively charged SiDBs should be prevented, SiDBs are not placed closer than the minimal_spacing.
+     * Positive charge policy.
      */
     positive_charges positive_sidbs = positive_charges::ALLOWED;
     /**
-     * Simulation parameters.
+     * Physical parameters for the positive charge check.
      */
-    sidb::model::simulation_parameters sim_params{};
+    model::simulation_parameters sim_params{};
     /**
-     * Maximum number of steps to place the specified number of SiDBs. Example: If the area, where SiDBs can be placed,
-     * is small and many SiDBs are to be placed, several tries are required to generate a layout with no positively
-     * charged SiDBs.
+     * Maximum number of placement attempts.
      */
     uint64_t maximal_attempts = static_cast<uint64_t>(10E6);
     /**
-     * The desired number of unique layouts to be generated.
+     * Number of unique layouts to generate with `generate_multiple_random_layouts`.
      */
     uint64_t number_of_unique_generated_layouts = 1;
     /**
-     * The maximum number of attempts allowed to generate the given number of unique layouts (default: \f$10^{6}\f$).
-     * Example: If the area, where SiDBs can be placed, is small and many SiDBs are to be placed, it may be difficult or
-     * even impossible to find several unique (given by number_of_unique_generated_layouts) layouts. Therefore, this
-     * parameter sets a limit for the maximum number of tries.
+     * Maximum number of generation attempts for multiple layouts.
      */
     uint64_t maximal_attempts_for_multiple_layouts = 1'000'000;
 };
 
-/**
- * Generates a layout featuring a random arrangement of SiDBs. These randomly placed dots can be incorporated into an
- * existing layout skeleton that may be optionally provided.
- *
- * @tparam Lyt SiDB cell-level SiDB layout type.
- * @param params The parameters for generating the random layout.
- * @param skeleton Optional layout to which random dots are added.
- * @return A randomly generated SiDB layout, or `std::nullopt` if the process failed due to conflicting
- * parameters.
- */
-template <typename Lyt>
-[[nodiscard]] std::optional<Lyt> generate_random_layout(const generate_random_layout_params<coordinate<Lyt>>& params,
-                                                        const std::optional<Lyt>& skeleton = std::nullopt) noexcept
+namespace detail
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
-    std::unordered_set<typename Lyt::coordinate> sidbs_affected_by_defects = {};
+/**
+ * The generator's random source, one per thread.
+ *
+ * @return The generator.
+ */
+[[nodiscard]] inline std::mt19937_64& random_generator() noexcept
+{
+    thread_local std::mt19937_64 generator{std::random_device{}()};
+
+    return generator;
+}
+
+}  // namespace detail
+
+/**
+ * Generates a random SiDB layout by placing SiDBs at random sites of an area, optionally on top of a skeleton. The
+ * skeleton's lattice, cells, and defects carry over; sites that hold a defect or that a neutral defect affects are
+ * left empty. Depending on the positive charge policy, SiDBs that would allow positive charges are removed again,
+ * or the generation is repeated until positive charges are possible.
+ *
+ * @param params Parameters.
+ * @param skeleton The skeleton to place SiDBs on, if any.
+ * @return The generated layout, or `std::nullopt` if not all SiDBs could be placed within the attempt limit.
+ */
+[[nodiscard]] inline std::optional<layout>
+generate_random_layout(const generate_random_layout_params& params,
+                       const std::optional<layout>&         skeleton = std::nullopt) noexcept
+{
+    std::unordered_set<lattice_site> sidbs_affected_by_defects{};
 
     uint64_t number_of_sidbs_of_final_layout = params.number_of_sidbs;
 
-    Lyt lyt{};
+    layout lyt{};
 
     if (skeleton.has_value())
     {
-        lyt = skeleton.value().clone();
+        lyt = *skeleton;
         number_of_sidbs_of_final_layout += lyt.num_cells();
-
-        if constexpr (is_sidb_defect_surface_v<Lyt>)
-        {
-            sidbs_affected_by_defects = skeleton.value().all_affected_sidbs(std::make_pair(0, 0));
-        }
+        sidbs_affected_by_defects = skeleton->all_affected_sidbs(std::make_pair(uint16_t{0}, uint16_t{0}));
     }
 
-    // counts the attempts to place the given number of SiDBs
-    uint64_t attempt_counter = 0;
+    const auto cell_type =
+        skeleton.has_value() ? sidb_technology::cell_type::LOGIC : sidb_technology::cell_type::NORMAL;
 
-    // stops if either all SiDBs are placed or the maximum number of attempts was performed
-    while (lyt.num_cells() < number_of_sidbs_of_final_layout && attempt_counter < params.maximal_attempts)
+    for (uint64_t attempt = 0; lyt.num_cells() < number_of_sidbs_of_final_layout && attempt < params.maximal_attempts;
+         ++attempt)
     {
-        // random coordinate within the area specified by two coordinates
-        const auto random_coord =
-            layouts::random_coordinate(params.coordinate_pair.first, params.coordinate_pair.second);
-        bool next_to_neutral_defect = false;
+        const auto random_site = random_site_in_area(params.coordinate_pair.first, params.coordinate_pair.second,
+                                                     detail::random_generator());
 
-        if (sidbs_affected_by_defects.count(random_coord) > 0)
+        // a defect occupies or affects the site
+        if (sidbs_affected_by_defects.contains(random_site) ||
+            lyt.get_defect(random_site).type != model::defect_type::NONE)
         {
-            next_to_neutral_defect = true;
+            continue;
         }
 
-        bool random_cell_is_identical_with_defect = false;
-        // check if a defect does not yet occupy random coordinate.
-        if constexpr (has_get_sidb_defect_v<Lyt>)
-        {
-            random_cell_is_identical_with_defect =
-                (lyt.get_defect(random_coord).type != sidb::model::defect_type::NONE);
-        }
+        lyt.assign_cell_type(random_site, cell_type);
 
-        // if the constraints that no positive SiDBs occur and the cell is not yet occupied by a defect are satisfied,
-        // the SiDB is added to the layout
-        if (!random_cell_is_identical_with_defect && !next_to_neutral_defect)
+        if (params.positive_sidbs == generate_random_layout_params::positive_charges::FORBIDDEN &&
+            simulation::analysis::can_positive_charges_occur(lyt, params.sim_params))
         {
-            if (skeleton.has_value())
-            {
-                lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::LOGIC);
-            }
-            else
-            {
-                lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::NORMAL);
-            }
-
-            if (params.positive_sidbs == generate_random_layout_params<coordinate<Lyt>>::positive_charges::FORBIDDEN &&
-                simulation::analysis::can_positive_charges_occur(lyt, params.sim_params))
-            {
-                lyt.assign_cell_type(random_coord, fiction::technology<Lyt>::cell_type::EMPTY);
-            }
+            lyt.assign_cell_type(random_site, sidb_technology::cell_type::EMPTY);
         }
-        attempt_counter += 1;
     }
 
-    if (params.positive_sidbs == generate_random_layout_params<coordinate<Lyt>>::positive_charges::MAY_OCCUR &&
+    if (params.positive_sidbs == generate_random_layout_params::positive_charges::MAY_OCCUR &&
         !simulation::analysis::can_positive_charges_occur(lyt, params.sim_params))
     {
         return generate_random_layout(params, skeleton);
@@ -187,67 +169,94 @@ template <typename Lyt>
         return lyt;
     }
 
-    // in case some SiDBs could not be placed, return std::nullopt
     return std::nullopt;
 }
-
 /**
- * Generates multiple random layouts featuring a random arrangement of SiDBs. These randomly placed dots can be
- * incorporated into an existing layout skeleton that may be optionally provided.
+ * Generates several unique random SiDB layouts with `generate_random_layout`.
  *
- * @tparam Lyt SiDB cell-level SiDB layout type.
- * @param params The parameters for generating the random SiDB layouts.
- * @param skeleton Optional layout to which random dots are added.
- * @return A vector containing the unique randomly generated SiDB layouts. If the design is impossible, `std::nullopt`
+ * @param params Parameters; `number_of_unique_generated_layouts` layouts are requested.
+ * @param skeleton The skeleton to place SiDBs on, if any.
+ * @return The layouts, or `std::nullopt` if none could be generated within the attempt limit.
  */
-template <typename Lyt>
-[[nodiscard]] std::optional<std::vector<Lyt>>
-generate_multiple_random_layouts(const generate_random_layout_params<coordinate<Lyt>>& params,
-                                 const std::optional<Lyt>&                             skeleton = std::nullopt) noexcept
+[[nodiscard]] inline std::optional<std::vector<layout>>
+generate_multiple_random_layouts(const generate_random_layout_params& params,
+                                 const std::optional<layout>&         skeleton = std::nullopt) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-
-    // collects all unique SiDB layouts
-    std::vector<Lyt> unique_lyts{};
+    std::vector<layout> unique_lyts{};
     unique_lyts.reserve(params.number_of_unique_generated_layouts);
 
-    // maps the digest of each collected layout to its index in unique_lyts, which reduces the uniqueness check to
-    // the layouts that share the candidate's digest
-    std::unordered_multimap<std::size_t, std::size_t> collected_digests{};
-    collected_digests.reserve(params.number_of_unique_generated_layouts);
+    std::unordered_set<layout> seen{};
 
-    // counter for unsuccessful generation attempts
-    uint64_t unsuccessful_generation_attempt_counter = 0;
-
-    while (unique_lyts.size() < params.number_of_unique_generated_layouts &&
-           unsuccessful_generation_attempt_counter < params.maximal_attempts_for_multiple_layouts)
+    for (uint64_t unsuccessful = 0; unique_lyts.size() < params.number_of_unique_generated_layouts &&
+                                    unsuccessful < params.maximal_attempts_for_multiple_layouts;)
     {
-        if (auto random_lyt = generate_random_layout(params, skeleton); random_lyt.has_value())
+        if (auto random_lyt = generate_random_layout(params, skeleton);
+            random_lyt.has_value() && seen.insert(*random_lyt).second)
         {
-            const auto digest = layouts::cell_layout_digest(random_lyt.value());
-
-            // only a collected layout that shares the candidate's digest can be identical to it; comparing those
-            // exactly keeps the result independent of digest collisions
-            const auto [first_match, last_match] = collected_digests.equal_range(digest);
-
-            const auto is_identical = std::any_of(
-                first_match, last_match, [&random_lyt, &unique_lyts](const auto& match)
-                { return layouts::are_cell_layouts_identical(random_lyt.value(), unique_lyts[match.second]); });
-
-            // add layout if unique
-            if (!is_identical)
-            {
-                collected_digests.emplace(digest, unique_lyts.size());
-                unique_lyts.emplace_back(std::move(random_lyt.value()));
-                continue;
-            }
+            unique_lyts.push_back(std::move(*random_lyt));
+            continue;
         }
-        ++unsuccessful_generation_attempt_counter;
+
+        ++unsuccessful;
     }
 
-    // return std::nullopt if no layouts were generated
     return unique_lyts.empty() ? std::nullopt : std::optional{std::move(unique_lyts)};
+}
+/**
+ * Transitional overload for SiDB cell-level layouts: the skeleton is converted with `to_sidb_layout` and the result
+ * with `to_cell_level_layout`.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param params Parameters.
+ * @param skeleton The skeleton to place SiDBs on, if any.
+ * @return The generated layout, or `std::nullopt`.
+ */
+template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] std::optional<Lyt> generate_random_layout(const generate_random_layout_params& params,
+                                                        const std::optional<Lyt>& skeleton = std::nullopt) noexcept
+{
+    const auto result = generate_random_layout(params, skeleton.has_value() ? std::optional{to_sidb_layout(*skeleton)} :
+                                                                              std::optional<layout>{});
+
+    if (!result.has_value())
+    {
+        return std::nullopt;
+    }
+
+    return to_cell_level_layout<Lyt>(*result);
+}
+/**
+ * Transitional overload for SiDB cell-level layouts; see `generate_random_layout`.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param params Parameters.
+ * @param skeleton The skeleton to place SiDBs on, if any.
+ * @return The layouts, or `std::nullopt`.
+ */
+template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] std::optional<std::vector<Lyt>>
+generate_multiple_random_layouts(const generate_random_layout_params& params,
+                                 const std::optional<Lyt>&            skeleton = std::nullopt) noexcept
+{
+    const auto result = generate_multiple_random_layouts(
+        params, skeleton.has_value() ? std::optional{to_sidb_layout(*skeleton)} : std::optional<layout>{});
+
+    if (!result.has_value())
+    {
+        return std::nullopt;
+    }
+
+    std::vector<Lyt> converted{};
+    converted.reserve(result->size());
+
+    for (const auto& lyt : *result)
+    {
+        converted.push_back(to_cell_level_layout<Lyt>(lyt));
+    }
+
+    return converted;
 }
 
 }  // namespace fiction::sidb::generators

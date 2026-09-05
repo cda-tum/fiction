@@ -19,6 +19,8 @@
 #include "fiction/technology/sidb/generators/is_gate_design_impossible.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
@@ -33,7 +35,6 @@ using namespace fiction::synthesis;
 
 TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-design-impossible]")
 {
-    using layout = sidb_defect_cell_clk_lyt_siqad;
 
     layout lyt{};
 
@@ -73,7 +74,6 @@ TEST_CASE("SiQAD's AND gate with input BDL pairs of different size", "[is-gate-d
 
 TEST_CASE("Bestagon CROSSING gate", "[is-gate-design-impossible]")
 {
-    using layout = sidb_defect_cell_clk_lyt_siqad;
 
     layout lyt{};
 
