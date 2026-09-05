@@ -117,6 +117,39 @@ TEST_CASE("Defect influence grid-search edge cases", "[defect-influence]")
         CHECK(domain.size() == 1);
     }
 
+    SECTION("QuickTrace tries every requested sample after an influential left edge")
+    {
+        auto lyt = layout{};
+        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type(site_at_row(2, 0), sidb_technology::cell_type::NORMAL);
+
+        auto contour_params                     = params;
+        contour_params.defect                   = defect{defect_type::DB, -1, 5.6, 5.0};
+        contour_params.additional_scanning_area = {1, 0};
+
+        defect_influence_stats stats{};
+        const auto             domain = defect_influence_quicktrace(lyt, 3, contour_params, &stats);
+
+        CHECK(domain.contains(site_at_row(-1, 0)) == std::optional{std::tuple{defect_influence_status::INFLUENTIAL}});
+        CHECK(stats.num_evaluated_defect_positions == 3);
+        CHECK(stats.num_influencing_defect_positions == 1);
+    }
+
+    SECTION("QuickTrace abandons a contour whose backtrack point is occupied")
+    {
+        auto lyt = layout{};
+        lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type(site_at_row(2, 0), sidb_technology::cell_type::NORMAL);
+
+        auto contour_params                     = params;
+        contour_params.defect                   = defect{defect_type::DB, -1, 5.6, 5.0};
+        contour_params.additional_scanning_area = {0, 0};
+
+        const auto domain = defect_influence_quicktrace(lyt, 1, contour_params);
+
+        CHECK(domain.contains(site_at_row(1, 0)) == std::optional{std::tuple{defect_influence_status::INFLUENTIAL}});
+    }
+
     SECTION("negative additional scanning area")
     {
         auto lyt = layout{};
