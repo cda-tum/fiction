@@ -157,10 +157,10 @@ class displacement_robustness_domain_impl
      * @param st Statistics.
      */
     displacement_robustness_domain_impl(const layout& lyt, const std::vector<TT>& spec,
-                                        displacement_robustness_domain_params ps,
-                                        displacement_robustness_domain_stats& st) :
+                                        const displacement_robustness_domain_params& ps,
+                                        displacement_robustness_domain_stats&        st) :
             layout_to_analyze{lyt},
-            params{std::move(ps)},
+            params{ps},
             stats{st},
             truth_table{spec},
             generator(rd())

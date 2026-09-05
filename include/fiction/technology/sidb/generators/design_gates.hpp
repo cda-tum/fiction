@@ -176,10 +176,11 @@ class design_gates_impl
      * @param ps Parameters.
      * @param st Statistics.
      */
-    design_gates_impl(layout skeleton, const std::vector<TT>& spec, design_gates_params ps, design_gates_stats& st) :
-            skeleton_layout{std::move(skeleton)},
+    design_gates_impl(const layout& skeleton, const std::vector<TT>& spec, const design_gates_params& ps,
+                      design_gates_stats& st) :
+            skeleton_layout{skeleton},
             truth_table{spec},
-            params{std::move(ps)},
+            params{ps},
             all_sidbs_in_canvas{sites_in_area(params.canvas.first, params.canvas.second)},
             stats{st},
             input_bdl_wires{simulation::logic::detect_bdl_wires(
