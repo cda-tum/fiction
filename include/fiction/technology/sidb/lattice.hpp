@@ -365,12 +365,27 @@ struct hash<fiction::sidb::lattice_site>
 template <>
 struct fmt::formatter<fiction::sidb::lattice_site>
 {
+    /**
+     * Parses an empty lattice-site format specification.
+     *
+     * @tparam ParseContext Format parse context type.
+     * @param ctx Format parse context.
+     * @return Iterator to the end of the specification.
+     */
     template <typename ParseContext>
     constexpr auto parse(ParseContext& ctx)
     {
         return ctx.begin();
     }
 
+    /**
+     * Writes a lattice site as `(x,y,z)`.
+     *
+     * @tparam FormatContext Format output context type.
+     * @param s Lattice site.
+     * @param ctx Format output context.
+     * @return Iterator past the formatted site.
+     */
     template <typename FormatContext>
     auto format(const fiction::sidb::lattice_site& s, FormatContext& ctx) const
     {

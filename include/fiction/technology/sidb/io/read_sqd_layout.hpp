@@ -370,10 +370,10 @@ class read_sqd_layout_impl
         return cell;
     }
     /**
-     * Parses a <latcoord> element from the SQD file and returns its specified cell position.
+     * Checks that the SQD lattice matches the target cell-level layout.
      *
-     * @param latcoord The <latcoord> element.
-     * @return The cell position specified by the <latcoord> element.
+     * @param name Lattice reconstruction name.
+     * @throws sqd_parsing_error if the lattice is unknown or does not match.
      */
     void parse_lat_type(const std::string& name)
     {
@@ -423,13 +423,6 @@ class read_sqd_layout_impl
         return dimer_to_cell(parse_sqd_integer(n), parse_sqd_integer(m), parse_sqd_integer(l));
     }
     /**
-     * Parses the <type> attribute of a <dbdot> element from the SQD file and returns the corresponding cell type.
-     *
-     * @param db_dot The <dbdot> element.
-     * @return The cell type specified by the <dbdot> element. If non is specified, the cell type is assumed to be
-     * normal.
-     */
-    /**
      * Parses a <dbdot> element from the SQD file and adds the respective dot to the layout.
      *
      * @param db_dot The <dbdot> element.
@@ -448,17 +441,10 @@ class read_sqd_layout_impl
         lyt.assign_cell_type(parse_latcoord(latcoord), detail::parse_dot_type(dot_type));
     }
     /**
-     * Parses a <val> attribute of a <type_label> element of a <property_map> element from the SQD file and converts it
-     * to the respective SiDB defect type.
-     *
-     * @param label The <type_label> element's <val> attribute.
-     * @return The SiDB defect type corresponding to the given label.
-     */
-    /**
      * Parses a <defect> element from the SQD file and adds the respective defect to the layout if it implements the
-     * has_assign_sidb_defect function..
+     * has_assign_sidb_defect function.
      *
-     * @param label The <defect> element.
+     * @param defect The <defect> element.
      */
     void parse_defect(const tinyxml2::XMLElement* defect)
     {
