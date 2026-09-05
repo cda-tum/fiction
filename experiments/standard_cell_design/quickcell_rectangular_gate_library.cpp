@@ -21,10 +21,11 @@
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/io/write_sqd_layout.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
+#include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <fmt/format.h>
@@ -112,12 +113,18 @@ int main()  // NOLINT
     constexpr auto num_canvas_sidbs                  = 3u;
     constexpr auto num_canvas_sidbs_2_input_2_output = 4u;
 
-    design_gates_params params{is_operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
-                                                     bdl_input_iterator_params{{3}},
-                                                     is_operational_params::operational_condition::REJECT_KINKS},
-                               design_gates_params::design_gates_mode::QUICKCELL,
-                               {{18, 9, 0}, {26, 13, 0}},
-                               num_canvas_sidbs};
+    design_gates_params params{
+        .operational_params =
+            is_operational_params{
+                .sim_params = simulation_parameters{2, -0.32},
+                .sim_engine = engine::QUICKEXACT,
+                .input_bdl_iterator_params =
+                    bdl_input_iterator_params{.bdl_wire_params =
+                                                  detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
+                .op_condition = is_operational_params::operational_condition::REJECT_KINKS},
+        .design_mode            = design_gates_params::design_gates_mode::QUICKCELL,
+        .canvas                 = {{18, 9, 0}, {26, 13, 0}},
+        .number_of_canvas_sidbs = num_canvas_sidbs};
 
     for (const auto& [truth_table, gate_name] : truth_tables_and_names)
     {

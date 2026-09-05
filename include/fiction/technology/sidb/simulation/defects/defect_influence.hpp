@@ -335,7 +335,8 @@ class defect_influence_impl
     /**
      * Bounds of the scanning area in columns and rows.
      */
-    int32_t nw_x_{}, se_x_{}, nw_row_{}, se_row_{};
+    int32_t nw_x_{}, se_x_{};
+    int64_t nw_row_{}, se_row_{};
     /**
      * The defect influence domain under construction.
      */
@@ -443,7 +444,7 @@ class defect_influence_impl
     [[nodiscard]] std::optional<lattice_site>
     find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec) noexcept
     {
-        std::uniform_int_distribution<int32_t> dist{nw_row_, se_row_};
+        std::uniform_int_distribution<int64_t> dist{nw_row_, se_row_};
 
         const auto starting_point = site_at_row(nw_x_, dist(generator_));
 
@@ -669,7 +670,7 @@ class defect_influence_impl
         const auto decr_row = (row - 1 >= nw_row_) ? row - 1 : row;
         const auto incr_row = (row + 1 <= se_row_) ? row + 1 : row;
 
-        const auto add = [this, &neighbors](const int32_t nx, const int32_t nrow)
+        const auto add = [this, &neighbors](const int32_t nx, const int64_t nrow)
         {
             if (const auto s = site_at_row(nx, nrow); layout_.is_empty_cell(s))
             {

@@ -362,15 +362,15 @@ class displacement_robustness_domain_impl
 
                 const auto row = row_of(c);
 
-                int32_t min_row = row - dy;
-                int32_t max_row = row + dy;
+                auto min_row = row - dy;
+                auto max_row = row + dy;
 
                 if (params_.dimer_policy ==
                         displacement_robustness_domain_params::dimer_displacement_policy::STAY_ON_ORIGINAL_DIMER &&
                     dy > 0)
                 {
-                    min_row = 2 * c.y;
-                    max_row = (2 * c.y) + 1;
+                    min_row = int64_t{2} * c.y;
+                    max_row = (int64_t{2} * c.y) + 1;
                 }
 
                 all.push_back(sites_in_area(site_at_row(c.x - dx, min_row), site_at_row(c.x + dx, max_row)));

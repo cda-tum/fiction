@@ -46,8 +46,6 @@
 #include <mockturtle/utils/progress_bar.hpp>
 #endif
 
-#include <kitty/dynamic_truth_table.hpp>
-#include <kitty/hash.hpp>
 #include <z3++.h>
 #include <z3_api.h>
 
