@@ -15,7 +15,6 @@
  */
 
 #include "pyfiction/documentation.hpp"
-#include "pyfiction/types.hpp"
 
 #include <fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
@@ -35,8 +34,7 @@ void write_sqd_sim_result(nanobind::module_& m)
     m.def("write_sqd_sim_result",
           static_cast<void (*)(const fiction::sidb::simulation::result&, const std::string_view&)>(
               &fiction::sidb::simulation::io::write_sqd_sim_result),
-          py::arg("sim_result"), py::arg("filename"),
-          DOC(fiction_sidb_simulation_io_write_sqd_sim_result_2));
+          py::arg("sim_result"), py::arg("filename"), DOC(fiction_sidb_simulation_io_write_sqd_sim_result_2));
 }
 
 }  // namespace pyfiction
