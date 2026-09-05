@@ -17,10 +17,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/technology/sidb/lattice.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 

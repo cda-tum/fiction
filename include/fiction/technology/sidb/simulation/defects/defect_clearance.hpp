@@ -22,7 +22,6 @@
 #include "fiction/technology/sidb/simulation/defects/defect_influence.hpp"
 
 #include <limits>
-#include <tuple>
 
 namespace fiction::sidb::simulation::defects
 {
@@ -86,7 +85,7 @@ calculate_defect_clearance(const layout& lyt, const defect_influence_domain& def
             }
         });
 
-    return defect_clearance{max_distance_position, max_distance};
+    return defect_clearance{.defect_position = max_distance_position, .defect_clearance_distance = max_distance};
 }
 
 }  // namespace fiction::sidb::simulation::defects

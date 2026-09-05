@@ -16,19 +16,14 @@
  * @author Benjamin Hien (hibenj)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/technology/sidb/generators/random_layout_generator.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
-#include <fiction/technology/sidb/simulation/analysis/can_positive_charges_occur.hpp>
+#include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -183,7 +178,7 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 {
     SECTION("given two identical coordinates")
     {
-        const generate_random_layout_params params{{{5, 5, 1}, {5, 5, 1}}, 1};
+        const generate_random_layout_params params{.coordinate_pair = {{5, 5, 1}, {5, 5, 1}}, .number_of_sidbs = 1};
 
         const auto result_lyt = generate_random_layout(params);
         REQUIRE(result_lyt.has_value());
@@ -202,11 +197,12 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
     {
         // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
         // a defect.
-        const generate_random_layout_params params{{{2, 1, 1}, {2, 1, 1}},
-                                                   1,
-                                                   generate_random_layout_params::positive_charges::FORBIDDEN,
-                                                   simulation_parameters{},
-                                                   5u};
+        const generate_random_layout_params params{.coordinate_pair = {{2, 1, 1}, {2, 1, 1}},
+                                                   .number_of_sidbs = 1,
+                                                   .positive_sidbs =
+                                                       generate_random_layout_params::positive_charges::FORBIDDEN,
+                                                   .sim_params       = simulation_parameters{},
+                                                   .maximal_attempts = 5u};
 
         auto defect_layout = layout{};
         defect_layout.assign_defect({2, 1, 1}, defect{defect_type::DB, -1, 5.6, 5});
@@ -219,11 +215,12 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
     {
         // it is not possible to generate a random layout since the position where a SiDB could be placed is occupied by
         // a defect.
-        const generate_random_layout_params params{{{2, 1, 1}, {2, 1, 1}},
-                                                   1,
-                                                   generate_random_layout_params::positive_charges::FORBIDDEN,
-                                                   simulation_parameters{},
-                                                   5u};
+        const generate_random_layout_params params{.coordinate_pair = {{2, 1, 1}, {2, 1, 1}},
+                                                   .number_of_sidbs = 1,
+                                                   .positive_sidbs =
+                                                       generate_random_layout_params::positive_charges::FORBIDDEN,
+                                                   .sim_params       = simulation_parameters{},
+                                                   .maximal_attempts = 5u};
 
         auto defect_layout = layout{};
         defect_layout.assign_defect({3, 1, 1}, defect{defect_type::DB, -1, 5.6, 5});
@@ -273,10 +270,11 @@ TEST_CASE("Random SiDB layout generation with defects", "[random-sidb-layout-gen
 
     SECTION("given corner coordinates and number of placed SiDBs, and allow positive charges")
     {
-        const generate_random_layout_params params{{{0, 0, 0}, {10, 2, 0}},
-                                                   10,
-                                                   generate_random_layout_params::positive_charges::ALLOWED,
-                                                   simulation_parameters{}};
+        const generate_random_layout_params params{.coordinate_pair = {{0, 0, 0}, {10, 2, 0}},
+                                                   .number_of_sidbs = 10,
+                                                   .positive_sidbs =
+                                                       generate_random_layout_params::positive_charges::ALLOWED,
+                                                   .sim_params = simulation_parameters{}};
 
         auto defect_layout = layout{};
         defect_layout.assign_defect({2, 2, 0}, defect{defect_type::DB, -1, 5.6, 5});

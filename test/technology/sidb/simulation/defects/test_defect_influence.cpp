@@ -16,12 +16,12 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/layouts/layout_utils.hpp>
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
@@ -32,10 +32,12 @@
 #include <fiction/technology/sidb/simulation/defects/defect_influence.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
+#include <cmath>
+#include <cstdint>
+#include <utility>
 #include <vector>
 
 using namespace fiction;
@@ -54,7 +56,9 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
 
     const defect defect{defect_type::SI_VACANCY, -1, 10.6, 5.9};
 
-    auto params = defect_influence_params{defect, is_operational_params{simulation_parameters{2, -0.32}}};
+    auto params = defect_influence_params{.defect = defect,
+                                          .operational_params =
+                                              is_operational_params{.sim_params = simulation_parameters{2, -0.32}}};
 
     // to save runtime in the CI, this test is only run in RELEASE mode
 #ifdef NDEBUG
@@ -78,7 +82,7 @@ TEST_CASE("novel designed AND Gate influence distance function which fails again
         defect_influence_stats stats{};
         const auto             defect_influence_domain =
             defect_influence_random_sampling(cube_lyt, std::vector<tt>{create_and_tt()}, 100, params, &stats);
-        CHECK(defect_influence_domain.size() > 0);
+        CHECK(!defect_influence_domain.empty());
         CHECK(calculate_defect_clearance(cube_lyt, defect_influence_domain).defect_clearance_distance <=
               6.21261176961831474);
     }
@@ -92,10 +96,11 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
 
     SECTION("Si Vacancy")
     {
-        auto params = defect_influence_params{defect{defect_type::SI_VACANCY, -1, 10.6, 5.9},
-                                              is_operational_params{simulation_parameters{2, -0.32}},
-                                              {20, 0},
-                                              defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+        auto params = defect_influence_params{
+            .defect                   = defect{defect_type::SI_VACANCY, -1, 10.6, 5.9},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {20, 0},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         const auto defect_influence_vacancy =
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, params);
@@ -129,7 +134,7 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
             defect_influence_stats stats{};
             const auto             defect_influence_domain =
                 defect_influence_random_sampling(lyt_cube, std::vector<tt>{create_and_tt()}, 100, params, &stats);
-            CHECK(defect_influence_domain.size() > 0);
+            CHECK(!defect_influence_domain.empty());
             CHECK(calculate_defect_clearance(lyt_cube, defect_influence_domain).defect_clearance_distance <=
                   3.16654512047436443);
         }
@@ -179,11 +184,11 @@ TEST_CASE("Tests for determining the defect influence distance for an AND gate w
 
     SECTION("Arsenic Defect")
     {
-        const auto defect_operational_arsenic_params =
-            defect_influence_params{defect{defect_type::UNKNOWN, 1, 9.7, 2.1},
-                                    is_operational_params{simulation_parameters{2, -0.32}},
-                                    {10, 0},
-                                    defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+        const auto defect_operational_arsenic_params = defect_influence_params{
+            .defect                   = defect{defect_type::UNKNOWN, 1, 9.7, 2.1},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {10, 0},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         const auto defect_influence_arsenic =
             defect_influence_grid_search(lyt_cube, std::vector<tt>{create_and_tt()}, defect_operational_arsenic_params);
@@ -201,9 +206,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
     SECTION("layout with one SiDB")
     {
         const auto defect_operational_params = defect_influence_params{
-            defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
-            is_operational_params{simulation_parameters{2, -0.32}}, std::pair<int32_t, int32_t>{2, 2},
-            defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+            .defect =
+                defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = std::pair<int32_t, int32_t>{2, 2},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
 
@@ -225,10 +232,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
     SECTION("layout with one SiDB, negative defect, smaller lambda_tf")
     {
         const auto defect_operational_params = defect_influence_params{
-            defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
-            is_operational_params{simulation_parameters{2, -0.32}},
-            {2, 2},
-            defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+            .defect =
+                defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {2, 2},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
         lyt.assign_cell_type(site_at_row(0, 0), sidb_cell_clk_lyt_cube::cell_type::NORMAL);
@@ -244,11 +252,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
 
     SECTION("layout with one SiDB, negative defect, large lambda_tf")
     {
-        const auto defect_operational_params =
-            defect_influence_params{defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, 20},
-                                    is_operational_params{simulation_parameters{2, -0.32}},
-                                    {30, 30},
-                                    defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+        const auto defect_operational_params = defect_influence_params{
+            .defect                   = defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, 20},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {30, 30},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
         lyt.assign_cell_type(site_at_row(0, 0), sidb_technology::cell_type::NORMAL);
@@ -267,10 +275,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
     SECTION("layout with one pertuber and one DB pair, negative defect")
     {
         const auto defect_operational_params = defect_influence_params{
-            defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
-            is_operational_params{simulation_parameters{2, -0.32}},
-            {20, 0},
-            defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+            .defect =
+                defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {20, 0},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
 
@@ -292,10 +301,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01")
     {
         auto defect_operational_params = defect_influence_params{
-            defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
-            is_operational_params{simulation_parameters{2, -0.32}},
-            {20, 20},
-            defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+            .defect =
+                defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {20, 20},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
 
@@ -332,10 +342,11 @@ TEST_CASE("Defect influence when considering the change of the ground state", "[
     SECTION("QuickExact simulation of a Y-shape SiDB OR gate with input 01, using cube coordinate")
     {
         const auto defect_operational_params = defect_influence_params{
-            defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
-            is_operational_params{simulation_parameters{2, -0.32}},
-            {30, 30},
-            defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
+            .defect =
+                defect{defect_type::UNKNOWN, -1, simulation_parameters{}.epsilon_r, simulation_parameters{}.lambda_tf},
+            .operational_params       = is_operational_params{.sim_params = simulation_parameters{2, -0.32}},
+            .additional_scanning_area = {30, 30},
+            .influence_def            = defect_influence_params::influence_definition::GROUND_STATE_CHANGE};
 
         layout lyt{};
 

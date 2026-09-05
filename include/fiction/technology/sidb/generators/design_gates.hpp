@@ -176,23 +176,22 @@ class design_gates_impl
      * @param ps Parameters.
      * @param st Statistics.
      */
-    design_gates_impl(const layout& skeleton, const std::vector<TT>& spec, const design_gates_params& ps,
-                      design_gates_stats& st) :
-            skeleton_layout_{skeleton},
-            truth_table_{spec},
-            params_{ps},
-            all_sidbs_in_canvas_{sites_in_area(params_.canvas.first, params_.canvas.second)},
-            stats_{st},
-            input_bdl_wires_{simulation::logic::detect_bdl_wires(
-                skeleton_layout_, params_.operational_params.input_bdl_iterator_params.bdl_wire_params,
+    design_gates_impl(layout skeleton, const std::vector<TT>& spec, design_gates_params ps, design_gates_stats& st) :
+            skeleton_layout{std::move(skeleton)},
+            truth_table{spec},
+            params{std::move(ps)},
+            all_sidbs_in_canvas{sites_in_area(params.canvas.first, params.canvas.second)},
+            stats{st},
+            input_bdl_wires{simulation::logic::detect_bdl_wires(
+                skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                 simulation::logic::bdl_wire_selection::INPUT)},
-            output_bdl_wires_{simulation::logic::detect_bdl_wires(
-                skeleton_layout_, params_.operational_params.input_bdl_iterator_params.bdl_wire_params,
+            output_bdl_wires{simulation::logic::detect_bdl_wires(
+                skeleton_layout, params.operational_params.input_bdl_iterator_params.bdl_wire_params,
                 simulation::logic::bdl_wire_selection::OUTPUT)},
-            all_canvas_layouts_{determine_all_possible_canvas_layouts()}
+            all_canvas_layouts{determine_all_possible_canvas_layouts()}
     {
-        stats_.number_of_layouts = all_canvas_layouts_.size();
-        stats_.sim_engine        = params_.operational_params.sim_engine;
+        stats.number_of_layouts = all_canvas_layouts.size();
+        stats.sim_engine        = params.operational_params.sim_engine;
     }
     /**
      * Simulates every combination of canvas SiDBs.
@@ -201,10 +200,10 @@ class design_gates_impl
      */
     [[nodiscard]] std::vector<layout> run_automatic_exhaustive_gate_designer() const noexcept
     {
-        const mockturtle::stopwatch stop{stats_.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params_.number_of_canvas_sidbs, all_sidbs_in_canvas_.size());
+            params.number_of_canvas_sidbs, all_sidbs_in_canvas.size());
 
         std::vector<layout> designed_gate_layouts{};
 
@@ -223,9 +222,8 @@ class design_gates_impl
         {
             const auto layout_with_added_cells = skeleton_layout_with_canvas_sidbs(combination);
 
-            if (const auto [status, sim_calls] =
-                    simulation::logic::is_operational(layout_with_added_cells, truth_table_, params_.operational_params,
-                                                      input_bdl_wires_, output_bdl_wires_);
+            if (const auto [status, sim_calls] = simulation::logic::is_operational(
+                    layout_with_added_cells, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
                 status == simulation::logic::operational_status::OPERATIONAL)
             {
                 {
@@ -245,20 +243,22 @@ class design_gates_impl
      *
      * @return The operational gate, or an empty vector if none was found.
      */
-    [[nodiscard]] std::vector<layout> run_random_design() const noexcept
+    [[nodiscard]] std::vector<layout> run_random_design() const
     {
         std::vector<layout> randomly_designed_gate_layouts{};
 
         // without a single admissible canvas layout, no random placement can ever succeed
-        if (all_canvas_layouts_.empty())
+        if (all_canvas_layouts.empty())
         {
             return randomly_designed_gate_layouts;
         }
 
-        const generate_random_layout_params parameter{params_.canvas, params_.number_of_canvas_sidbs,
-                                                      generate_random_layout_params::positive_charges::ALLOWED};
+        const generate_random_layout_params parameter{.coordinate_pair = params.canvas,
+                                                      .number_of_sidbs = params.number_of_canvas_sidbs,
+                                                      .positive_sidbs =
+                                                          generate_random_layout_params::positive_charges::ALLOWED};
 
-        const auto num_threads = std::max(std::min(number_of_threads_, all_canvas_layouts_.size()), std::size_t{1});
+        const auto num_threads = std::max(std::min(number_of_threads, all_canvas_layouts.size()), std::size_t{1});
 
         std::vector<std::thread> threads{};
         threads.reserve(num_threads);
@@ -273,7 +273,7 @@ class design_gates_impl
                 {
                     while (!gate_layout_is_found)
                     {
-                        auto result_lyt = generate_random_layout(parameter, skeleton_layout_);
+                        auto result_lyt = generate_random_layout(parameter, skeleton_layout);
 
                         if (!result_lyt.has_value())
                         {
@@ -281,7 +281,7 @@ class design_gates_impl
                         }
 
                         // neutral defects do not take part in the simulation
-                        for (const auto& [s, d] : skeleton_layout_.defects())
+                        for (const auto& [s, d] : skeleton_layout.defects())
                         {
                             if (model::is_neutrally_charged_defect(d))
                             {
@@ -289,14 +289,13 @@ class design_gates_impl
                             }
                         }
 
-                        if (const auto [status, sim_calls] =
-                                simulation::logic::is_operational(*result_lyt, truth_table_, params_.operational_params,
-                                                                  input_bdl_wires_, output_bdl_wires_);
+                        if (const auto [status, sim_calls] = simulation::logic::is_operational(
+                                *result_lyt, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
                             status == simulation::logic::operational_status::OPERATIONAL)
                         {
                             const std::scoped_lock lock{mutex};
 
-                            for (const auto& [s, d] : skeleton_layout_.defects())
+                            for (const auto& [s, d] : skeleton_layout.defects())
                             {
                                 if (model::is_neutrally_charged_defect(d))
                                 {
@@ -327,21 +326,21 @@ class design_gates_impl
      */
     [[nodiscard]] std::vector<layout> run_quickcell() noexcept
     {
-        const mockturtle::stopwatch stop{stats_.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         std::vector<layout> gate_candidates{};
 
         {
-            const mockturtle::stopwatch stop_pruning{stats_.pruning_total};
+            const mockturtle::stopwatch stop_pruning{stats.pruning_total};
             gate_candidates = run_pruning();
         }
 
-        stats_.number_of_layouts_after_first_pruning =
-            all_canvas_layouts_.size() - number_of_discarded_layouts_at_first_pruning_.load();
-        stats_.number_of_layouts_after_second_pruning =
-            stats_.number_of_layouts_after_first_pruning - number_of_discarded_layouts_at_second_pruning_.load();
-        stats_.number_of_layouts_after_third_pruning =
-            stats_.number_of_layouts_after_second_pruning - number_of_discarded_layouts_at_third_pruning_.load();
+        stats.number_of_layouts_after_first_pruning =
+            all_canvas_layouts.size() - number_of_discarded_layouts_at_first_pruning.load();
+        stats.number_of_layouts_after_second_pruning =
+            stats.number_of_layouts_after_first_pruning - number_of_discarded_layouts_at_second_pruning.load();
+        stats.number_of_layouts_after_third_pruning =
+            stats.number_of_layouts_after_second_pruning - number_of_discarded_layouts_at_third_pruning.load();
 
         std::vector<layout> gate_layouts{};
 
@@ -350,7 +349,7 @@ class design_gates_impl
             return gate_layouts;
         }
 
-        if (params_.design_mode == design_gates_params::design_gates_mode::PRUNING_ONLY)
+        if (params.design_mode == design_gates_params::design_gates_mode::PRUNING_ONLY)
         {
             return gate_candidates;
         }
@@ -360,13 +359,13 @@ class design_gates_impl
         std::mutex        mutex{};
         std::atomic<bool> gate_design_found = false;
 
-        params_.operational_params.strategy_to_analyze_operational_status =
+        params.operational_params.strategy_to_analyze_operational_status =
             simulation::logic::is_operational_params::operational_analysis_strategy::SIMULATION_ONLY;
 
         const auto check = [this, &gate_layouts, &mutex, &gate_design_found](const auto& candidate) noexcept
         {
             if (const auto [status, sim_calls] = simulation::logic::is_operational(
-                    candidate, truth_table_, params_.operational_params, input_bdl_wires_, output_bdl_wires_);
+                    candidate, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires);
                 status == simulation::logic::operational_status::OPERATIONAL)
             {
                 {
@@ -386,51 +385,51 @@ class design_gates_impl
     /**
      * The skeleton.
      */
-    const layout skeleton_layout_;
+    const layout skeleton_layout;
     /**
      * The Boolean function(s).
      */
-    const std::vector<TT> truth_table_;
+    const std::vector<TT> truth_table;
     /**
      * Parameters.
      */
-    design_gates_params params_;
+    design_gates_params params;
     /**
      * All sites of the canvas.
      */
-    std::vector<lattice_site> all_sidbs_in_canvas_;
+    std::vector<lattice_site> all_sidbs_in_canvas;
     /**
      * Statistics.
      */
-    design_gates_stats& stats_;
+    design_gates_stats& stats;
     /**
      * The input wires of the skeleton.
      */
-    const std::vector<simulation::logic::bdl_wire> input_bdl_wires_;
+    const std::vector<simulation::logic::bdl_wire> input_bdl_wires;
     /**
      * The output wires of the skeleton.
      */
-    const std::vector<simulation::logic::bdl_wire> output_bdl_wires_;
+    const std::vector<simulation::logic::bdl_wire> output_bdl_wires;
     /**
      * All canvas layouts: one per combination of canvas SiDBs.
      */
-    const std::vector<layout> all_canvas_layouts_{};
+    const std::vector<layout> all_canvas_layouts{};
     /**
      * Number of canvas layouts the first pruning filter discarded.
      */
-    std::atomic<std::size_t> number_of_discarded_layouts_at_first_pruning_{0};
+    std::atomic<std::size_t> number_of_discarded_layouts_at_first_pruning{0};
     /**
      * Number of canvas layouts the second pruning filter discarded.
      */
-    std::atomic<std::size_t> number_of_discarded_layouts_at_second_pruning_{0};
+    std::atomic<std::size_t> number_of_discarded_layouts_at_second_pruning{0};
     /**
      * Number of canvas layouts the third pruning filter discarded.
      */
-    std::atomic<std::size_t> number_of_discarded_layouts_at_third_pruning_{0};
+    std::atomic<std::size_t> number_of_discarded_layouts_at_third_pruning{0};
     /**
      * Number of threads to use.
      */
-    std::size_t number_of_threads_{std::thread::hardware_concurrency()};
+    std::size_t number_of_threads{std::thread::hardware_concurrency()};
     /**
      * Runs `fn` on every item on the configured number of threads; stops early once `done` is set and the
      * termination condition asks for the first solution only.
@@ -444,7 +443,7 @@ class design_gates_impl
     template <typename Items, typename Fn>
     void for_each_in_parallel(const Items& items, const Fn& fn, std::atomic<bool>& done) const noexcept
     {
-        const std::size_t num_threads = std::max(std::min(number_of_threads_, items.size()), std::size_t{1});
+        const std::size_t num_threads = std::max(std::min(number_of_threads, items.size()), std::size_t{1});
         const std::size_t chunk_size  = (items.size() + num_threads - 1) / num_threads;
 
         std::vector<std::thread> threads{};
@@ -460,8 +459,8 @@ class design_gates_impl
 
                     for (std::size_t j = start_index; j < end_index; ++j)
                     {
-                        if (done && params_.termination_cond ==
-                                        design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
+                        if (done &&
+                            params.termination_cond == design_gates_params::termination_condition::AFTER_FIRST_SOLUTION)
                         {
                             return;
                         }
@@ -485,12 +484,12 @@ class design_gates_impl
     {
         std::vector<layout> gate_candidates{};
 
-        if (all_canvas_layouts_.empty())
+        if (all_canvas_layouts.empty())
         {
             return gate_candidates;
         }
 
-        gate_candidates.reserve(all_canvas_layouts_.size());
+        gate_candidates.reserve(all_canvas_layouts.size());
 
         std::mutex mutex{};
 
@@ -501,16 +500,15 @@ class design_gates_impl
                 return;
             }
 
-            auto current_layout = skeleton_layout_;
+            auto current_layout = skeleton_layout;
 
             canvas_lyt.foreach_cell([&current_layout](const auto& c)
                                     { current_layout.assign_cell_type(c, sidb_technology::cell_type::LOGIC); });
 
             simulation::logic::detail::is_operational_impl<TT> is_operational_impl{
-                current_layout,   truth_table_,      params_.operational_params,
-                input_bdl_wires_, output_bdl_wires_, canvas_lyt};
+                current_layout, truth_table, params.operational_params, input_bdl_wires, output_bdl_wires, canvas_lyt};
 
-            for (auto i = 0u; i < truth_table_.front().num_bits(); ++i)
+            for (auto i = 0u; i < truth_table.front().num_bits(); ++i)
             {
                 const auto reason = is_operational_impl.is_layout_invalid(i);
 
@@ -523,17 +521,17 @@ class design_gates_impl
                 {
                     case simulation::logic::detail::layout_invalidity_reason::POTENTIAL_POSITIVE_CHARGES:
                     {
-                        ++number_of_discarded_layouts_at_first_pruning_;
+                        ++number_of_discarded_layouts_at_first_pruning;
                         break;
                     }
                     case simulation::logic::detail::layout_invalidity_reason::PHYSICAL_INFEASIBILITY:
                     {
-                        ++number_of_discarded_layouts_at_second_pruning_;
+                        ++number_of_discarded_layouts_at_second_pruning;
                         break;
                     }
                     case simulation::logic::detail::layout_invalidity_reason::IO_INSTABILITY:
                     {
-                        ++number_of_discarded_layouts_at_third_pruning_;
+                        ++number_of_discarded_layouts_at_third_pruning;
                         break;
                     }
                 }
@@ -546,7 +544,7 @@ class design_gates_impl
         };
 
         std::atomic<bool> never{false};
-        for_each_in_parallel(all_canvas_layouts_, conduct_pruning_steps, never);
+        for_each_in_parallel(all_canvas_layouts, conduct_pruning_steps, never);
 
         return gate_candidates;
     }
@@ -558,7 +556,7 @@ class design_gates_impl
     [[nodiscard]] std::vector<layout> determine_all_possible_canvas_layouts() const noexcept
     {
         const auto all_combinations = utils::math::determine_all_combinations_of_distributing_k_entities_on_n_positions(
-            params_.number_of_canvas_sidbs, all_sidbs_in_canvas_.size());
+            params.number_of_canvas_sidbs, all_sidbs_in_canvas.size());
 
         std::vector<layout> canvas_layouts{};
         canvas_layouts.reserve(all_combinations.size());
@@ -581,16 +579,16 @@ class design_gates_impl
      */
     [[nodiscard]] layout skeleton_layout_with_canvas_sidbs(const std::vector<std::size_t>& cell_indices) const noexcept
     {
-        auto lyt_copy = skeleton_layout_;
+        auto lyt_copy = skeleton_layout;
 
         for (const auto i : cell_indices)
         {
-            assert(i < all_sidbs_in_canvas_.size() && "cell indices are out-of-range");
+            assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            const auto& s = all_sidbs_in_canvas_[i];
+            const auto& s = all_sidbs_in_canvas[i];
 
             if (lyt_copy.get_cell_type(s) == sidb_technology::cell_type::EMPTY &&
-                skeleton_layout_.get_defect(s).type == model::defect_type::NONE)
+                skeleton_layout.get_defect(s).type == model::defect_type::NONE)
             {
                 lyt_copy.assign_cell_type(s, sidb_technology::cell_type::LOGIC);
             }
@@ -608,17 +606,17 @@ class design_gates_impl
     [[nodiscard]] std::optional<layout>
     design_canvas_layout(const std::vector<std::size_t>& cell_indices) const noexcept
     {
-        layout lyt{skeleton_layout_.get_lattice()};
+        layout lyt{skeleton_layout.get_lattice()};
 
         for (const auto i : cell_indices)
         {
-            assert(i < all_sidbs_in_canvas_.size() && "cell indices are out-of-range");
+            assert(i < all_sidbs_in_canvas.size() && "cell indices are out-of-range");
 
-            const auto& s = all_sidbs_in_canvas_[i];
+            const auto& s = all_sidbs_in_canvas[i];
 
-            if (skeleton_layout_.get_cell_type(s) == sidb_technology::cell_type::EMPTY)
+            if (skeleton_layout.get_cell_type(s) == sidb_technology::cell_type::EMPTY)
             {
-                if (skeleton_layout_.get_defect(s).type != model::defect_type::NONE)
+                if (skeleton_layout.get_defect(s).type != model::defect_type::NONE)
                 {
                     return std::nullopt;
                 }
@@ -627,7 +625,7 @@ class design_gates_impl
             }
         }
 
-        for (const auto& c : skeleton_layout_.cells_of_type(sidb_technology::cell_type::LOGIC))
+        for (const auto& c : skeleton_layout.cells_of_type(sidb_technology::cell_type::LOGIC))
         {
             lyt.assign_cell_type(c, sidb_technology::cell_type::LOGIC);
         }
@@ -653,7 +651,7 @@ class design_gates_impl
 template <typename TT>
 [[nodiscard]] std::vector<layout> design_gates(const layout& skeleton, const std::vector<TT>& spec,
                                                const design_gates_params& params = {},
-                                               design_gates_stats*        stats  = nullptr) noexcept
+                                               design_gates_stats*        stats  = nullptr)
 {
     static_assert(kitty::is_truth_table<TT>::value, "TT is not a truth table");
 
@@ -703,8 +701,7 @@ template <typename TT>
 template <typename Lyt, typename TT>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::vector<Lyt> design_gates(const Lyt& skeleton, const std::vector<TT>& spec,
-                                            const design_gates_params& params = {},
-                                            design_gates_stats*        stats  = nullptr) noexcept
+                                            const design_gates_params& params = {}, design_gates_stats* stats = nullptr)
 {
     const auto gates = design_gates(to_sidb_layout(skeleton), spec, params, stats);
 

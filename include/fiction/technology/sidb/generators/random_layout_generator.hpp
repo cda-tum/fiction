@@ -116,9 +116,8 @@ namespace detail
  * @param skeleton The skeleton to place SiDBs on, if any.
  * @return The generated layout, or `std::nullopt` if not all SiDBs could be placed within the attempt limit.
  */
-[[nodiscard]] inline std::optional<layout>
-generate_random_layout(const generate_random_layout_params& params,
-                       const std::optional<layout>&         skeleton = std::nullopt) noexcept
+[[nodiscard]] inline std::optional<layout> generate_random_layout(const generate_random_layout_params& params,
+                                                                  const std::optional<layout>& skeleton = std::nullopt)
 {
     std::unordered_set<lattice_site> sidbs_affected_by_defects{};
 
@@ -180,7 +179,7 @@ generate_random_layout(const generate_random_layout_params& params,
  */
 [[nodiscard]] inline std::optional<std::vector<layout>>
 generate_multiple_random_layouts(const generate_random_layout_params& params,
-                                 const std::optional<layout>&         skeleton = std::nullopt) noexcept
+                                 const std::optional<layout>&         skeleton = std::nullopt)
 {
     std::vector<layout> unique_lyts{};
     unique_lyts.reserve(params.number_of_unique_generated_layouts);
@@ -214,7 +213,7 @@ generate_multiple_random_layouts(const generate_random_layout_params& params,
 template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::optional<Lyt> generate_random_layout(const generate_random_layout_params& params,
-                                                        const std::optional<Lyt>& skeleton = std::nullopt) noexcept
+                                                        const std::optional<Lyt>&            skeleton = std::nullopt)
 {
     const auto result = generate_random_layout(params, skeleton.has_value() ? std::optional{to_sidb_layout(*skeleton)} :
                                                                               std::optional<layout>{});
@@ -238,7 +237,7 @@ template <typename Lyt>
     requires(is_cell_level_layout_v<Lyt>)
 [[nodiscard]] std::optional<std::vector<Lyt>>
 generate_multiple_random_layouts(const generate_random_layout_params& params,
-                                 const std::optional<Lyt>&            skeleton = std::nullopt) noexcept
+                                 const std::optional<Lyt>&            skeleton = std::nullopt)
 {
     const auto result = generate_multiple_random_layouts(
         params, skeleton.has_value() ? std::optional{to_sidb_layout(*skeleton)} : std::optional<layout>{});

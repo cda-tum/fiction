@@ -39,6 +39,7 @@
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/on_the_fly_gate_library.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 

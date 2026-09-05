@@ -26,6 +26,7 @@
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
+#include "fiction/technology/sidb/technology.hpp"
 #include "fiction/types.hpp"
 
 #include <kitty/traits.hpp>
@@ -154,10 +155,10 @@ class defect_influence_impl
      * @param st Statistics.
      */
     defect_influence_impl(const layout& lyt, const defect_influence_params& ps, defect_influence_stats& st) :
-            layout_{lyt},
-            base_{without_defects(lyt)},
-            params_{ps},
-            stats_{st}
+            layout_to_analyze{lyt},
+            base_layout{without_defects(lyt)},
+            params{ps},
+            stats{st}
     {
         determine_scanning_area();
     }
@@ -170,10 +171,10 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain
-    grid_search(const std::size_t step_size, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    [[nodiscard]] defect_influence_domain grid_search(const std::size_t                     step_size,
+                                                      const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
-        const mockturtle::stopwatch stop{stats_.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         const auto positions = all_positions();
 
@@ -191,7 +192,7 @@ class defect_influence_impl
 
         log_stats();
 
-        return influence_domain_;
+        return influence_domain;
     }
     /**
      * Evaluates randomly chosen positions of the scanning area.
@@ -202,13 +203,13 @@ class defect_influence_impl
      * @return The defect influence domain.
      */
     template <typename TT = tt>
-    [[nodiscard]] defect_influence_domain
-    random_sampling(const std::size_t samples, const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+    [[nodiscard]] defect_influence_domain random_sampling(const std::size_t                     samples,
+                                                          const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
-        const mockturtle::stopwatch stop{stats_.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         auto positions = all_positions();
-        std::ranges::shuffle(positions, generator_);
+        std::ranges::shuffle(positions, generator);
 
         const auto num = std::min(positions.size(), samples);
 
@@ -217,7 +218,7 @@ class defect_influence_impl
 
         log_stats();
 
-        return influence_domain_;
+        return influence_domain;
     }
     /**
      * *QuickTrace*: traces the contour of the influential region around the layout. From a non-influential position
@@ -231,9 +232,9 @@ class defect_influence_impl
      */
     template <typename TT = tt>
     [[nodiscard]] defect_influence_domain quicktrace(const std::size_t                     samples,
-                                                     const std::optional<std::vector<TT>>& spec = std::nullopt) noexcept
+                                                     const std::optional<std::vector<TT>>& spec = std::nullopt)
     {
-        const mockturtle::stopwatch stop{stats_.time_total};
+        const mockturtle::stopwatch stop{stats.time_total};
 
         const auto next_clockwise_point = [](std::vector<lattice_site>& neighborhood,
                                              const lattice_site&        backtrack) noexcept -> lattice_site
@@ -257,7 +258,7 @@ class defect_influence_impl
 
             if (!operational_starting_point.has_value())
             {
-                return influence_domain_;
+                return influence_domain;
             }
 
             if (!starting_points.insert(*operational_starting_point).second)
@@ -276,7 +277,7 @@ class defect_influence_impl
             const auto contour_starting_point = *contour_starting_p;
 
             auto current_contour_point = contour_starting_point;
-            auto backtrack_point       = current_contour_point.x == nw_x_ ?
+            auto backtrack_point       = current_contour_point.x == nw_x ?
                                              current_contour_point :
                                              site_at_row(current_contour_point.x - 1, row_of(current_contour_point));
 
@@ -295,7 +296,7 @@ class defect_influence_impl
             {
                 const auto status = is_defect_influential(spec, next_point);
 
-                if (status == defect_influence_status::INFLUENTIAL || !layout_.is_empty_cell(next_point))
+                if (status == defect_influence_status::INFLUENTIAL || !layout_to_analyze.is_empty_cell(next_point))
                 {
                     backtrack_point       = current_contour_point;
                     current_contour_point = next_point;
@@ -312,47 +313,47 @@ class defect_influence_impl
 
         log_stats();
 
-        return influence_domain_;
+        return influence_domain;
     }
 
   private:
     /**
      * The layout to analyze.
      */
-    const layout layout_;
+    const layout layout_to_analyze;
     /**
      * The layout without any defects; the ground state comparison places the defect itself.
      */
-    const layout base_;
+    const layout base_layout;
     /**
      * Parameters.
      */
-    const defect_influence_params& params_;
+    const defect_influence_params& params;
     /**
      * Statistics.
      */
-    defect_influence_stats& stats_;
+    defect_influence_stats& stats;
     /**
      * Bounds of the scanning area in columns and rows.
      */
-    int32_t nw_x_{}, se_x_{};
-    int64_t nw_row_{}, se_row_{};
+    int32_t nw_x{}, se_x{};
+    int64_t nw_row{}, se_row{};
     /**
      * The defect influence domain under construction.
      */
-    defect_influence_domain influence_domain_{};
+    defect_influence_domain influence_domain{};
     /**
      * Random generator for the sampling.
      */
-    inline static std::mt19937_64 generator_{std::random_device{}()};
+    inline static std::mt19937_64 generator{std::random_device{}()};
     /**
      * Number of simulator invocations.
      */
-    std::atomic<std::size_t> num_simulator_invocations_{0};
+    std::atomic<std::size_t> num_simulator_invocations{0};
     /**
      * Number of evaluated defect positions.
      */
-    std::atomic<std::size_t> num_evaluated_defect_positions_{0};
+    std::atomic<std::size_t> num_evaluated_defect_positions{0};
     /**
      * Returns a copy of a layout without its defects.
      *
@@ -375,12 +376,12 @@ class defect_influence_impl
      */
     void determine_scanning_area() noexcept
     {
-        const auto [nw, se] = layout_.bounding_box();
+        const auto [nw, se] = layout_to_analyze.bounding_box();
 
-        nw_x_   = nw.x - params_.additional_scanning_area.first;
-        se_x_   = se.x + params_.additional_scanning_area.first;
-        nw_row_ = row_of(nw) - params_.additional_scanning_area.second;
-        se_row_ = row_of(se) + params_.additional_scanning_area.second;
+        nw_x   = nw.x - params.additional_scanning_area.first;
+        se_x   = se.x + params.additional_scanning_area.first;
+        nw_row = row_of(nw) - params.additional_scanning_area.second;
+        se_row = row_of(se) + params.additional_scanning_area.second;
     }
     /**
      * All positions of the scanning area in raster order.
@@ -389,7 +390,7 @@ class defect_influence_impl
      */
     [[nodiscard]] std::vector<lattice_site> all_positions() const
     {
-        return sites_in_area(site_at_row(nw_x_, nw_row_), site_at_row(se_x_, se_row_));
+        return sites_in_area(site_at_row(nw_x, nw_row), site_at_row(se_x, se_row));
     }
     /**
      * Runs `fn(i)` for `i` in `[0, n)` on the configured number of threads.
@@ -399,10 +400,10 @@ class defect_influence_impl
      * @param fn The function to run.
      */
     template <typename Fn>
-    void run_in_parallel(const std::size_t n, Fn&& fn) const
+    void run_in_parallel(const std::size_t n, const Fn& fn) const
     {
         const auto number_of_threads =
-            std::max(std::min(std::max(params_.number_of_threads, std::size_t{1}), n), std::size_t{1});
+            std::max(std::min(std::max(params.number_of_threads, std::size_t{1}), n), std::size_t{1});
         const auto slice_size = (n + number_of_threads - 1) / number_of_threads;
 
         std::vector<std::thread> threads{};
@@ -442,11 +443,11 @@ class defect_influence_impl
      */
     template <typename TT>
     [[nodiscard]] std::optional<lattice_site>
-    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec) noexcept
+    find_non_influential_defect_position_at_left_side(const std::optional<std::vector<TT>>& spec)
     {
-        std::uniform_int_distribution<int64_t> dist{nw_row_, se_row_};
+        std::uniform_int_distribution<int64_t> dist{nw_row, se_row};
 
-        const auto starting_point = site_at_row(nw_x_, dist(generator_));
+        const auto starting_point = site_at_row(nw_x, dist(generator));
 
         if (is_defect_influential(spec, starting_point) == defect_influence_status::NON_INFLUENTIAL)
         {
@@ -465,55 +466,55 @@ class defect_influence_impl
      */
     template <typename TT>
     defect_influence_status is_defect_influential(const std::optional<std::vector<TT>>& spec,
-                                                  const lattice_site&                   defect_cell) noexcept
+                                                  const lattice_site&                   defect_cell)
     {
-        ++num_evaluated_defect_positions_;
+        ++num_evaluated_defect_positions;
 
-        if (const auto op_value = influence_domain_.contains(defect_cell); op_value.has_value())
+        if (const auto op_value = influence_domain.contains(defect_cell); op_value.has_value())
         {
             return std::get<0>(*op_value);
         }
 
         const auto non_influential = [this, &defect_cell]()
         {
-            ++num_simulator_invocations_;
-            influence_domain_.add_value(defect_cell, {defect_influence_status::NON_INFLUENTIAL});
+            ++num_simulator_invocations;
+            influence_domain.add_value(defect_cell, {defect_influence_status::NON_INFLUENTIAL});
 
             return defect_influence_status::NON_INFLUENTIAL;
         };
 
         const auto influential = [this, &defect_cell]()
         {
-            ++num_simulator_invocations_;
-            influence_domain_.add_value(defect_cell, {defect_influence_status::INFLUENTIAL});
+            ++num_simulator_invocations;
+            influence_domain.add_value(defect_cell, {defect_influence_status::INFLUENTIAL});
 
             return defect_influence_status::INFLUENTIAL;
         };
 
         // a defect cannot sit on an SiDB
-        if (!layout_.is_empty_cell(defect_cell))
+        if (!layout_to_analyze.is_empty_cell(defect_cell))
         {
             return non_influential();
         }
 
         if (spec.has_value())
         {
-            if (params_.influence_def == defect_influence_params::influence_definition::OPERATIONALITY_CHANGE)
+            if (params.influence_def == defect_influence_params::influence_definition::OPERATIONALITY_CHANGE)
             {
-                auto lyt_copy = layout_;
-                lyt_copy.assign_defect(defect_cell, params_.defect);
+                auto lyt_copy = layout_to_analyze;
+                lyt_copy.assign_defect(defect_cell, params.defect);
 
-                const auto [status, result] = logic::is_operational(lyt_copy, *spec, params_.operational_params);
+                const auto [status, result] = logic::is_operational(lyt_copy, *spec, params.operational_params);
 
                 return status == logic::operational_status::OPERATIONAL ? non_influential() : influential();
             }
 
             // ground state change for every input pattern; the defect is added by the comparison
-            logic::bdl_input_iterator bii{base_, params_.operational_params.input_bdl_iterator_params};
+            logic::bdl_input_iterator bii{base_layout, params.operational_params.input_bdl_iterator_params};
 
             for (auto i = 0u; i < spec->front().num_bits(); ++i, ++bii)
             {
-                ++num_simulator_invocations_;
+                ++num_simulator_invocations;
 
                 if (does_defect_influence_groundstate(*bii, defect_cell) == defect_influence_status::INFLUENTIAL)
                 {
@@ -524,9 +525,9 @@ class defect_influence_impl
             return non_influential();
         }
 
-        if (params_.influence_def == defect_influence_params::influence_definition::GROUND_STATE_CHANGE)
+        if (params.influence_def == defect_influence_params::influence_definition::GROUND_STATE_CHANGE)
         {
-            return does_defect_influence_groundstate(base_, defect_cell) == defect_influence_status::INFLUENTIAL ?
+            return does_defect_influence_groundstate(base_layout, defect_cell) == defect_influence_status::INFLUENTIAL ?
                        influential() :
                        non_influential();
         }
@@ -541,9 +542,9 @@ class defect_influence_impl
      * @return Whether the defect changes the ground state.
      */
     [[nodiscard]] defect_influence_status does_defect_influence_groundstate(const layout&       lyt_without_defect,
-                                                                            const lattice_site& defect_pos) noexcept
+                                                                            const lattice_site& defect_pos)
     {
-        if (layout_.is_empty())
+        if (layout_to_analyze.is_empty())
         {
             return defect_influence_status::INFLUENTIAL;
         }
@@ -553,15 +554,16 @@ class defect_influence_impl
             return defect_influence_status::NON_INFLUENTIAL;
         }
 
-        const engines::quickexact_params qe_params{params_.operational_params.sim_params,
-                                                   engines::quickexact_params::automatic_base_number_detection::OFF};
+        const engines::quickexact_params qe_params{
+            .sim_params            = params.operational_params.sim_params,
+            .base_number_detection = engines::quickexact_params::automatic_base_number_detection::OFF};
 
         const auto ground_states = engines::quickexact(lyt_without_defect, qe_params).groundstates();
 
         auto lyt_defect = lyt_without_defect;
-        lyt_defect.assign_defect(defect_pos, params_.defect);
+        lyt_defect.assign_defect(defect_pos, params.defect);
 
-        if (analysis::can_positive_charges_occur(lyt_defect, params_.operational_params.sim_params))
+        if (analysis::can_positive_charges_occur(lyt_defect, params.operational_params.sim_params))
         {
             return defect_influence_status::INFLUENTIAL;
         }
@@ -573,7 +575,7 @@ class defect_influence_impl
             return defect_influence_status::INFLUENTIAL;
         }
 
-        const auto base = params_.operational_params.sim_params.base;
+        const auto base = params.operational_params.sim_params.base;
 
         for (const auto& gs_defect : ground_states_defect)
         {
@@ -599,7 +601,7 @@ class defect_influence_impl
     template <typename TT>
     [[nodiscard]] std::optional<lattice_site>
     find_last_non_influential_defect_position_moving_right(const std::optional<std::vector<TT>>& spec,
-                                                           const lattice_site& starting_defect_position) noexcept
+                                                           const lattice_site& starting_defect_position)
     {
         const auto row = row_of(starting_defect_position);
 
@@ -607,7 +609,7 @@ class defect_influence_impl
         auto previous               = starting_defect_position;
         auto current                = starting_defect_position;
 
-        for (auto x = starting_defect_position.x; x <= se_x_; ++x)
+        for (auto x = starting_defect_position.x; x <= se_x; ++x)
         {
             previous = current;
             current  = site_at_row(x, row);
@@ -634,19 +636,19 @@ class defect_influence_impl
      */
     void log_stats() const noexcept
     {
-        stats_.num_simulator_invocations      = num_simulator_invocations_.load();
-        stats_.num_evaluated_defect_positions = num_evaluated_defect_positions_.load();
+        stats.num_simulator_invocations      = num_simulator_invocations.load();
+        stats.num_evaluated_defect_positions = num_evaluated_defect_positions.load();
 
-        influence_domain_.for_each(
+        influence_domain.for_each(
             [this](const auto& defect_pos [[maybe_unused]], const auto& status)
             {
                 if (std::get<0>(status) == defect_influence_status::INFLUENTIAL)
                 {
-                    ++stats_.num_influencing_defect_positions;
+                    ++stats.num_influencing_defect_positions;
                 }
                 else
                 {
-                    ++stats_.num_non_influencing_defect_positions;
+                    ++stats.num_non_influencing_defect_positions;
                 }
             });
     }
@@ -657,7 +659,7 @@ class defect_influence_impl
      * @param c The position.
      * @return The neighbors.
      */
-    [[nodiscard]] std::vector<lattice_site> moore_neighborhood(const lattice_site& c) const noexcept
+    [[nodiscard]] std::vector<lattice_site> moore_neighborhood(const lattice_site& c) const
     {
         std::vector<lattice_site> neighbors{};
         neighbors.reserve(8);
@@ -665,14 +667,14 @@ class defect_influence_impl
         const auto x   = c.x;
         const auto row = row_of(c);
 
-        const auto decr_x   = (x - 1 >= nw_x_) ? x - 1 : x;
-        const auto incr_x   = (x + 1 <= se_x_) ? x + 1 : x;
-        const auto decr_row = (row - 1 >= nw_row_) ? row - 1 : row;
-        const auto incr_row = (row + 1 <= se_row_) ? row + 1 : row;
+        const auto decr_x   = (x - 1 >= nw_x) ? x - 1 : x;
+        const auto incr_x   = (x + 1 <= se_x) ? x + 1 : x;
+        const auto decr_row = (row - 1 >= nw_row) ? row - 1 : row;
+        const auto incr_row = (row + 1 <= se_row) ? row + 1 : row;
 
         const auto add = [this, &neighbors](const int32_t nx, const int64_t nrow)
         {
-            if (const auto s = site_at_row(nx, nrow); layout_.is_empty_cell(s))
+            if (const auto s = site_at_row(nx, nrow); layout_to_analyze.is_empty_cell(s))
             {
                 neighbors.push_back(s);
             }
@@ -742,7 +744,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
 
     const auto result = p.grid_search(step_size, std::optional{spec});
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -769,7 +771,7 @@ defect_influence_grid_search(const layout& lyt, const std::vector<TT>& spec, con
 
     const auto result = p.grid_search(step_size);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -799,7 +801,7 @@ defect_influence_random_sampling(const layout& lyt, const std::vector<TT>& spec,
 
     const auto result = p.random_sampling(samples, std::optional{spec});
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -824,7 +826,7 @@ defect_influence_random_sampling(const layout& lyt, const std::size_t samples,
 
     const auto result = p.random_sampling(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -855,7 +857,7 @@ defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, cons
 
     const auto result = p.quicktrace(samples, std::optional{spec});
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }
@@ -881,7 +883,7 @@ defect_influence_quicktrace(const layout& lyt, const std::vector<TT>& spec, cons
 
     const auto result = p.quicktrace(samples);
 
-    if (stats)
+    if (stats != nullptr)
     {
         *stats = st;
     }

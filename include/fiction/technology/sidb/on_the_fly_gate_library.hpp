@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
 #include "fiction/synthesis/truth_tables.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
@@ -567,12 +566,12 @@ class on_the_fly_gate_library
             skeleton_with_defects_copy.assign_cell_type(l_cell, sidb::sidb_technology::cell_type::LOGIC);
         }
 
-        const auto status =
-            sidb::simulation::logic::is_operational(skeleton_with_defects_copy, truth_table,
-                                                    sidb::simulation::logic::is_operational_params{
-                                                        parameters.design_gate_params.operational_params.sim_params,
-                                                        parameters.design_gate_params.operational_params.sim_engine})
-                .first;
+        const auto status = sidb::simulation::logic::is_operational(
+                                skeleton_with_defects_copy, truth_table,
+                                sidb::simulation::logic::is_operational_params{
+                                    .sim_params = parameters.design_gate_params.operational_params.sim_params,
+                                    .sim_engine = parameters.design_gate_params.operational_params.sim_engine})
+                                .first;
 
         return status == sidb::simulation::logic::operational_status::OPERATIONAL;
     }
@@ -584,7 +583,7 @@ class on_the_fly_gate_library
      * @return The cell list.
      */
     [[nodiscard]] static std::array<std::array<char, gate_x_size()>, gate_y_size()>
-    cell_level_layout_to_list(const layout& lyt) noexcept
+    cell_level_layout_to_list(const layout& lyt)
     {
         std::array<std::array<char, gate_x_size()>, gate_y_size()> result{};
 
@@ -652,7 +651,7 @@ class on_the_fly_gate_library
                                           const fcn::port_list<fcn::port_direction>& p, const tile<GateLyt>& tile)
     {
         const auto params = sidb::generators::is_gate_design_impossible_params{
-            parameters.design_gate_params.operational_params.sim_params};
+            .sim_params = parameters.design_gate_params.operational_params.sim_params};
 
         const bool is_wire = spec == synthesis::create_crossing_wire_tt() || spec == synthesis::create_double_wire_tt();
         const auto function_to_report = is_wire ? synthesis::create_id_tt() : spec.front();
@@ -677,7 +676,7 @@ class on_the_fly_gate_library
      * @param cell_list The cell list.
      * @return The layout.
      */
-    [[nodiscard]] static layout cell_list_to_layout(const gate& cell_list) noexcept
+    [[nodiscard]] static layout cell_list_to_layout(const gate& cell_list)
     {
         layout lyt{};
 

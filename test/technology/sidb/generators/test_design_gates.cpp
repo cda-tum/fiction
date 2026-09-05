@@ -35,7 +35,6 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 #include <mockturtle/utils/stopwatch.hpp>

@@ -175,9 +175,27 @@ int main()  // NOLINT
             write_sqd_layout(result, fmt::format("{}/{}.sqd", layouts_folder, benchmark));
 
             // check equivalence
-            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, st.gate_layout.value());
-            const auto eq    = mockturtle::equivalence_checking(*miter);
-            assert(eq.has_value());
+            if (!st.gate_layout.has_value())
+            {
+                fmt::print("[e] Circuit design produced no gate-level layout\n");
+                continue;
+            }
+
+            const auto miter = mockturtle::miter<mockturtle::klut_network>(mapped_network, *st.gate_layout);
+
+            if (!miter.has_value())
+            {
+                fmt::print("[e] Miter construction failed\n");
+                continue;
+            }
+
+            const auto eq = mockturtle::equivalence_checking(*miter);
+
+            if (!eq.has_value())
+            {
+                fmt::print("[e] Equivalence checking failed\n");
+                continue;
+            }
 
             sidb_circuits_with_defects(benchmark, mockturtle::to_seconds(st.time_total),
                                        st.exact_stats.num_aspect_ratios, *eq, result.num_cells());
