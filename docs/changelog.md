@@ -341,7 +341,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - Experiments:
   - SiDB circuit experiments now reject missing placement and equivalence results before reporting.
-  - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export.
+  - The Bestagon experiment converts placed SiDB cells to `sidb::layout` before SQD export and reports input parsing
+    or equivalence-checking failures.
+  - The Bestagon critical-temperature domain experiment records the default temperature for each kink policy.
   - The library walkthrough writes QCA layouts only in QCADesigner and SVG formats.
 
 - I/O:

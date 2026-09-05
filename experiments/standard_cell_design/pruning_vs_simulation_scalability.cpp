@@ -13,6 +13,7 @@
  * @brief Scalability of *QuickCell*'s pruning against full simulation.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "fiction_experiments.hpp"
@@ -24,7 +25,6 @@
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <fmt/format.h>
 #include <kitty/constructors.hpp>
@@ -170,10 +170,14 @@ int main()  // NOLINT
 
     const std::array layout_names{"2i1o", "2i2o", "3i1o", "3i2o", "3i3o"};
 
-    is_operational_params operational_params{simulation_parameters{2, -0.32}, engine::QUICKEXACT,
-                                             bdl_input_iterator_params{detect_bdl_wires_params{3.0}},
-                                             is_operational_params::operational_condition::REJECT_KINKS,
-                                             is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
+    is_operational_params operational_params{
+        .sim_params = simulation_parameters{2, -0.32},
+        .sim_engine = engine::QUICKEXACT,
+        .input_bdl_iterator_params =
+            bdl_input_iterator_params{.bdl_wire_params = detect_bdl_wires_params{.threshold_bdl_interdistance = 3.0}},
+        .op_condition = is_operational_params::operational_condition::REJECT_KINKS,
+        .strategy_to_analyze_operational_status =
+            is_operational_params::operational_analysis_strategy::SIMULATION_ONLY};
 
     for (size_t i = 0; i < layout_truth_table.size(); ++i)
     {

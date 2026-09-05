@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -30,9 +31,7 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
-#include <limits>
 #include <string>
-#include <type_traits>
 
 // data types cannot properly be converted to bit field types
 #pragma GCC diagnostic push

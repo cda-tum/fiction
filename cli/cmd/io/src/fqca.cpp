@@ -12,13 +12,13 @@
  * @file
  * @brief Implements the `fqca` command.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "cmd/io/include/fqca.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/qca/io/write_fqca_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

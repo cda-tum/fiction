@@ -14,6 +14,7 @@
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -27,7 +28,6 @@
 #include "fiction/technology/sidb/simulation/logic/detect_bdl_pairs.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 

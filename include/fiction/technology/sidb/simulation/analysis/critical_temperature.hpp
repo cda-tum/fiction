@@ -18,7 +18,6 @@
 
 #pragma once
 
-#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
@@ -37,7 +36,6 @@
 #include "fiction/technology/sidb/simulation/logic/is_operational.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <fmt/format.h>

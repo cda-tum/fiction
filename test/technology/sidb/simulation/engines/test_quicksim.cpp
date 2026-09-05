@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/engines/quicksim.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -21,7 +22,6 @@
 
 #include "utils/blueprints/layout_blueprints.hpp"
 
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/charge_state.hpp>
@@ -29,7 +29,6 @@
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <optional>

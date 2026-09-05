@@ -28,7 +28,6 @@
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
 #include "fiction/technology/sidb/technology.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/math/gray_code_iterator.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>

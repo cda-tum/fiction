@@ -22,14 +22,12 @@
 #include "utils/blueprints/layout_blueprints.hpp"
 
 #include <fiction/synthesis/truth_tables.hpp>
-#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/analysis/band_bending_resilience.hpp>
 #include <fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <cmath>

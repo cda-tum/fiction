@@ -15,6 +15,7 @@
  * @author Simon Hofmann (simon1hofmann)
  * @author Jan Drewniok (Drewniok)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -32,6 +33,7 @@
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 #include <fiction/verification/critical_path_length_and_throughput.hpp>
@@ -86,10 +88,18 @@ struct store_technology<sidb::simulation::result>
  * @param lyt An SiDB layout.
  * @return The layout itself.
  */
+// NOLINTNEXTLINE(bugprone-return-const-ref-from-parameter): callers need a non-owning view of a stored lvalue.
 [[nodiscard]] inline const sidb::layout& sidb_layout_of(const sidb::layout& lyt) noexcept
 {
     return lyt;
 }
+/**
+ * Prevents a dangling reference when a temporary SiDB layout is passed.
+ *
+ * @param lyt A temporary SiDB layout.
+ * @return No value because this overload is deleted.
+ */
+[[nodiscard]] const sidb::layout& sidb_layout_of(sidb::layout&& lyt) = delete;
 /**
  * The SiDB layout behind a store element.
  *

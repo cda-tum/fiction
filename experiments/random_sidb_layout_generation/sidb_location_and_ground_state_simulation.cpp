@@ -13,13 +13,13 @@
  * @brief Simulates generated SiDB layouts and records their ground state charges.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "fiction/technology/sidb/io/read_sqd_layout.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp"
-#include "fiction/types.hpp"
 
 #include <cstdint>
 #include <cstdlib>
@@ -127,7 +127,7 @@ int main(int argc, const char* argv[])  // NOLINT
 
                         const auto lyt = read_sqd_layout(benchmark.string());
 
-                        const quickexact_params params{phys_params};
+                        const quickexact_params params{.sim_params = phys_params};
 
                         const auto simulation_results = quickexact(lyt, params);
 

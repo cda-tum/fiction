@@ -13,6 +13,7 @@
  * @brief Critical temperature of the Bestagon gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "fiction_experiments.hpp"
@@ -27,7 +28,6 @@
 
 #include <array>
 #include <cstdlib>
-#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -64,7 +64,7 @@ int main()  // NOLINT
         std::make_pair("wire", std::vector<tt>{create_id_tt()})};
 
     const simulation_parameters       sim_params{2, -0.32};
-    const critical_temperature_params ct_params{sim_params};
+    const critical_temperature_params ct_params{.operational_params = {.sim_params = sim_params}};
 
     for (const auto& [gate, truth_table] : gates)
     {

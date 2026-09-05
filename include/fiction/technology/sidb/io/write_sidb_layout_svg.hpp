@@ -13,38 +13,30 @@
  * @brief SVG writer for SiDB layouts.
  * @author Sophia Kuhn
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
-#include "fiction/layouts/bounding_box.hpp"
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/version_info.hpp"
 
 #include <fmt/format.h>
 
-#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdint>
-#include <exception>
 #include <fstream>
 #include <iostream>
-#include <optional>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <string_view>
 #include <tuple>
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace fiction::sidb::io
 {

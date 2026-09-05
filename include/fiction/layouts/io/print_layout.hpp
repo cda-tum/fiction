@@ -14,11 +14,11 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
-#include "fiction/layouts/bounding_box.hpp"
 #include "fiction/traits.hpp"
 
 #include <fmt/color.h>

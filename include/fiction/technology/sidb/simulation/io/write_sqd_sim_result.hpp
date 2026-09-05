@@ -20,7 +20,6 @@
 #include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/stl/stl_utils.hpp"
 #include "fiction/utils/version_info.hpp"
 

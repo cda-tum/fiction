@@ -13,11 +13,11 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/fcn/cell_ports.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/stl/hash.hpp"
@@ -30,9 +30,7 @@
 #include <cstdlib>
 #include <limits>
 #include <random>
-#include <type_traits>
 #include <utility>
-#include <vector>
 
 namespace fiction::layouts
 {
@@ -362,12 +360,7 @@ template <typename Lyt>
             return true;  // keep looping
         });
 
-    if (different_cells)
-    {
-        return false;
-    }
-
-    return true;
+    return !different_cells;
 }
 /**
  * @brief Computes a digest of the given cell-level layout that respects the equality

@@ -33,8 +33,9 @@
 #include <fiction/verification/critical_path_length_and_throughput.hpp>  // critical path and throughput calculations
 
 #include <fmt/format.h>                                        // output formatting
+#include <lorina/common.hpp>                                   // parser return codes
 #include <lorina/genlib.hpp>                                   // Genlib file parsing
-#include <lorina/lorina.hpp>                                   // Verilog/BLIF/AIGER/... file parsing
+#include <lorina/verilog.hpp>                                  // Verilog file parsing
 #include <mockturtle/algorithms/cut_rewriting.hpp>             // logic optimization with cut rewriting
 #include <mockturtle/algorithms/equivalence_checking.hpp>      // equivalence checking
 #include <mockturtle/algorithms/mapper.hpp>                    // Technology mapping on the logic level
@@ -43,11 +44,12 @@
 #include <mockturtle/io/genlib_reader.hpp>                     // call-backs to read Genlib files into gate libraries
 #include <mockturtle/io/verilog_reader.hpp>                    // call-backs to read Verilog files into networks
 #include <mockturtle/networks/xag.hpp>                         // XOR-AND-inverter graphs
+#include <mockturtle/utils/stopwatch.hpp>                      // runtime conversion
 #include <mockturtle/utils/tech_library.hpp>                   // technology library utils
 #include <mockturtle/views/depth_view.hpp>                     // to determine network levels
 
-#include <cassert>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
 #include <sstream>
 #include <string>
@@ -98,7 +100,7 @@ int main()  // NOLINT
     mockturtle::xag_npn_resynthesis<mockturtle::xag_network,                    // the input network type
                                     mockturtle::xag_network,                    // the database network type
                                     mockturtle::xag_npn_db_kind::xag_complete>  // the kind of database to use
-        resynthesis_function{};
+        const resynthesis_function{};
 
     // parameters for cut rewriting
     mockturtle::cut_rewriting_params cut_params{};
@@ -112,11 +114,14 @@ int main()  // NOLINT
     std::vector<mockturtle::gate> gates{};
 
     // parameters for technology mapping
-    mockturtle::map_params map_params{};
+    const mockturtle::map_params map_params{};
 
-    const auto read_genlib_result = lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates});
-    assert(read_genlib_result == lorina::return_code::success);
-    mockturtle::tech_library<2> gate_lib{gates};
+    if (lorina::read_genlib(library_stream, mockturtle::genlib_reader{gates}) != lorina::return_code::success)
+    {
+        fmt::print(stderr, "[e] could not parse the built-in gate library\n");
+        return EXIT_FAILURE;
+    }
+    const mockturtle::tech_library<2> gate_lib{gates};
 
     // parameters for SMT-based physical design
     exact_physical_design_params exact_params{};
@@ -137,22 +142,25 @@ int main()  // NOLINT
         fmt::print("[i] processing {}\n", benchmark);
         mockturtle::xag_network xag{};
 
-        const auto read_verilog_result =
-            lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag));
-        assert(read_verilog_result == lorina::return_code::success);
+        if (lorina::read_verilog(fiction_experiments::benchmark_path(benchmark), mockturtle::verilog_reader(xag)) !=
+            lorina::return_code::success)
+        {
+            fmt::print(stderr, "[e] could not parse benchmark {}\n", benchmark);
+            return EXIT_FAILURE;
+        }
 
         // compute depth
-        mockturtle::depth_view depth_xag{xag};
+        const mockturtle::depth_view depth_xag{xag};
 
         // rewrite network cuts using the given re-synthesis function
         const auto cut_xag = mockturtle::cut_rewriting(xag, resynthesis_function, cut_params);
         // compute depth
-        mockturtle::depth_view depth_cut_xag{cut_xag};
+        const mockturtle::depth_view depth_cut_xag{cut_xag};
 
         // perform technology mapping
         const auto mapped_network = mockturtle::map(cut_xag, gate_lib, map_params);
         // compute depth
-        mockturtle::depth_view depth_mapped_network{mapped_network};
+        const mockturtle::depth_view depth_mapped_network{mapped_network};
 
         // perform layout generation with an SMT-based exact algorithm
         const auto gate_level_layout = exact<gate_lyt>(mapped_network, exact_params, &exact_stats);
@@ -161,8 +169,17 @@ int main()  // NOLINT
         {
             // check equivalence
             const auto miter = mockturtle::miter<technology_network>(mapped_network, *gate_level_layout);
-            const auto eq    = mockturtle::equivalence_checking(*miter);
-            assert(eq.has_value());
+            if (!miter.has_value())
+            {
+                fmt::print(stderr, "[e] could not construct an equivalence miter for {}\n", benchmark);
+                return EXIT_FAILURE;
+            }
+            const auto eq = mockturtle::equivalence_checking(*miter);
+            if (!eq.has_value())
+            {
+                fmt::print(stderr, "[e] equivalence checking timed out for {}\n", benchmark);
+                return EXIT_FAILURE;
+            }
 
             // compute critical path and throughput
             const auto cp_tp = critical_path_length_and_throughput(*gate_level_layout);
@@ -171,8 +188,8 @@ int main()  // NOLINT
             const auto cell_level_layout = apply_gate_library<cell_lyt, bestagon_library>(*gate_level_layout);
 
             // compute area
-            area_stats                   area_stats{};
-            area_params<sidb_technology> area_ps{};
+            area_stats                         area_stats{};
+            const area_params<sidb_technology> area_ps{};
             area(cell_level_layout, area_ps, &area_stats);
 
             // write a SiQAD simulation file

@@ -20,7 +20,6 @@
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/simulation/analysis/physical_population_stability.hpp"
 #include "fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp"
-#include "fiction/traits.hpp"
 
 #include <kitty/dynamic_truth_table.hpp>
 

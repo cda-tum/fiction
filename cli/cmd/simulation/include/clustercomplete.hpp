@@ -12,6 +12,7 @@
  * @file
  * @brief Declares the `clustercomplete` command, which runs *ClusterComplete* on the current layout.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #if (FICTION_ALGLIB_ENABLED)
@@ -21,7 +22,6 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/clustercomplete.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>

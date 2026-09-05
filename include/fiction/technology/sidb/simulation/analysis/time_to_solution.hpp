@@ -27,7 +27,6 @@
 #include "fiction/technology/sidb/simulation/engines/quicksim.hpp"
 #include "fiction/technology/sidb/simulation/is_ground_state.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/traits.hpp"
 
 #include <fmt/format.h>
 #include <mockturtle/utils/stopwatch.hpp>

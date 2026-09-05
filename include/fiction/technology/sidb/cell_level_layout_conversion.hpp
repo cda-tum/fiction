@@ -16,6 +16,7 @@
 
 #pragma once
 
+#include "fiction/layouts/coordinates.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/traits.hpp"

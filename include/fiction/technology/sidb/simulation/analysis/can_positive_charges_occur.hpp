@@ -22,7 +22,6 @@
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
-#include "fiction/traits.hpp"
 
 #include <cstddef>
 

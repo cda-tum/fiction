@@ -14,16 +14,14 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
-#include "fiction/layouts/coordinates.hpp"
-#include "fiction/layouts/layout_utils.hpp"
 #include "fiction/traits.hpp"
 
 #include <algorithm>
-#include <cstdint>
 #include <limits>
 
 // data types cannot properly be converted to bit field types

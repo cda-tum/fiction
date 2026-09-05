@@ -14,11 +14,13 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/layouts/cartesian_layout.hpp>
+#include <fiction/layouts/coordinates.hpp>
 #include <fiction/traits.hpp>
 
 #include <set>

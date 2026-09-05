@@ -13,17 +13,15 @@
  * @brief Checks a heuristic simulation result against an exact one.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
 
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/traits.hpp"
 
 #include <algorithm>
 #include <cassert>
-#include <cstdint>
-#include <unordered_set>
 
 namespace fiction::sidb::simulation
 {

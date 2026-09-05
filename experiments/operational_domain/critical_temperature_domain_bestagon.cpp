@@ -13,6 +13,7 @@
  * @brief Critical temperature domains of the Bestagon gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "fiction_experiments.hpp"
@@ -102,17 +103,12 @@ int main()  // NOLINT
                                 is_operational_params::operational_condition::REJECT_KINKS})
         {
             operational_domain_stats op_domain_stats_gs{};
-            std::string              gate_name  = gate;
-            double                   ct_default = 0;
+            std::string              gate_name = gate;
 
             op_domain_params.operational_params.op_condition = cond;
-            ct_default                                       = critical_temperature_gate_based(
-                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
-
-            op_domain_params.operational_params.op_condition =
-                is_operational_params::operational_condition::REJECT_KINKS;
-            ct_default = critical_temperature_gate_based(
-                lyt, truth_table, critical_temperature_params{op_domain_params.operational_params});
+            const auto ct_default                            = critical_temperature_gate_based(
+                lyt, truth_table,
+                critical_temperature_params{.operational_params = op_domain_params.operational_params});
 
             if (cond == is_operational_params::operational_condition::REJECT_KINKS)
             {

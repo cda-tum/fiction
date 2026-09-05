@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Willem Lambooy (wlambooy)
  * @author Simon Hofmann (simon1hofmann)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -28,7 +29,6 @@
 #include <functional>
 #include <memory>
 #include <ranges>
-#include <type_traits>
 #include <utility>
 #include <vector>
 

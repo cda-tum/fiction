@@ -13,13 +13,13 @@
  * @brief Implements the `qll` command.
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #include "cmd/io/include/qll.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/fcn/io/write_qll_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

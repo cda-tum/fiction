@@ -12,6 +12,7 @@
  * @file
  * @brief Declares the `quicksim` command, which runs *QuickSim* on the current layout.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -19,7 +20,6 @@
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/types.hpp>
 
 #include <alice/alice.hpp>
 #include <nlohmann/json.hpp>

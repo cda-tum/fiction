@@ -13,6 +13,7 @@
  * @brief Critical temperature of the SiQAD gates.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "fiction_experiments.hpp"
@@ -27,7 +28,6 @@
 
 #include <array>
 #include <cstdlib>
-#include <filesystem>
 #include <string>
 #include <utility>
 #include <vector>
@@ -57,7 +57,7 @@ int main()  // NOLINT
         std::make_pair("xor", std::vector<tt>{create_xor_tt()}), std::make_pair("or", std::vector<tt>{create_or_tt()})};
 
     const simulation_parameters sim_params{2, -0.28};
-    critical_temperature_params ct_params{sim_params};
+    critical_temperature_params ct_params{.operational_params = {.sim_params = sim_params}};
 
     // this is how the gates are presented and simulated in "SiQAD: A Design and Simulation Tool for Atomic Silicon
     // Quantum Dot Circuits\" by Samuel Sze Hang Ng, Jacob Retallick, Hsi Nien Chiu, Robert Lupoiu, Lucian Livadaru,

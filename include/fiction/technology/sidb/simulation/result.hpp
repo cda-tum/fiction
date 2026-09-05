@@ -21,7 +21,6 @@
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/utils/math/math_utils.hpp"
@@ -31,13 +30,8 @@
 #include <chrono>
 #include <cmath>
 #include <cstddef>
-#include <cstdint>
-#include <limits>
-#include <set>
 #include <string>
-#include <typeinfo>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 namespace fiction::sidb::simulation

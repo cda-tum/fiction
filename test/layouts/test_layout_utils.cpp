@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -24,7 +25,6 @@
 #include <fiction/layouts/coordinates.hpp>
 #include <fiction/layouts/hexagonal_layout.hpp>
 #include <fiction/layouts/layout_utils.hpp>
-#include <fiction/traits.hpp>
 #include <fiction/types.hpp>
 
 using namespace fiction;

@@ -29,7 +29,6 @@
 #include "fiction/technology/sidb/simulation/engines/ground_state_space.hpp"
 #include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <mockturtle/utils/stopwatch.hpp>

@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -25,6 +26,7 @@
 
 #include <fmt/format.h>
 
+#include <cstdint>
 #include <map>
 #include <sstream>
 #include <vector>
@@ -33,7 +35,7 @@ using namespace fiction;
 using namespace fiction::layouts;
 
 #pragma GCC diagnostic push
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic ignored "-Wuseless-cast"
 #endif
 #pragma GCC diagnostic ignored "-Wconversion"
@@ -117,12 +119,12 @@ TEST_CASE("Offset to cube coordinate conversion", "[coordinates]")
 
     auto t1      = coords::offset{1, 3, 1};
     auto t1_cube = coords::to_cube(t1);
-    CHECK(t1_cube.x == t1.x);
+    CHECK(t1_cube.x == static_cast<int64_t>(t1.x));
     CHECK(t1_cube.y == 3);
 
     auto t2      = coords::offset{1, 2};
     auto t2_cube = coords::to_cube(t2);
-    CHECK(t2_cube.x == t2.x);
+    CHECK(t2_cube.x == static_cast<int64_t>(t2.x));
     CHECK(t2_cube.y == 2);
     CHECK(t2_cube.z == 0);
 }
@@ -228,6 +230,4 @@ TEST_CASE("Addition / subtraction of cube coordinates", "[coordinates]")
     CHECK(coord{-4, 4, 42} - coord{1, -7, 24} == coord{-5, 11, 18});
 }
 
-#if defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif

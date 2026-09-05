@@ -15,6 +15,7 @@
  * @author Willem Lambooy (wlambooy)
  * @author Marcel Walter (marcelwa)
  * @author Benjamin Hien (hibenj)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -32,6 +33,7 @@
 #include <fiction/technology/qca/qca_one_library.hpp>
 #include <fiction/technology/qca/sim7_mol_library.hpp>
 #include <fiction/technology/sidb/bestagon_library.hpp>
+#include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/generators/design_gates.hpp>
 #include <fiction/technology/sidb/io/read_sqd_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>

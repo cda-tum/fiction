@@ -12,13 +12,13 @@
  * @file
  * @brief Implements the `qcc` command.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "cmd/io/include/qcc.hpp"
 
 #include "stores.hpp"  // NOLINT(misc-include-cleaner)
 
-#include <fiction/networks/name_utils.hpp>
 #include <fiction/technology/inml/io/write_qcc_layout.hpp>
 #include <fiction/traits.hpp>
 #include <fiction/types.hpp>

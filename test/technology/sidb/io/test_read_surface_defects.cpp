@@ -12,19 +12,18 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/io/read_surface_defects.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
 
 #include <fiction/technology/sidb/io/read_surface_defects.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
-#include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
+#include <fiction/technology/sidb/model/defect.hpp>
 
 #include <fstream>
 #include <initializer_list>
 #include <sstream>
-#include <string>
 
 using namespace fiction;
 using namespace fiction::sidb;
