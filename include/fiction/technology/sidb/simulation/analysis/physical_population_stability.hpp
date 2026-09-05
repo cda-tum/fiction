@@ -122,7 +122,7 @@ class physical_population_stability_impl
      * @param parameters Parameters.
      */
     physical_population_stability_impl(const layout& lyt, const physical_population_stability_params& parameters) :
-            layout{lyt},
+            sidb_layout{lyt},
             params{parameters}
     {}
     /**
@@ -135,9 +135,9 @@ class physical_population_stability_impl
     {
         const engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params};
 
-        auto simulation_results = engines::quickexact(layout, quickexact_parameters);
+        auto simulation_results = engines::quickexact(sidb_layout, quickexact_parameters);
 
-        const potential_landscape land{layout, params.sim_params};
+        const potential_landscape land{sidb_layout, params.sim_params};
 
         // ascending energy, distinct charge distributions only
         std::ranges::stable_sort(simulation_results.charge_distributions,
@@ -220,7 +220,7 @@ class physical_population_stability_impl
     /**
      * The layout to analyze.
      */
-    const layout& layout;
+    const layout& sidb_layout;
     /**
      * Parameters.
      */
