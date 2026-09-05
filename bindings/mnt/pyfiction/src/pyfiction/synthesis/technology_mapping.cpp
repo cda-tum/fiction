@@ -77,6 +77,14 @@ void technology_mapping(nanobind::module_& m)
         .def_rw("xnor2", &fiction::synthesis::technology_mapping_params::xnor2,
                 DOC(fiction_synthesis_technology_mapping_params_xnor2))
 
+        .def_rw("lt2", &fiction::synthesis::technology_mapping_params::lt2,
+                DOC(fiction_synthesis_technology_mapping_params_lt2))
+        .def_rw("gt2", &fiction::synthesis::technology_mapping_params::gt2,
+                DOC(fiction_synthesis_technology_mapping_params_gt2))
+        .def_rw("le2", &fiction::synthesis::technology_mapping_params::le2,
+                DOC(fiction_synthesis_technology_mapping_params_le2))
+        .def_rw("ge2", &fiction::synthesis::technology_mapping_params::ge2,
+                DOC(fiction_synthesis_technology_mapping_params_ge2))
         .def_rw("and3", &fiction::synthesis::technology_mapping_params::and3,
                 DOC(fiction_synthesis_technology_mapping_params_and3))
         .def_rw("xor_and", &fiction::synthesis::technology_mapping_params::xor_and,
@@ -120,6 +128,9 @@ void technology_mapping(nanobind::module_& m)
           DOC(fiction_synthesis_all_supported_standard_functions));
 
     detail::technology_mapping_impl<py_logic_network>(m);
+    detail::technology_mapping_impl<py_aig_network>(m);
+    detail::technology_mapping_impl<py_xag_network>(m);
+    detail::technology_mapping_impl<py_mig_network>(m);
 }
 
 }  // namespace pyfiction

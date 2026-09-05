@@ -29,14 +29,15 @@
 #include <string>
 
 #include <nanobind/nanobind.h>
-#include <nanobind/stl/array.h>       // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/function.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/optional.h>    // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/pair.h>        // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/set.h>         // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/shared_ptr.h>  // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/string.h>      // NOLINT(misc-include-cleaner)
-#include <nanobind/stl/vector.h>      // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/array.h>        // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/function.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/optional.h>     // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/pair.h>         // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/set.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/shared_ptr.h>   // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string.h>       // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/string_view.h>  // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/vector.h>       // NOLINT(misc-include-cleaner)
 
 namespace pyfiction
 {
@@ -84,6 +85,10 @@ void clocked_layout(nanobind::module_& m, const std::string& topology)
 
         .def("is_clocking_scheme", &ClockedLyt::is_clocking_scheme, py::arg("name"),
              DOC(fiction_layouts_clocked_layout_is_clocking_scheme))
+        .def(
+            "get_clocking_scheme_name",
+            [](const ClockedLyt& lyt) { return std::string{lyt.get_clocking_scheme().name}; },
+            "Returns the name of the layout's clocking scheme, e.g., `2DDWave` or `USE`.")
 
         .def("is_incoming_clocked", &ClockedLyt::is_incoming_clocked, py::arg("cz1"), py::arg("cz2"),
              DOC(fiction_layouts_clocked_layout_is_incoming_clocked))

@@ -100,6 +100,7 @@ void gate_level_layout(nanobind::module_& m, const std::string& topology)
         .def("set_layout_name", &GateLyt::set_layout_name, py::arg("name"),
              DOC(fiction_layouts_gate_level_layout_set_layout_name))
         .def("get_layout_name", &GateLyt::get_layout_name, DOC(fiction_layouts_gate_level_layout_get_layout_name))
+        .def("clone", &GateLyt::clone, DOC(fiction_layouts_gate_level_layout_clone))
         .def("set_input_name", &GateLyt::set_input_name, py::arg("index"), py::arg("name"),
              DOC(fiction_layouts_gate_level_layout_set_input_name))
         .def("get_input_name", &GateLyt::get_input_name, py::arg("index"),

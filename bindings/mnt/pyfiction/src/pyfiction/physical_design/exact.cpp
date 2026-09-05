@@ -26,6 +26,7 @@
 
 #include <nanobind/nanobind.h>
 #include <nanobind/stl/array.h>          // NOLINT(misc-include-cleaner)
+#include <nanobind/stl/chrono.h>         // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/function.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/optional.h>       // NOLINT(misc-include-cleaner)
 #include <nanobind/stl/pair.h>           // NOLINT(misc-include-cleaner)
@@ -55,6 +56,8 @@ void exact(nanobind::module_& m)
         .def(py::init<>(), "Default constructor.")
         .def_rw("scheme", &fiction::physical_design::exact_physical_design_params::scheme,
                 DOC(fiction_physical_design_exact_physical_design_params_scheme))
+        .def_rw("upper_bound_area", &fiction::physical_design::exact_physical_design_params::upper_bound_area,
+                DOC(fiction_physical_design_exact_physical_design_params_upper_bound_area))
         .def_rw("upper_bound_x", &fiction::physical_design::exact_physical_design_params::upper_bound_x,
                 DOC(fiction_physical_design_exact_physical_design_params_upper_bound_x))
         .def_rw("upper_bound_y", &fiction::physical_design::exact_physical_design_params::upper_bound_y,

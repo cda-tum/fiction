@@ -43,6 +43,12 @@ void read_surface_defects(nanobind::module_& m);
  * @param m Python module.
  */
 void write_sidb_layout_svg(nanobind::module_& m);
+/**
+ * @brief Registers the textual layout printer.
+ *
+ * @param m Python module.
+ */
+void print_sidb_layout(nanobind::module_& m);
 
 /**
  * @brief Registers SiDB layout import and export.
@@ -55,6 +61,7 @@ void register_sidb_io(nanobind::module_& m)
     read_sqd_layout(m);
     read_surface_defects(m);
     write_sidb_layout_svg(m);
+    print_sidb_layout(m);
 }
 
 }  // namespace pyfiction
