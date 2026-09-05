@@ -24,11 +24,13 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engine.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
@@ -246,7 +248,7 @@ TEST_CASE("Error handling of operational domain algorithms", "[operational-domai
         // parameter space, which is the exhaustive cost it exists to avoid
         const auto and_gate = to_sidb_layout(blueprints::bestagon_and_gate<sidb_cell_clk_lyt_siqad>());
 
-        const layout and_lat{and_gate};
+        const auto& and_lat = and_gate;
 
         REQUIRE(and_lat.num_cells_of_type(sidb_technology::cell_type::LOGIC) > 0);
 

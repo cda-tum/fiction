@@ -22,13 +22,11 @@
 #include <fiction/synthesis/truth_tables.hpp>
 #include <fiction/technology/sidb/cell_level_layout_conversion.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
-#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/simulation/engines/quickexact.hpp>
 #include <fiction/technology/sidb/simulation/logic/bdl_input_iterator.hpp>
 #include <fiction/technology/sidb/simulation/logic/detect_bdl_wires.hpp>
 #include <fiction/technology/sidb/simulation/logic/is_operational.hpp>
 #include <fiction/technology/sidb/simulation/logic/verify_logic_match.hpp>
-#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
 
 #include <vector>

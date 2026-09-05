@@ -29,8 +29,6 @@
 #include <fiction/technology/sidb/simulation/engines/quicksim.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/traits.hpp>
-#include <fiction/types.hpp>
 #include <fiction/utils/math/math_utils.hpp>
 
 #include <cmath>

@@ -164,7 +164,7 @@ TEST_CASE("Bestagon AND gate", "[assess-physical-population-stability]")
 
     lyt.assign_cell_type({36, 19, 0}, sidb_technology::cell_type::NORMAL);
 
-    layout lat{lyt};
+    const layout lat{lyt};
 
     SECTION("no input specified")
     {
