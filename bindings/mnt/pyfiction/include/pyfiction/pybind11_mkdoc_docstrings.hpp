@@ -18064,6 +18064,9 @@ Returns:
 Raises:
     std::invalid_argument: if `step_size` is zero.
                            std::invalid_argument: if `spec` is empty.
+                           std::invalid_argument: if
+                           `params.additional_scanning_area` contains
+                           a negative value.
 
 )doc";
 
@@ -18085,6 +18088,9 @@ Returns:
 
 Raises:
     std::invalid_argument: if `step_size` is zero.
+                           std::invalid_argument: if
+                           `params.additional_scanning_area` contains
+                           a negative value.
 
 )doc";
 
@@ -18131,7 +18137,9 @@ Returns:
     The defect influence domain.
 
 Raises:
-    std::invalid_argument: if `spec` is empty.
+    std::invalid_argument: if `spec` is empty. std::invalid_argument:
+                           if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
@@ -18148,6 +18156,10 @@ Args:
 
 Returns:
     The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
@@ -18169,7 +18181,9 @@ Returns:
     The defect influence domain.
 
 Raises:
-    std::invalid_argument: if `spec` is empty.
+    std::invalid_argument: if `spec` is empty. std::invalid_argument:
+                           if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
@@ -18186,6 +18200,10 @@ Args:
 
 Returns:
     The defect influence domain.
+
+Raises:
+    std::invalid_argument: if `params.additional_scanning_area`
+                           contains a negative value.
 
 )doc";
 
