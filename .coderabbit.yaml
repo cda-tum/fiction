@@ -41,7 +41,8 @@ reviews:
         Python bindings built with nanobind, not pybind11. One translation unit per
         binding, wired into the enclosing register_<name>.cpp. Sources are collected by
         file(GLOB_RECURSE ...); do not suggest adding them to a manual CMake list. Do not
-        suggest new Python-level submodules; the mnt.pyfiction namespace shape is fixed.
+        suggest new Python-level submodules for bound symbols; the flat mnt.pyfiction
+        namespace shape is fixed. mnt.pyfiction.cli is the one pure-Python subpackage.
     - path: "test/**"
       instructions: >-
         Catch2. Test file base names must be unique across the whole test tree because
