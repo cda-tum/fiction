@@ -416,6 +416,30 @@ namespace detail
 {
 
 /**
+ * Validates a sweep range and calculates its rounded number of steps.
+ *
+ * @param range Sweep bounds and step size.
+ * @return The number of steps, excluding the initial point.
+ * @throws std::invalid_argument if bounds are non-finite or reversed, the step is not finite and positive, or
+ * the number of points exceeds the storage range.
+ */
+[[nodiscard]] inline std::size_t num_sweep_steps(const operational_domain_value_range& range)
+{
+    if (!std::isfinite(range.min) || !std::isfinite(range.max) || !std::isfinite(range.step) || range.max < range.min ||
+        range.step <= 0.0)
+    {
+        throw std::invalid_argument("Invalid sweep range: finite ordered bounds and a positive finite step required");
+    }
+    const auto steps      = std::round((range.max - range.min) / range.step);
+    const auto max_points = std::min(std::vector<std::size_t>{}.max_size(), std::vector<double>{}.max_size());
+    if (!std::isfinite(steps) || steps >= static_cast<double>(max_points))
+    {
+        throw std::invalid_argument("Sweep point count exceeds the storage range");
+    }
+    return static_cast<std::size_t>(steps);
+}
+
+/**
  * This function validates the given parameters for the operational domain computation. It checks if the minimum
  * value of any sweep dimension is larger than the corresponding maximum value, and if the step size of any sweep
  * dimension is negative or zero. Additionally, it checks the preconditions of the operational domain sketch.
@@ -463,20 +487,9 @@ inline void validate_operational_domain_params(const layout& lyt, const operatio
         }
     }
 
-    for (auto d = 0u; d < params.sweep_dimensions.size(); ++d)
+    for (const auto& range : params.sweep_dimensions)
     {
-        if (params.sweep_dimensions.at(d).max < params.sweep_dimensions.at(d).min)
-        {
-            throw std::invalid_argument(
-                fmt::format("Invalid sweep dimension: 'max' value is smaller than 'min' value for "
-                            "dimension {}",
-                            d));
-        }
-        if (params.sweep_dimensions.at(d).step <= 0.0)
-        {
-            throw std::invalid_argument(
-                fmt::format("Invalid sweep dimension: 'step' size is negative or 0 for dimension {}", d));
-        }
+        static_cast<void>(num_sweep_steps(range));
     }
 }
 
@@ -495,7 +508,7 @@ class operational_domain_impl
      * @param st Statistics of the process.
      */
     operational_domain_impl(const layout& source_layout, const std::vector<TT>& tt, const operational_domain_params& ps,
-                            operational_domain_stats& st) noexcept :
+                            operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{tt},
             params{ps},
@@ -573,7 +586,7 @@ class operational_domain_impl
     // The implementation stores a reference to the caller-owned layout.
     // NOLINTNEXTLINE(modernize-pass-by-value)
     operational_domain_impl(const layout& source_layout, const operational_domain_params& ps,
-                            operational_domain_stats& st) noexcept :
+                            operational_domain_stats& st) :
             sidb_layout{source_layout},
             truth_table{std::vector<TT>{}},
             params{ps},
@@ -1368,16 +1381,16 @@ class operational_domain_impl
     /**
      * Calculates the number of steps in the given dimension based on the provided parameters.
      *
+     * @param dimension Sweep dimension index.
      * @return The number of steps in the given dimension.
+     * @throws std::invalid_argument if the range is invalid or exceeds the storage range.
+     * @throws std::out_of_range if the dimension index is out of range.
      */
-    [[nodiscard]] std::size_t num_steps(const std::size_t dimension) const noexcept
+    [[nodiscard]] std::size_t num_steps(const std::size_t dimension) const
     {
-        assert(dimension < num_dimensions && "Invalid dimension");
-
-        return static_cast<std::size_t>(
-            std::round((params.sweep_dimensions.at(dimension).max - params.sweep_dimensions.at(dimension).min) /
-                       params.sweep_dimensions.at(dimension).step));
+        return num_sweep_steps(params.sweep_dimensions.at(dimension));
     }
+
     /**
      * Helper function that sets the value of a sweep dimension in the simulation parameters.
      *

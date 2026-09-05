@@ -13,6 +13,7 @@
  * @brief Finds the physical parameters under which a charge distribution is valid.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -39,10 +40,12 @@ namespace fiction::sidb::simulation::analysis
  * @param params Parameters; the sweep dimensions and the engine that determines the excited-state number.
  * @return The parameter points where `cd` is physically valid, each with its excited-state number; empty if `cd`
  * does not cover the layout's SiDBs in raster order.
+ * @throws std::invalid_argument if a sweep range has non-finite or reversed bounds, a non-positive
+ * or non-finite step, or more points than the storage range permits.
  */
 [[nodiscard]] inline domain<logic::parameter_point, uint64_t>
 physically_valid_parameters(const layout& lyt, const charge_distribution& cd,
-                            const logic::operational_domain_params& params = {}) noexcept
+                            const logic::operational_domain_params& params = {})
 {
     if (lyt.sidbs() != cd.sites())
     {

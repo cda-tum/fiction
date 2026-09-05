@@ -371,7 +371,7 @@ class is_operational_impl
      */
     [[nodiscard]] std::pair<operational_status, non_operationality_reason> run() 
     {
-        if (parameters.sim_engine == engine::QUICKSIM && lyt.num_charged_defects() > 0)
+        if (parameters.sim_engine == engine::QUICKSIM && sidb_layout.num_charged_defects() > 0)
         {
             throw std::invalid_argument("QuickSim does not support charged defects");
         }

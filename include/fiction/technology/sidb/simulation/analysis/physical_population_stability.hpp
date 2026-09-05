@@ -32,8 +32,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <set>
 #include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -143,14 +143,14 @@ class physical_population_stability_impl
         std::ranges::stable_sort(simulation_results.charge_distributions,
                                  [](const auto& lhs, const auto& rhs) { return lhs.energy() < rhs.energy(); });
 
-        std::unordered_set<uint64_t> seen{};
+        std::set<std::vector<model::charge_state>> seen{};
 
         std::vector<population_stability_information> popstability_information{};
         popstability_information.reserve(simulation_results.charge_distributions.size());
 
         for (const auto& cd : simulation_results.charge_distributions)
         {
-            if (!seen.insert(cd.charge_index(params.sim_params.base)).second)
+            if (!seen.insert(cd.charge_states()).second)
             {
                 continue;
             }

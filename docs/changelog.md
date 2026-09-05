@@ -241,6 +241,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - ClusterComplete now assigns distinct queue indices to workers without initial work.
   - Simulation comparison and output now validate distribution sites. Ground State Space uses the landscape's physical parameters.
   - Parallel SiDB consumers now propagate worker errors and reject QuickSim with charged defects.
+  - SiDB parameter sweeps now reject non-finite ranges, invalid steps, and unrepresentable point counts.
+  - Population-stability analysis now distinguishes complete charge distributions beyond the charge-index range.
 
 - Continuous integration:
   - Canceled CI runs now stop optional summary jobs.

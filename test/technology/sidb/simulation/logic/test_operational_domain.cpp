@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/logic/operational_domain.hpp`.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -41,6 +42,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <functional>
+#include <limits>
 #include <optional>
 #include <stdexcept>
 #include <unordered_set>
@@ -2063,11 +2065,32 @@ TEST_CASE("Two BDL pair wire with degeneracy for input 1", "[operational-domain]
 
 TEST_CASE("Operational domain rejects QuickSim with charged defects", "[operational-domain]")
 {
-    surfaces::defect_surface<sidb_100_cell_clk_lyt_siqad> lyt{};
+    layout lyt{};
     lyt.assign_defect({0, 0}, defect{defect_type::DB, -1});
     operational_domain_params params{};
     params.operational_params.sim_engine = engine::QUICKSIM;
     params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params), std::invalid_argument);
+}
+
+TEST_CASE("Operational-domain sweeps reject non-finite and oversized ranges", "[operational-domain]")
+{
+    const layout              lyt{};
+    operational_domain_params params{};
+    for (const auto value : {std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::infinity()})
+    {
+        for (const auto& range :
+             std::vector<operational_domain_value_range>{{.dimension = sweep_parameter::EPSILON_R, .min = value},
+                                                         {.dimension = sweep_parameter::EPSILON_R, .max = value},
+                                                         {.dimension = sweep_parameter::EPSILON_R, .step = value}})
+        {
+            params.sweep_dimensions = {range};
+            CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
+                            std::invalid_argument);
+        }
+    }
+    params.sweep_dimensions = {
+        {.dimension = sweep_parameter::EPSILON_R, .min = 1, .max = 2, .step = std::numeric_limits<double>::min()}};
     CHECK_THROWS_AS(operational_domain_grid_search(lyt, std::vector<tt>{create_and_tt()}, params),
                     std::invalid_argument);
 }

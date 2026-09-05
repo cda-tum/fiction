@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/analysis/physically_valid_parameters.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -30,6 +31,10 @@
 #include <fiction/technology/sidb/simulation/logic/operational_domain.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 #include <fiction/types.hpp>
+
+#include <limits>
+#include <stdexcept>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::sidb;
@@ -273,4 +278,31 @@ TEST_CASE(
         REQUIRE(p4.has_value());
         CHECK(std::get<0>(p4.value_or(decltype(p4)::value_type{})) == 0);
     }
+}
+
+TEST_CASE("Physical-validity sweep boundaries", "[physically-valid-parameters]")
+{
+    layout lyt{};
+    lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+    const charge_distribution cd{lyt};
+    operational_domain_params params{};
+    for (const auto& range : std::vector<operational_domain_value_range>{
+             {.dimension = sweep_parameter::EPSILON_R, .min = 5, .max = 6, .step = 0},
+             {.dimension = sweep_parameter::EPSILON_R, .min = 5, .max = 6, .step = -1},
+             {.dimension = sweep_parameter::EPSILON_R, .min = 6, .max = 5, .step = 1},
+             {.dimension = sweep_parameter::EPSILON_R, .min = std::numeric_limits<double>::quiet_NaN()},
+             {.dimension = sweep_parameter::EPSILON_R, .max = std::numeric_limits<double>::infinity()},
+             {.dimension = sweep_parameter::EPSILON_R, .step = std::numeric_limits<double>::quiet_NaN()},
+             {.dimension = sweep_parameter::EPSILON_R, .step = std::numeric_limits<double>::infinity()},
+             {.dimension = sweep_parameter::EPSILON_R, .step = std::numeric_limits<double>::min()}})
+    {
+        params.sweep_dimensions = {range};
+        CHECK_THROWS_AS(physically_valid_parameters(lyt, cd, params), std::invalid_argument);
+        CHECK(physically_valid_parameters(lyt, charge_distribution{}, params).empty());
+    }
+    params.sweep_dimensions = {{.dimension = sweep_parameter::EPSILON_R, .min = 5.6, .max = 5.6, .step = 0.1}};
+    params.operational_params.strategy_to_analyze_operational_status =
+        is_operational_params::operational_analysis_strategy::FILTER_ONLY;
+    params.operational_params.op_condition = is_operational_params::operational_condition::TOLERATE_KINKS;
+    CHECK(physically_valid_parameters(lyt, cd, params).size() == 1);
 }
