@@ -13,10 +13,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
+    lattice_site,
     quickexact,
     quickexact_params,
-    sidb_100_lattice,
+    sidb_layout,
     sidb_technology,
     write_location_and_ground_state,
 )
@@ -26,11 +26,17 @@ if TYPE_CHECKING:
 
 
 def test_write_location_and_ground_state(tmp_path: Path) -> None:
-    layout = sidb_100_lattice((2, 1))
-    layout.assign_cell_type((0, 0), sidb_technology.cell_type.NORMAL)
-    layout.assign_cell_type((2, 0), sidb_technology.cell_type.NORMAL)
+    """The writer emits one row per SiDB.
 
-    result = quickexact(charge_distribution_surface_100(layout), quickexact_params())
+    Args:
+        tmp_path: Temporary output directory.
+    """
+
+    layout = sidb_layout()
+    layout.assign_cell_type(lattice_site(0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(2, 0, 0), sidb_technology.cell_type.NORMAL)
+
+    result = quickexact(layout, quickexact_params())
     assert result.charge_distributions
 
     filename = tmp_path / "ground_state.txt"

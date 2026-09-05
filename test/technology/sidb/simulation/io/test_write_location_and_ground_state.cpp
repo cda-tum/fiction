@@ -15,33 +15,24 @@
  * @author Marcel Walter (marcelwa)
  */
 
-#include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-#include <fiction/layouts/cartesian_layout.hpp>
-#include <fiction/layouts/cell_level_layout.hpp>
-#include <fiction/layouts/clocked_layout.hpp>
-#include <fiction/layouts/coordinates.hpp>
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp>
-#include <fiction/technology/sidb/surfaces/charge_distribution_surface.hpp>
 #include <fiction/technology/sidb/technology.hpp>
-#include <fiction/types.hpp>
 
 #include <cctype>
 #include <sstream>
 #include <string>
 
 using namespace fiction;
-using namespace fiction::layouts;
 using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::sidb::simulation::io;
-using namespace fiction::sidb::surfaces;
-
-using layout = sidb_100_cell_clk_lyt_siqad;
 
 // Helper function to compare string output with expected string
 bool compare_output(const std::string& output, const std::string& expected)
@@ -55,24 +46,19 @@ bool compare_output(const std::string& output, const std::string& expected)
     return clean_output == clean_expected;
 }
 
-TEMPLATE_TEST_CASE(
-    "writes expected output", "[write_txt_sim_result]",
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>),
-    (cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::siqad>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::siqad>>>>),
-    (charge_distribution_surface<cell_level_layout<sidb_technology, clocked_layout<cartesian_layout<coords::offset>>>>))
+TEST_CASE("writes expected output", "[write_txt_sim_result]")
 {
     layout lyt{};
 
     SECTION("Output is written to ostream correctly, degenerated GS")
     {
-        lyt.assign_cell_type({0, 0}, layout::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, layout::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 0}, layout::cell_type::NORMAL);
-        lyt.assign_cell_type({8, 0}, layout::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({8, 0}, sidb_technology::cell_type::NORMAL);
 
         const simulation_parameters params{2, -0.32};
-        const auto                  simulation_results = exhaustive_ground_state_simulation<layout>(lyt, params);
+        const auto                  simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);
@@ -94,12 +80,12 @@ TEMPLATE_TEST_CASE(
 
     SECTION("Output is written to ostream correctly, unique GS")
     {
-        lyt.assign_cell_type({0, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type({3, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
-        lyt.assign_cell_type({5, 0}, sidb_cell_clk_lyt_siqad::cell_type::NORMAL);
+        lyt.assign_cell_type({0, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({3, 0}, sidb_technology::cell_type::NORMAL);
+        lyt.assign_cell_type({5, 0}, sidb_technology::cell_type::NORMAL);
 
         const simulation_parameters params{2, -0.32};
-        const auto                  simulation_results = exhaustive_ground_state_simulation<layout>(lyt, params);
+        const auto                  simulation_results = exhaustive_ground_state_simulation(lyt, params);
 
         std::stringstream ss;
         write_location_and_ground_state(simulation_results, ss);

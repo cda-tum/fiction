@@ -301,14 +301,15 @@ class critical_temperature_impl
      */
     void non_gate_based_simulation() noexcept
     {
-        mockturtle::stopwatch         stop{stats.time_total};
-        sidb::simulation::result<Lyt> simulation_results{};
+        mockturtle::stopwatch                stop{stats.time_total};
+        sidb::simulation::legacy_result<Lyt> simulation_results{};
 
         if (params.operational_params.sim_engine == engine::QUICKEXACT)
         {
-            const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
-                params.operational_params.sim_params,
-                sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+            const sidb::simulation::engines::quickexact_params qe_params{
+                .sim_params = params.operational_params.sim_params,
+                .base_number_detection =
+                    sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
 
             // All physically valid charge configurations are determined for the given layout (`QuickExact` simulation
             // is used to provide 100 % accuracy for the Critical Temperature).
@@ -317,8 +318,8 @@ class critical_temperature_impl
 #if (FICTION_ALGLIB_ENABLED)
         else if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
-            const sidb::simulation::engines::clustercomplete_params<cell<Lyt>> cc_params{
-                params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
+                                                                                  params.operational_params.sim_params};
 
             // All physically valid charge configurations are determined for the given layout (`ClusterComplete`
             // simulation is used to provide 100 % accuracy for the Critical Temperature).
@@ -550,7 +551,7 @@ class critical_temperature_impl
      * @param lyt_with_input_pattern The SiDB layout with a given input combination applied.
      * @return Simulation results.
      */
-    [[nodiscard]] sidb::simulation::result<Lyt>
+    [[nodiscard]] sidb::simulation::legacy_result<Lyt>
     physical_simulation_of_layout(const Lyt& lyt_with_input_pattern) noexcept
     {
         if (params.operational_params.sim_engine == engine::EXGS)
@@ -562,17 +563,18 @@ class critical_temperature_impl
         if (params.operational_params.sim_engine == engine::QUICKEXACT)
         {
             // perform QuickExact exact simulation
-            const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
-                params.operational_params.sim_params,
-                fiction::sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+            const sidb::simulation::engines::quickexact_params qe_params{
+                .sim_params = params.operational_params.sim_params,
+                .base_number_detection =
+                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
             return sidb::simulation::engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (params.operational_params.sim_engine == engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params<cell<Lyt>> cc_params{
-                params.operational_params.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params =
+                                                                                  params.operational_params.sim_params};
             return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
@@ -585,16 +587,17 @@ class critical_temperature_impl
                                                                        .iteration_steps = params.iteration_steps,
                                                                        .alpha           = params.alpha};
 
-            if (const auto result = sidb::simulation::engines::quicksim<Lyt>(lyt_with_input_pattern, qs_params))
+            if (const auto result = sidb::simulation::engines::quicksim(lyt_with_input_pattern, qs_params))
             {
                 return result.value();
             }
-            return sidb::simulation::result<Lyt>{};  // return empty result if no valid charge distribution was found
+            return sidb::simulation::legacy_result<Lyt>{};  // return empty result if no valid charge distribution was
+                                                            // found
         }
 
         assert(false && "unsupported simulation engine");
 
-        return sidb::simulation::result<Lyt>{};
+        return sidb::simulation::legacy_result<Lyt>{};
     }
 };
 

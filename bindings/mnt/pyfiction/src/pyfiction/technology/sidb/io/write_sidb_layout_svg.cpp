@@ -17,6 +17,7 @@
 #include "pyfiction/documentation.hpp"
 #include "pyfiction/types.hpp"
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/io/write_sidb_layout_svg.hpp>
 #include <fiction/technology/sidb/layout.hpp>
 
@@ -129,7 +130,7 @@ void write_sidb_layout_svg(nanobind::module_& m)
 
     m.def("write_sidb_layout_svg", write_sidb_layout_svg_pointer, py::arg("layout"), py::arg("filename"),
           py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
-          DOC(fiction_sidb_io_write_sidb_layout_svg_3));
+          DOC(fiction_sidb_io_write_sidb_layout_svg_4));
 
     m.def(
         "write_sidb_layout_svg_to_string",
@@ -141,6 +142,28 @@ void write_sidb_layout_svg(nanobind::module_& m)
         },
         py::arg("layout"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
         DOC(fiction_sidb_io_write_sidb_layout_svg_3));
+
+    // NOLINTNEXTLINE(misc-const-correctness)
+    void (*const write_sidb_layout_svg_cd_pointer)(
+        const fiction::sidb::layout&, const fiction::sidb::charge_distribution&, const std::string_view&,
+        const fiction::sidb::io::write_sidb_layout_svg_params&) = &fiction::sidb::io::write_sidb_layout_svg;
+
+    m.def("write_sidb_layout_svg", write_sidb_layout_svg_cd_pointer, py::arg("layout"), py::arg("charge_distribution"),
+          py::arg("filename"), py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+          DOC(fiction_sidb_io_write_sidb_layout_svg_6));
+
+    m.def(
+        "write_sidb_layout_svg_to_string",
+        [](const fiction::sidb::layout& layout, const fiction::sidb::charge_distribution& cd,
+           const fiction::sidb::io::write_sidb_layout_svg_params& params)
+        {
+            std::ostringstream oss;
+            fiction::sidb::io::write_sidb_layout_svg(layout, cd, oss, params);
+            return oss.str();
+        },
+        py::arg("layout"), py::arg("charge_distribution"),
+        py::arg("ps") = fiction::sidb::io::write_sidb_layout_svg_params{},
+        DOC(fiction_sidb_io_write_sidb_layout_svg_5));
 }
 
 }  // namespace pyfiction

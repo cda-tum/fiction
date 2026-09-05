@@ -18,7 +18,7 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::analysis::calculate_energy_distribution
+```{doxygenfunction} fiction::sidb::simulation::analysis::calculate_energy_distribution(const std::vector<charge_distribution>& charge_distributions)
 
 ```
 

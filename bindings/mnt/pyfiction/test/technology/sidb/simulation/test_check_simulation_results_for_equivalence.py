@@ -6,49 +6,78 @@
 #
 # Licensed under the MIT License
 
+"""Tests for ``check_simulation_results_for_equivalence``."""
+
 from __future__ import annotations
 
+import pytest
+
 from mnt.pyfiction import (
-    charge_distribution_surface_100,
-    charge_distribution_surface_111,
+    charge_distribution,
     check_simulation_results_for_equivalence,
+    lattice,
+    lattice_site,
+    quickexact,
+    quickexact_params,
     sidb_100_lattice,
     sidb_111_lattice,
-    sidb_simulation_result_100,
-    sidb_simulation_result_111,
+    sidb_charge_state,
+    sidb_layout,
+    sidb_simulation_result,
     sidb_technology,
 )
 
 
-def test_cds_with_two_sidbs_100_lattice():
-    # Use standard constructor.
-    lattice_100 = sidb_100_lattice()
-    lattice_100.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    lattice_100.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
+@pytest.mark.parametrize(
+    "lat",
+    [pytest.param(lattice.si_100_2x1(), id="100"), pytest.param(lattice.si_111_1x1(), id="111")],
+)
+def test_two_sidbs(lat: lattice) -> None:
+    """Equivalence compares charge states on both non-template lattices.
 
-    first_result_100 = sidb_simulation_result_100()
-    second_result_100 = sidb_simulation_result_100()
+    Args:
+        lat: Lattice to test.
+    """
 
-    first_result_100.charge_distributions = [charge_distribution_surface_100(lattice_100)]
-    second_result_100.charge_distributions = [charge_distribution_surface_100(lattice_100)]
+    layout = sidb_layout(lat)
+    layout.assign_cell_type(lattice_site(0, 0, 1), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type(lattice_site(0, 1, 1), sidb_technology.cell_type.NORMAL)
 
-    equivalent = check_simulation_results_for_equivalence(first_result_100, second_result_100)
+    first_result = sidb_simulation_result()
+    second_result = sidb_simulation_result()
 
-    assert equivalent
+    first_result.charge_distributions = [charge_distribution(layout)]
+    second_result.charge_distributions = [charge_distribution(layout)]
+
+    assert check_simulation_results_for_equivalence(first_result, second_result)
+
+    # a different charge state breaks the equivalence
+    other = charge_distribution(layout)
+    other.assign_charge_state(lattice_site(0, 1, 1), sidb_charge_state.NEUTRAL)
+    second_result.charge_distributions = [other]
+
+    assert not check_simulation_results_for_equivalence(first_result, second_result)
+
+    # so does a different number of distributions
+    second_result.charge_distributions = [charge_distribution(layout), other]
+
+    assert not check_simulation_results_for_equivalence(first_result, second_result)
 
 
-def test_cds_with_two_sidbs_111_lattice():
-    # Use standard constructor.
-    lattice_111 = sidb_111_lattice()
-    lattice_111.assign_cell_type((0, 1), sidb_technology.cell_type.NORMAL)
-    lattice_111.assign_cell_type((0, 3), sidb_technology.cell_type.NORMAL)
+@pytest.mark.parametrize(
+    "layout",
+    [pytest.param(sidb_100_lattice(), id="100"), pytest.param(sidb_111_lattice(), id="111")],
+)
+def test_legacy_results(layout: sidb_100_lattice | sidb_111_lattice) -> None:
+    """Equivalence accepts transitional simulation results.
 
-    first_result_111 = sidb_simulation_result_111()
-    second_result_111 = sidb_simulation_result_111()
+    Args:
+        layout: Cell-level layout to test.
+    """
 
-    first_result_111.charge_distributions = [charge_distribution_surface_111(lattice_111)]
-    second_result_111.charge_distributions = [charge_distribution_surface_111(lattice_111)]
+    layout.assign_cell_type((0, 0, 0), sidb_technology.cell_type.NORMAL)
+    layout.assign_cell_type((2, 0, 0), sidb_technology.cell_type.NORMAL)
 
-    equivalent = check_simulation_results_for_equivalence(first_result_111, second_result_111)
+    result = quickexact(layout, quickexact_params())
 
-    assert equivalent
+    assert check_simulation_results_for_equivalence(result, result)

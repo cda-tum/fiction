@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/simulation/analysis/minimum_energy.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
@@ -44,7 +45,7 @@ template <typename Lyt>
 class write_location_and_ground_state_impl
 {
   public:
-    write_location_and_ground_state_impl(const sidb::simulation::result<Lyt>& src, std::ostream& s) :
+    write_location_and_ground_state_impl(const sidb::simulation::legacy_result<Lyt>& src, std::ostream& s) :
             sim_result{src},
             os{s}
     {}
@@ -101,11 +102,68 @@ class write_location_and_ground_state_impl
     /**
      * Simulation results.
      */
-    const sidb::simulation::result<Lyt>& sim_result;
+    const sidb::simulation::legacy_result<Lyt>& sim_result;
     /**
      * Output stream used for writing the simulation sim_result.
      */
     std::ostream& os;
+};
+
+/**
+ * Writes the SiDB positions of a `result` and the charge states of every ground state as CSV.
+ */
+class location_and_ground_state_writer
+{
+  public:
+    location_and_ground_state_writer(const sidb::simulation::result& src, std::ostream& s) : sim_result{src}, os{s} {}
+
+    void run()
+    {
+        const auto min_energy = fiction::utils::math::round_to_n_decimal_places(
+            simulation::analysis::minimum_energy(sim_result.charge_distributions.cbegin(),
+                                                 sim_result.charge_distributions.cend()),
+            6);
+
+        std::vector<const charge_distribution*> ground_states{};
+
+        for (const auto& cd : sim_result.charge_distributions)
+        {
+            if (std::fabs(fiction::utils::math::round_to_n_decimal_places(cd.energy(), 6) - min_energy) <
+                utils::math::ERROR_MARGIN)
+            {
+                ground_states.push_back(&cd);
+            }
+        }
+
+        if (ground_states.empty())
+        {
+            return;
+        }
+
+        os << "x [nm]; y [nm];";
+
+        for (const auto i : std::views::iota(std::size_t{0}, ground_states.size()))
+        {
+            os << fmt::format("GS_{};", i);
+        }
+        os << '\n';
+
+        for (std::size_t i = 0; i < sim_result.lyt.num_cells(); ++i)
+        {
+            const auto pos = sim_result.lyt.get_lattice().nm_position(sim_result.lyt.sidbs()[i]);
+            os << fmt::format("{:.3f};{:.3f};", pos.first, pos.second);
+
+            for (const auto* cd : ground_states)
+            {
+                os << fmt::format("{};", sidb::model::charge_state_to_sign(cd->get_charge_state_by_index(i)));
+            }
+            os << "\n";
+        }
+    }
+
+  private:
+    const sidb::simulation::result& sim_result;
+    std::ostream&                   os;
 };
 
 }  // namespace detail
@@ -121,7 +179,7 @@ class write_location_and_ground_state_impl
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+void write_location_and_ground_state(const sidb::simulation::legacy_result<Lyt>& sim_result, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
@@ -142,11 +200,45 @@ void write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_re
  * @param filename The file name to create and write into.
  */
 template <typename Lyt>
-void write_location_and_ground_state(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
+void write_location_and_ground_state(const sidb::simulation::legacy_result<Lyt>& sim_result,
+                                     const std::string_view&                     filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
 
+    std::ofstream os{std::string{filename}, std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_location_and_ground_state(sim_result, os);
+    os.close();
+}
+
+/**
+ * Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV to a stream.
+ *
+ * @param sim_result Result to write.
+ * @param os Output stream to write into.
+ */
+inline void write_location_and_ground_state(const sidb::simulation::result& sim_result, std::ostream& os)
+{
+    detail::location_and_ground_state_writer p{sim_result, os};
+
+    p.run();
+}
+/**
+ * Writes the SiDB positions of a simulation result and the charge states of its ground states as CSV.
+ *
+ * @param sim_result Result to write.
+ * @param filename File to write into.
+ * @throws std::ofstream::failure if the file cannot be opened.
+ */
+inline void write_location_and_ground_state(const sidb::simulation::result& sim_result,
+                                            const std::string_view&         filename)
+{
     std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())

@@ -20,14 +20,16 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
-#include "fiction/layouts/coordinates.hpp"
+#include "fiction/technology/sidb/cell_level_layout_conversion.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
+#include "fiction/technology/sidb/lattice.hpp"
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/model/defect.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp"
 #include "fiction/technology/sidb/simulation/engines/ground_state_space.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 #include "fiction/traits.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
@@ -55,7 +57,6 @@ namespace fiction::sidb::simulation::engines
 /**
  * The struct containing the parameters both passed on to pre-simulator Ground State Space, and used during simulation.
  */
-template <typename CellType = layouts::coords::offset>
 struct clustercomplete_params
 {
     /**
@@ -83,7 +84,7 @@ struct clustercomplete_params
     /**
      * Local external electrostatic potentials (e.g., locally applied electrodes).
      */
-    std::unordered_map<CellType, double> local_external_potential = {};
+    std::unordered_map<lattice_site, double> local_external_potential = {};
     /**
      * Global external electrostatic potential. Value is applied on each cell in the layout.
      */
@@ -117,7 +118,6 @@ struct clustercomplete_params
 namespace detail
 {
 
-template <typename Lyt>
 class clustercomplete_impl
 {
   public:
@@ -127,9 +127,9 @@ class clustercomplete_impl
      * @param lyt Layout to simulate.
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      */
-    clustercomplete_impl(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept :
+    clustercomplete_impl(const layout& lyt, const clustercomplete_params& params) noexcept :
             available_threads{std::max(uint64_t{1}, params.available_threads)},
-            charge_layout{initialize_charge_layout(lyt, params)},
+            landscape{lyt, params.sim_params, params.local_external_potential, params.global_potential},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus(),
@@ -142,9 +142,10 @@ class clustercomplete_impl
      * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
      * @return Results of the exact simulation.
      */
-    [[nodiscard]] sidb::simulation::result<Lyt> run(const clustercomplete_params<cell<Lyt>>& params) noexcept
+    [[nodiscard]] result run(const clustercomplete_params& params) noexcept
     {
         sim_result.sim_params     = params.sim_params;
+        sim_result.lyt            = landscape.get_layout();
         sim_result.algorithm_name = "ClusterComplete";
         sim_result.additional_simulation_parameters.emplace("global_potential", params.global_potential);
         sim_result.additional_simulation_parameters.emplace("validity_witness_partitioning_limit",
@@ -154,16 +155,20 @@ class clustercomplete_impl
 
         // run Ground State Space to obtain the complete hierarchical charge space
         const ground_state_space_results& gss_stats = ground_state_space(
-            charge_layout,
-            ground_state_space_params{params.sim_params, params.validity_witness_partitioning_max_cluster_size_gss,
-                                      params.num_overlapping_witnesses_limit_gss});
+            landscape,
+            ground_state_space_params{
+                .sim_params                              = params.sim_params,
+                .witness_partitioning_cluster_size_limit = params.validity_witness_partitioning_max_cluster_size_gss,
+                .num_overlapping_witnesses_limit_gss     = params.num_overlapping_witnesses_limit_gss});
 
         if (!gss_stats.top_cluster)
         {
+            sim_result.simulation_runtime += gss_stats.runtime;
+
             return sim_result;
         }
 
-        if (params.report_gss_stats == clustercomplete_params<cell<Lyt>>::ground_state_space_reporting::ON)
+        if (params.report_gss_stats == clustercomplete_params::ground_state_space_reporting::ON)
         {
             gss_stats.report();
         }
@@ -238,7 +243,7 @@ class clustercomplete_impl
     /**
      * Simulation results.
      */
-    sidb::simulation::result<Lyt> sim_result{};
+    result sim_result{};
     /**
      * Number of available threads.
      */
@@ -254,7 +259,7 @@ class clustercomplete_impl
     /**
      * The base layout that is used to create charge distribution surface copies.
      */
-    const sidb::surfaces::charge_distribution_surface<Lyt> charge_layout;
+    const potential_landscape landscape;
     /**
      * Globally available array of bounds that section the band gap, used for pruning.
      */
@@ -327,30 +332,6 @@ class clustercomplete_impl
      * @param params Parameters for ClusterComplete.
      * @return The charge layout initializes with defects specified in the given parameters.
      */
-    [[nodiscard]] static sidb::surfaces::charge_distribution_surface<Lyt>
-    initialize_charge_layout(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params) noexcept
-    {
-        sidb::surfaces::charge_distribution_surface<Lyt> cds{lyt};
-        cds.assign_physical_parameters(params.sim_params);
-
-        // assign defects if applicable
-        if constexpr (has_foreach_sidb_defect_v<Lyt>)
-        {
-            lyt.foreach_sidb_defect(
-                [&](const auto& cd)
-                {
-                    if (const auto& [cell, defect] = cd; defect.type != sidb::model::defect_type::NONE)
-                    {
-                        cds.add_sidb_defect_to_potential_landscape(cell, lyt.get_defect(cell));
-                    }
-                });
-        }
-
-        cds.assign_local_external_potential(params.local_external_potential);
-        cds.assign_global_external_potential(params.global_potential);
-
-        return cds;
-    }
     /**
      * This function performs an analysis that is crucial to the *ClusterComplete*'s efficiency: as the *Ground State
      * Space* construct is broken down, combinations of multiset charge configurations are tried together in more detail
@@ -413,46 +394,30 @@ class clustercomplete_impl
      */
     void add_if_configuration_stability_is_met(const clustering_state& cl_state) noexcept
     {
-        sidb::surfaces::charge_distribution_surface charge_layout_copy{charge_layout};
+        charge_distribution cd{landscape.sites(), sidb::model::charge_state::NEGATIVE};
+        std::vector<double> local_internal_potential(landscape.num_sidbs(), 0.0);
 
-        // convert bottom clustering state to charge distribution
         for (const auto& pst : cl_state.proj_states)
         {
             const uint64_t sidb_ix = get_singleton_ix(pst->cluster);
-            charge_layout_copy.assign_charge_state_by_index(sidb_ix,
-                                                            singleton_multiset_conf_to_charge_state(pst->multiset_conf),
-                                                            sidb::surfaces::charge_index_mode::KEEP_CHARGE_INDEX);
 
-            assert(charge_layout_copy.get_local_external_potential_by_index(sidb_ix).has_value() &&
-                   "Local external potential at SiDB is undefined");
+            cd.assign_charge_state_by_index(sidb_ix, singleton_multiset_conf_to_charge_state(pst->multiset_conf));
 
-            charge_layout_copy.assign_local_internal_potential_by_index(
-                sidb_ix, -cl_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) -
-                             *charge_layout_copy.get_local_external_potential_by_index(sidb_ix));
+            local_internal_potential[sidb_ix] =
+                -cl_state.pot_bounds.get<bound_direction::LOWER>(sidb_ix) - landscape.local_external_potential(sidb_ix);
         }
 
-        if (!charge_layout_copy.is_configuration_stable())
+        if (!landscape.is_configuration_stable(cd, local_internal_potential))
         {
             return;
         }
 
-        // population stability is a given when this function is called; hence the charge distribution is physically
-        // valid when configuration stability is met
-        charge_layout_copy.declare_physically_valid();
-
-        if constexpr (is_sidb_defect_surface_v<Lyt>)
-        {
-            charge_layout_copy.update_local_defect_potential();
-        }
-
-        charge_layout_copy.recompute_electrostatic_potential_energy();
-
-        charge_layout_copy.charge_distribution_to_index();
+        cd.assign_energy(landscape.energy(cd, local_internal_potential));
 
         {
             const std::scoped_lock lock{mutex_to_protect_the_simulation_results};
 
-            sim_result.charge_distributions.emplace_back(charge_layout_copy);
+            sim_result.charge_distributions.push_back(std::move(cd));
         }
     }
     /**
@@ -593,7 +558,7 @@ class clustercomplete_impl
         }
 
         // check if all clusters are singletons
-        if (cl_state.proj_states.size() == charge_layout.num_cells())
+        if (cl_state.proj_states.size() == landscape.num_sidbs())
         {
             add_if_configuration_stability_is_met(cl_state);
             return;
@@ -637,7 +602,7 @@ class clustercomplete_impl
             for (const charge_space_composition& composition : ccs.compositions)
             {
                 // convert charge space composition to clustering state
-                clustering_state cl_state{charge_layout.num_cells()};
+                clustering_state cl_state{landscape.num_sidbs()};
                 add_composition(cl_state, composition);
 
                 // unfold
@@ -737,7 +702,7 @@ class clustercomplete_impl
          */
         void apply_informant() noexcept
         {
-            mole informant = std::move(thief_informants.front());
+            const mole informant = thief_informants.front();
             thief_informants.pop_front();
 
             add_composition(clustering_state_for_thieves, informant.composition);
@@ -770,7 +735,7 @@ class clustercomplete_impl
          * enable forward-tracking. The mole says which composition to add to the clustering state, and which cluster is
          * selected for the subsequent unfolding.
          */
-        void add_to_queue(const std::vector<charge_space_composition>& compositions, mole&& informant) noexcept
+        void add_to_queue(const std::vector<charge_space_composition>& compositions, const mole informant) noexcept
         {
             const std::scoped_lock lock{mutex_to_protect_this_queue};
 
@@ -785,7 +750,7 @@ class clustercomplete_impl
             work_in_queue_count += compositions.size() - 1;
 
             // add informant
-            thief_informants.emplace_back(std::move(informant));
+            thief_informants.emplace_back(informant);
 
             assert(queue.empty() || queue.size() == thief_informants.size() + 1);
         }
@@ -858,7 +823,7 @@ class clustercomplete_impl
             }
 
             // stealing goes from the back
-            work_t work = queue.back().back();
+            const work_t work = queue.back().back();
             queue.back().pop_back();
 
             --work_in_queue_count;
@@ -1012,7 +977,7 @@ class clustercomplete_impl
         // for each worker, add work to the queue from the respectively assigned section
         for (uint64_t i = 0; i < num_threads_with_initial_work; ++i)
         {
-            std::unique_ptr<worker> w = std::make_unique<worker>(i, charge_layout.num_cells(), workers);
+            std::unique_ptr<worker> w = std::make_unique<worker>(i, landscape.num_sidbs(), workers);
 
             w->work_stealing_queue.queue.emplace_front();
 
@@ -1032,7 +997,7 @@ class clustercomplete_impl
         // initialize each worker that did not get initial work as thieves
         for (uint64_t thread_ix = 0; thread_ix < available_threads - num_threads_with_initial_work; ++thread_ix)
         {
-            workers.emplace_back(std::make_unique<worker>(thread_ix, charge_layout.num_cells(), workers));
+            workers.emplace_back(std::make_unique<worker>(thread_ix, landscape.num_sidbs(), workers));
         }
     }
     /**
@@ -1069,7 +1034,7 @@ class clustercomplete_impl
         }
 
         // check if all clusters are singletons
-        if (w.cl_state.proj_states.size() == charge_layout.num_cells())
+        if (w.cl_state.proj_states.size() == landscape.num_sidbs())
         {
             add_if_configuration_stability_is_met(w.cl_state);
             return true;
@@ -1082,8 +1047,9 @@ class clustercomplete_impl
         cluster_projector_state_ptr max_pst = take_parent_out(w.cl_state, max_pst_ix);
 
         // unfold all compositions
-        if (!unfold_all_compositions(w, get_projector_state_compositions(*max_pst),
-                                     typename worker_queue::mole{max_pst_ix, composition}))
+        if (!unfold_all_compositions(
+                w, get_projector_state_compositions(*max_pst),
+                typename worker_queue::mole{.parent_to_move_out_ix = max_pst_ix, .composition = composition}))
         {
             return false;
         }
@@ -1111,14 +1077,14 @@ class clustercomplete_impl
      */
     // NOLINTNEXTLINE(bugprone-exception-escape): std::get is safely guarded
     [[nodiscard]] bool unfold_all_compositions(worker& w, const std::vector<charge_space_composition>& compositions,
-                                               typename worker_queue::mole&& informant) noexcept
+                                               const typename worker_queue::mole informant) noexcept
     {
         if (compositions.empty())
         {
             return true;
         }
 
-        w.work_stealing_queue.add_to_queue(compositions, std::move(informant));
+        w.work_stealing_queue.add_to_queue(compositions, informant);
 
         // unfold first composition
         unfold_composition(w, compositions.front());
@@ -1189,19 +1155,30 @@ class clustercomplete_impl
  * *ClusterComplete* was proposed in \"Mastering the Exponential Complexity of Exact Physical Simulation of Silicon
  * Dangling Bonds\" by W. Lambooy, J. Drewniok, M. Walter, and R. Wille in ASP-DAC 2026.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @param lyt Layout to simulate.
  * @param params Parameter required for both the invocation of *Ground State Space*, and the simulation following.
  * @return Simulation results.
  */
-template <typename Lyt>
-[[nodiscard]] sidb::simulation::result<Lyt>
-clustercomplete(const Lyt& lyt, const clustercomplete_params<cell<Lyt>>& params = {}) noexcept
+[[nodiscard]] inline result clustercomplete(const layout& lyt, const clustercomplete_params& params = {}) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    return detail::clustercomplete_impl{lyt, params}.run(params);
+}
 
-    return detail::clustercomplete_impl<Lyt>{lyt, params}.run(params);
+/**
+ * *ClusterComplete* on a Cartesian SiDB cell-level layout: the layout is converted with `to_sidb_layout`, simulated,
+ * and the result converted back with `to_legacy_result`. This overload serves the algorithms that still consume
+ * `legacy_result`.
+ *
+ * @tparam Lyt SiDB cell-level layout type.
+ * @param lyt Layout to simulate.
+ * @param params Parameter required for the simulation.
+ * @return Simulation result over surfaces of `lyt`.
+ */
+template <typename Lyt>
+    requires(is_cell_level_layout_v<Lyt>)
+[[nodiscard]] legacy_result<Lyt> clustercomplete(const Lyt& lyt, const clustercomplete_params& params = {}) noexcept
+{
+    return to_legacy_result(clustercomplete(to_sidb_layout(lyt), params), lyt);
 }
 
 }  // namespace fiction::sidb::simulation::engines

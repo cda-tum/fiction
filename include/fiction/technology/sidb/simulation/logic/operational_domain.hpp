@@ -108,7 +108,7 @@ struct parameter_point
      */
     [[nodiscard]] static int64_t quantize(const double value) noexcept
     {
-        return static_cast<int64_t>(std::llround(value / fiction::utils::math::ERROR_MARGIN));
+        return std::llround(value / fiction::utils::math::ERROR_MARGIN);
     }
     /**
      * Support for structured bindings.
@@ -1123,15 +1123,16 @@ class operational_domain_impl
                         set_dimension_value(sim_params, param_point.get_parameters().at(d), d);
                     }
 
-                    auto sim_results = sidb::simulation::result<Lyt>{};
+                    auto sim_results = sidb::simulation::legacy_result<Lyt>{};
 
                     if (params.operational_params.sim_engine == engine::QUICKEXACT)
                     {
                         // perform an exact ground state simulation
                         sim_results = sidb::simulation::engines::quickexact(
-                            lyt, sidb::simulation::engines::quickexact_params<cell<Lyt>>{
-                                     sim_params, sidb::simulation::engines::quickexact_params<
-                                                     cell<Lyt>>::automatic_base_number_detection::OFF});
+                            lyt, sidb::simulation::engines::quickexact_params{
+                                     .sim_params            = sim_params,
+                                     .base_number_detection = sidb::simulation::engines::quickexact_params::
+                                         automatic_base_number_detection::OFF});
                     }
                     else if (params.operational_params.sim_engine == engine::EXGS)
                     {

@@ -1034,7 +1034,7 @@ class is_operational_impl
      * @param lyt_with_input_pattern The SiDB layout with a given input combination applied.
      * @return Simulation results.
      */
-    [[nodiscard]] sidb::simulation::result<Lyt>
+    [[nodiscard]] sidb::simulation::legacy_result<Lyt>
     physical_simulation_of_layout(const Lyt& lyt_with_input_pattern) noexcept
     {
         if (parameters.sim_engine == engine::EXGS)
@@ -1046,16 +1046,17 @@ class is_operational_impl
         if (parameters.sim_engine == engine::QUICKEXACT)
         {
             // perform QuickExact exact simulation
-            const sidb::simulation::engines::quickexact_params<cell<Lyt>> qe_params{
-                parameters.sim_params,
-                fiction::sidb::simulation::engines::quickexact_params<cell<Lyt>>::automatic_base_number_detection::OFF};
+            const sidb::simulation::engines::quickexact_params qe_params{
+                .sim_params = parameters.sim_params,
+                .base_number_detection =
+                    fiction::sidb::simulation::engines::quickexact_params::automatic_base_number_detection::OFF};
             return sidb::simulation::engines::quickexact(lyt_with_input_pattern, qe_params);
         }
 #if (FICTION_ALGLIB_ENABLED)
         if (parameters.sim_engine == engine::CLUSTERCOMPLETE)
         {
             // perform ClusterComplete exact simulation
-            const sidb::simulation::engines::clustercomplete_params<cell<Lyt>> cc_params{parameters.sim_params};
+            const sidb::simulation::engines::clustercomplete_params cc_params{.sim_params = parameters.sim_params};
             return sidb::simulation::engines::clustercomplete(lyt_with_input_pattern, cc_params);
         }
 #endif  // FICTION_ALGLIB_ENABLED
@@ -1075,14 +1076,14 @@ class is_operational_impl
                 {
                     return qs_result.value();
                 }
-                return sidb::simulation::result<Lyt>{};  // return empty result if no valid charge distribution was
-                                                         // found
+                return sidb::simulation::legacy_result<Lyt>{};  // return empty result if no valid charge distribution
+                                                                // was found
             }
         }
 
         assert(false && "unsupported simulation engine");
 
-        return sidb::simulation::result<Lyt>{};
+        return sidb::simulation::legacy_result<Lyt>{};
     }
     /**
      * This function iterates through the input wires and evaluates their charge states against the expected

@@ -25,8 +25,8 @@
  */
 // #define DEBUG_SIDB_CLUSTER_HIERARCHY
 
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
 #include <set>
@@ -130,18 +130,13 @@ struct binary_cluster_hierarchy_node
  * This function performs the ALGLIB agglomerative clustering algorithm for a given SiDB layout. By default, the cluster
  * are created by a minimal positional variance heuristic, also known as Ward's method.
  *
- * @tparam Lyt SiDB cell-level layout type.
  * @param lyt The layout to create a cluster hierarchy of.
  * @param linkage_method The agglomerative clustering linking heuristic that is used by ALGLIB.
  */
-template <typename Lyt>
-[[nodiscard]] static binary_cluster_hierarchy_node cluster_hierarchy(
-    Lyt&                             lyt,
+[[nodiscard]] inline binary_cluster_hierarchy_node cluster_hierarchy(
+    const layout&                    lyt,
     cluster_hierarchy_linkage_method linkage_method = cluster_hierarchy_linkage_method::MINIMUM_VARIANCE) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
-
     // no clusterizer call required for <= 1 SiDBs
     if (lyt.num_cells() == 0)
     {
@@ -153,13 +148,13 @@ template <typename Lyt>
         return binary_cluster_hierarchy_node{{0}, {nullptr, nullptr}};
     }
 
-    sidb::surfaces::charge_distribution_surface<Lyt> charge_lyt{lyt};
+    const auto num_sidbs = lyt.num_cells();
 
     alglib::real_2d_array d{};
-    d.setlength(static_cast<alglib::ae_int_t>(charge_lyt.num_cells()), 2);
-    for (uint64_t i = 0; i < charge_lyt.num_cells(); ++i)
+    d.setlength(static_cast<alglib::ae_int_t>(num_sidbs), 2);
+    for (uint64_t i = 0; i < num_sidbs; ++i)
     {
-        const auto [x, y] = charge_lyt.get_all_sidb_locations_in_nm().at(i);
+        const auto [x, y] = lyt.get_lattice().nm_position(lyt.sidbs()[i]);
 
         d(static_cast<int>(i), 0) = x;
         d(static_cast<int>(i), 1) = y;
@@ -185,7 +180,7 @@ template <typename Lyt>
         for (uint8_t c = 0; c < 2; ++c)
         {
             // create leaf nodes
-            if (cs.at(c) < charge_lyt.num_cells())
+            if (cs.at(c) < num_sidbs)
             {
                 nodes[cs.at(c)] = std::make_unique<binary_cluster_hierarchy_node>(
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
@@ -198,7 +193,7 @@ template <typename Lyt>
         }
 
         // rep.z assigns each new cluster to N + i
-        const uint64_t new_n = charge_lyt.num_cells() + static_cast<uint64_t>(i);
+        const uint64_t new_n = num_sidbs + static_cast<uint64_t>(i);
 
 #ifdef DEBUG_SIDB_CLUSTER_HIERARCHY
         std::set<uint64_t> unioned_set{};

@@ -17,6 +17,7 @@
 
 #pragma once
 
+#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/nm_position.hpp"
 #include "fiction/technology/sidb/simulation/result.hpp"
@@ -123,7 +124,7 @@ template <typename Lyt>
 class write_sqd_sim_result_impl
 {
   public:
-    write_sqd_sim_result_impl(const sidb::simulation::result<Lyt>& src, std::ostream& s) :
+    write_sqd_sim_result_impl(const sidb::simulation::legacy_result<Lyt>& src, std::ostream& s) :
             sim_result{src},
             os{s},
             ordered_cells{obtain_ordered_cells()}
@@ -148,7 +149,7 @@ class write_sqd_sim_result_impl
     /**
      * The simulation sim_result to write.
      */
-    const sidb::simulation::result<Lyt>& sim_result;
+    const sidb::simulation::legacy_result<Lyt>& sim_result;
     /**
      * The output stream to write to.
      */
@@ -288,6 +289,100 @@ class write_sqd_sim_result_impl
     }
 };
 
+/**
+ * Writes a `result` as a SiQAD simulation result file: engine info, physical parameters, the SiDB positions in
+ * ångström, and every charge distribution sorted by energy.
+ */
+class sqd_sim_result_writer
+{
+  public:
+    sqd_sim_result_writer(const sidb::simulation::result& src, std::ostream& s) : sim_result{src}, os{s} {}
+
+    void run()
+    {
+        os << siqad::XML_HEADER << siqad::OPEN_SIM_OUT;
+
+        write_engine_info();
+        write_simulation_parameters();
+        write_physical_locations();
+        write_electron_distributions();
+
+        os << siqad::CLOSE_SIM_OUT;
+    }
+
+  private:
+    const sidb::simulation::result& sim_result;
+    std::ostream&                   os;
+
+    void write_engine_info()
+    {
+        const auto current_time = std::time(nullptr);
+        os << fmt::format(siqad::ENG_INFO_BLOCK, sim_result.algorithm_name, FICTION_VERSION, FICTION_REPO, 0,
+                          fmt::format("{:%Y-%m-%d %H:%M:%S}", fiction::utils::stl::safe_localtime(current_time)),
+                          sim_result.simulation_runtime.count());
+    }
+
+    void write_simulation_parameters()
+    {
+        os << siqad::OPEN_SIM_PARAMS;
+
+        os << fmt::format(siqad::PHYS_SIM_PARAMS, sim_result.sim_params.lambda_tf, sim_result.sim_params.epsilon_r,
+                          sim_result.sim_params.mu_minus);
+
+        for (const auto& [name, value] : sim_result.additional_simulation_parameters)
+        {
+            if (value.has_value())
+            {
+                os << fmt::format(siqad::ADD_SIM_PARAM, name, any_to_string(value), name);
+            }
+        }
+
+        os << siqad::CLOSE_SIM_PARAMS;
+    }
+
+    void write_physical_locations()
+    {
+        os << siqad::OPEN_PHYSLOC;
+
+        for (const auto& s : sim_result.lyt.sidbs())
+        {
+            const auto [nm_x, nm_y] = sim_result.lyt.get_lattice().nm_position(s);
+            os << fmt::format(siqad::DBDOT, nm_x * 10, nm_y * 10);  // convert nm to Angstrom
+        }
+
+        os << siqad::CLOSE_PHYSLOC;
+    }
+
+    void write_electron_distributions()
+    {
+        os << siqad::OPEN_ELEC_DIST;
+
+        std::vector<const charge_distribution*> ordered{};
+        ordered.reserve(sim_result.charge_distributions.size());
+
+        for (const auto& cd : sim_result.charge_distributions)
+        {
+            ordered.push_back(&cd);
+        }
+
+        std::ranges::sort(ordered, [](const auto* a, const auto* b) { return a->energy() < b->energy(); });
+
+        for (const auto* cd : ordered)
+        {
+            os << fmt::format(
+                siqad::DIST_ENERGY,
+                cd->energy(),  // system energy
+                1,             // occurrence count
+                1,             // physical validity: a result only holds valid distributions
+                3,  // simulation state count (fixed to 3 since state count = 2 is not supported by SiQAD yet).
+                sidb::model::charge_configuration_to_string(cd->charge_states())  // charge distribution
+            );
+        }
+
+        os << siqad::CLOSE_ELEC_DIST;
+    }
+};
+
 }  // namespace detail
 
 /**
@@ -301,7 +396,7 @@ class write_sqd_sim_result_impl
  * @param os The output stream to write into.
  */
 template <typename Lyt>
-void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::ostream& os)
+void write_sqd_sim_result(const sidb::simulation::legacy_result<Lyt>& sim_result, std::ostream& os)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
@@ -322,11 +417,43 @@ void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, std::
  * @param filename The file name to create and write into. Should preferably use the `.xml` extension.
  */
 template <typename Lyt>
-void write_sqd_sim_result(const sidb::simulation::result<Lyt>& sim_result, const std::string_view& filename)
+void write_sqd_sim_result(const sidb::simulation::legacy_result<Lyt>& sim_result, const std::string_view& filename)
 {
     static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
     static_assert(has_sidb_technology_v<Lyt>, "Lyt must be an SiDB layout");
 
+    std::ofstream os{std::string{filename}, std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("could not open file");
+    }
+
+    write_sqd_sim_result(sim_result, os);
+    os.close();
+}
+
+/**
+ * Writes a simulation result as a SiQAD simulation result file to a stream.
+ *
+ * @param sim_result Result to write.
+ * @param os Output stream to write into.
+ */
+inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, std::ostream& os)
+{
+    detail::sqd_sim_result_writer p{sim_result, os};
+
+    p.run();
+}
+/**
+ * Writes a simulation result as a SiQAD simulation result file.
+ *
+ * @param sim_result Result to write.
+ * @param filename File to write into.
+ * @throws std::ofstream::failure if the file cannot be opened.
+ */
+inline void write_sqd_sim_result(const sidb::simulation::result& sim_result, const std::string_view& filename)
+{
     std::ofstream os{std::string{filename}, std::ofstream::out};
 
     if (!os.is_open())

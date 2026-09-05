@@ -17,14 +17,38 @@
 
 #pragma once
 
-#include "fiction/traits.hpp"
-
 #include <algorithm>
 #include <iterator>
 #include <limits>
+#include <type_traits>
 
 namespace fiction::sidb::simulation::analysis
 {
+
+namespace detail
+{
+
+/**
+ * The energy of a `charge_distribution` or of a `charge_distribution_surface`.
+ *
+ * @tparam T `charge_distribution` or `charge_distribution_surface`.
+ * @param cd The distribution.
+ * @return Its electrostatic potential energy (unit: eV).
+ */
+template <typename T>
+[[nodiscard]] double energy_of(const T& cd) noexcept
+{
+    if constexpr (requires { cd.energy(); })
+    {
+        return cd.energy();
+    }
+    else
+    {
+        return cd.get_electrostatic_potential_energy();
+    }
+}
+
+}  // namespace detail
 
 /**
  * Returns an iterator to the charge distribution of minimum energy contained in a range of
@@ -40,12 +64,9 @@ template <typename InputIt>
 {
     static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
                   "InputIt must meet the requirements of LegacyInputIterator");
-    static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
-                  "Range must be of charge_distribution_surface objects");
 
-    return std::min_element(
-        first, last, [](const auto& cds1, const auto& cds2)
-        { return cds1.get_electrostatic_potential_energy() < cds2.get_electrostatic_potential_energy(); });
+    return std::min_element(first, last, [](const auto& cd1, const auto& cd2)
+                            { return detail::energy_of(cd1) < detail::energy_of(cd2); });
 }
 
 /**
@@ -63,12 +84,10 @@ template <typename InputIt>
 {
     static_assert(std::is_base_of_v<std::input_iterator_tag, typename std::iterator_traits<InputIt>::iterator_category>,
                   "InputIt must meet the requirements of LegacyInputIterator");
-    static_assert(is_charge_distribution_surface_v<typename std::iterator_traits<InputIt>::value_type>,
-                  "Range must be of charge_distribution_surface objects");
 
     if (first != last)
     {
-        return minimum_energy_distribution(first, last)->get_electrostatic_potential_energy();
+        return detail::energy_of(*minimum_energy_distribution(first, last));
     }
 
     return std::numeric_limits<double>::infinity();

@@ -65,6 +65,26 @@ template <typename Coordinate>
     return {s.x, row_of(s), 0};
 }
 /**
+ * The coordinate of a lattice site in a given SiDB cell-level layout type: the site itself for SiQAD coordinates,
+ * the column and single-SiDB row otherwise.
+ *
+ * @tparam CellLyt SiDB cell-level layout type.
+ * @param s Lattice site.
+ * @return The cell of `CellLyt` at `s`.
+ */
+template <typename CellLyt>
+[[nodiscard]] constexpr cell<CellLyt> to_cell(const lattice_site& s) noexcept
+{
+    if constexpr (has_siqad_coord_v<CellLyt>)
+    {
+        return {s.x, s.y, s.z};
+    }
+    else
+    {
+        return {s.x, row_of(s)};
+    }
+}
+/**
  * The lattice a cell-level layout type is tagged with: H-Si(111)-1x1 for a `lattice<lattice_111, …>` layout and
  * H-Si(100)-2x1 for every other SiDB layout.
  *

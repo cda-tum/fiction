@@ -91,6 +91,38 @@ described by setting the vectors directly.
 
 ::::
 
+## Charge Distribution
+
+A charge distribution assigns one charge state to every SiDB of a layout, in the order of
+`layout::sidbs()`, and carries the electrostatic potential energy of that assignment. Simulation engines return one
+distribution per physically valid state beside a single copy of the simulated layout.
+
+::::{tab-set}
+:sync-group: language
+
+:::{tab-item} C++
+:sync: cpp
+
+**Header:** `fiction/technology/sidb/charge_distribution.hpp`
+
+```{doxygenclass} fiction::sidb::charge_distribution
+:members:
+```
+
+:::
+
+:::{tab-item} Python
+:sync: python
+
+```{eval-rst}
+.. autoclass:: mnt.pyfiction.charge_distribution
+   :members:
+```
+
+:::
+
+::::
+
 ## Conversion from Cell-level Layouts
 
 Placement and routing produce Cartesian SiDB cell-level layouts whose rows count single SiDB rows. These functions

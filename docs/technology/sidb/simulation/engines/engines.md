@@ -16,7 +16,7 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::engines::quicksim
+```{doxygenfunction} fiction::sidb::simulation::engines::quicksim(const layout& lyt, const quicksim_params& ps = quicksim_params{})
 
 ```
 
@@ -52,7 +52,7 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::engines::quickexact
+```{doxygenfunction} fiction::sidb::simulation::engines::quickexact(const layout& lyt, const quickexact_params& params = {})
 
 ```
 
@@ -64,13 +64,13 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::engines::clustercomplete
+```{doxygenfunction} fiction::sidb::simulation::engines::clustercomplete(const layout& lyt, const clustercomplete_params& params = {})
 
 ```
 
 **Header:** `fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp`
 
-```{doxygenfunction} fiction::sidb::simulation::engines::exhaustive_ground_state_simulation
+```{doxygenfunction} fiction::sidb::simulation::engines::exhaustive_ground_state_simulation(const layout& lyt, const model::simulation_parameters& params = model::simulation_parameters{})
 
 ```
 
@@ -107,6 +107,8 @@
 :members:
 ```
 
-```{doxygenfunction} fiction::sidb::simulation::engines::ground_state_space
+```{doxygenfunction} fiction::sidb::simulation::engines::ground_state_space(const potential_landscape& land, const ground_state_space_params& params = {})
+```
 
+```{doxygenfunction} fiction::sidb::simulation::engines::ground_state_space(const layout& lyt, const ground_state_space_params& params = {})
 ```

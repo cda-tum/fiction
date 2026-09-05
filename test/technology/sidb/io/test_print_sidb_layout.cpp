@@ -16,9 +16,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/technology/sidb/charge_distribution.hpp>
 #include <fiction/technology/sidb/io/print_sidb_layout.hpp>
 #include <fiction/technology/sidb/lattice.hpp>
 #include <fiction/technology/sidb/layout.hpp>
+#include <fiction/technology/sidb/model/charge_state.hpp>
 #include <fiction/technology/sidb/model/defect.hpp>
 #include <fiction/technology/sidb/technology.hpp>
 
@@ -136,4 +138,27 @@ TEST_CASE("Text padding rejects unrepresentable lattice sites", "[print-sidb-lay
         CHECK_THROWS_AS(print_sidb_layout(os, lyt, false, true), std::out_of_range);
         CHECK(os.str().empty());
     }
+}
+
+TEST_CASE("Print SiDBs with a charge distribution", "[print-sidb-layout]")
+{
+    layout lyt{};
+
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::INPUT);
+    lyt.assign_cell_type({2, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({4, 0, 1}, sidb_technology::cell_type::OUTPUT);
+    lyt.assign_defect({6, 0, 1}, defect{defect_type::UNKNOWN, -1});
+
+    charge_distribution cd{lyt, charge_state::NEGATIVE};
+    cd.assign_charge_state({2, 0, 0}, charge_state::NEUTRAL);
+    cd.assign_charge_state({4, 0, 1}, charge_state::POSITIVE);
+
+    std::stringstream print_stream{};
+
+    print_sidb_layout(print_stream, lyt, cd, false, false, true);
+
+    constexpr const char* layout_print = " ●  ·  ◯  ·  ·  ·  · \n"
+                                         " ·  ·  ·  ·  ●  ·  ⊟ \n";
+
+    CHECK(layout_print == print_stream.str());
 }

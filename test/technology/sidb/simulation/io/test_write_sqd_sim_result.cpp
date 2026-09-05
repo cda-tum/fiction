@@ -17,13 +17,13 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <fiction/technology/sidb/lattice.hpp>
+#include <fiction/technology/sidb/layout.hpp>
 #include <fiction/technology/sidb/model/simulation_parameters.hpp>
 #include <fiction/technology/sidb/simulation/engines/exhaustive_ground_state_simulation.hpp>
 #include <fiction/technology/sidb/simulation/io/write_sqd_sim_result.hpp>
 #include <fiction/technology/sidb/simulation/result.hpp>
-#include <fiction/technology/sidb/surfaces/lattice.hpp>
-#include <fiction/technology/sidb/surfaces/lattice_orientations.hpp>
-#include <fiction/types.hpp>
+#include <fiction/technology/sidb/technology.hpp>
 #include <fiction/utils/stl/stl_utils.hpp>
 #include <fiction/utils/version_info.hpp>
 
@@ -31,16 +31,17 @@
 #include <chrono>
 #include <cstdint>
 #include <ctime>
+#include <numbers>
 #include <sstream>
 #include <string>
 #include <vector>
 
 using namespace fiction;
+using namespace fiction::sidb;
 using namespace fiction::sidb::model;
 using namespace fiction::sidb::simulation;
 using namespace fiction::sidb::simulation::engines;
 using namespace fiction::sidb::simulation::io;
-using namespace fiction::sidb::surfaces;
 using namespace fiction::utils::stl;
 
 TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
@@ -110,21 +111,21 @@ TEST_CASE("Utility function: any_to_string", "[sqd-sim-result]")
     }
     SECTION("float")
     {
-        constexpr float value  = -3.141593f;
+        constexpr float value  = -std::numbers::pi_v<float>;
         const auto      result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "-3.141593");
     }
     SECTION("double")
     {
-        constexpr double value  = 3.14159265359;
+        constexpr double value  = std::numbers::pi;
         const auto       result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "3.141593");  // will be rounded by std::to_string
     }
     SECTION("long double")
     {
-        constexpr long double value  = 2.7182818284590452353602874l;
+        constexpr long double value  = std::numbers::e_v<long double>;
         const auto            result = sidb::simulation::io::detail::any_to_string(value);
 
         CHECK(result == "2.718282");  // will be rounded by std::to_string
@@ -177,9 +178,7 @@ TEST_CASE("Write empty simulation result", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using lattice = lattice<lattice_100, sidb_cell_clk_lyt_siqad>;
-
-    result<lattice> sim_result{};
+    result sim_result{};
 
     sim_result.algorithm_name     = "TestSim";
     sim_result.simulation_runtime = 42s;  // NOLINT(misc-include-cleaner)
@@ -292,25 +291,21 @@ TEST_CASE("Write simulation result with ExGS simulation", "[sqd-sim-result]")
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = sidb_cell_clk_lyt;
+    layout lyt{};
 
-    sidb_layout lyt{{20, 10}};
+    lyt.assign_cell_type({0, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({0, 0, 0}, sidb_layout::cell_type::NORMAL);
-    lyt.assign_cell_type({5, 0, 0}, sidb_layout::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
+    lyt.assign_cell_type({11, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({13, 0, 0}, sidb_technology::cell_type::NORMAL);
 
-    lyt.assign_cell_type({11, 0, 0}, sidb_layout::cell_type::NORMAL);
-    lyt.assign_cell_type({13, 0, 0}, sidb_layout::cell_type::NORMAL);
-
-    lyt.assign_cell_type({17, 0, 0}, sidb_layout::cell_type::NORMAL);
-    lyt.assign_cell_type({19, 0, 0}, sidb_layout::cell_type::NORMAL);
+    lyt.assign_cell_type({17, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({19, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     const simulation_parameters params{2, -0.32};
 
-    const lattice<lattice_100, sidb_layout> lat{lyt};
-
-    auto sim_result = exhaustive_ground_state_simulation(lat, params);
+    auto sim_result = exhaustive_ground_state_simulation(lyt, params);
 
     sim_result.algorithm_name = "ExGS";
 
@@ -360,19 +355,15 @@ TEST_CASE("Write simulation result with ExGS simulation and positive DBs", "[sqd
 {
     using namespace std::chrono_literals;
 
-    using sidb_layout = sidb_cell_clk_lyt_siqad;
+    layout lyt{};
 
-    sidb_layout lyt{{20, 10}};
-
-    lyt.assign_cell_type({5, 0, 0}, sidb_layout::cell_type::NORMAL);
-    lyt.assign_cell_type({6, 0, 0}, sidb_layout::cell_type::NORMAL);
-    lyt.assign_cell_type({7, 0, 0}, sidb_layout::cell_type::NORMAL);
+    lyt.assign_cell_type({5, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({6, 0, 0}, sidb_technology::cell_type::NORMAL);
+    lyt.assign_cell_type({7, 0, 0}, sidb_technology::cell_type::NORMAL);
 
     const simulation_parameters params{3, -0.32};
 
-    const lattice<lattice_100, sidb_layout> lat{lyt};
-
-    auto sim_result = exhaustive_ground_state_simulation(lat, params);
+    auto sim_result = exhaustive_ground_state_simulation(lyt, params);
 
     sim_result.algorithm_name = "ExGS";
     std::stringstream simulation_stream{};

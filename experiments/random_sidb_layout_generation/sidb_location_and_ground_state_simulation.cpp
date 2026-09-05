@@ -19,15 +19,13 @@
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/quickexact.hpp"
 #include "fiction/technology/sidb/simulation/io/write_location_and_ground_state.hpp"
-#include "fiction/technology/sidb/surfaces/lattice.hpp"
-#include "fiction/technology/sidb/surfaces/lattice_orientations.hpp"
 #include "fiction/types.hpp"
 
 #include <cstdint>
 #include <cstdlib>
 #include <filesystem>
-#include <iomanip>
 #include <iostream>
+#include <span>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -63,13 +61,19 @@ int main(int argc, const char* argv[])  // NOLINT
                                                          {"--mu_minus", "-0.32"},
                                                          {"--orientation", "100"}};
 
-    std::vector<std::string> arguments(argv + 1, argv + argc);  // Convert argv to a vector of strings
+    const std::span<const char* const> command_line{argv, static_cast<std::size_t>(argc)};
+    std::vector<std::string>           arguments{};
+    arguments.reserve(command_line.size() - 1);
+    for (const char* argument : command_line.subspan(1))
+    {
+        arguments.emplace_back(argument);
+    }
 
     // Parse command-line arguments
     for (size_t i = 0; i < arguments.size(); ++i)
     {
         const std::string& arg = arguments[i];
-        if (options.count(arg) > 0)
+        if (options.contains(arg))
         {
             if (i + 1 < arguments.size())
             {
@@ -129,7 +133,7 @@ int main(int argc, const char* argv[])  // NOLINT
                         {
                             auto lyt = read_sqd_layout<sidb_100_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<cell<sidb_100_cell_clk_lyt_siqad>> params{phys_params};
+                            const quickexact_params params{.sim_params = phys_params};
 
                             const auto simulation_results = quickexact<sidb_100_cell_clk_lyt_siqad>(lyt, params);
 
@@ -145,7 +149,7 @@ int main(int argc, const char* argv[])  // NOLINT
                         {
                             auto lyt = read_sqd_layout<sidb_111_cell_clk_lyt_siqad>(benchmark.string());
 
-                            const quickexact_params<cell<sidb_111_cell_clk_lyt_siqad>> params{phys_params};
+                            const quickexact_params params{.sim_params = phys_params};
 
                             const auto simulation_results = quickexact<sidb_111_cell_clk_lyt_siqad>(lyt, params);
 

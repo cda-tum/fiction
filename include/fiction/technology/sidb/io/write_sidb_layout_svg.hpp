@@ -19,6 +19,7 @@
 
 #include "fiction/layouts/bounding_box.hpp"
 #include "fiction/layouts/layout_utils.hpp"
+#include "fiction/technology/sidb/charge_distribution.hpp"
 #include "fiction/technology/sidb/lattice.hpp"
 #include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
@@ -434,11 +435,14 @@ class sidb_layout_svg_writer
      * @param layout Layout to draw.
      * @param stream Output stream.
      * @param p Drawing parameters.
+     * @param charges Charge distribution to draw, or `nullptr` to use the default SiDB color.
      */
-    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p) :
+    sidb_layout_svg_writer(const layout& layout, std::ostream& stream, const write_sidb_layout_svg_params& p,
+                           const charge_distribution* charges = nullptr) :
             lyt{layout},
             os{stream},
-            ps{p}
+            ps{p},
+            cd{charges}
     {
         if (ps.color_background == write_sidb_layout_svg_params::color_mode::LIGHT)
         {
@@ -485,9 +489,43 @@ class sidb_layout_svg_writer
             {
                 const auto [x, y] = lyt.get_lattice().nm_position(padded(s));
 
+                std::string fill_color   = sidb_color;
+                std::string border_color = sidb_edge_color;
+                auto        fill_opacity = 1.0;
+
+                if (cd != nullptr)
+                {
+                    switch (cd->get_charge_state(s))
+                    {
+                        case model::charge_state::POSITIVE:
+                        {
+                            fill_color   = svg::POSITIVE_COLOR;
+                            border_color = svg::POSITIVE_COLOR;
+                            break;
+                        }
+                        case model::charge_state::NEGATIVE:
+                        {
+                            fill_color   = svg::NEGATIVE_COLOR;
+                            border_color = svg::NEGATIVE_COLOR;
+                            break;
+                        }
+                        case model::charge_state::NEUTRAL:
+                        {
+                            fill_opacity = 0.0;
+                            break;
+                        }
+                        default:
+                        {
+                            border_color = svg::NEUTRAL_COLOR;
+                            fill_opacity = 0.0;
+                            break;
+                        }
+                    }
+                }
+
                 svg_content << fmt::format(
                     R"(<use xlink:href="#sidb_color" x="{0}" y="{1}" style="fill:{2}; fill-opacity:{3}; stroke:{4}; stroke-width:{5};"/>)",
-                    x * 10, y * 10, sidb_color, 1.0, sidb_edge_color, ps.sidb_border_width);
+                    x * 10, y * 10, fill_color, fill_opacity, border_color, ps.sidb_border_width);
             });
 
         const auto [min_x, min_y] = lyt.get_lattice().nm_position(min_site);
@@ -521,6 +559,10 @@ class sidb_layout_svg_writer
      * Drawing parameters.
      */
     const write_sidb_layout_svg_params ps;
+    /**
+     * Charge distribution to draw, or `nullptr` to use the default SiDB color.
+     */
+    const charge_distribution* cd;
     /**
      * Background color.
      */
@@ -621,6 +663,45 @@ inline void write_sidb_layout_svg(const layout& lyt, const std::string_view& fil
     }
 
     write_sidb_layout_svg(lyt, os, ps);
+    os.close();
+}
+
+/**
+ * Writes an `sidb::layout` with a charge distribution as an SVG image to a stream: as the layout overload, with every
+ * SiDB colored by its charge state.
+ *
+ * @param lyt Layout to draw.
+ * @param cd Charge distribution over the layout's SiDBs.
+ * @param os Output stream to write into.
+ * @param ps Drawing parameters.
+ */
+inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, std::ostream& os,
+                                  const write_sidb_layout_svg_params& ps = {})
+{
+    const detail::sidb_layout_svg_writer p{lyt, os, ps, &cd};
+    p.run();
+}
+/**
+ * Writes an `sidb::layout` with a charge distribution as an SVG image. See the stream overload for the image's
+ * content.
+ *
+ * @param lyt Layout to draw.
+ * @param cd Charge distribution over the layout's SiDBs.
+ * @param filename File to write into.
+ * @param ps Drawing parameters.
+ * @throws std::ofstream::failure if the file cannot be opened.
+ */
+inline void write_sidb_layout_svg(const layout& lyt, const charge_distribution& cd, const std::string_view& filename,
+                                  const write_sidb_layout_svg_params& ps = {})
+{
+    std::ofstream os{std::string{filename}, std::ofstream::out};
+
+    if (!os.is_open())
+    {
+        throw std::ofstream::failure("Could not open file");
+    }
+
+    write_sidb_layout_svg(lyt, cd, os, ps);
     os.close();
 }
 

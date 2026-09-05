@@ -20,11 +20,11 @@
 
 #if (FICTION_ALGLIB_ENABLED)
 
+#include "fiction/technology/sidb/layout.hpp"
 #include "fiction/technology/sidb/model/charge_state.hpp"
 #include "fiction/technology/sidb/model/simulation_parameters.hpp"
 #include "fiction/technology/sidb/simulation/engines/cluster_hierarchy.hpp"
-#include "fiction/technology/sidb/surfaces/charge_distribution_surface.hpp"
-#include "fiction/traits.hpp"
+#include "fiction/technology/sidb/simulation/potential_landscape.hpp"
 #include "fiction/utils/math/math_utils.hpp"
 
 #include <btree.h>
@@ -130,20 +130,19 @@ struct ground_state_space_results
 namespace detail
 {
 
-template <typename Lyt>
 class ground_state_space_impl
 {
   public:
     /**
      * Constructor. Invokes the algorithm with the given parameters on the given layout.
      *
-     * @param lyt Layout to construct the *Ground State Space* of.
+     * @param land Potential landscape to construct the *Ground State Space* of.
      * @param parameters The parameters that *Ground State Space* will use throughout the construction.
      */
-    ground_state_space_impl(const Lyt& lyt, const ground_state_space_params parameters) noexcept :
+    ground_state_space_impl(const potential_landscape& land, const ground_state_space_params parameters) noexcept :
             params{parameters},
-            top_cluster{to_cluster(cluster_hierarchy(lyt))},
-            clst{get_initial_clustering(top_cluster, get_local_potential_bounds(lyt, params.sim_params))},
+            top_cluster{to_cluster(cluster_hierarchy(land.get_layout()))},
+            clst{get_initial_clustering(top_cluster, land)},
             mu_bounds_with_error{fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  -fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_minus,
                                  fiction::utils::math::ERROR_MARGIN - params.sim_params.mu_plus(),
@@ -223,35 +222,6 @@ class ground_state_space_impl
         return pot_bound > mu_bounds_with_error.at(2);
     }
     /**
-     * Function used to initialize two charge distribution surfaces, each corresponding to the initial lower/upper bound
-     * on the electrostatic potential in the layout. The minimum electrostatic potential depends on the given simulation
-     * base: when positive charges are considered, there may be negative electrostatic potential.
-     *
-     * @param lyt Layout to construct the *Ground State Space* of.
-     * @param simulation_parameters Parameters used to calculate the electrostatic potential in the layout.
-     * @return The two charge distribution surfaces that each represent respective bounds on the electrostatic potential
-     * in the layout.
-     */
-    [[nodiscard]] static std::pair<sidb::surfaces::charge_distribution_surface<Lyt>,
-                                   sidb::surfaces::charge_distribution_surface<Lyt>>
-    get_local_potential_bounds(const Lyt& lyt, const sidb::model::simulation_parameters& sim_params) noexcept
-    {
-        sidb::surfaces::charge_distribution_surface<Lyt> cds_min{lyt};
-        sidb::surfaces::charge_distribution_surface<Lyt> cds_max{lyt};
-
-        cds_min.assign_physical_parameters(sim_params);
-        cds_max.assign_physical_parameters(sim_params);
-
-        cds_min.assign_all_charge_states(sim_params.base == 3 ? sidb::model::charge_state::POSITIVE :
-                                                                sidb::model::charge_state::NEUTRAL);
-        cds_max.assign_all_charge_states(sidb::model::charge_state::NEGATIVE);
-
-        cds_min.update_after_charge_change();
-        cds_max.update_after_charge_change();
-
-        return {cds_min, cds_max};
-    }
-    /**
      * Recursive function used to get the initial clst; the data object that collects all SiDBs in the layout that
      * are each individually lifted to (singleton) SiDB cluster objects. Each SiDB cluster object has information of its
      * electrostatic potential effect onto each SiDB in the layout, as well as information on the accumulated
@@ -265,49 +235,45 @@ class ground_state_space_impl
      *
      * @param c Cluster to add to the clst if it is a singleton, otherwise this function is called recursively on
      * each of its children.
-     * @param local_potential_bound_containers Charge distribution surface objects containing information on the initial
-     * minimum and maximum electrostatic potential.
+     * @param land Potential landscape that supplies the initial electrostatic potentials.
      * @return The clst that contains only singleton clusters, one for each SiDB in the layout.
      */
-    [[nodiscard]] static clustering get_initial_clustering(
-        const cluster_ptr&                                                 c,
-        const std::pair<sidb::surfaces::charge_distribution_surface<Lyt>,
-                        sidb::surfaces::charge_distribution_surface<Lyt>>& local_potential_bound_containers) noexcept
+    [[nodiscard]] static clustering get_initial_clustering(const cluster_ptr&         c,
+                                                           const potential_landscape& land) noexcept
     {
-        const auto& [min_loc_pot_cds, max_loc_pot_cds] = local_potential_bound_containers;
-
         clustering clst{};
 
         if (c->children.empty())
         {
             const uint64_t i = get_singleton_ix(c);
 
-            assert(min_loc_pot_cds.get_local_potential_caused_by_defects_by_index(i).has_value() &&
-                   "SiDB i is out of range");
-            assert(min_loc_pot_cds.get_local_internal_potential_by_index(i).has_value() && "SiDB i is out of range");
-            assert(max_loc_pot_cds.get_local_internal_potential_by_index(i).has_value() && "SiDB i is out of range");
-            assert(min_loc_pot_cds.get_local_external_potential_by_index(i).has_value() && "SiDB i is out of range");
+            assert(i < land.num_sidbs() && "SiDB i is out of range");
 
-            const double defect_pot = *min_loc_pot_cds.get_local_potential_caused_by_defects_by_index(i);
+            const auto base = land.params().base;
 
-            const double min_loc_pot = *min_loc_pot_cds.get_local_internal_potential_by_index(i) - defect_pot;
-            const double max_loc_pot = *max_loc_pot_cds.get_local_internal_potential_by_index(i) - defect_pot;
+            // the local potential bounds an SiDB can receive from the other SiDBs: all of them positive (or neutral
+            // in a two-state simulation) versus all of them negative
+            double min_loc_pot = 0.0;
+            double max_loc_pot = 0.0;
 
-            const double loc_ext_pot = *min_loc_pot_cds.get_local_external_potential_by_index(i) + defect_pot;
+            for (uint64_t j = 0; j < land.num_sidbs(); ++j)
+            {
+                min_loc_pot += land.chargeless_potential(i, j) * (base == 3 ? 1.0 : 0.0);
+                max_loc_pot -= land.chargeless_potential(i, j);
+            }
 
-            c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot,
-                                                         min_loc_pot_cds.get_simulation_params().base, c);
+            const double defect_pot  = land.local_potential_caused_by_defects(i);
+            const double loc_ext_pot = land.local_external_potential(i) + defect_pot;
 
-            c->pot_projs[i] =
-                potential_projection_order{-loc_ext_pot, min_loc_pot_cds.get_simulation_params().base, true};
+            c->initialize_singleton_cluster_charge_space(-min_loc_pot, -max_loc_pot, -loc_ext_pot, base, c);
 
-            for (uint64_t j = 0; j < min_loc_pot_cds.num_cells(); ++j)
+            c->pot_projs[i] = potential_projection_order{-loc_ext_pot, base, true};
+
+            for (uint64_t j = 0; j < land.num_sidbs(); ++j)
             {
                 if (j != i)
                 {
-                    c->pot_projs[j] =
-                        potential_projection_order{min_loc_pot_cds.get_chargeless_potential_by_indices(i, j),
-                                                   min_loc_pot_cds.get_simulation_params().base};
+                    c->pot_projs[j] = potential_projection_order{land.chargeless_potential(i, j), base};
                 }
             }
 
@@ -316,7 +282,7 @@ class ground_state_space_impl
 
         for (const cluster_ptr& child : c->children)
         {
-            const clustering& child_clustering = get_initial_clustering(child, local_potential_bound_containers);
+            const clustering& child_clustering = get_initial_clustering(child, land);
             clst.insert(child_clustering.cbegin(), child_clustering.cend());
         }
 
@@ -381,8 +347,8 @@ class ground_state_space_impl
      * @param sidb_ix SiDB that receives the given potential projection from `c`.
      * @param pp Potential projection from `c` to `sidb_ix` to add.
      */
-    static constexpr void add_pot_projection(const cluster_ptr& c, const uint64_t sidb_ix,
-                                             const potential_projection& pp) noexcept
+    static void add_pot_projection(const cluster_ptr& c, const uint64_t sidb_ix,
+                                   const potential_projection& pp) noexcept
     {
         c->pot_projs[sidb_ix].add(pp);
     }
@@ -394,8 +360,8 @@ class ground_state_space_impl
      * @param rm_pst Projector state to move all occurrences of in the projection onto `sidb_ix`.
      * @param sidb_ix SiDB that receives the potential projections to be removed.
      */
-    static constexpr void remove_all_cluster_charge_state_occurrences(const cluster_projector_state& rm_pst,
-                                                                      const uint64_t                 sidb_ix) noexcept
+    static void remove_all_cluster_charge_state_occurrences(const cluster_projector_state& rm_pst,
+                                                            const uint64_t                 sidb_ix) noexcept
     {
         rm_pst.cluster->pot_projs[sidb_ix].remove_m_conf(rm_pst.multiset_conf);
     }
@@ -433,8 +399,8 @@ class ground_state_space_impl
      * @param rst Receptor state at which the updates to the accumulation of externally received potential should be
      * made when necessary.
      */
-    constexpr void update_external_potential_projection(const cluster_projector_state& pst,
-                                                        const cluster_receptor_state&  rst) const noexcept
+    static void update_external_potential_projection(const cluster_projector_state& pst,
+                                                     const cluster_receptor_state&  rst) noexcept
     {
         update_external_pot_projection_if_bound_removed<bound_direction::LOWER>(pst, rst);
         update_external_pot_projection_if_bound_removed<bound_direction::UPPER>(pst, rst);
@@ -663,15 +629,15 @@ class ground_state_space_impl
      * @param pst The projector state that, together with a receiving SiDB, yields a pair of bounds on the potential
      * projection from the cluster associated with the projector state onto the receiving SiDB.
      * @param sidb_ix The receiving SiDB.
-     * @param composition_pot_bounds This optional parameter supplies the additional composition information when
-     * available.
+     * @param composition_pot_bounds Pointer to the additional composition information. This pointer must be non-null
+     * in composition analysis mode.
      * @return A pair of doubles that represent the lower and upper bound of the potential projection onto the given
      * SiDB.
      */
     template <potential_bound_analysis_mode mode>
     [[nodiscard]] static std::pair<double, double>
     get_received_potential_bounds(const cluster_projector_state& pst, const uint64_t sidb_ix,
-                                  const std::optional<complete_potential_bounds_store>& composition_pot_bounds) noexcept
+                                  const complete_potential_bounds_store* composition_pot_bounds) noexcept
     {
         if constexpr (mode == potential_bound_analysis_mode::ANALYZE_MULTISET)
         {
@@ -683,10 +649,12 @@ class ground_state_space_impl
         }
         else if constexpr (mode == potential_bound_analysis_mode::ANALYZE_COMPOSITION)
         {
+            assert(composition_pot_bounds != nullptr);
+
             // this considers the flattened self-projection of the previous level
-            return {composition_pot_bounds.value().get<bound_direction::LOWER>(sidb_ix) +
+            return {composition_pot_bounds->get<bound_direction::LOWER>(sidb_ix) +
                         pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::LOWER>(sidb_ix),
-                    composition_pot_bounds.value().get<bound_direction::UPPER>(sidb_ix) +
+                    composition_pot_bounds->get<bound_direction::UPPER>(sidb_ix) +
                         pst.cluster->parent.lock()->received_ext_pot_bounds.get<bound_direction::UPPER>(sidb_ix)};
         }
     }
@@ -697,14 +665,14 @@ class ground_state_space_impl
      * @tparam mode The potential bound analysis mode that switches the function between analysing a multiset charge
      * configuration either with or without composition information.
      * @param pst The projector state for which the potential bound analysis is to be performed.
-     * @param composition_potential_bounds This optional parameter supplies the additional composition information when
-     * available.
+     * @param composition_potential_bounds Pointer to the additional composition information. This pointer must be
+     * non-null in composition analysis mode.
      * @return `false` if and only if `pst` can be excluded from the *Ground State Space*.
      */
     template <potential_bound_analysis_mode mode>
-    [[nodiscard]] bool perform_potential_bound_analysis(const cluster_projector_state& pst,
-                                                        const std::optional<complete_potential_bounds_store>&
-                                                            composition_potential_bounds = std::nullopt) const noexcept
+    [[nodiscard]] bool perform_potential_bound_analysis(
+        const cluster_projector_state&         pst,
+        const complete_potential_bounds_store* composition_potential_bounds = nullptr) const noexcept
     {
         witness_partitioning_state st{pst};
 
@@ -947,7 +915,7 @@ class ground_state_space_impl
         composition.pot_bounds.initialize_complete_potential_bounds(top_cluster->num_sidbs());
 
         // perform physically informed space pruning for a multiset composition
-        for (cluster_projector_state& receiving_pst : composition.proj_states)
+        for (const cluster_projector_state& receiving_pst : composition.proj_states)
         {
             for (const uint64_t sidb_ix : receiving_pst.cluster->sidbs)
             {
@@ -964,7 +932,7 @@ class ground_state_space_impl
             }
 
             if (!perform_potential_bound_analysis<potential_bound_analysis_mode::ANALYZE_COMPOSITION>(
-                    receiving_pst, composition.pot_bounds))
+                    receiving_pst, &composition.pot_bounds))
             {
                 return false;
             }
@@ -1222,53 +1190,45 @@ class ground_state_space_impl
 }  // namespace detail
 
 /**
- * The purely constructive *Ground State Space* algorithm is the key ingredient of the *ClusterComplete* exact SiDB
- * simulator that lifts exact SiDB simulation to permit multiple gates in connection. It uses iterative "loop until
- * fixpoint" concepts to prune the simulation search space for not only a flat layout of SiDBs, but rather generalizes,
- * and lifts the physically informed space pruning technique introduced with *QuickExact* to higher order, allowing
- * *Ground State Space* to prune multiset charge state configurations at any level in a cluster hierarchy.
+ * The *Ground State Space* algorithm constructs a cluster hierarchy over the SiDBs of a potential landscape and prunes
+ * every cluster charge state that cannot be part of a physically valid charge distribution. *ClusterComplete* unfolds
+ * the surviving states into the valid distributions.
  *
- * The role of the cluster hierarchy is to rank interactions between groups, or clusters of SiDBs that together make up
- * the whole layout, such that the variation in electrostatic potential under different charge state assignments is
- * highest between the children clusters of clusters that low in the hierarchy. Thereby, the structure allows us to
- * consider the most charge state assignment-dependent interaction in a more detailed physically informed space pruning
- * analysis, enabling high pruning efficacy for the few pruning tests (with respect to the exponential search space).
- *
- * Starting at a clst of all singleton clusters, the charge spaces, ie. a set of multiset charge configurations
- * (initially { {{-}}, {{0}}, {{+}} } or omitting the singleton multiset {{+}} in the case of base 2 pre-simulation),
- * are pruned iteratively through potential bound analysis. Through merges, ie., replacing a set of children in the
- * clst with their parent, we may inspect the most crucially dependant interactions in the layout separately. The
- * procedure finishes when the charge spaces have been folded all the way up to the top cluster, parent of all, which
- * then contains all information resulting from the construction. *ClusterComplete*, without much trickery, now simply
- * unfolds this result, allowing simulation of problems that were previously seen as astronomical, due to the
- * (base 2 or 3) exponential growth in the number of SiDBs.
- *
- * @tparam Lyt SiDB cell-level layout type.
- * @param lyt Layout to construct the *Ground State Space* of.
- * @param params The parameters that *Ground State Space* will use throughout the construction. The physical parameters
- * that *Ground State Space* will use to prune simulation search space are stored in there. In particular, the user may
- * configure parameters that decide limits on the problem sizes of pruning by validity witness partitioning. By default,
- * these are set to avoid runtimes from being affected, as these sub-problems may scale factorially. Thereby, these
- * parameters are especially useful for large simulation problems that could benefit from extra intensive pruning before
- * *ClusterComplete* unfolds the constructed hierarchical charge space.
- * @return The results of the construction, which include the top cluster which parents all other clusters, and thereby
- * contains the charge spaces of each cluster.
+ * @param land Potential landscape of the layout to simulate; its parameters set the base of the simulation, and its
+ * external potentials and defects enter the bounds.
+ * @param params Parameters of the pruning.
+ * @return The pruned cluster hierarchy with statistics, or an empty result for an empty layout.
  */
-template <typename Lyt>
-[[nodiscard]] ground_state_space_results ground_state_space(const Lyt&                       lyt,
-                                                            const ground_state_space_params& params = {}) noexcept
+[[nodiscard]] inline ground_state_space_results
+ground_state_space(const potential_landscape& land, const ground_state_space_params& params = {}) noexcept
 {
-    static_assert(is_cell_level_layout_v<Lyt>, "Lyt is not a cell-level layout");
-    static_assert(has_sidb_technology_v<Lyt>, "Lyt is not an SiDB layout");
+    if (land.num_sidbs() == 0)
+    {
+        return ground_state_space_results{};
+    }
 
+    detail::ground_state_space_impl p{land, params};
+
+    return p.run();
+}
+/**
+ * Runs *Ground State Space* on a layout under the parameters' physical model, without external potentials.
+ *
+ * @param lyt Layout to simulate.
+ * @param params Parameters of the pruning; `params.sim_params` sets the physical model.
+ * @return The pruned cluster hierarchy with statistics, or an empty result for an empty layout.
+ */
+[[nodiscard]] inline ground_state_space_results
+ground_state_space(const layout& lyt, const ground_state_space_params& params = {}) noexcept
+{
     if (lyt.num_cells() == 0)
     {
         return ground_state_space_results{};
     }
 
-    detail::ground_state_space_impl<Lyt> p{lyt, params};
+    const potential_landscape land{lyt, params.sim_params};
 
-    return p.run();
+    return ground_state_space(land, params);
 }
 
 }  // namespace fiction::sidb::simulation::engines

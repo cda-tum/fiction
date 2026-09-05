@@ -146,7 +146,7 @@ class physical_population_stability_impl
      */
     [[nodiscard]] std::vector<population_stability_information<Lyt>> run() noexcept
     {
-        const sidb::simulation::engines::quickexact_params<cell<Lyt>> quickexact_parameters{params.sim_params};
+        const sidb::simulation::engines::quickexact_params quickexact_parameters{.sim_params = params.sim_params};
         const auto simulation_results = sidb::simulation::engines::quickexact(layout, quickexact_parameters);
         const auto energy_and_unique_charge_index = collect_energy_and_charge_index(simulation_results);
 
@@ -373,7 +373,7 @@ class physical_population_stability_impl
      * of the energy values.
      */
     [[nodiscard]] std::vector<energy_and_charge_index>
-    collect_energy_and_charge_index(const sidb::simulation::result<Lyt>& sim_results) const noexcept
+    collect_energy_and_charge_index(const sidb::simulation::legacy_result<Lyt>& sim_results) const noexcept
     {
         std::vector<energy_and_charge_index> energy_charge_index{};
         energy_charge_index.reserve(sim_results.charge_distributions.size());
