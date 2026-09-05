@@ -30,6 +30,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `sidb::simulation::potential_landscape` stores static electrostatics for reuse across
     charge configurations and simulation worker threads
 
+- CLI:
+
+  - The `fiction` command-line interface is now a Python shell in `mnt.pyfiction.cli`;
+    `pip install mnt.pyfiction` installs the `fiction` script. It keeps the stores, the `-c`
+    command strings, script files with `source`, and the `-l` JSON log of the C++ shell.
+  - `write FILE` writes networks and layouts in the format the suffix names, replacing the
+    eight format commands; `read` reads `.aag` and `.pla` files as well.
+  - `aig PASS...` runs aigverse's rewriting, resubstitution, refactoring, and balancing on an
+    AIG, `abc` runs an external ABC's scripts, and `generate` builds adders and multiplexers.
+  - The JSON log describes every store element with one schema, in `snake_case` keys with
+    numbers where the C++ shell wrote `1/x` strings.
+
+- Dependencies:
+
+  - `mnt.pyfiction` depends on `prompt_toolkit`, `rich`, and `aigverse` for the shell.
+
 - Documentation:
 
   - Added an FCN bibliography, BibTeX download, and OpenGraph metadata.
@@ -62,6 +78,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - `apply_bestagon_library` returns `sidb_layout`
   - Added `on_the_fly_sidb_circuit_design` to design SiDB circuits from placed and routed
     hexagonal gate-level layouts, with configurable gate-design parameters
+  - `aig_network`, `xag_network`, and `mig_network` with their readers, `write_verilog`,
+    `write_blif`, `write_aiger`, `convert_network`, `count_gate_types`, and `print_sidb_layout`
+  - `dynamic_truth_table` gains `create_from_binary_string`, `create_from_hex_string`,
+    `create_from_expression`, `create_random`, `to_binary`, and `to_hex`; networks gain `depth`,
+    gate-level layouts `clone`, clocked layouts `get_clocking_scheme_name`, and `exact_params`
+    `upper_bound_area`
+  - `technology_mapping`, `simulate`, `count_gate_types`, and `write_dot_network` accept every
+    network type; `technology_mapping_params` exposes `lt2`, `gt2`, `le2`, and `ge2`
 
 - Tooling:
 
