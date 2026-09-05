@@ -13,6 +13,7 @@
  * @brief Tests for `fiction/technology/sidb/simulation/defects/displacement_robustness_domain.hpp`.
  * @author Jan Drewniok (Drewniok)
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -257,4 +258,21 @@ TEST_CASE("Determine the probability of fabricating an operational BDL wire with
             determine_probability_of_fabricating_operational_gate(lyt, std::vector<tt>{create_id_tt()}, params, 0.0);
         CHECK_THAT(result, Catch::Matchers::WithinAbs(1.0, ERROR_MARGIN));
     }
+}
+
+TEST_CASE("Displaced layouts retain their name and stationary defects", "[displacement-robustness-domain]")
+{
+    auto lyt = to_sidb_layout(blueprints::bdl_wire<sidb_cell_clk_lyt_siqad>());
+    lyt.set_layout_name("defective wire");
+    lyt.assign_defect({20, 20, 0}, defect{defect_type::SI_VACANCY, -1, 5.6, 5.0});
+
+    displacement_robustness_domain_params params{};
+    params.displacement_variations = {0, 0};
+    const auto domain = determine_displacement_robustness_domain(lyt, std::vector<tt>{create_id_tt()}, params);
+
+    REQUIRE(domain.operational_values.size() == 1);
+    const auto& displaced = domain.operational_values.front().first;
+    CHECK(displaced.get_layout_name() == lyt.get_layout_name());
+    CHECK(displaced.defects() == lyt.defects());
+    CHECK(displaced.sidbs() == lyt.sidbs());
 }

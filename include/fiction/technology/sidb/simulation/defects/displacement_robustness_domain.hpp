@@ -435,7 +435,11 @@ class displacement_robustness_domain_impl
                 break;
             }
 
-            layout displaced{layout_to_analyze.get_lattice()};
+            layout displaced{layout_to_analyze.get_lattice(), layout_to_analyze.get_layout_name()};
+            for (const auto& [site, d] : layout_to_analyze.defects())
+            {
+                displaced.assign_defect(site, d);
+            }
 
             for (std::size_t i = 0; i < cell_displacements.size(); ++i)
             {
@@ -481,6 +485,7 @@ class displacement_robustness_domain_impl
 /**
  * Determines the displacement robustness domain of an SiDB gate: every SiDB that is not fixed is displaced by up to
  * the configured number of columns and rows, and every resulting layout is checked for operability.
+ * Displaced layouts retain the layout name and the defects at their original positions.
  *
  * @tparam TT Truth table type.
  * @param lyt The operational gate layout.

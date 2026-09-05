@@ -581,14 +581,10 @@ class defect_influence_impl
             return defect_influence_status::INFLUENTIAL;
         }
 
-        const auto base = params.operational_params.sim_params.base;
-
         for (const auto& gs_defect : ground_states_defect)
         {
-            const auto index = gs_defect.charge_index(base);
-
             if (!std::ranges::any_of(ground_states,
-                                     [index, base](const auto& gs) { return gs.charge_index(base) == index; }))
+                                     [&gs_defect](const auto& gs) { return gs.same_charge_states(gs_defect); }))
             {
                 return defect_influence_status::INFLUENTIAL;
             }
