@@ -180,6 +180,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   - Change detection now allows five minutes for runner setup and file comparisons.
 
 - Data structures:
+  - Lattice sites now reject invalid basis indices in construction and geometry queries.
   - SiDB row conversion and area iteration now handle coordinate limits without signed overflow;
     defect influence clips to representable sites, and cube conversion rejects rows outside its range
   - Lattice-site construction and arithmetic now reject coordinate overflow; cell insertion preserves the layout on
@@ -196,6 +197,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   the wrong type; a `static_assert` per `*_ptr` alias pins each to the type its name says
 
 - I/O:
+  - SQD readers now reject fractional coordinates and trailing text in numeric attributes.
   - SQD input now preserves explicit custom lattice geometry, including lattice names and both basis sites
   - SQD cell-level output now propagates exceptions from cell and defect formatting
   - `write_sidb_layout_svg` now propagates allocation errors when setting colors and formatting lattice points

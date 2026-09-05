@@ -12,6 +12,7 @@
  * @file
  * @brief Python bindings for `fiction/technology/sidb/lattice.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include "pyfiction/documentation.hpp"
@@ -49,7 +50,10 @@ void lattice(nanobind::module_& m)
         .def(py::init<int32_t, int32_t>(), py::arg("x"), py::arg("y"), DOC(fiction_sidb_lattice_site_lattice_site_3))
         .def_rw("x", &fiction::sidb::lattice_site::x, DOC(fiction_sidb_lattice_site_x))
         .def_rw("y", &fiction::sidb::lattice_site::y, DOC(fiction_sidb_lattice_site_y))
-        .def_rw("z", &fiction::sidb::lattice_site::z, DOC(fiction_sidb_lattice_site_z))
+        .def_prop_rw(
+            "z", [](const fiction::sidb::lattice_site& s) { return s.z; },
+            [](fiction::sidb::lattice_site& s, const int64_t z) { s = {s.x, s.y, z}; },
+            DOC(fiction_sidb_lattice_site_z))
         // NOLINTBEGIN(misc-redundant-expression): nanobind operator bindings intentionally compare placeholder objects.
         .def(py::self == py::self, DOC(fiction_sidb_lattice_site_operator_eq))
         .def(py::self != py::self)

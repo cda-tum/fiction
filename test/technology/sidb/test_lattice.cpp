@@ -12,6 +12,7 @@
  * @file
  * @brief Tests for `fiction/technology/sidb/lattice.hpp`.
  * @author Marcel Walter (marcelwa)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_test_macros.hpp>
@@ -78,6 +79,19 @@ TEST_CASE("Lattice sites", "[lattice]")
         CHECK_THROWS_AS((lattice_site{0, max_unsigned}), std::out_of_range);
         CHECK_THROWS_AS((lattice_site{max_unsigned, 0, 1}), std::out_of_range);
         CHECK_THROWS_AS((lattice_site{0, max_unsigned, 1}), std::out_of_range);
+    }
+    SECTION("invalid basis indices")
+    {
+        for (const auto basis_site : {-1, 2, 256})
+        {
+            CHECK_THROWS_AS((lattice_site{0, 0, basis_site}), std::out_of_range);
+        }
+        lattice_site invalid{};
+        invalid.z      = 2;
+        const auto lat = lattice::si_100_2x1();
+        CHECK_THROWS_AS(lat.nm_position(invalid), std::out_of_range);
+        CHECK_THROWS_AS(lat.nm_distance(invalid, invalid), std::out_of_range);
+        CHECK_THROWS_AS(lat.nm_distance({}, invalid), std::out_of_range);
     }
     SECTION("raster order")
     {

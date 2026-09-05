@@ -13,6 +13,7 @@
  * @brief The H-Si surface lattice as lattice vectors plus a two-site basis, and the lattice sites SiDBs occupy.
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -73,16 +74,17 @@ struct lattice_site
      * @throws std::out_of_range if a coordinate exceeds the lattice-site range.
      */
     template <std::integral X, std::integral Y, std::integral Z>
-    constexpr lattice_site(const X x_coord, const Y y_coord, const Z basis_site) :
-            z{static_cast<uint8_t>(static_cast<uint8_t>(basis_site) & 1u)}
+    constexpr lattice_site(const X x_coord, const Y y_coord, const Z basis_site)
     {
         // Unary plus promotes character and bool coordinates to types accepted by std::in_range.
-        if (!std::in_range<int32_t>(+x_coord) || !std::in_range<int32_t>(+y_coord))
+        if (!std::in_range<int32_t>(+x_coord) || !std::in_range<int32_t>(+y_coord) ||
+            (basis_site != 0 && basis_site != 1))
         {
             throw std::out_of_range("Coordinate exceeds the lattice-site range");
         }
         x = static_cast<int32_t>(+x_coord);
         y = static_cast<int32_t>(+y_coord);
+        z = static_cast<uint8_t>(basis_site);
     }
     /**
      * Creates the site `(x, y, 0)`.
@@ -295,8 +297,9 @@ struct lattice
      *
      * @param s Site.
      * @return The `(x, y)` position of `s` (unit: nm).
+     * @throws std::out_of_range if the basis index is not 0 or 1.
      */
-    [[nodiscard]] vector nm_position(const lattice_site& s) const noexcept
+    [[nodiscard]] vector nm_position(const lattice_site& s) const
     {
         const auto b = basis.at(s.z);
 
@@ -309,16 +312,17 @@ struct lattice
      * @param source First site.
      * @param target Second site.
      * @return Distance between `source` and `target` (unit: nm).
+     * @throws std::out_of_range if either basis index is not 0 or 1.
      */
-    [[nodiscard]] double nm_distance(const lattice_site& source, const lattice_site& target) const noexcept
+    [[nodiscard]] double nm_distance(const lattice_site& source, const lattice_site& target) const
     {
+        const auto [x1, y1] = nm_position(source);
+        const auto [x2, y2] = nm_position(target);
+
         if (source == target)
         {
             return 0.0;
         }
-
-        const auto [x1, y1] = nm_position(source);
-        const auto [x2, y2] = nm_position(target);
 
         return std::hypot(x1 - x2, y1 - y2);
     }

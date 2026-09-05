@@ -46,6 +46,17 @@ def test_rows() -> None:
     ]
 
 
+def test_basis_indices() -> None:
+    """Constructors and writable basis indices reject sites outside the two-site basis."""
+    with pytest.raises(IndexError):
+        lattice_site(0, 0, 2)
+    site = lattice_site(0, 0, 1)
+    for basis_index in (-1, 2, 256):
+        with pytest.raises(IndexError):
+            site.z = basis_index
+        assert site.z == 1
+
+
 def test_predefined_lattices() -> None:
     """Predefined silicon lattices map sites to nanometer positions."""
     si_100 = lattice.si_100_2x1()

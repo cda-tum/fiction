@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #include <catch2/catch_message.hpp>
@@ -38,6 +39,7 @@
 #include <string>
 #include <unordered_set>
 #include <utility>
+#include <vector>
 
 using namespace fiction;
 using namespace fiction::layouts;
@@ -1280,6 +1282,10 @@ TEST_CASE("Malformed SQD defect values", "[sqd]")
     for (const auto* value :
          {"<property_map><type_label><val/></type_label></property_map>",
           R"(<coulomb charge="x" eps_r="5.6" lambda_tf="5"/>)",
+          R"(<coulomb charge="-1junk" eps_r="5.6" lambda_tf="5"/>)",
+          R"(<coulomb charge="-1.5" eps_r="5.6" lambda_tf="5"/>)",
+          R"(<coulomb charge="-1" eps_r="5.6junk" lambda_tf="5"/>)",
+          R"(<coulomb charge="-1" eps_r="5.6" lambda_tf="5junk"/>)",
           R"(<coulomb charge="999999999999999999999999" eps_r="5.6" lambda_tf="5"/>)",
           R"(<coulomb charge="-1" eps_r="x" lambda_tf="5"/>)", R"(<coulomb charge="-1" eps_r="1e9999" lambda_tf="5"/>)",
           R"(<coulomb charge="-1" eps_r="-1" lambda_tf="5"/>)", R"(<coulomb charge="-1" eps_r="nan" lambda_tf="5"/>)",
@@ -1379,4 +1385,23 @@ TEST_CASE("SQD parsing error into an sidb::layout", "[sqd]")
     {
         CHECK_THROWS_AS(read_sqd_layout("/this/file/does/not/exist.sqd"), std::ifstream::failure);
     }
+}
+
+TEST_CASE("SQD coordinates consume complete numeric attributes", "[sqd]")
+{
+    using legacy_layout = surfaces::lattice<lattice_100, sidb_cell_clk_lyt_siqad>;
+    for (const auto* attributes : {R"(n="1junk" m="2" l="1")", R"(n="1" m="2.7" l="1")", R"(n="1" m="2" l="1tail")"})
+    {
+        const auto         document = std::string{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
+                                                  R"(<layer type="DB"><dbdot><latcoord )"} +
+                                      attributes + " /></dbdot></layer></design></siqad>";
+        std::istringstream stream{document};
+        CHECK_THROWS_AS(read_sqd_layout(stream), sqd_parsing_error);
+        std::istringstream legacy_stream{document};
+        CHECK_THROWS_AS(read_sqd_layout<legacy_layout>(legacy_stream), sqd_parsing_error);
+    }
+    std::istringstream stream{"<siqad><layers><layer_prop><lat_vec/></layer_prop></layers><design>"
+                              R"(<layer type="DB"><dbdot><latcoord n=" 1 " m=" 2 " l=" 1 "/>)"
+                              "</dbdot></layer></design></siqad>"};
+    CHECK(read_sqd_layout(stream).sidbs() == std::vector<lattice_site>{{1, 2, 1}});
 }

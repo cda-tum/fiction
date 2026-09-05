@@ -14,6 +14,7 @@
  * @author Marcel Walter (marcelwa)
  * @author Jan Drewniok (Drewniok)
  * @author Willem Lambooy (wlambooy)
+ * @author OpenAI (Codex)
  */
 
 #pragma once
@@ -61,6 +62,51 @@ class sqd_parsing_error : public std::runtime_error
 
 namespace detail
 {
+
+/**
+ * Parses a finite SQD number without trailing non-whitespace characters.
+ *
+ * @param text Numeric XML text or attribute.
+ * @return The parsed number.
+ * @throws sqd_parsing_error if the number is missing, non-finite, or has trailing characters.
+ * @throws std::invalid_argument if the text is not numeric.
+ * @throws std::out_of_range if the number exceeds the range of a double.
+ */
+[[nodiscard]] inline double parse_sqd_number(const char* text)
+{
+    if (text == nullptr)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: missing SQD number");
+    }
+    const std::string number{text};
+    std::size_t       consumed{};
+    const auto        value = std::stod(number, &consumed);
+    if (!std::isfinite(value) || number.find_first_not_of(" \t\r\n", consumed) != std::string::npos)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: invalid SQD number");
+    }
+    return value;
+}
+/**
+ * Parses an integer without trailing non-whitespace characters.
+ *
+ * @param text Numeric XML attribute.
+ * @return The parsed integer.
+ * @throws sqd_parsing_error if the number has trailing characters.
+ * @throws std::invalid_argument if the text is not an integer.
+ * @throws std::out_of_range if the integer exceeds the int64_t range.
+ */
+[[nodiscard]] inline int64_t parse_sqd_integer(const char* text)
+{
+    const std::string number{text};
+    std::size_t       consumed{};
+    const auto        value = std::stoll(number, &consumed);
+    if (number.find_first_not_of(" \t\r\n", consumed) != std::string::npos)
+    {
+        throw sqd_parsing_error("Error parsing SQD file: invalid integer");
+    }
+    return value;
+}
 
 /**
  * Parses the `<type>` element of a `<dbdot>`; a missing element means a normal SiDB.
@@ -368,13 +414,13 @@ class read_sqd_layout_impl
         // special case for SiQAD coordinates
         if constexpr (has_siqad_coord_v<Lyt>)
         {
-            cell<Lyt> cell{std::stoll(n), std::stoll(m), std::stoll(l)};
+            cell<Lyt> cell{parse_sqd_integer(n), parse_sqd_integer(m), parse_sqd_integer(l)};
             update_bounding_box(cell);
             return cell;
         }
 
         // Cartesian coordinates
-        return dimer_to_cell(std::stoll(n), std::stoll(m), std::stoll(l));
+        return dimer_to_cell(parse_sqd_integer(n), parse_sqd_integer(m), parse_sqd_integer(l));
     }
     /**
      * Parses the <type> attribute of a <dbdot> element from the SQD file and returns the corresponding cell type.
@@ -461,9 +507,9 @@ class read_sqd_layout_impl
                         "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
                 }
 
-                charge    = std::stoll(charge_string);
-                eps_r     = std::stod(eps_r_string);
-                lambda_tf = std::stod(lambda_tf_string);
+                charge    = parse_sqd_integer(charge_string);
+                eps_r     = parse_sqd_number(eps_r_string);
+                lambda_tf = parse_sqd_number(lambda_tf_string);
 
                 if (!std::isfinite(eps_r) || !std::isfinite(lambda_tf) || eps_r < 0.0 || lambda_tf < 0.0)
                 {
@@ -619,30 +665,6 @@ class sqd_reader
     std::istream& is;
 
     /**
-     * Parses a finite lattice number without trailing non-whitespace characters.
-     *
-     * @param text Numeric XML text or attribute.
-     * @return The parsed number.
-     * @throws sqd_parsing_error if the number is missing, non-finite, or has trailing characters.
-     * @throws std::invalid_argument if the text is not numeric.
-     * @throws std::out_of_range if the number exceeds the range of a double.
-     */
-    [[nodiscard]] static double parse_lattice_number(const char* text)
-    {
-        if (text == nullptr)
-        {
-            throw sqd_parsing_error("Error parsing SQD file: missing lattice number");
-        }
-        const std::string number{text};
-        std::size_t       consumed{};
-        const auto        value = std::stod(number, &consumed);
-        if (!std::isfinite(value) || number.find_first_not_of(" \t\r\n", consumed) != std::string::npos)
-        {
-            throw sqd_parsing_error("Error parsing SQD file: invalid lattice number");
-        }
-        return value;
-    }
-    /**
      * Parses a lattice vector or basis site with finite components.
      *
      * @param element Vector element with x and y attributes.
@@ -657,7 +679,7 @@ class sqd_reader
         {
             throw sqd_parsing_error("Error parsing SQD file: missing lattice vector or basis site");
         }
-        return {parse_lattice_number(element->Attribute("x")), parse_lattice_number(element->Attribute("y"))};
+        return {parse_sqd_number(element->Attribute("x")), parse_sqd_number(element->Attribute("y"))};
     }
     /**
      * Reads explicit two-site lattice geometry, or a predefined lattice when geometry is absent.
@@ -677,7 +699,7 @@ class sqd_reader
             element.FirstChildElement("N") != nullptr)
         {
             const auto* count = element.FirstChildElement("N");
-            if (count == nullptr || parse_lattice_number(count->GetText()) != 2.0)
+            if (count == nullptr || parse_sqd_number(count->GetText()) != 2.0)
             {
                 throw sqd_parsing_error("Error parsing SQD file: lattice must have two basis sites");
             }
@@ -713,15 +735,15 @@ class sqd_reader
             throw sqd_parsing_error("Error parsing SQD file: no attribute 'n', 'm' or 'l' in element 'latcoord'");
         }
 
-        const auto basis_site = std::stoll(l);
+        const auto basis_site = parse_sqd_integer(l);
 
         if (basis_site < 0 || basis_site > 1)
         {
             throw sqd_parsing_error("Error parsing SQD file: dimer has invalid dot index");
         }
 
-        const auto x = std::stoll(n);
-        const auto y = std::stoll(m);
+        const auto x = parse_sqd_integer(n);
+        const auto y = parse_sqd_integer(m);
         return {x, y, basis_site};
     }
     /**
@@ -787,9 +809,9 @@ class sqd_reader
                     "Error parsing SQD file: no attribute 'charge', 'eps_r', or 'lambda_tf' in element 'coulomb'");
             }
 
-            charge    = std::stoll(charge_string);
-            eps_r     = std::stod(eps_r_string);
-            lambda_tf = std::stod(lambda_tf_string);
+            charge    = parse_sqd_integer(charge_string);
+            eps_r     = parse_sqd_number(eps_r_string);
+            lambda_tf = parse_sqd_number(lambda_tf_string);
 
             if (!std::isfinite(eps_r) || !std::isfinite(lambda_tf) || eps_r < 0.0 || lambda_tf < 0.0)
             {
